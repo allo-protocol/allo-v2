@@ -1,0 +1,343 @@
+{
+  "_format": "ethers-rs-sol-cache-3",
+  "paths": {
+    "artifacts": "out",
+    "build_infos": "out/build-info",
+    "sources": "contracts",
+    "tests": "test",
+    "scripts": "script",
+    "libraries": [
+      "lib",
+      "node_modules"
+    ]
+  },
+  "files": {
+    "contracts/Lock.sol": {
+      "lastModificationDate": 1686764829675,
+      "contentHash": "b512cd27c65bdb27847ea3c0fd65cabf",
+      "sourceName": "contracts/Lock.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "=0.8.19",
+      "artifacts": {
+        "Lock": {
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "Lock.sol/Lock.json"
+        }
+      }
+    },
+    "contracts/Registry.sol": {
+      "lastModificationDate": 1686765574993,
+      "contentHash": "fe6642807a2689f520d70e9168e64857",
+      "sourceName": "contracts/Registry.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "contracts/interfaces/IRegistry.sol",
+        "contracts/utils/MetaPtr.sol"
+      ],
+      "versionRequirement": "=0.8.19",
+      "artifacts": {
+        "Registry": {
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "Registry.sol/Registry.json"
+        }
+      }
+    },
+    "contracts/interfaces/IAllo.sol": {
+      "lastModificationDate": 1686765503921,
+      "contentHash": "e7986df6eb63270f7236d9358d03a617",
+      "sourceName": "contracts/interfaces/IAllo.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "contracts/utils/MetaPtr.sol"
+      ],
+      "versionRequirement": "=0.8.19",
+      "artifacts": {
+        "IAllo": {
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "IAllo.sol/IAllo.json"
+        }
+      }
+    },
+    "contracts/interfaces/IAllocationStrategy.sol": {
+      "lastModificationDate": 1686765207852,
+      "contentHash": "47d08e90a378cd8843ba6b4824c5a195",
+      "sourceName": "contracts/interfaces/IAllocationStrategy.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "=0.8.19",
+      "artifacts": {
+        "IAllocationStrategy": {
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "IAllocationStrategy.sol/IAllocationStrategy.json"
+        }
+      }
+    },
+    "contracts/interfaces/IAquaduct.sol": {
+      "lastModificationDate": 1686765201563,
+      "contentHash": "9c659df959fe33271d2dd215adcde8eb",
+      "sourceName": "contracts/interfaces/IAquaduct.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "=0.8.19",
+      "artifacts": {
+        "IAqeduct": {
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "IAquaduct.sol/IAqeduct.json"
+        }
+      }
+    },
+    "contracts/interfaces/IDistributionStrategy.sol": {
+      "lastModificationDate": 1686765250012,
+      "contentHash": "ba44710f4c2455b47b9a7ca019c97c52",
+      "sourceName": "contracts/interfaces/IDistributionStrategy.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "=0.8.19",
+      "artifacts": {
+        "IDistributionStrategy": {
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "IDistributionStrategy.sol/IDistributionStrategy.json"
+        }
+      }
+    },
+    "contracts/interfaces/IRegistry.sol": {
+      "lastModificationDate": 1686765439952,
+      "contentHash": "40849304b2c58516e6ed489b35230aef",
+      "sourceName": "contracts/interfaces/IRegistry.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "contracts/utils/MetaPtr.sol"
+      ],
+      "versionRequirement": "=0.8.19",
+      "artifacts": {
+        "IRegistry": {
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "IRegistry.sol/IRegistry.json"
+        }
+      }
+    },
+    "contracts/utils/MetaPtr.sol": {
+      "lastModificationDate": 1686765382025,
+      "contentHash": "561f301b6fb20ec2c110ec8efb63ec3f",
+      "sourceName": "contracts/utils/MetaPtr.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "=0.8.19",
+      "artifacts": {
+        "MetaPtr": {
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "MetaPtr.sol/MetaPtr.json"
+        }
+      }
+    }
+  }
+}
