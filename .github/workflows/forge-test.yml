@@ -1,0 +1,42 @@
+name: contracts - build -> forge test
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - "**"
+jobs:
+  tests:
+    concurrency: ci-forge-${{ github.head_ref || github.run_id }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: "recursive"
+          fetch-depth: 1
+
+      - name: Setup node env
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node }}
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Install foundry
+        uses: foundry-rs/foundry-toolchain@v1.0.9
+        with:
+          version: nightly
+
+      - name: Run Forge build
+        run: |
+          yarn forge:compile
+        id: build
+
+      - name: Run Forge test
+        run: |
+          yarn forge:test
+        id: test
