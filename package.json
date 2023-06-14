@@ -7,6 +7,20 @@
   "author": "Jaxcoder <codenamejason@outlook.com>",
   "license": "MIT",
   "private": true,
+  "scripts": {
+    "account": "hardhat run scripts/listAccount.ts",
+    "chain": "hardhat node --network hardhat --no-deploy",
+    "compile": "hardhat compile",
+    "forge:compile": "forge build",
+    "hardhat:deploy": "hardhat deploy --export-all ./temp/hardhat_contracts.json \"$@\" && hardhat run scripts/generateTsAbis.ts",
+    "fork": "MAINNET_FORKING_ENABLED=true hardhat node --network hardhat --no-deploy",
+    "generate": "hardhat run scripts/generateAccount.ts",
+    "lint": "eslint --config ./.eslintrc.json --ignore-path ./.eslintignore ./*.ts ./deploy/**/*.ts ./scripts/**/*.ts ./test/**/*.ts",
+    "lint-staged": "eslint --config ./.eslintrc.json --ignore-path ./.eslintignore",
+    "hardhat:test": "REPORT_GAS=true hardhat test --network hardhat",
+    "forge:test": "forge test",
+    "verify": "hardhat etherscan-verify"
+  },
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",
     "@nomicfoundation/hardhat-ethers": "^3.0.0",

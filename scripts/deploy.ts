@@ -1,22 +1,21 @@
-import { ethers } from "hardhat";
+import { ethers, upgrades } from "hardhat";
+import { prettyNum } from "../test/utils/utils";
 
 async function main() {
-  const currentTimestampInSeconds = Math.round(Date.now() / 1000);
-  const unlockTime = currentTimestampInSeconds + 60;
+  
+    // Contracts are deployed using the first signer/account by default
+    // const [owner, otherAccount] = await ethers.getSigners();
 
-  const lockedAmount = ethers.parseEther("0.001");
+    const Registry = await ethers.getContractFactory("Registry");
+    const registry = await upgrades.deployProxy(Registry, []);
+    console.log("tx hash", registry.deployTransaction.hash);
+    await registry.deployed();
 
-  const lock = await ethers.deployContract("Lock", [unlockTime], {
-    value: lockedAmount,
-  });
+    const rec = await registry.deployTransaction.wait();
+    const gas = prettyNum(rec.gasUsed.toString());
+    console.log(`gas used: ${gas}`)
 
-  await lock.waitForDeployment();
-
-  console.log(
-    `Lock with ${ethers.formatEther(
-      lockedAmount
-    )}ETH and unlock timestamp ${unlockTime} deployed to ${lock.target}`
-  );
+    console.log("Registry deployed to:", registry.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
