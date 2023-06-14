@@ -10,7 +10,7 @@
   "scripts": {
     "account": "hardhat run scripts/listAccount.ts",
     "chain": "hardhat node --network hardhat --no-deploy",
-    "compile": "hardhat compile",
+    "hardhat:compile": "hardhat compile",
     "forge:compile": "forge build",
     "hardhat:deploy": "hardhat deploy --export-all ./temp/hardhat_contracts.json \"$@\" && hardhat run scripts/generateTsAbis.ts",
     "fork": "MAINNET_FORKING_ENABLED=true hardhat node --network hardhat --no-deploy",

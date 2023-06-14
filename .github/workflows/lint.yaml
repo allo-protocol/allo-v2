@@ -31,4 +31,4 @@ jobs:
         run: yarn install --immutable
 
       - name: Run hardhat lint
-        run: yarn hardhat:lint --max-warnings=0
+        run: yarn lint-staged --max-warnings=0
