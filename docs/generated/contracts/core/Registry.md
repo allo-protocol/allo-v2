@@ -16,7 +16,7 @@
 function addIdentityOwner(bytes32 identityId, address newOwner) external nonpayable
 ```
 
-Associate a new owner with a project
+Associate a new owner with a identity
 
 
 
@@ -24,8 +24,8 @@ Associate a new owner with a project
 
 | Name | Type | Description |
 |---|---|---|
-| identityId | bytes32 | ID of previously created project |
-| newOwner | address | address of new project owner |
+| identityId | bytes32 | ID of previously created identity |
+| newOwner | address | address of new identity owner |
 
 ### createIdentity
 
@@ -49,7 +49,7 @@ function createIdentity(MetaPtr metadata) external nonpayable
 function getProjectOwners(bytes32 identityId) external view returns (address[])
 ```
 
-Retrieve list of project owners
+Retrieve list of identity owners
 
 
 
@@ -57,13 +57,13 @@ Retrieve list of project owners
 
 | Name | Type | Description |
 |---|---|---|
-| identityId | bytes32 | ID of project |
+| identityId | bytes32 | ID of identity |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | address[] | List of current owners of given project |
+| _0 | address[] | List of current owners of given identity |
 
 ### identities
 
@@ -133,7 +133,7 @@ function identityOwners(bytes32) external view returns (uint256 count)
 function identityOwnersCount(bytes32 identityId) external view returns (uint256)
 ```
 
-Retrieve count of existing project owners
+Retrieve count of existing identity owners
 
 
 
@@ -141,13 +141,13 @@ Retrieve count of existing project owners
 
 | Name | Type | Description |
 |---|---|---|
-| identityId | bytes32 | ID of project |
+| identityId | bytes32 | ID of identity |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | uint256 | Count of owners for given project |
+| _0 | uint256 | Count of owners for given identity |
 
 ### initialize
 
@@ -166,7 +166,7 @@ Initializes the contract after an upgrade
 function removeIdentityOwner(bytes32 identityId, address prevOwner, address owner) external nonpayable
 ```
 
-Disassociate an existing owner from a project
+Disassociate an existing owner from a identity
 
 
 
@@ -174,7 +174,7 @@ Disassociate an existing owner from a project
 
 | Name | Type | Description |
 |---|---|---|
-| identityId | bytes32 | ID of previously created project |
+| identityId | bytes32 | ID of previously created identity |
 | prevOwner | address | Address of previous owner in OwnerList |
 | owner | address | Address of new Owner |
 
@@ -198,6 +198,23 @@ function updateIdentityMetadata(bytes32 identityId, MetaPtr metadata) external n
 
 
 ## Events
+
+### IdentityCreated
+
+```solidity
+event IdentityCreated(bytes32 indexed identityId, address indexed owner)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| identityId `indexed` | bytes32 | undefined |
+| owner `indexed` | address | undefined |
 
 ### Initialized
 
@@ -253,23 +270,6 @@ event OwnerAdded(bytes32 indexed identityId, address indexed owner)
 
 ```solidity
 event OwnerRemoved(bytes32 indexed identityId, address indexed owner)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| identityId `indexed` | bytes32 | undefined |
-| owner `indexed` | address | undefined |
-
-### ProjectCreated
-
-```solidity
-event ProjectCreated(bytes32 indexed identityId, address indexed owner)
 ```
 
 

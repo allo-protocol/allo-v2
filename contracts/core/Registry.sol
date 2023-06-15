@@ -2,19 +2,11 @@
 pragma solidity 0.8.19;
 
 import {MetaPtr} from "../utils/MetaPtr.sol";
-// import {IRegistry} from "./interfaces/IRegistry.sol";
+import {IRegistry} from "./interfaces/IRegistry.sol";
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-contract Registry is Initializable {
-    // Types
-
-    // The identity struct contains the minimal data we need for a identity
-    struct Identity {
-        bytes32 id;
-        MetaPtr metadata;
-    }
-
+contract Registry is Initializable, IRegistry {
     // A linked list of owners of a identity
     // The use of a linked list allows us to easily add and remove owners,
     // access them directly in O(1), and loop through them.
@@ -42,21 +34,21 @@ contract Registry is Initializable {
     uint256 public identitiesCount;
 
     // The mapping of identities, from identityId to Project
-    mapping(bytes32 => Identity) public identities;
+    mapping(address => IdentityDetails) public identities;
 
     // The mapping identities owners, from identityId to OwnerList
-    mapping(bytes32 => OwnerList) public identityOwners;
+    mapping(address => OwnerList) public identityOwners;
 
     // Events
 
-    event IdentityCreated(bytes32 indexed identityId, address indexed owner);
-    event MetadataUpdated(bytes32 indexed identityId, MetaPtr metaPtr);
-    event OwnerAdded(bytes32 indexed identityId, address indexed owner);
-    event OwnerRemoved(bytes32 indexed identityId, address indexed owner);
+    event IdentityCreated(address indexed identityId, address indexed owner);
+    event MetadataUpdated(address indexed identityId, IdentityDetails metaPtr);
+    event OwnerAdded(address indexed identityId, address indexed owner);
+    event OwnerRemoved(address indexed identityId, address indexed owner);
 
     // Modifiers
 
-    modifier onlyIdentityOwner(bytes32 identityId) {
+    modifier onlyIdentityOwner(address identityId) {
         require(
             identityOwners[identityId].list[msg.sender] != address(0),
             "PR000"
@@ -72,23 +64,41 @@ contract Registry is Initializable {
 
     // External functions
 
+    function getIdentities(
+        address _identityId
+    ) external view override returns (IdentityDetails memory) {
+        return identities[_identityId];
+    }
+
     /**
      * @notice Creates a new identity with a metadata pointer
-     * @param metadata the metadata pointer
+     * @param _identityDetails struct details
+     * @param _owners array of addresses of owners
      */
-    function createIdentity(MetaPtr calldata metadata) external {
-        bytes32 identityId = keccak256(
-            abi.encodePacked(metadata.pointer, msg.sender)
-        );
+    function createIdentity(
+        IdentityDetails memory _identityDetails,
+        address[] memory _owners
+    ) external override returns (uint256) {
+        // todo:
+        // IdentityDetails storage identity = identities[identityId];
+        // identity.id = identityId;
+        // identity.metadata = metadata;
+        // _initIdentityOwners(identityId);
+        // emit IdentityCreated(identityId, msg.sender);
+        // emit MetadataUpdated(identityId, metadata);
+    }
 
-        Identity storage identity = identities[identityId];
-        identity.id = identityId;
-        identity.metadata = metadata;
-
-        _initIdentityOwners(identityId);
-
-        emit IdentityCreated(identityId, msg.sender);
-        emit MetadataUpdated(identityId, metadata);
+    /**
+     * @notice Checks if an address is an owner of a identity
+     * @param _identityId ID of identity
+     * @param _owner Address of potential owner
+     * @return True if the address is an owner of the identity, false otherwise
+     */
+    function isOwnerOfIdentity(
+        address _identityId,
+        address _owner
+    ) external view override returns (bool) {
+        // todo:
     }
 
     /**
@@ -97,10 +107,12 @@ contract Registry is Initializable {
      * @param metadata Updated pointer to external metadata
      */
     function updateIdentityMetadata(
-        bytes32 identityId,
-        MetaPtr calldata metadata
+        address identityId,
+        IdentityDetails calldata metadata
     ) external onlyIdentityOwner(identityId) {
-        identities[identityId].metadata = metadata;
+        // this is a permissionless update
+        identities[identityId].permissionlessMetadata = metadata
+            .permissionlessMetadata;
         emit MetadataUpdated(identityId, metadata);
     }
 
@@ -110,7 +122,7 @@ contract Registry is Initializable {
      * @param newOwner address of new identity owner
      */
     function addIdentityOwner(
-        bytes32 identityId,
+        address identityId,
         address newOwner
     ) external onlyIdentityOwner(identityId) {
         require(
@@ -138,7 +150,7 @@ contract Registry is Initializable {
      * @param owner Address of new Owner
      */
     function removeIdentityOwner(
-        bytes32 identityId,
+        address identityId,
         address prevOwner,
         address owner
     ) external onlyIdentityOwner(identityId) {
@@ -164,7 +176,7 @@ contract Registry is Initializable {
      * @return Count of owners for given identity
      */
     function identityOwnersCount(
-        bytes32 identityId
+        address identityId
     ) external view returns (uint256) {
         return identityOwners[identityId].count;
     }
@@ -175,7 +187,7 @@ contract Registry is Initializable {
      * @return List of current owners of given identity
      */
     function getProjectOwners(
-        bytes32 identityId
+        address identityId
     ) external view returns (address[] memory) {
         OwnerList storage owners = identityOwners[identityId];
 
@@ -203,7 +215,7 @@ contract Registry is Initializable {
      * @notice Create initial OwnerList for passed identity
      * @param identityId ID of identity
      */
-    function _initIdentityOwners(bytes32 identityId) internal {
+    function _initIdentityOwners(address identityId) internal {
         OwnerList storage owners = identityOwners[identityId];
 
         owners.list[_OWNERS_LIST_SENTINEL] = msg.sender;

@@ -2,7 +2,7 @@
 pragma solidity 0.8.19;
 
 import { MetaPtr } from "../../utils/MetaPtr.sol";
-
+/// @dev This is the interface for the Allo core contract
 interface IAllo {
     /**
         STORAGE (with public getters)

@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.17;
+pragma solidity 0.8.19;
 
 import {Test} from "forge-std/Test.sol";
 import {Registry} from "../../contracts/core/Registry.sol";
+import {IRegistry} from "../../contracts/core/interfaces/IRegistry.sol";
 import {MetaPtr} from "../../contracts/utils/MetaPtr.sol";
 
-contract ExpectEmit {
-    event IdentityCreated(bytes32 identityId, MetaPtr metadata);
-    event MetadataUpdated(bytes32 identityId, MetaPtr metadata);
+contract ExpectEmit is IRegistry {
+    event IdentityCreated(bytes32 identityId, IdentityDetails metadata);
+    event MetadataUpdated(bytes32 identityId, IdentityDetails metadata);
     event OwnerAdded(bytes32 identityId, address owner);
     event OwnerRemoved(bytes32 identityId, address owner);
 

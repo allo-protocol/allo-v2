@@ -5,12 +5,22 @@ import { MetaPtr } from "../../utils/MetaPtr.sol";
 
 // use Solady Roles for ownership of projects: https://github.com/Vectorized/solady/blob/main/src/auth/OwnableRoles.sol
 interface IRegistry {
-    struct IdentityDetails {
+    struct PermissionedMetadata {
+        MetaPtr metadata;
+        address[] owners;
+    }
+
+    struct PermissionlessMetadata {
         MetaPtr metadata;
     }
 
+    struct IdentityDetails {
+        PermissionedMetadata permissionedMetadata;
+        PermissionlessMetadata permissionlessMetadata;
+    }
+
     // getter for identities mapping
-    function identities(uint256 _projectId) external view returns (IdentityDetails memory);
+    function getIdentities(address _identityId) external view returns (IdentityDetails memory);
 
     // create a new project with metadata
     // sets roles so that all owners are owners of the project
@@ -19,5 +29,5 @@ interface IRegistry {
     // this will use solmate ROLES to check if the msg.sender is an owner of the identity
     // @todo figure out how to best represent identity ownership and details
     // @todo should identityId be bytes hash vs uint256?
-    function isOwnerOfIdentity(uint256 _identityId, address _owner) external view returns (bool);
+    function isOwnerOfIdentity(address _identityId, address _owner) external view returns (bool);
 }

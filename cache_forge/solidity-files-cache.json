@@ -13,8 +13,8 @@
   },
   "files": {
     "contracts/core/Allo.sol": {
-      "lastModificationDate": 1686795339490,
-      "contentHash": "245d89cd186a3827c85ecd88b1b39735",
+      "lastModificationDate": 1686835319403,
+      "contentHash": "d8f27ceba69e7b96fbbe84547bc819cd",
       "sourceName": "contracts/core/Allo.sol",
       "solcConfig": {
         "settings": {
@@ -45,6 +45,7 @@
         }
       },
       "imports": [
+        "contracts/core/interfaces/IAllo.sol",
         "contracts/utils/MetaPtr.sol",
         "node_modules/@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol",
         "node_modules/@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol"
@@ -1319,8 +1320,8 @@
       }
     },
     "test/foundry/Registry.t.sol": {
-      "lastModificationDate": 1686798970656,
-      "contentHash": "b50af80fce1cb5fc5a02d9f82b2a8ec8",
+      "lastModificationDate": 1686835101149,
+      "contentHash": "2d83b27d54dedd3ada7a756e160c7281",
       "sourceName": "test/foundry/Registry.t.sol",
       "solcConfig": {
         "settings": {
@@ -1373,7 +1374,7 @@
         "node_modules/@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol",
         "node_modules/@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol"
       ],
-      "versionRequirement": "^0.8.17",
+      "versionRequirement": "=0.8.19",
       "artifacts": {
         "ExpectEmit": {
           "0.8.19+commit.7dd6d404.Darwin.appleclang": "Registry.t.sol/ExpectEmit.json"
