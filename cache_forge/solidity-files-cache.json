@@ -13,8 +13,8 @@
   },
   "files": {
     "contracts/core/Allo.sol": {
-      "lastModificationDate": 1686835319403,
-      "contentHash": "d8f27ceba69e7b96fbbe84547bc819cd",
+      "lastModificationDate": 1686852659307,
+      "contentHash": "9b1a6bb0dda0c8405d333f37e5139831",
       "sourceName": "contracts/core/Allo.sol",
       "solcConfig": {
         "settings": {
@@ -138,8 +138,8 @@
       }
     },
     "contracts/core/Registry.sol": {
-      "lastModificationDate": 1686798908085,
-      "contentHash": "9c5be7b2373911c5d812cedac0a30dc3",
+      "lastModificationDate": 1686855469212,
+      "contentHash": "920bcd0c129ddb61af06962728d85afb",
       "sourceName": "contracts/core/Registry.sol",
       "solcConfig": {
         "settings": {
@@ -170,7 +170,8 @@
         }
       },
       "imports": [
-        "contracts/utils/MetaPtr.sol",
+        "contracts/core/interfaces/IRegistry.sol",
+        "contracts/core/libraries/Metadata.sol",
         "node_modules/@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol",
         "node_modules/@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol"
       ],
@@ -182,8 +183,8 @@
       }
     },
     "contracts/core/interfaces/IAllo.sol": {
-      "lastModificationDate": 1686792974510,
-      "contentHash": "03e77e746638caf52c13f1e87152b2f7",
+      "lastModificationDate": 1686852633107,
+      "contentHash": "8bad866e013d624437eede9efef8593e",
       "sourceName": "contracts/core/interfaces/IAllo.sol",
       "solcConfig": {
         "settings": {
@@ -304,8 +305,8 @@
       }
     },
     "contracts/core/interfaces/IRegistry.sol": {
-      "lastModificationDate": 1686792963384,
-      "contentHash": "ed19519e240f9274732212a6fb755aaa",
+      "lastModificationDate": 1686855470885,
+      "contentHash": "6d64f899b2719ade75f89e6d1e0e027f",
       "sourceName": "contracts/core/interfaces/IRegistry.sol",
       "solcConfig": {
         "settings": {
@@ -336,12 +337,52 @@
         }
       },
       "imports": [
-        "contracts/utils/MetaPtr.sol"
+        "contracts/core/libraries/Metadata.sol"
       ],
       "versionRequirement": "=0.8.19",
       "artifacts": {
         "IRegistry": {
           "0.8.19+commit.7dd6d404.Darwin.appleclang": "IRegistry.sol/IRegistry.json"
+        }
+      }
+    },
+    "contracts/core/libraries/Metadata.sol": {
+      "lastModificationDate": 1686854076333,
+      "contentHash": "2176baf31506001250743d3b9b25cd68",
+      "sourceName": "contracts/core/libraries/Metadata.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "=0.8.19",
+      "artifacts": {
+        "Metadata": {
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "Metadata.sol/Metadata.json"
         }
       }
     },
@@ -466,8 +507,8 @@
       }
     },
     "contracts/utils/MetaPtr.sol": {
-      "lastModificationDate": 1686767198819,
-      "contentHash": "561f301b6fb20ec2c110ec8efb63ec3f",
+      "lastModificationDate": 1686852818619,
+      "contentHash": "87a0d23af8c486f58194573d7e004cad",
       "sourceName": "contracts/utils/MetaPtr.sol",
       "solcConfig": {
         "settings": {
@@ -1320,8 +1361,8 @@
       }
     },
     "test/foundry/Registry.t.sol": {
-      "lastModificationDate": 1686835101149,
-      "contentHash": "2d83b27d54dedd3ada7a756e160c7281",
+      "lastModificationDate": 1686855848620,
+      "contentHash": "1b50d10bdf98aa01b274cf8da7a1f3c5",
       "sourceName": "test/foundry/Registry.t.sol",
       "solcConfig": {
         "settings": {
@@ -1353,7 +1394,8 @@
       },
       "imports": [
         "contracts/core/Registry.sol",
-        "contracts/utils/MetaPtr.sol",
+        "contracts/core/interfaces/IRegistry.sol",
+        "contracts/core/libraries/Metadata.sol",
         "lib/forge-std/lib/ds-test/src/test.sol",
         "lib/forge-std/src/Base.sol",
         "lib/forge-std/src/StdAssertions.sol",

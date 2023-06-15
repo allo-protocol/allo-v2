@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import {MetaPtr} from "../utils/MetaPtr.sol";
 import {IRegistry} from "./interfaces/IRegistry.sol";
-
+import {Metadata} from "../core/libraries/Metadata.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 contract Registry is Initializable, IRegistry {
@@ -30,11 +29,8 @@ contract Registry is Initializable, IRegistry {
     // Used as sentinel value in the owners linked list.
     address constant _OWNERS_LIST_SENTINEL = address(0x1);
 
-    // The number of identities created, used to give an incremental id to each one
-    uint256 public identitiesCount;
-
-    // The mapping of identities, from identityId to Project
-    mapping(address => IdentityDetails) public identities;
+    // The mapping of identities, from identityId to IdentityDetails
+    mapping(address => Metadata.IdentityDetails) public identities;
 
     // The mapping identities owners, from identityId to OwnerList
     mapping(address => OwnerList) public identityOwners;
@@ -42,7 +38,7 @@ contract Registry is Initializable, IRegistry {
     // Events
 
     event IdentityCreated(address indexed identityId, address indexed owner);
-    event MetadataUpdated(address indexed identityId, IdentityDetails metaPtr);
+    event MetadataUpdated(address indexed identityId, Metadata.IdentityDetails metaPtr);
     event OwnerAdded(address indexed identityId, address indexed owner);
     event OwnerRemoved(address indexed identityId, address indexed owner);
 
@@ -64,41 +60,43 @@ contract Registry is Initializable, IRegistry {
 
     // External functions
 
+    // This function will retrieve the identity details associated with the provided identityId.
     function getIdentities(
         address _identityId
-    ) external view override returns (IdentityDetails memory) {
+    ) external view override returns (Metadata.IdentityDetails memory) {
         return identities[_identityId];
     }
 
-    /**
-     * @notice Creates a new identity with a metadata pointer
-     * @param _identityDetails struct details
-     * @param _owners array of addresses of owners
-     */
+    // This function creates a new identity and returns its ID (for this example, we're just using a counter as the ID).
     function createIdentity(
-        IdentityDetails memory _identityDetails,
+        Metadata.IdentityDetails memory _identityDetails,
         address[] memory _owners
     ) external override returns (uint256) {
-        // todo:
-        // IdentityDetails storage identity = identities[identityId];
-        // identity.id = identityId;
-        // identity.metadata = metadata;
-        // _initIdentityOwners(identityId);
-        // emit IdentityCreated(identityId, msg.sender);
-        // emit MetadataUpdated(identityId, metadata);
+        // Implement the function here, including updating the mapping and handling the owners array.
     }
 
-    /**
-     * @notice Checks if an address is an owner of a identity
-     * @param _identityId ID of identity
-     * @param _owner Address of potential owner
-     * @return True if the address is an owner of the identity, false otherwise
-     */
+    // This function checks if a specific address is an owner of a specific identity.
     function isOwnerOfIdentity(
         address _identityId,
         address _owner
     ) external view override returns (bool) {
-        // todo:
+        // Implement the function here, possibly using the Solmate Roles library as mentioned in the comments.
+    }
+
+    function updateIdentityName(
+        address _identityId,
+        string memory _name
+    ) external override {
+        // check if the caller has the right to update the identity
+        require(
+            this.isOwnerOfIdentity(_identityId, msg.sender),
+            "Caller is not owner of this identity"
+        );
+
+        // update the name of the identity
+        identities[_identityId].name = _name;
+        // Also may want to update the attestation address. This will depend on how we generate our attestation addresses.
+        // identities[_identityId].attestationAddress = ... ;
     }
 
     /**
@@ -108,7 +106,7 @@ contract Registry is Initializable, IRegistry {
      */
     function updateIdentityMetadata(
         address identityId,
-        IdentityDetails calldata metadata
+        Metadata.IdentityDetails calldata metadata
     ) external onlyIdentityOwner(identityId) {
         // this is a permissionless update
         identities[identityId].permissionlessMetadata = metadata
