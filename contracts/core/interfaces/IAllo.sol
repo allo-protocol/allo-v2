@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import { MetaPtr } from "../utils/MetaPtr.sol";
-
+import { MetaPtr } from "../../utils/MetaPtr.sol";
+/// @dev This is the interface for the Allo core contract
 interface IAllo {
     /**
         STORAGE (with public getters)
@@ -14,21 +14,22 @@ interface IAllo {
 
     struct PoolData {
         address owner;
-        uint project;
+        bytes32 identity; // do we need this?
         address votingStrategy;
         address payoutStrategy;
         MetaPtr metadata;
+        bool active;
     }
 
     // Public getter on the pools mapping
-    /// @notice calls out to the registry to get the project metadata
-    function getPoolInfo(uint256 _poolId) external view returns (PoolData memory, string memory);
+    /// @notice calls out to the registry to get the identity metadata
+    function getPoolInfo(uint _poolId) external view returns (PoolData memory, string memory);
 
     // @todo insert clonable strategy library, including validation that an existing pool has safe strategy
 
     // creates pool locally, transfers pool amount to distribution strategy => returns poolId
     // takes fee from user
-    // validates that the owner is actually allowed to use the project
+    // validates that the owner is actually allowed to use the identity
     function createPool(PoolData memory _poolData, address _poolToken, uint _poolAmt) external view returns (uint);
 
     // passes _data & msg.sender through to the allocation strategy for that pool
@@ -47,4 +48,7 @@ interface IAllo {
 
     // call to payoutStrategy.claim()
     function claim(uint _poolId, bytes memory _data) external;
+
+    // call to distributionStrategy.close()
+    function closePool(uint _poolId) external;
 }

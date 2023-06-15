@@ -8,13 +8,13 @@ interface IDistributionStrategy {
         address allo;
     */
 
-    // call to allo() and query rounds[roundId].owner
+    // call to allo() and query pools[poolId].owner
     function owner() external view returns (address);
 
     // decode the _data into what's relevant to determine payouts
     // default will be a struct with a list of addresses and WAD percentages
     // turn "on" the abilty to claim payouts
-    function activateDistribution(bytes memory _data) external ;
+    function activateDistribution(bytes memory _data) external;
 
     // claim a payout based on the strategy's needs
     // this could include merkle proofs, etc or just nothing
