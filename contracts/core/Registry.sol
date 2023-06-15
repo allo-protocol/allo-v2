@@ -36,7 +36,7 @@ contract Registry is Initializable {
     // State variables
 
     // Used as sentinel value in the owners linked list.
-    address constant OWNERS_LIST_SENTINEL = address(0x1);
+    address constant _OWNERS_LIST_SENTINEL = address(0x1);
 
     // The number of identities created, used to give an incremental id to each one
     uint256 public identitiesCount;
@@ -49,7 +49,7 @@ contract Registry is Initializable {
 
     // Events
 
-    event ProjectCreated(bytes32 indexed identityId, address indexed owner);
+    event IdentityCreated(bytes32 indexed identityId, address indexed owner);
     event MetadataUpdated(bytes32 indexed identityId, MetaPtr metaPtr);
     event OwnerAdded(bytes32 indexed identityId, address indexed owner);
     event OwnerRemoved(bytes32 indexed identityId, address indexed owner);
@@ -73,25 +73,27 @@ contract Registry is Initializable {
     // External functions
 
     /**
-     * @notice Creates a new project with a metadata pointer
+     * @notice Creates a new identity with a metadata pointer
      * @param metadata the metadata pointer
      */
     function createIdentity(MetaPtr calldata metadata) external {
-        bytes32 identityId = keccak256(abi.encodePacked(metadata.pointer, msg.sender));
+        bytes32 identityId = keccak256(
+            abi.encodePacked(metadata.pointer, msg.sender)
+        );
 
         Identity storage identity = identities[identityId];
         identity.id = identityId;
         identity.metadata = metadata;
 
-        initProjectOwners(identityId);
+        _initIdentityOwners(identityId);
 
-        emit ProjectCreated(identityId, msg.sender);
+        emit IdentityCreated(identityId, msg.sender);
         emit MetadataUpdated(identityId, metadata);
     }
 
     /**
-     * @notice Updates Metadata for singe project
-     * @param identityId ID of previously created project
+     * @notice Updates Metadata for singe identity
+     * @param identityId ID of previously created identity
      * @param metadata Updated pointer to external metadata
      */
     function updateIdentityMetadata(
@@ -103,9 +105,9 @@ contract Registry is Initializable {
     }
 
     /**
-     * @notice Associate a new owner with a project
-     * @param identityId ID of previously created project
-     * @param newOwner address of new project owner
+     * @notice Associate a new owner with a identity
+     * @param identityId ID of previously created identity
+     * @param newOwner address of new identity owner
      */
     function addIdentityOwner(
         bytes32 identityId,
@@ -113,7 +115,7 @@ contract Registry is Initializable {
     ) external onlyIdentityOwner(identityId) {
         require(
             newOwner != address(0) &&
-                newOwner != OWNERS_LIST_SENTINEL &&
+                newOwner != _OWNERS_LIST_SENTINEL &&
                 newOwner != address(this),
             "PR001"
         );
@@ -122,16 +124,16 @@ contract Registry is Initializable {
 
         require(owners.list[newOwner] == address(0), "PR002");
 
-        owners.list[newOwner] = owners.list[OWNERS_LIST_SENTINEL];
-        owners.list[OWNERS_LIST_SENTINEL] = newOwner;
+        owners.list[newOwner] = owners.list[_OWNERS_LIST_SENTINEL];
+        owners.list[_OWNERS_LIST_SENTINEL] = newOwner;
         owners.count++;
 
         emit OwnerAdded(identityId, newOwner);
     }
 
     /**
-     * @notice Disassociate an existing owner from a project
-     * @param identityId ID of previously created project
+     * @notice Disassociate an existing owner from a identity
+     * @param identityId ID of previously created identity
      * @param prevOwner Address of previous owner in OwnerList
      * @param owner Address of new Owner
      */
@@ -140,7 +142,7 @@ contract Registry is Initializable {
         address prevOwner,
         address owner
     ) external onlyIdentityOwner(identityId) {
-        require(owner != address(0) && owner != OWNERS_LIST_SENTINEL, "PR001");
+        require(owner != address(0) && owner != _OWNERS_LIST_SENTINEL, "PR001");
 
         OwnerList storage owners = identityOwners[identityId];
 
@@ -157,9 +159,9 @@ contract Registry is Initializable {
     // Public functions
 
     /**
-     * @notice Retrieve count of existing project owners
-     * @param identityId ID of project
-     * @return Count of owners for given project
+     * @notice Retrieve count of existing identity owners
+     * @param identityId ID of identity
+     * @return Count of owners for given identity
      */
     function identityOwnersCount(
         bytes32 identityId
@@ -168,9 +170,9 @@ contract Registry is Initializable {
     }
 
     /**
-     * @notice Retrieve list of project owners
-     * @param identityId ID of project
-     * @return List of current owners of given project
+     * @notice Retrieve list of identity owners
+     * @param identityId ID of identity
+     * @return List of current owners of given identity
      */
     function getProjectOwners(
         bytes32 identityId
@@ -180,13 +182,13 @@ contract Registry is Initializable {
         address[] memory list = new address[](owners.count);
 
         uint256 index = 0;
-        address current = owners.list[OWNERS_LIST_SENTINEL];
+        address current = owners.list[_OWNERS_LIST_SENTINEL];
 
         if (current == address(0x0)) {
             return list;
         }
 
-        while (current != OWNERS_LIST_SENTINEL) {
+        while (current != _OWNERS_LIST_SENTINEL) {
             list[index] = current;
             current = owners.list[current];
             index++;
@@ -198,14 +200,14 @@ contract Registry is Initializable {
     // Internal functions
 
     /**
-     * @notice Create initial OwnerList for passed project
-     * @param identityId ID of project
+     * @notice Create initial OwnerList for passed identity
+     * @param identityId ID of identity
      */
-    function initProjectOwners(bytes32 identityId) internal {
+    function _initIdentityOwners(bytes32 identityId) internal {
         OwnerList storage owners = identityOwners[identityId];
 
-        owners.list[OWNERS_LIST_SENTINEL] = msg.sender;
-        owners.list[msg.sender] = OWNERS_LIST_SENTINEL;
+        owners.list[_OWNERS_LIST_SENTINEL] = msg.sender;
+        owners.list[msg.sender] = _OWNERS_LIST_SENTINEL;
         owners.count = 1;
     }
 
