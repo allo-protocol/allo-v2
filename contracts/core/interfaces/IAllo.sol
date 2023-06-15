@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import { MetaPtr } from "../utils/MetaPtr.sol";
+import { MetaPtr } from "../../utils/MetaPtr.sol";
 
 interface IAllo {
     /**
@@ -14,7 +14,7 @@ interface IAllo {
 
     struct PoolData {
         address owner;
-        uint project;
+        uint project; // do we need this?
         address votingStrategy;
         address payoutStrategy;
         MetaPtr metadata;
