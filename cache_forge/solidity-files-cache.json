@@ -4,7 +4,7 @@
     "artifacts": "out",
     "build_infos": "out/build-info",
     "sources": "contracts",
-    "tests": "test",
+    "tests": "test/foundry",
     "scripts": "script",
     "libraries": [
       "lib",
@@ -12,10 +12,10 @@
     ]
   },
   "files": {
-    "contracts/Allo.sol": {
-      "lastModificationDate": 1686792856104,
-      "contentHash": "99c601aff8467b35c8f13694e4191eab",
-      "sourceName": "contracts/Allo.sol",
+    "contracts/core/Allo.sol": {
+      "lastModificationDate": 1686795339490,
+      "contentHash": "245d89cd186a3827c85ecd88b1b39735",
+      "sourceName": "contracts/core/Allo.sol",
       "solcConfig": {
         "settings": {
           "optimizer": {
@@ -56,10 +56,10 @@
         }
       }
     },
-    "contracts/Registry.sol": {
-      "lastModificationDate": 1686792856104,
-      "contentHash": "53482074d9ef19615bf41ddc8f8fcde1",
-      "sourceName": "contracts/Registry.sol",
+    "contracts/core/Registry.sol": {
+      "lastModificationDate": 1686792999393,
+      "contentHash": "d63c5cb4790b1f49db92a436dd4e4b54",
+      "sourceName": "contracts/core/Registry.sol",
       "solcConfig": {
         "settings": {
           "optimizer": {
@@ -100,10 +100,10 @@
         }
       }
     },
-    "contracts/interfaces/IAllo.sol": {
-      "lastModificationDate": 1686792286544,
-      "contentHash": "e90f701a83c1265cc991b0d9ed4b065d",
-      "sourceName": "contracts/interfaces/IAllo.sol",
+    "contracts/core/interfaces/IAllo.sol": {
+      "lastModificationDate": 1686792974510,
+      "contentHash": "03e77e746638caf52c13f1e87152b2f7",
+      "sourceName": "contracts/core/interfaces/IAllo.sol",
       "solcConfig": {
         "settings": {
           "optimizer": {
@@ -142,10 +142,10 @@
         }
       }
     },
-    "contracts/interfaces/IAllocationStrategy.sol": {
-      "lastModificationDate": 1686765207852,
+    "contracts/core/interfaces/IAllocationStrategy.sol": {
+      "lastModificationDate": 1686767198819,
       "contentHash": "47d08e90a378cd8843ba6b4824c5a195",
-      "sourceName": "contracts/interfaces/IAllocationStrategy.sol",
+      "sourceName": "contracts/core/interfaces/IAllocationStrategy.sol",
       "solcConfig": {
         "settings": {
           "optimizer": {
@@ -182,50 +182,10 @@
         }
       }
     },
-    "contracts/interfaces/IAquaduct.sol": {
-      "lastModificationDate": 1686765201563,
-      "contentHash": "9c659df959fe33271d2dd215adcde8eb",
-      "sourceName": "contracts/interfaces/IAquaduct.sol",
-      "solcConfig": {
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "metadata": {
-            "bytecodeHash": "ipfs",
-            "appendCBOR": true
-          },
-          "outputSelection": {
-            "*": {
-              "": [
-                "ast"
-              ],
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ]
-            }
-          },
-          "evmVersion": "paris",
-          "libraries": {}
-        }
-      },
-      "imports": [],
-      "versionRequirement": "=0.8.19",
-      "artifacts": {
-        "IAqeduct": {
-          "0.8.19+commit.7dd6d404.Darwin.appleclang": "IAquaduct.sol/IAqeduct.json"
-        }
-      }
-    },
-    "contracts/interfaces/IDistributionStrategy.sol": {
-      "lastModificationDate": 1686765250012,
-      "contentHash": "ba44710f4c2455b47b9a7ca019c97c52",
-      "sourceName": "contracts/interfaces/IDistributionStrategy.sol",
+    "contracts/core/interfaces/IDistributionStrategy.sol": {
+      "lastModificationDate": 1686793208667,
+      "contentHash": "b15fe076a658f00e423fef324da713ef",
+      "sourceName": "contracts/core/interfaces/IDistributionStrategy.sol",
       "solcConfig": {
         "settings": {
           "optimizer": {
@@ -262,10 +222,10 @@
         }
       }
     },
-    "contracts/interfaces/IRegistry.sol": {
-      "lastModificationDate": 1686792570713,
-      "contentHash": "db28def3cf1cf8079a535735b3f474a5",
-      "sourceName": "contracts/interfaces/IRegistry.sol",
+    "contracts/core/interfaces/IRegistry.sol": {
+      "lastModificationDate": 1686792963384,
+      "contentHash": "ed19519e240f9274732212a6fb755aaa",
+      "sourceName": "contracts/core/interfaces/IRegistry.sol",
       "solcConfig": {
         "settings": {
           "optimizer": {
@@ -304,8 +264,128 @@
         }
       }
     },
+    "contracts/strategies/allocation/Aquaduct.sol": {
+      "lastModificationDate": 1686794194901,
+      "contentHash": "17d66a02c32dada5b53d08aaae56e9d7",
+      "sourceName": "contracts/strategies/allocation/Aquaduct.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "=0.8.19",
+      "artifacts": {
+        "Aquaduct": {
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "Aquaduct.sol/Aquaduct.json"
+        }
+      }
+    },
+    "contracts/strategies/allocation/interfaces/IAquaduct.sol": {
+      "lastModificationDate": 1686767198819,
+      "contentHash": "9c659df959fe33271d2dd215adcde8eb",
+      "sourceName": "contracts/strategies/allocation/interfaces/IAquaduct.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "=0.8.19",
+      "artifacts": {
+        "IAqeduct": {
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "IAquaduct.sol/IAqeduct.json"
+        }
+      }
+    },
+    "contracts/strategies/distribution/SplitPayouts.sol": {
+      "lastModificationDate": 1686793255754,
+      "contentHash": "de0a0e2ae641a37422d190b3ac8f4e52",
+      "sourceName": "contracts/strategies/distribution/SplitPayouts.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "=0.8.19",
+      "artifacts": {
+        "SplitPayoutsStrategy": {
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "SplitPayouts.sol/SplitPayoutsStrategy.json"
+        }
+      }
+    },
     "contracts/utils/MetaPtr.sol": {
-      "lastModificationDate": 1686765382025,
+      "lastModificationDate": 1686767198819,
       "contentHash": "561f301b6fb20ec2c110ec8efb63ec3f",
       "sourceName": "contracts/utils/MetaPtr.sol",
       "solcConfig": {
@@ -382,7 +462,7 @@
       "versionRequirement": "^0.8.2",
       "artifacts": {
         "Initializable": {
-          "0.8.19+commit.7dd6d404.Darwin.appleclang": "Initializable.sol/Initializable.json"
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "proxy/utils/Initializable.sol/Initializable.json"
         }
       }
     },
@@ -422,7 +502,7 @@
       "versionRequirement": "^0.8.1",
       "artifacts": {
         "AddressUpgradeable": {
-          "0.8.19+commit.7dd6d404.Darwin.appleclang": "AddressUpgradeable.sol/AddressUpgradeable.json"
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "contracts-upgradeable/utils/AddressUpgradeable.sol/AddressUpgradeable.json"
         }
       }
     }

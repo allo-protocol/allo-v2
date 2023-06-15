@@ -2,7 +2,7 @@
 pragma solidity 0.8.19;
 
 import {MetaPtr} from "../utils/MetaPtr.sol";
-// import {IRegistry} from "./interfaces/IRegistry.sol";
+// import {IAllo} from "./interfaces/IAllo.sol";
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
