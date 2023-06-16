@@ -2,8 +2,8 @@
 pragma solidity 0.8.19;
 
 import {Test} from "forge-std/Test.sol";
-import {Registry} from "../../contracts/core/Registry.sol";
-import {Metadata} from "../../contracts/core/libraries/Metadata.sol";
+import {Registry} from "../src/core/Registry.sol";
+import {Metadata} from "../src/core/libraries/Metadata.sol";
 
 contract ExpectEmit {
     event IdentityCreated(

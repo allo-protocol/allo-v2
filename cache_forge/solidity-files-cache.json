@@ -3,551 +3,16 @@
   "paths": {
     "artifacts": "out",
     "build_infos": "out/build-info",
-    "sources": "contracts",
-    "tests": "test/foundry",
+    "sources": "src",
+    "tests": "test",
     "scripts": "script",
     "libraries": [
-      "lib",
-      "node_modules"
+      "lib"
     ]
   },
   "files": {
-    "contracts/core/Allo.sol": {
-      "lastModificationDate": 1686852659307,
-      "contentHash": "9b1a6bb0dda0c8405d333f37e5139831",
-      "sourceName": "contracts/core/Allo.sol",
-      "solcConfig": {
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "metadata": {
-            "bytecodeHash": "ipfs",
-            "appendCBOR": true
-          },
-          "outputSelection": {
-            "*": {
-              "": [
-                "ast"
-              ],
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ]
-            }
-          },
-          "evmVersion": "paris",
-          "libraries": {}
-        }
-      },
-      "imports": [
-        "contracts/core/interfaces/IAllo.sol",
-        "contracts/utils/MetaPtr.sol",
-        "node_modules/@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol",
-        "node_modules/@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol"
-      ],
-      "versionRequirement": "=0.8.19",
-      "artifacts": {
-        "Allo": {
-          "0.8.19+commit.7dd6d404.Darwin.appleclang": "Allo.sol/Allo.json"
-        }
-      }
-    },
-    "contracts/core/BaseAllocation.sol": {
-      "lastModificationDate": 1686797427513,
-      "contentHash": "7354d775f805df6811a05249211578a7",
-      "sourceName": "contracts/core/BaseAllocation.sol",
-      "solcConfig": {
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "metadata": {
-            "bytecodeHash": "ipfs",
-            "appendCBOR": true
-          },
-          "outputSelection": {
-            "*": {
-              "": [
-                "ast"
-              ],
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ]
-            }
-          },
-          "evmVersion": "paris",
-          "libraries": {}
-        }
-      },
-      "imports": [],
-      "versionRequirement": "=0.8.19",
-      "artifacts": {
-        "BaseAllocation": {
-          "0.8.19+commit.7dd6d404.Darwin.appleclang": "BaseAllocation.sol/BaseAllocation.json"
-        }
-      }
-    },
-    "contracts/core/BaseDistribution.sol": {
-      "lastModificationDate": 1686797482246,
-      "contentHash": "dc64560acbec72501e3102836ab12a4c",
-      "sourceName": "contracts/core/BaseDistribution.sol",
-      "solcConfig": {
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "metadata": {
-            "bytecodeHash": "ipfs",
-            "appendCBOR": true
-          },
-          "outputSelection": {
-            "*": {
-              "": [
-                "ast"
-              ],
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ]
-            }
-          },
-          "evmVersion": "paris",
-          "libraries": {}
-        }
-      },
-      "imports": [],
-      "versionRequirement": "=0.8.19",
-      "artifacts": {
-        "BaseDistribution": {
-          "0.8.19+commit.7dd6d404.Darwin.appleclang": "BaseDistribution.sol/BaseDistribution.json"
-        }
-      }
-    },
-    "contracts/core/Registry.sol": {
-      "lastModificationDate": 1686855469212,
-      "contentHash": "920bcd0c129ddb61af06962728d85afb",
-      "sourceName": "contracts/core/Registry.sol",
-      "solcConfig": {
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "metadata": {
-            "bytecodeHash": "ipfs",
-            "appendCBOR": true
-          },
-          "outputSelection": {
-            "*": {
-              "": [
-                "ast"
-              ],
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ]
-            }
-          },
-          "evmVersion": "paris",
-          "libraries": {}
-        }
-      },
-      "imports": [
-        "contracts/core/interfaces/IRegistry.sol",
-        "contracts/core/libraries/Metadata.sol",
-        "node_modules/@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol",
-        "node_modules/@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol"
-      ],
-      "versionRequirement": "=0.8.19",
-      "artifacts": {
-        "Registry": {
-          "0.8.19+commit.7dd6d404.Darwin.appleclang": "Registry.sol/Registry.json"
-        }
-      }
-    },
-    "contracts/core/interfaces/IAllo.sol": {
-      "lastModificationDate": 1686852633107,
-      "contentHash": "8bad866e013d624437eede9efef8593e",
-      "sourceName": "contracts/core/interfaces/IAllo.sol",
-      "solcConfig": {
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "metadata": {
-            "bytecodeHash": "ipfs",
-            "appendCBOR": true
-          },
-          "outputSelection": {
-            "*": {
-              "": [
-                "ast"
-              ],
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ]
-            }
-          },
-          "evmVersion": "paris",
-          "libraries": {}
-        }
-      },
-      "imports": [
-        "contracts/utils/MetaPtr.sol"
-      ],
-      "versionRequirement": "=0.8.19",
-      "artifacts": {
-        "IAllo": {
-          "0.8.19+commit.7dd6d404.Darwin.appleclang": "IAllo.sol/IAllo.json"
-        }
-      }
-    },
-    "contracts/core/interfaces/IAllocationStrategy.sol": {
-      "lastModificationDate": 1686767198819,
-      "contentHash": "47d08e90a378cd8843ba6b4824c5a195",
-      "sourceName": "contracts/core/interfaces/IAllocationStrategy.sol",
-      "solcConfig": {
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "metadata": {
-            "bytecodeHash": "ipfs",
-            "appendCBOR": true
-          },
-          "outputSelection": {
-            "*": {
-              "": [
-                "ast"
-              ],
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ]
-            }
-          },
-          "evmVersion": "paris",
-          "libraries": {}
-        }
-      },
-      "imports": [],
-      "versionRequirement": "=0.8.19",
-      "artifacts": {
-        "IAllocationStrategy": {
-          "0.8.19+commit.7dd6d404.Darwin.appleclang": "IAllocationStrategy.sol/IAllocationStrategy.json"
-        }
-      }
-    },
-    "contracts/core/interfaces/IDistributionStrategy.sol": {
-      "lastModificationDate": 1686793208667,
-      "contentHash": "b15fe076a658f00e423fef324da713ef",
-      "sourceName": "contracts/core/interfaces/IDistributionStrategy.sol",
-      "solcConfig": {
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "metadata": {
-            "bytecodeHash": "ipfs",
-            "appendCBOR": true
-          },
-          "outputSelection": {
-            "*": {
-              "": [
-                "ast"
-              ],
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ]
-            }
-          },
-          "evmVersion": "paris",
-          "libraries": {}
-        }
-      },
-      "imports": [],
-      "versionRequirement": "=0.8.19",
-      "artifacts": {
-        "IDistributionStrategy": {
-          "0.8.19+commit.7dd6d404.Darwin.appleclang": "IDistributionStrategy.sol/IDistributionStrategy.json"
-        }
-      }
-    },
-    "contracts/core/interfaces/IRegistry.sol": {
-      "lastModificationDate": 1686855470885,
-      "contentHash": "6d64f899b2719ade75f89e6d1e0e027f",
-      "sourceName": "contracts/core/interfaces/IRegistry.sol",
-      "solcConfig": {
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "metadata": {
-            "bytecodeHash": "ipfs",
-            "appendCBOR": true
-          },
-          "outputSelection": {
-            "*": {
-              "": [
-                "ast"
-              ],
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ]
-            }
-          },
-          "evmVersion": "paris",
-          "libraries": {}
-        }
-      },
-      "imports": [
-        "contracts/core/libraries/Metadata.sol"
-      ],
-      "versionRequirement": "=0.8.19",
-      "artifacts": {
-        "IRegistry": {
-          "0.8.19+commit.7dd6d404.Darwin.appleclang": "IRegistry.sol/IRegistry.json"
-        }
-      }
-    },
-    "contracts/core/libraries/Metadata.sol": {
-      "lastModificationDate": 1686854076333,
-      "contentHash": "2176baf31506001250743d3b9b25cd68",
-      "sourceName": "contracts/core/libraries/Metadata.sol",
-      "solcConfig": {
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "metadata": {
-            "bytecodeHash": "ipfs",
-            "appendCBOR": true
-          },
-          "outputSelection": {
-            "*": {
-              "": [
-                "ast"
-              ],
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ]
-            }
-          },
-          "evmVersion": "paris",
-          "libraries": {}
-        }
-      },
-      "imports": [],
-      "versionRequirement": "=0.8.19",
-      "artifacts": {
-        "Metadata": {
-          "0.8.19+commit.7dd6d404.Darwin.appleclang": "Metadata.sol/Metadata.json"
-        }
-      }
-    },
-    "contracts/strategies/allocation/Aquaduct.sol": {
-      "lastModificationDate": 1686794194901,
-      "contentHash": "17d66a02c32dada5b53d08aaae56e9d7",
-      "sourceName": "contracts/strategies/allocation/Aquaduct.sol",
-      "solcConfig": {
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "metadata": {
-            "bytecodeHash": "ipfs",
-            "appendCBOR": true
-          },
-          "outputSelection": {
-            "*": {
-              "": [
-                "ast"
-              ],
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ]
-            }
-          },
-          "evmVersion": "paris",
-          "libraries": {}
-        }
-      },
-      "imports": [],
-      "versionRequirement": "=0.8.19",
-      "artifacts": {
-        "Aquaduct": {
-          "0.8.19+commit.7dd6d404.Darwin.appleclang": "Aquaduct.sol/Aquaduct.json"
-        }
-      }
-    },
-    "contracts/strategies/allocation/interfaces/IAquaduct.sol": {
-      "lastModificationDate": 1686767198819,
-      "contentHash": "9c659df959fe33271d2dd215adcde8eb",
-      "sourceName": "contracts/strategies/allocation/interfaces/IAquaduct.sol",
-      "solcConfig": {
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "metadata": {
-            "bytecodeHash": "ipfs",
-            "appendCBOR": true
-          },
-          "outputSelection": {
-            "*": {
-              "": [
-                "ast"
-              ],
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ]
-            }
-          },
-          "evmVersion": "paris",
-          "libraries": {}
-        }
-      },
-      "imports": [],
-      "versionRequirement": "=0.8.19",
-      "artifacts": {
-        "IAqeduct": {
-          "0.8.19+commit.7dd6d404.Darwin.appleclang": "IAquaduct.sol/IAqeduct.json"
-        }
-      }
-    },
-    "contracts/strategies/distribution/SplitPayouts.sol": {
-      "lastModificationDate": 1686793255754,
-      "contentHash": "de0a0e2ae641a37422d190b3ac8f4e52",
-      "sourceName": "contracts/strategies/distribution/SplitPayouts.sol",
-      "solcConfig": {
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "metadata": {
-            "bytecodeHash": "ipfs",
-            "appendCBOR": true
-          },
-          "outputSelection": {
-            "*": {
-              "": [
-                "ast"
-              ],
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ]
-            }
-          },
-          "evmVersion": "paris",
-          "libraries": {}
-        }
-      },
-      "imports": [],
-      "versionRequirement": "=0.8.19",
-      "artifacts": {
-        "SplitPayoutsStrategy": {
-          "0.8.19+commit.7dd6d404.Darwin.appleclang": "SplitPayouts.sol/SplitPayoutsStrategy.json"
-        }
-      }
-    },
-    "contracts/utils/MetaPtr.sol": {
-      "lastModificationDate": 1686852818619,
-      "contentHash": "87a0d23af8c486f58194573d7e004cad",
-      "sourceName": "contracts/utils/MetaPtr.sol",
-      "solcConfig": {
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "metadata": {
-            "bytecodeHash": "ipfs",
-            "appendCBOR": true
-          },
-          "outputSelection": {
-            "*": {
-              "": [
-                "ast"
-              ],
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ]
-            }
-          },
-          "evmVersion": "paris",
-          "libraries": {}
-        }
-      },
-      "imports": [],
-      "versionRequirement": "=0.8.19",
-      "artifacts": {
-        "MetaPtr": {
-          "0.8.19+commit.7dd6d404.Darwin.appleclang": "MetaPtr.sol/MetaPtr.json"
-        }
-      }
-    },
     "lib/forge-std/lib/ds-test/src/test.sol": {
-      "lastModificationDate": 1686764402327,
+      "lastModificationDate": 1686858102407,
       "contentHash": "9febff9d09f18af5306669dc276c4c43",
       "sourceName": "lib/forge-std/lib/ds-test/src/test.sol",
       "solcConfig": {
@@ -587,7 +52,7 @@
       }
     },
     "lib/forge-std/src/Base.sol": {
-      "lastModificationDate": 1686764400615,
+      "lastModificationDate": 1686857848211,
       "contentHash": "ee13c050b1914464f1d3f90cde90204b",
       "sourceName": "lib/forge-std/src/Base.sol",
       "solcConfig": {
@@ -636,7 +101,7 @@
       }
     },
     "lib/forge-std/src/StdAssertions.sol": {
-      "lastModificationDate": 1686764400615,
+      "lastModificationDate": 1686857848211,
       "contentHash": "6cc2858240bcd443debbbf075490e325",
       "sourceName": "lib/forge-std/src/StdAssertions.sol",
       "solcConfig": {
@@ -679,7 +144,7 @@
       }
     },
     "lib/forge-std/src/StdChains.sol": {
-      "lastModificationDate": 1686764400615,
+      "lastModificationDate": 1686857848211,
       "contentHash": "9c76820952c8f5e2fc02f872dc3afeb4",
       "sourceName": "lib/forge-std/src/StdChains.sol",
       "solcConfig": {
@@ -721,7 +186,7 @@
       }
     },
     "lib/forge-std/src/StdCheats.sol": {
-      "lastModificationDate": 1686795687931,
+      "lastModificationDate": 1686926810643,
       "contentHash": "b4becd959ffb157ebaca62c549ae0774",
       "sourceName": "lib/forge-std/src/StdCheats.sol",
       "solcConfig": {
@@ -767,7 +232,7 @@
       }
     },
     "lib/forge-std/src/StdError.sol": {
-      "lastModificationDate": 1686764400616,
+      "lastModificationDate": 1686857848212,
       "contentHash": "64c896e1276a291776e5ea5aecb3870a",
       "sourceName": "lib/forge-std/src/StdError.sol",
       "solcConfig": {
@@ -807,7 +272,7 @@
       }
     },
     "lib/forge-std/src/StdInvariant.sol": {
-      "lastModificationDate": 1686764400616,
+      "lastModificationDate": 1686857848212,
       "contentHash": "12c06010ec43ce935ed209d5aca30828",
       "sourceName": "lib/forge-std/src/StdInvariant.sol",
       "solcConfig": {
@@ -847,7 +312,7 @@
       }
     },
     "lib/forge-std/src/StdJson.sol": {
-      "lastModificationDate": 1686764400616,
+      "lastModificationDate": 1686857848212,
       "contentHash": "2e1d13674e152408867795362d833c24",
       "sourceName": "lib/forge-std/src/StdJson.sol",
       "solcConfig": {
@@ -889,7 +354,7 @@
       }
     },
     "lib/forge-std/src/StdMath.sol": {
-      "lastModificationDate": 1686764400616,
+      "lastModificationDate": 1686857848212,
       "contentHash": "9da8f453eba6bb98f3d75bc6822bfb29",
       "sourceName": "lib/forge-std/src/StdMath.sol",
       "solcConfig": {
@@ -929,7 +394,7 @@
       }
     },
     "lib/forge-std/src/StdStorage.sol": {
-      "lastModificationDate": 1686764400616,
+      "lastModificationDate": 1686857848213,
       "contentHash": "3cb9868082df39a53927db09dbc21f23",
       "sourceName": "lib/forge-std/src/StdStorage.sol",
       "solcConfig": {
@@ -974,7 +439,7 @@
       }
     },
     "lib/forge-std/src/StdStyle.sol": {
-      "lastModificationDate": 1686764400616,
+      "lastModificationDate": 1686857848213,
       "contentHash": "820e6f6b7704f0c980fae604b1e34b18",
       "sourceName": "lib/forge-std/src/StdStyle.sol",
       "solcConfig": {
@@ -1016,7 +481,7 @@
       }
     },
     "lib/forge-std/src/StdUtils.sol": {
-      "lastModificationDate": 1686764400616,
+      "lastModificationDate": 1686857848213,
       "contentHash": "dd923493ddd9f98777687205cfe9d646",
       "sourceName": "lib/forge-std/src/StdUtils.sol",
       "solcConfig": {
@@ -1059,7 +524,7 @@
       }
     },
     "lib/forge-std/src/Test.sol": {
-      "lastModificationDate": 1686764400617,
+      "lastModificationDate": 1686857848213,
       "contentHash": "bc9d74a0c612e1c2b66cca2973bcc803",
       "sourceName": "lib/forge-std/src/Test.sol",
       "solcConfig": {
@@ -1116,7 +581,7 @@
       }
     },
     "lib/forge-std/src/Vm.sol": {
-      "lastModificationDate": 1686795687931,
+      "lastModificationDate": 1686926810644,
       "contentHash": "b2b05e33a0242fdb2657ae36dbcc23b6",
       "sourceName": "lib/forge-std/src/Vm.sol",
       "solcConfig": {
@@ -1159,7 +624,7 @@
       }
     },
     "lib/forge-std/src/console.sol": {
-      "lastModificationDate": 1686764400617,
+      "lastModificationDate": 1686857848214,
       "contentHash": "100b8a33b917da1147740d7ab8b0ded3",
       "sourceName": "lib/forge-std/src/console.sol",
       "solcConfig": {
@@ -1199,7 +664,7 @@
       }
     },
     "lib/forge-std/src/console2.sol": {
-      "lastModificationDate": 1686764400617,
+      "lastModificationDate": 1686857848215,
       "contentHash": "491ca717c1915995e78cc361485a3067",
       "sourceName": "lib/forge-std/src/console2.sol",
       "solcConfig": {
@@ -1239,7 +704,7 @@
       }
     },
     "lib/forge-std/src/interfaces/IMulticall3.sol": {
-      "lastModificationDate": 1686764400618,
+      "lastModificationDate": 1686857848216,
       "contentHash": "7b131ca1ca32ef6378b7b9ad5488b901",
       "sourceName": "lib/forge-std/src/interfaces/IMulticall3.sol",
       "solcConfig": {
@@ -1278,10 +743,10 @@
         }
       }
     },
-    "node_modules/@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol": {
-      "lastModificationDate": 1686765795729,
-      "contentHash": "b0970a564d121abf9adfff8d1a01eb16",
-      "sourceName": "node_modules/@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol",
+    "lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol": {
+      "lastModificationDate": 1686857850771,
+      "contentHash": "8a3b1168bc495c414b682d74a4e91a24",
+      "sourceName": "lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol",
       "solcConfig": {
         "settings": {
           "optimizer": {
@@ -1311,19 +776,19 @@
         }
       },
       "imports": [
-        "node_modules/@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol"
+        "lib/openzeppelin-contracts-upgradeable/contracts/utils/AddressUpgradeable.sol"
       ],
-      "versionRequirement": "^0.8.2",
+      "versionRequirement": "^0.8.19",
       "artifacts": {
         "Initializable": {
-          "0.8.19+commit.7dd6d404.Darwin.appleclang": "proxy/utils/Initializable.sol/Initializable.json"
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "Initializable.sol/Initializable.json"
         }
       }
     },
-    "node_modules/@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol": {
-      "lastModificationDate": 1686765795729,
-      "contentHash": "c30c805386fda8a42ff515da963d3a95",
-      "sourceName": "node_modules/@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol",
+    "lib/openzeppelin-contracts-upgradeable/contracts/utils/AddressUpgradeable.sol": {
+      "lastModificationDate": 1686857850787,
+      "contentHash": "5bfe9e962de3c9a0a1159e528986f696",
+      "sourceName": "lib/openzeppelin-contracts-upgradeable/contracts/utils/AddressUpgradeable.sol",
       "solcConfig": {
         "settings": {
           "optimizer": {
@@ -1353,17 +818,17 @@
         }
       },
       "imports": [],
-      "versionRequirement": "^0.8.1",
+      "versionRequirement": "^0.8.19",
       "artifacts": {
         "AddressUpgradeable": {
-          "0.8.19+commit.7dd6d404.Darwin.appleclang": "contracts-upgradeable/utils/AddressUpgradeable.sol/AddressUpgradeable.json"
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "AddressUpgradeable.sol/AddressUpgradeable.json"
         }
       }
     },
-    "test/foundry/Registry.t.sol": {
-      "lastModificationDate": 1686855848620,
-      "contentHash": "1b50d10bdf98aa01b274cf8da7a1f3c5",
-      "sourceName": "test/foundry/Registry.t.sol",
+    "src/core/Allo.sol": {
+      "lastModificationDate": 1686857779358,
+      "contentHash": "9b1a6bb0dda0c8405d333f37e5139831",
+      "sourceName": "src/core/Allo.sol",
       "solcConfig": {
         "settings": {
           "optimizer": {
@@ -1393,9 +858,540 @@
         }
       },
       "imports": [
-        "contracts/core/Registry.sol",
-        "contracts/core/interfaces/IRegistry.sol",
-        "contracts/core/libraries/Metadata.sol",
+        "lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol",
+        "lib/openzeppelin-contracts-upgradeable/contracts/utils/AddressUpgradeable.sol",
+        "src/core/interfaces/IAllo.sol",
+        "src/utils/MetaPtr.sol"
+      ],
+      "versionRequirement": "=0.8.19",
+      "artifacts": {
+        "Allo": {
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "Allo.sol/Allo.json"
+        }
+      }
+    },
+    "src/core/BaseAllocation.sol": {
+      "lastModificationDate": 1686857779358,
+      "contentHash": "7354d775f805df6811a05249211578a7",
+      "sourceName": "src/core/BaseAllocation.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "=0.8.19",
+      "artifacts": {
+        "BaseAllocation": {
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "BaseAllocation.sol/BaseAllocation.json"
+        }
+      }
+    },
+    "src/core/BaseDistribution.sol": {
+      "lastModificationDate": 1686857779358,
+      "contentHash": "dc64560acbec72501e3102836ab12a4c",
+      "sourceName": "src/core/BaseDistribution.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "=0.8.19",
+      "artifacts": {
+        "BaseDistribution": {
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "BaseDistribution.sol/BaseDistribution.json"
+        }
+      }
+    },
+    "src/core/Registry.sol": {
+      "lastModificationDate": 1686857779358,
+      "contentHash": "920bcd0c129ddb61af06962728d85afb",
+      "sourceName": "src/core/Registry.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol",
+        "lib/openzeppelin-contracts-upgradeable/contracts/utils/AddressUpgradeable.sol",
+        "src/core/interfaces/IRegistry.sol",
+        "src/core/libraries/Metadata.sol"
+      ],
+      "versionRequirement": "=0.8.19",
+      "artifacts": {
+        "Registry": {
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "Registry.sol/Registry.json"
+        }
+      }
+    },
+    "src/core/interfaces/IAllo.sol": {
+      "lastModificationDate": 1686857779359,
+      "contentHash": "8bad866e013d624437eede9efef8593e",
+      "sourceName": "src/core/interfaces/IAllo.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "src/utils/MetaPtr.sol"
+      ],
+      "versionRequirement": "=0.8.19",
+      "artifacts": {
+        "IAllo": {
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "IAllo.sol/IAllo.json"
+        }
+      }
+    },
+    "src/core/interfaces/IAllocationStrategy.sol": {
+      "lastModificationDate": 1686857779359,
+      "contentHash": "47d08e90a378cd8843ba6b4824c5a195",
+      "sourceName": "src/core/interfaces/IAllocationStrategy.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "=0.8.19",
+      "artifacts": {
+        "IAllocationStrategy": {
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "IAllocationStrategy.sol/IAllocationStrategy.json"
+        }
+      }
+    },
+    "src/core/interfaces/IDistributionStrategy.sol": {
+      "lastModificationDate": 1686857779359,
+      "contentHash": "b15fe076a658f00e423fef324da713ef",
+      "sourceName": "src/core/interfaces/IDistributionStrategy.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "=0.8.19",
+      "artifacts": {
+        "IDistributionStrategy": {
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "IDistributionStrategy.sol/IDistributionStrategy.json"
+        }
+      }
+    },
+    "src/core/interfaces/IRegistry.sol": {
+      "lastModificationDate": 1686857779359,
+      "contentHash": "6d64f899b2719ade75f89e6d1e0e027f",
+      "sourceName": "src/core/interfaces/IRegistry.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "src/core/libraries/Metadata.sol"
+      ],
+      "versionRequirement": "=0.8.19",
+      "artifacts": {
+        "IRegistry": {
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "IRegistry.sol/IRegistry.json"
+        }
+      }
+    },
+    "src/core/libraries/Metadata.sol": {
+      "lastModificationDate": 1686857779359,
+      "contentHash": "2176baf31506001250743d3b9b25cd68",
+      "sourceName": "src/core/libraries/Metadata.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "=0.8.19",
+      "artifacts": {
+        "Metadata": {
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "Metadata.sol/Metadata.json"
+        }
+      }
+    },
+    "src/strategies/allocation/Aquaduct.sol": {
+      "lastModificationDate": 1686857779360,
+      "contentHash": "17d66a02c32dada5b53d08aaae56e9d7",
+      "sourceName": "src/strategies/allocation/Aquaduct.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "=0.8.19",
+      "artifacts": {
+        "Aquaduct": {
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "Aquaduct.sol/Aquaduct.json"
+        }
+      }
+    },
+    "src/strategies/allocation/interfaces/IAquaduct.sol": {
+      "lastModificationDate": 1686857779360,
+      "contentHash": "9c659df959fe33271d2dd215adcde8eb",
+      "sourceName": "src/strategies/allocation/interfaces/IAquaduct.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "=0.8.19",
+      "artifacts": {
+        "IAqeduct": {
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "IAquaduct.sol/IAqeduct.json"
+        }
+      }
+    },
+    "src/strategies/distribution/SplitPayouts.sol": {
+      "lastModificationDate": 1686857779360,
+      "contentHash": "de0a0e2ae641a37422d190b3ac8f4e52",
+      "sourceName": "src/strategies/distribution/SplitPayouts.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "=0.8.19",
+      "artifacts": {
+        "SplitPayoutsStrategy": {
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "SplitPayouts.sol/SplitPayoutsStrategy.json"
+        }
+      }
+    },
+    "src/utils/MetaPtr.sol": {
+      "lastModificationDate": 1686857779360,
+      "contentHash": "87a0d23af8c486f58194573d7e004cad",
+      "sourceName": "src/utils/MetaPtr.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "=0.8.19",
+      "artifacts": {
+        "MetaPtr": {
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "MetaPtr.sol/MetaPtr.json"
+        }
+      }
+    },
+    "test/Registry.t.sol": {
+      "lastModificationDate": 1686927074463,
+      "contentHash": "c9f8bb27668e3e9d3defc7bb13395b13",
+      "sourceName": "test/Registry.t.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [
         "lib/forge-std/lib/ds-test/src/test.sol",
         "lib/forge-std/src/Base.sol",
         "lib/forge-std/src/StdAssertions.sol",
@@ -1413,8 +1409,11 @@
         "lib/forge-std/src/console.sol",
         "lib/forge-std/src/console2.sol",
         "lib/forge-std/src/interfaces/IMulticall3.sol",
-        "node_modules/@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol",
-        "node_modules/@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol"
+        "lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol",
+        "lib/openzeppelin-contracts-upgradeable/contracts/utils/AddressUpgradeable.sol",
+        "src/core/Registry.sol",
+        "src/core/interfaces/IRegistry.sol",
+        "src/core/libraries/Metadata.sol"
       ],
       "versionRequirement": "=0.8.19",
       "artifacts": {
