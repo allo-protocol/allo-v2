@@ -23,12 +23,8 @@ forge update
 forge install foundry-rs/forge-std
 ```
 
-You should now be able to compile the contracts with hardhat
+You should now be able to compile (build) the contracts
 ```bash
-yarn hardhat:compile
-```
-or Foundry (recommended)
-```bash
-yarn foundry:compile
+yarn compile
 ```
 
