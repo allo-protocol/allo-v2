@@ -22,11 +22,6 @@ interface IAllocationStrategy {
 
     // decode the _data into what's relevant for this strategy
     // perform whatever actions are necessary (token transfers, storage updates, etc)
-    // all approvals, checks, etc all happen within internal functions from here?
-    function updatePool(bytes memory _data) external payable returns (bytes memory);
-
-    // decode the _data into what's relevant for this strategy
-    // perform whatever actions are necessary (token transfers, storage updates, etc)
     // all approvals, checks, etc all happen within internal functions from here
     // we'll also use beforeAllocation() and afterAllocation() hooks so users can override when customizing
     // return the number of votes cast

@@ -34,6 +34,11 @@ interface IAllo {
 
     // passes _data & msg.sender through to the allocation strategy for that pool
     function applyToPool(uint _poolId, bytes memory _data) external payable;
+    
+    // decode the _data into what's relevant for this strategy
+    // perform whatever actions are necessary (token transfers, storage updates, etc)
+    // all approvals, checks, etc all happen within internal functions from here?
+    function updatePool(uint _poolId, bytes memory _data) external payable returns (bytes memory);
 
     // transfers _poolAmt from msg.sender to the pool, and takes a fee
     function fundPool(uint _poolId, address _poolToken, uint _poolAmt) external payable;
