@@ -36,7 +36,7 @@ interface IAllo {
     function createPool(PoolData memory _poolData) external view returns (uint);
 
     // passes _data & msg.sender through to the allocation strategy for that pool
-    function applyToPool(uint _poolId, bytes memory _data) external payable;
+    function applyToPool(uint _poolId, bytes memory _data, address sender) external payable;
 
     // decode the _data into what's relevant for this strategy
     // perform whatever actions are necessary (token transfers, storage updates, etc)

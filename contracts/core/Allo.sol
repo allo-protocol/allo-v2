@@ -34,7 +34,8 @@ contract Allo is Initializable, IAllo {
 
     function applyToPool(
         uint _poolId,
-        bytes memory _data
+        bytes memory _data,
+        address sender
     ) external payable override {
         // Implement the function here
     }
