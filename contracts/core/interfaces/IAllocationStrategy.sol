@@ -29,6 +29,13 @@ interface IAllocationStrategy {
         bytes memory _data
     ) external payable returns (bytes memory);
 
+    // return whether application is pending, accepted, or rejected
+    // strategies will need to add their own logic to translate to these categories if they use different ones
+    // @todo should this be bytes memory or can we assume application is bytes32 / uint?
+    function getApplicationStatus(
+        bytes memory _data
+    ) external view returns (ApplicationStatus);
+
     // decode the _data into what's relevant for this strategy
     // perform whatever actions are necessary (token transfers, storage updates, etc)
     // all approvals, checks, etc all happen within internal functions from here
