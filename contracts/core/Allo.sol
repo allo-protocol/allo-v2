@@ -48,7 +48,6 @@ contract Allo is Initializable, IAllo {
 
     function fundPool(
         uint _poolId,
-        address _poolToken, // should the pool already know the token?
         uint _poolAmt
     ) external payable override {
         // Implement the function here
