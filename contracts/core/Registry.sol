@@ -73,7 +73,10 @@ contract Registry is Initializable {
         return identities[_identityId];
     }
 
-    // This function creates a new identity and returns its ID (for this example, we're just using a counter as the ID).
+    // create a new identity with metadata
+    // set identityId using an incrementer
+    // attestationAddr = addr(hash(id, name)) => this confirms that neither can change while keepign address the same
+    // @todo think about whether there's any value to deploying an address using CREATE2, we think not
     function createIdentity(
         IdentityDetails memory _identityDetails,
         address[] memory _owners
@@ -81,7 +84,8 @@ contract Registry is Initializable {
         // Implement the function here, including updating the mapping and handling the owners array.
     }
 
-    // This function checks if a specific address is an owner of a specific identity.
+    // this will use solmate ROLES to check if the msg.sender is an owner of the identity
+    // @todo figure out how to best represent identity ownership and details
     function isOwnerOfIdentity(
         uint _identityId,
         address _owner
@@ -89,6 +93,8 @@ contract Registry is Initializable {
         // Implement the function here, possibly using the Solmate Roles library as mentioned in the comments.
     }
 
+    // updates the name of the identity
+    // note that this will also change the attestation address, since it's a hash that includes the name
     function updateIdentityName(
         uint _identityId,
         string memory _name
@@ -105,6 +111,9 @@ contract Registry is Initializable {
         // identities[_identityId].attestationAddress = ... ;
     }
 
+    // @todo override changing owners (core owner, not contributors) to make sure it updates attestation address
+    // update the metadata of the identity
+    // checks ownership role first, probably separate roles for this vs using it (owner vs user?)
     /**
      * @notice Updates Metadata for singe identity
      * @param identityId ID of previously created identity

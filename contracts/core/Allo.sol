@@ -20,15 +20,19 @@ contract Allo is Initializable {
      */
     function initialize() public reinitializer(1) {}
 
-    // External functions
-
+    // Public getter on the pools mapping
+    /// @notice calls out to the registry to get the identity metadata
     function getPoolInfo(
         uint256 _poolId
     ) external view returns (PoolData memory, string memory) {
         // Implement the function here
     }
 
-    // todo: update pure back to view when we have the implementation done.
+    // @todo insert clonable strategy library, including validation that an existing pool has safe strategy
+
+    // creates pool locally, transfers pool amount to distribution strategy => returns poolId
+    // takes fee from user
+    // validates that the owner is actually allowed to use the identity
     function createPool(
         PoolData memory /*_poolData*/
     ) external pure returns (uint) {
@@ -38,6 +42,8 @@ contract Allo is Initializable {
         return _poolId;
     }
 
+    // passes _data & msg.sender through to the allocation strategy for that pool
+    // it should return a uint that represents the application
     function applyToPool(
         uint _poolId,
         bytes memory _data
@@ -45,6 +51,9 @@ contract Allo is Initializable {
         // Implement the function here
     }
 
+    // decode the _data into what's relevant for this strategy
+    // perform whatever actions are necessary (token transfers, storage updates, etc)
+    // all approvals, checks, etc all happen within internal functions from here?
     function updateMetadata(
         uint _poolId,
         bytes memory _data
@@ -52,25 +61,29 @@ contract Allo is Initializable {
         // Implement the function here
     }
 
+    // transfers _poolAmt from msg.sender to the pool, and takes a fee
     function fundPool(uint _poolId, uint _poolAmt) external payable {
         // Implement the function here
     }
 
-    function allocate(
-        uint _poolId,
-        bytes memory _data
-    ) external payable {
+    // passes _data & msg.sender through to the allocation strategy for that pool
+    function allocate(uint _poolId, bytes memory _data) external payable {
         // Implement the function here
     }
 
+    // calls voting.generatePayouts() and then uses return data for payout.activatePayouts()
+    // permissionless for anyone to call, checks happen within the strategies
+    // check to make sure they haven't skrited around fee
     function finalize(uint _poolId) external {
         // Implement the function here
     }
 
+    // call to payoutStrategy.distribute()
     function distribute(uint _poolId, bytes memory _data) external {
         // Implement the function here
     }
 
+    // call to distributionStrategy.close()
     function closePool(uint _poolId) external {
         // Implement the function here
     }
