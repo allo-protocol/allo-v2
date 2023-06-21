@@ -26,7 +26,8 @@ interface IAllocationStrategy {
     // update whatever is needed to store the applicant
     // @todo return arbitrary data to pass back? think more about this
     function applyToPool(
-        bytes memory _data
+        bytes memory _data,
+        address sender
     ) external payable returns (bytes memory);
 
     // return whether application is pending, accepted, or rejected
