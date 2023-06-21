@@ -25,7 +25,7 @@ interface IAllocationStrategy {
     // all approvals, checks, etc all happen within internal functions from here
     // we'll also use beforeAllocation() and afterAllocation() hooks so users can override when customizing
     // return the number of votes cast
-    function allocate(bytes memory _data) external payable returns (uint);
+    function allocate(bytes memory _data, address sender) external payable returns (uint);
 
     // can only be called by allo address
     // return list of addresses combined with WAD percentages to pay out
