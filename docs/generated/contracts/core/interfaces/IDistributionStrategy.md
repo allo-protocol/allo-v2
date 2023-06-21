@@ -29,7 +29,7 @@ function activateDistribution(bytes _data) external nonpayable
 ### claim
 
 ```solidity
-function claim(bytes _data) external nonpayable
+function distribute(bytes _data) external nonpayable
 ```
 
 
@@ -58,7 +58,3 @@ STORAGE (with public getters) uint256 poolId; address allo;
 | Name | Type | Description |
 |---|---|---|
 | _0 | address | undefined |
-
-
-
-

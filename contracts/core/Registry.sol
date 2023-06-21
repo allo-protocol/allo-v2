@@ -21,7 +21,7 @@ contract Registry is Initializable, IRegistry {
     // }
     struct OwnerList {
         uint256 count;
-        mapping(address => address) list;
+        mapping(uint => address) list;
     }
 
     // State variables
@@ -30,21 +30,21 @@ contract Registry is Initializable, IRegistry {
     address constant _OWNERS_LIST_SENTINEL = address(0x1);
 
     // The mapping of identities, from identityId to IdentityDetails
-    mapping(address => Metadata.IdentityDetails) public identities;
+    mapping(uint => IdentityDetails) public identities;
 
     // The mapping identities owners, from identityId to OwnerList
     mapping(address => OwnerList) public identityOwners;
 
     // Events
 
-    event IdentityCreated(address indexed identityId, address indexed owner);
-    event MetadataUpdated(address indexed identityId, Metadata.IdentityDetails metaPtr);
-    event OwnerAdded(address indexed identityId, address indexed owner);
-    event OwnerRemoved(address indexed identityId, address indexed owner);
+    event IdentityCreated(uint indexed identityId, address indexed owner);
+    event MetadataUpdated(uint indexed identityId, IdentityDetails metaPtr);
+    event OwnerAdded(uint indexed identityId, address indexed owner);
+    event OwnerRemoved(uint indexed identityId, address indexed owner);
 
     // Modifiers
 
-    modifier onlyIdentityOwner(address identityId) {
+    modifier onlyIdentityOwner(uint identityId) {
         require(
             identityOwners[identityId].list[msg.sender] != address(0),
             "PR000"
@@ -61,15 +61,13 @@ contract Registry is Initializable, IRegistry {
     // External functions
 
     // This function will retrieve the identity details associated with the provided identityId.
-    function getIdentities(
-        address _identityId
-    ) external view override returns (Metadata.IdentityDetails memory) {
+    function getIdentity(uint _identityId) external view override returns (IdentityDetails memory) {
         return identities[_identityId];
     }
 
     // This function creates a new identity and returns its ID (for this example, we're just using a counter as the ID).
     function createIdentity(
-        Metadata.IdentityDetails memory _identityDetails,
+        IdentityDetails memory _identityDetails,
         address[] memory _owners
     ) external override returns (uint256) {
         // Implement the function here, including updating the mapping and handling the owners array.
@@ -77,14 +75,14 @@ contract Registry is Initializable, IRegistry {
 
     // This function checks if a specific address is an owner of a specific identity.
     function isOwnerOfIdentity(
-        address _identityId,
+        uint _identityId,
         address _owner
     ) external view override returns (bool) {
         // Implement the function here, possibly using the Solmate Roles library as mentioned in the comments.
     }
 
     function updateIdentityName(
-        address _identityId,
+        uint _identityId,
         string memory _name
     ) external override {
         // check if the caller has the right to update the identity
@@ -105,13 +103,14 @@ contract Registry is Initializable, IRegistry {
      * @param metadata Updated pointer to external metadata
      */
     function updateIdentityMetadata(
-        address identityId,
-        Metadata.IdentityDetails calldata metadata
-    ) external onlyIdentityOwner(identityId) {
+        uint identityId,
+        string calldata metadata
+    ) external override onlyIdentityOwner(identityId) {
         // this is a permissionless update
-        identities[identityId].permissionlessMetadata = metadata
-            .permissionlessMetadata;
-        emit MetadataUpdated(identityId, metadata);
+        // ZACH: this should just be updating metadata string, not that no permissions/permissionless split
+        // identities[identityId].permissionlessMetadata = metadata
+        //     .permissionlessMetadata;
+        // emit MetadataUpdated(identityId, metadata);
     }
 
     /**
@@ -120,7 +119,7 @@ contract Registry is Initializable, IRegistry {
      * @param newOwner address of new identity owner
      */
     function addIdentityOwner(
-        address identityId,
+        uint identityId,
         address newOwner
     ) external onlyIdentityOwner(identityId) {
         require(
@@ -148,7 +147,7 @@ contract Registry is Initializable, IRegistry {
      * @param owner Address of new Owner
      */
     function removeIdentityOwner(
-        address identityId,
+        uint identityId,
         address prevOwner,
         address owner
     ) external onlyIdentityOwner(identityId) {
@@ -174,7 +173,7 @@ contract Registry is Initializable, IRegistry {
      * @return Count of owners for given identity
      */
     function identityOwnersCount(
-        address identityId
+        uint identityId
     ) external view returns (uint256) {
         return identityOwners[identityId].count;
     }
@@ -185,7 +184,7 @@ contract Registry is Initializable, IRegistry {
      * @return List of current owners of given identity
      */
     function getProjectOwners(
-        address identityId
+        uint identityId
     ) external view returns (address[] memory) {
         OwnerList storage owners = identityOwners[identityId];
 
@@ -213,7 +212,7 @@ contract Registry is Initializable, IRegistry {
      * @notice Create initial OwnerList for passed identity
      * @param identityId ID of identity
      */
-    function _initIdentityOwners(address identityId) internal {
+    function _initIdentityOwners(uint identityId) internal {
         OwnerList storage owners = identityOwners[identityId];
 
         owners.list[_OWNERS_LIST_SENTINEL] = msg.sender;

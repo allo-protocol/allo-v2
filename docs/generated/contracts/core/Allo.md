@@ -47,7 +47,7 @@ function applyToPool(uint256 _poolId, bytes _data) external payable
 ### claim
 
 ```solidity
-function claim(uint256 _poolId, bytes _data) external nonpayable
+function distribute(uint256 _poolId, bytes _data) external nonpayable
 ```
 
 
@@ -215,6 +215,3 @@ error NotInitializing()
 
 
 *The contract is not initializing.*
-
-
-

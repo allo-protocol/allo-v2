@@ -29,7 +29,7 @@ function activateDistribution(bytes _data) external nonpayable
 ### claim
 
 ```solidity
-function claim(bytes _data) external nonpayable
+function distribute(bytes _data) external nonpayable
 ```
 
 
@@ -64,7 +64,3 @@ function payouts(uint256) external view returns (address to, uint256 amount)
 |---|---|---|
 | to | address | undefined |
 | amount | uint256 | undefined |
-
-
-
-

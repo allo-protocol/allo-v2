@@ -15,7 +15,7 @@ contract SplitPayoutsStrategy {
         // todo: decode _data into a struct with a list of addresses and amounts
     }
 
-    function claim(bytes memory _data) external {
+    function distribute(bytes memory _data) external {
         // todo:
     }
 }

@@ -47,7 +47,7 @@ function applyToPool(uint256 _poolId, bytes _data) external payable
 ### claim
 
 ```solidity
-function claim(uint256 _poolId, bytes _data) external nonpayable
+function distribute(uint256 _poolId, bytes _data) external nonpayable
 ```
 
 
@@ -141,7 +141,3 @@ calls out to the registry to get the project metadata
 |---|---|---|
 | _0 | IAllo.PoolData | undefined |
 | _1 | string | undefined |
-
-
-
-
