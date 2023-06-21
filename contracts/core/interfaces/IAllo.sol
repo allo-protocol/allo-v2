@@ -15,9 +15,9 @@ interface IAllo {
 
     struct PoolData {
         address owner;
-        bytes32 identity; // do we need this? and should it be an address?
-        address votingStrategy;
-        address payoutStrategy;
+        address identity; // do we need this? and should it be an address?
+        address allocationStrategy;
+        address distributionStrategy;
         MetaPtr metadata;
         bool active;
     }
@@ -36,7 +36,7 @@ interface IAllo {
     function createPool(PoolData memory _poolData) external view returns (uint);
 
     // passes _data & msg.sender through to the allocation strategy for that pool
-    function applyToPool(uint _poolId, bytes memory _data, address sender) external payable;
+    function applyToPool(uint _poolId, bytes memory _data) external payable;
 
     // decode the _data into what's relevant for this strategy
     // perform whatever actions are necessary (token transfers, storage updates, etc)
@@ -49,7 +49,6 @@ interface IAllo {
     // transfers _poolAmt from msg.sender to the pool, and takes a fee
     function fundPool(
         uint _poolId,
-        address _poolToken,
         uint _poolAmt
     ) external payable;
 
