@@ -12,20 +12,40 @@ interface IAllocationStrategy {
         uint64 votingEnd;
     */
 
+    enum ApplicationStatus {
+        None,
+        Pending,
+        Accepted,
+        Rejected
+    }
+
     // call to allo() and query pools[poolId].owner
     function owner() external view returns (address);
 
     // decode the _data into what's relevant for this strategy
     // update whatever is needed to store the applicant
     // @todo return arbitrary data to pass back? think more about this
-    function applyToPool(bytes memory _data) external payable returns (bytes memory);
+    function applyToPool(
+        bytes memory _data,
+        address sender
+    ) external payable returns (bytes memory);
+
+    // return whether application is pending, accepted, or rejected
+    // strategies will need to add their own logic to translate to these categories if they use different ones
+    // @todo should this be bytes memory or can we assume application is bytes32 / uint?
+    function getApplicationStatus(
+        bytes memory _data
+    ) external view returns (ApplicationStatus);
 
     // decode the _data into what's relevant for this strategy
     // perform whatever actions are necessary (token transfers, storage updates, etc)
     // all approvals, checks, etc all happen within internal functions from here
     // we'll also use beforeAllocation() and afterAllocation() hooks so users can override when customizing
     // return the number of votes cast
-    function allocate(bytes memory _data, address sender) external payable returns (uint);
+    function allocate(
+        bytes memory _data,
+        address sender
+    ) external payable returns (uint);
 
     // can only be called by allo address
     // return list of addresses combined with WAD percentages to pay out

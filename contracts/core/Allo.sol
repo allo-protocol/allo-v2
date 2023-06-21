@@ -22,12 +22,14 @@ contract Allo is Initializable, IAllo {
         // Implement the function here
     }
 
+    // todo: update pure back to view when we have the implementation done.
     function createPool(
-        PoolData memory _poolData,
-        address _poolToken,
-        uint _poolAmt
-    ) external view override returns (uint) {
-        // Implement the function here
+        PoolData memory /*_poolData*/
+    ) external pure override returns (uint) {
+        uint32 _poolId = 0;
+
+        // todo: return the poolId? what do we want to return here?
+        return _poolId;
     }
 
     function applyToPool(
@@ -43,10 +45,9 @@ contract Allo is Initializable, IAllo {
     ) external payable override returns (bytes memory) {
         // Implement the function here
     }
- 
+
     function fundPool(
         uint _poolId,
-        address _poolToken,
         uint _poolAmt
     ) external payable override {
         // Implement the function here
