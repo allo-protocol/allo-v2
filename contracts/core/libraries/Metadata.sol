@@ -9,20 +9,4 @@ library Metadata {
         /// @notice Pointer to fetch metadata for the specified protocol
         string pointer;
     }
-
-    struct PermissionedMetadata {
-        MetaPtr metadata;
-        address[] owners;
-    }
-
-    struct PermissionlessMetadata {
-        MetaPtr metadata;
-    }
-
-    struct IdentityDetails {
-        string name;
-        PermissionedMetadata permissionedMetadata;
-        PermissionlessMetadata permissionlessMetadata;
-        address attestationAddress;
-    }
 }

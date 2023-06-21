@@ -8,17 +8,17 @@ interface IDistributionStrategy {
         address allo;
     */
 
-    // call to allo() and query pools[poolId].owner
-    function owner() external view returns (address);
+    // call to allo() to get identity for pool, then to registry() to get metadata
+    function getOwnerIdentity() external view returns (string memory);
 
     // decode the _data into what's relevant to determine payouts
     // default will be a struct with a list of addresses and WAD percentages
     // turn "on" the abilty to claim payouts
-    function activateDistribution(bytes memory _data) external;
+    function activateDistribution(bytes memory _inputData, bytes memory _allocStratData) external;
 
     // claim a payout based on the strategy's needs
     // this could include merkle proofs, etc or just nothing
-    function claim(bytes memory _data) external;
+    function distribute(bytes memory _data) external;
 
     // many owners will probably want a way to update roots, pull out funds if not claimed, etc
     // but all of that will be in specific implementations, not requried interface

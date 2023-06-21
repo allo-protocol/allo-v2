@@ -30,7 +30,7 @@ contract Registry is Initializable, IRegistry {
     address constant _OWNERS_LIST_SENTINEL = address(0x1);
 
     // The mapping of identities, from identityId to IdentityDetails
-    mapping(address => Metadata.IdentityDetails) public identities;
+    mapping(address => IdentityDetails) public identities;
 
     // The mapping identities owners, from identityId to OwnerList
     mapping(address => OwnerList) public identityOwners;

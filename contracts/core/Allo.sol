@@ -64,7 +64,7 @@ contract Allo is Initializable, IAllo {
         // Implement the function here
     }
 
-    function claim(uint _poolId, bytes memory _data) external override {
+    function distribute(uint _poolId, bytes memory _data) external override {
         // Implement the function here
     }
 

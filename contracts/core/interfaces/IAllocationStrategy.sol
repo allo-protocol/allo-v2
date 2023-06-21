@@ -19,8 +19,8 @@ interface IAllocationStrategy {
         Rejected
     }
 
-    // call to allo() and query pools[poolId].owner
-    function owner() external view returns (address);
+    // call to allo() to get identity for pool, then to registry() to get metadata
+    function getOwnerIdentity() external view returns (string memory);
 
     // decode the _data into what's relevant for this strategy
     // update whatever is needed to store the applicant
@@ -33,9 +33,8 @@ interface IAllocationStrategy {
     // return whether application is pending, accepted, or rejected
     // strategies will need to add their own logic to translate to these categories if they use different ones
     // @todo should this be bytes memory or can we assume application is bytes32 / uint?
-    function getApplicationStatus(
-        bytes memory _data
-    ) external view returns (ApplicationStatus);
+    // ZACH RESPONSE: changed to uint, applications should just be trakced by id
+    function getApplicationStatus(uint applicationId) external view returns (ApplicationStatus);
 
     // decode the _data into what's relevant for this strategy
     // perform whatever actions are necessary (token transfers, storage updates, etc)
