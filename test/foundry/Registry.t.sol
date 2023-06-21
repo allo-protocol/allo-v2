@@ -8,11 +8,11 @@ import {Metadata} from "../../contracts/core/libraries/Metadata.sol";
 contract ExpectEmit {
     event IdentityCreated(
         address identityId,
-        Metadata.IdentityDetails metadata
+        Registry.IdentityDetails metadata
     );
     event MetadataUpdated(
         address identityId,
-        Metadata.IdentityDetails metadata
+        Registry.IdentityDetails metadata
     );
     event OwnerAdded(address identityId, address owner);
     event OwnerRemoved(address identityId, address owner);

@@ -8,29 +8,26 @@ interface IRegistry {
     struct IdentityDetails {
         uint id;
         string name;
-        MetaPtr metadata;
+        Metadata.MetaPtr metadata;
         address attestationAddress;
     }
 
-    // id to IdentityDetails
-    mapping(uint => IdentityDetails) identities;
-
     // getter for identities mapping
-    function getIdentity(address _identityId) external view returns (IdentityDetails memory);
+    function getIdentity(uint _identityId) external view returns (IdentityDetails memory);
 
     // create a new project with metadata
     // set identityId using an incrementer
     // attestationAddr = addr(hash(id, name)) => this confirms that neither can change while keepign address the same
     // @todo think about whether there's any value to deploying an address using CREATE2, we think not
     function createIdentity(
-        Metadata.IdentityDetails memory _identityDetails,
+        IdentityDetails memory _identityDetails,
         address[] memory _owners
     ) external returns (uint256);
 
     // updates the name of the identity
     // note that this will also change the attestation address, since it's a hash that includes the name
     function updateIdentityName(
-        address _identityId,
+        uint _identityId,
         string memory _name
     ) external;
 
@@ -43,7 +40,7 @@ interface IRegistry {
     // this will use solmate ROLES to check if the msg.sender is an owner of the identity
     // @todo figure out how to best represent identity ownership and details
     function isOwnerOfIdentity(
-        address _identityId,
+        uint _identityId,
         address _owner
     ) external view returns (bool);
 }
