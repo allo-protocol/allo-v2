@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import {IRegistry} from "./interfaces/IRegistry.sol";
 import {Metadata} from "../core/libraries/Metadata.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-contract Registry is Initializable, IRegistry {
+contract Registry is Initializable {
     // A linked list of owners of a identity
     // The use of a linked list allows us to easily add and remove owners,
     // access them directly in O(1), and loop through them.
@@ -22,6 +21,13 @@ contract Registry is Initializable, IRegistry {
     struct OwnerList {
         uint256 count;
         mapping(uint => address) list;
+    }
+
+    struct IdentityDetails {
+        uint id;
+        string name;
+        Metadata.MetaPtr metadata;
+        address attestationAddress;
     }
 
     // State variables
@@ -61,7 +67,9 @@ contract Registry is Initializable, IRegistry {
     // External functions
 
     // This function will retrieve the identity details associated with the provided identityId.
-    function getIdentity(uint _identityId) external view override returns (IdentityDetails memory) {
+    function getIdentity(
+        uint _identityId
+    ) external view returns (IdentityDetails memory) {
         return identities[_identityId];
     }
 
@@ -69,7 +77,7 @@ contract Registry is Initializable, IRegistry {
     function createIdentity(
         IdentityDetails memory _identityDetails,
         address[] memory _owners
-    ) external override returns (uint256) {
+    ) external returns (uint256) {
         // Implement the function here, including updating the mapping and handling the owners array.
     }
 
@@ -77,14 +85,14 @@ contract Registry is Initializable, IRegistry {
     function isOwnerOfIdentity(
         uint _identityId,
         address _owner
-    ) external view override returns (bool) {
+    ) external view returns (bool) {
         // Implement the function here, possibly using the Solmate Roles library as mentioned in the comments.
     }
 
     function updateIdentityName(
         uint _identityId,
         string memory _name
-    ) external override {
+    ) external {
         // check if the caller has the right to update the identity
         require(
             this.isOwnerOfIdentity(_identityId, msg.sender),
@@ -105,7 +113,7 @@ contract Registry is Initializable, IRegistry {
     function updateIdentityMetadata(
         uint identityId,
         string calldata metadata
-    ) external override onlyIdentityOwner(identityId) {
+    ) external onlyIdentityOwner(identityId) {
         // this is a permissionless update
         // ZACH: this should just be updating metadata string, not that no permissions/permissionless split
         // identities[identityId].permissionlessMetadata = metadata

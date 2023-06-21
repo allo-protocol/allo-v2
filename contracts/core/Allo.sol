@@ -2,12 +2,18 @@
 pragma solidity 0.8.19;
 
 import {MetaPtr} from "../utils/MetaPtr.sol";
-import {IAllo} from "./interfaces/IAllo.sol";
-// import {IAllo} from "./interfaces/IAllo.sol";
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-contract Allo is Initializable, IAllo {
+contract Allo is Initializable {
+    struct PoolData {
+        address identity;
+        address allocationStrategy;
+        address distributionStrategy;
+        MetaPtr metadata;
+        bool active;
+    }
+
     /**
      * @notice Initializes the contract after an upgrade
      * @dev In future deploys of the implementation, an higher version should be passed to reinitializer
@@ -18,14 +24,14 @@ contract Allo is Initializable, IAllo {
 
     function getPoolInfo(
         uint256 _poolId
-    ) external view override returns (PoolData memory, string memory) {
+    ) external view returns (PoolData memory, string memory) {
         // Implement the function here
     }
 
     // todo: update pure back to view when we have the implementation done.
     function createPool(
         PoolData memory /*_poolData*/
-    ) external pure override returns (uint) {
+    ) external pure returns (uint) {
         uint32 _poolId = 0;
 
         // todo: return the poolId? what do we want to return here?
@@ -35,40 +41,37 @@ contract Allo is Initializable, IAllo {
     function applyToPool(
         uint _poolId,
         bytes memory _data
-    ) external payable override returns (uint) {
+    ) external payable returns (uint) {
         // Implement the function here
     }
 
     function updateMetadata(
         uint _poolId,
         bytes memory _data
-    ) external payable override returns (bytes memory) {
+    ) external payable returns (bytes memory) {
         // Implement the function here
     }
 
-    function fundPool(
-        uint _poolId,
-        uint _poolAmt
-    ) external payable override {
+    function fundPool(uint _poolId, uint _poolAmt) external payable {
         // Implement the function here
     }
 
     function allocate(
         uint _poolId,
         bytes memory _data
-    ) external payable override {
+    ) external payable {
         // Implement the function here
     }
 
-    function finalize(uint _poolId) external override {
+    function finalize(uint _poolId) external {
         // Implement the function here
     }
 
-    function distribute(uint _poolId, bytes memory _data) external override {
+    function distribute(uint _poolId, bytes memory _data) external {
         // Implement the function here
     }
 
-    function closePool(uint _poolId) external override {
+    function closePool(uint _poolId) external {
         // Implement the function here
     }
 }
