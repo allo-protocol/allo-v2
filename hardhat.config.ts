@@ -36,12 +36,6 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
   }
 });
 
-let deployPrivateKey = process.env.DEPLOYER_PRIVATE_KEY as string;
-if (!deployPrivateKey) {
-  deployPrivateKey =
-    "0x0000000000000000000000000000000000000000000000000000000000000001";
-}
-
 /**
  * Generates hardhat network configuration the test networks.
  * @param network
@@ -53,9 +47,8 @@ function createTestnetConfig(
   url: string
 ): NetworkUserConfig {
   return {
-    accounts: [deployPrivateKey],
+    accounts: [process.env.DEPLOYER_PRIVATE_KEY as string],
     chainId: chainIds[network],
-    allowUnlimitedContractSize: true,
     url,
   };
 }
@@ -71,7 +64,7 @@ function createMainnetConfig(
   url: string
 ): NetworkUserConfig {
   return {
-    accounts: [deployPrivateKey],
+    accounts: [process.env.DEPLOYER_PRIVATE_KEY as string],
     chainId: chainIds[network],
     url,
   };
@@ -91,7 +84,6 @@ const abiExporter = [
   },
 ];
 
-
 const config: HardhatUserConfig = {
   solidity: {
     version: "0.8.19",
@@ -107,13 +99,17 @@ const config: HardhatUserConfig = {
     tests: "./test/hardhat",
   },
   networks: {
-    // Mainnet Networks
+    // ===============================
+    // ====== Mainnet Networks =======
+    // ===============================
     mainnet: createMainnetConfig(
       "mainnet",
       process.env.MAINNET_RPC_URL as string
     )
 
-    // Test Networks
+    // ===============================
+    // ======== Test Networks ========
+    // ===============================
     sepolia: createTestnetConfig(
       "sepolia",
       process.env.SEPOLIA_RPC_URL as string
@@ -126,12 +122,12 @@ const config: HardhatUserConfig = {
     ),
   },
 
-
   gasReporter: {
     coinmarketcap: process.env.COINMARKETCAP_API_KEY,
     enabled: process.env.REPORT_GAS !== undefined,
     currency: "USD"
   },
+
   etherscan: {
     apiKey: {
       // @ts-ignore
