@@ -8,6 +8,7 @@ import { Metadata } from "./libraries/Metadata.sol";
 contract Registry is AccessControl {
 
     error NO_ACCESS_TO_ROLE();
+    error NOT_SUPPORTED();
 
     /// @notice Unique identifier for an identity
     uint private identityId;
@@ -87,8 +88,6 @@ contract Registry is AccessControl {
         emit IdentityNameUpdated(_identityId, _name);
     }
 
-    // @todo override changing owners (core owner, not contributors) to make sure it updates attestation address
-
     /// @notice update the metadata of the identity
     /// @param _identityId The identityId of the identity
     /// @param _metadata The new metadata of the identity
@@ -137,5 +136,39 @@ contract Registry is AccessControl {
         roleHash = keccak256(
             abi.encodePacked(_identityId, _roleType)
         );
+    }
+
+    // --- ACCESS CONTROL ---
+
+    /// @notice OZ function to grant role reverts 
+    function grantRole(bytes32 role, address account) public virtual override onlyRole(getRoleAdmin(role)) {
+        revert NOT_SUPPORTED();
+    }
+
+    /// @notice OZ function to grant role reverts 
+    function revokeRole(bytes32 role, address account) public virtual override onlyRole(getRoleAdmin(role)) {
+        revert NOT_SUPPORTED();
+    }
+
+    function grantIdentityRole(uint _identityId, RoleType _roleType, address account) external returns (uint) {
+        bytes32 role = _generateRole(_identityId, _roleType);
+        _grantRole(role, account);
+
+        if(_roleType == RoleType.OWNER) {
+            IdentityDetails memory identity = identities[_identityId];
+            // TODO: HOW to update attestation address cause name and identityId is never updated?
+
+        }
+        return _identityId;
+    }
+
+    function revokeIdentityRole(uint _identityId, RoleType _roleType, address account) external returns (uint) {
+        bytes32 role = _generateRole(_identityId, _roleType);
+        _revokeRole(role, account);
+        if(_roleType == RoleType.OWNER) {
+            IdentityDetails memory identity = identities[_identityId];
+            // TODO: How to update attestation address cause name and identityId is never updated?
+        }
+        return _identityId;
     }
 }
