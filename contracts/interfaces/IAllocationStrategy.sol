@@ -6,10 +6,6 @@ interface IAllocationStrategy {
         STORAGE (with public getters)
         uint256 poolId;
         address allo;
-        uint64 applicationStart;
-        uint64 applicationEnd;
-        uint64 votingStart;
-        uint64 votingEnd;
     */
 
     enum ApplicationStatus {
@@ -32,8 +28,6 @@ interface IAllocationStrategy {
 
     // return whether application is pending, accepted, or rejected
     // strategies will need to add their own logic to translate to these categories if they use different ones
-    // @todo should this be bytes memory or can we assume application is bytes32 / uint?
-    // ZACH RESPONSE: changed to uint, applications should just be trakced by id
     function getApplicationStatus(uint applicationId) external view returns (ApplicationStatus);
 
     // decode the _data into what's relevant for this strategy
@@ -51,4 +45,7 @@ interface IAllocationStrategy {
     // @todo there will be other return formats
     // define formats for returns here so we can explicitly say which distribution strategies are compatible
     function generatePayouts() external payable returns (bytes memory);
+
+    // many owners will probably want a way to add custom application approval logic
+    // but all of that will be in specific implementations, not requried interface
 }
