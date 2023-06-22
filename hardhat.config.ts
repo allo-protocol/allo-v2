@@ -105,7 +105,7 @@ const config: HardhatUserConfig = {
     mainnet: createMainnetConfig(
       "mainnet",
       process.env.MAINNET_RPC_URL as string
-    )
+    ),
 
     // ===============================
     // ======== Test Networks ========
