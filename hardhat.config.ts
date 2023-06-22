@@ -18,9 +18,11 @@ dotenv.config();
 const chainIds = {
   // local
   localhost: 31337,
+
   // testnet
   goerli: 5,
   "fantom-testnet": 4002,
+  "sepolia": 11155111,
 
   // mainnet
   mainnet: 1,
@@ -136,11 +138,7 @@ const config: HardhatUserConfig = {
   gasReporter: {
     coinmarketcap: process.env.COINMARKETCAP_API_KEY,
     enabled: process.env.REPORT_GAS !== undefined,
-    currency: "USD",
-    excludeContracts: [
-      "contracts/mocks",
-      "contracts/dummy"
-    ],
+    currency: "USD"
   },
   etherscan: {
     apiKey: {
