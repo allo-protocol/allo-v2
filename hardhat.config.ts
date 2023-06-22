@@ -20,14 +20,10 @@ const chainIds = {
   localhost: 31337,
 
   // testnet
-  goerli: 5,
-  "fantom-testnet": 4002,
-  "sepolia": 11155111,
+  sepolia: 11155111,
 
   // mainnet
-  mainnet: 1,
-  "optimism-mainnet": 10,
-  "fantom-mainnet": 250,
+  mainnet: 1
 };
 
 // This is a sample Hardhat task. To learn how to create your own go to
@@ -46,8 +42,6 @@ if (!deployPrivateKey) {
     "0x0000000000000000000000000000000000000000000000000000000000000001";
 }
 
-const infuraIdKey = process.env.INFURA_ID as string;
-
 /**
  * Generates hardhat network configuration the test networks.
  * @param network
@@ -56,11 +50,8 @@ const infuraIdKey = process.env.INFURA_ID as string;
  */
 function createTestnetConfig(
   network: keyof typeof chainIds,
-  url?: string
+  url: string
 ): NetworkUserConfig {
-  if (!url) {
-    url = `https://${network}.infura.io/v3/${infuraIdKey}`;
-  }
   return {
     accounts: [deployPrivateKey],
     chainId: chainIds[network],
@@ -77,11 +68,8 @@ function createTestnetConfig(
  */
 function createMainnetConfig(
   network: keyof typeof chainIds,
-  url?: string
+  url: string
 ): NetworkUserConfig {
-  if (!url) {
-    url = `https://${network}.infura.io/v3/${infuraIdKey}`;
-  }
   return {
     accounts: [deployPrivateKey],
     chainId: chainIds[network],
@@ -119,22 +107,26 @@ const config: HardhatUserConfig = {
     tests: "./test/hardhat",
   },
   networks: {
-    // Main Networks
-    mainnet: createMainnetConfig("mainnet"),
-    "optimism-mainnet": createMainnetConfig("optimism-mainnet"),
-    "fantom-mainnet": createMainnetConfig(
-      "fantom-mainnet",
-      "https://rpc.ftm.tools"
-    ),
+    // Mainnet Networks
+    mainnet: createMainnetConfig(
+      "mainnet",
+      process.env.MAINNET_RPC_URL as string
+    )
 
     // Test Networks
-    goerli: createTestnetConfig("goerli"),
-    "fantom-testnet": createTestnetConfig(
-      "fantom-testnet",
-      "https://rpc.testnet.fantom.network/"
+    sepolia: createTestnetConfig(
+      "sepolia",
+      process.env.SEPOLIA_RPC_URL as string
     ),
-    localhost: createTestnetConfig("localhost", "http://127.0.0.1:8545"),
+
+    // Localhost
+    localhost: createTestnetConfig(
+      "localhost",
+      "http://127.0.0.1:8545"
+    ),
   },
+
+
   gasReporter: {
     coinmarketcap: process.env.COINMARKETCAP_API_KEY,
     enabled: process.env.REPORT_GAS !== undefined,
@@ -145,13 +137,7 @@ const config: HardhatUserConfig = {
       // @ts-ignore
       mainnet: process.env.ETHERSCAN_API_KEY,
       // @ts-ignore
-      goerli: process.env.ETHERSCAN_API_KEY,
-      // @ts-ignore
-      optimisticEthereum: process.env.OPTIMISTIC_ETHERSCAN_API_KEY,
-      // @ts-ignore
-      ftmTestnet: process.env.FTMSCAN_API_KEY,
-      // @ts-ignore
-      opera: process.env.FTMSCAN_API_KEY,
+      sepolia: process.env.ETHERSCAN_API_KEY,
     },
   },
   abiExporter: abiExporter,
