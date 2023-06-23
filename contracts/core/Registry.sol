@@ -53,16 +53,15 @@ contract Registry is AccessControl {
     /// @param _index Index of the identity
     /// @param _name The name of the identity
     /// @param _metadata The metadata of the identity
-    /// @param _owners The owners of the identity
+    /// @param _owner The owner of the identity
     /// @param _members The members of the identity
     function createIdentity(
         uint _index,
         string memory _name,
         Metadata memory _metadata,
-        address[] memory _owners,
+        address _owner, // Note: this is a single owner
         address[] memory _members
     ) external returns (bytes32) {
-
         bytes32 identityId = _generateIdentityId(_index);
 
         if (identitiesById[identityId].id == bytes32(0)) {
@@ -85,17 +84,12 @@ contract Registry is AccessControl {
         bytes32 memberRole = _generateRole(identityId, RoleType.MEMBER);
 
         // assign roles
-        uint256 ownerLength = _owners.length;
-        for (uint i = 0; i < ownerLength;) {
-            address _owner = _owners[i];
-            _grantRole(ownerRole, _owner);
-            _grantRole(memberRole, _owner);
-            unchecked {
-                i++;
-            }
-        }
+        address owner = _owner;
+        _grantRole(ownerRole, owner);
+        _grantRole(memberRole, owner);
+
         uint256 memberLength = _members.length;
-        for (uint i = 0; i < memberLength;) {
+        for (uint i = 0; i < memberLength; ) {
             _grantRole(memberRole, _members[i]);
             unchecked {
                 i++;
@@ -116,7 +110,7 @@ contract Registry is AccessControl {
     /// @notice Updates the name of the identity and generates new anchor
     /// @param _identityId The identityId of the identity
     /// @param _name The new name of the identity
-    /// @dev Only owner can update the name. _identityId is reused. 
+    /// @dev Only owner can update the name. _identityId is reused.
     function updateIdentityName(
         bytes32 _identityId,
         string memory _name
@@ -127,11 +121,8 @@ contract Registry is AccessControl {
             revert NO_ACCESS_TO_ROLE();
         }
 
-        address anchor = _generateAnchor(
-            _identityId,
-            _name
-        );
-        
+        address anchor = _generateAnchor(_identityId, _name);
+
         Identity storage identity = identitiesById[_identityId];
         identity.name = _name;
         identity.anchor = anchor;
@@ -174,13 +165,13 @@ contract Registry is AccessControl {
 
     /// @notice Returns if the given address is an member of the identity
     /// @param _identityId The identityId of the identity
-    /// @param _owner The address to check
+    /// @param _member The address to check
     function isMemberOfIdentity(
         bytes32 _identityId,
-        address _owner
+        address _member
     ) external view returns (bool) {
         bytes32 memberRole = _generateRole(_identityId, RoleType.MEMBER);
-        return hasRole(memberRole, _owner);
+        return hasRole(memberRole, _member);
     }
 
     /// @notice Generates the anchor for the given identityId and name
@@ -190,7 +181,9 @@ contract Registry is AccessControl {
         bytes32 _identityId,
         string memory _name
     ) internal pure returns (address) {
-        bytes32 attestationHash = keccak256(abi.encodePacked(_identityId, _name));
+        bytes32 attestationHash = keccak256(
+            abi.encodePacked(_identityId, _name)
+        );
 
         return address(uint160(uint256(attestationHash)));
     }
@@ -198,12 +191,7 @@ contract Registry is AccessControl {
     /// @notice Generates the identityId based on msg.sender
     /// @param _index Index of the identity
     function _generateIdentityId(uint _index) internal view returns (bytes32) {
-        return keccak256(
-            abi.encodePacked(
-                msg.sender,
-                _index
-            )
-        );
+        return keccak256(abi.encodePacked(msg.sender, _index));
     }
 
     /// @notice Generates the OZ role for an given identity
@@ -216,8 +204,57 @@ contract Registry is AccessControl {
         roleHash = keccak256(abi.encodePacked(_identityId, _roleType));
     }
 
-    /// TODO: Role management
-    /// Who can add / remove owner for an identity
-    /// Who can add / remove members for an identity
-    /// Multiple owners vs single owner
+    // Note: Role management - Spoke with Nate, we are going to go with single owner for now
+    // ! Who can add / remove owner for an identity? No one. It's a single owner.
+    // ? Transfer ownership will not be supported for now.
+    // - Owner can add / remove members
+    // - Single owner
+
+    /// @notice Adds members to the identity
+    /// @param _identityId The identityId of the identity
+    /// @param _members The members to add
+    function addMembers(
+        bytes32 _identityId,
+        address[] memory _members
+    ) external {
+        bytes32 ownerRole = _generateRole(_identityId, RoleType.OWNER);
+
+        if (!hasRole(ownerRole, msg.sender)) {
+            revert NO_ACCESS_TO_ROLE();
+        }
+
+        bytes32 memberRole = _generateRole(_identityId, RoleType.MEMBER);
+
+        uint256 memberLength = _members.length;
+        for (uint i = 0; i < memberLength; ) {
+            _grantRole(memberRole, _members[i]);
+            unchecked {
+                i++;
+            }
+        }
+    }
+
+    /// @notice Removes members from the identity
+    /// @param _identityId The identityId of the identity
+    /// @param _members The members to remove
+    function removeMembers(
+        bytes32 _identityId,
+        address[] memory _members
+    ) external {
+        bytes32 ownerRole = _generateRole(_identityId, RoleType.OWNER);
+
+        if (!hasRole(ownerRole, msg.sender)) {
+            revert NO_ACCESS_TO_ROLE();
+        }
+
+        bytes32 memberRole = _generateRole(_identityId, RoleType.MEMBER);
+
+        uint256 memberLength = _members.length;
+        for (uint i = 0; i < memberLength; ) {
+            _revokeRole(memberRole, _members[i]);
+            unchecked {
+                i++;
+            }
+        }
+    }
 }
