@@ -9,9 +9,6 @@ contract Registry is AccessControl {
     error NO_ACCESS_TO_ROLE();
     error INDEX_NOT_AVAILABLE();
 
-    /// @notice Maps msg.sender addresses to nonces to generate identityId
-    mapping (address => uint) public identityIndex;
-
     /// @notice Types of roles assigned to an identity
     enum RoleType {
         OWNER,
@@ -218,4 +215,9 @@ contract Registry is AccessControl {
     ) internal pure returns (bytes32 roleHash) {
         roleHash = keccak256(abi.encodePacked(_identityId, _roleType));
     }
+
+    /// TODO: Role management
+    /// Who can add / remove owner for an identity
+    /// Who can add / remove members for an identity
+    /// Multiple owners vs single owner
 }
