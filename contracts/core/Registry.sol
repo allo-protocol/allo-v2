@@ -7,10 +7,10 @@ import {Metadata} from "./libraries/Metadata.sol";
 
 contract Registry is AccessControl {
     error NO_ACCESS_TO_ROLE();
-    // error NOT_ALLOWED();
+    error INDEX_NOT_AVAILABLE();
 
     /// @notice Maps msg.sender addresses to nonces to generate identityId
-    mapping (address => uint) public senderNonceMap;
+    mapping (address => uint) public identityIndex;
 
     /// @notice Types of roles assigned to an identity
     enum RoleType {
@@ -21,17 +21,22 @@ contract Registry is AccessControl {
     /// @notice Struct to hold details of an identity
     struct Identity {
         bytes32 id;
+        uint index;
         string name;
         Metadata metadata;
         address anchor;
     }
 
-    /// @notice identityId -> Identity
-    mapping(bytes32 => Identity) public identities;
+    /// @notice Identity.id -> Identity
+    mapping(bytes32 => Identity) public identitiesById;
+
+    /// @notice anchor -> Identity.id
+    mapping(address => bytes32) public anchorToIdentityId;
 
     // Events
     event IdentityCreated(
         bytes32 indexed identityId,
+        uint index,
         string name,
         Metadata metadata,
         address anchor
@@ -48,52 +53,67 @@ contract Registry is AccessControl {
 
     /// @notice Creates a new identity
     /// @dev This will also set the attestation address generated from msg.sender and name
+    /// @param _index Index of the identity
     /// @param _name The name of the identity
     /// @param _metadata The metadata of the identity
     /// @param _owners The owners of the identity
     /// @param _members The members of the identity
     function createIdentity(
+        uint _index,
         string memory _name,
         Metadata memory _metadata,
         address[] memory _owners,
         address[] memory _members
     ) external returns (bytes32) {
 
-        bytes32 _identityId = _generateIdentityId();
+        bytes32 identityId = _generateIdentityId(_index);
+
+        if (identitiesById[identityId].id == bytes32(0)) {
+            revert INDEX_NOT_AVAILABLE();
+        }
 
         Identity memory identity = Identity(
-            _identityId,
+            identityId,
+            _index,
             _name,
             _metadata,
-            _generateAnchor(_identityId, _name)
+            _generateAnchor(identityId, _name)
         );
 
-        identities[_identityId] = identity;
+        identitiesById[identityId] = identity;
+        anchorToIdentityId[identity.anchor] = identityId;
 
         // generate roles
-        bytes32 ownerRole = _generateRole(_identityId, RoleType.OWNER);
-        bytes32 memberRole = _generateRole(_identityId, RoleType.MEMBER);
+        bytes32 ownerRole = _generateRole(identityId, RoleType.OWNER);
+        bytes32 memberRole = _generateRole(identityId, RoleType.MEMBER);
 
         // assign roles
-        // todo: check if both arrays are empty, we don't want to emit below if so.
-        for (uint i = 0; i < _owners.length; i++) {
-            _grantRole(ownerRole, _owners[i]);
+        uint256 ownerLength = _owners.length;
+        for (uint i = 0; i < ownerLength;) {
+            address _owner = _owners[i];
+            _grantRole(ownerRole, _owner);
+            _grantRole(memberRole, _owner);
+            unchecked {
+                i++;
+            }
         }
-        for (uint i = 0; i < _members.length; i++) {
+        uint256 memberLength = _members.length;
+        for (uint i = 0; i < memberLength;) {
             _grantRole(memberRole, _members[i]);
+            unchecked {
+                i++;
+            }
         }
 
         emit IdentityCreated(
             identity.id,
+            identity.index,
             identity.name,
             identity.metadata,
             identity.anchor
         );
 
-        // increment nonce
-        senderNonceMap[msg.sender] = senderNonceMap[msg.sender] + 1;
-
-        return _identityId;
+        return identityId;
     }
 
     /// @notice Updates the name of the identity and generates new anchor
@@ -110,15 +130,18 @@ contract Registry is AccessControl {
             revert NO_ACCESS_TO_ROLE();
         }
 
-        identities[_identityId].name = _name;
-        identities[_identityId].anchor = _generateAnchor(
+        address anchor = _generateAnchor(
             _identityId,
             _name
         );
-        address anchor = identities[_identityId].anchor;
+        
+        Identity storage identity = identitiesById[_identityId];
+        identity.name = _name;
+        identity.anchor = anchor;
 
         emit IdentityNameUpdated(_identityId, _name, anchor);
 
+        // TODO: should we return identity
         return anchor;
     }
 
@@ -130,16 +153,13 @@ contract Registry is AccessControl {
         bytes32 _identityId,
         Metadata memory _metadata
     ) external {
-        bytes32 ownerRole = _generateRole(_identityId, RoleType.OWNER);
         bytes32 memberRole = _generateRole(_identityId, RoleType.MEMBER);
 
-        if (
-            !hasRole(ownerRole, msg.sender) || !hasRole(memberRole, msg.sender)
-        ) {
+        if (!hasRole(memberRole, msg.sender)) {
             revert NO_ACCESS_TO_ROLE();
         }
 
-        identities[_identityId].metadata = _metadata;
+        identitiesById[_identityId].metadata = _metadata;
 
         emit IdentityMetadataUpdated(_identityId, _metadata);
     }
@@ -179,11 +199,12 @@ contract Registry is AccessControl {
     }
 
     /// @notice Generates the identityId based on msg.sender
-    function _generateIdentityId() internal view returns (bytes32) {
+    /// @param _index Index of the identity
+    function _generateIdentityId(uint _index) internal view returns (bytes32) {
         return keccak256(
             abi.encodePacked(
                 msg.sender,
-                senderNonceMap[msg.sender]
+                _index
             )
         );
     }
@@ -197,74 +218,4 @@ contract Registry is AccessControl {
     ) internal pure returns (bytes32 roleHash) {
         roleHash = keccak256(abi.encodePacked(_identityId, _roleType));
     }
-
-    // // --- ACCESS CONTROL ---
-
-    // /// @notice OZ function to grant role reverts
-    // /// @dev Use grantIdentityRoles instead
-    // /// @param role The role to grant
-    // /// @param account The account to grant the role to
-    // function grantRole(bytes32 role, address account) public virtual override {
-    //     revert NOT_ALLOWED();
-    // }
-
-    // /// @notice OZ function to revoke role reverts
-    // /// @dev Use revokeIdentityRoles instead
-    // /// @param role The role to revoke
-    // /// @param account The account to revoke the role from
-    // function revokeRole(bytes32 role, address account) public virtual override {
-    //     revert NOT_ALLOWED();
-    // }
-
-    // /// @notice function to grant role(s) to an identity (owner or member?)
-    // /// @dev
-    // /// @param _identityId The identityId of the identity
-    // /// @param _roleType The roleType of the identity
-    // /// @param account The account to grant the role to
-    // function grantIdentityRoles(
-    //     uint _identityId,
-    //     RoleType _roleType,
-    //     address[] accounts
-    // ) external returns (uint) {
-    //     bytes32 isOwner = hasRole(
-    //         _generateRole(_identityId, RoleType.OWNER),
-    //         msg.sender
-    //     );
-    //     if (!isOwner) {
-    //         revert NO_ACCESS_TO_ROLE();
-    //     }
-
-    //     bytes32 role = _generateRole(_identityId, _roleType);
-
-    //     // assign role        
-    //     for (uint i = 0; i < accounts.length; i++) {
-    //         _grantRole(role, accounts[i]);
-    //     }
-
-    //     // create new identityId
-    //     if (_roleType == RoleType.OWNER) {
-           
-    //     }
-    //     return _identityId;
-    // }
-
-    // /// @notice function to revoke role(s) to an identity (owner or member?)
-    // /// @dev Internal function to revoke role(s) to an identity (owner or member?)
-    // /// @param _identityId The identityId of the identity
-    // /// @param _roleType The roleType of the identity
-    // /// @param account The account to grant the role to
-    // function revokeIdentityRoles(
-    //     uint _identityId,
-    //     RoleType _roleType,
-    //     address account
-    // ) external returns (uint) {
-    //     bytes32 role = _generateRole(_identityId, _roleType);
-    //     _revokeRole(role, account);
-    //     if (_roleType == RoleType.OWNER) {
-    //         Identity memory identity = identities[_identityId];
-    //         // TODO: How to update attestation address cause name and identityId is never updated?
-    //         // NOTE: see comment: https://github.com/allo-protocol/allo-v2/pull/12#discussion_r1238843703
-    //     }
-    //     return _identityId;
-    // }
 }
