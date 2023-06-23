@@ -19,14 +19,14 @@ contract Registry is AccessControl {
     }
 
     /// @notice Struct to hold details of an identity
-    struct IdentityDetails {
+    struct Identity {
         string name;
         Metadata metadata;
         address anchor;
     }
 
-    /// @notice identityId -> IdentityDetails
-    mapping(uint => IdentityDetails) public identities;
+    /// @notice identityId -> Identity
+    mapping(uint => Identity) public identities;
 
     // Events
     event IdentityCreated(
@@ -44,23 +44,23 @@ contract Registry is AccessControl {
 
     /// @notice Creates a new identity
     /// @dev This will also set the attestation address generated from msg.sender and name
-    /// @param name The name of the identity
-    /// @param metadata The metadata of the identity
+    /// @param _name The name of the identity
+    /// @param _metadata The metadata of the identity
     /// @param _owners The owners of the identity
     /// @param _members The members of the identity
     function createIdentity(
-        string memory name,
-        Metadata memory metadata,
+        string memory _name,
+        Metadata memory _metadata,
         address[] memory _owners,
         address[] memory _members
     ) external returns (uint256) {
-        IdentityDetails memory identityDetails = IdentityDetails(
-            name,
-            metadata,
-            _generateAnchor(name, msg.sender)
+        Identity memory identity = Identity(
+            _name,
+            _metadata,
+            _generateAnchor(_name, msg.sender)
         );
 
-        identities[identityId] = identityDetails;
+        identities[identityId] = identity;
 
         // generate roles
         bytes32 ownerRole = _generateRole(identityId, RoleType.OWNER);
@@ -75,12 +75,12 @@ contract Registry is AccessControl {
             _grantRole(memberRole, _members[i]);
         }
 
-        // NOTE: should we use the identityDetails we created above or the data passed in?
+        // NOTE: should we use the identity we created above or the data passed in?
         emit IdentityCreated(
             identityId,
-            name,
-            metadata,
-            identityDetails.anchor
+            _name,
+            _metadata,
+            identity.anchor
         );
 
         identityId++;
@@ -222,7 +222,7 @@ contract Registry is AccessControl {
         _grantRole(role, account);
 
         if (_roleType == RoleType.OWNER) {
-            IdentityDetails memory identity = identities[_identityId];
+            Identity memory identity = identities[_identityId];
             // TODO: HOW to update attestation address cause name and identityId is never updated?
             // NOTE: see comment: https://github.com/allo-protocol/allo-v2/pull/12#discussion_r1238843703
         }
@@ -242,7 +242,7 @@ contract Registry is AccessControl {
         bytes32 role = _generateRole(_identityId, _roleType);
         _revokeRole(role, account);
         if (_roleType == RoleType.OWNER) {
-            IdentityDetails memory identity = identities[_identityId];
+            Identity memory identity = identities[_identityId];
             // TODO: How to update attestation address cause name and identityId is never updated?
             // NOTE: see comment: https://github.com/allo-protocol/allo-v2/pull/12#discussion_r1238843703
         }
