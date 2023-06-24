@@ -59,7 +59,7 @@ contract Registry is AccessControl {
         uint _index,
         string memory _name,
         Metadata memory _metadata,
-        address _owner, // Note: this is a single owner
+        address _owner,
         address[] memory _members
     ) external returns (bytes32) {
         bytes32 identityId = _generateIdentityId(_index);
@@ -84,9 +84,8 @@ contract Registry is AccessControl {
         bytes32 memberRole = _generateRole(identityId, RoleType.MEMBER);
 
         // assign roles
-        address owner = _owner;
-        _grantRole(ownerRole, owner);
-        _grantRole(memberRole, owner);
+        _grantRole(ownerRole, _owner);
+        _grantRole(memberRole, _owner);
 
         uint256 memberLength = _members.length;
         for (uint i = 0; i < memberLength; ) {
@@ -110,7 +109,7 @@ contract Registry is AccessControl {
     /// @notice Updates the name of the identity and generates new anchor
     /// @param _identityId The identityId of the identity
     /// @param _name The new name of the identity
-    /// @dev Only owner can update the name. _identityId is reused.
+    /// @dev Only owner can update the name.
     function updateIdentityName(
         bytes32 _identityId,
         string memory _name
@@ -204,11 +203,25 @@ contract Registry is AccessControl {
         roleHash = keccak256(abi.encodePacked(_identityId, _roleType));
     }
 
-    // Note: Role management - Spoke with Nate, we are going to go with single owner for now
-    // ! Who can add / remove owner for an identity? No one. It's a single owner.
-    // ? Transfer ownership will not be supported for now.
-    // - Owner can add / remove members
-    // - Single owner
+    // Note: Check with product if we can retain this function as if a role
+    // can be granted, we should have a way to revoke / transfer ownership
+    /// @notice Transfers the ownership of the identity to a new owner
+    /// @param _identityId The identityId of the identity
+    /// @param _owner New Owner
+    // function changeIdentityOwner(
+    //     bytes32 _identityId,
+    //     address _owner
+    // ) external {
+    //     bytes32 ownerRole = _generateRole(_identityId, RoleType.OWNER);
+
+    //     if (!hasRole(ownerRole, msg.sender)) {
+    //         revert NO_ACCESS_TO_ROLE();
+    //     }
+
+    //     _grantRole(ownerRole, _owner);
+    //     _revokeRole(ownerRole, msg.sender);
+    // }
+
 
     /// @notice Adds members to the identity
     /// @param _identityId The identityId of the identity
