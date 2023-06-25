@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.19;
 
 import {AccessControl} from "../../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
 
 import {Metadata} from "./libraries/Metadata.sol";
 
 contract Registry is AccessControl {
+
+    /// @notice Custom errors
     error NO_ACCESS_TO_ROLE();
     error INDEX_NOT_AVAILABLE();
 
@@ -24,13 +26,20 @@ contract Registry is AccessControl {
         address anchor;
     }
 
+    /// ==========================
+    /// === Storage Variables ====
+    /// ==========================
+
     /// @notice Identity.id -> Identity
     mapping(bytes32 => Identity) public identitiesById;
 
     /// @notice anchor -> Identity.id
     mapping(address => bytes32) public anchorToIdentityId;
 
-    // Events
+    /// ======================
+    /// ======= Events =======
+    /// ======================
+
     event IdentityCreated(
         bytes32 indexed identityId,
         uint index,
@@ -48,6 +57,23 @@ contract Registry is AccessControl {
         Metadata metadata
     );
 
+    /// ======================
+    /// ==== Constructor =====
+    /// ======================
+    constructor() {
+        // Empty constructor
+    }
+
+    /// ====================================
+    /// ==== External/Public Functions =====
+    /// ====================================
+
+    /// @notice Retrieve identity by identityId
+    /// @param identityId The identityId of the identity
+    function getIdentity(bytes32 identityId) public view returns (Identity memory) {
+        return identitiesById[identityId];
+    }
+
     /// @notice Creates a new identity
     /// @dev This will also set the attestation address generated from msg.sender and name
     /// @param _index Index of the identity
@@ -64,7 +90,7 @@ contract Registry is AccessControl {
     ) external returns (bytes32) {
         bytes32 identityId = _generateIdentityId(_index);
 
-        if (identitiesById[identityId].id == bytes32(0)) {
+        if (identitiesById[identityId].id != bytes32(0)) {
             revert INDEX_NOT_AVAILABLE();
         }
 
@@ -114,9 +140,8 @@ contract Registry is AccessControl {
         bytes32 _identityId,
         string memory _name
     ) external returns (address) {
-        bytes32 ownerRole = _generateRole(_identityId, RoleType.OWNER);
 
-        if (!hasRole(ownerRole, msg.sender)) {
+        if (!isOwnerOfIdentity(_identityId, msg.sender)) {
             revert NO_ACCESS_TO_ROLE();
         }
 
@@ -125,6 +150,8 @@ contract Registry is AccessControl {
         Identity storage identity = identitiesById[_identityId];
         identity.name = _name;
         identity.anchor = anchor;
+
+        anchorToIdentityId[identity.anchor] = _identityId;
 
         emit IdentityNameUpdated(_identityId, _name, anchor);
 
@@ -140,9 +167,8 @@ contract Registry is AccessControl {
         bytes32 _identityId,
         Metadata memory _metadata
     ) external {
-        bytes32 memberRole = _generateRole(_identityId, RoleType.MEMBER);
 
-        if (!hasRole(memberRole, msg.sender)) {
+        if (!isMemberOfIdentity(_identityId, msg.sender)) {
             revert NO_ACCESS_TO_ROLE();
         }
 
@@ -157,7 +183,7 @@ contract Registry is AccessControl {
     function isOwnerOfIdentity(
         bytes32 _identityId,
         address _owner
-    ) external view returns (bool) {
+    ) public view returns (bool) {
         bytes32 ownerRole = _generateRole(_identityId, RoleType.OWNER);
         return hasRole(ownerRole, _owner);
     }
@@ -168,10 +194,87 @@ contract Registry is AccessControl {
     function isMemberOfIdentity(
         bytes32 _identityId,
         address _member
-    ) external view returns (bool) {
+    ) public view returns (bool) {
         bytes32 memberRole = _generateRole(_identityId, RoleType.MEMBER);
         return hasRole(memberRole, _member);
     }
+
+    // Note: Check with product if we can retain this function as if a role
+    // can be granted, we should have a way to revoke / transfer ownership
+    /// @notice Transfers the ownership of the identity to a new owner
+    /// @param _identityId The identityId of the identity
+    /// @param _owner New Owner
+    /// @dev Only owner can transfer ownership.
+    /// Note: both old and new owner will be members of the identity
+    // function changeIdentityOwner(
+    //     bytes32 _identityId,
+    //     address _owner
+    // ) external {
+    //     bytes32 ownerRole = _generateRole(_identityId, RoleType.OWNER);
+
+    //     if (!hasRole(ownerRole, msg.sender)) {
+    //         revert NO_ACCESS_TO_ROLE();
+    //     }
+
+    //     bytes32 memberRole = _generateRole(_identityId, RoleType.MEMBER);
+
+    //     _grantRole(ownerRole, _owner);
+    //     _grantRole(memberRole, _owner);
+    //     _revokeRole(ownerRole, msg.sender);
+    // }
+
+
+    /// @notice Adds members to the identity
+    /// @param _identityId The identityId of the identity
+    /// @param _members The members to add
+    /// @dev Only owner can add members
+    function addMembers(
+        bytes32 _identityId,
+        address[] memory _members
+    ) external {
+
+        if (!isOwnerOfIdentity(_identityId, msg.sender)) {
+            revert NO_ACCESS_TO_ROLE();
+        }
+
+        bytes32 memberRole = _generateRole(_identityId, RoleType.MEMBER);
+
+        uint256 memberLength = _members.length;
+        for (uint i = 0; i < memberLength; ) {
+            _grantRole(memberRole, _members[i]);
+            unchecked {
+                i++;
+            }
+        }
+    }
+
+    /// @notice Removes members from the identity
+    /// @param _identityId The identityId of the identity
+    /// @param _members The members to remove
+    /// @dev Only owner can remove members
+    function removeMembers(
+        bytes32 _identityId,
+        address[] memory _members
+    ) external {
+
+        if (!isOwnerOfIdentity(_identityId, msg.sender)) {
+            revert NO_ACCESS_TO_ROLE();
+        }
+
+        bytes32 memberRole = _generateRole(_identityId, RoleType.MEMBER);
+
+        uint256 memberLength = _members.length;
+        for (uint i = 0; i < memberLength; ) {
+            _revokeRole(memberRole, _members[i]);
+            unchecked {
+                i++;
+            }
+        }
+    }
+
+    /// ====================================
+    /// ======== Internal Functions ========
+    /// ====================================
 
     /// @notice Generates the anchor for the given identityId and name
     /// @param _identityId Id of the identity
@@ -190,7 +293,7 @@ contract Registry is AccessControl {
     /// @notice Generates the identityId based on msg.sender
     /// @param _index Index of the identity
     function _generateIdentityId(uint _index) internal view returns (bytes32) {
-        return keccak256(abi.encodePacked(msg.sender, _index));
+        return keccak256(abi.encodePacked(_index, msg.sender));
     }
 
     /// @notice Generates the OZ role for an given identity
@@ -201,73 +304,5 @@ contract Registry is AccessControl {
         RoleType _roleType
     ) internal pure returns (bytes32 roleHash) {
         roleHash = keccak256(abi.encodePacked(_identityId, _roleType));
-    }
-
-    // Note: Check with product if we can retain this function as if a role
-    // can be granted, we should have a way to revoke / transfer ownership
-    /// @notice Transfers the ownership of the identity to a new owner
-    /// @param _identityId The identityId of the identity
-    /// @param _owner New Owner
-    // function changeIdentityOwner(
-    //     bytes32 _identityId,
-    //     address _owner
-    // ) external {
-    //     bytes32 ownerRole = _generateRole(_identityId, RoleType.OWNER);
-
-    //     if (!hasRole(ownerRole, msg.sender)) {
-    //         revert NO_ACCESS_TO_ROLE();
-    //     }
-
-    //     _grantRole(ownerRole, _owner);
-    //     _revokeRole(ownerRole, msg.sender);
-    // }
-
-
-    /// @notice Adds members to the identity
-    /// @param _identityId The identityId of the identity
-    /// @param _members The members to add
-    function addMembers(
-        bytes32 _identityId,
-        address[] memory _members
-    ) external {
-        bytes32 ownerRole = _generateRole(_identityId, RoleType.OWNER);
-
-        if (!hasRole(ownerRole, msg.sender)) {
-            revert NO_ACCESS_TO_ROLE();
-        }
-
-        bytes32 memberRole = _generateRole(_identityId, RoleType.MEMBER);
-
-        uint256 memberLength = _members.length;
-        for (uint i = 0; i < memberLength; ) {
-            _grantRole(memberRole, _members[i]);
-            unchecked {
-                i++;
-            }
-        }
-    }
-
-    /// @notice Removes members from the identity
-    /// @param _identityId The identityId of the identity
-    /// @param _members The members to remove
-    function removeMembers(
-        bytes32 _identityId,
-        address[] memory _members
-    ) external {
-        bytes32 ownerRole = _generateRole(_identityId, RoleType.OWNER);
-
-        if (!hasRole(ownerRole, msg.sender)) {
-            revert NO_ACCESS_TO_ROLE();
-        }
-
-        bytes32 memberRole = _generateRole(_identityId, RoleType.MEMBER);
-
-        uint256 memberLength = _members.length;
-        for (uint i = 0; i < memberLength; ) {
-            _revokeRole(memberRole, _members[i]);
-            unchecked {
-                i++;
-            }
-        }
     }
 }
