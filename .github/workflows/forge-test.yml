@@ -1,4 +1,4 @@
-name: contracts - build -> forge test
+name: contracts forge - fmt -> build -> test
 on:
   push:
     branches:
@@ -31,12 +31,17 @@ jobs:
         with:
           version: nightly
 
+      - name: Run Forge Format
+        run: |
+          forge fmt --check
+        id: fmt
+
       - name: Run Forge build
         run: |
-          yarn forge:compile
+          forge compile
         id: build
 
       - name: Run Forge test
         run: |
-          yarn forge:test
+          forge test
         id: test

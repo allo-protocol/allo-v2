@@ -3,10 +3,10 @@ pragma solidity 0.8.19;
 
 interface IAllocationStrategy {
     /**
-        STORAGE (with public getters)
-        uint256 poolId;
-        address allo;
-    */
+     * STORAGE (with public getters)
+     *     uint256 poolId;
+     *     address allo;
+     */
 
     enum ApplicationStatus {
         None,
@@ -21,24 +21,18 @@ interface IAllocationStrategy {
     // decode the _data into what's relevant for this strategy
     // update whatever is needed to store the applicant
     // @todo return arbitrary data to pass back? think more about this
-    function applyToPool(
-        bytes memory _data,
-        address sender
-    ) external payable returns (bytes memory);
+    function applyToPool(bytes memory _data, address sender) external payable returns (bytes memory);
 
     // return whether application is pending, accepted, or rejected
     // strategies will need to add their own logic to translate to these categories if they use different ones
-    function getApplicationStatus(uint applicationId) external view returns (ApplicationStatus);
+    function getApplicationStatus(uint256 applicationId) external view returns (ApplicationStatus);
 
     // decode the _data into what's relevant for this strategy
     // perform whatever actions are necessary (token transfers, storage updates, etc)
     // all approvals, checks, etc all happen within internal functions from here
     // we'll also use beforeAllocation() and afterAllocation() hooks so users can override when customizing
     // return the number of votes cast
-    function allocate(
-        bytes memory _data,
-        address sender
-    ) external payable returns (uint);
+    function allocate(bytes memory _data, address sender) external payable returns (uint256);
 
     // can only be called by allo address
     // return list of addresses combined with WAD percentages to pay out

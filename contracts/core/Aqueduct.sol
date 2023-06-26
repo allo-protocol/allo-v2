@@ -5,17 +5,17 @@ contract Aqueduct {
     constructor() {}
 
     /**
-        STORAGE (with public getters)
-        address owner; // & all ownership transfer logic
-        address allo;
-    */
+     * STORAGE (with public getters)
+     *     address owner; // & all ownership transfer logic
+     *     address allo;
+     */
 
     // can receive ETH
     receive() external payable {
         // NOTE: receive ETH
     }
 
-    /// @notice 
+    /// @notice
     function createPool(
         address _identity,
         address _allocationStrategy,
