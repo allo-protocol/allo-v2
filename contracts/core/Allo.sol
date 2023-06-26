@@ -138,16 +138,7 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
 
         // Note: Only fund the pool on creation if the amount is greater than 0
         if (_amount > 0) {
-            // Todo: Verify Fee percentage
-            uint256 feeAmount = (_amount * feePercentage) / DENOMINATOR;
-            require(feeAmount <= _amount, "Fee amount exceeds amount sent");
-
-            // Pay the protocol fee
-            _transferAmount(treasury, _amount, _token);
-
-            // Send the remaining amount to the distribution strategy
-            uint256 amountAfterFee = _amount - feeAmount;
-            _transferAmount(payable(address(pool.distributionStrategy)), amountAfterFee, _token);
+            _applyFeeAndTransfer(_token, _amount, pool);
         }
 
         poolId = _poolIndex++;
@@ -197,16 +188,7 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
 
         Pool storage pool = pools[_poolId];
 
-        // TODO: Should this be restricted to pool owner?
-        // TODO: Verify Fee percentage
-        uint256 feeAmount = (_amount * feePercentage) / DENOMINATOR;
-
-        // Transfer tokens to the treasury
-        _transferAmount(treasury, feeAmount, _token);
-
-        // Transfer remaining tokens to the distribution strategy
-        uint256 amountAfterFee = _amount - feeAmount;
-        _transferAmount(payable(address(pool.distributionStrategy)), amountAfterFee, _token);
+        _applyFeeAndTransfer(_token, _amount, pool);
 
         emit PoolFunded(_poolId, _amount);
     }
@@ -265,6 +247,23 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
     /// ====================================
     /// ==== Internal Functions =====
     /// ====================================
+
+    /// @notice Applies the fee and transfers the amount to the distribution strategy
+    /// @param _token The address of the token to transfer
+    /// @param _amount The amount to transfer
+    /// @param _pool The pool to transfer to
+    function _applyFeeAndTransfer(address _token, uint256 _amount, Pool memory _pool) internal {
+        // Todo: Verify Fee percentage
+        uint256 feeAmount = (_amount * feePercentage) / DENOMINATOR;
+        require(feeAmount <= _amount, "Fee amount exceeds amount sent");
+
+        // Pay the protocol fee
+        _transferAmount(treasury, _amount, _token);
+
+        // Send the remaining amount to the distribution strategy
+        uint256 amountAfterFee = _amount - feeAmount;
+        _transferAmount(payable(address(_pool.distributionStrategy)), amountAfterFee, _token);
+    }
 
     /// @notice Transfers the amount to the address
     /// @param _to The address to transfer to
