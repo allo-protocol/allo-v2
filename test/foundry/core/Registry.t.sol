@@ -5,15 +5,18 @@ import {Registry} from "../../../contracts/core/Registry.sol";
 import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
 
 contract RegistryTest is Test {
-    event IdentityCreated(bytes32 indexed identityId, uint256 nonce, string name, Metadata metadata, address anchor);
+    event IdentityCreated(
+        bytes32 indexed identityId, uint256 nonce, string name, Metadata metadata, address owner, address anchor
+    );
 
     event IdentityNameUpdated(bytes32 indexed identityId, string name, address anchor);
 
     event IdentityMetadataUpdated(bytes32 indexed identityId, Metadata metadata);
 
+    event IdentityOwnerUpdated(bytes32 indexed identityId, address owner);
+
     Registry public registry;
 
-    address public admin;
     address public owner;
     address public member1;
     address public member2;
@@ -27,7 +30,6 @@ contract RegistryTest is Test {
     function setUp() public {
         notAMember = makeAddr("notAMember");
 
-        admin = makeAddr("admin");
         owner = makeAddr("owner");
         member1 = makeAddr("member1");
         member2 = makeAddr("member2");
@@ -36,7 +38,7 @@ contract RegistryTest is Test {
         name = "New Identity";
         nonce = 2;
 
-        registry = new Registry(admin);
+        registry = new Registry();
 
         members = new address[](2);
         members[0] = member1;
@@ -49,7 +51,7 @@ contract RegistryTest is Test {
         bytes32 testIdentityId = _testUtilGenerateIdentityId(nonce, address(this));
         address testAnchor = _testUtilGenerateAnchor(testIdentityId, name);
 
-        emit IdentityCreated(testIdentityId, nonce, name, metadata, testAnchor);
+        emit IdentityCreated(testIdentityId, nonce, name, metadata, owner, testAnchor);
 
         // create identity
         bytes32 newIdentityId = registry.createIdentity(nonce, name, metadata, owner, members);
@@ -164,6 +166,14 @@ contract RegistryTest is Test {
         registry.updateIdentityMetadata(newIdentityId, newMetadata);
     }
 
+    function test_isOwnerOrMemberOfIdentity() public {
+        bytes32 newIdentityId = registry.createIdentity(nonce, name, metadata, owner, members);
+
+        assertTrue(registry.isOwnerOrMemberOfIdentity(newIdentityId, owner), "isOwner");
+        assertTrue(registry.isOwnerOrMemberOfIdentity(newIdentityId, member1), "isMember");
+        assertFalse(registry.isOwnerOrMemberOfIdentity(newIdentityId, notAMember), "notAMember");
+    }
+
     function test_isOwnerOfIdentity() public {
         bytes32 newIdentityId = registry.createIdentity(nonce, name, metadata, owner, members);
 
@@ -226,6 +236,9 @@ contract RegistryTest is Test {
 
         assertTrue(registry.isOwnerOfIdentity(newIdentityId, owner), "before: isOwner");
         assertFalse(registry.isOwnerOfIdentity(newIdentityId, notAMember), "before: notAnOwner");
+
+        vm.expectEmit(true, false, false, true);
+        emit IdentityOwnerUpdated(newIdentityId, notAMember);
 
         vm.prank(owner);
         registry.changeIdentityOwner(newIdentityId, notAMember);

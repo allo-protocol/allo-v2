@@ -6,7 +6,6 @@ import {AccessControl} from "@openzeppelin/access/AccessControl.sol";
 import {Metadata} from "./libraries/Metadata.sol";
 
 contract Registry is AccessControl {
-
     /// @notice Custom errors
     error NO_ACCESS_TO_ROLE();
     error NONCE_NOT_AVAILABLE();
@@ -19,7 +18,8 @@ contract Registry is AccessControl {
 
     /// @notice Struct to hold details of an identity
     struct Identity {
-        uint nonce;
+        uint256 nonce;
+        address owner;
         string name;
         Metadata metadata;
         address anchor;
@@ -40,31 +40,11 @@ contract Registry is AccessControl {
     /// ======================
 
     event IdentityCreated(
-        bytes32 indexed identityId,
-        uint nonce,
-        string name,
-        Metadata metadata,
-        address anchor
+        bytes32 indexed identityId, uint256 nonce, string name, Metadata metadata, address owner, address anchor
     );
-    event IdentityNameUpdated(
-        bytes32 indexed identityId,
-        string name,
-        address anchor
-    );
-    event IdentityMetadataUpdated(
-        bytes32 indexed identityId,
-        Metadata metadata
-    );
-
-    /// ====================================
-    /// ========== Constructor =============
-    /// ====================================
-
-    constructor(address _admin) {
-        // DEFAULT_ADMIN_ROLE would be set by Allo team
-        // to grant or revoke roles in emergencies.
-        _grantRole(DEFAULT_ADMIN_ROLE, _admin);
-    }
+    event IdentityNameUpdated(bytes32 indexed identityId, string name, address anchor);
+    event IdentityMetadataUpdated(bytes32 indexed identityId, Metadata metadata);
+    event IdentityOwnerUpdated(bytes32 indexed identityId, address owner);
 
     /// ====================================
     /// =========== Modifier ===============
@@ -99,10 +79,10 @@ contract Registry is AccessControl {
     /// @param _nonce Nonce used to generate identityId
     /// @param _name The name of the identity
     /// @param _metadata The metadata of the identity
-    /// @param _owner The owner of the identity
     /// @param _members The members of the identity
+    /// @param _owner The owner of the identity
     function createIdentity(
-        uint _nonce,
+        uint256 _nonce,
         string memory _name,
         Metadata memory _metadata,
         address _owner,
@@ -116,6 +96,7 @@ contract Registry is AccessControl {
 
         Identity memory identity = Identity({
             nonce: _nonce,
+            owner: _owner,
             name: _name,
             metadata: _metadata,
             anchor: _generateAnchor(identityId, _name)
@@ -124,27 +105,17 @@ contract Registry is AccessControl {
         identitiesById[identityId] = identity;
         anchorToIdentityId[identity.anchor] = identityId;
 
-        // generate roles
-        bytes32 ownerRole = _generateRole(identityId, RoleType.OWNER);
-        bytes32 memberRole = _generateRole(identityId, RoleType.MEMBER);
-
         // assign roles
-        _grantRole(ownerRole, _owner);
-
         uint256 memberLength = _members.length;
-        for (uint i = 0; i < memberLength; ) {
-            _grantRole(memberRole, _members[i]);
+        for (uint256 i = 0; i < memberLength;) {
+            _grantRole(identityId, _members[i]);
             unchecked {
                 i++;
             }
         }
 
         emit IdentityCreated(
-            identityId,
-            identity.nonce,
-            identity.name,
-            identity.metadata,
-            identity.anchor
+            identityId, identity.nonce, identity.name, identity.metadata, identity.owner, identity.anchor
         );
 
         return identityId;
@@ -154,11 +125,11 @@ contract Registry is AccessControl {
     /// @param _identityId The identityId of the identity
     /// @param _name The new name of the identity
     /// @dev Only owner can update the name.
-    function updateIdentityName(
-        bytes32 _identityId,
-        string memory _name
-    ) external isIdentityOwner(_identityId) returns (address) {
-
+    function updateIdentityName(bytes32 _identityId, string memory _name)
+        external
+        isIdentityOwner(_identityId)
+        returns (address)
+    {
         address anchor = _generateAnchor(_identityId, _name);
 
         Identity storage identity = identitiesById[_identityId];
@@ -181,74 +152,54 @@ contract Registry is AccessControl {
     /// @param _identityId The identityId of the identity
     /// @param _metadata The new metadata of the identity
     /// @dev Only owner can update metadata
-    function updateIdentityMetadata(
-        bytes32 _identityId,
-        Metadata memory _metadata
-    ) external isIdentityOwner(_identityId) {
-
+    function updateIdentityMetadata(bytes32 _identityId, Metadata memory _metadata)
+        external
+        isIdentityOwner(_identityId)
+    {
         identitiesById[_identityId].metadata = _metadata;
 
         emit IdentityMetadataUpdated(_identityId, _metadata);
     }
 
+    /// @notice Returns if the given address is an owner or member of the identity
+    /// @param _identityId The identityId of the identity
+    /// @param _account The address to check
+    function isOwnerOrMemberOfIdentity(bytes32 _identityId, address _account) public view returns (bool) {
+        return isOwnerOfIdentity(_identityId, _account) || isMemberOfIdentity(_identityId, _account);
+    }
+
     /// @notice Returns if the given address is an owner of the identity
     /// @param _identityId The identityId of the identity
     /// @param _owner The address to check
-    function isOwnerOfIdentity(
-        bytes32 _identityId,
-        address _owner
-    ) public view returns (bool) {
-        bytes32 ownerRole = _generateRole(_identityId, RoleType.OWNER);
-        return hasRole(ownerRole, _owner);
+    function isOwnerOfIdentity(bytes32 _identityId, address _owner) public view returns (bool) {
+        return identitiesById[_identityId].owner == _owner;
     }
 
     /// @notice Returns if the given address is an member of the identity
     /// @param _identityId The identityId of the identity
     /// @param _member The address to check
-    function isMemberOfIdentity(
-        bytes32 _identityId,
-        address _member
-    ) public view returns (bool) {
-        bytes32 memberRole = _generateRole(_identityId, RoleType.MEMBER);
-        return hasRole(memberRole, _member);
+    function isMemberOfIdentity(bytes32 _identityId, address _member) public view returns (bool) {
+        return hasRole(_identityId, _member);
     }
 
-    // Note: Check with product if we can retain this function as if a role
-    // can be granted, we should have a way to revoke / transfer ownership
     /// @notice Transfers the ownership of the identity to a new owner
     /// @param _identityId The identityId of the identity
     /// @param _owner New Owner
     /// @dev Only owner can transfer ownership.
-    /// Note: both old and new owner will be members of the identity
-    function changeIdentityOwner(
-        bytes32 _identityId,
-        address _owner
-    ) external {
-        bytes32 ownerRole = _generateRole(_identityId, RoleType.OWNER);
-
-        if (!hasRole(ownerRole, msg.sender)) {
-            revert NO_ACCESS_TO_ROLE();
-        }
-
-        _grantRole(ownerRole, _owner);
-        _revokeRole(ownerRole, msg.sender);
+    function changeIdentityOwner(bytes32 _identityId, address _owner) external isIdentityOwner(_identityId) {
+        identitiesById[_identityId].owner = _owner;
+        emit IdentityOwnerUpdated(_identityId, _owner);
     }
-
 
     /// @notice Adds members to the identity
     /// @param _identityId The identityId of the identity
     /// @param _members The members to add
     /// @dev Only owner can add members
-    function addMembers(
-        bytes32 _identityId,
-        address[] memory _members
-    ) external isIdentityOwner(_identityId) {
-
-        bytes32 memberRole = _generateRole(_identityId, RoleType.MEMBER);
-
+    function addMembers(bytes32 _identityId, address[] memory _members) external isIdentityOwner(_identityId) {
         uint256 memberLength = _members.length;
-        for (uint i = 0; i < memberLength; ) {
-            _grantRole(memberRole, _members[i]);
+
+        for (uint256 i = 0; i < memberLength;) {
+            _grantRole(_identityId, _members[i]);
             unchecked {
                 i++;
             }
@@ -259,16 +210,11 @@ contract Registry is AccessControl {
     /// @param _identityId The identityId of the identity
     /// @param _members The members to remove
     /// @dev Only owner can remove members
-    function removeMembers(
-        bytes32 _identityId,
-        address[] memory _members
-    ) external isIdentityOwner(_identityId) {
-
-        bytes32 memberRole = _generateRole(_identityId, RoleType.MEMBER);
-
+    function removeMembers(bytes32 _identityId, address[] memory _members) external isIdentityOwner(_identityId) {
         uint256 memberLength = _members.length;
-        for (uint i = 0; i < memberLength; ) {
-            _revokeRole(memberRole, _members[i]);
+
+        for (uint256 i = 0; i < memberLength;) {
+            _revokeRole(_identityId, _members[i]);
             unchecked {
                 i++;
             }
@@ -282,30 +228,15 @@ contract Registry is AccessControl {
     /// @notice Generates the anchor for the given identityId and name
     /// @param _identityId Id of the identity
     /// @param _name The name of the identity
-    function _generateAnchor(
-        bytes32 _identityId,
-        string memory _name
-    ) internal pure returns (address) {
-        bytes32 attestationHash = keccak256(
-            abi.encodePacked(_identityId, _name)
-        );
+    function _generateAnchor(bytes32 _identityId, string memory _name) internal pure returns (address) {
+        bytes32 attestationHash = keccak256(abi.encodePacked(_identityId, _name));
 
         return address(uint160(uint256(attestationHash)));
     }
 
     /// @notice Generates the identityId based on msg.sender
     /// @param _nonce Nonce used to generate identityId
-    function _generateIdentityId(uint _nonce) internal view returns (bytes32) {
+    function _generateIdentityId(uint256 _nonce) internal view returns (bytes32) {
         return keccak256(abi.encodePacked(_nonce, msg.sender));
-    }
-
-    /// @notice Generates the OZ role for an given identity
-    /// @param _identityId The identityId of the identity
-    /// @param _roleType The roleType of the identity
-    function _generateRole(
-        bytes32 _identityId,
-        RoleType _roleType
-    ) internal pure returns (bytes32 roleHash) {
-        roleHash = keccak256(abi.encodePacked(_identityId, _roleType));
     }
 }
