@@ -131,52 +131,36 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
 
         Pool memory pool = Pool({
             identityId: _identityId,
-            allocationStrategy: IAllocationStrategy(
-                Clone.createClone(_allocationStrategy, _nonce)
-            ),
-            distributionStrategy: IDistributionStrategy(
-                Clone.createClone(_distributionStrategy, _nonce)
-            ),
+            allocationStrategy: IAllocationStrategy(Clone.createClone(_allocationStrategy, _nonce)),
+            distributionStrategy: IDistributionStrategy(Clone.createClone(_distributionStrategy, _nonce)),
             metadata: _metadata
         });
 
-        // Todo: Verify Fee percentage
-        uint256 feeAmount = (_amount * feePercentage) / DENOMINATOR;
-        require(feeAmount <= _amount, "Fee amount exceeds amount");
-        
-        // Pay the protocol fee
-        _transferAmount(treasury, _amount, _token);
+        // Note: Only fund the pool on creation if the amount is greater than 0
+        if (_amount > 0) {
+            // Todo: Verify Fee percentage
+            uint256 feeAmount = (_amount * feePercentage) / DENOMINATOR;
+            require(feeAmount <= _amount, "Fee amount exceeds amount sent");
 
-        // todo: Move this to strategy
-        // _transferAmount(
-        //     payable(address(pool.distributionStrategy)),
-        //     _amount,
-        //     _token
-        // );
+            // Pay the protocol fee
+            _transferAmount(treasury, _amount, _token);
+
+            // Send the remaining amount to the distribution strategy
+            uint256 amountAfterFee = _amount - feeAmount;
+            _transferAmount(payable(address(pool.distributionStrategy)), amountAfterFee, _token);
+        }
 
         poolId = _poolIndex++;
         pools[poolId] = pool;
 
-        emit PoolCreated(
-            poolId,
-            _identityId,
-            _allocationStrategy,
-            _distributionStrategy,
-            _token,
-            _amount,
-            _metadata
-        );
+        emit PoolCreated(poolId, _identityId, _allocationStrategy, _distributionStrategy, _token, _amount, _metadata);
     }
 
     /// @notice passes _data through to the allocation strategy for that pool
     /// @param _poolId id of the pool
     /// @param _data encoded data unique to the allocation strategy for that pool
-    function applyToPool(
-        uint256 _poolId,
-        bytes memory _data
-    ) external payable returns (uint256 applicationId) {
-        IAllocationStrategy allocationStrategy = pools[_poolId]
-            .allocationStrategy;
+    function applyToPool(uint256 _poolId, bytes memory _data) external payable returns (uint256 applicationId) {
+        IAllocationStrategy allocationStrategy = pools[_poolId].allocationStrategy;
 
         // todo: we are returning bytes here as defined in the interface, should we return a uint256?
         // Note: @zobront @thelostone-mc @kurtmerbeth
@@ -190,10 +174,12 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
     /// @param _poolId id of the pool
     /// @param _metadata new metadata of the pool
     /// @dev Only callable by the pool member
-    function updatePoolMetadata(
-        uint256 _poolId,
-        Metadata memory _metadata
-    ) external payable isPoolMember(_poolId) returns (bytes memory) {
+    function updatePoolMetadata(uint256 _poolId, Metadata memory _metadata)
+        external
+        payable
+        isPoolMember(_poolId)
+        returns (bytes memory)
+    {
         Pool storage pool = pools[_poolId];
         pool.metadata = _metadata;
 
@@ -205,13 +191,12 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
     /// @notice Fund a pool
     /// @param _poolId id of the pool
     /// @param _amount extra amount of the token to be deposited into the pool
+    /// @param _token The address of the token that the pool is denominated in
     function fundPool(uint256 _poolId, uint256 _amount, address _token) external payable {
-        // Note: @zobront @thelostone-mc @kurtmerbeth how do we want to handle funding the pool?
-        // 1. Do we expose a fundPool() function on the interface?
-        // 2. In that fund pool function we can do the transfer to the pool
-        // 3. The problem is the fee can be skipped if we do it this way
+        require(_amount > 0, "Amount must be greater than 0");
 
-        // Pool storage pool = pools[_poolId];
+        Pool storage pool = pools[_poolId];
+
         // TODO: Should this be restricted to pool owner?
         // TODO: Verify Fee percentage
         uint256 feeAmount = (_amount * feePercentage) / DENOMINATOR;
@@ -219,16 +204,9 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
         // Transfer tokens to the treasury
         _transferAmount(treasury, feeAmount, _token);
 
-        // Todo: Move this to strategy
-        // Transfer tokens to the pool
-        // _transferAmount(
-        //     payable(address(pool.distributionStrategy)),
-        //     _amount,
-        //     pool.token
-        // );
-
-        // Update pool amount
-        // pool.amount += _amount;
+        // Transfer remaining tokens to the distribution strategy
+        uint256 amountAfterFee = _amount - feeAmount;
+        _transferAmount(payable(address(pool.distributionStrategy)), amountAfterFee, _token);
 
         emit PoolFunded(_poolId, _amount);
     }
@@ -247,30 +225,19 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
     ///
     /// calls voting.generatePayouts() and then uses return data for payout.activatePayouts()
     /// check to make sure they haven't skrited around fee
-    function finalize(
-        uint256 _poolId,
-        bytes calldata _dataFromPoolOwner
-    ) external isPoolMember(_poolId) {
+    function finalize(uint256 _poolId, bytes calldata _dataFromPoolOwner) external isPoolMember(_poolId) {
         // ASK: Do we need _dataFromPoolOwner to allow owner to pass custom data ?
         Pool memory pool = pools[_poolId];
-        bytes memory dataFromAllocationStrategy = pool
-            .allocationStrategy
-            .generatePayouts();
+        bytes memory dataFromAllocationStrategy = pool.allocationStrategy.generatePayouts();
 
-        pool.distributionStrategy.activateDistribution(
-            dataFromAllocationStrategy,
-            _dataFromPoolOwner
-        );
+        pool.distributionStrategy.activateDistribution(dataFromAllocationStrategy, _dataFromPoolOwner);
     }
 
     /// @notice passes _data & msg.sender through to the disribution strategy for that pool
     /// @param _poolId id of the pool
     /// @param _data encoded data unique to the distributionStrategy strategy for that pool
     /// @dev Only callable by the pool member
-    function distribute(
-        uint256 _poolId,
-        bytes memory _data
-    ) external isPoolMember(_poolId) {
+    function distribute(uint256 _poolId, bytes memory _data) external isPoolMember(_poolId) {
         pools[_poolId].distributionStrategy.distribute(_data, msg.sender);
     }
 
@@ -303,17 +270,10 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
     /// @param _to The address to transfer to
     /// @param _amount The amount to transfer
     /// @param _token The address of the token to transfer
-    // Note: @zobront @thelostone-mc @kurtmerbeth we lose this ability
-    // by giving the strategies the ability instead to handle all token transfers
-    // which I think is okay. We can always add this back in if we need it.
-    function _transferAmount(
-        address payable _to,
-        uint256 _amount,
-        address _token
-    ) internal {
+    function _transferAmount(address payable _to, uint256 _amount, address _token) internal {
         if (_token == address(0)) {
             // Native Token
-            (bool sent, ) = _to.call{value: _amount}("");
+            (bool sent,) = _to.call{value: _amount}("");
             if (!sent) {
                 revert TRANSFER_FAILED();
             }

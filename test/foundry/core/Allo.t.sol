@@ -32,24 +32,11 @@ contract AlloTest is Test {
 
     event FeeUpdated(uint256 fee);
 
-    event IdentityCreated(
-        bytes32 indexed identityId,
-        uint256 nonce,
-        string name,
-        Metadata metadata,
-        address anchor
-    );
+    event IdentityCreated(bytes32 indexed identityId, uint256 nonce, string name, Metadata metadata, address anchor);
 
-    event IdentityNameUpdated(
-        bytes32 indexed identityId,
-        string name,
-        address anchor
-    );
+    event IdentityNameUpdated(bytes32 indexed identityId, string name, address anchor);
 
-    event IdentityMetadataUpdated(
-        bytes32 indexed identityId,
-        Metadata metadata
-    );
+    event IdentityMetadataUpdated(bytes32 indexed identityId, Metadata metadata);
 
     Allo allo;
     Registry public registry;
@@ -86,30 +73,12 @@ contract AlloTest is Test {
     function test_createPool() public {
         vm.expectEmit(true, false, false, true);
 
-        bytes32 testIdentityId = TestUtilities._testUtilGenerateIdentityId(
-            nonce,
-            address(this)
-        );
+        bytes32 testIdentityId = TestUtilities._testUtilGenerateIdentityId(nonce, address(this));
 
         // todo: test that the pool is created
-        allo.createPool(
-            testIdentityId,
-            address(0),
-            payable(address(0)),
-            address(0),
-            1000,
-            metadata
-        );
+        allo.createPool(testIdentityId, address(0), payable(address(0)), address(0), 1000, metadata);
 
-        emit PoolCreated(
-            1,
-            "0x12345",
-            address(0),
-            address(0),
-            address(0),
-            1000,
-            metadata
-        );
+        emit PoolCreated(1, "0x12345", address(0), address(0), address(0), 1000, metadata);
     }
 
     function test_updatePoolMetadata() public {
