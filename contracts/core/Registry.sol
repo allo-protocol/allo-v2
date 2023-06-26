@@ -20,7 +20,7 @@ contract Registry is AccessControl {
     /// @notice Struct to hold details of an identity
     struct Identity {
         bytes32 id;
-        uint index;
+        uint nonce;
         string name;
         Metadata metadata;
         address anchor;
@@ -42,7 +42,7 @@ contract Registry is AccessControl {
 
     event IdentityCreated(
         bytes32 indexed identityId,
-        uint index,
+        uint nonce,
         string name,
         Metadata metadata,
         address anchor
@@ -83,19 +83,19 @@ contract Registry is AccessControl {
 
     /// @notice Creates a new identity
     /// @dev This will also set the attestation address generated from msg.sender and name
-    /// @param _index Index of the identity
+    /// @param _nonce Index of the identity
     /// @param _name The name of the identity
     /// @param _metadata The metadata of the identity
     /// @param _owner The owner of the identity
     /// @param _members The members of the identity
     function createIdentity(
-        uint _index,
+        uint _nonce,
         string memory _name,
         Metadata memory _metadata,
         address _owner,
         address[] memory _members
     ) external returns (bytes32) {
-        bytes32 identityId = _generateIdentityId(_index);
+        bytes32 identityId = _generateIdentityId(_nonce);
 
         if (identitiesById[identityId].id != bytes32(0)) {
             revert INDEX_NOT_AVAILABLE();
@@ -103,7 +103,7 @@ contract Registry is AccessControl {
 
         Identity memory identity = Identity(
             identityId,
-            _index,
+            _nonce,
             _name,
             _metadata,
             _generateAnchor(identityId, _name)
@@ -298,9 +298,9 @@ contract Registry is AccessControl {
     }
 
     /// @notice Generates the identityId based on msg.sender
-    /// @param _index Index of the identity
-    function _generateIdentityId(uint _index) internal view returns (bytes32) {
-        return keccak256(abi.encodePacked(_index, msg.sender));
+    /// @param _nonce Index of the identity
+    function _generateIdentityId(uint _nonce) internal view returns (bytes32) {
+        return keccak256(abi.encodePacked(_nonce, msg.sender));
     }
 
     /// @notice Generates the OZ role for an given identity
