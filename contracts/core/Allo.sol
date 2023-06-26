@@ -133,61 +133,94 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
 
         Pool memory pool = Pool({
             identityId: _identityId,
-            allocationStrategy: IAllocationStrategy(_createClone(_allocationStrategy)),
-            distributionStrategy: IDistributionStrategy(_createClone(_distributionStrategy)),
+            allocationStrategy: IAllocationStrategy(
+                _createClone(_allocationStrategy)
+            ),
+            distributionStrategy: IDistributionStrategy(
+                _createClone(_distributionStrategy)
+            ),
             token: _token,
             amount: _amount,
             metadata: _metadata
         });
 
         // TODO: Verify Fee percentage
-        uint256 feeAmount = _amount * feePercentage / DENOMINATOR;
+        uint256 feeAmount = (_amount * feePercentage) / DENOMINATOR;
         _transferAmount(treasury, _amount, pool.token);
 
-        _transferAmount(payable(address(pool.distributionStrategy)), _amount, _token);
+        _transferAmount(
+            payable(address(pool.distributionStrategy)),
+            _amount,
+            _token
+        );
 
         poolId = _poolIndex++;
         pools[poolId] = pool;
 
-        emit PoolCreated(poolId, _identityId, _allocationStrategy, _distributionStrategy, _token, _amount, _metadata);
+        emit PoolCreated(
+            poolId,
+            _identityId,
+            _allocationStrategy,
+            _distributionStrategy,
+            _token,
+            _amount,
+            _metadata
+        );
     }
 
     /// @notice passes _data through to the allocation strategy for that pool
     /// @param _poolId id of the pool
     /// @param _data encoded data unique to the allocation strategy for that pool
-    function applyToPool(uint256 _poolId, bytes memory _data) external payable returns (uint256 applicationId) {
-        IAllocationStrategy allocationStrategy = pools[_poolId].allocationStrategy;
-        applicationId = allocationStrategy.applyToPool(_data, msg.sender);
+    function applyToPool(
+        uint256 _poolId,
+        bytes memory _data
+    ) external payable returns (uint256 applicationId) {
+        IAllocationStrategy allocationStrategy = pools[_poolId]
+            .allocationStrategy;
+
+        // todo: we are returning bytes here as defined in the interface, should we return a uint256?
+        // Note: @zobront @thelostone-mc @kurtmerbeth
+        bytes memory data = allocationStrategy.applyToPool(_data, msg.sender);
+        applicationId = abi.decode(data, (uint256));
+
+        return applicationId;
     }
 
     /// @notice Update pool metadata
     /// @param _poolId id of the pool
     /// @param _metadata new metadata of the pool
     /// @dev Only callable by the pool member
-    function updatePoolMetadata(uint256 _poolId, Metadata memory _metadata)
-        external
-        payable
-        isPoolMember(_poolId)
-        returns (bytes memory)
-    {
+    function updatePoolMetadata(
+        uint256 _poolId,
+        Metadata memory _metadata
+    ) external payable isPoolMember(_poolId) returns (bytes memory) {
         Pool storage pool = pools[_poolId];
         pool.metadata = _metadata;
 
         emit PoolMetadataUpdated(_poolId, _metadata);
+
+        return abi.encode(pool);
     }
 
     /// @notice Fund a pool
     /// @param _poolId id of the pool
     /// @param _amount extra amount of the token to be deposited into the pool
     function fundPool(uint256 _poolId, uint256 _amount) external payable {
+        Pool storage pool = pools[_poolId];
         // TODO: Should this be restricted to pool owner?
         // TODO: Verify Fee percentage
-        uint256 feeAmount = _amount * feePercentage / DENOMINATOR;
+        // uint256 feeAmount = (_amount * feePercentage) / DENOMINATOR;
+
+        // Transfer tokens to the treasury
         _transferAmount(treasury, _amount, pool.token);
+        // Transfer tokens to the pool
+        _transferAmount(
+            payable(address(pool.distributionStrategy)),
+            _amount,
+            pool.token
+        );
 
-        Pool storage pool = pools[_poolId];
-
-        _transferAmount(payable(address(pool.distributionStrategy)), _amount, pool.token);
+        // Update pool amount
         pool.amount += _amount;
 
         emit PoolFunded(_poolId, _amount);
@@ -207,42 +240,57 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
     ///
     /// calls voting.generatePayouts() and then uses return data for payout.activatePayouts()
     /// check to make sure they haven't skrited around fee
-    function finalize(uint256 _poolId, bytes calldata _dataFromPoolOwner) external isPoolMember(_poolId) {
+    function finalize(
+        uint256 _poolId,
+        bytes calldata _dataFromPoolOwner
+    ) external isPoolMember(_poolId) {
         // ASK: Do we need _dataFromPoolOwner to allow owner to pass custom data ?
         Pool memory pool = pools[_poolId];
-        bytes memory dataFromAllocationStrategy = pool.allocationStrategy.generatePayouts();
-        pool.disributionStrategy.activatePayouts(dataFromAllocationStrategy, _dataFromPoolOwner);
+        bytes memory dataFromAllocationStrategy = pool
+            .allocationStrategy
+            .generatePayouts();
+
+        pool.distributionStrategy.activateDistribution(
+            dataFromAllocationStrategy,
+            _dataFromPoolOwner
+        );
     }
 
     /// @notice passes _data & msg.sender through to the disribution strategy for that pool
     /// @param _poolId id of the pool
-    /// @param _data encoded data unique to the disributionStrategy strategy for that pool
+    /// @param _data encoded data unique to the distributionStrategy strategy for that pool
     /// @dev Only callable by the pool member
-    function distribute(uint256 _poolId, bytes memory _data) external isPoolMember(_poolId) {
-        pools[_poolId].disributionStrategy.distribute(_data, msg.sender);
+    function distribute(
+        uint256 _poolId,
+        bytes memory _data
+    ) external isPoolMember(_poolId) {
+        pools[_poolId].distributionStrategy.distribute(_data, msg.sender);
     }
 
     /// @notice Updates the treasury address
     /// @param _treasury The new treasury address
     /// @dev Only callable by the owner
-    function updateTreasury(address _treasury) external onlyOwner {
+    function updateTreasury(address payable _treasury) external onlyOwner {
         treasury = _treasury;
         emit TreasuryUpdated(treasury);
     }
 
-    /// @notice Updates the fee
-    /// @param _fee The new fee
+    /// @notice Updates the fee percentage
+    /// @param _feePercentage The new fee
     /// @dev Only callable by the owner
-    function updateFee(uint24 _fee) external onlyOwner {
-        if (_protocolFeePercentage > DENOMINATOR) {
+    function updateFee(uint24 _feePercentage) external onlyOwner {
+        if (_feePercentage > DENOMINATOR) {
             revert INVALID_FEE_PERCENTAGE();
         }
-        fee = _fee;
-        emit FeeUpdated(fee);
+
+        feePercentage = _feePercentage;
+
+        emit FeeUpdated(feePercentage);
     }
 
     /// @notice Create a determenstic clone of of contract
     /// @param _contract The address of the contract to clone
+    // Todo: Move into it's own library which would invoke Allo.createPool
     function _createClone(address _contract) internal returns (address clone) {
         require(_isContract(_contract), "not a contract");
         bytes32 salt = keccak256(abi.encodePacked(msg.sender, _nonce++));
@@ -263,16 +311,20 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
     /// @param _to The address to transfer to
     /// @param _amount The amount to transfer
     /// @param _token The address of the token to transfer
-    function _transferAmount(address payable _to, uint256 _amount, address _token) internal {
+    function _transferAmount(
+        address payable _to,
+        uint256 _amount,
+        address _token
+    ) internal {
         if (_token == address(0)) {
             // Native Token
-            (bool sent, bytes memory data) = _to.call{value: _amount}("");
+            (bool sent, ) = _to.call{value: _amount}("");
             if (!sent) {
                 revert TRANSFER_FAILED();
             }
         } else {
             // ERC20 Token
-            IERC20Upgradeable(_token).safeTransfer(_to, _amount);
+            IERC20Upgradeable(_token).transfer(_to, _amount);
         }
     }
 }
