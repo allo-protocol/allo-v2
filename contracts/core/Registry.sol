@@ -74,6 +74,13 @@ contract Registry is AccessControl {
         return identitiesById[identityId];
     }
 
+    /// @notice Retrieve identity by anchor
+    /// @param anchor The anchor of the identity
+    function getIdentityByAnchor(address anchor) public view returns (Identity memory) {
+        bytes32 identityId = anchorToIdentityId[anchor];
+        return identitiesById[identityId];
+    }
+
     /// @notice Creates a new identity
     /// @dev This will also set the attestation address generated from msg.sender and name
     /// @param _index Index of the identity
