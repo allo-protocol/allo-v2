@@ -295,9 +295,14 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
         emit FeeUpdated(feePercentage);
     }
 
+    /// ====================================
+    /// ==== Internal Functions =====
+    /// ====================================
+
     /// @notice Transfers the amount to the address
     /// @param _to The address to transfer to
     /// @param _amount The amount to transfer
+    /// @param _token The address of the token to transfer
     // Note: @zobront @thelostone-mc @kurtmerbeth we lose this ability
     // by giving the strategies the ability instead to handle all token transfers
     // which I think is okay. We can always add this back in if we need it.
