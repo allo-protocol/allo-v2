@@ -13,8 +13,8 @@
   },
   "files": {
     "contracts/core/Allo.sol": {
-      "lastModificationDate": 1687363847542,
-      "contentHash": "f10935492558a0e10c300e6e40f59acd",
+      "lastModificationDate": 1687792893636,
+      "contentHash": "e08e05df8e09834c53901c3155202f4a",
       "sourceName": "contracts/core/Allo.sol",
       "solcConfig": {
         "settings": {
@@ -45,10 +45,9 @@
         }
       },
       "imports": [
-        "contracts/core/interfaces/IAllo.sol",
-        "contracts/utils/MetaPtr.sol",
-        "node_modules/@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol",
-        "node_modules/@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol"
+        "contracts/core/libraries/Metadata.sol",
+        "lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol",
+        "lib/openzeppelin-contracts-upgradeable/contracts/utils/AddressUpgradeable.sol"
       ],
       "versionRequirement": "=0.8.19",
       "artifacts": {
@@ -57,10 +56,10 @@
         }
       }
     },
-    "contracts/core/BaseAllocation.sol": {
-      "lastModificationDate": 1686797427513,
-      "contentHash": "7354d775f805df6811a05249211578a7",
-      "sourceName": "contracts/core/BaseAllocation.sol",
+    "contracts/core/Aqueduct.sol": {
+      "lastModificationDate": 1687739568288,
+      "contentHash": "1f78eed4eea8b0727bede8de35669845",
+      "sourceName": "contracts/core/Aqueduct.sol",
       "solcConfig": {
         "settings": {
           "optimizer": {
@@ -92,54 +91,14 @@
       "imports": [],
       "versionRequirement": "=0.8.19",
       "artifacts": {
-        "BaseAllocation": {
-          "0.8.19+commit.7dd6d404.Darwin.appleclang": "BaseAllocation.sol/BaseAllocation.json"
-        }
-      }
-    },
-    "contracts/core/BaseDistribution.sol": {
-      "lastModificationDate": 1686797482246,
-      "contentHash": "dc64560acbec72501e3102836ab12a4c",
-      "sourceName": "contracts/core/BaseDistribution.sol",
-      "solcConfig": {
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "metadata": {
-            "bytecodeHash": "ipfs",
-            "appendCBOR": true
-          },
-          "outputSelection": {
-            "*": {
-              "": [
-                "ast"
-              ],
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ]
-            }
-          },
-          "evmVersion": "paris",
-          "libraries": {}
-        }
-      },
-      "imports": [],
-      "versionRequirement": "=0.8.19",
-      "artifacts": {
-        "BaseDistribution": {
-          "0.8.19+commit.7dd6d404.Darwin.appleclang": "BaseDistribution.sol/BaseDistribution.json"
+        "Aqueduct": {
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "Aqueduct.sol/Aqueduct.json"
         }
       }
     },
     "contracts/core/Registry.sol": {
-      "lastModificationDate": 1686855469212,
-      "contentHash": "920bcd0c129ddb61af06962728d85afb",
+      "lastModificationDate": 1687795710037,
+      "contentHash": "f13900f99c1419da4839ff0381308a24",
       "sourceName": "contracts/core/Registry.sol",
       "solcConfig": {
         "settings": {
@@ -170,10 +129,15 @@
         }
       },
       "imports": [
-        "contracts/core/interfaces/IRegistry.sol",
         "contracts/core/libraries/Metadata.sol",
-        "node_modules/@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol",
-        "node_modules/@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol"
+        "lib/openzeppelin-contracts/contracts/access/AccessControl.sol",
+        "lib/openzeppelin-contracts/contracts/access/IAccessControl.sol",
+        "lib/openzeppelin-contracts/contracts/utils/Context.sol",
+        "lib/openzeppelin-contracts/contracts/utils/Strings.sol",
+        "lib/openzeppelin-contracts/contracts/utils/introspection/ERC165.sol",
+        "lib/openzeppelin-contracts/contracts/utils/introspection/IERC165.sol",
+        "lib/openzeppelin-contracts/contracts/utils/math/Math.sol",
+        "lib/openzeppelin-contracts/contracts/utils/math/SignedMath.sol"
       ],
       "versionRequirement": "=0.8.19",
       "artifacts": {
@@ -182,173 +146,9 @@
         }
       }
     },
-    "contracts/core/interfaces/IAllo.sol": {
-      "lastModificationDate": 1687363914740,
-      "contentHash": "a8da149297374ef9161e2b09c44c91f1",
-      "sourceName": "contracts/core/interfaces/IAllo.sol",
-      "solcConfig": {
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "metadata": {
-            "bytecodeHash": "ipfs",
-            "appendCBOR": true
-          },
-          "outputSelection": {
-            "*": {
-              "": [
-                "ast"
-              ],
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ]
-            }
-          },
-          "evmVersion": "paris",
-          "libraries": {}
-        }
-      },
-      "imports": [
-        "contracts/utils/MetaPtr.sol"
-      ],
-      "versionRequirement": "=0.8.19",
-      "artifacts": {
-        "IAllo": {
-          "0.8.19+commit.7dd6d404.Darwin.appleclang": "IAllo.sol/IAllo.json"
-        }
-      }
-    },
-    "contracts/core/interfaces/IAllocationStrategy.sol": {
-      "lastModificationDate": 1687363760288,
-      "contentHash": "84751c53fc28fd3f0e9784893e3a40c6",
-      "sourceName": "contracts/core/interfaces/IAllocationStrategy.sol",
-      "solcConfig": {
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "metadata": {
-            "bytecodeHash": "ipfs",
-            "appendCBOR": true
-          },
-          "outputSelection": {
-            "*": {
-              "": [
-                "ast"
-              ],
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ]
-            }
-          },
-          "evmVersion": "paris",
-          "libraries": {}
-        }
-      },
-      "imports": [],
-      "versionRequirement": "=0.8.19",
-      "artifacts": {
-        "IAllocationStrategy": {
-          "0.8.19+commit.7dd6d404.Darwin.appleclang": "IAllocationStrategy.sol/IAllocationStrategy.json"
-        }
-      }
-    },
-    "contracts/core/interfaces/IDistributionStrategy.sol": {
-      "lastModificationDate": 1686793208667,
-      "contentHash": "b15fe076a658f00e423fef324da713ef",
-      "sourceName": "contracts/core/interfaces/IDistributionStrategy.sol",
-      "solcConfig": {
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "metadata": {
-            "bytecodeHash": "ipfs",
-            "appendCBOR": true
-          },
-          "outputSelection": {
-            "*": {
-              "": [
-                "ast"
-              ],
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ]
-            }
-          },
-          "evmVersion": "paris",
-          "libraries": {}
-        }
-      },
-      "imports": [],
-      "versionRequirement": "=0.8.19",
-      "artifacts": {
-        "IDistributionStrategy": {
-          "0.8.19+commit.7dd6d404.Darwin.appleclang": "IDistributionStrategy.sol/IDistributionStrategy.json"
-        }
-      }
-    },
-    "contracts/core/interfaces/IRegistry.sol": {
-      "lastModificationDate": 1686855470885,
-      "contentHash": "6d64f899b2719ade75f89e6d1e0e027f",
-      "sourceName": "contracts/core/interfaces/IRegistry.sol",
-      "solcConfig": {
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "metadata": {
-            "bytecodeHash": "ipfs",
-            "appendCBOR": true
-          },
-          "outputSelection": {
-            "*": {
-              "": [
-                "ast"
-              ],
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ]
-            }
-          },
-          "evmVersion": "paris",
-          "libraries": {}
-        }
-      },
-      "imports": [
-        "contracts/core/libraries/Metadata.sol"
-      ],
-      "versionRequirement": "=0.8.19",
-      "artifacts": {
-        "IRegistry": {
-          "0.8.19+commit.7dd6d404.Darwin.appleclang": "IRegistry.sol/IRegistry.json"
-        }
-      }
-    },
     "contracts/core/libraries/Metadata.sol": {
-      "lastModificationDate": 1686854076333,
-      "contentHash": "2176baf31506001250743d3b9b25cd68",
+      "lastModificationDate": 1687739568288,
+      "contentHash": "a846b8cdcaf161d2a1bf67c6be2dc6b3",
       "sourceName": "contracts/core/libraries/Metadata.sol",
       "solcConfig": {
         "settings": {
@@ -386,10 +186,10 @@
         }
       }
     },
-    "contracts/strategies/allocation/Aquaduct.sol": {
-      "lastModificationDate": 1686794194901,
-      "contentHash": "17d66a02c32dada5b53d08aaae56e9d7",
-      "sourceName": "contracts/strategies/allocation/Aquaduct.sol",
+    "contracts/interfaces/IAllocationStrategy.sol": {
+      "lastModificationDate": 1687739568289,
+      "contentHash": "07a4edccd709818100ad725d3fea0f6c",
+      "sourceName": "contracts/interfaces/IAllocationStrategy.sol",
       "solcConfig": {
         "settings": {
           "optimizer": {
@@ -421,15 +221,15 @@
       "imports": [],
       "versionRequirement": "=0.8.19",
       "artifacts": {
-        "Aquaduct": {
-          "0.8.19+commit.7dd6d404.Darwin.appleclang": "Aquaduct.sol/Aquaduct.json"
+        "IAllocationStrategy": {
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "IAllocationStrategy.sol/IAllocationStrategy.json"
         }
       }
     },
-    "contracts/strategies/allocation/interfaces/IAquaduct.sol": {
-      "lastModificationDate": 1686767198819,
-      "contentHash": "9c659df959fe33271d2dd215adcde8eb",
-      "sourceName": "contracts/strategies/allocation/interfaces/IAquaduct.sol",
+    "contracts/interfaces/IDistributionStrategy.sol": {
+      "lastModificationDate": 1687739568289,
+      "contentHash": "6c1ec8addcd50a60120af69bd0faeb9b",
+      "sourceName": "contracts/interfaces/IDistributionStrategy.sol",
       "solcConfig": {
         "settings": {
           "optimizer": {
@@ -461,88 +261,8 @@
       "imports": [],
       "versionRequirement": "=0.8.19",
       "artifacts": {
-        "IAqeduct": {
-          "0.8.19+commit.7dd6d404.Darwin.appleclang": "IAquaduct.sol/IAqeduct.json"
-        }
-      }
-    },
-    "contracts/strategies/distribution/SplitPayouts.sol": {
-      "lastModificationDate": 1686793255754,
-      "contentHash": "de0a0e2ae641a37422d190b3ac8f4e52",
-      "sourceName": "contracts/strategies/distribution/SplitPayouts.sol",
-      "solcConfig": {
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "metadata": {
-            "bytecodeHash": "ipfs",
-            "appendCBOR": true
-          },
-          "outputSelection": {
-            "*": {
-              "": [
-                "ast"
-              ],
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ]
-            }
-          },
-          "evmVersion": "paris",
-          "libraries": {}
-        }
-      },
-      "imports": [],
-      "versionRequirement": "=0.8.19",
-      "artifacts": {
-        "SplitPayoutsStrategy": {
-          "0.8.19+commit.7dd6d404.Darwin.appleclang": "SplitPayouts.sol/SplitPayoutsStrategy.json"
-        }
-      }
-    },
-    "contracts/utils/MetaPtr.sol": {
-      "lastModificationDate": 1686852818619,
-      "contentHash": "87a0d23af8c486f58194573d7e004cad",
-      "sourceName": "contracts/utils/MetaPtr.sol",
-      "solcConfig": {
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "metadata": {
-            "bytecodeHash": "ipfs",
-            "appendCBOR": true
-          },
-          "outputSelection": {
-            "*": {
-              "": [
-                "ast"
-              ],
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ]
-            }
-          },
-          "evmVersion": "paris",
-          "libraries": {}
-        }
-      },
-      "imports": [],
-      "versionRequirement": "=0.8.19",
-      "artifacts": {
-        "MetaPtr": {
-          "0.8.19+commit.7dd6d404.Darwin.appleclang": "MetaPtr.sol/MetaPtr.json"
+        "IDistributionStrategy": {
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "IDistributionStrategy.sol/IDistributionStrategy.json"
         }
       }
     },
@@ -1278,10 +998,10 @@
         }
       }
     },
-    "node_modules/@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol": {
-      "lastModificationDate": 1686765795729,
-      "contentHash": "b0970a564d121abf9adfff8d1a01eb16",
-      "sourceName": "node_modules/@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol",
+    "lib/openzeppelin-contracts/contracts/access/AccessControl.sol": {
+      "lastModificationDate": 1687710358924,
+      "contentHash": "fc04808e75980b4e9803938c91fbb88f",
+      "sourceName": "lib/openzeppelin-contracts/contracts/access/AccessControl.sol",
       "solcConfig": {
         "settings": {
           "optimizer": {
@@ -1311,19 +1031,25 @@
         }
       },
       "imports": [
-        "node_modules/@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol"
+        "lib/openzeppelin-contracts/contracts/access/IAccessControl.sol",
+        "lib/openzeppelin-contracts/contracts/utils/Context.sol",
+        "lib/openzeppelin-contracts/contracts/utils/Strings.sol",
+        "lib/openzeppelin-contracts/contracts/utils/introspection/ERC165.sol",
+        "lib/openzeppelin-contracts/contracts/utils/introspection/IERC165.sol",
+        "lib/openzeppelin-contracts/contracts/utils/math/Math.sol",
+        "lib/openzeppelin-contracts/contracts/utils/math/SignedMath.sol"
       ],
-      "versionRequirement": "^0.8.2",
+      "versionRequirement": "^0.8.19",
       "artifacts": {
-        "Initializable": {
-          "0.8.19+commit.7dd6d404.Darwin.appleclang": "proxy/utils/Initializable.sol/Initializable.json"
+        "AccessControl": {
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "AccessControl.sol/AccessControl.json"
         }
       }
     },
-    "node_modules/@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol": {
-      "lastModificationDate": 1686765795729,
-      "contentHash": "c30c805386fda8a42ff515da963d3a95",
-      "sourceName": "node_modules/@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol",
+    "lib/openzeppelin-contracts/contracts/access/IAccessControl.sol": {
+      "lastModificationDate": 1687710358924,
+      "contentHash": "6ab5395116798727018ad8c801b045ca",
+      "sourceName": "lib/openzeppelin-contracts/contracts/access/IAccessControl.sol",
       "solcConfig": {
         "settings": {
           "optimizer": {
@@ -1353,17 +1079,344 @@
         }
       },
       "imports": [],
-      "versionRequirement": "^0.8.1",
+      "versionRequirement": "^0.8.19",
       "artifacts": {
-        "AddressUpgradeable": {
-          "0.8.19+commit.7dd6d404.Darwin.appleclang": "contracts-upgradeable/utils/AddressUpgradeable.sol/AddressUpgradeable.json"
+        "IAccessControl": {
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "IAccessControl.sol/IAccessControl.json"
         }
       }
     },
-    "test/foundry/Registry.t.sol": {
-      "lastModificationDate": 1686855848620,
-      "contentHash": "1b50d10bdf98aa01b274cf8da7a1f3c5",
-      "sourceName": "test/foundry/Registry.t.sol",
+    "lib/openzeppelin-contracts/contracts/utils/Context.sol": {
+      "lastModificationDate": 1687710358942,
+      "contentHash": "60e42aac9f34cccee5620051518cc8ab",
+      "sourceName": "lib/openzeppelin-contracts/contracts/utils/Context.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.19",
+      "artifacts": {
+        "Context": {
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "Context.sol/Context.json"
+        }
+      }
+    },
+    "lib/openzeppelin-contracts/contracts/utils/Strings.sol": {
+      "lastModificationDate": 1687710358943,
+      "contentHash": "c103c2887deef819e252b95aa0e7b19e",
+      "sourceName": "lib/openzeppelin-contracts/contracts/utils/Strings.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "lib/openzeppelin-contracts/contracts/utils/math/Math.sol",
+        "lib/openzeppelin-contracts/contracts/utils/math/SignedMath.sol"
+      ],
+      "versionRequirement": "^0.8.19",
+      "artifacts": {
+        "Strings": {
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "Strings.sol/Strings.json"
+        }
+      }
+    },
+    "lib/openzeppelin-contracts/contracts/utils/introspection/ERC165.sol": {
+      "lastModificationDate": 1687710358944,
+      "contentHash": "cbc50b9e3691f0f3d9395103d1c969a4",
+      "sourceName": "lib/openzeppelin-contracts/contracts/utils/introspection/ERC165.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "lib/openzeppelin-contracts/contracts/utils/introspection/IERC165.sol"
+      ],
+      "versionRequirement": "^0.8.19",
+      "artifacts": {
+        "ERC165": {
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "ERC165.sol/ERC165.json"
+        }
+      }
+    },
+    "lib/openzeppelin-contracts/contracts/utils/introspection/IERC165.sol": {
+      "lastModificationDate": 1687710358944,
+      "contentHash": "7b993c72b0cd067d32f49b745137a2cb",
+      "sourceName": "lib/openzeppelin-contracts/contracts/utils/introspection/IERC165.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.19",
+      "artifacts": {
+        "IERC165": {
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "IERC165.sol/IERC165.json"
+        }
+      }
+    },
+    "lib/openzeppelin-contracts/contracts/utils/math/Math.sol": {
+      "lastModificationDate": 1687710358944,
+      "contentHash": "0d2748928800a4c210c134658bc1e28c",
+      "sourceName": "lib/openzeppelin-contracts/contracts/utils/math/Math.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.19",
+      "artifacts": {
+        "Math": {
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "Math.sol/Math.json"
+        }
+      }
+    },
+    "lib/openzeppelin-contracts/contracts/utils/math/SignedMath.sol": {
+      "lastModificationDate": 1687710358944,
+      "contentHash": "0e0a174761ec04cecc398c1cba0d1a88",
+      "sourceName": "lib/openzeppelin-contracts/contracts/utils/math/SignedMath.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.19",
+      "artifacts": {
+        "SignedMath": {
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "SignedMath.sol/SignedMath.json"
+        }
+      }
+    },
+    "lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol": {
+      "lastModificationDate": 1687710362644,
+      "contentHash": "8a3b1168bc495c414b682d74a4e91a24",
+      "sourceName": "lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "lib/openzeppelin-contracts-upgradeable/contracts/utils/AddressUpgradeable.sol"
+      ],
+      "versionRequirement": "^0.8.19",
+      "artifacts": {
+        "Initializable": {
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "Initializable.sol/Initializable.json"
+        }
+      }
+    },
+    "lib/openzeppelin-contracts-upgradeable/contracts/utils/AddressUpgradeable.sol": {
+      "lastModificationDate": 1687710362648,
+      "contentHash": "5bfe9e962de3c9a0a1159e528986f696",
+      "sourceName": "lib/openzeppelin-contracts-upgradeable/contracts/utils/AddressUpgradeable.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.19",
+      "artifacts": {
+        "AddressUpgradeable": {
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "AddressUpgradeable.sol/AddressUpgradeable.json"
+        }
+      }
+    },
+    "test/foundry/core/Registry.t.sol": {
+      "lastModificationDate": 1687796147868,
+      "contentHash": "9ae256159b0cbc3ee1168501e536177e",
+      "sourceName": "test/foundry/core/Registry.t.sol",
       "solcConfig": {
         "settings": {
           "optimizer": {
@@ -1394,7 +1447,6 @@
       },
       "imports": [
         "contracts/core/Registry.sol",
-        "contracts/core/interfaces/IRegistry.sol",
         "contracts/core/libraries/Metadata.sol",
         "lib/forge-std/lib/ds-test/src/test.sol",
         "lib/forge-std/src/Base.sol",
@@ -1413,14 +1465,17 @@
         "lib/forge-std/src/console.sol",
         "lib/forge-std/src/console2.sol",
         "lib/forge-std/src/interfaces/IMulticall3.sol",
-        "node_modules/@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol",
-        "node_modules/@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol"
+        "lib/openzeppelin-contracts/contracts/access/AccessControl.sol",
+        "lib/openzeppelin-contracts/contracts/access/IAccessControl.sol",
+        "lib/openzeppelin-contracts/contracts/utils/Context.sol",
+        "lib/openzeppelin-contracts/contracts/utils/Strings.sol",
+        "lib/openzeppelin-contracts/contracts/utils/introspection/ERC165.sol",
+        "lib/openzeppelin-contracts/contracts/utils/introspection/IERC165.sol",
+        "lib/openzeppelin-contracts/contracts/utils/math/Math.sol",
+        "lib/openzeppelin-contracts/contracts/utils/math/SignedMath.sol"
       ],
-      "versionRequirement": "=0.8.19",
+      "versionRequirement": "^0.8.19",
       "artifacts": {
-        "ExpectEmit": {
-          "0.8.19+commit.7dd6d404.Darwin.appleclang": "Registry.t.sol/ExpectEmit.json"
-        },
         "RegistryTest": {
           "0.8.19+commit.7dd6d404.Darwin.appleclang": "Registry.t.sol/RegistryTest.json"
         }
