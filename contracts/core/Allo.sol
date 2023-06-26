@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import "@openzeppelin-upgradeable/proxy/ClonesUpgradeable.sol";
 import "@openzeppelin-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin-upgradeable/utils/MulticallUpgradeable.sol";
 import "@openzeppelin-upgradeable/token/ERC20/IERC20Upgradeable.sol";
@@ -9,6 +8,7 @@ import "@openzeppelin-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@solady/auth/Ownable.sol";
 
 import {Metadata} from "./libraries/Metadata.sol";
+import {Clone} from "./libraries/Clone.sol";
 import "../interfaces/IAllocationStrategy.sol";
 import "../interfaces/IDistributionStrategy.sol";
 import "./Registry.sol";
@@ -134,10 +134,10 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
         Pool memory pool = Pool({
             identityId: _identityId,
             allocationStrategy: IAllocationStrategy(
-                _createClone(_allocationStrategy)
+                Clone.createClone(_allocationStrategy, _nonce)
             ),
             distributionStrategy: IDistributionStrategy(
-                _createClone(_distributionStrategy)
+                Clone.createClone(_distributionStrategy, _nonce)
             ),
             token: _token,
             amount: _amount,
@@ -146,6 +146,8 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
 
         // TODO: Verify Fee percentage
         uint256 feeAmount = (_amount * feePercentage) / DENOMINATOR;
+        require(feeAmount <= _amount, "Fee amount exceeds amount");
+        
         _transferAmount(treasury, _amount, pool.token);
 
         _transferAmount(
@@ -286,25 +288,6 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
         feePercentage = _feePercentage;
 
         emit FeeUpdated(feePercentage);
-    }
-
-    /// @notice Create a determenstic clone of of contract
-    /// @param _contract The address of the contract to clone
-    // Todo: Move into it's own library which would invoke Allo.createPool
-    function _createClone(address _contract) internal returns (address clone) {
-        require(_isContract(_contract), "not a contract");
-        bytes32 salt = keccak256(abi.encodePacked(msg.sender, _nonce++));
-        clone = ClonesUpgradeable.cloneDeterministic(_contract, salt);
-    }
-
-    /// @notice Checks if the address is a contract
-    /// @param _address The address to check
-    function _isContract(address _address) internal view returns (bool) {
-        uint256 codeSize;
-        assembly {
-            codeSize := extcodesize(_address)
-        }
-        return codeSize > 0;
     }
 
     /// @notice Transfers the amount to the address

@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 import "forge-std/Test.sol";
 import {Registry} from "../../../contracts/core/Registry.sol";
 import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
+import {TestUtilities} from "../utils/TestUtilities.sol";
 
 contract RegistryTest is Test {
     event IdentityCreated(
@@ -47,8 +48,8 @@ contract RegistryTest is Test {
     function test_createIdentity() public {
         vm.expectEmit(true, false, false, true);
 
-        bytes32 testIdentityId = _testUtilGenerateIdentityId(nonce, address(this));
-        address testAnchor = _testUtilGenerateAnchor(testIdentityId, name);
+        bytes32 testIdentityId = TestUtilities._testUtilGenerateIdentityId(nonce, address(this));
+        address testAnchor = TestUtilities._testUtilGenerateAnchor(testIdentityId, name);
 
         emit IdentityCreated(testIdentityId, nonce, name, metadata, owner, testAnchor);
 
@@ -83,7 +84,7 @@ contract RegistryTest is Test {
         bytes32 newIdentityId = registry.createIdentity(nonce, name, metadata, owner, members);
 
         string memory newName = "New Name";
-        address testAnchor = _testUtilGenerateAnchor(newIdentityId, newName);
+        address testAnchor = TestUtilities._testUtilGenerateAnchor(newIdentityId, newName);
         vm.expectEmit(true, false, false, true);
         emit IdentityNameUpdated(newIdentityId, newName, testAnchor);
         Registry.Identity memory identity = registry.getIdentityById(newIdentityId);
@@ -98,7 +99,7 @@ contract RegistryTest is Test {
     }
 
     function testRevert_updateIdentityNameForInvalidId() public {
-        bytes32 invalidIdentityId = _testUtilGenerateIdentityId(nonce, address(this));
+        bytes32 invalidIdentityId = TestUtilities._testUtilGenerateIdentityId(nonce, address(this));
         string memory newName = "New Name";
 
         vm.expectRevert(Registry.NO_ACCESS_TO_ROLE.selector);
@@ -147,7 +148,7 @@ contract RegistryTest is Test {
 
     function test_updateIdentityMetadataForInvalidId() public {
         vm.expectRevert(Registry.NO_ACCESS_TO_ROLE.selector);
-        bytes32 invalidIdentityId = _testUtilGenerateIdentityId(nonce, address(this));
+        bytes32 invalidIdentityId = TestUtilities._testUtilGenerateIdentityId(nonce, address(this));
         Metadata memory newMetadata = Metadata({protocol: 1, pointer: "new metadata"});
 
         vm.prank(owner);
@@ -282,20 +283,5 @@ contract RegistryTest is Test {
         vm.prank(owner);
         vm.expectRevert(Registry.NOT_PENDING_OWNER.selector);
         registry.acceptIdentityOwnership(newIdentityId);
-    }
-
-    /// @notice Generates the anchor for the given identityId and name
-    /// @param _identityId Id of the identity
-    /// @param _name The name of the identity
-    function _testUtilGenerateAnchor(bytes32 _identityId, string memory _name) internal pure returns (address) {
-        bytes32 attestationHash = keccak256(abi.encodePacked(_identityId, _name));
-
-        return address(uint160(uint256(attestationHash)));
-    }
-
-    /// @notice Generates the identityId based on msg.sender
-    /// @param _nonce Nonce used to generate identityId
-    function _testUtilGenerateIdentityId(uint256 _nonce, address sender) internal pure returns (bytes32) {
-        return keccak256(abi.encodePacked(_nonce, sender));
     }
 }
