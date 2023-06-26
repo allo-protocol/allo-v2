@@ -24,8 +24,6 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
         IAllocationStrategy allocationStrategy;
         IDistributionStrategy distributionStrategy;
         Metadata metadata;
-        address token;
-        uint256 amount;
     }
 
     uint24 public constant DENOMINATOR = 100000;
@@ -139,22 +137,22 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
             distributionStrategy: IDistributionStrategy(
                 Clone.createClone(_distributionStrategy, _nonce)
             ),
-            token: _token,
-            amount: _amount,
             metadata: _metadata
         });
 
-        // TODO: Verify Fee percentage
+        // Todo: Verify Fee percentage
         uint256 feeAmount = (_amount * feePercentage) / DENOMINATOR;
         require(feeAmount <= _amount, "Fee amount exceeds amount");
         
-        _transferAmount(treasury, _amount, pool.token);
+        // Pay the protocol fee
+        _transferAmount(treasury, _amount, _token);
 
-        _transferAmount(
-            payable(address(pool.distributionStrategy)),
-            _amount,
-            _token
-        );
+        // todo: Move this to strategy
+        // _transferAmount(
+        //     payable(address(pool.distributionStrategy)),
+        //     _amount,
+        //     _token
+        // );
 
         poolId = _poolIndex++;
         pools[poolId] = pool;
@@ -207,23 +205,30 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
     /// @notice Fund a pool
     /// @param _poolId id of the pool
     /// @param _amount extra amount of the token to be deposited into the pool
-    function fundPool(uint256 _poolId, uint256 _amount) external payable {
-        Pool storage pool = pools[_poolId];
+    function fundPool(uint256 _poolId, uint256 _amount, address _token) external payable {
+        // Note: @zobront @thelostone-mc @kurtmerbeth how do we want to handle funding the pool?
+        // 1. Do we expose a fundPool() function on the interface?
+        // 2. In that fund pool function we can do the transfer to the pool
+        // 3. The problem is the fee can be skipped if we do it this way
+
+        // Pool storage pool = pools[_poolId];
         // TODO: Should this be restricted to pool owner?
         // TODO: Verify Fee percentage
-        // uint256 feeAmount = (_amount * feePercentage) / DENOMINATOR;
+        uint256 feeAmount = (_amount * feePercentage) / DENOMINATOR;
 
         // Transfer tokens to the treasury
-        _transferAmount(treasury, _amount, pool.token);
+        _transferAmount(treasury, feeAmount, _token);
+
+        // Todo: Move this to strategy
         // Transfer tokens to the pool
-        _transferAmount(
-            payable(address(pool.distributionStrategy)),
-            _amount,
-            pool.token
-        );
+        // _transferAmount(
+        //     payable(address(pool.distributionStrategy)),
+        //     _amount,
+        //     pool.token
+        // );
 
         // Update pool amount
-        pool.amount += _amount;
+        // pool.amount += _amount;
 
         emit PoolFunded(_poolId, _amount);
     }
@@ -293,7 +298,9 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
     /// @notice Transfers the amount to the address
     /// @param _to The address to transfer to
     /// @param _amount The amount to transfer
-    /// @param _token The address of the token to transfer
+    // Note: @zobront @thelostone-mc @kurtmerbeth we lose this ability
+    // by giving the strategies the ability instead to handle all token transfers
+    // which I think is okay. We can always add this back in if we need it.
     function _transferAmount(
         address payable _to,
         uint256 _amount,
