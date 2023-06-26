@@ -2,7 +2,7 @@
 pragma solidity 0.8.19;
 
 import { Metadata } from "./libraries/Metadata.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin-upgradeable/proxy/utils/Initializable.sol";
 
 contract Allo is Initializable {
     struct PoolData {
