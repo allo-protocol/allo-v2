@@ -1,0 +1,9 @@
+repos:
+  - repo: local
+    hooks:
+      - id: format
+        name: format code
+        description: format solidity code with `forge fmt`
+        language: system
+        entry: forge fmt
+        pass_filenames: false
