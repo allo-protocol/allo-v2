@@ -3,10 +3,10 @@ pragma solidity 0.8.19;
 
 interface IDistributionStrategy {
     /**
-        STORAGE (with public getters)
-        uint256 poolId;
-        address allo;
-    */
+     * STORAGE (with public getters)
+     *     uint256 poolId;
+     *     address allo;
+     */
 
     // call to allo() to get identity for pool, then to registry() to get metadata
     function getOwnerIdentity() external view returns (string memory);
