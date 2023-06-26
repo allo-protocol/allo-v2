@@ -92,7 +92,7 @@ contract RegistryTest is Test {
 
         assertEq(registry.getIdentityById(newIdentityId).name, newName, "name");
         // old and new anchor should be mapped to identityId
-        assertEq(registry.anchorToIdentityId(identity.anchor), newIdentityId, "old anchor");
+        assertEq(registry.anchorToIdentityId(identity.anchor), bytes32(0), "old anchor");
         assertEq(registry.anchorToIdentityId(newAnchor), newIdentityId, "new anchor");
     }
 

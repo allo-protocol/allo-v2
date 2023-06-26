@@ -59,6 +59,7 @@ contract Registry is AccessControl {
     /// ====================================
     /// ========== Constructor =============
     /// ====================================
+
     constructor(address _admin) {
         // DEFAULT_ADMIN_ROLE would be set by Allo team
         // to grant or revoke roles in emergencies.
@@ -66,9 +67,10 @@ contract Registry is AccessControl {
     }
 
     /// ====================================
-    /// ========== Modifier =============
+    /// =========== Modifier ===============
     /// ====================================
-    modifier isPoolOwner(bytes32 _identityId) {
+
+    modifier isIdentityOwner(bytes32 _identityId) {
         if (!isOwnerOfIdentity(_identityId, msg.sender)) {
             revert NO_ACCESS_TO_ROLE();
         }
@@ -155,15 +157,18 @@ contract Registry is AccessControl {
     function updateIdentityName(
         bytes32 _identityId,
         string memory _name
-    ) external isPoolOwner(_identityId) returns (address) {
+    ) external isIdentityOwner(_identityId) returns (address) {
 
         address anchor = _generateAnchor(_identityId, _name);
 
         Identity storage identity = identitiesById[_identityId];
         identity.name = _name;
-        identity.anchor = anchor;
 
-        // TODO: should we clear old anchor?
+        // clear old anchor
+        anchorToIdentityId[identity.anchor] = bytes32(0);
+
+        // set new anchor
+        identity.anchor = anchor;
         anchorToIdentityId[identity.anchor] = _identityId;
 
         emit IdentityNameUpdated(_identityId, _name, anchor);
@@ -179,7 +184,7 @@ contract Registry is AccessControl {
     function updateIdentityMetadata(
         bytes32 _identityId,
         Metadata memory _metadata
-    ) external isPoolOwner(_identityId) {
+    ) external isIdentityOwner(_identityId) {
 
         identitiesById[_identityId].metadata = _metadata;
 
@@ -237,7 +242,7 @@ contract Registry is AccessControl {
     function addMembers(
         bytes32 _identityId,
         address[] memory _members
-    ) external isPoolOwner(_identityId) {
+    ) external isIdentityOwner(_identityId) {
 
         bytes32 memberRole = _generateRole(_identityId, RoleType.MEMBER);
 
@@ -257,7 +262,7 @@ contract Registry is AccessControl {
     function removeMembers(
         bytes32 _identityId,
         address[] memory _members
-    ) external isPoolOwner(_identityId) {
+    ) external isIdentityOwner(_identityId) {
 
         bytes32 memberRole = _generateRole(_identityId, RoleType.MEMBER);
 
