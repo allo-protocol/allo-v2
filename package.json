@@ -10,7 +10,7 @@
   "scripts": {
     "forge:compile": "forge build",
     "forge:test": "forge test",
-    "prettier": "forge fmt contracts/**/*.sol && forge fmt test/**/*.sol",
+    "forge:fmt": "forge fmt contracts/**/*.sol && forge fmt test/**/*.sol",
     "fork": "anvil --fork-url",
     "chain": "anvil --block-time 10",
     "hardhat:compile": "npx hardhat compile",
