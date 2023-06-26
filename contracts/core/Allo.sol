@@ -15,7 +15,7 @@ import "./Registry.sol";
 
 contract Allo is Initializable, Ownable, MulticallUpgradeable {
     error NO_ACCESS_TO_ROLE();
-
+    error INVALID_FEE_PERCENTAGE();
     error TRANSFER_FAILED();
 
     /// @notice Struct to hold details of an Pool
@@ -26,24 +26,26 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
         Metadata metadata;
         address token;
         uint256 amount;
-        bool active;
     }
+
+    uint24 public constant DENOMINATOR = 100000;
 
     /// ==========================
     /// === Storage Variables ====
     /// ==========================
 
-    /// @notice Incremental Index
+    /// @notice Fee percentage
+    /// @dev 100% = 100_000 | 10% = 10_000 | 1% = 1_000 | 0.1% = 100 | 0.01% = 10
+    uint24 public feePercentage;
+
+    /// @notice Incremental index
     uint256 private _poolIndex;
 
     /// @notice Nonce to create salt for clone strategy
     uint256 private _nonce;
 
-    /// @notice Fee
-    uint256 public fee; // ASK: should this be percentage ?
-
-    /// @notice Allo Treasury
-    address public treasury;
+    /// @notice Allo treasury
+    address payable public treasury;
 
     /// @notice Registry of pool creators
     Registry public registry;
@@ -110,9 +112,6 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
         return pools[_poolId];
     }
 
-    // creates pool locally, transfers pool amount to distribution strategy => returns poolId
-    // takes fee from user
-
     /// @notice Creates a new pool
     /// @param _identityId The identityId of the pool creator in the registry
     /// @param _allocationStrategy The address of the allocation strategy
@@ -138,11 +137,12 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
             distributionStrategy: IDistributionStrategy(_createClone(_distributionStrategy)),
             token: _token,
             amount: _amount,
-            metadata: _metadata,
-            active: true
+            metadata: _metadata
         });
 
-        // TODO: Add fee logic
+        // TODO: Verify Fee percentage
+        uint256 feeAmount = _amount * feePercentage / DENOMINATOR;
+        _transferAmount(treasury, _amount, pool.token);
 
         _transferAmount(payable(address(pool.distributionStrategy)), _amount, _token);
 
@@ -181,7 +181,9 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
     /// @param _amount extra amount of the token to be deposited into the pool
     function fundPool(uint256 _poolId, uint256 _amount) external payable {
         // TODO: Should this be restricted to pool owner?
-        // TODO: Add fee logic
+        // TODO: Verify Fee percentage
+        uint256 feeAmount = _amount * feePercentage / DENOMINATOR;
+        _transferAmount(treasury, _amount, pool.token);
 
         Pool storage pool = pools[_poolId];
 
@@ -220,17 +222,6 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
         pools[_poolId].disributionStrategy.distribute(_data, msg.sender);
     }
 
-    // TODO: DO WE NEED THIS? Not every strategy needs this
-    /// @notice Closes the pool
-    /// @param _poolId id of the pool
-    /// @dev Only callable by the pool member
-    function closePool(uint256 _poolId) external isPoolMember(_poolId) {
-        // pools[_poolId].allocationStrategy.close(); // ASK: Do we need this ?
-        pools[_poolId].distributionStrategy.close();
-        pools[_poolId].active = false;
-        emit PoolClosed(_poolId);
-    }
-
     /// @notice Updates the treasury address
     /// @param _treasury The new treasury address
     /// @dev Only callable by the owner
@@ -242,7 +233,10 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
     /// @notice Updates the fee
     /// @param _fee The new fee
     /// @dev Only callable by the owner
-    function updateFee(uint256 _fee) external onlyOwner {
+    function updateFee(uint24 _fee) external onlyOwner {
+        if (_protocolFeePercentage > DENOMINATOR) {
+            revert INVALID_FEE_PERCENTAGE();
+        }
         fee = _fee;
         emit FeeUpdated(fee);
     }
@@ -281,9 +275,4 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
             IERC20Upgradeable(_token).safeTransfer(_to, _amount);
         }
     }
-
-    // ASK: Should registry be updatable
-    // ASK: Should we allow multiple registries
-    // ASK: Do we need closePool
-    // ASK: If yes -> do we need openPool to set active = true
 }
