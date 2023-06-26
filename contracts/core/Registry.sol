@@ -206,22 +206,22 @@ contract Registry is AccessControl {
     /// @param _owner New Owner
     /// @dev Only owner can transfer ownership.
     /// Note: both old and new owner will be members of the identity
-    // function changeIdentityOwner(
-    //     bytes32 _identityId,
-    //     address _owner
-    // ) external {
-    //     bytes32 ownerRole = _generateRole(_identityId, RoleType.OWNER);
+    function changeIdentityOwner(
+        bytes32 _identityId,
+        address _owner
+    ) external {
+        bytes32 ownerRole = _generateRole(_identityId, RoleType.OWNER);
 
-    //     if (!hasRole(ownerRole, msg.sender)) {
-    //         revert NO_ACCESS_TO_ROLE();
-    //     }
+        if (!hasRole(ownerRole, msg.sender)) {
+            revert NO_ACCESS_TO_ROLE();
+        }
 
-    //     bytes32 memberRole = _generateRole(_identityId, RoleType.MEMBER);
+        bytes32 memberRole = _generateRole(_identityId, RoleType.MEMBER);
 
-    //     _grantRole(ownerRole, _owner);
-    //     _grantRole(memberRole, _owner);
-    //     _revokeRole(ownerRole, msg.sender);
-    // }
+        _grantRole(ownerRole, _owner);
+        _grantRole(memberRole, _owner);
+        _revokeRole(ownerRole, msg.sender);
+    }
 
 
     /// @notice Adds members to the identity

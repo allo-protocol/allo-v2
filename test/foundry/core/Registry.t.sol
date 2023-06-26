@@ -230,30 +230,30 @@ contract RegistryTest is Test {
         registry.removeMembers(newIdentityId, members);
     }
 
-    // function test_changeIdentityOwner() public {
-    //     bytes32 newIdentityId = registry.createIdentity(index, name, metadata, owner, new address[](0));
+    function test_changeIdentityOwner() public {
+        bytes32 newIdentityId = registry.createIdentity(index, name, metadata, owner, new address[](0));
 
-    //     assertTrue(registry.isOwnerOfIdentity(newIdentityId, owner), "before: isOwner");
-    //     assertTrue(registry.isMemberOfIdentity(newIdentityId, owner), "before: isMember");
-    //     assertFalse(registry.isOwnerOfIdentity(newIdentityId, notAMember), "before: notAnOwner");
-    //     assertFalse(registry.isMemberOfIdentity(newIdentityId, notAMember), "before: notAMember");
+        assertTrue(registry.isOwnerOfIdentity(newIdentityId, owner), "before: isOwner");
+        assertTrue(registry.isMemberOfIdentity(newIdentityId, owner), "before: isMember");
+        assertFalse(registry.isOwnerOfIdentity(newIdentityId, notAMember), "before: notAnOwner");
+        assertFalse(registry.isMemberOfIdentity(newIdentityId, notAMember), "before: notAMember");
 
-    //     vm.prank(owner);
-    //     registry.changeIdentityOwner(newIdentityId, notAMember);
+        vm.prank(owner);
+        registry.changeIdentityOwner(newIdentityId, notAMember);
 
-    //     assertFalse(registry.isOwnerOfIdentity(newIdentityId, owner), "after: notAnOwner");
-    //     assertTrue(registry.isMemberOfIdentity(newIdentityId, owner), "before: isMember");
-    //     assertTrue(registry.isOwnerOfIdentity(newIdentityId, notAMember), "after: isOwner");
-    //     assertTrue(registry.isMemberOfIdentity(newIdentityId, notAMember), "after: isMember");
-    // }
+        assertFalse(registry.isOwnerOfIdentity(newIdentityId, owner), "after: notAnOwner");
+        assertTrue(registry.isMemberOfIdentity(newIdentityId, owner), "before: isMember");
+        assertTrue(registry.isOwnerOfIdentity(newIdentityId, notAMember), "after: isOwner");
+        assertTrue(registry.isMemberOfIdentity(newIdentityId, notAMember), "after: isMember");
+    }
 
-    // function testRevert_changeIdentityOwner_NO_ACCESS_TO_ROLE() public {
-    //     bytes32 newIdentityId = registry.createIdentity(index, name, metadata, owner, new address[](0));
+    function testRevert_changeIdentityOwner_NO_ACCESS_TO_ROLE() public {
+        bytes32 newIdentityId = registry.createIdentity(index, name, metadata, owner, new address[](0));
 
-    //     vm.prank(member1);
-    //     vm.expectRevert(Registry.NO_ACCESS_TO_ROLE.selector);
-    //     registry.changeIdentityOwner(newIdentityId, notAMember);
-    // }
+        vm.prank(member1);
+        vm.expectRevert(Registry.NO_ACCESS_TO_ROLE.selector);
+        registry.changeIdentityOwner(newIdentityId, notAMember);
+    }
 
     /// @notice Generates the anchor for the given identityId and name
     /// @param _identityId Id of the identity
