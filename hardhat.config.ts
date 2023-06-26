@@ -15,6 +15,8 @@ import "solidity-coverage";
 
 dotenv.config();
 
+const deployerPrivateKey = process.env.DEPLOYER_PRIVATE_KEY || "";
+
 const chainIds = {
   // local
   localhost: 31337,
@@ -47,7 +49,7 @@ function createTestnetConfig(
   url: string
 ): NetworkUserConfig {
   return {
-    accounts: [process.env.DEPLOYER_PRIVATE_KEY as string],
+    accounts: [deployerPrivateKey || ""],
     chainId: chainIds[network],
     url,
   };
@@ -64,7 +66,7 @@ function createMainnetConfig(
   url: string
 ): NetworkUserConfig {
   return {
-    accounts: [process.env.DEPLOYER_PRIVATE_KEY as string],
+    accounts: [deployerPrivateKey || ""],
     chainId: chainIds[network],
     url,
   };
@@ -104,7 +106,7 @@ const config: HardhatUserConfig = {
     // ===============================
     mainnet: createMainnetConfig(
       "mainnet",
-      process.env.MAINNET_RPC_URL as string
+      process.env.MAINNET_RPC_URL || ""
     ),
 
     // ===============================
@@ -112,7 +114,7 @@ const config: HardhatUserConfig = {
     // ===============================
     sepolia: createTestnetConfig(
       "sepolia",
-      process.env.SEPOLIA_RPC_URL as string
+      process.env.SEPOLIA_RPC_URL ?? "" as string
     ),
 
     // Localhost
@@ -123,7 +125,7 @@ const config: HardhatUserConfig = {
   },
 
   gasReporter: {
-    coinmarketcap: process.env.COINMARKETCAP_API_KEY,
+    coinmarketcap: process.env.COINMARKETCAP_API_KEY ?? "",
     enabled: process.env.REPORT_GAS !== undefined,
     currency: "USD"
   },
@@ -131,9 +133,9 @@ const config: HardhatUserConfig = {
   etherscan: {
     apiKey: {
       // @ts-ignore
-      mainnet: process.env.ETHERSCAN_API_KEY,
+      mainnet: process.env.ETHERSCAN_API_KEY ?? "",
       // @ts-ignore
-      sepolia: process.env.ETHERSCAN_API_KEY,
+      sepolia: process.env.ETHERSCAN_API_KEY ?? "",
     },
   },
   abiExporter: abiExporter,
