@@ -10,12 +10,6 @@ contract Registry is AccessControl {
     error NO_ACCESS_TO_ROLE();
     error NONCE_NOT_AVAILABLE();
 
-    /// @notice Types of roles assigned to an identity
-    enum RoleType {
-        OWNER,
-        MEMBER
-    }
-
     /// @notice Struct to hold details of an identity
     struct Identity {
         uint256 nonce;
@@ -90,7 +84,7 @@ contract Registry is AccessControl {
     ) external returns (bytes32) {
         bytes32 identityId = _generateIdentityId(_nonce);
 
-        if (identitiesById[identityId].nonce != 0) {
+        if (identitiesById[identityId].owner != address(0)) {
             revert NONCE_NOT_AVAILABLE();
         }
 
@@ -140,7 +134,7 @@ contract Registry is AccessControl {
 
         // set new anchor
         identity.anchor = anchor;
-        anchorToIdentityId[identity.anchor] = _identityId;
+        anchorToIdentityId[anchor] = _identityId;
 
         emit IdentityNameUpdated(_identityId, _name, anchor);
 
