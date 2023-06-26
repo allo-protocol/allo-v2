@@ -20,9 +20,6 @@ interface IDistributionStrategy {
     // this could include merkle proofs, etc or just nothing
     function distribute(bytes memory _data, address sender) external;
 
-    /// close the distribution strategy. msg.sender should be Allo.sol
-    function close() external;
-
     // many owners will probably want a way to update roots, pull out funds if not claimed, etc
     // but all of that will be in specific implementations, not requried interface
 }
