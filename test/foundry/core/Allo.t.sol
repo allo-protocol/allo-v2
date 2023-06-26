@@ -1,3 +1,5 @@
+pragma solidity 0.8.19;
+
 import "forge-std/Test.sol";
 
 import {Allo} from "../../../contracts/core/Allo.sol";
@@ -60,7 +62,7 @@ contract AlloTest is Test {
         name = "New Identity";
         nonce = 2;
 
-        registry = new Registry(admin);
+        registry = new Registry();
 
         members = new address[](2);
         members[0] = member1;
