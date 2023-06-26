@@ -5,6 +5,7 @@ import "forge-std/Test.sol";
 import {Allo} from "../../../contracts/core/Allo.sol";
 import {Registry} from "../../../contracts/core/Registry.sol";
 import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
+import {TestUtilities} from "../utils/TestUtilities.sol";
 
 import "../../../contracts/interfaces/IAllocationStrategy.sol";
 import "../../../contracts/interfaces/IDistributionStrategy.sol";
@@ -31,11 +32,24 @@ contract AlloTest is Test {
 
     event FeeUpdated(uint256 fee);
 
-    event IdentityCreated(bytes32 indexed identityId, uint256 nonce, string name, Metadata metadata, address anchor);
+    event IdentityCreated(
+        bytes32 indexed identityId,
+        uint256 nonce,
+        string name,
+        Metadata metadata,
+        address anchor
+    );
 
-    event IdentityNameUpdated(bytes32 indexed identityId, string name, address anchor);
+    event IdentityNameUpdated(
+        bytes32 indexed identityId,
+        string name,
+        address anchor
+    );
 
-    event IdentityMetadataUpdated(bytes32 indexed identityId, Metadata metadata);
+    event IdentityMetadataUpdated(
+        bytes32 indexed identityId,
+        Metadata metadata
+    );
 
     Allo allo;
     Registry public registry;
@@ -72,7 +86,7 @@ contract AlloTest is Test {
     function test_createPool() public {
         vm.expectEmit(true, false, false, true);
 
-        bytes32 testIdentityId = _testUtilGenerateIdentityId(
+        bytes32 testIdentityId = TestUtilities._testUtilGenerateIdentityId(
             nonce,
             address(this)
         );
@@ -110,20 +124,5 @@ contract AlloTest is Test {
         assertEq(poolMetadata.pointer, "test metadata");
     }
 
-    // todo: move utility funcions to a library
-
-    /// @notice Generates the anchor for the given identityId and name
-    /// @param _identityId Id of the identity
-    /// @param _name The name of the identity
-    function _testUtilGenerateAnchor(bytes32 _identityId, string memory _name) internal pure returns (address) {
-        bytes32 attestationHash = keccak256(abi.encodePacked(_identityId, _name));
-
-        return address(uint160(uint256(attestationHash)));
-    }
-
-    /// @notice Generates the identityId based on msg.sender
-    /// @param _nonce Nonce used to generate identityId
-    function _testUtilGenerateIdentityId(uint256 _nonce, address sender) internal pure returns (bytes32) {
-        return keccak256(abi.encodePacked(_nonce, sender));
-    }
+    // todo:
 }
