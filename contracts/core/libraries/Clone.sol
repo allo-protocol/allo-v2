@@ -6,7 +6,6 @@ import "@openzeppelin-upgradeable/proxy/ClonesUpgradeable.sol";
 /// @title Clone library
 /// @notice A library to create clones of the strategy contracts when a pool is created
 library Clone {
-
     /// @notice Checks if the address is a contract
     /// @param _address The address to check
     function _isContract(address _address) internal view returns (bool) {
@@ -21,7 +20,7 @@ library Clone {
     /// @param _contract The address of the contract to clone
     /// @param _nonce The nonce to use for the clone
     // Todo: Move into it's own library which would invoke Allo.createPool
-    function createClone(address _contract, uint _nonce) internal returns (address clone) {
+    function createClone(address _contract, uint256 _nonce) internal returns (address clone) {
         require(_isContract(_contract), "not a contract");
         bytes32 salt = keccak256(abi.encodePacked(msg.sender, _nonce++));
         clone = ClonesUpgradeable.cloneDeterministic(_contract, salt);
