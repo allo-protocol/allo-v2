@@ -9,7 +9,6 @@ contract Registry is AccessControl {
     /// @notice Custom errors
     error NO_ACCESS_TO_ROLE();
     error NONCE_NOT_AVAILABLE();
-    error NO_PENDING_OWNER();
     error NOT_PENDING_OWNER();
 
     /// @notice Struct to hold details of an identity
@@ -196,12 +195,9 @@ contract Registry is AccessControl {
     /// @notice Transfers the ownership of the identity to the pending owner
     /// @param _identityId The identityId of the identity
     /// @dev Only pending owner can claim ownership.
-    function changeIdentityOwner(bytes32 _identityId) external {
+    function acceptIdentityOwnership(bytes32 _identityId) external {
         Identity storage identity = identitiesById[_identityId];
 
-        if (identity.pendingOwner == address(0)) {
-            revert NO_PENDING_OWNER();
-        }
         if (msg.sender != identity.pendingOwner) {
             revert NOT_PENDING_OWNER();
         }

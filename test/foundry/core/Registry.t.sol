@@ -252,7 +252,7 @@ contract RegistryTest is Test {
         registry.updateIdentityPendingOwner(newIdentityId, notAMember);
     }
 
-    function test_changeIdentityOwner() public {
+    function test_acceptIdentityOwnership() public {
         bytes32 newIdentityId = registry.createIdentity(nonce, name, metadata, owner, new address[](0));
 
         vm.prank(owner);
@@ -266,22 +266,14 @@ contract RegistryTest is Test {
         emit IdentityOwnerUpdated(newIdentityId, notAMember);
 
         vm.prank(notAMember);
-        registry.changeIdentityOwner(newIdentityId);
+        registry.acceptIdentityOwnership(newIdentityId);
 
         assertFalse(registry.isOwnerOfIdentity(newIdentityId, owner), "after: notAnOwner");
         assertTrue(registry.isOwnerOfIdentity(newIdentityId, notAMember), "after: isOwner");
         assertEq(registry.getIdentityById(newIdentityId).pendingOwner, address(0), "after: pendingOwner");
     }
 
-    function testRevert_changeIdentityOwner_NO_PENDING_OWNER() public {
-        bytes32 newIdentityId = registry.createIdentity(nonce, name, metadata, owner, new address[](0));
-
-        vm.prank(owner);
-        vm.expectRevert(Registry.NO_PENDING_OWNER.selector);
-        registry.changeIdentityOwner(newIdentityId);
-    }
-
-    function testRevert_changeIdentityOwner_NOT_PENDING_OWNER() public {
+    function testRevert_acceptIdentityOwnership_NOT_PENDING_OWNER() public {
         bytes32 newIdentityId = registry.createIdentity(nonce, name, metadata, owner, new address[](0));
 
         vm.prank(owner);
@@ -289,7 +281,7 @@ contract RegistryTest is Test {
 
         vm.prank(owner);
         vm.expectRevert(Registry.NOT_PENDING_OWNER.selector);
-        registry.changeIdentityOwner(newIdentityId);
+        registry.acceptIdentityOwnership(newIdentityId);
     }
 
     /// @notice Generates the anchor for the given identityId and name
