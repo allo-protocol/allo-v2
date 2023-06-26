@@ -10,10 +10,9 @@ contract RegistryTest is Test {
     );
 
     event IdentityNameUpdated(bytes32 indexed identityId, string name, address anchor);
-
     event IdentityMetadataUpdated(bytes32 indexed identityId, Metadata metadata);
-
     event IdentityOwnerUpdated(bytes32 indexed identityId, address owner);
+    event IdentityPendingOwnerUpdated(bytes32 indexed identityId, address pendingOwner);
 
     Registry public registry;
 
@@ -231,28 +230,66 @@ contract RegistryTest is Test {
         registry.removeMembers(newIdentityId, members);
     }
 
-    function test_changeIdentityOwner() public {
+    function test_updateIdentityPendingOwner() public {
         bytes32 newIdentityId = registry.createIdentity(nonce, name, metadata, owner, new address[](0));
 
-        assertTrue(registry.isOwnerOfIdentity(newIdentityId, owner), "before: isOwner");
-        assertFalse(registry.isOwnerOfIdentity(newIdentityId, notAMember), "before: notAnOwner");
-
         vm.expectEmit(true, false, false, true);
-        emit IdentityOwnerUpdated(newIdentityId, notAMember);
+        emit IdentityPendingOwnerUpdated(newIdentityId, notAMember);
+
+        assertEq(registry.getIdentityById(newIdentityId).pendingOwner, address(0), "before: pendingOwner");
 
         vm.prank(owner);
-        registry.changeIdentityOwner(newIdentityId, notAMember);
+        registry.updateIdentityPendingOwner(newIdentityId, notAMember);
 
-        assertFalse(registry.isOwnerOfIdentity(newIdentityId, owner), "after: notAnOwner");
-        assertTrue(registry.isOwnerOfIdentity(newIdentityId, notAMember), "after: isOwner");
+        assertEq(registry.getIdentityById(newIdentityId).pendingOwner, notAMember, "after: pendingOwner");
     }
 
-    function testRevert_changeIdentityOwner_NO_ACCESS_TO_ROLE() public {
+    function testRevert_updateIdentityPendingOwner_NO_ACCESS_TO_ROLE() public {
         bytes32 newIdentityId = registry.createIdentity(nonce, name, metadata, owner, new address[](0));
 
         vm.prank(member1);
         vm.expectRevert(Registry.NO_ACCESS_TO_ROLE.selector);
-        registry.changeIdentityOwner(newIdentityId, notAMember);
+        registry.updateIdentityPendingOwner(newIdentityId, notAMember);
+    }
+
+    function test_changeIdentityOwner() public {
+        bytes32 newIdentityId = registry.createIdentity(nonce, name, metadata, owner, new address[](0));
+
+        vm.prank(owner);
+        registry.updateIdentityPendingOwner(newIdentityId, notAMember);
+
+        assertTrue(registry.isOwnerOfIdentity(newIdentityId, owner), "before: isOwner");
+        assertFalse(registry.isOwnerOfIdentity(newIdentityId, notAMember), "before: notAnOwner");
+        assertEq(registry.getIdentityById(newIdentityId).pendingOwner, notAMember, "before: pendingOwner");
+
+        vm.expectEmit(true, false, false, true);
+        emit IdentityOwnerUpdated(newIdentityId, notAMember);
+
+        vm.prank(notAMember);
+        registry.changeIdentityOwner(newIdentityId);
+
+        assertFalse(registry.isOwnerOfIdentity(newIdentityId, owner), "after: notAnOwner");
+        assertTrue(registry.isOwnerOfIdentity(newIdentityId, notAMember), "after: isOwner");
+        assertEq(registry.getIdentityById(newIdentityId).pendingOwner, address(0), "after: pendingOwner");
+    }
+
+    function testRevert_changeIdentityOwner_NO_PENDING_OWNER() public {
+        bytes32 newIdentityId = registry.createIdentity(nonce, name, metadata, owner, new address[](0));
+
+        vm.prank(owner);
+        vm.expectRevert(Registry.NO_PENDING_OWNER.selector);
+        registry.changeIdentityOwner(newIdentityId);
+    }
+
+    function testRevert_changeIdentityOwner_NOT_PENDING_OWNER() public {
+        bytes32 newIdentityId = registry.createIdentity(nonce, name, metadata, owner, new address[](0));
+
+        vm.prank(owner);
+        registry.updateIdentityPendingOwner(newIdentityId, notAMember);
+
+        vm.prank(owner);
+        vm.expectRevert(Registry.NOT_PENDING_OWNER.selector);
+        registry.changeIdentityOwner(newIdentityId);
     }
 
     /// @notice Generates the anchor for the given identityId and name

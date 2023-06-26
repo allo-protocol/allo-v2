@@ -9,13 +9,16 @@ contract Registry is AccessControl {
     /// @notice Custom errors
     error NO_ACCESS_TO_ROLE();
     error NONCE_NOT_AVAILABLE();
+    error NO_PENDING_OWNER();
+    error NOT_PENDING_OWNER();
 
     /// @notice Struct to hold details of an identity
     struct Identity {
         uint256 nonce;
-        address owner;
         string name;
         Metadata metadata;
+        address owner;
+        address pendingOwner;
         address anchor;
     }
 
@@ -39,6 +42,7 @@ contract Registry is AccessControl {
     event IdentityNameUpdated(bytes32 indexed identityId, string name, address anchor);
     event IdentityMetadataUpdated(bytes32 indexed identityId, Metadata metadata);
     event IdentityOwnerUpdated(bytes32 indexed identityId, address owner);
+    event IdentityPendingOwnerUpdated(bytes32 indexed identityId, address pendingOwner);
 
     /// ====================================
     /// =========== Modifier ===============
@@ -84,15 +88,16 @@ contract Registry is AccessControl {
     ) external returns (bytes32) {
         bytes32 identityId = _generateIdentityId(_nonce);
 
-        if (identitiesById[identityId].owner != address(0)) {
+        if (identitiesById[identityId].anchor != address(0)) {
             revert NONCE_NOT_AVAILABLE();
         }
 
         Identity memory identity = Identity({
             nonce: _nonce,
-            owner: _owner,
             name: _name,
             metadata: _metadata,
+            owner: _owner,
+            pendingOwner: address(0),
             anchor: _generateAnchor(identityId, _name)
         });
 
@@ -176,13 +181,35 @@ contract Registry is AccessControl {
         return hasRole(_identityId, _member);
     }
 
-    /// @notice Transfers the ownership of the identity to a new owner
+    /// @notice Updates the pending owner of the identity
     /// @param _identityId The identityId of the identity
-    /// @param _owner New Owner
-    /// @dev Only owner can transfer ownership.
-    function changeIdentityOwner(bytes32 _identityId, address _owner) external isIdentityOwner(_identityId) {
-        identitiesById[_identityId].owner = _owner;
-        emit IdentityOwnerUpdated(_identityId, _owner);
+    /// @param _pendingOwner New pending owner
+    function updateIdentityPendingOwner(bytes32 _identityId, address _pendingOwner)
+        external
+        isIdentityOwner(_identityId)
+    {
+        identitiesById[_identityId].pendingOwner = _pendingOwner;
+
+        emit IdentityPendingOwnerUpdated(_identityId, _pendingOwner);
+    }
+
+    /// @notice Transfers the ownership of the identity to the pending owner
+    /// @param _identityId The identityId of the identity
+    /// @dev Only pending owner can claim ownership.
+    function changeIdentityOwner(bytes32 _identityId) external {
+        Identity storage identity = identitiesById[_identityId];
+
+        if (identity.pendingOwner == address(0)) {
+            revert NO_PENDING_OWNER();
+        }
+        if (msg.sender != identity.pendingOwner) {
+            revert NOT_PENDING_OWNER();
+        }
+
+        identity.owner = identity.pendingOwner;
+        identity.pendingOwner = address(0);
+
+        emit IdentityOwnerUpdated(_identityId, identity.owner);
     }
 
     /// @notice Adds members to the identity
