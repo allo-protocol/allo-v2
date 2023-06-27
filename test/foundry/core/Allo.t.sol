@@ -78,7 +78,7 @@ contract AlloTest is Test {
         // vm.expectEmit(true, false, false, true);
 
         // create identity
-        bytes32 testIdentityId = registry.createIdentity(nonce, name, metadata, owner, members);
+        // bytes32 testIdentityId = registry.createIdentity(nonce, name, metadata, owner, members);
         // console.logBytes32(testIdentityId);
 
         // uint poolId = allo.createPool(testIdentityId, allocationStrategy, distributionStrategy, token, 0, metadata);
