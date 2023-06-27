@@ -155,15 +155,10 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
     /// @notice passes _data through to the allocation strategy for that pool
     /// @param _poolId id of the pool
     /// @param _data encoded data unique to the allocation strategy for that pool
-    function applyToPool(uint256 _poolId, bytes memory _data) external payable returns (uint256 applicationId) {
+    function applyToPool(uint256 _poolId, bytes memory _data) external payable returns (bytes memory) {
         IAllocationStrategy allocationStrategy = pools[_poolId].allocationStrategy;
 
-        // todo: we are returning bytes here as defined in the interface, should we return a uint256?
-        // Note: @zobront @thelostone-mc @kurtmerbeth
-        bytes memory data = allocationStrategy.applyToPool(_data, msg.sender);
-        applicationId = abi.decode(data, (uint256));
-
-        return applicationId;
+        return allocationStrategy.applyToPool(_data, msg.sender);
     }
 
     /// @notice Update pool metadata
