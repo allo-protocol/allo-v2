@@ -128,7 +128,7 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
         uint256 _amount,
         Metadata memory _metadata
     ) external payable returns (uint256 poolId) {
-        if (!registry.isMemberOfIdentity(_identityId, msg.sender)) {
+        if (!registry.isOwnerOrMemberOfIdentity(_identityId, msg.sender)) {
             revert NO_ACCESS_TO_ROLE();
         }
 
@@ -265,10 +265,6 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
     function _deductFeeAndTransfer(address _token, uint256 _amount, Pool memory _pool) internal {
         uint256 feeAmount = (_amount * feePercentage) / DENOMINATOR;
 
-        if (feeAmount <= _amount) {
-            revert NOT_ENOUGH_FUNDS();
-        }
-
         // Pay the protocol fee
         _transferAmount(treasury, _amount, _token);
 
@@ -292,5 +288,6 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
             // ERC20 Token
             IERC20Upgradeable(_token).transfer(_to, _amount);
         }
+
     }
 }
