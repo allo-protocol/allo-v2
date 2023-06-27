@@ -288,6 +288,5 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
             // ERC20 Token
             IERC20Upgradeable(_token).transfer(_to, _amount);
         }
-
     }
 }
