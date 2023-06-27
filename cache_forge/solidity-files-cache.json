@@ -13,7 +13,7 @@
   },
   "files": {
     "contracts/core/Allo.sol": {
-      "lastModificationDate": 1687792893636,
+      "lastModificationDate": 1687801464904,
       "contentHash": "e08e05df8e09834c53901c3155202f4a",
       "sourceName": "contracts/core/Allo.sol",
       "solcConfig": {
@@ -36,7 +36,8 @@
                 "evm.bytecode",
                 "evm.deployedBytecode",
                 "evm.methodIdentifiers",
-                "metadata"
+                "metadata",
+                "storageLayout"
               ]
             }
           },
@@ -57,8 +58,8 @@
       }
     },
     "contracts/core/Aqueduct.sol": {
-      "lastModificationDate": 1687739568288,
-      "contentHash": "1f78eed4eea8b0727bede8de35669845",
+      "lastModificationDate": 1687801464903,
+      "contentHash": "53232cb65f65ca8854b6e56a74413dea",
       "sourceName": "contracts/core/Aqueduct.sol",
       "solcConfig": {
         "settings": {
@@ -80,7 +81,8 @@
                 "evm.bytecode",
                 "evm.deployedBytecode",
                 "evm.methodIdentifiers",
-                "metadata"
+                "metadata",
+                "storageLayout"
               ]
             }
           },
@@ -97,8 +99,8 @@
       }
     },
     "contracts/core/Registry.sol": {
-      "lastModificationDate": 1687795710037,
-      "contentHash": "f13900f99c1419da4839ff0381308a24",
+      "lastModificationDate": 1687801464906,
+      "contentHash": "6d021bcd32cead560fdad4f531e00e86",
       "sourceName": "contracts/core/Registry.sol",
       "solcConfig": {
         "settings": {
@@ -120,7 +122,8 @@
                 "evm.bytecode",
                 "evm.deployedBytecode",
                 "evm.methodIdentifiers",
-                "metadata"
+                "metadata",
+                "storageLayout"
               ]
             }
           },
@@ -147,8 +150,8 @@
       }
     },
     "contracts/core/libraries/Metadata.sol": {
-      "lastModificationDate": 1687739568288,
-      "contentHash": "a846b8cdcaf161d2a1bf67c6be2dc6b3",
+      "lastModificationDate": 1687801464903,
+      "contentHash": "2b4a13694908d1f1df9ca61ed9b87ad1",
       "sourceName": "contracts/core/libraries/Metadata.sol",
       "solcConfig": {
         "settings": {
@@ -170,7 +173,8 @@
                 "evm.bytecode",
                 "evm.deployedBytecode",
                 "evm.methodIdentifiers",
-                "metadata"
+                "metadata",
+                "storageLayout"
               ]
             }
           },
@@ -187,8 +191,8 @@
       }
     },
     "contracts/interfaces/IAllocationStrategy.sol": {
-      "lastModificationDate": 1687739568289,
-      "contentHash": "07a4edccd709818100ad725d3fea0f6c",
+      "lastModificationDate": 1687801464903,
+      "contentHash": "38c7b6131f78f8af15686e3db34c8a52",
       "sourceName": "contracts/interfaces/IAllocationStrategy.sol",
       "solcConfig": {
         "settings": {
@@ -210,7 +214,8 @@
                 "evm.bytecode",
                 "evm.deployedBytecode",
                 "evm.methodIdentifiers",
-                "metadata"
+                "metadata",
+                "storageLayout"
               ]
             }
           },
@@ -227,8 +232,8 @@
       }
     },
     "contracts/interfaces/IDistributionStrategy.sol": {
-      "lastModificationDate": 1687739568289,
-      "contentHash": "6c1ec8addcd50a60120af69bd0faeb9b",
+      "lastModificationDate": 1687801464903,
+      "contentHash": "686b614ebf16ce280bff9a0ee50f0f18",
       "sourceName": "contracts/interfaces/IDistributionStrategy.sol",
       "solcConfig": {
         "settings": {
@@ -250,7 +255,8 @@
                 "evm.bytecode",
                 "evm.deployedBytecode",
                 "evm.methodIdentifiers",
-                "metadata"
+                "metadata",
+                "storageLayout"
               ]
             }
           },
@@ -267,7 +273,7 @@
       }
     },
     "lib/forge-std/lib/ds-test/src/test.sol": {
-      "lastModificationDate": 1686764402327,
+      "lastModificationDate": 1687710358870,
       "contentHash": "9febff9d09f18af5306669dc276c4c43",
       "sourceName": "lib/forge-std/lib/ds-test/src/test.sol",
       "solcConfig": {
@@ -290,7 +296,8 @@
                 "evm.bytecode",
                 "evm.deployedBytecode",
                 "evm.methodIdentifiers",
-                "metadata"
+                "metadata",
+                "storageLayout"
               ]
             }
           },
@@ -307,7 +314,7 @@
       }
     },
     "lib/forge-std/src/Base.sol": {
-      "lastModificationDate": 1686764400615,
+      "lastModificationDate": 1687422254561,
       "contentHash": "ee13c050b1914464f1d3f90cde90204b",
       "sourceName": "lib/forge-std/src/Base.sol",
       "solcConfig": {
@@ -330,7 +337,8 @@
                 "evm.bytecode",
                 "evm.deployedBytecode",
                 "evm.methodIdentifiers",
-                "metadata"
+                "metadata",
+                "storageLayout"
               ]
             }
           },
@@ -356,7 +364,7 @@
       }
     },
     "lib/forge-std/src/StdAssertions.sol": {
-      "lastModificationDate": 1686764400615,
+      "lastModificationDate": 1687422254561,
       "contentHash": "6cc2858240bcd443debbbf075490e325",
       "sourceName": "lib/forge-std/src/StdAssertions.sol",
       "solcConfig": {
@@ -379,7 +387,8 @@
                 "evm.bytecode",
                 "evm.deployedBytecode",
                 "evm.methodIdentifiers",
-                "metadata"
+                "metadata",
+                "storageLayout"
               ]
             }
           },
@@ -399,7 +408,7 @@
       }
     },
     "lib/forge-std/src/StdChains.sol": {
-      "lastModificationDate": 1686764400615,
+      "lastModificationDate": 1687422254562,
       "contentHash": "9c76820952c8f5e2fc02f872dc3afeb4",
       "sourceName": "lib/forge-std/src/StdChains.sol",
       "solcConfig": {
@@ -422,7 +431,8 @@
                 "evm.bytecode",
                 "evm.deployedBytecode",
                 "evm.methodIdentifiers",
-                "metadata"
+                "metadata",
+                "storageLayout"
               ]
             }
           },
@@ -441,7 +451,7 @@
       }
     },
     "lib/forge-std/src/StdCheats.sol": {
-      "lastModificationDate": 1686795687931,
+      "lastModificationDate": 1687422254562,
       "contentHash": "b4becd959ffb157ebaca62c549ae0774",
       "sourceName": "lib/forge-std/src/StdCheats.sol",
       "solcConfig": {
@@ -464,7 +474,8 @@
                 "evm.bytecode",
                 "evm.deployedBytecode",
                 "evm.methodIdentifiers",
-                "metadata"
+                "metadata",
+                "storageLayout"
               ]
             }
           },
@@ -487,7 +498,7 @@
       }
     },
     "lib/forge-std/src/StdError.sol": {
-      "lastModificationDate": 1686764400616,
+      "lastModificationDate": 1687422254562,
       "contentHash": "64c896e1276a291776e5ea5aecb3870a",
       "sourceName": "lib/forge-std/src/StdError.sol",
       "solcConfig": {
@@ -510,7 +521,8 @@
                 "evm.bytecode",
                 "evm.deployedBytecode",
                 "evm.methodIdentifiers",
-                "metadata"
+                "metadata",
+                "storageLayout"
               ]
             }
           },
@@ -527,7 +539,7 @@
       }
     },
     "lib/forge-std/src/StdInvariant.sol": {
-      "lastModificationDate": 1686764400616,
+      "lastModificationDate": 1687422254562,
       "contentHash": "12c06010ec43ce935ed209d5aca30828",
       "sourceName": "lib/forge-std/src/StdInvariant.sol",
       "solcConfig": {
@@ -550,7 +562,8 @@
                 "evm.bytecode",
                 "evm.deployedBytecode",
                 "evm.methodIdentifiers",
-                "metadata"
+                "metadata",
+                "storageLayout"
               ]
             }
           },
@@ -567,7 +580,7 @@
       }
     },
     "lib/forge-std/src/StdJson.sol": {
-      "lastModificationDate": 1686764400616,
+      "lastModificationDate": 1687422254562,
       "contentHash": "2e1d13674e152408867795362d833c24",
       "sourceName": "lib/forge-std/src/StdJson.sol",
       "solcConfig": {
@@ -590,7 +603,8 @@
                 "evm.bytecode",
                 "evm.deployedBytecode",
                 "evm.methodIdentifiers",
-                "metadata"
+                "metadata",
+                "storageLayout"
               ]
             }
           },
@@ -609,7 +623,7 @@
       }
     },
     "lib/forge-std/src/StdMath.sol": {
-      "lastModificationDate": 1686764400616,
+      "lastModificationDate": 1687422254562,
       "contentHash": "9da8f453eba6bb98f3d75bc6822bfb29",
       "sourceName": "lib/forge-std/src/StdMath.sol",
       "solcConfig": {
@@ -632,7 +646,8 @@
                 "evm.bytecode",
                 "evm.deployedBytecode",
                 "evm.methodIdentifiers",
-                "metadata"
+                "metadata",
+                "storageLayout"
               ]
             }
           },
@@ -649,7 +664,7 @@
       }
     },
     "lib/forge-std/src/StdStorage.sol": {
-      "lastModificationDate": 1686764400616,
+      "lastModificationDate": 1687422254562,
       "contentHash": "3cb9868082df39a53927db09dbc21f23",
       "sourceName": "lib/forge-std/src/StdStorage.sol",
       "solcConfig": {
@@ -672,7 +687,8 @@
                 "evm.bytecode",
                 "evm.deployedBytecode",
                 "evm.methodIdentifiers",
-                "metadata"
+                "metadata",
+                "storageLayout"
               ]
             }
           },
@@ -694,7 +710,7 @@
       }
     },
     "lib/forge-std/src/StdStyle.sol": {
-      "lastModificationDate": 1686764400616,
+      "lastModificationDate": 1687422254562,
       "contentHash": "820e6f6b7704f0c980fae604b1e34b18",
       "sourceName": "lib/forge-std/src/StdStyle.sol",
       "solcConfig": {
@@ -717,7 +733,8 @@
                 "evm.bytecode",
                 "evm.deployedBytecode",
                 "evm.methodIdentifiers",
-                "metadata"
+                "metadata",
+                "storageLayout"
               ]
             }
           },
@@ -736,7 +753,7 @@
       }
     },
     "lib/forge-std/src/StdUtils.sol": {
-      "lastModificationDate": 1686764400616,
+      "lastModificationDate": 1687422254563,
       "contentHash": "dd923493ddd9f98777687205cfe9d646",
       "sourceName": "lib/forge-std/src/StdUtils.sol",
       "solcConfig": {
@@ -759,7 +776,8 @@
                 "evm.bytecode",
                 "evm.deployedBytecode",
                 "evm.methodIdentifiers",
-                "metadata"
+                "metadata",
+                "storageLayout"
               ]
             }
           },
@@ -779,7 +797,7 @@
       }
     },
     "lib/forge-std/src/Test.sol": {
-      "lastModificationDate": 1686764400617,
+      "lastModificationDate": 1687422254563,
       "contentHash": "bc9d74a0c612e1c2b66cca2973bcc803",
       "sourceName": "lib/forge-std/src/Test.sol",
       "solcConfig": {
@@ -802,7 +820,8 @@
                 "evm.bytecode",
                 "evm.deployedBytecode",
                 "evm.methodIdentifiers",
-                "metadata"
+                "metadata",
+                "storageLayout"
               ]
             }
           },
@@ -836,7 +855,7 @@
       }
     },
     "lib/forge-std/src/Vm.sol": {
-      "lastModificationDate": 1686795687931,
+      "lastModificationDate": 1687724905182,
       "contentHash": "b2b05e33a0242fdb2657ae36dbcc23b6",
       "sourceName": "lib/forge-std/src/Vm.sol",
       "solcConfig": {
@@ -859,7 +878,8 @@
                 "evm.bytecode",
                 "evm.deployedBytecode",
                 "evm.methodIdentifiers",
-                "metadata"
+                "metadata",
+                "storageLayout"
               ]
             }
           },
@@ -879,7 +899,7 @@
       }
     },
     "lib/forge-std/src/console.sol": {
-      "lastModificationDate": 1686764400617,
+      "lastModificationDate": 1687422254563,
       "contentHash": "100b8a33b917da1147740d7ab8b0ded3",
       "sourceName": "lib/forge-std/src/console.sol",
       "solcConfig": {
@@ -902,7 +922,8 @@
                 "evm.bytecode",
                 "evm.deployedBytecode",
                 "evm.methodIdentifiers",
-                "metadata"
+                "metadata",
+                "storageLayout"
               ]
             }
           },
@@ -919,7 +940,7 @@
       }
     },
     "lib/forge-std/src/console2.sol": {
-      "lastModificationDate": 1686764400617,
+      "lastModificationDate": 1687422254564,
       "contentHash": "491ca717c1915995e78cc361485a3067",
       "sourceName": "lib/forge-std/src/console2.sol",
       "solcConfig": {
@@ -942,7 +963,8 @@
                 "evm.bytecode",
                 "evm.deployedBytecode",
                 "evm.methodIdentifiers",
-                "metadata"
+                "metadata",
+                "storageLayout"
               ]
             }
           },
@@ -959,7 +981,7 @@
       }
     },
     "lib/forge-std/src/interfaces/IMulticall3.sol": {
-      "lastModificationDate": 1686764400618,
+      "lastModificationDate": 1687422254565,
       "contentHash": "7b131ca1ca32ef6378b7b9ad5488b901",
       "sourceName": "lib/forge-std/src/interfaces/IMulticall3.sol",
       "solcConfig": {
@@ -982,7 +1004,8 @@
                 "evm.bytecode",
                 "evm.deployedBytecode",
                 "evm.methodIdentifiers",
-                "metadata"
+                "metadata",
+                "storageLayout"
               ]
             }
           },
@@ -1022,7 +1045,8 @@
                 "evm.bytecode",
                 "evm.deployedBytecode",
                 "evm.methodIdentifiers",
-                "metadata"
+                "metadata",
+                "storageLayout"
               ]
             }
           },
@@ -1070,7 +1094,8 @@
                 "evm.bytecode",
                 "evm.deployedBytecode",
                 "evm.methodIdentifiers",
-                "metadata"
+                "metadata",
+                "storageLayout"
               ]
             }
           },
@@ -1110,7 +1135,8 @@
                 "evm.bytecode",
                 "evm.deployedBytecode",
                 "evm.methodIdentifiers",
-                "metadata"
+                "metadata",
+                "storageLayout"
               ]
             }
           },
@@ -1150,7 +1176,8 @@
                 "evm.bytecode",
                 "evm.deployedBytecode",
                 "evm.methodIdentifiers",
-                "metadata"
+                "metadata",
+                "storageLayout"
               ]
             }
           },
@@ -1193,7 +1220,8 @@
                 "evm.bytecode",
                 "evm.deployedBytecode",
                 "evm.methodIdentifiers",
-                "metadata"
+                "metadata",
+                "storageLayout"
               ]
             }
           },
@@ -1235,7 +1263,8 @@
                 "evm.bytecode",
                 "evm.deployedBytecode",
                 "evm.methodIdentifiers",
-                "metadata"
+                "metadata",
+                "storageLayout"
               ]
             }
           },
@@ -1275,7 +1304,8 @@
                 "evm.bytecode",
                 "evm.deployedBytecode",
                 "evm.methodIdentifiers",
-                "metadata"
+                "metadata",
+                "storageLayout"
               ]
             }
           },
@@ -1315,7 +1345,8 @@
                 "evm.bytecode",
                 "evm.deployedBytecode",
                 "evm.methodIdentifiers",
-                "metadata"
+                "metadata",
+                "storageLayout"
               ]
             }
           },
@@ -1355,7 +1386,8 @@
                 "evm.bytecode",
                 "evm.deployedBytecode",
                 "evm.methodIdentifiers",
-                "metadata"
+                "metadata",
+                "storageLayout"
               ]
             }
           },
@@ -1397,7 +1429,8 @@
                 "evm.bytecode",
                 "evm.deployedBytecode",
                 "evm.methodIdentifiers",
-                "metadata"
+                "metadata",
+                "storageLayout"
               ]
             }
           },
@@ -1414,8 +1447,8 @@
       }
     },
     "test/foundry/core/Registry.t.sol": {
-      "lastModificationDate": 1687796147868,
-      "contentHash": "9ae256159b0cbc3ee1168501e536177e",
+      "lastModificationDate": 1687801464906,
+      "contentHash": "16ecd7cb19dbb896e0393cdb9ba6c782",
       "sourceName": "test/foundry/core/Registry.t.sol",
       "solcConfig": {
         "settings": {
@@ -1437,7 +1470,8 @@
                 "evm.bytecode",
                 "evm.deployedBytecode",
                 "evm.methodIdentifiers",
-                "metadata"
+                "metadata",
+                "storageLayout"
               ]
             }
           },
