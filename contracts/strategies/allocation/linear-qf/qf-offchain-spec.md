@@ -12,7 +12,8 @@ At time of writing (June 2023), most prominent QF formulas are too computational
 In order to facilitate this, the contract will emit vote events so that off-chain calculation services can pull in the relevant data. 
 
 ## User flows
-Full flow is documented here: https://miro.com/app/board/uXjVMXyfa-o=/?share_link_id=797514162800
+Full flow is shown here: 
+![Alt text](<Strategy Evaluation - QF Vote with events.png>)
 
 ### Pool Creation
 - identity owner or member creates pool via `createPool` method on `Allo.sol`
