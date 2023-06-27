@@ -236,12 +236,12 @@ contract RegistryTest is Test {
         vm.expectEmit(true, false, false, true);
         emit IdentityPendingOwnerUpdated(newIdentityId, notAMember);
 
-        assertEq(registry.getIdentityById(newIdentityId).pendingOwner, address(0), "before: pendingOwner");
+        assertEq(registry.getIdentityPendingOwner(newIdentityId), address(0), "before: pendingOwner");
 
         vm.prank(owner);
         registry.updateIdentityPendingOwner(newIdentityId, notAMember);
 
-        assertEq(registry.getIdentityById(newIdentityId).pendingOwner, notAMember, "after: pendingOwner");
+        assertEq(registry.getIdentityPendingOwner(newIdentityId), notAMember, "after: pendingOwner");
     }
 
     function testRevert_updateIdentityPendingOwner_NO_ACCESS_TO_ROLE() public {
@@ -260,7 +260,7 @@ contract RegistryTest is Test {
 
         assertTrue(registry.isOwnerOfIdentity(newIdentityId, owner), "before: isOwner");
         assertFalse(registry.isOwnerOfIdentity(newIdentityId, notAMember), "before: notAnOwner");
-        assertEq(registry.getIdentityById(newIdentityId).pendingOwner, notAMember, "before: pendingOwner");
+        assertEq(registry.getIdentityPendingOwner(newIdentityId), notAMember, "before: pendingOwner");
 
         vm.expectEmit(true, false, false, true);
         emit IdentityOwnerUpdated(newIdentityId, notAMember);
@@ -270,7 +270,7 @@ contract RegistryTest is Test {
 
         assertFalse(registry.isOwnerOfIdentity(newIdentityId, owner), "after: notAnOwner");
         assertTrue(registry.isOwnerOfIdentity(newIdentityId, notAMember), "after: isOwner");
-        assertEq(registry.getIdentityById(newIdentityId).pendingOwner, address(0), "after: pendingOwner");
+        assertEq(registry.getIdentityPendingOwner(newIdentityId), address(0), "after: pendingOwner");
     }
 
     function testRevert_acceptIdentityOwnership_NOT_PENDING_OWNER() public {

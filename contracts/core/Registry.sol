@@ -17,7 +17,6 @@ contract Registry is AccessControl {
         string name;
         Metadata metadata;
         address owner;
-        address pendingOwner;
         address anchor;
     }
 
@@ -30,6 +29,9 @@ contract Registry is AccessControl {
 
     /// @notice anchor -> Identity.id
     mapping(address => bytes32) public anchorToIdentityId;
+
+    /// @notice Identity.id -> pending owner
+    mapping(bytes32 => address) public identityIdToPendingOwner;
 
     /// ======================
     /// ======= Events =======
@@ -71,6 +73,12 @@ contract Registry is AccessControl {
         return identitiesById[identityId];
     }
 
+    /// @notice Retrieve identity's pending owner
+    /// @param identityId The identityId of the identity
+    function getIdentityPendingOwner(bytes32 identityId) public view returns (address) {
+        return identityIdToPendingOwner[identityId];
+    }
+
     /// @notice Creates a new identity
     /// @dev This will also set the attestation address generated from msg.sender and name
     /// @param _nonce Nonce used to generate identityId
@@ -96,7 +104,6 @@ contract Registry is AccessControl {
             name: _name,
             metadata: _metadata,
             owner: _owner,
-            pendingOwner: address(0),
             anchor: _generateAnchor(identityId, _name)
         });
 
@@ -187,7 +194,7 @@ contract Registry is AccessControl {
         external
         isIdentityOwner(_identityId)
     {
-        identitiesById[_identityId].pendingOwner = _pendingOwner;
+        identityIdToPendingOwner[_identityId] = _pendingOwner;
 
         emit IdentityPendingOwnerUpdated(_identityId, _pendingOwner);
     }
@@ -197,13 +204,14 @@ contract Registry is AccessControl {
     /// @dev Only pending owner can claim ownership.
     function acceptIdentityOwnership(bytes32 _identityId) external {
         Identity storage identity = identitiesById[_identityId];
+        address newOwner = identityIdToPendingOwner[_identityId];
 
-        if (msg.sender != identity.pendingOwner) {
+        if (msg.sender != newOwner) {
             revert NOT_PENDING_OWNER();
         }
 
-        identity.owner = identity.pendingOwner;
-        identity.pendingOwner = address(0);
+        identity.owner = newOwner;
+        identityIdToPendingOwner[_identityId] = address(0);
 
         emit IdentityOwnerUpdated(_identityId, identity.owner);
     }
