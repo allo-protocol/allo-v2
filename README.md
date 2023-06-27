@@ -2,13 +2,13 @@
 
 ## Getting Started
 ```bash
-git clone https://github.com/allo-protocol/allo-contracts-v2
+git clone https://github.com/allo-protocol/allo-v2
 ```
 
 ### Install Dependencies
 
 ```bash
-cd allo-contracts-v2
+cd allo-v2
 
 yarn install
 ```
