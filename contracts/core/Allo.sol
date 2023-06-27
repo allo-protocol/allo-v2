@@ -76,6 +76,8 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
 
     event FeeUpdated(uint256 fee);
 
+    event RegistryUpdated(address registry);
+
     /// ====================================
     /// =========== Intializer =============
     /// ====================================
@@ -139,7 +141,7 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
 
         // Note: Only fund the pool on creation if the amount is greater than 0
         if (_amount > 0) {
-            _applyFeeAndTransfer(_token, _amount, pool);
+            _deductFeeAndTransfer(_token, _amount, pool);
         }
 
         poolId = _poolIndex++;
@@ -193,7 +195,7 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
 
         Pool storage pool = pools[_poolId];
 
-        _applyFeeAndTransfer(_token, _amount, pool);
+        _deductFeeAndTransfer(_token, _amount, pool);
 
         emit PoolFunded(_poolId, _amount);
     }
@@ -228,6 +230,14 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
         pools[_poolId].distributionStrategy.distribute(_data, msg.sender);
     }
 
+    /// @notice Updates the registry address
+    /// @param _registry The new registry address
+    /// @dev Only callable by the owner if the current registry cannot be used
+    function updateRegistry(address _registry) external onlyOwner {
+        registry = Registry(_registry);
+        emit RegistryUpdated(_registry);
+    }
+
     /// @notice Updates the treasury address
     /// @param _treasury The new treasury address
     /// @dev Only callable by the owner
@@ -250,17 +260,19 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
     }
 
     /// ====================================
-    /// ==== Internal Functions =====
+    /// ======= Internal Functions =========
     /// ====================================
 
-    /// @notice Applies the fee and transfers the amount to the distribution strategy
+    /// @notice Deduct the fee and transfers the amount to the distribution strategy
     /// @param _token The address of the token to transfer
     /// @param _amount The amount to transfer
     /// @param _pool The pool to transfer to
-    function _applyFeeAndTransfer(address _token, uint256 _amount, Pool memory _pool) internal {
-        // Todo: Verify Fee percentage
+    function _deductFeeAndTransfer(address _token, uint256 _amount, Pool memory _pool) internal {
         uint256 feeAmount = (_amount * feePercentage) / DENOMINATOR;
-        require(feeAmount <= _amount, "Fee amount exceeds amount sent");
+
+        if (feeAmount <= _amount) {
+            revert NOT_ENOUGH_FUNDS();
+        }
 
         // Pay the protocol fee
         _transferAmount(treasury, _amount, _token);

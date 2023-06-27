@@ -19,7 +19,6 @@ library Clone {
     /// @notice Create a determenstic clone of of contract
     /// @param _contract The address of the contract to clone
     /// @param _nonce The nonce to use for the clone
-    // Todo: Move into it's own library which would invoke Allo.createPool
     function createClone(address _contract, uint256 _nonce) internal returns (address clone) {
         require(_isContract(_contract), "not a contract");
         bytes32 salt = keccak256(abi.encodePacked(msg.sender, _nonce++));

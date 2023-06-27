@@ -13,8 +13,8 @@
   },
   "files": {
     "contracts/core/Allo.sol": {
-      "lastModificationDate": 1687792893636,
-      "contentHash": "e08e05df8e09834c53901c3155202f4a",
+      "lastModificationDate": 1687848335562,
+      "contentHash": "ea6ac4a6ebf55990689ab09974f3c647",
       "sourceName": "contracts/core/Allo.sol",
       "solcConfig": {
         "settings": {
@@ -45,9 +45,25 @@
         }
       },
       "imports": [
+        "contracts/core/Registry.sol",
+        "contracts/core/libraries/Clone.sol",
         "contracts/core/libraries/Metadata.sol",
+        "contracts/interfaces/IAllocationStrategy.sol",
+        "contracts/interfaces/IDistributionStrategy.sol",
+        "lib/openzeppelin-contracts/contracts/access/AccessControl.sol",
+        "lib/openzeppelin-contracts/contracts/access/IAccessControl.sol",
+        "lib/openzeppelin-contracts/contracts/utils/Context.sol",
+        "lib/openzeppelin-contracts/contracts/utils/Strings.sol",
+        "lib/openzeppelin-contracts/contracts/utils/introspection/ERC165.sol",
+        "lib/openzeppelin-contracts/contracts/utils/introspection/IERC165.sol",
+        "lib/openzeppelin-contracts/contracts/utils/math/Math.sol",
+        "lib/openzeppelin-contracts/contracts/utils/math/SignedMath.sol",
+        "lib/openzeppelin-contracts-upgradeable/contracts/proxy/ClonesUpgradeable.sol",
         "lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol",
-        "lib/openzeppelin-contracts-upgradeable/contracts/utils/AddressUpgradeable.sol"
+        "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol",
+        "lib/openzeppelin-contracts-upgradeable/contracts/utils/AddressUpgradeable.sol",
+        "lib/openzeppelin-contracts-upgradeable/contracts/utils/MulticallUpgradeable.sol",
+        "lib/solady/src/auth/Ownable.sol"
       ],
       "versionRequirement": "=0.8.19",
       "artifacts": {
@@ -57,8 +73,8 @@
       }
     },
     "contracts/core/Aqueduct.sol": {
-      "lastModificationDate": 1687739568288,
-      "contentHash": "1f78eed4eea8b0727bede8de35669845",
+      "lastModificationDate": 1687846741395,
+      "contentHash": "53232cb65f65ca8854b6e56a74413dea",
       "sourceName": "contracts/core/Aqueduct.sol",
       "solcConfig": {
         "settings": {
@@ -97,8 +113,8 @@
       }
     },
     "contracts/core/Registry.sol": {
-      "lastModificationDate": 1687795710037,
-      "contentHash": "f13900f99c1419da4839ff0381308a24",
+      "lastModificationDate": 1687846741396,
+      "contentHash": "6d021bcd32cead560fdad4f531e00e86",
       "sourceName": "contracts/core/Registry.sol",
       "solcConfig": {
         "settings": {
@@ -146,9 +162,51 @@
         }
       }
     },
+    "contracts/core/libraries/Clone.sol": {
+      "lastModificationDate": 1687847347614,
+      "contentHash": "84768cb7633b5217c961f6dff43efa01",
+      "sourceName": "contracts/core/libraries/Clone.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "lib/openzeppelin-contracts-upgradeable/contracts/proxy/ClonesUpgradeable.sol"
+      ],
+      "versionRequirement": "=0.8.19",
+      "artifacts": {
+        "Clone": {
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "Clone.sol/Clone.json"
+        }
+      }
+    },
     "contracts/core/libraries/Metadata.sol": {
-      "lastModificationDate": 1687739568288,
-      "contentHash": "a846b8cdcaf161d2a1bf67c6be2dc6b3",
+      "lastModificationDate": 1687846741395,
+      "contentHash": "2b4a13694908d1f1df9ca61ed9b87ad1",
       "sourceName": "contracts/core/libraries/Metadata.sol",
       "solcConfig": {
         "settings": {
@@ -187,8 +245,8 @@
       }
     },
     "contracts/interfaces/IAllocationStrategy.sol": {
-      "lastModificationDate": 1687739568289,
-      "contentHash": "07a4edccd709818100ad725d3fea0f6c",
+      "lastModificationDate": 1687846741395,
+      "contentHash": "38c7b6131f78f8af15686e3db34c8a52",
       "sourceName": "contracts/interfaces/IAllocationStrategy.sol",
       "solcConfig": {
         "settings": {
@@ -227,8 +285,8 @@
       }
     },
     "contracts/interfaces/IDistributionStrategy.sol": {
-      "lastModificationDate": 1687739568289,
-      "contentHash": "6c1ec8addcd50a60120af69bd0faeb9b",
+      "lastModificationDate": 1687846761955,
+      "contentHash": "0c5bc3aad6ec5208f35c45ea3ace2900",
       "sourceName": "contracts/interfaces/IDistributionStrategy.sol",
       "solcConfig": {
         "settings": {
@@ -267,7 +325,7 @@
       }
     },
     "lib/forge-std/lib/ds-test/src/test.sol": {
-      "lastModificationDate": 1686764402327,
+      "lastModificationDate": 1687710358870,
       "contentHash": "9febff9d09f18af5306669dc276c4c43",
       "sourceName": "lib/forge-std/lib/ds-test/src/test.sol",
       "solcConfig": {
@@ -307,7 +365,7 @@
       }
     },
     "lib/forge-std/src/Base.sol": {
-      "lastModificationDate": 1686764400615,
+      "lastModificationDate": 1687422254561,
       "contentHash": "ee13c050b1914464f1d3f90cde90204b",
       "sourceName": "lib/forge-std/src/Base.sol",
       "solcConfig": {
@@ -356,7 +414,7 @@
       }
     },
     "lib/forge-std/src/StdAssertions.sol": {
-      "lastModificationDate": 1686764400615,
+      "lastModificationDate": 1687422254561,
       "contentHash": "6cc2858240bcd443debbbf075490e325",
       "sourceName": "lib/forge-std/src/StdAssertions.sol",
       "solcConfig": {
@@ -399,7 +457,7 @@
       }
     },
     "lib/forge-std/src/StdChains.sol": {
-      "lastModificationDate": 1686764400615,
+      "lastModificationDate": 1687422254562,
       "contentHash": "9c76820952c8f5e2fc02f872dc3afeb4",
       "sourceName": "lib/forge-std/src/StdChains.sol",
       "solcConfig": {
@@ -441,7 +499,7 @@
       }
     },
     "lib/forge-std/src/StdCheats.sol": {
-      "lastModificationDate": 1686795687931,
+      "lastModificationDate": 1687422254562,
       "contentHash": "b4becd959ffb157ebaca62c549ae0774",
       "sourceName": "lib/forge-std/src/StdCheats.sol",
       "solcConfig": {
@@ -487,7 +545,7 @@
       }
     },
     "lib/forge-std/src/StdError.sol": {
-      "lastModificationDate": 1686764400616,
+      "lastModificationDate": 1687422254562,
       "contentHash": "64c896e1276a291776e5ea5aecb3870a",
       "sourceName": "lib/forge-std/src/StdError.sol",
       "solcConfig": {
@@ -527,7 +585,7 @@
       }
     },
     "lib/forge-std/src/StdInvariant.sol": {
-      "lastModificationDate": 1686764400616,
+      "lastModificationDate": 1687422254562,
       "contentHash": "12c06010ec43ce935ed209d5aca30828",
       "sourceName": "lib/forge-std/src/StdInvariant.sol",
       "solcConfig": {
@@ -567,7 +625,7 @@
       }
     },
     "lib/forge-std/src/StdJson.sol": {
-      "lastModificationDate": 1686764400616,
+      "lastModificationDate": 1687422254562,
       "contentHash": "2e1d13674e152408867795362d833c24",
       "sourceName": "lib/forge-std/src/StdJson.sol",
       "solcConfig": {
@@ -609,7 +667,7 @@
       }
     },
     "lib/forge-std/src/StdMath.sol": {
-      "lastModificationDate": 1686764400616,
+      "lastModificationDate": 1687422254562,
       "contentHash": "9da8f453eba6bb98f3d75bc6822bfb29",
       "sourceName": "lib/forge-std/src/StdMath.sol",
       "solcConfig": {
@@ -649,7 +707,7 @@
       }
     },
     "lib/forge-std/src/StdStorage.sol": {
-      "lastModificationDate": 1686764400616,
+      "lastModificationDate": 1687422254562,
       "contentHash": "3cb9868082df39a53927db09dbc21f23",
       "sourceName": "lib/forge-std/src/StdStorage.sol",
       "solcConfig": {
@@ -694,7 +752,7 @@
       }
     },
     "lib/forge-std/src/StdStyle.sol": {
-      "lastModificationDate": 1686764400616,
+      "lastModificationDate": 1687422254562,
       "contentHash": "820e6f6b7704f0c980fae604b1e34b18",
       "sourceName": "lib/forge-std/src/StdStyle.sol",
       "solcConfig": {
@@ -736,7 +794,7 @@
       }
     },
     "lib/forge-std/src/StdUtils.sol": {
-      "lastModificationDate": 1686764400616,
+      "lastModificationDate": 1687422254563,
       "contentHash": "dd923493ddd9f98777687205cfe9d646",
       "sourceName": "lib/forge-std/src/StdUtils.sol",
       "solcConfig": {
@@ -779,7 +837,7 @@
       }
     },
     "lib/forge-std/src/Test.sol": {
-      "lastModificationDate": 1686764400617,
+      "lastModificationDate": 1687422254563,
       "contentHash": "bc9d74a0c612e1c2b66cca2973bcc803",
       "sourceName": "lib/forge-std/src/Test.sol",
       "solcConfig": {
@@ -836,7 +894,7 @@
       }
     },
     "lib/forge-std/src/Vm.sol": {
-      "lastModificationDate": 1686795687931,
+      "lastModificationDate": 1687724905182,
       "contentHash": "b2b05e33a0242fdb2657ae36dbcc23b6",
       "sourceName": "lib/forge-std/src/Vm.sol",
       "solcConfig": {
@@ -879,7 +937,7 @@
       }
     },
     "lib/forge-std/src/console.sol": {
-      "lastModificationDate": 1686764400617,
+      "lastModificationDate": 1687422254563,
       "contentHash": "100b8a33b917da1147740d7ab8b0ded3",
       "sourceName": "lib/forge-std/src/console.sol",
       "solcConfig": {
@@ -919,7 +977,7 @@
       }
     },
     "lib/forge-std/src/console2.sol": {
-      "lastModificationDate": 1686764400617,
+      "lastModificationDate": 1687422254564,
       "contentHash": "491ca717c1915995e78cc361485a3067",
       "sourceName": "lib/forge-std/src/console2.sol",
       "solcConfig": {
@@ -959,7 +1017,7 @@
       }
     },
     "lib/forge-std/src/interfaces/IMulticall3.sol": {
-      "lastModificationDate": 1686764400618,
+      "lastModificationDate": 1687422254565,
       "contentHash": "7b131ca1ca32ef6378b7b9ad5488b901",
       "sourceName": "lib/forge-std/src/interfaces/IMulticall3.sol",
       "solcConfig": {
@@ -1331,6 +1389,46 @@
         }
       }
     },
+    "lib/openzeppelin-contracts-upgradeable/contracts/proxy/ClonesUpgradeable.sol": {
+      "lastModificationDate": 1687710362643,
+      "contentHash": "01a3e5782467332d3fcfde5174544ba7",
+      "sourceName": "lib/openzeppelin-contracts-upgradeable/contracts/proxy/ClonesUpgradeable.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.19",
+      "artifacts": {
+        "ClonesUpgradeable": {
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "ClonesUpgradeable.sol/ClonesUpgradeable.json"
+        }
+      }
+    },
     "lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol": {
       "lastModificationDate": 1687710362644,
       "contentHash": "8a3b1168bc495c414b682d74a4e91a24",
@@ -1370,6 +1468,46 @@
       "artifacts": {
         "Initializable": {
           "0.8.19+commit.7dd6d404.Darwin.appleclang": "Initializable.sol/Initializable.json"
+        }
+      }
+    },
+    "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol": {
+      "lastModificationDate": 1687710362645,
+      "contentHash": "9816014ddf75aaecb50c229c624428fb",
+      "sourceName": "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.19",
+      "artifacts": {
+        "IERC20Upgradeable": {
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "IERC20Upgradeable.sol/IERC20Upgradeable.json"
         }
       }
     },
@@ -1413,9 +1551,171 @@
         }
       }
     },
+    "lib/openzeppelin-contracts-upgradeable/contracts/utils/MulticallUpgradeable.sol": {
+      "lastModificationDate": 1687710362648,
+      "contentHash": "6ed86f08a40b522cf7b1637d2eda17e8",
+      "sourceName": "lib/openzeppelin-contracts-upgradeable/contracts/utils/MulticallUpgradeable.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol",
+        "lib/openzeppelin-contracts-upgradeable/contracts/utils/AddressUpgradeable.sol"
+      ],
+      "versionRequirement": "^0.8.19",
+      "artifacts": {
+        "MulticallUpgradeable": {
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "MulticallUpgradeable.sol/MulticallUpgradeable.json"
+        }
+      }
+    },
+    "lib/solady/src/auth/Ownable.sol": {
+      "lastModificationDate": 1687768383817,
+      "contentHash": "b61226d5d637283c6c5355a6f3ec1bad",
+      "sourceName": "lib/solady/src/auth/Ownable.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.4",
+      "artifacts": {
+        "Ownable": {
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "Ownable.sol/Ownable.json"
+        }
+      }
+    },
+    "test/foundry/core/Allo.t.sol": {
+      "lastModificationDate": 1687848359587,
+      "contentHash": "218b9e4e4511939f64026e0d9af6a3cf",
+      "sourceName": "test/foundry/core/Allo.t.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "contracts/core/Allo.sol",
+        "contracts/core/Registry.sol",
+        "contracts/core/libraries/Clone.sol",
+        "contracts/core/libraries/Metadata.sol",
+        "contracts/interfaces/IAllocationStrategy.sol",
+        "contracts/interfaces/IDistributionStrategy.sol",
+        "lib/forge-std/lib/ds-test/src/test.sol",
+        "lib/forge-std/src/Base.sol",
+        "lib/forge-std/src/StdAssertions.sol",
+        "lib/forge-std/src/StdChains.sol",
+        "lib/forge-std/src/StdCheats.sol",
+        "lib/forge-std/src/StdError.sol",
+        "lib/forge-std/src/StdInvariant.sol",
+        "lib/forge-std/src/StdJson.sol",
+        "lib/forge-std/src/StdMath.sol",
+        "lib/forge-std/src/StdStorage.sol",
+        "lib/forge-std/src/StdStyle.sol",
+        "lib/forge-std/src/StdUtils.sol",
+        "lib/forge-std/src/Test.sol",
+        "lib/forge-std/src/Vm.sol",
+        "lib/forge-std/src/console.sol",
+        "lib/forge-std/src/console2.sol",
+        "lib/forge-std/src/interfaces/IMulticall3.sol",
+        "lib/openzeppelin-contracts/contracts/access/AccessControl.sol",
+        "lib/openzeppelin-contracts/contracts/access/IAccessControl.sol",
+        "lib/openzeppelin-contracts/contracts/utils/Context.sol",
+        "lib/openzeppelin-contracts/contracts/utils/Strings.sol",
+        "lib/openzeppelin-contracts/contracts/utils/introspection/ERC165.sol",
+        "lib/openzeppelin-contracts/contracts/utils/introspection/IERC165.sol",
+        "lib/openzeppelin-contracts/contracts/utils/math/Math.sol",
+        "lib/openzeppelin-contracts/contracts/utils/math/SignedMath.sol",
+        "lib/openzeppelin-contracts-upgradeable/contracts/proxy/ClonesUpgradeable.sol",
+        "lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol",
+        "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol",
+        "lib/openzeppelin-contracts-upgradeable/contracts/utils/AddressUpgradeable.sol",
+        "lib/openzeppelin-contracts-upgradeable/contracts/utils/MulticallUpgradeable.sol",
+        "lib/solady/src/auth/Ownable.sol",
+        "test/foundry/utils/TestUtilities.sol"
+      ],
+      "versionRequirement": "=0.8.19",
+      "artifacts": {
+        "AlloTest": {
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "Allo.t.sol/AlloTest.json"
+        }
+      }
+    },
     "test/foundry/core/Registry.t.sol": {
-      "lastModificationDate": 1687796147868,
-      "contentHash": "9ae256159b0cbc3ee1168501e536177e",
+      "lastModificationDate": 1687846796884,
+      "contentHash": "ee1f8f7cb10d076f1991b56f55c85c52",
       "sourceName": "test/foundry/core/Registry.t.sol",
       "solcConfig": {
         "settings": {
@@ -1472,12 +1772,53 @@
         "lib/openzeppelin-contracts/contracts/utils/introspection/ERC165.sol",
         "lib/openzeppelin-contracts/contracts/utils/introspection/IERC165.sol",
         "lib/openzeppelin-contracts/contracts/utils/math/Math.sol",
-        "lib/openzeppelin-contracts/contracts/utils/math/SignedMath.sol"
+        "lib/openzeppelin-contracts/contracts/utils/math/SignedMath.sol",
+        "test/foundry/utils/TestUtilities.sol"
       ],
       "versionRequirement": "^0.8.19",
       "artifacts": {
         "RegistryTest": {
           "0.8.19+commit.7dd6d404.Darwin.appleclang": "Registry.t.sol/RegistryTest.json"
+        }
+      }
+    },
+    "test/foundry/utils/TestUtilities.sol": {
+      "lastModificationDate": 1687846816958,
+      "contentHash": "8b6ed1bc98970792f3e175d2b8f288dc",
+      "sourceName": "test/foundry/utils/TestUtilities.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs",
+            "appendCBOR": true
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "paris",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "=0.8.19",
+      "artifacts": {
+        "TestUtilities": {
+          "0.8.19+commit.7dd6d404.Darwin.appleclang": "TestUtilities.sol/TestUtilities.json"
         }
       }
     }
