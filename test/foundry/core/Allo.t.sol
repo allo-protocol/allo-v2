@@ -10,13 +10,17 @@ import {TestUtilities} from "../utils/TestUtilities.sol";
 import "../../../contracts/interfaces/IAllocationStrategy.sol";
 import "../../../contracts/interfaces/IDistributionStrategy.sol";
 
+import {MockAllocation} from "../utils/MockAllocation.sol";
+import {MockDistribution} from "../utils/MockDistribution.sol";
+import {MockToken} from "../utils/MockToken.sol";
+
 // todo:
 contract AlloTest is Test {
     event PoolCreated(
         uint256 indexed poolId,
         bytes32 indexed identityId,
         address allocationStrategy,
-        address distributionStrategy,
+        address payable distributionStrategy,
         address token,
         uint256 amount,
         Metadata metadata
@@ -41,14 +45,17 @@ contract AlloTest is Test {
     address public member2;
     address[] public members;
     address public notAMember;
+    address payable public treasury;
 
     address public allocationStrategy;
-    address payable public distributionStrategy;
+    address public distributionStrategy;
     address public token;
 
     Metadata public metadata;
     string public name;
     uint256 public nonce;
+
+    bytes32 public identityId;
 
     function setUp() public {
         allo = new Allo();
@@ -62,51 +69,58 @@ contract AlloTest is Test {
         nonce = 2;
 
         registry = new Registry();
+        allo.initialize(address(registry));
 
         members = new address[](2);
         members[0] = member1;
         members[1] = member2;
 
-        distributionStrategy = payable(makeAddr("distributionStrategy"));
-        allocationStrategy = address(makeAddr("allocationStrategy"));
+        treasury = payable(makeAddr("treasury"));
+        allo.updateTreasury(treasury);
 
-        token = makeAddr("token");
+        distributionStrategy = address(new MockDistribution());
+        allocationStrategy = address(new MockAllocation());
+        MockToken mockToken = new MockToken();
+        token = address(mockToken);
+        mockToken.mint(0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f, 1000000 * 10 ** 18);
+        identityId = registry.createIdentity(nonce, name, metadata, owner, members);
     }
 
     /// @notice Test creating a pool with no tokens
     function test_createPool() public {
-        // vm.expectEmit(true, false, false, true);
+        vm.expectEmit(true, true, false, false);
+        emit PoolCreated(0, identityId, allocationStrategy, payable(distributionStrategy), token, 0, metadata);
+        vm.prank(owner);
 
-        // create identity
-        // bytes32 testIdentityId = registry.createIdentity(nonce, name, metadata, owner, members);
-        // console.logBytes32(testIdentityId);
+        uint256 poolId =
+            allo.createPool(identityId, allocationStrategy, payable(distributionStrategy), token, 0, metadata);
 
-        // uint poolId = allo.createPool(testIdentityId, allocationStrategy, distributionStrategy, token, 0, metadata);
-
-        // assertEq(allo.getPoolInfo(poolId).identityId, testIdentityId);
-
-        // emit PoolCreated(1, testIdentityId, address(0), address(0), address(0), 0, metadata);
+        assertEq(allo.getPoolInfo(poolId).identityId, identityId);
     }
 
-    // /// @notice Test creating a pool with tokens
-    // function test_createPoolWithTokens() public {
-    //     vm.expectEmit(true, false, false, true);
-    //     bytes32 testIdentityId = registry.createIdentity(nonce, name, metadata, owner, members);
+    /// @notice Test creating a pool with tokens
+    function test_createPoolWithTokens() public {
+        vm.expectEmit(true, false, false, true);
+        emit PoolCreated(
+            0, identityId, allocationStrategy, payable(distributionStrategy), token, 10 * 10 ** 18, metadata
+        );
+        vm.prank(owner);
 
-    //     // todo: test that the pool is created with tokens sent
-    //     allo.allo.createPool(testIdentityId, allocationStrategy, distributionStrategy, token, 0, metadata);
+        uint256 poolId = allo.createPool(
+            identityId, allocationStrategy, payable(distributionStrategy), token, 10 * 10 ** 18, metadata
+        );
 
-    //     emit PoolCreated(1, "0x12345", address(0), address(0), address(0), 10000 * (10 ** uint256(18)), metadata);
-    // }
+        assertEq(allo.getPoolInfo(poolId).identityId, identityId);
+    }
 
     // function testRevert_createPool_NO_ACCESS_TO_ROLE() public {
-    //     bytes32 testIdentityId = registry.createIdentity(nonce, name, metadata, owner, members);
-    //     allo.allo.createPool(testIdentityId, allocationStrategy, distributionStrategy, token, 0, metadata);
+    //     bytes32 identityId = registry.createIdentity(nonce, name, metadata, owner, members);
+    //     allo.createPool(identityId, allocationStrategy, distributionStrategy, token, 0, metadata);
 
     //     vm.expectRevert(Allo.NO_ACCESS_TO_ROLE.selector);
 
     //     vm.prank(member1);
-    //     allo.allo.createPool(testIdentityId, allocationStrategy, distributionStrategy, token, 0, metadata);
+    //     allo.createPool(identityId, allocationStrategy, distributionStrategy, token, 0, metadata);
     // }
 
     // /// @notice Test updating the metadata of a pool
