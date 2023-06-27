@@ -13,7 +13,8 @@ cd allo-v2
 yarn install
 ```
 
-> Make sure you have foundry installed globally
+> Make sure you have foundry installed globally. [Get it here](https://book.getfoundry.sh/getting-started/installation).
+
 ### Update Foundry and Install Libs
 ```bash
 foundryup
