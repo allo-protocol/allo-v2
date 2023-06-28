@@ -29,6 +29,8 @@ contract Allo is Initializable, Ownable, AccessControl {
         IAllocationStrategy allocationStrategy;
         IDistributionStrategy distributionStrategy;
         Metadata metadata;
+        bytes32 managerRole;
+        bytes32 adminRole;
     }
 
     /// @notice Fee denominator
@@ -124,8 +126,15 @@ contract Allo is Initializable, Ownable, AccessControl {
     /// =========== Modifier ===============
     /// ====================================
 
-    modifier onlyPoolOwner(uint256 _poolId) {
-        if (!hasRole(keccak256(abi.encodePacked(_poolId)), msg.sender)) {
+    modifier onlyPoolManager(uint256 _poolId) {
+        if (!_isPoolManager(_poolId, msg.sender)) {
+            revert UNAUTHORIZED();
+        }
+        _;
+    }
+
+    modifier onlyPoolAdmin(uint256 _poolId) {
+        if (!_isPoolAdmin(_poolId, msg.sender)) {
             revert UNAUTHORIZED();
         }
         _;
@@ -146,7 +155,7 @@ contract Allo is Initializable, Ownable, AccessControl {
     /// @param _token The address of the token
     /// @param _amount The amount of the token
     /// @param _metadata The metadata of the pool
-    /// @param _owners The owners of the pool
+    /// @param _managers The managers of the pool
     function createPoolWithClone(
         bytes32 _identityId,
         address _allocationStrategy,
@@ -158,7 +167,7 @@ contract Allo is Initializable, Ownable, AccessControl {
         address _token,
         uint256 _amount,
         Metadata memory _metadata,
-        address[] memory _owners
+        address[] memory _managers
     ) external payable returns (uint256 poolId) {
         address allocationStrategy;
         address distributionStrategy;
@@ -194,7 +203,7 @@ contract Allo is Initializable, Ownable, AccessControl {
             _token,
             _amount,
             _metadata,
-            _owners
+            _managers
         );
     }
 
@@ -207,7 +216,7 @@ contract Allo is Initializable, Ownable, AccessControl {
     /// @param _token The address of the token that the pool is denominated in
     /// @param _amount The amount of the token to be deposited into the pool
     /// @param _metadata The metadata of the pool
-    /// @param _owners The owners of the pool
+    /// @param _managers The _managers of the pool
     function createPool(
         bytes32 _identityId,
         address _allocationStrategy,
@@ -217,7 +226,7 @@ contract Allo is Initializable, Ownable, AccessControl {
         address _token,
         uint256 _amount,
         Metadata memory _metadata,
-        address[] memory _owners
+        address[] memory _managers
     ) external payable returns (uint256 poolId) {
         return _createPool(
             _identityId,
@@ -228,7 +237,7 @@ contract Allo is Initializable, Ownable, AccessControl {
             _token,
             _amount,
             _metadata,
-            _owners
+            _managers
         );
     }
 
@@ -239,7 +248,7 @@ contract Allo is Initializable, Ownable, AccessControl {
     /// @param _token The address of the token that the pool is denominated in
     /// @param _amount The amount of the token to be deposited into the pool
     /// @param _metadata The metadata of the pool
-    /// @param _owners The owners of the pool
+    /// @param _managers The managers of the pool
     function _createPool(
         bytes32 _identityId,
         IAllocationStrategy _allocationStrategy,
@@ -249,43 +258,46 @@ contract Allo is Initializable, Ownable, AccessControl {
         address _token,
         uint256 _amount,
         Metadata memory _metadata,
-        address[] memory _owners
+        address[] memory _managers
     ) internal returns (uint256 poolId) {
         if (!registry.isOwnerOrMemberOfIdentity(_identityId, msg.sender)) {
             revert UNAUTHORIZED();
         }
 
+        // access control
+        bytes32 POOL_MANAGER_ROLE = bytes32(poolId);
+        bytes32 POOL_ADMIN_ROLE = keccak256(abi.encodePacked(poolId, "admin"));
+
         Pool memory pool = Pool({
             identityId: _identityId,
             allocationStrategy: _allocationStrategy,
             distributionStrategy: _distributionStrategy,
-            metadata: _metadata
+            metadata: _metadata,
+            managerRole: POOL_MANAGER_ROLE,
+            adminRole: POOL_ADMIN_ROLE
         });
 
         poolId = ++_poolIndex;
         pools[poolId] = pool;
 
+        // grant admin roles to pool creator
+        _grantRole(POOL_ADMIN_ROLE, msg.sender);
+        // set admin role for POOL_MANAGER_ROLE
+        _setRoleAdmin(POOL_MANAGER_ROLE, POOL_ADMIN_ROLE);
+
         // initialize strategies
         // @dev Initialization is expect to revert when invoked more than once
-        _allocationStrategy.initialize(_identityId, poolId, address(this), _initAllocationData);
-        _distributionStrategy.initialize(_identityId, poolId, address(this), _initDistributionData);
+        _allocationStrategy.initialize(address(this), _identityId, poolId, _initAllocationData);
+        _distributionStrategy.initialize(address(this), _identityId, poolId, _token, _initDistributionData);
 
-        // access control
-        bytes32 POOL_OWNER_ROLE = keccak256(abi.encodePacked(poolId));
-        bytes32 POOL_ADMIN_ROLE = keccak256(abi.encodePacked(poolId, "admin"));
-
-        // grant pool owners roles
-        for (uint256 i = 0; i < _owners.length;) {
-            _grantRole(POOL_OWNER_ROLE, _owners[i]);
+        // grant pool managers roles
+        uint256 managersLength = _managers.length;
+        for (uint256 i = 0; i < managersLength;) {
+            _grantRole(POOL_MANAGER_ROLE, _managers[i]);
             unchecked {
                 i++;
             }
         }
-
-        // grant admin roles to pool creator
-        _grantRole(POOL_ADMIN_ROLE, msg.sender);
-        // set admin role for POOL_OWNER_ROLE
-        _setRoleAdmin(POOL_OWNER_ROLE, POOL_ADMIN_ROLE);
 
         if (baseFee > 0) {
             _transferAmount(treasury, baseFee, address(0));
@@ -310,8 +322,8 @@ contract Allo is Initializable, Ownable, AccessControl {
     /// @notice Update pool metadata
     /// @param _poolId id of the pool
     /// @param _metadata new metadata of the pool
-    /// @dev Only callable by the pool owner
-    function updatePoolMetadata(uint256 _poolId, Metadata memory _metadata) external onlyPoolOwner(_poolId) {
+    /// @dev Only callable by the pool managers
+    function updatePoolMetadata(uint256 _poolId, Metadata memory _metadata) external onlyPoolManager(_poolId) {
         Pool storage pool = pools[_poolId];
         pool.metadata = _metadata;
 
@@ -353,8 +365,8 @@ contract Allo is Initializable, Ownable, AccessControl {
     /// @notice passes _data & msg.sender through to the disribution strategy for that pool
     /// @param _poolId id of the pool
     /// @param _data encoded data unique to the distributionStrategy strategy for that pool
-    function distribute(uint256 _poolId, bytes memory _data) external {
-        pools[_poolId].distributionStrategy.distribute(_data, msg.sender);
+    function distribute(uint256 _poolId, uint256[] memory _applicationIds, bytes memory _data) external {
+        pools[_poolId].distributionStrategy.distribute(_applicationIds, _data, msg.sender);
     }
 
     /// @notice Updates the registry address
@@ -404,6 +416,50 @@ contract Allo is Initializable, Ownable, AccessControl {
         emit BaseFeeUpdated(baseFee);
     }
 
+    /// @notice Checks if the address is a pool admin
+    /// @param _poolId The pool id
+    /// @param _address The address to check
+    /// @return bool
+    function isPoolAdmin(uint256 _poolId, address _address) external view returns (bool) {
+        return _isPoolAdmin(_poolId, _address);
+    }
+
+    /// @notice Checks if the address is a pool manager
+    /// @param _poolId The pool id
+    /// @param _address The address to check
+    /// @return bool
+    function isPoolManager(uint256 _poolId, address _address) external view returns (bool) {
+        return _isPoolManager(_poolId, _address);
+    }
+
+    /// @notice Add a pool manager
+    /// @param _poolId The pool id
+    /// @param _manager The address to add
+    function addPoolManager(uint256 _poolId, address _manager) external onlyPoolAdmin(_poolId) {
+        _grantRole(pools[_poolId].managerRole, _manager);
+    }
+
+    /// @notice Remove a pool manager
+    /// @param _poolId The pool id
+    /// @param _manager The address remove
+    function removePoolManager(uint256 _poolId, address _manager) external onlyPoolAdmin(_poolId) {
+        _revokeRole(pools[_poolId].managerRole, _manager);
+    }
+
+    /// @notice Return the allocation strategy for a pool
+    /// @param _poolId The pool id
+    /// @return address
+    function getAllocationStrategy(uint256 _poolId) external view returns (address) {
+        return address(pools[_poolId].allocationStrategy);
+    }
+
+    /// @notice Return the distribution strategy for a pool
+    /// @param _poolId The pool id
+    /// @return address
+    function getDistributionStrategy(uint256 _poolId) external view returns (address) {
+        return address(pools[_poolId].distributionStrategy);
+    }
+
     /// ====================================
     /// ======= Internal Functions =========
     /// ====================================
@@ -431,6 +487,7 @@ contract Allo is Initializable, Ownable, AccessControl {
         // Send the remaining amount to the distribution strategy
         uint256 amountAfterFee = _amount - feeAmount;
         _transferAmount(payable(address(_distributionStrategy)), amountAfterFee, _token);
+        _distributionStrategy.poolFunded(amountAfterFee);
 
         emit PoolFunded(_poolId, amountAfterFee, feeAmount);
     }
@@ -456,5 +513,21 @@ contract Allo is Initializable, Ownable, AccessControl {
     /// @param _strategy The address of the strategy
     function _isApprovedStrategy(address _strategy) internal view returns (bool) {
         return approvedStrategies[_strategy];
+    }
+
+    /// @notice Checks if the address is a pool admin
+    /// @param _poolId The pool id
+    /// @param _address The address to check
+    /// @return bool
+    function _isPoolAdmin(uint256 _poolId, address _address) internal view returns (bool) {
+        return hasRole(pools[_poolId].adminRole, _address);
+    }
+
+    /// @notice Checks if the address is a pool manager
+    /// @param _poolId The pool id
+    /// @param _address The address to check
+    /// @return bool
+    function _isPoolManager(uint256 _poolId, address _address) internal view returns (bool) {
+        return hasRole(pools[_poolId].managerRole, _address);
     }
 }

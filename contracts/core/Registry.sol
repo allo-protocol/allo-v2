@@ -5,11 +5,15 @@ import {AccessControl} from "@openzeppelin/access/AccessControl.sol";
 
 import {Metadata} from "./libraries/Metadata.sol";
 
+/// @title Registry
+/// @notice Registry contract for identities
+/// @dev This contract is used to create and manage identities
+/// @author allo-team
 contract Registry is AccessControl {
     /// @notice Custom errors
-    error UNAUTHORIZED();
     error NONCE_NOT_AVAILABLE();
     error NOT_PENDING_OWNER();
+    error UNAUTHORIZED();
 
     /// @notice Struct to hold details of an identity
     struct Identity {
@@ -24,11 +28,11 @@ contract Registry is AccessControl {
     /// === Storage Variables ====
     /// ==========================
 
-    /// @notice Identity.id -> Identity
-    mapping(bytes32 => Identity) public identitiesById;
-
     /// @notice anchor -> Identity.id
     mapping(address => bytes32) public anchorToIdentityId;
+
+    /// @notice Identity.id -> Identity
+    mapping(bytes32 => Identity) public identitiesById;
 
     /// @notice Identity.id -> pending owner
     mapping(bytes32 => address) public identityIdToPendingOwner;
@@ -49,6 +53,7 @@ contract Registry is AccessControl {
     /// =========== Modifier ===============
     /// ====================================
 
+    /// @notice Modifier to check if the caller is the owner of the identity
     modifier onlyIdentityOwner(bytes32 _identityId) {
         if (!isOwnerOfIdentity(_identityId, msg.sender)) {
             revert UNAUTHORIZED();
@@ -67,9 +72,9 @@ contract Registry is AccessControl {
     }
 
     /// @notice Retrieve identity by anchor
-    /// @param anchor The anchor of the identity
-    function getIdentityByAnchor(address anchor) public view returns (Identity memory) {
-        bytes32 identityId = anchorToIdentityId[anchor];
+    /// @param _anchor The anchor of the identity
+    function getIdentityByAnchor(address _anchor) public view returns (Identity memory) {
+        bytes32 identityId = anchorToIdentityId[_anchor];
         return identitiesById[identityId];
     }
 
