@@ -52,6 +52,9 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
     /// @notice Pool.id -> Pool
     mapping(uint256 => Pool) public pools;
 
+    /// @notice Strategy -> bool
+    mapping(address => bool) public ApprovedStrategies;
+
     /// ======================
     /// ======= Events =======
     /// ======================
@@ -142,10 +145,18 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
             revert NO_ACCESS_TO_ROLE();
         }
 
+        address allocationStrategy = (IAllocationStrategy(_allocationStrategy).isCloneable())
+            ? Clone.createClone(_allocationStrategy, _nonce++)
+            : _allocationStrategy;
+
+        address distributionStrategy = (IDistributionStrategy(_distributionStrategy).isCloneable())
+            ? payable(Clone.createClone(_distributionStrategy, _nonce++))
+            : _distributionStrategy;
+
         Pool memory pool = Pool({
             identityId: _identityId,
-            allocationStrategy: IAllocationStrategy(Clone.createClone(_allocationStrategy, _nonce++)),
-            distributionStrategy: IDistributionStrategy(Clone.createClone(_distributionStrategy, _nonce++)),
+            allocationStrategy: IAllocationStrategy(allocationStrategy),
+            distributionStrategy: IDistributionStrategy(distributionStrategy),
             metadata: _metadata
         });
 
@@ -238,6 +249,18 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
         emit FeeUpdated(feePercentage);
     }
 
+    /// @notice Add a strategy to the whitelist
+    /// @param _strategy The address of the strategy
+    function addToApprovedStrategies(address _strategy) external onlyOwner {
+        ApprovedStrategies[_strategy] = true;
+    }
+
+    /// @notice Remove a strategy from the whitelist
+    /// @param _strategy The address of the strategy
+    function removeFromApprovedStrategies(address _strategy) external onlyOwner {
+        ApprovedStrategies[_strategy] = false;
+    }
+
     /// ====================================
     /// ======= Internal Functions =========
     /// ====================================
@@ -275,6 +298,12 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
             // ERC20 Token
             IERC20Upgradeable(_token).transfer(_to, _amount);
         }
+    }
+
+    /// @notice Checks if the strategy is approved
+    /// @param _strategy The address of the strategy
+    function _isApprovedStrategy(address _strategy) internal view returns (bool) {
+        return ApprovedStrategies[_strategy];
     }
 }
 
