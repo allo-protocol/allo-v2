@@ -19,7 +19,7 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
     error TRANSFER_FAILED();
     error NOT_ENOUGH_FUNDS();
     error STRATEGY_ALREADY_USED();
-    error NOT_APPROVED_STRATEGY();
+    error STRATEGY_NOT_APPROVED();
 
     /// @notice Struct to hold details of an Pool
     struct Pool {
@@ -150,15 +150,14 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
         bool _cloneAllocationStrategy,
         bool _cloneDistributionStrategy
     ) external payable returns (uint256 poolId) {
-        // if (!_isApprovedStrategy(_allocationStrategy) && !_isApprovedStrategy(_distributionStrategy)) {
-        //     revert NOT_APPROVED_STRATEGY();
-        // }
+        if (!_isApprovedStrategy(_allocationStrategy) && !_isApprovedStrategy(_distributionStrategy)) {
+            revert STRATEGY_NOT_APPROVED();
+        }
         address allocationStrategy =
             _cloneAllocationStrategy ? Clone.createClone(_allocationStrategy, _nonce++) : _allocationStrategy;
 
-        address distributionStrategy = _cloneDistributionStrategy && _isApprovedStrategy(_distributionStrategy)
-            ? Clone.createClone(_distributionStrategy, _nonce++)
-            : _distributionStrategy;
+        address distributionStrategy =
+            _cloneDistributionStrategy ? Clone.createClone(_distributionStrategy, _nonce++) : _distributionStrategy;
 
         return _createPool(_identityId, allocationStrategy, payable(distributionStrategy), _token, _amount, _metadata);
     }
@@ -250,7 +249,7 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
     /// @param _poolId id of the pool
     /// @param _amount extra amount of the token to be deposited into the pool
     /// @param _token The address of the token that the pool is denominated in
-    // TODO: Ask product, should we restrict to pool admin?
+    /// @dev Anyone can fund a pool
     function fundPool(uint256 _poolId, uint256 _amount, address _token) external payable {
         if (_amount == 0) {
             revert NOT_ENOUGH_FUNDS();
@@ -292,7 +291,7 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
     /// @notice Updates the fee percentage
     /// @param _feePercentage The new fee
     /// @dev Only callable by the owner
-    function updateFee(uint24 _feePercentage) external onlyOwner {
+    function updateFee(uint256 _feePercentage) external onlyOwner {
         if (_feePercentage > FEE_DENOMINATOR) {
             revert INVALID_FEE_PERCENTAGE();
         }
@@ -313,6 +312,12 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
     /// @param _strategy The address of the strategy
     function removeFromApprovedStrategies(address _strategy) external onlyOwner {
         approvedStrategies[_strategy] = false;
+    }
+
+    /// @notice Add a strategy to the used list
+    /// @param _strategy The address of the strategy
+    function addToUsedStrategies(address _strategy) external onlyOwner {
+        usedStrategies[_strategy] = true;
     }
 
     /// ====================================
