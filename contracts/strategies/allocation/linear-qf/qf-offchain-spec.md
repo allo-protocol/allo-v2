@@ -16,24 +16,48 @@ Full flow is shown here:
 ![Alt text](<Strategy Evaluation - QF Vote with events.png>)
 
 ### Pool Creation
-- identity owner or member creates pool via `createPool` method on `Allo.sol`
-- core QF settings are recorded on allocation strategy contract, including
-    - Application start/end and voting start/end dates
-    - On-chain application requirements 
-    - Sybil Defense settings (minimum contribution, matching cap, donor matching eligibility requirements)
-    - Pool metadata
+- identity admin creates pool via `createPool` method on `Allo.sol`
+- QF settings will require storing a mix of on-chain and off-chain data on the strategy contract:
+    - On-chain settings:
+        - Application start/end 
+        - Voting start/end dates
+        - Is Allo registry identity required? yes/no
+    - Off-chain settings:
+        - Sybil Defense settings (minimum contribution, matching cap, donor matching eligibility requirements)
+        - Pool metadata
+
+### Local application statuses
+Applications can have one of the following local statuses. An application can only be assigned one status at any given time.
+- `Pending` - a valid application has been submitted, but no decision has been made. 
+    - Maps to `Pending` global status. 
+- `Rejected` - not accepted to the pool, and not eligible for fund allocation. 
+    - Maps to `Rejected` global status.
+- `Accepted` - accepted to the pool, and eligible for fund allocation.
+    - Maps to `Accepted` global status.
+- `Re-applied` — the application was originally `Rejected`, but a new application has been submitted. No decision has been made on the reapplication. 
+    - Maps to `Pending` global status.
+
 
 ### Application
 - applicant applies to pool via `applyToPool` on `Allo.sol`
-    - application only processed if application period is open
-    - otherwise, revert
-- allocation strategy checks that application is eligible
-    - if yes, application marked as `Pending`
-    - if no, application marked as `Rejected`
+- strategy checks that application is valid:
+    - Is application period open?
+        - If no, revert with message that application period is closed
+    - If Allo registry identity required, does the application have valid Allo registry identity?
+        - If no, revert with message that pool requires a valid Allo registry identity
+- If application is valid, mark as `Pending`
+
 
 ### Application approval
-- pool owner or member makes decision via `reviewApplications` on allocation strategy contract
-- 
+- pool admin makes decision via `reviewApplications` on allocation strategy contract. Pool admin can only set applications to `Accepted` or `Rejected`. 
+    
+
+### Re-application
+- Re-applications are submitted via `applyToPool` on `Allo.sol`, but handled as follows:
+    - If application is valid (see decision tree above), then proceed to following checks
+    - If the original application's local status is `Pending`, then the application is reverted with the message that application has already been submitted
+    - If the original application's local status is `Rejected`, then set application's status as `Re-applied`
+
 
 ### Donation voting
 - donor submits donation via `allocate` on `Allo.sol`
