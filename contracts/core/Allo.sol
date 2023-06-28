@@ -214,7 +214,6 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
         poolId = _poolIndex++;
 
         if (_amount > 0) {
-            // TODO: Ask product, should we have minimum fee
             _fundPool(_token, _amount, poolId, address(pool.distributionStrategy));
         }
 
@@ -326,7 +325,7 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
         uint256 feeAmount = (_amount * feePercentage) / FEE_DENOMINATOR;
 
         // Pay the protocol fee
-        _transferAmount(treasury, _amount, _token);
+        _transferAmount(treasury, feeAmount, _token);
 
         // Send the remaining amount to the distribution strategy
         uint256 amountAfterFee = _amount - feeAmount;
@@ -358,7 +357,3 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
         return approvedStrategies[_strategy];
     }
 }
-
-/// ASK: Min fee?
-/// ASK: Should _clone be in it's own library
-/// ASK: createPool + createPoolWithClone (whitelist logic)
