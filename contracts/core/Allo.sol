@@ -124,13 +124,6 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
     /// ==== External/Public Functions =====
     /// ====================================
 
-    /// @notice Returns the pool info
-    /// @param _poolId The id of the pool
-    /// @dev calls out to the registry to get the identity metadata
-    function getPoolInfo(uint256 _poolId) external view returns (Pool memory) {
-        return pools[_poolId];
-    }
-
     /// @notice Creates a new pool (with clone)
     /// @param _identityId The identityId of the pool
     /// @param _allocationStrategy The address of the allocation strategy

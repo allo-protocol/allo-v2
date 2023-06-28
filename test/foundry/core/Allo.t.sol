@@ -94,7 +94,7 @@ contract AlloTest is Test {
     /// @notice Helper function to create a pool
     /// @param _amount The amount of tokens to fund the pool with
     /// @param fundPool Whether or not to fund the pool
-    function createPoolUtil(uint256 _amount, bool fundPool) internal returns (uint256 poolId) {
+    function createPoolHelper(uint256 _amount, bool fundPool) internal returns (uint256 poolId) {
         vm.prank(owner);
         if (fundPool) {
             poolId =
@@ -104,16 +104,35 @@ contract AlloTest is Test {
         }
     }
 
+    /// @notice Helper function to get pool info from mapping
+    /// @param poolId The id of the pool to get info for
+    function getPoolInfoHelper(uint256 poolId) public view returns (Allo.Pool memory) {
+        (
+            bytes32 _identityId,
+            IAllocationStrategy _allocationStrategy,
+            IDistributionStrategy _distributionStrategy,
+            Metadata memory _metadata
+        ) = allo.pools(poolId);
+
+        Allo.Pool memory pool;
+        pool.identityId = _identityId;
+        pool.allocationStrategy = _allocationStrategy;
+        pool.distributionStrategy = _distributionStrategy;
+        pool.metadata = _metadata;
+
+        return pool;
+    }
+
     /// @notice Test creating a pool with no tokens
     function test_createPool() public {
         vm.expectEmit(true, true, false, false);
         emit PoolCreated(1, identityId, allocationStrategy, payable(distributionStrategy), token, 0, metadata);
 
-        uint256 poolId = createPoolUtil(0, false);
+        uint256 poolId = createPoolHelper(0, false);
 
-        assertEq(allo.getPoolInfo(poolId).identityId, identityId);
-        assertEq(address(allo.getPoolInfo(poolId).distributionStrategy), distributionStrategy);
-        assertEq(address(allo.getPoolInfo(poolId).allocationStrategy), allocationStrategy);
+        assertEq(getPoolInfoHelper(poolId).identityId, identityId);
+        assertEq(address(getPoolInfoHelper(poolId).distributionStrategy), distributionStrategy);
+        assertEq(address(getPoolInfoHelper(poolId).allocationStrategy), allocationStrategy);
     }
 
     // Invoke createPoolWithClone -> create clones (only allocation)
@@ -127,9 +146,9 @@ contract AlloTest is Test {
     //         identityId, allocationStrategy, payable(distributionStrategy), token, 0, metadata, true, false
     //     );
 
-    //     assertEq(allo.getPoolInfo(poolId).identityId, identityId);
-    //     assertEq(address(allo.getPoolInfo(poolId).distributionStrategy), distributionStrategy);
-    //     assertNotEq(address(allo.getPoolInfo(poolId).allocationStrategy), allocationStrategy);
+    //     assertEq(getPoolInfoHelper(poolId).identityId, identityId);
+    //     assertEq(address(getPoolInfoHelper(poolId).distributionStrategy), distributionStrategy);
+    //     assertNotEq(address(getPoolInfoHelper(poolId).allocationStrategy), allocationStrategy);
     // }
 
     // Invoke createPoolWithClone -> create clones (only distribution)
@@ -142,9 +161,9 @@ contract AlloTest is Test {
     //         identityId, allocationStrategy, payable(distributionStrategy), token, 0, metadata, false, true
     //     );
 
-    //     assertEq(allo.getPoolInfo(poolId).identityId, identityId);
-    //     assertNotEq(address(allo.getPoolInfo(poolId).distributionStrategy), distributionStrategy);
-    //     assertEq(address(allo.getPoolInfo(poolId).allocationStrategy), allocationStrategy);
+    //     assertEq(getPoolInfoHelper(poolId).identityId, identityId);
+    //     assertNotEq(address(getPoolInfoHelper(poolId).distributionStrategy), distributionStrategy);
+    //     assertEq(address(getPoolInfoHelper(poolId).allocationStrategy), allocationStrategy);
     // }
 
     // Invoke createPoolWithClone -> create clones (both allocation + distribution)
@@ -156,9 +175,9 @@ contract AlloTest is Test {
     //         identityId, allocationStrategy, payable(distributionStrategy), token, 0, metadata, true, true
     //     );
 
-    //     assertEq(allo.getPoolInfo(poolId).identityId, identityId);
-    //     assertNotEq(address(allo.getPoolInfo(poolId).distributionStrategy), distributionStrategy);
-    //     assertNotEq(address(allo.getPoolInfo(poolId).allocationStrategy), allocationStrategy);
+    //     assertEq(getPoolInfoHelper(poolId).identityId, identityId);
+    //     assertNotEq(address(getPoolInfoHelper(poolId).distributionStrategy), distributionStrategy);
+    //     assertNotEq(address(getPoolInfoHelper(poolId).allocationStrategy), allocationStrategy);
     // }
 
     // Invoke createPoolWithClone -> set both flags as false // same createPool directly (no clones)
@@ -170,9 +189,9 @@ contract AlloTest is Test {
     //         identityId, allocationStrategy, payable(distributionStrategy), token, 0, metadata, false, false
     //     );
 
-    //     assertEq(allo.getPoolInfo(poolId).identityId, identityId);
-    //     assertNotEq(address(allo.getPoolInfo(poolId).distributionStrategy), distributionStrategy);
-    //     assertNotEq(address(allo.getPoolInfo(poolId).allocationStrategy), allocationStrategy);
+    //     assertEq(getPoolInfoHelper(poolId).identityId, identityId);
+    //     assertNotEq(address(getPoolInfoHelper(poolId).distributionStrategy), distributionStrategy);
+    //     assertNotEq(address(getPoolInfoHelper(poolId).allocationStrategy), allocationStrategy);
     // }
 
     /// @notice Invoke createPool with used strategy -> revert
@@ -181,7 +200,7 @@ contract AlloTest is Test {
         allo.addToUsedStrategies(allocationStrategy);
 
         vm.expectRevert(Allo.STRATEGY_ALREADY_USED.selector);
-        createPoolUtil(0, false);
+        createPoolHelper(0, false);
     }
 
     // Invoke createPool with approved strategy -> revert
@@ -200,11 +219,11 @@ contract AlloTest is Test {
             1, identityId, allocationStrategy, payable(distributionStrategy), token, 10 * 10 ** 18, metadata
         );
 
-        uint256 poolId = createPoolUtil(10 * 10 ** 18, true);
+        uint256 poolId = createPoolHelper(10 * 10 ** 18, true);
 
-        assertEq(allo.getPoolInfo(poolId).identityId, identityId);
-        assertEq(address(allo.getPoolInfo(poolId).distributionStrategy), distributionStrategy);
-        assertEq(address(allo.getPoolInfo(poolId).allocationStrategy), allocationStrategy);
+        assertEq(getPoolInfoHelper(poolId).identityId, identityId);
+        assertEq(address(getPoolInfoHelper(poolId).distributionStrategy), distributionStrategy);
+        assertEq(address(getPoolInfoHelper(poolId).allocationStrategy), allocationStrategy);
     }
 
     /// @notice Test reverting creating a pool with no tokens
@@ -217,14 +236,14 @@ contract AlloTest is Test {
 
     /// @notice Test updating the metadata of a pool
     function test_updatePoolMetadata() public {
-        uint256 poolId = createPoolUtil(0, false);
+        uint256 poolId = createPoolHelper(0, false);
         vm.prank(owner);
 
         // update the metadata
         allo.updatePoolMetadata(poolId, Metadata({protocol: 1, pointer: "updated metadata"}));
 
         // check that the metadata was updated
-        Allo.Pool memory pool = allo.getPoolInfo(poolId);
+        Allo.Pool memory pool = getPoolInfoHelper(poolId);
         Metadata memory poolMetadata = pool.metadata;
 
         assertEq(poolMetadata.protocol, 1);
@@ -233,7 +252,7 @@ contract AlloTest is Test {
 
     /// @notice Test reverting updating the metadata of a pool with bad actor
     function testRevert_updatePoolMetadata_NO_ACCESS_TO_ROLE() public {
-        uint256 poolId = createPoolUtil(0, false);
+        uint256 poolId = createPoolHelper(0, false);
         vm.expectRevert(Allo.NO_ACCESS_TO_ROLE.selector);
 
         vm.prank(makeAddr("not owner"));
@@ -250,16 +269,16 @@ contract AlloTest is Test {
     // function test_fundPool() public {
     //     vm.expectEmit(true, false, false, true);
 
-    //     uint256 poolId = createPoolUtil(10 * 10 ** 18, true);
+    //     uint256 poolId = createPoolHelper(10 * 10 ** 18, true);
     //     emit PoolFunded(poolId, 10 * 10 ** 18);
 
-    //     assertEq(allo.getPoolInfo(poolId).identityId, identityId);
+    //     assertEq(getPoolInfoHelper(poolId).identityId, identityId);
     // }
 
     /// @notice Test reverting funding a pool for insufficient funds
     /// @dev This is also tested in test_createPoolWithTokens
     function testRevert_fundPool_NOT_ENOUGH_FUNDS() public {
-        uint256 poolId = createPoolUtil(0, false);
+        uint256 poolId = createPoolHelper(0, false);
 
         vm.prank(makeAddr("broke chad"));
         vm.expectRevert(Allo.NOT_ENOUGH_FUNDS.selector);
