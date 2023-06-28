@@ -20,8 +20,8 @@ interface IAllocationStrategy {
 
     // decode the _data into what's relevant for this strategy
     // update whatever is needed to store the applicant
-    // @todo return arbitrary data to pass back? think more about this
-    function applyToPool(bytes memory _data, address sender) external payable returns (bytes memory);
+    // return the applicationId
+    function applyToPool(bytes memory _data, address sender) external payable returns (uint256);
 
     // return whether application is pending, accepted, or rejected
     // strategies will need to add their own logic to translate to these categories if they use different ones
