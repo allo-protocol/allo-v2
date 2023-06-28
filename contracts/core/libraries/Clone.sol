@@ -21,7 +21,7 @@ library Clone {
     /// @param _nonce The nonce to use for the clone
     function createClone(address _contract, uint256 _nonce) internal returns (address clone) {
         require(_isContract(_contract), "not a contract");
-        bytes32 salt = keccak256(abi.encodePacked(msg.sender, _nonce++));
+        bytes32 salt = keccak256(abi.encodePacked(msg.sender, _nonce));
         clone = ClonesUpgradeable.cloneDeterministic(_contract, salt);
 
         return clone;
