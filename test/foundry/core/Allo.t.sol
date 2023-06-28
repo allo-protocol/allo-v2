@@ -110,11 +110,17 @@ contract AlloTest is Test {
         uint256 poolId = createPoolUtil(0, false);
 
         assertEq(allo.getPoolInfo(poolId).identityId, identityId);
-        // Make sure the clones worked
-        // todo: move this to another test
-        assertNotEq(address(allo.getPoolInfo(poolId).distributionStrategy), distributionStrategy);
-        assertNotEq(address(allo.getPoolInfo(poolId).allocationStrategy), allocationStrategy);
+        assertEq(address(allo.getPoolInfo(poolId).distributionStrategy), distributionStrategy);
+        assertEq(address(allo.getPoolInfo(poolId).allocationStrategy), allocationStrategy);
     }
+
+    // Invoke createPoolWithClone -> create clones (only allocation)
+    // Invoke createPoolWithClone -> create clones (only distribution)
+    // Invoke createPoolWithClone -> create clones (both allocation + distribution)
+    // Invoke createPoolWithClone -> set both flags as false // same createPool directly (no clones)
+
+    // Invoke createPool with used strategy -> revert
+    // Invoke createPool with approved strategy -> revert
 
     /// @notice Test creating a pool with tokens
     function test_createPoolWithTokens() public {
@@ -126,10 +132,8 @@ contract AlloTest is Test {
         uint256 poolId = createPoolUtil(10 * 10 ** 18, true);
 
         assertEq(allo.getPoolInfo(poolId).identityId, identityId);
-        // Make sure the clones worked
-        // todo: move this to another test
-        assertNotEq(address(allo.getPoolInfo(poolId).distributionStrategy), distributionStrategy);
-        assertNotEq(address(allo.getPoolInfo(poolId).allocationStrategy), allocationStrategy);
+        assertEq(address(allo.getPoolInfo(poolId).distributionStrategy), distributionStrategy);
+        assertEq(address(allo.getPoolInfo(poolId).allocationStrategy), allocationStrategy);
     }
 
     /// @notice Test reverting creating a pool with no tokens
