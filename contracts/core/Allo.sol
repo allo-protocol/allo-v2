@@ -302,14 +302,14 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
         emit FeeUpdated(feePercentage);
     }
 
-    /// @notice Add a strategy to the whitelist
+    /// @notice Add a strategy to the allowlist
     /// @param _strategy The address of the strategy
     function addToApprovedStrategies(address _strategy) external onlyOwner {
         approvedStrategies[_strategy] = true;
         usedStrategies[_strategy] = true;
     }
 
-    /// @notice Remove a strategy from the whitelist
+    /// @notice Remove a strategy from the allowlist
     /// @param _strategy The address of the strategy
     function removeFromApprovedStrategies(address _strategy) external onlyOwner {
         approvedStrategies[_strategy] = false;
