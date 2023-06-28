@@ -73,12 +73,6 @@ contract Registry is AccessControl {
         return identitiesById[identityId];
     }
 
-    /// @notice Retrieve identity's pending owner
-    /// @param identityId The identityId of the identity
-    function getIdentityPendingOwner(bytes32 identityId) public view returns (address) {
-        return identityIdToPendingOwner[identityId];
-    }
-
     /// @notice Creates a new identity
     /// @dev This will also set the attestation address generated from msg.sender and name
     /// @param _nonce Nonce used to generate identityId
