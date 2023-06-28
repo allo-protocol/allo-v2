@@ -105,7 +105,7 @@ contract AlloTest is Test {
     /// @notice Test creating a pool with no tokens
     function test_createPool() public {
         vm.expectEmit(true, true, false, false);
-        emit PoolCreated(0, identityId, allocationStrategy, payable(distributionStrategy), token, 0, metadata);
+        emit PoolCreated(1, identityId, allocationStrategy, payable(distributionStrategy), token, 0, metadata);
 
         uint256 poolId = createPoolUtil(0, false);
 
@@ -126,7 +126,7 @@ contract AlloTest is Test {
     function test_createPoolWithTokens() public {
         vm.expectEmit(true, false, false, true);
         emit PoolCreated(
-            0, identityId, allocationStrategy, payable(distributionStrategy), token, 10 * 10 ** 18, metadata
+            1, identityId, allocationStrategy, payable(distributionStrategy), token, 10 * 10 ** 18, metadata
         );
 
         uint256 poolId = createPoolUtil(10 * 10 ** 18, true);
@@ -179,7 +179,7 @@ contract AlloTest is Test {
     function test_fundPool() public {
         vm.expectEmit(true, false, false, true);
         emit PoolCreated(
-            0, identityId, allocationStrategy, payable(distributionStrategy), token, 10 * 10 ** 18, metadata
+            1, identityId, allocationStrategy, payable(distributionStrategy), token, 10 * 10 ** 18, metadata
         );
 
         uint256 poolId = createPoolUtil(10 * 10 ** 18, true);

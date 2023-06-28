@@ -19,6 +19,7 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
     error TRANSFER_FAILED();
     error NOT_ENOUGH_FUNDS();
     error STRATEGY_ALREADY_USED();
+    error NOT_APPROVED_STRATEGY();
 
     /// @notice Struct to hold details of an Pool
     struct Pool {
@@ -149,13 +150,15 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
         bool _cloneAllocationStrategy,
         bool _cloneDistributionStrategy
     ) external payable returns (uint256 poolId) {
-        /// Check the boolean flag to see if the strategy should be cloned
-        /// Additionally, force clone the strategy if it's approved
+        // if (!_isApprovedStrategy(_allocationStrategy) && !_isApprovedStrategy(_distributionStrategy)) {
+        //     revert NOT_APPROVED_STRATEGY();
+        // }
         address allocationStrategy =
             _cloneAllocationStrategy ? Clone.createClone(_allocationStrategy, _nonce++) : _allocationStrategy;
 
-        address distributionStrategy =
-            _cloneDistributionStrategy ? Clone.createClone(_distributionStrategy, _nonce++) : _distributionStrategy;
+        address distributionStrategy = _cloneDistributionStrategy && _isApprovedStrategy(_distributionStrategy)
+            ? Clone.createClone(_distributionStrategy, _nonce++)
+            : _distributionStrategy;
 
         return _createPool(_identityId, allocationStrategy, payable(distributionStrategy), _token, _amount, _metadata);
     }
@@ -211,7 +214,7 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
             metadata: _metadata
         });
 
-        poolId = _poolIndex++;
+        poolId = ++_poolIndex;
 
         if (_amount > 0) {
             _fundPool(_token, _amount, poolId, address(pool.distributionStrategy));
