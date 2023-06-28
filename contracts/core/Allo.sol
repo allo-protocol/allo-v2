@@ -87,11 +87,7 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
     /// @param _registry The address of the registry
     /// @param _treasury The address of the treasury
     /// @param _feePercentage The fee percentage
-    function initialize(
-        address _registry,
-        address payable _treasury,
-        uint256 _feePercentage
-    ) public reinitializer(1) {
+    function initialize(address _registry, address payable _treasury, uint256 _feePercentage) public reinitializer(1) {
         _initializeOwner(msg.sender);
 
         registry = Registry(_registry);
@@ -179,15 +175,11 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
     /// @param _poolId id of the pool
     /// @param _metadata new metadata of the pool
     /// @dev Only callable by the pool admin
-    function updatePoolMetadata(uint256 _poolId, Metadata memory _metadata)
-        external
-        isPoolAdmin(_poolId)
-    {
+    function updatePoolMetadata(uint256 _poolId, Metadata memory _metadata) external isPoolAdmin(_poolId) {
         Pool storage pool = pools[_poolId];
         pool.metadata = _metadata;
 
         emit PoolMetadataUpdated(_poolId, _metadata);
-
     }
 
     /// @notice Fund a pool
@@ -255,7 +247,7 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
     /// @param _amount The amount to transfer
     /// @param _poolId The pool id
     /// @param _distributionStrategy The address of the distribution strategy
-    function _fundPool(address _token, uint256 _amount, uint256 _poolId,address _distributionStrategy) internal {
+    function _fundPool(address _token, uint256 _amount, uint256 _poolId, address _distributionStrategy) internal {
         uint256 feeAmount = (_amount * feePercentage) / FEE_DENOMINATOR;
 
         // Pay the protocol fee

@@ -4,7 +4,7 @@ pragma solidity 0.8.19;
 import "../../../contracts/interfaces/IDistributionStrategy.sol";
 
 contract MockDistribution is IDistributionStrategy {
-    /// 
+    ///
     function getOwnerIdentity() external view returns (string memory) {
         // Todo:
     }

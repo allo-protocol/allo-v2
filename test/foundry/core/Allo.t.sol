@@ -111,7 +111,7 @@ contract AlloTest is Test {
         uint256 poolId = createPool(0, false);
 
         assertEq(allo.getPoolInfo(poolId).identityId, identityId);
-                // Make sure the clones worked
+        // Make sure the clones worked
         // todo: move this to another test
         assertNotEq(address(allo.getPoolInfo(poolId).distributionStrategy), distributionStrategy);
         assertNotEq(address(allo.getPoolInfo(poolId).allocationStrategy), allocationStrategy);
@@ -128,7 +128,7 @@ contract AlloTest is Test {
         uint256 poolId = createPool(10 * 10 ** 18, true);
 
         assertEq(allo.getPoolInfo(poolId).identityId, identityId);
-                // Make sure the clones worked
+        // Make sure the clones worked
         // todo: move this to another test
         assertNotEq(address(allo.getPoolInfo(poolId).distributionStrategy), distributionStrategy);
         assertNotEq(address(allo.getPoolInfo(poolId).allocationStrategy), allocationStrategy);
@@ -190,7 +190,7 @@ contract AlloTest is Test {
     function testRevert_fundPool_NOT_ENOUGH_FUNDS() public {
         vm.prank(owner);
 
-        uint poolId = createPool(0, false);
+        uint256 poolId = createPool(0, false);
 
         vm.prank(makeAddr("broke chad"));
         vm.expectRevert(Allo.NOT_ENOUGH_FUNDS.selector);
@@ -201,7 +201,6 @@ contract AlloTest is Test {
     /// @notice Test allocating a pool
     function test_allocate() public {
         // Todo:
-
     }
 
     /// @notice Test finalizing a pool
