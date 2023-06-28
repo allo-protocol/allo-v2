@@ -9,16 +9,22 @@ contract MockDistribution is IDistributionStrategy {
     uint256 public poolId;
     bool public initialized;
 
-    function initialize(bytes32, uint256, address, bytes memory) external {
+    function initialize(address _allo, bytes32 _identityId, uint256 _poolId, address _token, bytes memory _data)
+        external
+    {
         if (initialized) {
             revert();
         }
         initialized = true;
+        // surpress compiler warnings:
+        _allo;
+        _identityId;
+        _poolId;
+        _token;
+        _data;
     }
 
-    function getOwnerIdentity() external view returns (string memory) {}
+    function distribute(uint256[] memory _applicationIds, bytes memory _data, address _sender) external {}
 
-    function activateDistribution(bytes memory _inputData, bytes memory _allocStratData) external {}
-
-    function distribute(bytes memory _data, address sender) external {}
+    function poolFunded(uint256 _amount) external {}
 }
