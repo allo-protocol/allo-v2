@@ -27,15 +27,15 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
         Metadata metadata;
     }
 
-    uint24 public constant DENOMINATOR = 100000;
+    uint256 public constant FEE_DENOMINATOR = 1e18;
 
     /// ==========================
     /// === Storage Variables ====
     /// ==========================
 
     /// @notice Fee percentage
-    /// @dev 100% = 100_000 | 10% = 10_000 | 1% = 1_000 | 0.1% = 100 | 0.01% = 10
-    uint24 public feePercentage;
+    /// @dev 1e18 = 100%, 1e17 = 10%, 1e16 = 1%, 1e15 = 0.1%
+    uint256 public feePercentage;
 
     /// @notice Incremental index
     uint256 private _poolIndex;
@@ -68,7 +68,7 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
 
     event PoolMetadataUpdated(uint256 indexed poolId, Metadata metadata);
 
-    event PoolFunded(uint256 indexed poolId, uint256 amount);
+    event PoolFunded(uint256 indexed poolId, uint256 amount, uint256 fee);
 
     event PoolClosed(uint256 indexed poolId);
 
@@ -85,10 +85,22 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
     /// @notice Initializes the contract after an upgrade
     /// @dev During upgrade -> an higher version should be passed to reinitializer
     /// @param _registry The address of the registry
-    function initialize(address _registry) public reinitializer(1) {
+    /// @param _treasury The address of the treasury
+    /// @param _feePercentage The fee percentage
+    function initialize(
+        address _registry,
+        address payable _treasury,
+        uint256 _feePercentage
+    ) public reinitializer(1) {
         _initializeOwner(msg.sender);
 
         registry = Registry(_registry);
+        treasury = _treasury;
+        feePercentage = _feePercentage;
+
+        emit RegistryUpdated(_registry);
+        emit TreasuryUpdated(_treasury);
+        emit FeeUpdated(_feePercentage);
 
         __Multicall_init();
     }
@@ -97,8 +109,10 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
     /// =========== Modifier ===============
     /// ====================================
 
-    modifier isPoolMember(uint256 _poolId) {
-        registry.isMemberOfIdentity(pools[_poolId].identityId, msg.sender);
+    modifier isPoolAdmin(uint256 _poolId) {
+        if (!registry.isOwnerOrMemberOfIdentity(pools[_poolId].identityId, msg.sender)) {
+            revert NO_ACCESS_TO_ROLE();
+        }
         _;
     }
 
@@ -106,7 +120,7 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
     /// ==== External/Public Functions =====
     /// ====================================
 
-    /// @notice Fetch pool and identityMetadata
+    /// @notice Returns the pool info
     /// @param _poolId The id of the pool
     /// @dev calls out to the registry to get the identity metadata
     function getPoolInfo(uint256 _poolId) external view returns (Pool memory) {
@@ -134,28 +148,28 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
 
         Pool memory pool = Pool({
             identityId: _identityId,
-            allocationStrategy: IAllocationStrategy(Clone.createClone(_allocationStrategy, _nonce)),
-            distributionStrategy: IDistributionStrategy(Clone.createClone(_distributionStrategy, _nonce)),
+            allocationStrategy: IAllocationStrategy(Clone.createClone(_allocationStrategy, _nonce++)),
+            distributionStrategy: IDistributionStrategy(Clone.createClone(_distributionStrategy, _nonce++)),
             metadata: _metadata
         });
 
-        // Note: Only fund the pool on creation if the amount is greater than 0
+        poolId = _poolIndex++;
+
         if (_amount > 0) {
-            _deductFeeAndTransfer(_token, _amount, pool);
+            // TODO: Ask product, should we have minimum fee
+            _fundPool(_token, _amount, poolId, address(pool.distributionStrategy));
         }
 
-        poolId = _poolIndex++;
         pools[poolId] = pool;
 
         emit PoolCreated(poolId, _identityId, _allocationStrategy, _distributionStrategy, _token, _amount, _metadata);
-
-        return poolId;
     }
 
     /// @notice passes _data through to the allocation strategy for that pool
+    /// @notice returns the applicationId from the allocation strategy
     /// @param _poolId id of the pool
     /// @param _data encoded data unique to the allocation strategy for that pool
-    function applyToPool(uint256 _poolId, bytes memory _data) external payable returns (bytes memory) {
+    function applyToPool(uint256 _poolId, bytes memory _data) external payable returns (uint256) {
         IAllocationStrategy allocationStrategy = pools[_poolId].allocationStrategy;
 
         return allocationStrategy.applyToPool(_data, msg.sender);
@@ -164,64 +178,42 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
     /// @notice Update pool metadata
     /// @param _poolId id of the pool
     /// @param _metadata new metadata of the pool
-    /// @dev Only callable by the pool member
+    /// @dev Only callable by the pool admin
     function updatePoolMetadata(uint256 _poolId, Metadata memory _metadata)
         external
-        payable
-        isPoolMember(_poolId)
-        returns (bytes memory)
+        isPoolAdmin(_poolId)
     {
         Pool storage pool = pools[_poolId];
         pool.metadata = _metadata;
 
         emit PoolMetadataUpdated(_poolId, _metadata);
 
-        return abi.encode(pool);
     }
 
     /// @notice Fund a pool
     /// @param _poolId id of the pool
     /// @param _amount extra amount of the token to be deposited into the pool
     /// @param _token The address of the token that the pool is denominated in
+    // TODO: Ask product, should we restrict to pool admin?
     function fundPool(uint256 _poolId, uint256 _amount, address _token) external payable {
-        if (_amount <= 0) {
+        if (_amount == 0) {
             revert NOT_ENOUGH_FUNDS();
         }
 
-        Pool storage pool = pools[_poolId];
-
-        _deductFeeAndTransfer(_token, _amount, pool);
-
-        emit PoolFunded(_poolId, _amount);
+        _fundPool(_token, _amount, _poolId, address(pools[_poolId].distributionStrategy));
     }
 
     /// @notice passes _data & msg.sender through to the allocation strategy for that pool
     /// @param _poolId id of the pool
     /// @param _data encoded data unique to the allocation strategy for that pool
     function allocate(uint256 _poolId, bytes memory _data) external payable {
-        pools[_poolId].allocationStrategy.allocate(_data, msg.sender);
-    }
-
-    /// @notice Finalizes a pool
-    /// @param _poolId id of the pool
-    /// @param _dataFromPoolOwner encoded data unique to the pool owner
-    /// @dev Only callable by the pool member
-    ///
-    /// calls voting.generatePayouts() and then uses return data for payout.activatePayouts()
-    /// check to make sure they haven't skrited around fee
-    function finalize(uint256 _poolId, bytes calldata _dataFromPoolOwner) external isPoolMember(_poolId) {
-        // ASK: Do we need _dataFromPoolOwner to allow owner to pass custom data ?
-        Pool memory pool = pools[_poolId];
-        bytes memory dataFromAllocationStrategy = pool.allocationStrategy.generatePayouts();
-
-        pool.distributionStrategy.activateDistribution(dataFromAllocationStrategy, _dataFromPoolOwner);
+        pools[_poolId].allocationStrategy.allocate{value: msg.value}(_data, msg.sender);
     }
 
     /// @notice passes _data & msg.sender through to the disribution strategy for that pool
     /// @param _poolId id of the pool
     /// @param _data encoded data unique to the distributionStrategy strategy for that pool
-    /// @dev Only callable by the pool member
-    function distribute(uint256 _poolId, bytes memory _data) external isPoolMember(_poolId) {
+    function distribute(uint256 _poolId, bytes memory _data) external {
         pools[_poolId].distributionStrategy.distribute(_data, msg.sender);
     }
 
@@ -245,7 +237,7 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
     /// @param _feePercentage The new fee
     /// @dev Only callable by the owner
     function updateFee(uint24 _feePercentage) external onlyOwner {
-        if (_feePercentage > DENOMINATOR) {
+        if (_feePercentage > FEE_DENOMINATOR) {
             revert INVALID_FEE_PERCENTAGE();
         }
 
@@ -261,16 +253,19 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
     /// @notice Deduct the fee and transfers the amount to the distribution strategy
     /// @param _token The address of the token to transfer
     /// @param _amount The amount to transfer
-    /// @param _pool The pool to transfer to
-    function _deductFeeAndTransfer(address _token, uint256 _amount, Pool memory _pool) internal {
-        uint256 feeAmount = (_amount * feePercentage) / DENOMINATOR;
+    /// @param _poolId The pool id
+    /// @param _distributionStrategy The address of the distribution strategy
+    function _fundPool(address _token, uint256 _amount, uint256 _poolId,address _distributionStrategy) internal {
+        uint256 feeAmount = (_amount * feePercentage) / FEE_DENOMINATOR;
 
         // Pay the protocol fee
         _transferAmount(treasury, _amount, _token);
 
         // Send the remaining amount to the distribution strategy
         uint256 amountAfterFee = _amount - feeAmount;
-        _transferAmount(payable(address(_pool.distributionStrategy)), amountAfterFee, _token);
+        _transferAmount(payable(_distributionStrategy), amountAfterFee, _token);
+
+        emit PoolFunded(_poolId, amountAfterFee, feeAmount);
     }
 
     /// @notice Transfers the amount to the address
