@@ -46,7 +46,6 @@ contract AlloTest is Test {
     address public member1;
     address public member2;
     address[] public members;
-    address public notAMember;
     address payable public treasury;
 
     address public allocationStrategy;
@@ -93,21 +92,20 @@ contract AlloTest is Test {
     /// @notice Helper function to create a pool
     /// @param _amount The amount of tokens to fund the pool with
     /// @param fundPool Whether or not to fund the pool
-    function createPoolUtil(uint256 _amount, bool fundPool) public returns (uint256 poolId) {
+    function createPoolUtil(uint256 _amount, bool fundPool) internal returns (uint256 poolId) {
+        vm.prank(owner);
         if (fundPool) {
             poolId =
                 allo.createPool(identityId, allocationStrategy, payable(distributionStrategy), token, _amount, metadata);
         } else {
             poolId = allo.createPool(identityId, allocationStrategy, payable(distributionStrategy), token, 0, metadata);
         }
-        return poolId;
     }
 
     /// @notice Test creating a pool with no tokens
     function test_createPool() public {
         vm.expectEmit(true, true, false, false);
         emit PoolCreated(0, identityId, allocationStrategy, payable(distributionStrategy), token, 0, metadata);
-        vm.prank(owner);
 
         uint256 poolId = createPoolUtil(0, false);
 
@@ -124,7 +122,6 @@ contract AlloTest is Test {
         emit PoolCreated(
             0, identityId, allocationStrategy, payable(distributionStrategy), token, 10 * 10 ** 18, metadata
         );
-        vm.prank(owner);
 
         uint256 poolId = createPoolUtil(10 * 10 ** 18, true);
 
@@ -140,29 +137,28 @@ contract AlloTest is Test {
         vm.prank(makeAddr("not owner"));
         vm.expectRevert(Allo.NO_ACCESS_TO_ROLE.selector);
 
-        createPoolUtil(0, false);
+        allo.createPool(identityId, allocationStrategy, payable(distributionStrategy), token, 0, metadata);
     }
 
-    //! todo: failing ???
     /// @notice Test updating the metadata of a pool
-    // function test_updatePoolMetadata() public {
-    //     vm.prank(owner);
-    //     uint poolId = createPoolUtil(0, false);
-    //     // update the metadata
-    //     allo.updatePoolMetadata(poolId, Metadata({protocol: 1, pointer: "updated metadata"}));
+    function test_updatePoolMetadata() public {
+        uint256 poolId = createPoolUtil(0, false);
+        vm.prank(owner);
 
-    //     // check that the metadata was updated
-    //     Allo.Pool memory pool = allo.getPoolInfo(poolId);
-    //     Metadata memory poolMetadata = pool.metadata;
+        // update the metadata
+        allo.updatePoolMetadata(poolId, Metadata({protocol: 1, pointer: "updated metadata"}));
 
-    //     assertEq(poolMetadata.protocol, 1);
-    //     assertEq(poolMetadata.pointer, "updated metadata");
-    // }
+        // check that the metadata was updated
+        Allo.Pool memory pool = allo.getPoolInfo(poolId);
+        Metadata memory poolMetadata = pool.metadata;
+
+        assertEq(poolMetadata.protocol, 1);
+        assertEq(poolMetadata.pointer, "updated metadata");
+    }
 
     /// @notice Test reverting updating the metadata of a pool with bad actor
     function testRevert_updatePoolMetadata_NO_ACCESS_TO_ROLE() public {
-        vm.prank(owner);
-        uint poolId = createPoolUtil(0, false);
+        uint256 poolId = createPoolUtil(0, false);
         vm.expectRevert(Allo.NO_ACCESS_TO_ROLE.selector);
 
         vm.prank(makeAddr("not owner"));
@@ -181,7 +177,6 @@ contract AlloTest is Test {
         emit PoolCreated(
             0, identityId, allocationStrategy, payable(distributionStrategy), token, 10 * 10 ** 18, metadata
         );
-        vm.prank(owner);
 
         uint256 poolId = createPoolUtil(10 * 10 ** 18, true);
 
@@ -191,8 +186,6 @@ contract AlloTest is Test {
     /// @notice Test reverting funding a pool for insufficient funds
     /// @dev This is also tested in test_createPoolWithTokens
     function testRevert_fundPool_NOT_ENOUGH_FUNDS() public {
-        vm.prank(owner);
-
         uint256 poolId = createPoolUtil(0, false);
 
         vm.prank(makeAddr("broke chad"));

@@ -11,7 +11,7 @@ contract MockAllocation is IAllocationStrategy {
     // decode the _data into what's relevant for this strategy
     // update whatever is needed to store the applicant
     // @todo return arbitrary data to pass back? think more about this
-    function applyToPool(bytes memory _data, address sender) external payable returns (uint) {
+    function applyToPool(bytes memory _data, address sender) external payable returns (uint256) {
         // Todo:
     }
 
