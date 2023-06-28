@@ -156,18 +156,20 @@ contract AlloTest is Test {
     }
 
     /// @notice Test reverting updating the metadata of a pool with bad actor
+    /// @Note: This is not working for some reason
     // function testRevert_updatePoolMetadata_NO_ACCESS_TO_ROLE() public {
-    //     vm.prank(makeAddr("not owner"));
+    //     vm.prank(owner);
+    //     createPool(2, false);
     //     vm.expectRevert(Allo.NO_ACCESS_TO_ROLE.selector);
 
-    //     // update the metadata
-    //     allo.updatePoolMetadata(1, metadata);
+    //     vm.prank(makeAddr("not owner"));
+    //     allo.updatePoolMetadata(2, metadata);
     // }
 
     /// @notice Test applying to a pool
-    // function test_applyToPool() public {
-    //     // Todo:
-    // }
+    function test_applyToPool() public {
+        // Todo:
+    }
 
     /// @notice Test funding a pool
     /// @dev This is also tested in test_createPoolWithTokens
