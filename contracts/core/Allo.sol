@@ -277,3 +277,7 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
         }
     }
 }
+
+/// ASK: Min fee?
+/// ASK: Should _clone be in it's own library
+/// ASK: createPool + createPoolWithClone (whitelist logic)
