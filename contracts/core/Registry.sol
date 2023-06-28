@@ -211,7 +211,7 @@ contract Registry is AccessControl {
         }
 
         identity.owner = newOwner;
-        identityIdToPendingOwner[_identityId] = address(0);
+        delete identityIdToPendingOwner[_identityId];
 
         emit IdentityOwnerUpdated(_identityId, identity.owner);
     }
