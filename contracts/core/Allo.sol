@@ -150,9 +150,17 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
         bool _cloneAllocationStrategy,
         bool _cloneDistributionStrategy
     ) external payable returns (uint256 poolId) {
-        if (!_isApprovedStrategy(_allocationStrategy) && !_isApprovedStrategy(_distributionStrategy)) {
+        // Note: I added both options here to see what we wanted to go with.
+        if (_cloneAllocationStrategy && !_isApprovedStrategy(_allocationStrategy)) {
             revert STRATEGY_NOT_APPROVED();
+            // require(_isApprovedStrategy(_allocationStrategy), "STRATEGY_NOT_APPROVED");
         }
+
+        if (_cloneDistributionStrategy && !_isApprovedStrategy(_distributionStrategy)) {
+            revert STRATEGY_NOT_APPROVED();
+            // require(_isApprovedStrategy(_distributionStrategy), "STRATEGY_NOT_APPROVED");
+        }
+
         address allocationStrategy =
             _cloneAllocationStrategy ? Clone.createClone(_allocationStrategy, _nonce++) : _allocationStrategy;
 
