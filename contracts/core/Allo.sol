@@ -221,12 +221,11 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
             metadata: _metadata
         });
 
-        poolId = ++_poolIndex;
-
         if (_amount > 0) {
             _fundPool(_token, _amount, poolId, address(pool.distributionStrategy));
         }
 
+        poolId = ++_poolIndex;
         pools[poolId] = pool;
 
         emit PoolCreated(poolId, _identityId, _allocationStrategy, _distributionStrategy, _token, _amount, _metadata);
