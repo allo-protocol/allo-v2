@@ -15,9 +15,6 @@ interface IAllocationStrategy {
         Rejected
     }
 
-    // return whether this strategy is cloneable or not
-    function isCloneable() external pure returns (bool);
-
     // call to allo() to get identity for pool, then to registry() to get metadata
     function getOwnerIdentity() external view returns (string memory);
 

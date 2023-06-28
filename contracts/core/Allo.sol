@@ -18,6 +18,7 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
     error INVALID_FEE_PERCENTAGE();
     error TRANSFER_FAILED();
     error NOT_ENOUGH_FUNDS();
+    error STRATEGY_ALREADY_USED();
 
     /// @notice Struct to hold details of an Pool
     struct Pool {
@@ -53,7 +54,10 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
     mapping(uint256 => Pool) public pools;
 
     /// @notice Strategy -> bool
-    mapping(address => bool) public ApprovedStrategies;
+    mapping(address => bool) public approvedStrategies;
+
+    /// @notice Strategy -> bool
+    mapping(address => bool) public usedStrategies;
 
     /// ======================
     /// ======= Events =======
@@ -126,6 +130,36 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
         return pools[_poolId];
     }
 
+    /// @notice Creates a new pool (with clone)
+    /// @param _identityId The identityId of the pool
+    /// @param _allocationStrategy The address of the allocation strategy
+    /// @param _distributionStrategy The address of the distribution strategy
+    /// @param _token The address of the token
+    /// @param _amount The amount of the token
+    /// @param _metadata The metadata of the pool
+    /// @param _cloneAllocationStrategy Boolean flag to clone the allocation strategy
+    /// @param _cloneDistributionStrategy Boolean flag to clone the distribution strategy
+    function createPoolWithClone(
+        bytes32 _identityId,
+        address _allocationStrategy,
+        address payable _distributionStrategy,
+        address _token,
+        uint256 _amount,
+        Metadata memory _metadata,
+        bool _cloneAllocationStrategy,
+        bool _cloneDistributionStrategy
+    ) external payable returns (uint256 poolId) {
+        /// Check the boolean flag to see if the strategy should be cloned
+        /// Additionally, force clone the strategy if it's approved
+        address allocationStrategy =
+            _cloneAllocationStrategy ? Clone.createClone(_allocationStrategy, _nonce++) : _allocationStrategy;
+
+        address distributionStrategy =
+            _cloneDistributionStrategy ? Clone.createClone(_distributionStrategy, _nonce++) : _distributionStrategy;
+
+        return _createPool(_identityId, allocationStrategy, payable(distributionStrategy), _token, _amount, _metadata);
+    }
+
     /// @notice Creates a new pool
     /// @param _identityId The identityId of the pool creator in the registry
     /// @param _allocationStrategy The address of the allocation strategy
@@ -141,22 +175,39 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
         uint256 _amount,
         Metadata memory _metadata
     ) external payable returns (uint256 poolId) {
+        return _createPool(_identityId, _allocationStrategy, _distributionStrategy, _token, _amount, _metadata);
+    }
+
+    /// @notice Creates a new pool
+    /// @param _identityId The identityId of the pool creator in the registry
+    /// @param _allocationStrategy The address of the allocation strategy
+    /// @param _distributionStrategy The address of the distribution strategy
+    /// @param _token The address of the token that the pool is denominated in
+    /// @param _amount The amount of the token to be deposited into the pool
+    /// @param _metadata The metadata of the pool
+    function _createPool(
+        bytes32 _identityId,
+        address _allocationStrategy,
+        address payable _distributionStrategy,
+        address _token,
+        uint256 _amount,
+        Metadata memory _metadata
+    ) internal returns (uint256 poolId) {
         if (!registry.isOwnerOrMemberOfIdentity(_identityId, msg.sender)) {
             revert NO_ACCESS_TO_ROLE();
         }
 
-        address allocationStrategy = (IAllocationStrategy(_allocationStrategy).isCloneable())
-            ? Clone.createClone(_allocationStrategy, _nonce++)
-            : _allocationStrategy;
+        if (usedStrategies[_allocationStrategy] || usedStrategies[_distributionStrategy]) {
+            revert STRATEGY_ALREADY_USED();
+        }
 
-        address distributionStrategy = (IDistributionStrategy(_distributionStrategy).isCloneable())
-            ? payable(Clone.createClone(_distributionStrategy, _nonce++))
-            : _distributionStrategy;
+        usedStrategies[_allocationStrategy] = true;
+        usedStrategies[_distributionStrategy] = true;
 
         Pool memory pool = Pool({
             identityId: _identityId,
-            allocationStrategy: IAllocationStrategy(allocationStrategy),
-            distributionStrategy: IDistributionStrategy(distributionStrategy),
+            allocationStrategy: IAllocationStrategy(_allocationStrategy),
+            distributionStrategy: IDistributionStrategy(_distributionStrategy),
             metadata: _metadata
         });
 
@@ -252,13 +303,14 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
     /// @notice Add a strategy to the whitelist
     /// @param _strategy The address of the strategy
     function addToApprovedStrategies(address _strategy) external onlyOwner {
-        ApprovedStrategies[_strategy] = true;
+        approvedStrategies[_strategy] = true;
+        usedStrategies[_strategy] = true;
     }
 
     /// @notice Remove a strategy from the whitelist
     /// @param _strategy The address of the strategy
     function removeFromApprovedStrategies(address _strategy) external onlyOwner {
-        ApprovedStrategies[_strategy] = false;
+        approvedStrategies[_strategy] = false;
     }
 
     /// ====================================
@@ -303,7 +355,7 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
     /// @notice Checks if the strategy is approved
     /// @param _strategy The address of the strategy
     function _isApprovedStrategy(address _strategy) internal view returns (bool) {
-        return ApprovedStrategies[_strategy];
+        return approvedStrategies[_strategy];
     }
 }
 
