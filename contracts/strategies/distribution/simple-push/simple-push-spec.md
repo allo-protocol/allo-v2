@@ -18,7 +18,7 @@ Pool owner specifies two key pieces of data on the distribution strategy when th
 * `amount` — the amount of the `payoutToken` that will be in the pool
 
 ### Generate payout
-When an allocation strategy has finalized its list of recipients, the pool owner calls `finalize` on `Allo.sol`. When this happens:
+When an allocation strategy has created its list of recipients, the pool owner passes that information to the distribution strategy by interacting with `Allo.sol`. When this happens:
 * `Allo.sol` calls `generatePayout` on the allocation strategy, which returns a distribution mapping of recipients to the percent of the pool they should receive
 * `Allo.sol` calls `activateDistribution` on the distribution strategy, which saves the returned distribution mapping on the distribution strategy contract.
 
