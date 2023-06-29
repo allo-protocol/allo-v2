@@ -14,8 +14,8 @@ import "../interfaces/IDistributionStrategy.sol";
 import "./Registry.sol";
 
 contract Allo is Initializable, Ownable, MulticallUpgradeable {
-    error NO_ACCESS_TO_ROLE();
-    error INVALID_FEE_PERCENTAGE();
+    /// @notice Custom errors
+    error UNAUTHORIZED();
     error TRANSFER_FAILED();
     error NOT_ENOUGH_FUNDS();
     error STRATEGY_ALREADY_USED();
@@ -28,6 +28,7 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
         Metadata metadata;
     }
 
+    /// @notice Fee denominator
     uint256 public constant FEE_DENOMINATOR = 1e18;
 
     /// ==========================
@@ -111,7 +112,7 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
 
     modifier isPoolAdmin(uint256 _poolId) {
         if (!registry.isOwnerOrMemberOfIdentity(pools[_poolId].identityId, msg.sender)) {
-            revert NO_ACCESS_TO_ROLE();
+            revert UNAUTHORIZED();
         }
         _;
     }
@@ -178,7 +179,7 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
         Metadata memory _metadata
     ) internal returns (uint256 poolId) {
         if (!registry.isOwnerOrMemberOfIdentity(_identityId, msg.sender)) {
-            revert NO_ACCESS_TO_ROLE();
+            revert UNAUTHORIZED();
         }
 
         if (usedStrategies[_allocationStrategy] || usedStrategies[_distributionStrategy]) {
@@ -273,10 +274,6 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
     /// @param _feePercentage The new fee
     /// @dev Only callable by the owner
     function updateFee(uint256 _feePercentage) external onlyOwner {
-        if (_feePercentage > FEE_DENOMINATOR) {
-            revert INVALID_FEE_PERCENTAGE();
-        }
-
         feePercentage = _feePercentage;
 
         emit FeeUpdated(feePercentage);

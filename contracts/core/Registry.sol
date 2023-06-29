@@ -7,7 +7,7 @@ import {Metadata} from "./libraries/Metadata.sol";
 
 contract Registry is AccessControl {
     /// @notice Custom errors
-    error NO_ACCESS_TO_ROLE();
+    error UNAUTHORIZED();
     error NONCE_NOT_AVAILABLE();
     error NOT_PENDING_OWNER();
 
@@ -51,7 +51,7 @@ contract Registry is AccessControl {
 
     modifier isIdentityOwner(bytes32 _identityId) {
         if (!isOwnerOfIdentity(_identityId, msg.sender)) {
-            revert NO_ACCESS_TO_ROLE();
+            revert UNAUTHORIZED();
         }
         _;
     }

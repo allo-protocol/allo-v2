@@ -6,11 +6,15 @@ import "../../../contracts/interfaces/IAllocationStrategy.sol";
 contract MockAllocation is IAllocationStrategy {
     function getOwnerIdentity() external view returns (string memory) {}
 
-    function applyToPool(bytes memory _data, address sender) external payable returns (uint256) {}
+    function applyToPool(bytes memory, address) external payable returns (uint256) {
+        return 1;
+    }
 
-    function getApplicationStatus(uint256 applicationId) external view returns (ApplicationStatus) {}
+    function getApplicationStatus(uint256) external view returns (ApplicationStatus) {
+        // return ApplicationStatus.Applied;
+    }
 
-    function allocate(bytes memory _data, address sender) external payable returns (uint256) {}
+    function allocate(bytes memory, address) external payable returns (uint256) {}
 
     function generatePayouts() external payable returns (bytes memory) {}
 }

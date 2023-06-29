@@ -102,16 +102,16 @@ contract RegistryTest is Test {
         bytes32 invalidIdentityId = TestUtilities._testUtilGenerateIdentityId(nonce, address(this));
         string memory newName = "New Name";
 
-        vm.expectRevert(Registry.NO_ACCESS_TO_ROLE.selector);
+        vm.expectRevert(Registry.UNAUTHORIZED.selector);
 
         vm.prank(owner);
         registry.updateIdentityName(invalidIdentityId, newName);
     }
 
-    function testRevert_updateIdentityName_NO_ACCESS_TO_ROLE() public {
+    function testRevert_updateIdentityName_UNAUTHORIZED() public {
         bytes32 newIdentityId = registry.createIdentity(nonce, name, metadata, owner, members);
 
-        vm.expectRevert(Registry.NO_ACCESS_TO_ROLE.selector);
+        vm.expectRevert(Registry.UNAUTHORIZED.selector);
 
         string memory newName = "New Name";
 
@@ -119,10 +119,10 @@ contract RegistryTest is Test {
         registry.updateIdentityName(newIdentityId, newName);
     }
 
-    function testRevert_updateIdentityName_NO_ACCESS_TO_ROLE_byMember() public {
+    function testRevert_updateIdentityName_UNAUTHORIZED_byMember() public {
         bytes32 newIdentityId = registry.createIdentity(nonce, name, metadata, owner, members);
 
-        vm.expectRevert(Registry.NO_ACCESS_TO_ROLE.selector);
+        vm.expectRevert(Registry.UNAUTHORIZED.selector);
 
         string memory newName = "New Name";
 
@@ -147,7 +147,7 @@ contract RegistryTest is Test {
     }
 
     function test_updateIdentityMetadataForInvalidId() public {
-        vm.expectRevert(Registry.NO_ACCESS_TO_ROLE.selector);
+        vm.expectRevert(Registry.UNAUTHORIZED.selector);
         bytes32 invalidIdentityId = TestUtilities._testUtilGenerateIdentityId(nonce, address(this));
         Metadata memory newMetadata = Metadata({protocol: 1, pointer: "new metadata"});
 
@@ -155,12 +155,12 @@ contract RegistryTest is Test {
         registry.updateIdentityMetadata(invalidIdentityId, newMetadata);
     }
 
-    function testRevert_updateIdentityMetadata_NO_ACCESS_TO_ROLE() public {
+    function testRevert_updateIdentityMetadata_UNAUTHORIZED() public {
         bytes32 newIdentityId = registry.createIdentity(nonce, name, metadata, owner, members);
 
         Metadata memory newMetadata = Metadata({protocol: 1, pointer: "new metadata"});
 
-        vm.expectRevert(Registry.NO_ACCESS_TO_ROLE.selector);
+        vm.expectRevert(Registry.UNAUTHORIZED.selector);
 
         vm.prank(notAMember);
         registry.updateIdentityMetadata(newIdentityId, newMetadata);
@@ -202,11 +202,11 @@ contract RegistryTest is Test {
         assertTrue(registry.isMemberOfIdentity(newIdentityId, member2), "member2 added");
     }
 
-    function testRevert_addMembers_NO_ACCESS_TO_ROLE() public {
+    function testRevert_addMembers_UNAUTHORIZED() public {
         bytes32 newIdentityId = registry.createIdentity(nonce, name, metadata, owner, new address[](0));
 
         vm.prank(member1);
-        vm.expectRevert(Registry.NO_ACCESS_TO_ROLE.selector);
+        vm.expectRevert(Registry.UNAUTHORIZED.selector);
         registry.addMembers(newIdentityId, members);
     }
 
@@ -223,11 +223,11 @@ contract RegistryTest is Test {
         assertFalse(registry.isMemberOfIdentity(newIdentityId, member2), "member2 not added");
     }
 
-    function testRevert_removeMembers_NO_ACCESS_TO_ROLE() public {
+    function testRevert_removeMembers_UNAUTHORIZED() public {
         bytes32 newIdentityId = registry.createIdentity(nonce, name, metadata, owner, new address[](0));
 
         vm.prank(member1);
-        vm.expectRevert(Registry.NO_ACCESS_TO_ROLE.selector);
+        vm.expectRevert(Registry.UNAUTHORIZED.selector);
         registry.removeMembers(newIdentityId, members);
     }
 
@@ -244,11 +244,11 @@ contract RegistryTest is Test {
         assertEq(pendingOwner, notAMember, "after: pendingOwner");
     }
 
-    function testRevert_updateIdentityPendingOwner_NO_ACCESS_TO_ROLE() public {
+    function testRevert_updateIdentityPendingOwner_UNAUTHORIZED() public {
         bytes32 newIdentityId = registry.createIdentity(nonce, name, metadata, owner, new address[](0));
 
         vm.prank(member1);
-        vm.expectRevert(Registry.NO_ACCESS_TO_ROLE.selector);
+        vm.expectRevert(Registry.UNAUTHORIZED.selector);
         registry.updateIdentityPendingOwner(newIdentityId, notAMember);
     }
 
