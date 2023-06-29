@@ -42,9 +42,6 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
     /// @notice Incremental index
     uint256 private _poolIndex;
 
-    /// @notice Nonce to create salt for clone strategy
-    uint256 private _nonce;
-
     /// @notice Allo treasury
     address payable public treasury;
 
@@ -155,10 +152,10 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
         }
 
         address allocationStrategy =
-            _cloneAllocationStrategy ? Clone.createClone(_allocationStrategy, _nonce++) : _allocationStrategy;
+            _cloneAllocationStrategy ? Clone.createClone(_allocationStrategy) : _allocationStrategy;
 
         address distributionStrategy =
-            _cloneDistributionStrategy ? Clone.createClone(_distributionStrategy, _nonce++) : _distributionStrategy;
+            _cloneDistributionStrategy ? Clone.createClone(_distributionStrategy) : _distributionStrategy;
 
         return _createPool(_identityId, allocationStrategy, payable(distributionStrategy), _token, _amount, _metadata);
     }

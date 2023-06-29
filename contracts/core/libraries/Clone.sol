@@ -6,6 +6,18 @@ import "@openzeppelin-upgradeable/proxy/ClonesUpgradeable.sol";
 /// @title Clone library
 /// @notice A library to create clones of the strategy contracts when a pool is created
 library Clone {
+    /// @notice Custom errors
+    error NOT_CONTRACT();
+
+    /// @notice Create a clone of the contract
+    /// @param _contract The address of the contract to clone
+    function createClone(address _contract) internal returns (address) {
+        if (!_isContract(_contract)) {
+            revert NOT_CONTRACT();
+        }
+        return ClonesUpgradeable.clone(_contract);
+    }
+
     /// @notice Checks if the address is a contract
     /// @param _address The address to check
     function _isContract(address _address) internal view returns (bool) {
@@ -14,16 +26,5 @@ library Clone {
             codeSize := extcodesize(_address)
         }
         return codeSize > 0;
-    }
-
-    /// @notice Create a determenstic clone of of contract
-    /// @param _contract The address of the contract to clone
-    /// @param _nonce The nonce to use for the clone
-    function createClone(address _contract, uint256 _nonce) internal returns (address clone) {
-        require(_isContract(_contract), "not a contract");
-        bytes32 salt = keccak256(abi.encodePacked(msg.sender, _nonce));
-        clone = ClonesUpgradeable.cloneDeterministic(_contract, salt);
-
-        return clone;
     }
 }
