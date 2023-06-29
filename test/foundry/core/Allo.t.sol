@@ -203,15 +203,6 @@ contract AlloTest is Test {
         createPoolHelper(0, false);
     }
 
-    // Invoke createPool with approved strategy -> revert
-    function testRevert_createPoolWithUnapprovedStrategy() public {
-        vm.prank(owner);
-        vm.expectRevert(Allo.STRATEGY_NOT_APPROVED.selector);
-        allo.createPoolWithClone(
-            identityId, allocationStrategy, payable(distributionStrategy), token, 0, metadata, true, true
-        );
-    }
-
     /// @notice Test creating a pool with tokens
     function test_createPoolWithTokens() public {
         vm.expectEmit(true, false, false, true);

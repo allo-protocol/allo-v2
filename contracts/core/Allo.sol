@@ -19,7 +19,6 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
     error TRANSFER_FAILED();
     error NOT_ENOUGH_FUNDS();
     error STRATEGY_ALREADY_USED();
-    error STRATEGY_NOT_APPROVED();
 
     /// @notice Struct to hold details of an Pool
     struct Pool {
@@ -121,41 +120,26 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
     /// ==== External/Public Functions =====
     /// ====================================
 
-    /// @notice Creates a new pool (with clone)
+    /// @notice Creates a new pool (with clone for approved strategies)
     /// @param _identityId The identityId of the pool
     /// @param _allocationStrategy The address of the allocation strategy
     /// @param _distributionStrategy The address of the distribution strategy
     /// @param _token The address of the token
     /// @param _amount The amount of the token
     /// @param _metadata The metadata of the pool
-    /// @param _cloneAllocationStrategy Boolean flag to clone the allocation strategy
-    /// @param _cloneDistributionStrategy Boolean flag to clone the distribution strategy
     function createPoolWithClone(
         bytes32 _identityId,
         address _allocationStrategy,
         address payable _distributionStrategy,
         address _token,
         uint256 _amount,
-        Metadata memory _metadata,
-        bool _cloneAllocationStrategy,
-        bool _cloneDistributionStrategy
+        Metadata memory _metadata
     ) external payable returns (uint256 poolId) {
-        // Note: I added both options here to see what we wanted to go with.
-        if (_cloneAllocationStrategy && !_isApprovedStrategy(_allocationStrategy)) {
-            revert STRATEGY_NOT_APPROVED();
-            // require(_isApprovedStrategy(_allocationStrategy), "STRATEGY_NOT_APPROVED");
-        }
-
-        if (_cloneDistributionStrategy && !_isApprovedStrategy(_distributionStrategy)) {
-            revert STRATEGY_NOT_APPROVED();
-            // require(_isApprovedStrategy(_distributionStrategy), "STRATEGY_NOT_APPROVED");
-        }
-
         address allocationStrategy =
-            _cloneAllocationStrategy ? Clone.createClone(_allocationStrategy) : _allocationStrategy;
-
-        address distributionStrategy =
-            _cloneDistributionStrategy ? Clone.createClone(_distributionStrategy) : _distributionStrategy;
+            _isApprovedStrategy(_allocationStrategy) ? Clone.createClone(_allocationStrategy) : _allocationStrategy;
+        address distributionStrategy = _isApprovedStrategy(_distributionStrategy)
+            ? Clone.createClone(_distributionStrategy)
+            : _distributionStrategy;
 
         return _createPool(_identityId, allocationStrategy, payable(distributionStrategy), _token, _amount, _metadata);
     }
