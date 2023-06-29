@@ -131,16 +131,33 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
     function createPoolWithClone(
         bytes32 _identityId,
         address _allocationStrategy,
+        bool _cloneAllocationStrategy,
         address payable _distributionStrategy,
+        bool _cloneDistributionStrategy,
         address _token,
         uint256 _amount,
         Metadata memory _metadata
     ) external payable returns (uint256 poolId) {
-        address allocationStrategy =
-            _isApprovedStrategy(_allocationStrategy) ? Clone.createClone(_allocationStrategy) : _allocationStrategy;
-        address distributionStrategy = _isApprovedStrategy(_distributionStrategy)
-            ? Clone.createClone(_distributionStrategy)
-            : _distributionStrategy;
+        address allocationStrategy;
+        address distributionStrategy;
+
+        if (_cloneAllocationStrategy) {
+            if (!_isApprovedStrategy(_allocationStrategy)) {
+                revert STRATEGY_ALREADY_USED();
+            }
+            allocationStrategy = Clone.createClone(_allocationStrategy);
+        } else {
+            allocationStrategy = _allocationStrategy;
+        }
+
+        if (_cloneDistributionStrategy) {
+            if (!_isApprovedStrategy(_distributionStrategy)) {
+                revert STRATEGY_ALREADY_USED();
+            }
+            distributionStrategy = Clone.createClone(_distributionStrategy);
+        } else {
+            distributionStrategy = _distributionStrategy;
+        }
 
         return _createPool(_identityId, allocationStrategy, payable(distributionStrategy), _token, _amount, _metadata);
     }
@@ -196,14 +213,18 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
             metadata: _metadata
         });
 
-        if (_amount > 0) {
-            _fundPool(_token, _amount, poolId, address(pool.distributionStrategy));
-        }
-
         poolId = ++_poolIndex;
         pools[poolId] = pool;
 
-        emit PoolCreated(poolId, _identityId, _allocationStrategy, _distributionStrategy, _token, _amount, _metadata);
+        if (_amount > 0) {
+            _fundPool(_token, _amount, poolId, address(pool.distributionStrategy));
+            emit PoolCreated(
+                poolId, _identityId, _allocationStrategy, _distributionStrategy, _token, _amount, _metadata
+            );
+        }
+
+        // forcing 0 for the amount bc that either means the tx to transfer failed or they didn't send any funds
+        emit PoolCreated(poolId, _identityId, _allocationStrategy, _distributionStrategy, _token, 0, _metadata);
     }
 
     /// @notice passes _data through to the allocation strategy for that pool

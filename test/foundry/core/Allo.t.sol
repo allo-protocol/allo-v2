@@ -131,9 +131,8 @@ contract AlloTest is Test {
         emit PoolCreated(1, identityId, allocationStrategy, payable(distributionStrategy), token, 0, metadata);
 
         vm.prank(owner);
-        uint256 poolId = allo.createPoolWithClone(
-            identityId, allocationStrategy, payable(distributionStrategy), token, 0, metadata
-        );
+        uint256 poolId =
+            allo.createPoolWithClone(identityId, allocationStrategy, true, payable(distributionStrategy), false, token, 0, metadata);
 
         assertEq(_utilGetPoolInfo(poolId).identityId, identityId);
         assertEq(address(_utilGetPoolInfo(poolId).distributionStrategy), distributionStrategy);
@@ -148,9 +147,8 @@ contract AlloTest is Test {
         emit PoolCreated(1, identityId, allocationStrategy, payable(distributionStrategy), token, 0, metadata);
 
         vm.prank(owner);
-        uint256 poolId = allo.createPoolWithClone(
-            identityId, allocationStrategy, payable(distributionStrategy), token, 0, metadata
-        );
+        uint256 poolId =
+            allo.createPoolWithClone(identityId, allocationStrategy, false, payable(distributionStrategy), true, token, 0, metadata);
 
         assertEq(_utilGetPoolInfo(poolId).identityId, identityId);
         assertNotEq(address(_utilGetPoolInfo(poolId).distributionStrategy), distributionStrategy);
@@ -162,9 +160,8 @@ contract AlloTest is Test {
         emit PoolCreated(1, identityId, allocationStrategy, payable(distributionStrategy), token, 0, metadata);
 
         vm.prank(owner);
-        uint256 poolId = allo.createPoolWithClone(
-            identityId, allocationStrategy, payable(distributionStrategy), token, 0, metadata
-        );
+        uint256 poolId =
+            allo.createPoolWithClone(identityId, allocationStrategy, false, payable(distributionStrategy), false, token, 0, metadata);
 
         assertEq(_utilGetPoolInfo(poolId).identityId, identityId);
         assertEq(address(_utilGetPoolInfo(poolId).distributionStrategy), distributionStrategy);
@@ -217,7 +214,7 @@ contract AlloTest is Test {
         assertEq(address(_utilGetPoolInfo(poolId).distributionStrategy), distributionStrategy);
         assertEq(address(_utilGetPoolInfo(poolId).allocationStrategy), allocationStrategy);
     }
- 
+
     function test_applyToPool() public {
         uint256 poolId = _utilCreatePool(0);
 
