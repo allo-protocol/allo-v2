@@ -49,7 +49,7 @@ contract Registry is AccessControl {
     /// =========== Modifier ===============
     /// ====================================
 
-    modifier isIdentityOwner(bytes32 _identityId) {
+    modifier onlyIdentityOwner(bytes32 _identityId) {
         if (!isOwnerOfIdentity(_identityId, msg.sender)) {
             revert UNAUTHORIZED();
         }
@@ -126,7 +126,7 @@ contract Registry is AccessControl {
     /// @dev Only owner can update the name.
     function updateIdentityName(bytes32 _identityId, string memory _name)
         external
-        isIdentityOwner(_identityId)
+        onlyIdentityOwner(_identityId)
         returns (address)
     {
         address anchor = _generateAnchor(_identityId, _name);
@@ -153,7 +153,7 @@ contract Registry is AccessControl {
     /// @dev Only owner can update metadata
     function updateIdentityMetadata(bytes32 _identityId, Metadata memory _metadata)
         external
-        isIdentityOwner(_identityId)
+        onlyIdentityOwner(_identityId)
     {
         identitiesById[_identityId].metadata = _metadata;
 
@@ -186,7 +186,7 @@ contract Registry is AccessControl {
     /// @param _pendingOwner New pending owner
     function updateIdentityPendingOwner(bytes32 _identityId, address _pendingOwner)
         external
-        isIdentityOwner(_identityId)
+        onlyIdentityOwner(_identityId)
     {
         identityIdToPendingOwner[_identityId] = _pendingOwner;
 
@@ -214,7 +214,7 @@ contract Registry is AccessControl {
     /// @param _identityId The identityId of the identity
     /// @param _members The members to add
     /// @dev Only owner can add members
-    function addMembers(bytes32 _identityId, address[] memory _members) external isIdentityOwner(_identityId) {
+    function addMembers(bytes32 _identityId, address[] memory _members) external onlyIdentityOwner(_identityId) {
         uint256 memberLength = _members.length;
 
         for (uint256 i = 0; i < memberLength;) {
@@ -229,7 +229,7 @@ contract Registry is AccessControl {
     /// @param _identityId The identityId of the identity
     /// @param _members The members to remove
     /// @dev Only owner can remove members
-    function removeMembers(bytes32 _identityId, address[] memory _members) external isIdentityOwner(_identityId) {
+    function removeMembers(bytes32 _identityId, address[] memory _members) external onlyIdentityOwner(_identityId) {
         uint256 memberLength = _members.length;
 
         for (uint256 i = 0; i < memberLength;) {

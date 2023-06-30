@@ -114,7 +114,7 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
     /// =========== Modifier ===============
     /// ====================================
 
-    modifier isPoolAdmin(uint256 _poolId) {
+    modifier onlyPoolAdmin(uint256 _poolId) {
         if (!registry.isOwnerOrMemberOfIdentity(pools[_poolId].identityId, msg.sender)) {
             revert UNAUTHORIZED();
         }
@@ -243,7 +243,7 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
     /// @param _poolId id of the pool
     /// @param _metadata new metadata of the pool
     /// @dev Only callable by the pool admin
-    function updatePoolMetadata(uint256 _poolId, Metadata memory _metadata) external isPoolAdmin(_poolId) {
+    function updatePoolMetadata(uint256 _poolId, Metadata memory _metadata) external onlyPoolAdmin(_poolId) {
         Pool storage pool = pools[_poolId];
         pool.metadata = _metadata;
 
