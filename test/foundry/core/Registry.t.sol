@@ -271,8 +271,7 @@ contract RegistryTest is Test {
 
         assertFalse(registry.isOwnerOfIdentity(newIdentityId, owner), "after: notAnOwner");
         assertTrue(registry.isOwnerOfIdentity(newIdentityId, notAMember), "after: isOwner");
-        // Todo: mock this another way
-        // assertEq(pendingOwner, address(0), "after: pendingOwner");
+        assertEq(registry.identityIdToPendingOwner(newIdentityId), address(0), "after: pendingOwner");
     }
 
     function testRevert_acceptIdentityOwnership_NOT_PENDING_OWNER() public {
