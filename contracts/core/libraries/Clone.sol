@@ -11,11 +11,13 @@ library Clone {
 
     /// @notice Create a clone of the contract
     /// @param _contract The address of the contract to clone
-    function createClone(address _contract) internal returns (address) {
+    /// @param _nonce The nonce to use for the clone
+    function createClone(address _contract, uint256 _nonce) internal returns (address) {
         if (!_isContract(_contract)) {
             revert NOT_CONTRACT();
         }
-        return ClonesUpgradeable.clone(_contract);
+        bytes32 salt = keccak256(abi.encodePacked(msg.sender, _nonce));
+        return ClonesUpgradeable.cloneDeterministic(_contract, salt);
     }
 
     /// @notice Checks if the address is a contract

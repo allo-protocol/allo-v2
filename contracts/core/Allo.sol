@@ -43,6 +43,9 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
     /// @notice Incremental index
     uint256 private _poolIndex;
 
+    /// @notice Nonce for cloning strategies
+    uint256 private _nonce;
+
     /// @notice Allo treasury
     address payable public treasury;
 
@@ -148,7 +151,7 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
             if (!_isApprovedStrategy(_allocationStrategy)) {
                 revert NOT_APPROVED_STRATEGY();
             }
-            allocationStrategy = Clone.createClone(_allocationStrategy);
+            allocationStrategy = Clone.createClone(_allocationStrategy, _nonce++);
         } else {
             allocationStrategy = _allocationStrategy;
         }
@@ -157,7 +160,7 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
             if (!_isApprovedStrategy(_distributionStrategy)) {
                 revert NOT_APPROVED_STRATEGY();
             }
-            distributionStrategy = Clone.createClone(_distributionStrategy);
+            distributionStrategy = Clone.createClone(_distributionStrategy, _nonce++);
         } else {
             distributionStrategy = _distributionStrategy;
         }
