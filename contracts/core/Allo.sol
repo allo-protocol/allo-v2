@@ -19,6 +19,7 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
     error TRANSFER_FAILED();
     error NOT_ENOUGH_FUNDS();
     error STRATEGY_ALREADY_USED();
+    error NOT_APPROVED_STRATEGY();
 
     /// @notice Struct to hold details of an Pool
     struct Pool {
@@ -124,7 +125,9 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
     /// @notice Creates a new pool (with clone for approved strategies)
     /// @param _identityId The identityId of the pool
     /// @param _allocationStrategy The address of the allocation strategy
+    /// @param _cloneAllocationStrategy Whether to clone the allocation strategy
     /// @param _distributionStrategy The address of the distribution strategy
+    /// @param _cloneDistributionStrategy Whether to clone the distribution strategy
     /// @param _token The address of the token
     /// @param _amount The amount of the token
     /// @param _metadata The metadata of the pool
@@ -143,7 +146,7 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
 
         if (_cloneAllocationStrategy) {
             if (!_isApprovedStrategy(_allocationStrategy)) {
-                revert STRATEGY_ALREADY_USED();
+                revert NOT_APPROVED_STRATEGY();
             }
             allocationStrategy = Clone.createClone(_allocationStrategy);
         } else {
@@ -152,7 +155,7 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
 
         if (_cloneDistributionStrategy) {
             if (!_isApprovedStrategy(_distributionStrategy)) {
-                revert STRATEGY_ALREADY_USED();
+                revert NOT_APPROVED_STRATEGY();
             }
             distributionStrategy = Clone.createClone(_distributionStrategy);
         } else {
@@ -218,13 +221,9 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
 
         if (_amount > 0) {
             _fundPool(_token, _amount, poolId, address(pool.distributionStrategy));
-            emit PoolCreated(
-                poolId, _identityId, _allocationStrategy, _distributionStrategy, _token, _amount, _metadata
-            );
         }
 
-        // forcing 0 for the amount bc that either means the tx to transfer failed or they didn't send any funds
-        emit PoolCreated(poolId, _identityId, _allocationStrategy, _distributionStrategy, _token, 0, _metadata);
+        emit PoolCreated(poolId, _identityId, _allocationStrategy, _distributionStrategy, _token, _amount, _metadata);
     }
 
     /// @notice passes _data through to the allocation strategy for that pool

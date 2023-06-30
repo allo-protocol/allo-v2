@@ -131,8 +131,9 @@ contract AlloTest is Test {
         emit PoolCreated(1, identityId, allocationStrategy, payable(distributionStrategy), token, 0, metadata);
 
         vm.prank(owner);
-        uint256 poolId =
-            allo.createPoolWithClone(identityId, allocationStrategy, true, payable(distributionStrategy), false, token, 0, metadata);
+        uint256 poolId = allo.createPoolWithClone(
+            identityId, allocationStrategy, true, payable(distributionStrategy), false, token, 0, metadata
+        );
 
         assertEq(_utilGetPoolInfo(poolId).identityId, identityId);
         assertEq(address(_utilGetPoolInfo(poolId).distributionStrategy), distributionStrategy);
@@ -147,8 +148,9 @@ contract AlloTest is Test {
         emit PoolCreated(1, identityId, allocationStrategy, payable(distributionStrategy), token, 0, metadata);
 
         vm.prank(owner);
-        uint256 poolId =
-            allo.createPoolWithClone(identityId, allocationStrategy, false, payable(distributionStrategy), true, token, 0, metadata);
+        uint256 poolId = allo.createPoolWithClone(
+            identityId, allocationStrategy, false, payable(distributionStrategy), true, token, 0, metadata
+        );
 
         assertEq(_utilGetPoolInfo(poolId).identityId, identityId);
         assertNotEq(address(_utilGetPoolInfo(poolId).distributionStrategy), distributionStrategy);
@@ -160,12 +162,31 @@ contract AlloTest is Test {
         emit PoolCreated(1, identityId, allocationStrategy, payable(distributionStrategy), token, 0, metadata);
 
         vm.prank(owner);
-        uint256 poolId =
-            allo.createPoolWithClone(identityId, allocationStrategy, false, payable(distributionStrategy), false, token, 0, metadata);
+        uint256 poolId = allo.createPoolWithClone(
+            identityId, allocationStrategy, false, payable(distributionStrategy), false, token, 0, metadata
+        );
 
         assertEq(_utilGetPoolInfo(poolId).identityId, identityId);
         assertEq(address(_utilGetPoolInfo(poolId).distributionStrategy), distributionStrategy);
         assertEq(address(_utilGetPoolInfo(poolId).allocationStrategy), allocationStrategy);
+    }
+
+    function testRevert_createPoolWithCloneWithUnapprovedAllocationStrategy_NOT_APPROVED_STRATEGY() public {
+        vm.expectRevert(Allo.NOT_APPROVED_STRATEGY.selector);
+
+        vm.prank(owner);
+        allo.createPoolWithClone(
+            identityId, allocationStrategy, true, payable(distributionStrategy), false, token, 0, metadata
+        );
+    }
+
+    function testRevert_createPoolWithCloneWithUnapprovedDistributionStrategy_NOT_APPROVED_STRATEGY() public {
+        vm.expectRevert(Allo.NOT_APPROVED_STRATEGY.selector);
+
+        vm.prank(owner);
+        allo.createPoolWithClone(
+            identityId, allocationStrategy, false, payable(distributionStrategy), true, token, 0, metadata
+        );
     }
 
     function test_createPool() public {
