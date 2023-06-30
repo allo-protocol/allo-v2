@@ -79,7 +79,7 @@ If the vote pushes the proposal's yes vote totals to >= the `acceptanceThreshold
 If the vote makes it so that it is mathematically impossible for the proposal to hit >= the `acceptanceThreshold` with yes votes the remaining `committee` members, then the proposal is marked as `rejected`.
 
 #### `generatePayouts()`
-The pool admin can transfer an accepted proposal to the distribution process by calling the `generatePayouts` function. Any proposal marked as `accepted` is considered eligible to begin the distribution process. 
+The pool admin can transfer an accepted proposal to the distribution process by calling the `generatePayouts` function. Any proposal marked as `accepted` is considered eligible to begin the distribution process. The proposal is recorded as eligible to receive their `amountRequested`. 
 
 ### Custom Functions
 These are functions that are called via the allocation strategy contract.
