@@ -260,9 +260,7 @@ contract Allo is Initializable, Ownable, AccessControl {
     /// @param _poolId id of the pool
     /// @param _data encoded data unique to the allocation strategy for that pool
     function applyToPool(uint256 _poolId, bytes memory _data) external payable returns (uint256) {
-        IAllocationStrategy allocationStrategy = pools[_poolId].allocationStrategy;
-
-        return allocationStrategy.applyToPool(_data, msg.sender);
+        return pools[_poolId].allocationStrategy.applyToPool(_data, msg.sender);
     }
 
     /// @notice Update pool metadata
