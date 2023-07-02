@@ -29,11 +29,15 @@ contract AlloTest is Test {
 
     event PoolFunded(uint256 indexed poolId, uint256 amount, uint256 fee);
 
+    event BaseFeePaid(uint256 indexed poolId, uint256 amount);
+
     event PoolClosed(uint256 indexed poolId);
 
     event TreasuryUpdated(address treasury);
 
-    event FeeUpdated(uint256 fee);
+    event FeePercentageUpdated(uint256 feePercentage);
+
+    event BaseFeeUpdated(uint256 fee);
 
     event RegistryUpdated(address registry);
 
@@ -71,7 +75,7 @@ contract AlloTest is Test {
         nonce = 2;
 
         registry = new Registry();
-        allo.initialize(address(registry), treasury, 1e16);
+        allo.initialize(address(registry), treasury, 1e16, 0);
         // Note: OZ v5 will require this.
         // allo.transferOwnership(owner);
 
@@ -122,9 +126,10 @@ contract AlloTest is Test {
         vm.expectEmit(true, false, false, true);
         emit RegistryUpdated(address(registry));
         emit TreasuryUpdated(treasury);
-        emit FeeUpdated(1e16);
+        emit FeePercentageUpdated(1e16);
+        emit BaseFeeUpdated(1e16);
 
-        coreContract.initialize(address(registry), treasury, 1e16);
+        coreContract.initialize(address(registry), treasury, 1e16, 1e15);
     }
 
     function test_createPoolWithCloneWithApprovedAllocationStrategy() public {
@@ -213,6 +218,24 @@ contract AlloTest is Test {
 
         assertTrue(allo.hasRole(POOL_OWNER_ROLE, members[0]));
         assertTrue(allo.hasRole(POOL_OWNER_ROLE, members[1]));
+    }
+
+    function test_createPoolWithBaseFee() public {
+        uint256 baseFee = 1e17;
+
+        vm.prank(alloOwner);
+        allo.updateBaseFee(baseFee);
+
+        vm.expectEmit(true, false, false, true);
+
+        vm.deal(address(owner), 1 ether);
+
+        vm.prank(owner);
+        uint256 poolId = allo.createPool{value: baseFee}(
+            identityId, allocationStrategy, payable(distributionStrategy), token, 0, metadata, members
+        );
+
+        emit BaseFeePaid(poolId, baseFee);
     }
 
     function testRevert_createPool_UNAUTHORIZED() public {
@@ -379,7 +402,7 @@ contract AlloTest is Test {
         vm.expectEmit(true, false, false, false);
 
         uint256 newFee = 1e17;
-        emit FeeUpdated(newFee);
+        emit FeePercentageUpdated(newFee);
 
         vm.prank(alloOwner);
         allo.updateFee(newFee);
@@ -388,11 +411,27 @@ contract AlloTest is Test {
     }
 
     function testRevert_updateFee_UNAUTHORIZED() public {
-        uint24 newFee = 2000;
         vm.expectRevert();
 
         vm.prank(makeAddr("anon"));
-        allo.updateFee(newFee);
+        allo.updateFee(2000);
+    }
+
+    function test_updateBaseFee() public {
+        vm.expectEmit(true, false, false, false);
+
+        uint256 newBaseFee = 1e17;
+        emit BaseFeeUpdated(newBaseFee);
+
+        vm.prank(alloOwner);
+        allo.updateBaseFee(newBaseFee);
+    }
+
+    function test_updateBaseFee_UNAUTHORIZED() public {
+        vm.expectRevert();
+
+        vm.prank(makeAddr("anon"));
+        allo.updateBaseFee(1e16);
     }
 
     function test_addToApprovedStrategies() public {

@@ -43,6 +43,9 @@ contract Allo is Initializable, Ownable, AccessControl {
     /// @dev 1e18 = 100%, 1e17 = 10%, 1e16 = 1%, 1e15 = 0.1%
     uint256 public feePercentage;
 
+    /// @notice Base fee
+    uint256 public baseFee;
+
     /// @notice Incremental index
     uint256 private _poolIndex;
 
@@ -82,11 +85,15 @@ contract Allo is Initializable, Ownable, AccessControl {
 
     event PoolFunded(uint256 indexed poolId, uint256 amount, uint256 fee);
 
+    event BaseFeePaid(uint256 indexed poolId, uint256 amount);
+
     event PoolClosed(uint256 indexed poolId);
 
     event TreasuryUpdated(address treasury);
 
-    event FeeUpdated(uint256 fee);
+    event FeePercentageUpdated(uint256 feePercentage);
+
+    event BaseFeeUpdated(uint256 baseFee);
 
     event RegistryUpdated(address registry);
 
@@ -99,16 +106,22 @@ contract Allo is Initializable, Ownable, AccessControl {
     /// @param _registry The address of the registry
     /// @param _treasury The address of the treasury
     /// @param _feePercentage The fee percentage
-    function initialize(address _registry, address payable _treasury, uint256 _feePercentage) public reinitializer(1) {
+    /// @param _baseFee The base fee
+    function initialize(address _registry, address payable _treasury, uint256 _feePercentage, uint256 _baseFee)
+        public
+        reinitializer(1)
+    {
         _initializeOwner(msg.sender);
 
         registry = Registry(_registry);
         treasury = _treasury;
         feePercentage = _feePercentage;
+        baseFee = _baseFee;
 
         emit RegistryUpdated(_registry);
         emit TreasuryUpdated(_treasury);
-        emit FeeUpdated(_feePercentage);
+        emit FeePercentageUpdated(_feePercentage);
+        emit BaseFeeUpdated(_baseFee);
     }
 
     /// ====================================
@@ -248,6 +261,11 @@ contract Allo is Initializable, Ownable, AccessControl {
         // set admin role for POOL_OWNER_ROLE
         _setRoleAdmin(POOL_OWNER_ROLE, POOL_ADMIN_ROLE);
 
+        if (baseFee > 0) {
+            _transferAmount(treasury, baseFee, address(0));
+            emit BaseFeePaid(poolId, baseFee);
+        }
+
         if (_amount > 0) {
             _fundPool(_token, _amount, poolId, address(pool.distributionStrategy));
         }
@@ -335,7 +353,7 @@ contract Allo is Initializable, Ownable, AccessControl {
     function updateFee(uint256 _feePercentage) external onlyOwner {
         feePercentage = _feePercentage;
 
-        emit FeeUpdated(feePercentage);
+        emit FeePercentageUpdated(feePercentage);
     }
 
     /// @notice Add a strategy to the allowlist
@@ -355,6 +373,11 @@ contract Allo is Initializable, Ownable, AccessControl {
     /// @param _strategy The address of the strategy
     function addToUsedStrategies(address _strategy) external onlyOwner {
         usedStrategies[_strategy] = true;
+    }
+
+    function updateBaseFee(uint256 _baseFee) external onlyOwner {
+        baseFee = _baseFee;
+        emit BaseFeeUpdated(baseFee);
     }
 
     /// ====================================
