@@ -46,8 +46,8 @@ contract Allo is Initializable, Ownable, AccessControl {
     /// @notice Incremental index
     uint256 private _poolIndex;
 
-    /// @notice Nonce for cloning strategies
-    uint256 private _nonce;
+    /// @notice msg.sender -> nonce for cloning strategies
+    mapping(address => uint256) private _nonces;
 
     /// @notice Allo treasury
     address payable public treasury;
@@ -154,7 +154,7 @@ contract Allo is Initializable, Ownable, AccessControl {
             if (!_isApprovedStrategy(_allocationStrategy)) {
                 revert NOT_APPROVED_STRATEGY();
             }
-            allocationStrategy = Clone.createClone(_allocationStrategy, _nonce++);
+            allocationStrategy = Clone.createClone(_allocationStrategy, _nonces[msg.sender]++);
         } else {
             allocationStrategy = _allocationStrategy;
         }
@@ -163,7 +163,7 @@ contract Allo is Initializable, Ownable, AccessControl {
             if (!_isApprovedStrategy(_distributionStrategy)) {
                 revert NOT_APPROVED_STRATEGY();
             }
-            distributionStrategy = Clone.createClone(_distributionStrategy, _nonce++);
+            distributionStrategy = Clone.createClone(_distributionStrategy, _nonces[msg.sender]++);
         } else {
             distributionStrategy = _distributionStrategy;
         }
