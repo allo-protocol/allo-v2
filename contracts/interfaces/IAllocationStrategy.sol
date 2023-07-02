@@ -1,22 +1,15 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-interface IAllocationStrategy {
-    /**
-     * STORAGE (with public getters)
-     *     uint256 poolId;
-     *     address allo;
-     */
+import "./IStrategy.sol";
 
+interface IAllocationStrategy is IStrategy {
     enum ApplicationStatus {
         None,
         Pending,
         Accepted,
         Rejected
     }
-
-    // call to allo() to get identity for pool, then to registry() to get metadata
-    function getOwnerIdentity() external view returns (string memory);
 
     // decode the _data into what's relevant for this strategy
     // update whatever is needed to store the applicant

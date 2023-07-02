@@ -99,7 +99,15 @@ contract AlloTest is Test {
     function _utilCreatePool(uint256 _amount) internal returns (uint256) {
         vm.prank(owner);
         return allo.createPool(
-            identityId, allocationStrategy, payable(distributionStrategy), token, _amount, metadata, members
+            identityId,
+            allocationStrategy,
+            bytes(0),
+            payable(distributionStrategy),
+            bytes(0),
+            token,
+            _amount,
+            metadata,
+            members
         );
     }
 
@@ -243,22 +251,6 @@ contract AlloTest is Test {
         vm.expectRevert(Allo.UNAUTHORIZED.selector);
 
         allo.createPool(identityId, allocationStrategy, payable(distributionStrategy), token, 0, metadata, members);
-    }
-
-    function testRevert_createPoolWithUsedAllocationStrategy_STRATEGY_ALREADY_USED() public {
-        vm.prank(alloOwner);
-        allo.addToUsedStrategies(allocationStrategy);
-
-        vm.expectRevert(Allo.STRATEGY_ALREADY_USED.selector);
-        _utilCreatePool(0);
-    }
-
-    function testRevert_createPoolWithUsedDistributionStrategy_STRATEGY_ALREADY_USED() public {
-        vm.prank(alloOwner);
-        allo.addToUsedStrategies(distributionStrategy);
-
-        vm.expectRevert(Allo.STRATEGY_ALREADY_USED.selector);
-        _utilCreatePool(0);
     }
 
     function test_createPoolWithTokens() public {
@@ -436,13 +428,11 @@ contract AlloTest is Test {
 
     function test_addToApprovedStrategies() public {
         assertFalse(allo.approvedStrategies(distributionStrategy));
-        assertFalse(allo.usedStrategies(distributionStrategy));
 
         vm.prank(alloOwner);
         allo.addToApprovedStrategies(distributionStrategy);
 
         assertTrue(allo.approvedStrategies(distributionStrategy));
-        assertTrue(allo.usedStrategies(distributionStrategy));
     }
 
     function testRevert_addToApprovedStrategies_UNAUTHORIZED() public {
@@ -456,32 +446,15 @@ contract AlloTest is Test {
         allo.addToApprovedStrategies(distributionStrategy);
 
         assertTrue(allo.approvedStrategies(distributionStrategy));
-        assertTrue(allo.usedStrategies(distributionStrategy));
 
         vm.prank(alloOwner);
         allo.removeFromApprovedStrategies(distributionStrategy);
         assertFalse(allo.approvedStrategies(distributionStrategy));
-        assertTrue(allo.usedStrategies(distributionStrategy));
     }
 
     function testRevert_removeFromApprovedStrategies_UNAUTHORIZED() public {
         vm.expectRevert();
         vm.prank(makeAddr("anon"));
         allo.addToApprovedStrategies(distributionStrategy);
-    }
-
-    function test_addToUsedStrategies() public {
-        assertFalse(allo.usedStrategies(distributionStrategy));
-
-        vm.prank(alloOwner);
-        allo.addToUsedStrategies(distributionStrategy);
-
-        assertTrue(allo.usedStrategies(distributionStrategy));
-    }
-
-    function test_addToUsedStrategies_UNAUTHORIZED() public {
-        vm.expectRevert();
-        vm.prank(makeAddr("anon"));
-        allo.addToUsedStrategies(distributionStrategy);
     }
 }
