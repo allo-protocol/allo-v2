@@ -3,6 +3,7 @@ pragma solidity 0.8.19;
 
 import "@openzeppelin-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "@openzeppelin-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import {AccessControl} from "@openzeppelin/access/AccessControl.sol";
 
 import "@solady/auth/Ownable.sol";
@@ -14,6 +15,8 @@ import "../interfaces/IDistributionStrategy.sol";
 import "./Registry.sol";
 
 contract Allo is Initializable, Ownable, AccessControl {
+    using SafeERC20Upgradeable for IERC20Upgradeable;
+
     /// @notice Custom errors
     error UNAUTHORIZED();
     error TRANSFER_FAILED();
@@ -395,7 +398,7 @@ contract Allo is Initializable, Ownable, AccessControl {
             }
         } else {
             // ERC20 Token
-            IERC20Upgradeable(_token).transfer(_to, _amount);
+            IERC20Upgradeable(_token).safeTransfer(_to, _amount);
         }
     }
 
