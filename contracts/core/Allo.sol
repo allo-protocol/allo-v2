@@ -2,7 +2,6 @@
 pragma solidity 0.8.19;
 
 import "@openzeppelin-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin-upgradeable/utils/MulticallUpgradeable.sol";
 import "@openzeppelin-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 
 import "@solady/auth/Ownable.sol";
@@ -13,7 +12,7 @@ import "../interfaces/IAllocationStrategy.sol";
 import "../interfaces/IDistributionStrategy.sol";
 import "./Registry.sol";
 
-contract Allo is Initializable, Ownable, MulticallUpgradeable {
+contract Allo is Initializable, Ownable {
     /// @notice Custom errors
     error UNAUTHORIZED();
     error TRANSFER_FAILED();
@@ -106,8 +105,6 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
         emit RegistryUpdated(_registry);
         emit TreasuryUpdated(_treasury);
         emit FeeUpdated(_feePercentage);
-
-        __Multicall_init();
     }
 
     /// ====================================
@@ -267,7 +264,19 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
     /// @param _poolId id of the pool
     /// @param _data encoded data unique to the allocation strategy for that pool
     function allocate(uint256 _poolId, bytes memory _data) external payable {
-        pools[_poolId].allocationStrategy.allocate{value: msg.value}(_data, msg.sender);
+        _allocate(_poolId, _data);
+    }
+
+    /// @notice allocate to multiple pools
+    /// @param _poolIds ids of the pools
+    /// @param _datas encoded data unique to the allocation strategy for that pool
+    function batchAllocate(uint256[] calldata _poolIds, bytes[] memory _datas) external payable {
+        for (uint256 i = 0; i < _poolIds.length;) {
+            _allocate(_poolIds[i], _datas[i]);
+            unchecked {
+                i++;
+            }
+        }
     }
 
     /// @notice passes _data & msg.sender through to the disribution strategy for that pool
@@ -324,6 +333,10 @@ contract Allo is Initializable, Ownable, MulticallUpgradeable {
     /// ====================================
     /// ======= Internal Functions =========
     /// ====================================
+
+    function _allocate(uint256 _poolId, bytes memory _data) internal {
+        pools[_poolId].allocationStrategy.allocate{value: msg.value}(_data, msg.sender);
+    }
 
     /// @notice Deduct the fee and transfers the amount to the distribution strategy
     /// @param _token The address of the token to transfer

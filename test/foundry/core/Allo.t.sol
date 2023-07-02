@@ -296,6 +296,23 @@ contract AlloTest is Test {
         allo.allocate(poolId, bytes(""));
     }
 
+    function test_batchAllocate() public {
+        uint256[] memory poolIds = new uint256[](2);
+
+        poolIds[0] = _utilCreatePool(0);
+
+        address mockAllocation = address(new MockAllocation());
+        address mockDistribution = address(new MockDistribution());
+        vm.prank(owner);
+        poolIds[1] = allo.createPool(identityId, mockAllocation, payable(mockDistribution), token, 0, metadata);
+
+        bytes[] memory datas = new bytes[](2);
+        datas[0] = bytes("data1");
+        datas[1] = "data2";
+        // allocate to the pool should not revert
+        allo.batchAllocate(poolIds, datas);
+    }
+
     function test_distribute() public {
         uint256 poolId = _utilCreatePool(0);
         // distribution to the pool should not revert
