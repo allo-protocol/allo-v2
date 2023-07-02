@@ -75,9 +75,11 @@ contract AlloTest is Test {
         // Note: OZ v5 will require this.
         // allo.transferOwnership(owner);
 
-        members = new address[](2);
+        members = new address[](3);
         members[0] = member1;
         members[1] = member2;
+
+        members[2] = owner;
 
         treasury = payable(makeAddr("treasury"));
         allo.updateTreasury(treasury);
@@ -92,7 +94,9 @@ contract AlloTest is Test {
 
     function _utilCreatePool(uint256 _amount) internal returns (uint256) {
         vm.prank(owner);
-        return allo.createPool(identityId, allocationStrategy, payable(distributionStrategy), token, _amount, metadata);
+        return allo.createPool(
+            identityId, allocationStrategy, payable(distributionStrategy), token, _amount, metadata, members
+        );
     }
 
     function _utilGetPoolInfo(uint256 poolId) internal view returns (Allo.Pool memory) {
@@ -132,7 +136,7 @@ contract AlloTest is Test {
 
         vm.prank(owner);
         uint256 poolId = allo.createPoolWithClone(
-            identityId, allocationStrategy, true, payable(distributionStrategy), false, token, 0, metadata
+            identityId, allocationStrategy, true, payable(distributionStrategy), false, token, 0, metadata, members
         );
 
         assertEq(_utilGetPoolInfo(poolId).identityId, identityId);
@@ -149,7 +153,7 @@ contract AlloTest is Test {
 
         vm.prank(owner);
         uint256 poolId = allo.createPoolWithClone(
-            identityId, allocationStrategy, false, payable(distributionStrategy), true, token, 0, metadata
+            identityId, allocationStrategy, false, payable(distributionStrategy), true, token, 0, metadata, members
         );
 
         assertEq(_utilGetPoolInfo(poolId).identityId, identityId);
@@ -163,7 +167,7 @@ contract AlloTest is Test {
 
         vm.prank(owner);
         uint256 poolId = allo.createPoolWithClone(
-            identityId, allocationStrategy, false, payable(distributionStrategy), false, token, 0, metadata
+            identityId, allocationStrategy, false, payable(distributionStrategy), false, token, 0, metadata, members
         );
 
         assertEq(_utilGetPoolInfo(poolId).identityId, identityId);
@@ -176,7 +180,7 @@ contract AlloTest is Test {
 
         vm.prank(owner);
         allo.createPoolWithClone(
-            identityId, allocationStrategy, true, payable(distributionStrategy), false, token, 0, metadata
+            identityId, allocationStrategy, true, payable(distributionStrategy), false, token, 0, metadata, members
         );
     }
 
@@ -185,7 +189,7 @@ contract AlloTest is Test {
 
         vm.prank(owner);
         allo.createPoolWithClone(
-            identityId, allocationStrategy, false, payable(distributionStrategy), true, token, 0, metadata
+            identityId, allocationStrategy, false, payable(distributionStrategy), true, token, 0, metadata, members
         );
     }
 
@@ -198,13 +202,24 @@ contract AlloTest is Test {
         assertEq(_utilGetPoolInfo(poolId).identityId, identityId);
         assertEq(address(_utilGetPoolInfo(poolId).distributionStrategy), distributionStrategy);
         assertEq(address(_utilGetPoolInfo(poolId).allocationStrategy), allocationStrategy);
+
+        bytes32 POOL_OWNER_ROLE = keccak256(abi.encodePacked(poolId));
+        bytes32 POOL_ADMIN_ROLE = keccak256(abi.encodePacked(poolId, "admin"));
+
+        assertEq(allo.getRoleAdmin(POOL_OWNER_ROLE), POOL_ADMIN_ROLE);
+
+        assertTrue(allo.hasRole(POOL_OWNER_ROLE, owner));
+        assertTrue(allo.hasRole(POOL_ADMIN_ROLE, owner));
+
+        assertTrue(allo.hasRole(POOL_OWNER_ROLE, members[0]));
+        assertTrue(allo.hasRole(POOL_OWNER_ROLE, members[1]));
     }
 
     function testRevert_createPool_UNAUTHORIZED() public {
         vm.prank(makeAddr("not owner"));
         vm.expectRevert(Allo.UNAUTHORIZED.selector);
 
-        allo.createPool(identityId, allocationStrategy, payable(distributionStrategy), token, 0, metadata);
+        allo.createPool(identityId, allocationStrategy, payable(distributionStrategy), token, 0, metadata, members);
     }
 
     function testRevert_createPoolWithUsedAllocationStrategy_STRATEGY_ALREADY_USED() public {
@@ -304,7 +319,7 @@ contract AlloTest is Test {
         address mockAllocation = address(new MockAllocation());
         address mockDistribution = address(new MockDistribution());
         vm.prank(owner);
-        poolIds[1] = allo.createPool(identityId, mockAllocation, payable(mockDistribution), token, 0, metadata);
+        poolIds[1] = allo.createPool(identityId, mockAllocation, payable(mockDistribution), token, 0, metadata, members);
 
         bytes[] memory datas = new bytes[](2);
         datas[0] = bytes("data1");

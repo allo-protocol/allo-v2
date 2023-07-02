@@ -3,6 +3,7 @@ pragma solidity 0.8.19;
 
 import "@openzeppelin-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import {AccessControl} from "@openzeppelin/access/AccessControl.sol";
 
 import "@solady/auth/Ownable.sol";
 
@@ -12,7 +13,7 @@ import "../interfaces/IAllocationStrategy.sol";
 import "../interfaces/IDistributionStrategy.sol";
 import "./Registry.sol";
 
-contract Allo is Initializable, Ownable {
+contract Allo is Initializable, Ownable, AccessControl {
     /// @notice Custom errors
     error UNAUTHORIZED();
     error TRANSFER_FAILED();
@@ -111,8 +112,8 @@ contract Allo is Initializable, Ownable {
     /// =========== Modifier ===============
     /// ====================================
 
-    modifier onlyPoolAdmin(uint256 _poolId) {
-        if (!registry.isOwnerOrMemberOfIdentity(pools[_poolId].identityId, msg.sender)) {
+    modifier onlyPoolOwner(uint256 _poolId) {
+        if (!hasRole(keccak256(abi.encodePacked(_poolId)), msg.sender)) {
             revert UNAUTHORIZED();
         }
         _;
@@ -131,6 +132,7 @@ contract Allo is Initializable, Ownable {
     /// @param _token The address of the token
     /// @param _amount The amount of the token
     /// @param _metadata The metadata of the pool
+    /// @param _owners The owners of the pool
     function createPoolWithClone(
         bytes32 _identityId,
         address _allocationStrategy,
@@ -139,7 +141,8 @@ contract Allo is Initializable, Ownable {
         bool _cloneDistributionStrategy,
         address _token,
         uint256 _amount,
-        Metadata memory _metadata
+        Metadata memory _metadata,
+        address[] memory _owners
     ) external payable returns (uint256 poolId) {
         address allocationStrategy;
         address distributionStrategy;
@@ -162,7 +165,9 @@ contract Allo is Initializable, Ownable {
             distributionStrategy = _distributionStrategy;
         }
 
-        return _createPool(_identityId, allocationStrategy, payable(distributionStrategy), _token, _amount, _metadata);
+        return _createPool(
+            _identityId, allocationStrategy, payable(distributionStrategy), _token, _amount, _metadata, _owners
+        );
     }
 
     /// @notice Creates a new pool
@@ -172,15 +177,17 @@ contract Allo is Initializable, Ownable {
     /// @param _token The address of the token that the pool is denominated in
     /// @param _amount The amount of the token to be deposited into the pool
     /// @param _metadata The metadata of the pool
+    /// @param _owners The owners of the pool
     function createPool(
         bytes32 _identityId,
         address _allocationStrategy,
         address payable _distributionStrategy,
         address _token,
         uint256 _amount,
-        Metadata memory _metadata
+        Metadata memory _metadata,
+        address[] memory _owners
     ) external payable returns (uint256 poolId) {
-        return _createPool(_identityId, _allocationStrategy, _distributionStrategy, _token, _amount, _metadata);
+        return _createPool(_identityId, _allocationStrategy, _distributionStrategy, _token, _amount, _metadata, _owners);
     }
 
     /// @notice Creates a new pool
@@ -190,13 +197,15 @@ contract Allo is Initializable, Ownable {
     /// @param _token The address of the token that the pool is denominated in
     /// @param _amount The amount of the token to be deposited into the pool
     /// @param _metadata The metadata of the pool
+    /// @param _owners The owners of the pool
     function _createPool(
         bytes32 _identityId,
         address _allocationStrategy,
         address payable _distributionStrategy,
         address _token,
         uint256 _amount,
-        Metadata memory _metadata
+        Metadata memory _metadata,
+        address[] memory _owners
     ) internal returns (uint256 poolId) {
         if (!registry.isOwnerOrMemberOfIdentity(_identityId, msg.sender)) {
             revert UNAUTHORIZED();
@@ -219,6 +228,23 @@ contract Allo is Initializable, Ownable {
         poolId = ++_poolIndex;
         pools[poolId] = pool;
 
+        // access control
+        bytes32 POOL_OWNER_ROLE = keccak256(abi.encodePacked(poolId));
+        bytes32 POOL_ADMIN_ROLE = keccak256(abi.encodePacked(poolId, "admin"));
+
+        // grant pool owners roles
+        for (uint256 i = 0; i < _owners.length;) {
+            _grantRole(POOL_OWNER_ROLE, _owners[i]);
+            unchecked {
+                i++;
+            }
+        }
+
+        // grant admin roles to pool creator
+        _grantRole(POOL_ADMIN_ROLE, msg.sender);
+        // set admin role for POOL_OWNER_ROLE
+        _setRoleAdmin(POOL_OWNER_ROLE, POOL_ADMIN_ROLE);
+
         if (_amount > 0) {
             _fundPool(_token, _amount, poolId, address(pool.distributionStrategy));
         }
@@ -239,8 +265,8 @@ contract Allo is Initializable, Ownable {
     /// @notice Update pool metadata
     /// @param _poolId id of the pool
     /// @param _metadata new metadata of the pool
-    /// @dev Only callable by the pool admin
-    function updatePoolMetadata(uint256 _poolId, Metadata memory _metadata) external onlyPoolAdmin(_poolId) {
+    /// @dev Only callable by the pool owner
+    function updatePoolMetadata(uint256 _poolId, Metadata memory _metadata) external onlyPoolOwner(_poolId) {
         Pool storage pool = pools[_poolId];
         pool.metadata = _metadata;
 
