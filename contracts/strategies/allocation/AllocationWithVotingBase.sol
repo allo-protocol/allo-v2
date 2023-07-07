@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import {IAllocationStrategy} from "../../interfaces/IAllocationStrategy.sol";
-import {Allo} from "../../core/Allo.sol";
+import "./BaseAllocationStrategy.sol";
 import {Registry} from "../../core/Registry.sol";
 import {Metadata} from "../../core/libraries/Metadata.sol";
 import {Transfer} from "../../core/libraries/Transfer.sol";
@@ -12,7 +11,7 @@ import {ReentrancyGuard} from "@openzeppelin/security/ReentrancyGuard.sol";
 /// @notice A strategy that allows users to apply to a pool and vote on applications
 /// @dev This strategy is used for QF pools that have offchain calculations
 /// @author allo-team
-contract AllocationWithVotingBase is IAllocationStrategy, Transfer, ReentrancyGuard {
+contract AllocationWithVotingBase is BaseAllocationStrategy, Transfer, ReentrancyGuard {
     /// @notice Custom errors
     error ALLOCATION_AMOUNT_UNDERFLOW();
     error ALLOCATION_AMOUNT_MISMATCH();
@@ -20,19 +19,8 @@ contract AllocationWithVotingBase is IAllocationStrategy, Transfer, ReentrancyGu
     error IDENTITY_REQUIRED();
     error INVALID_TIME();
     error INVALID_INPUT();
-    error STRATEGY_ALREADY_INITIALIZED();
-    error UNAUTHORIZED();
     error VOTING_NOT_OPEN();
     error VOTING_NOT_ENDED();
-
-    // Note: this is mapped to the Allo global status's in the mapping below.
-    /// @notice Enum for the local status of the application
-    enum Status {
-        PENDING,
-        ACCEPTED,
-        REJECTED,
-        REAPPLIED
-    }
 
     /// @notice Struct to hold details of an application
     struct Application {
@@ -64,19 +52,6 @@ contract AllocationWithVotingBase is IAllocationStrategy, Transfer, ReentrancyGu
         address token;
     }
 
-    /// ==========================
-    /// === Storage Variables ====
-    /// ==========================
-
-    Allo public allo;
-
-    bytes32 public identityId;
-
-    uint256 public poolId;
-    uint256 private _index;
-
-    bool public initialized;
-
     /// =================================
     /// === Custom Storage Variables ====
     /// =================================
@@ -87,6 +62,7 @@ contract AllocationWithVotingBase is IAllocationStrategy, Transfer, ReentrancyGu
     uint256 public applicationEndTime;
     uint256 public votingStartTime;
     uint256 public votingEndTime;
+    uint256 private _index;
 
     bool public identityRequired;
     bool public payoutReady;
@@ -110,30 +86,9 @@ contract AllocationWithVotingBase is IAllocationStrategy, Transfer, ReentrancyGu
     event ApplicationStatusUpdated(address indexed applicant, uint256 indexed applicationId, Status status);
     event Allocated(bytes data, address indexed allocator);
     event Claimed(uint256 indexed applicationId, address receipient, uint256 amount);
-    event Initialized(address allo, bytes32 identityId, uint256 poolId, bytes data);
     event TimestampsUpdated(
         uint256 applicationStartTime, uint256 applicationEndTime, uint256 votingStartTime, uint256 votingEndTime
     );
-
-    /// ====================================
-    /// =========== Modifier ===============
-    /// ====================================
-
-    /// @notice Modifier to check if the caller is the Allo contract
-    modifier onlyAllo() {
-        if (msg.sender != address(allo) || address(allo) == address(0)) {
-            revert UNAUTHORIZED();
-        }
-        _;
-    }
-
-    /// @notice Modifier to check if the caller is a pool manager
-    modifier onlyPoolManager() {
-        if (!allo.isPoolManager(poolId, msg.sender)) {
-            revert UNAUTHORIZED();
-        }
-        _;
-    }
 
     /// @notice Initialize the contract
     /// @param _allo The address of the Allo contract
@@ -141,27 +96,13 @@ contract AllocationWithVotingBase is IAllocationStrategy, Transfer, ReentrancyGu
     /// @param _poolId The poolId of the pool
     /// @param _data The data to be decoded
     /// @dev This function is called by the Allo contract
-    function initialize(address _allo, bytes32 _identityId, uint256 _poolId, bytes memory _data)
-        external
-        override
-        onlyAllo
-    {
-        if (initialized) {
-            revert STRATEGY_ALREADY_INITIALIZED();
-        }
-
-        initialized = true;
-
-        allo = Allo(_allo);
-        identityId = _identityId;
-        poolId = _poolId;
+    function initialize(address _allo, bytes32 _identityId, uint256 _poolId, bytes memory _data) public override {
+        super.initialize(_allo, _identityId, _poolId, _data);
 
         // decode data custom to this strategy
         (bool _identityRequired, address _registry) = abi.decode(_data, (bool, address));
         identityRequired = _identityRequired;
         registry = Registry(_registry);
-
-        emit Initialized(_allo, _identityId, _poolId, _data);
     }
 
     /// @notice Apply to the pool
