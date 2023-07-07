@@ -14,7 +14,7 @@ interface IAllocationStrategy is IStrategy {
     // decode the _data into what's relevant for this strategy
     // update whatever is needed to store the applicant
     // return the applicationId
-    function applyToPool(bytes memory _data, address sender) external payable returns (uint256);
+    function addRecipient(bytes memory _data, address sender) external payable returns (uint256);
 
     // return whether application is pending, accepted, or rejected
     // strategies will need to add their own logic to translate to these categories if they use different ones

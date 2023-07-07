@@ -124,6 +124,7 @@ contract Allo is Initializable, Ownable, AccessControl {
     /// =========== Modifier ===============
     /// ====================================
 
+    /// @notice Checks if the msg sender is the pool owner
     modifier onlyPoolOwner(uint256 _poolId) {
         if (!hasRole(keccak256(abi.encodePacked(_poolId)), msg.sender)) {
             revert UNAUTHORIZED();
@@ -303,8 +304,8 @@ contract Allo is Initializable, Ownable, AccessControl {
     /// @notice returns the applicationId from the allocation strategy
     /// @param _poolId id of the pool
     /// @param _data encoded data unique to the allocation strategy for that pool
-    function applyToPool(uint256 _poolId, bytes memory _data) external payable returns (uint256) {
-        return pools[_poolId].allocationStrategy.applyToPool(_data, msg.sender);
+    function addRecipient(uint256 _poolId, bytes memory _data) external payable returns (uint256) {
+        return pools[_poolId].allocationStrategy.addRecipient(_data, msg.sender);
     }
 
     /// @notice Update pool metadata

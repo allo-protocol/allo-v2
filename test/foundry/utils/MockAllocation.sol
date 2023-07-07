@@ -18,7 +18,7 @@ contract MockAllocation is IAllocationStrategy {
 
     function getOwnerIdentity() external view returns (string memory) {}
 
-    function applyToPool(bytes memory, address) external payable returns (uint256) {
+    function addRecipient(bytes memory, address) external payable returns (uint256) {
         return 1;
     }
 
