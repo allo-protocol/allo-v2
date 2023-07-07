@@ -17,7 +17,9 @@ import {MockToken} from "../../utils/MockToken.sol";
 
 contract SplitterDistributionStrategyTest is Test {
     event Initialized(address allo, bytes32 identityId, uint256 indexed poolId, address token, bytes data);
-    event PayoutsDistributed(uint256[] applicationIds, PayoutSummary[] payoutSummary, address sender);
+    event PayoutsDistributed(
+        uint256[] applicationIds, IDistributionStrategy.PayoutSummary[] payoutSummary, address sender
+    );
     event PoolFundingIncreased(uint256 amount);
 
     Allo public allo;
@@ -81,38 +83,27 @@ contract SplitterDistributionStrategyTest is Test {
         initialized = false;
     }
 
-    function test_initialize() public {
-    }
+    function test_initialize() public {}
 
-    function testRevert_initialize_STRATEGY_ALREADY_INITIALIZED() public {
-    }
+    function testRevert_initialize_STRATEGY_ALREADY_INITIALIZED() public {}
 
     function test_distribute() public {
         vm.prank(address(allo));
     }
 
-    function testRevert_distribute_UNAUTHORIZED() public {
-    }
+    function testRevert_distribute_UNAUTHORIZED() public {}
 
-    function testRevert_distribute_PAYOUT_NOT_READY() public {
-    }
+    function testRevert_distribute_PAYOUT_NOT_READY() public {}
 
-    function testRevert_distribute_ALREADY_DISTRIBUTED() public {
+    function testRevert_distribute_ALREADY_DISTRIBUTED() public {}
 
-    }
+    function test_poolFunded() public {}
 
-    function test_poolFunded() public {
-    }
+    function testRevert_poolFunded_UNAUTHORIZED() public {}
 
-    function testRevert_poolFunded_UNAUTHORIZED() public {
-    }
+    function testRevert_poolFunded_PAYOUT_FINALIZED() public {}
 
-    function testRevert_poolFunded_PAYOUT_FINALIZED() public {
-    }
+    function test_recieve() public {}
 
-    function test_recieve() public {
-    }
-
-    function test_recieve_UNAUTHORIZED() public {
-    }
+    function test_recieve_UNAUTHORIZED() public {}
 }
