@@ -12,7 +12,10 @@ import {ReentrancyGuard} from "@openzeppelin/security/ReentrancyGuard.sol";
 /// @dev This strategy is used for QF pools that have offchain calculations
 /// @author allo-team
 contract AllocationWithVotingBase is BaseAllocationStrategy, Transfer, ReentrancyGuard {
-    /// @notice Custom errors
+    /// ======================
+    /// ======= Errors =======
+    /// ======================
+
     error ALLOCATION_AMOUNT_UNDERFLOW();
     error ALLOCATION_AMOUNT_MISMATCH();
     error APPLICATIONS_NOT_OPEN();
