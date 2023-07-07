@@ -16,10 +16,9 @@ import {MockDistribution} from "../../utils/MockDistribution.sol";
 import {MockToken} from "../../utils/MockToken.sol";
 
 contract SplitterDistributionStrategyTest is Test {
-    // todo: add the events when done
-    event Initialized(address indexed _allo, bytes32 indexed _identityId, uint256 indexed _poolId, address _token);
-    event PayoutsDistributed(uint256[] _applicationIds, address _sender);
-    event PoolFunded(uint256 _amount);
+    event Initialized(address allo, bytes32 identityId, uint256 indexed poolId, address token, bytes data);
+    event PayoutsDistributed(uint256[] applicationIds, PayoutSummary[] payoutSummary, address sender);
+    event PoolFundingIncreased(uint256 amount);
 
     Allo public allo;
     Registry public registry;
@@ -82,51 +81,38 @@ contract SplitterDistributionStrategyTest is Test {
         initialized = false;
     }
 
-    /// @notice Test that the contract is initialized correctly and only once.
     function test_initialize() public {
-        vm.prank(address(allo));
-        // vm.expectEmit(true, false, false, true);
-        // emit Initialized(address(allo), identityId, 0, token);
-
-        // splitter.initialize(address(allo), identityId, 0, token, abi.encode(0, 0, 0, 0));
-
-        // assertEq(splitter.allo(), address(allo));
     }
 
-    //
     function testRevert_initialize_STRATEGY_ALREADY_INITIALIZED() public {
-        vm.prank(address(allo));
-
-        // Note: the allo address is not working here???
-        // splitter.initialize(address(allo), identityId, 0, token, abi.encode(0, 0, 0, 0));
     }
 
-    /// @notice Test the distribution of funds
     function test_distribute() public {
         vm.prank(address(allo));
     }
 
-    /// @notice Test that this reverts if the sender is not the allo contract
     function testRevert_distribute_UNAUTHORIZED() public {
-        vm.prank(member1);
     }
 
     function testRevert_distribute_PAYOUT_NOT_READY() public {
-        vm.prank(member1);
     }
 
-    /// @notice Test that the pool calculates total amount correctly
+    function testRevert_distribute_ALREADY_DISTRIBUTED() public {
+
+    }
+
     function test_poolFunded() public {
-        vm.prank(address(allo));
     }
 
-    /// @notice Test that this reverts if the sender is not the allo contract
     function testRevert_poolFunded_UNAUTHORIZED() public {
-        vm.prank(member1);
     }
 
-    //
     function testRevert_poolFunded_PAYOUT_FINALIZED() public {
-        vm.prank(address(allo));
+    }
+
+    function test_recieve() public {
+    }
+
+    function test_recieve_UNAUTHORIZED() public {
     }
 }

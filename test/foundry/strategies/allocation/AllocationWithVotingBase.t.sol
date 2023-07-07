@@ -12,6 +12,17 @@ contract AllocationWithVotingBaseTest is Test {
 
     bool public identityRequired;
 
+
+    event ApplicationSubmitted(
+        uint256 indexed applicationId, bytes32 indexed identityId, address recipient, Metadata metadata, address sender
+    );
+    event ApplicationStatusUpdated(address indexed applicant, uint256 indexed applicationId, Status status);
+    event Allocated(bytes data, address indexed allocator);
+    event Claimed(uint256 indexed applicationId, address receipient, uint256 amount);
+    event TimestampsUpdated(
+        uint256 applicationStartTime, uint256 applicationEndTime, uint256 votingStartTime, uint256 votingEndTime
+    );
+
     function setUp() public {
         applicationStartTime = 0;
         applicationEndTime = 0;
@@ -20,44 +31,78 @@ contract AllocationWithVotingBaseTest is Test {
         identityRequired = false;
     }
 
-    function test_ContractInitialized() public {
-        // Todo: test that the contract is initialized correctly
+    function test_initialize() public {
     }
 
-    function test_applyToPool() public {
-        // Todo: test applying to the pool
+    function test_applyToPool_new_application() public {
+    }
+
+    function test_applyToPool_update_application() public {
+    }
+
+    function testRevert_applyToPool_APPLICATIONS_NOT_OPEN() public {
+    }
+
+    function testRevert_applyToPool_new_application_UNAUTHORIZED() public {
+    }
+
+    function testRevert_applyToPool_update_application_UNAUTHORIZED() public {
     }
 
     function test_getApplicationStatus() public {
-        // Todo:
     }
 
-    function test_allocate_SinglePayout() public {
-        // Todo: test voting on the application
+    function test_allocate_native() public {
     }
 
-    function test_allocate_MultiPayout() public {
-        // Todo: test voting on the application
+    function test_allocate_erc20() public {
     }
 
     function testRevert_allocate_NOT_ALLO() public {
-        // Todo: test revert if not allo
     }
 
     function testRevert_allocate_VOTING_NOT_OPEN() public {
-        // Todo: test revert if voting not open
+    }
+
+    function testRevert_allocate_ALLOCATION_AMOUNT_MISMATCH() public {
     }
 
     function testRevert_allocate_TRANSFER_FAILED() public {
-        // Todo: test revert if tranfer fails
     }
 
-    function test_ReviewApplications() public {
-        // Todo: test review applications
+
+    function test_getPayout() public {
+
     }
 
-    function testRevert_ReviewApplications_NOT_ADMIN() public {
-        // Todo: test revert if not admin
+    function test_reviewApplications() public {
+    }
+
+    function testRevert_reviewApplications_UNAUTHORIZED() public {
+    }
+
+    function test_setPayout() public {
+
+    }
+
+    function test_setPayout_UNAUTHORIZED() public {
+
+    }
+
+    function test_setPayout_INVALID_INPUT() public {
+
+    }
+
+    function test_setPayout_INVALID_APPLICATION() public {
+
+    }
+
+    function test_claim() public {
+
+    }
+
+    function testRevert_claim_VOTING_NOT_ENDED() public {
+
     }
 
     function test_updateTimestamps() public {
@@ -82,6 +127,5 @@ contract AllocationWithVotingBaseTest is Test {
 
     /// @notice votingStartTime must be in the future
     function testRevert_updateTimestamps_VSINFUTURE_INVALID_TIME() public {
-        // Todo: test revert if invalid time
     }
 }
