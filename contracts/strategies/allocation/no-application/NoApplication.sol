@@ -27,7 +27,7 @@ abstract contract NoApplication is IAllocationStrategy, BaseAllocationStrategy {
 
     event Allocated(bytes data, address indexed allocator);
 
-    function applyToPool(bytes memory, address) external payable override returns (uint256) {
+    function addRecipient(bytes memory, address) external payable override returns (uint256) {
         revert NOT_IMPLEMENTED();
     }
 
@@ -77,5 +77,5 @@ abstract contract NoApplication is IAllocationStrategy, BaseAllocationStrategy {
         return payoutReady;
     }
 
-    function _isEligibleForAllocation(address _sender) internal view returns (bool) {}
+    function _isEligibleForAllocation(address _sender) internal view virtual returns (bool) {}
 }

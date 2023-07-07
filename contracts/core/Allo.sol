@@ -134,6 +134,22 @@ contract Allo is Initializable, Ownable, AccessControl {
         _;
     }
 
+    /// @notice Checks if the msg sender is a pool admin
+    modifier onlyPoolAdmin(uint256 _poolId) {
+        if (!_isPoolAdmin(_poolId, msg.sender)) {
+            revert UNAUTHORIZED();
+        }
+        _;
+    }
+
+    /// @notice Checks if the msg sender is a pool manager
+    modifier onlyPoolManager(uint256 _poolId) {
+        if (!_isPoolManager(_poolId, msg.sender)) {
+            revert UNAUTHORIZED();
+        }
+        _;
+    }
+
     /// ====================================
     /// ==== External/Public Functions =====
     /// ====================================

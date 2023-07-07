@@ -23,29 +23,30 @@ contract TokenBalanceNoApplication is NoApplication {
     /// @param _poolId Id of the pool
     /// @param _data The data to be decoded
     /// @dev This function is called by the Allo contract
-    function initialize(address _allo, bytes32 _identityId, uint256 _poolId, bytes memory _data)
-        public
-        virtual
-        override
-        onlyAllo
-    {
-        if (initialized) {
-            revert STRATEGY_ALREADY_INITIALIZED();
-        }
+    // NOTE: this seems to be overriding a override...
+    // function initialize(address _allo, bytes32 _identityId, uint256 _poolId, bytes memory _data)
+    //     public
+    //     virtual
+    //     override
+    //     onlyAllo
+    // {
+    //     if (initialized) {
+    //         revert STRATEGY_ALREADY_INITIALIZED();
+    //     }
 
-        initialized = true;
+    //     initialized = true;
 
-        allo = Allo(_allo);
-        identityId = _identityId;
-        poolId = _poolId;
+    //     allo = Allo(_allo);
+    //     identityId = _identityId;
+    //     poolId = _poolId;
 
-        // decode data
-        (uint256 _balanceThreshold, address _token) = abi.decode(_data, (uint256, address));
-        balanceThreshold = _balanceThreshold;
-        token = _token;
+    //     // decode data
+    //     (uint256 _balanceThreshold, address _token) = abi.decode(_data, (uint256, address));
+    //     balanceThreshold = _balanceThreshold;
+    //     token = _token;
 
-        emit Initialized(_allo, _identityId, _poolId, _data);
-    }
+    //     emit Initialized(_allo, _identityId, _poolId, _data);
+    // }
 
     /// @notice Checks if the sender is eligible for allocation
     function _isEligibleForAllocation(address _sender) internal view override returns (bool) {
