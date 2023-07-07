@@ -10,12 +10,10 @@ interface IStrategy {
      *     address allo;
      */
 
-    // initialize the strategy with the poolId and allo address
-    // set initialized to true and ensure it can't be called again
-    // check if identityId passed, is same as the identityId set during deployment
-    // if identityId is not set during deployment, then set it (for clones)
-    function initialize(bytes32 _identityId, uint256 _poolId, address _allo, bytes memory _data) external;
-
-    // call to allo() to get identity for pool, then to registry() to get metadata
-    function getOwnerIdentity() external view returns (string memory);
+    struct PayoutSummary {
+        // bytes32 identityId;
+        address recipient;
+        // uint256 amount;
+        uint256 percentage;
+    }
 }
