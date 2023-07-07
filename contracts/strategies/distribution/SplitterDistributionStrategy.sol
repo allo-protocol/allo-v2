@@ -13,30 +13,33 @@ contract SplitterDistributionStrategy is IDistributionStrategy, Transfer, Reentr
     error UNAUTHORIZED();
     error PAYOUT_NOT_READY();
     error PAYOUT_FINALIZED();
+    error ALREADY_DISTRIBUTED();
 
     /// ==========================
     /// === Storage Variables ====
     /// ==========================
 
     Allo public allo;
+    bool public initialized;
     bytes32 public identityId;
     uint256 public poolId;
-    bool public initialized;
+    uint256 public amount;
     address public token;
 
     /// =================================
     /// === Custom Storage Variables ====
     /// =================================
-    uint256 public totalAmount;
-    mapping(uint256 => uint256) public applicationIdToPaidAmount;
+
+    /// Application.id -> amount paid
+    mapping(uint256 => uint256) public paidAmounts;
 
     /// ======================
     /// ======= Events =======
     /// ======================
 
-    event Initialized(address indexed _allo, bytes32 indexed _identityId, uint256 indexed _poolId, address _token);
-    event PayoutsDistributed(uint256[] _applicationIds, address _sender);
-    event PoolFunded(uint256 _amount);
+    event Initialized(address allo, bytes32 identityId, uint256 indexed poolId, address token, bytes data);
+    event PayoutsDistributed(uint256[] applicationIds, PayoutSummary[] payoutSummary, address sender);
+    event PoolFundingIncreased(uint256 amount);
 
     /// ====================================
     /// =========== Modifier ===============
@@ -62,13 +65,14 @@ contract SplitterDistributionStrategy is IDistributionStrategy, Transfer, Reentr
     /// @param _allo The address of the Allo contract
     /// @param _identityId The identityId of the pool
     /// @param _poolId The poolId of the pool
+    /// @param _token The pool token
+    /// @param _data unused for this strategy
     /// @dev This function is called by the Allo contract
     function initialize(address _allo, bytes32 _identityId, uint256 _poolId, address _token, bytes memory _data)
         external
         override
         onlyAllo
     {
-        _data;
         if (initialized) {
             revert STRATEGY_ALREADY_INITIALIZED();
         }
@@ -80,49 +84,57 @@ contract SplitterDistributionStrategy is IDistributionStrategy, Transfer, Reentr
         poolId = _poolId;
         token = _token;
 
-        emit Initialized(_allo, _identityId, _poolId, _token);
+        emit Initialized(_allo, _identityId, _poolId, _token, _data);
     }
 
     /// @notice Distribute the payouts to the recipients
     /// @param _applicationIds The applicationIds to distribute to
+    /// @param _data encoded bytes passed to the allocation strategy
     /// @param _sender The sender of the payouts
-    function distribute(uint256[] memory _applicationIds, bytes memory, address _sender)
+    function distribute(uint256[] memory _applicationIds, bytes calldata _data, address _sender)
         external
         onlyAllo
         nonReentrant
     {
         IAllocationStrategy allocationStrategy = IAllocationStrategy(allo.getAllocationStrategy(poolId));
 
-        if (!allocationStrategy.readyToPayout()) {
+        if (!allocationStrategy.readyToPayout("0x")) {
             revert PAYOUT_NOT_READY();
         }
 
-        PayoutSummary[] memory payouts = allocationStrategy.getPayout(_applicationIds, "0x");
+        PayoutSummary[] memory payouts = allocationStrategy.getPayout(_applicationIds, _data);
 
         uint256 applicationIdsLength = _applicationIds.length;
 
         for (uint256 i = 0; i < applicationIdsLength;) {
-            uint256 transferAmount = (totalAmount * payouts[i].percentage) / 1e18;
+            uint256 applicationId = _applicationIds[i];
 
-            transferAmount -= applicationIdToPaidAmount[_applicationIds[i]];
-            applicationIdToPaidAmount[_applicationIds[i]] += transferAmount;
+            if (paidAmounts[applicationId] > 0) {
+                revert ALREADY_DISTRIBUTED();
+            }
 
-            _transferAmount(token, payouts[i].recipient, transferAmount);
+            uint256 amountToTransfer = (amount * payouts[i].percentage) / 1e18;
+
+            paidAmounts[applicationId] = amountToTransfer;
+
+            _transferAmount(token, payouts[i].recipient, amountToTransfer);
             unchecked {
                 i++;
             }
         }
-        emit PayoutsDistributed(_applicationIds, _sender);
+
+        emit PayoutsDistributed(_applicationIds, payouts, _sender);
     }
 
-    /// @notice Tracks the pool amount to distribute
-    /// @param _amount The amount to add to the pool
+    /// @notice invoked via allo.fundPool to update pool's amount
+    /// @param _amount amount by which pool is increased
     function poolFunded(uint256 _amount) external onlyAllo {
-        if (IAllocationStrategy(allo.getAllocationStrategy(poolId)).readyToPayout()) {
+        if (IAllocationStrategy(allo.getAllocationStrategy(poolId)).readyToPayout("0x")) {
             revert PAYOUT_FINALIZED();
         }
-        totalAmount += _amount;
-        // emit event
-        emit PoolFunded(_amount);
+        amount += _amount;
+        emit PoolFundingIncreased(amount);
     }
+
+    receive() external payable onlyAllo {}
 }
