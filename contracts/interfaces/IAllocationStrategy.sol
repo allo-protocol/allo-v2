@@ -1,13 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-interface IAllocationStrategy {
-    /**
-     * STORAGE (with public getters)
-     *     uint256 poolId;
-     *     address allo;
-     */
+import "./IStrategy.sol";
 
+interface IAllocationStrategy is IStrategy {
     enum ApplicationStatus {
         None,
         Pending,
@@ -15,13 +11,10 @@ interface IAllocationStrategy {
         Rejected
     }
 
-    // call to allo() to get identity for pool, then to registry() to get metadata
-    function getOwnerIdentity() external view returns (string memory);
-
     // decode the _data into what's relevant for this strategy
     // update whatever is needed to store the applicant
-    // @todo return arbitrary data to pass back? think more about this
-    function applyToPool(bytes memory _data, address sender) external payable returns (bytes memory);
+    // return the applicationId
+    function applyToPool(bytes memory _data, address sender) external payable returns (uint256);
 
     // return whether application is pending, accepted, or rejected
     // strategies will need to add their own logic to translate to these categories if they use different ones
