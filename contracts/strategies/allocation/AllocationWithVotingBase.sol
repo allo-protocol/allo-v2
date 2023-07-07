@@ -215,14 +215,12 @@ contract AllocationWithVotingBase is BaseAllocationStrategy, Transfer, Reentranc
 
     /// @notice Retrieves application payout amount
     /// @param _applicationId ApplicationId array of the applications
-    /// @param _data not used
     /// @return summaries PayoutSummary array of the applications
-    function getPayout(uint256[] memory _applicationId, bytes memory _data)
+    function getPayout(uint256[] memory _applicationId, bytes memory)
         external
         view
         returns (PayoutSummary[] memory summaries)
     {
-        _data; // surpress compiler warning
         uint256 applicationIdLength = _applicationId.length;
         summaries = new PayoutSummary[](applicationIdLength);
 
@@ -240,39 +238,24 @@ contract AllocationWithVotingBase is BaseAllocationStrategy, Transfer, Reentranc
 
     /// @notice Review applications
     /// @param _data The data to be decoded
-    /// @dev Pool admin can only set applications to `ACCEPTED` or `REJECTED`
+    /// @dev
     function reviewApplications(bytes memory _data) external onlyPoolManager {
-        // Note: How to determine single vs multi application calls?
-        // =========================================================================================================
-
-        // Single application call
-        (uint256 applicationId, Status status) = abi.decode(_data, (uint256, Status));
-        // set the status
-        applications[applicationId].status = status;
-
-        // map to the Allo global status's
-        applicationStatus[applicationId] = IAllocationStrategy.ApplicationStatus.Accepted;
-
-        emit ApplicationStatusUpdated(msg.sender, applicationId, status);
-
-        // =========================================================================================================
-
-        // Multi application call
         (uint256[] memory applicationIds, Status[] memory statuses) = abi.decode(_data, (uint256[], Status[]));
 
-        // set the status's
-        for (uint256 i; i < applicationIds.length; i++) {
+        for (uint256 i; i < applicationIds.length;) {
             applications[applicationIds[i]].status = statuses[i];
             // map to the Allo global status's
             applicationStatus[applicationIds[i]] = IAllocationStrategy.ApplicationStatus.Accepted;
 
             emit ApplicationStatusUpdated(msg.sender, applicationIds[i], statuses[i]);
-        }
 
-        // =========================================================================================================
+            unchecked {
+                i++;
+            }
+        }
     }
 
-    /// @notice Set the payout amounts for the applications
+    /// @notice Set the payout amounts for all the applications and marks the contract as ready for payout
     /// @param _data The data to be decoded
     /// @dev Pool admin can only set payout amounts for `ACCEPTED` applications
     function setPayout(bytes memory _data) external onlyPoolManager {
@@ -301,12 +284,12 @@ contract AllocationWithVotingBase is BaseAllocationStrategy, Transfer, Reentranc
                 i++;
             }
         }
+
         payoutReady = true;
     }
 
     /// @notice Claim the payout for the applications
     /// @param _claims The claims to be processed
-    /// @dev Anyone can claim the payout for the applications
     function claim(Claim[] calldata _claims) external nonReentrant {
         if (votingEndTime > block.timestamp) {
             revert VOTING_NOT_ENDED();
@@ -358,7 +341,7 @@ contract AllocationWithVotingBase is BaseAllocationStrategy, Transfer, Reentranc
 
     /// @notice Check if the pool is ready to payout
     /// @return bool True if the pool is ready to payout
-    function readyToPayout() external view returns (bool) {
-        return payoutReady && votingEndTime < block.timestamp;
+    function readyToPayout(bytes calldata) external view returns (bool) {
+        return payoutReady;
     }
 }

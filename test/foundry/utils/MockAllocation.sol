@@ -44,7 +44,7 @@ contract MockAllocation is IAllocationStrategy {
         // todo:
     }
 
-    function readyToPayout() external view returns (bool) {
+    function readyToPayout(bytes calldata) external view returns (bool) {
         // todo:
     }
 }

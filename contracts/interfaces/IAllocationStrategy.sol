@@ -39,10 +39,8 @@ interface IAllocationStrategy is IStrategy {
         view
         returns (PayoutSummary[] memory summaries);
 
-    function readyToPayout() external view returns (bool);
-
-    // todo: discuss if we need it
-    //function getTotalAllocations(bytes memory _data) external view returns (uint256 totalAmount);
+    // signal that pool is ready for distribution
+    function readyToPayout(bytes memory _data) external view returns (bool);
 
     // many owners will probably want a way to add custom application approval logic
     // but all of that will be in specific implementations, not requried interface
