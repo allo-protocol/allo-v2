@@ -2,18 +2,18 @@
 pragma solidity 0.8.19;
 
 /**
-  * Simple Project Registry
-  * 
-  * This contract is a very minimal implementation of a registry, intended for
-  * testing and demonstration. Allo provides a robust Project Registry that
-  * strategies can use. But strategies can use any means of validating projects
-  * (whether they are on the Allo Registry or not).
-  *
-  * This contract assumes an owner, like a DAO, with explicit permission to add
-  * and remove projects from the registry. The allocation strategy that
-  * accompanies simply check whether or not a project is listed on this
-  * registry.
-  */
+ * Simple Project Registry
+ *
+ * This contract is a very minimal implementation of a registry, intended for
+ * testing and demonstration. Allo provides a robust Project Registry that
+ * strategies can use. But strategies can use any means of validating projects
+ * (whether they are on the Allo Registry or not).
+ *
+ * This contract assumes an owner, like a DAO, with explicit permission to add
+ * and remove projects from the registry. The allocation strategy that
+ * accompanies simply check whether or not a project is listed on this
+ * registry.
+ */
 
 import "@openzeppelin/access/Ownable.sol";
 
@@ -24,7 +24,6 @@ import "@openzeppelin/access/Ownable.sol";
 //an owner, like a DAO, with explicit permission to add and remove projects from
 //the registry.
 contract SimpleProjectRegistry is Ownable {
-
     ///////////////////////////////
     ////////// Variables //////////
     ///////////////////////////////
@@ -87,5 +86,3 @@ contract SimpleProjectRegistry is Ownable {
         }
     }
 }
-
-
