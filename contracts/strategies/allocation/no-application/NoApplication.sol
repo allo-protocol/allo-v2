@@ -4,7 +4,7 @@ pragma solidity 0.8.19;
 import {BaseAllocationStrategy} from "../BaseAllocationStrategy.sol";
 import {IAllocationStrategy} from "../../../interfaces/IAllocationStrategy.sol";
 
-abstract contract NoApplication is IAllocationStrategy, BaseAllocationStrategy {
+abstract contract NoApplication is BaseAllocationStrategy {
     /// ======================
     /// ======= Errors =======
     /// ======================
@@ -27,7 +27,7 @@ abstract contract NoApplication is IAllocationStrategy, BaseAllocationStrategy {
 
     event Allocated(bytes data, address indexed allocator);
 
-    function addRecipient(bytes memory, address) external payable override returns (uint256) {
+    function registerRecipient(bytes memory, address) external payable override returns (uint256) {
         revert NOT_IMPLEMENTED();
     }
 

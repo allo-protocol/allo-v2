@@ -108,7 +108,13 @@ contract AllocationWithVotingBase is BaseAllocationStrategy, Transfer, Reentranc
     /// @notice Apply to the pool
     /// @param _data The data to be decoded
     /// @param _sender The sender of the transaction
-    function addRecipient(bytes memory _data, address _sender) external payable override onlyAllo returns (uint256) {
+    function registerRecipient(bytes memory _data, address _sender)
+        external
+        payable
+        override
+        onlyAllo
+        returns (uint256)
+    {
         if (applicationStartTime <= block.timestamp || applicationEndTime >= block.timestamp) {
             revert APPLICATIONS_NOT_OPEN();
         }

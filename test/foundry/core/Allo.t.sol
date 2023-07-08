@@ -352,7 +352,7 @@ contract AlloTest is Test {
         uint256 poolId = _utilCreatePool(0);
 
         // apply to the pool
-        uint256 applicationId = allo.addRecipient(poolId, bytes(""));
+        uint256 applicationId = allo.registerRecipient(poolId, bytes(""));
         assertEq(applicationId, 1);
     }
 

@@ -22,7 +22,7 @@ contract MockAllocation is IAllocationStrategy {
         _data;
     }
 
-    function addRecipient(bytes memory _data, address _sender) external payable returns (uint256) {
+    function registerRecipient(bytes memory _data, address _sender) external payable returns (uint256) {
         // surpress compiler warnings:
         _data;
         _sender;
