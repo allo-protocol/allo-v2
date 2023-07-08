@@ -32,12 +32,12 @@ contract TokenBalanceAllocationGating is AllocationGating {
     }
 
     /// @notice Checks if recipient owns token balance greater than threshold
-    /// @param recipient Address of the recipient
-    function _isEligibleForAllocation(address _sender) internal view override returns (bool) {
+    /// @param _recipient Address of the recipient
+    function _isEligibleForAllocation(address _recipient) internal view override returns (bool) {
         if (token == address(0)) {
-            return address(_sender).balance >= balanceThreshold;
+            return address(_recipient).balance >= balanceThreshold;
         }
 
-        return IERC20(token).balanceOf(_sender) >= balanceThreshold;
+        return IERC20(token).balanceOf(_recipient) >= balanceThreshold;
     }
 }
