@@ -31,14 +31,14 @@ contract SplitterDistributionStrategy is IDistributionStrategy, Transfer, Reentr
     /// =================================
 
     /// Recipient.id -> amount paid
-    mapping(uint256 => uint256) public paidAmounts;
+    mapping(address => uint256) public paidAmounts;
 
     /// ======================
     /// ======= Events =======
     /// ======================
 
     event Initialized(address allo, bytes32 identityId, uint256 indexed poolId, address token, bytes data);
-    event PayoutsDistributed(uint256[] recipientIds, PayoutSummary[] payoutSummary, address sender);
+    event PayoutsDistributed(address[] recipientIds, PayoutSummary[] payoutSummary, address sender);
     event PoolFundingIncreased(uint256 amount);
 
     /// ====================================
@@ -91,7 +91,7 @@ contract SplitterDistributionStrategy is IDistributionStrategy, Transfer, Reentr
     /// @param _recipientIds The recipientIds to distribute to
     /// @param _data encoded bytes passed to the allocation strategy
     /// @param _sender The sender of the payouts
-    function distribute(uint256[] memory _recipientIds, bytes calldata _data, address _sender)
+    function distribute(address[] memory _recipientIds, bytes calldata _data, address _sender)
         external
         onlyAllo
         nonReentrant
@@ -107,7 +107,7 @@ contract SplitterDistributionStrategy is IDistributionStrategy, Transfer, Reentr
         uint256 recipientIdsLength = _recipientIds.length;
 
         for (uint256 i = 0; i < recipientIdsLength;) {
-            uint256 recipientId = _recipientIds[i];
+            address recipientId = _recipientIds[i];
 
             if (paidAmounts[recipientId] > 0) {
                 revert ALREADY_DISTRIBUTED();

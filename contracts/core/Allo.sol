@@ -319,7 +319,7 @@ contract Allo is Initializable, Ownable, AccessControl {
     /// @notice returns the recipientId from the allocation strategy
     /// @param _poolId id of the pool
     /// @param _data encoded data unique to the allocation strategy for that pool
-    function registerRecipients(uint256 _poolId, bytes memory _data) external payable returns (uint256) {
+    function registerRecipients(uint256 _poolId, bytes memory _data) external payable returns (address) {
         return pools[_poolId].allocationStrategy.registerRecipients(_data, msg.sender);
     }
 
@@ -373,7 +373,7 @@ contract Allo is Initializable, Ownable, AccessControl {
     /// @notice passes _data & msg.sender through to the disribution strategy for that pool
     /// @param _poolId id of the pool
     /// @param _data encoded data unique to the distributionStrategy strategy for that pool
-    function distribute(uint256 _poolId, uint256[] memory _recipientIds, bytes memory _data) external {
+    function distribute(uint256 _poolId, address[] memory _recipientIds, bytes memory _data) external {
         pools[_poolId].distributionStrategy.distribute(_recipientIds, _data, msg.sender);
     }
 

@@ -39,7 +39,7 @@ contract AllocationWithOffchainCalculations is BaseAllocationStrategy, Transfer,
     struct Recipient {
         bytes32 identityId;
         address payoutAddress;
-        uint256 recipientId;
+        address recipientId;
         mapping(address => uint256) tokenAmounts;
         Status status;
         Metadata metadata;
@@ -48,7 +48,7 @@ contract AllocationWithOffchainCalculations is BaseAllocationStrategy, Transfer,
 
     /// @notice Struct to hold details of an Allocation
     struct Allocation {
-        uint256 recipientId;
+        address recipientId;
         uint256 amount;
     }
 
@@ -61,7 +61,7 @@ contract AllocationWithOffchainCalculations is BaseAllocationStrategy, Transfer,
 
     /// @notice Struct to hold details of the allocations to claim
     struct Claim {
-        uint256 recipientId;
+        address recipientId;
         address token;
     }
 
@@ -75,30 +75,34 @@ contract AllocationWithOffchainCalculations is BaseAllocationStrategy, Transfer,
     uint256 public registerEndTime;
     uint256 public votingStartTime;
     uint256 public votingEndTime;
-    uint256 private _index;
+    uint160 private _index;
 
     bool public identityRequired;
     bool public payoutReady;
 
     /// @notice recipientId - Status
-    mapping(uint256 => RecipientStatus) public recipientStatus;
+    mapping(address => RecipientStatus) public recipientStatus;
 
     /// @notice recipientId -> Recipient
-    mapping(uint256 => Recipient) public recipients;
+    mapping(address => Recipient) public recipients;
 
     ///@notice recipientId -> PayoutSummary
-    mapping(uint256 => PayoutSummary) public payoutSummaries;
+    mapping(address => PayoutSummary) public payoutSummaries;
 
     /// ======================
     /// ======= Events =======
     /// ======================
 
     event RecipientSubmitted(
-        uint256 indexed recipientId, bytes32 indexed identityId, address recipient, Metadata metadata, address sender
+        address indexed recipientId,
+        bytes32 indexed identityId,
+        address payoutAddress,
+        Metadata metadata,
+        address sender
     );
-    event RecipientStatusUpdated(address indexed applicant, uint256 indexed recipientId, Status status);
+    event RecipientStatusUpdated(address indexed applicant, address indexed recipientId, Status status);
     event Allocated(bytes data, address indexed allocator);
-    event Claimed(uint256 indexed recipientId, address receipient, uint256 amount);
+    event Claimed(address indexed recipientId, address receipient, uint256 amount);
     event TimestampsUpdated(
         uint256 registerStartTime, uint256 registerEndTime, uint256 votingStartTime, uint256 votingEndTime
     );
@@ -126,14 +130,14 @@ contract AllocationWithOffchainCalculations is BaseAllocationStrategy, Transfer,
         payable
         override
         onlyAllo
-        returns (uint256)
+        returns (address)
     {
         if (registerStartTime <= block.timestamp || registerEndTime >= block.timestamp) {
             revert REGISTRATION_NOT_OPEN();
         }
 
-        (uint256 recipientId, address payoutAddress, bytes32 _identityId, Metadata memory metadata) =
-            abi.decode(_data, (uint256, address, bytes32, Metadata));
+        (address recipientId, address payoutAddress, bytes32 _identityId, Metadata memory metadata) =
+            abi.decode(_data, (address, address, bytes32, Metadata));
 
         if (identityRequired && !registry.isOwnerOrMemberOfIdentity(identityId, _sender)) {
             revert UNAUTHORIZED();
@@ -141,9 +145,9 @@ contract AllocationWithOffchainCalculations is BaseAllocationStrategy, Transfer,
 
         Recipient storage recipient;
 
-        if (recipientId == 0) {
+        if (recipientId == address(0)) {
             // Create a new recipient
-            recipientId = ++_index;
+            recipientId = address(++_index);
 
             recipient = recipients[recipientId];
             recipient.identityId = _identityId;
@@ -180,7 +184,7 @@ contract AllocationWithOffchainCalculations is BaseAllocationStrategy, Transfer,
 
     /// @notice Returns the status of the recipient
     /// @param _recipientId The recipientId of the recipient
-    function getRecipientStatus(uint256 _recipientId) external view override returns (RecipientStatus) {
+    function getRecipientStatus(address _recipientId) external view override returns (RecipientStatus) {
         return recipientStatus[_recipientId];
     }
 
@@ -235,7 +239,7 @@ contract AllocationWithOffchainCalculations is BaseAllocationStrategy, Transfer,
     /// @notice Retrieves recipient payout amount
     /// @param _recipientId recipientId array of the recipients
     /// @return summaries PayoutSummary array of the recipients
-    function getPayout(uint256[] memory _recipientId, bytes memory)
+    function getPayout(address[] memory _recipientId, bytes memory)
         external
         view
         returns (PayoutSummary[] memory summaries)
@@ -259,7 +263,7 @@ contract AllocationWithOffchainCalculations is BaseAllocationStrategy, Transfer,
     /// @param _data The data to be decoded
     /// @dev
     function reviewRecipients(bytes memory _data) external onlyPoolManager {
-        (uint256[] memory recipientIds, Status[] memory statuses) = abi.decode(_data, (uint256[], Status[]));
+        (address[] memory recipientIds, Status[] memory statuses) = abi.decode(_data, (address[], Status[]));
 
         for (uint256 i; i < recipientIds.length;) {
             recipients[recipientIds[i]].status = statuses[i];
@@ -282,7 +286,7 @@ contract AllocationWithOffchainCalculations is BaseAllocationStrategy, Transfer,
             revert VOTING_NOT_ENDED();
         }
 
-        (uint256[] memory recipientIds, PayoutSummary[] memory payout) = abi.decode(_data, (uint256[], PayoutSummary[]));
+        (address[] memory recipientIds, PayoutSummary[] memory payout) = abi.decode(_data, (address[], PayoutSummary[]));
 
         uint256 recipientIdsLength = recipientIds.length;
         if (recipientIdsLength != payout.length) {
@@ -290,7 +294,7 @@ contract AllocationWithOffchainCalculations is BaseAllocationStrategy, Transfer,
         }
 
         for (uint256 i; i < recipientIdsLength;) {
-            uint256 recipientId = recipientIds[i];
+            address recipientId = recipientIds[i];
 
             if (recipients[recipientId].status != Status.ACCEPTED) {
                 revert INVALID_INPUT();

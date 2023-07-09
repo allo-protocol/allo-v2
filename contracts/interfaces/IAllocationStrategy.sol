@@ -19,12 +19,12 @@ interface IAllocationStrategy is IStrategy {
 
     // decode the _data into what's relevant for this strategy
     // update whatever is needed to store the recipient
-    // return the recipientId
-    function registerRecipients(bytes memory _data, address _sender) external payable returns (uint256);
+    // return the recipientId as address
+    function registerRecipients(bytes memory _data, address _sender) external payable returns (address);
 
     // return whether recipient is pending, accepted, or rejected
     // strategies will need to add their own logic to translate to these categories if they use different ones
-    function getRecipientStatus(uint256 _recipientId) external view returns (RecipientStatus);
+    function getRecipientStatus(address _recipientId) external view returns (RecipientStatus);
 
     // decode the _data into what's relevant for this strategy
     // perform whatever actions are necessary (token transfers, storage updates, etc)
@@ -34,7 +34,7 @@ interface IAllocationStrategy is IStrategy {
     function allocate(bytes memory _data, address _sender) external payable;
 
     // generate the payouts for the strategy
-    function getPayout(uint256[] memory _recipientId, bytes memory _data)
+    function getPayout(address[] memory _recipientId, bytes memory _data)
         external
         view
         returns (PayoutSummary[] memory summaries);

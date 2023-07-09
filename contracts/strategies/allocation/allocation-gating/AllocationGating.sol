@@ -18,7 +18,7 @@ abstract contract AllocationGating is BaseAllocationStrategy {
     bool public payoutReady;
 
     ///@notice recipientId -> PayoutSummary
-    mapping(uint256 => PayoutSummary) public payoutSummaries;
+    mapping(address => PayoutSummary) public payoutSummaries;
 
     /// ======================
     /// ======= Events =======
@@ -31,12 +31,12 @@ abstract contract AllocationGating is BaseAllocationStrategy {
     /// ====================================
 
     /// @notice not implemented
-    function registerRecipients(bytes memory, address) external payable override returns (uint256) {
+    function registerRecipients(bytes memory, address) external payable override returns (address) {
         revert NOT_IMPLEMENTED();
     }
 
     /// @notice Checks if msg.sender is eligible for allocation
-    function getRecipientStatus(uint256) external view override returns (RecipientStatus) {
+    function getRecipientStatus(address) external view override returns (RecipientStatus) {
         if (_isEligibleForAllocation(msg.sender)) {
             return RecipientStatus.Accepted;
         }
@@ -62,7 +62,7 @@ abstract contract AllocationGating is BaseAllocationStrategy {
                 revert NOT_ELIGIBLE();
             }
 
-            payoutSummaries[i] = allocation;
+            allocations[i] = allocation;
 
             unchecked {
                 i++;
@@ -74,7 +74,7 @@ abstract contract AllocationGating is BaseAllocationStrategy {
 
     /// @notice Get the payout summary for recipients
     /// @param _recipientId Array of recipient ids
-    function getPayout(uint256[] memory _recipientId, bytes memory)
+    function getPayout(address[] memory _recipientId, bytes memory)
         external
         view
         override

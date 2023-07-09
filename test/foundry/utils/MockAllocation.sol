@@ -22,15 +22,15 @@ contract MockAllocation is IAllocationStrategy {
         _data;
     }
 
-    function registerRecipients(bytes memory, address) external payable override returns (uint256) {
-        return 1;
+    function registerRecipients(bytes memory, address) external payable override returns (address) {
+        return address(1);
     }
 
-    function getRecipientStatus(uint256) external view override returns (RecipientStatus) {}
+    function getRecipientStatus(address) external view override returns (RecipientStatus) {}
 
     function allocate(bytes memory, address) external payable override {}
 
-    function getPayout(uint256[] memory, bytes memory)
+    function getPayout(address[] memory, bytes memory)
         external
         view
         override

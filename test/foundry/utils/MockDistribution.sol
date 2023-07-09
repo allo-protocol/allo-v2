@@ -24,7 +24,7 @@ contract MockDistribution is IDistributionStrategy {
         _data;
     }
 
-    function distribute(uint256[] memory _recipientIds, bytes memory _data, address _sender) external {}
+    function distribute(address[] memory _recipientIds, bytes memory _data, address _sender) external {}
 
     function poolFunded(uint256 _amount) external {}
 }
