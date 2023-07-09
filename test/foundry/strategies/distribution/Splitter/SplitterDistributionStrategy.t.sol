@@ -18,7 +18,7 @@ import {MockToken} from "../../../utils/MockToken.sol";
 contract SplitterDistributionStrategyTest is Test {
     event Initialized(address allo, bytes32 identityId, uint256 indexed poolId, address token, bytes data);
     event PayoutsDistributed(
-        uint256[] recipentIds, IDistributionStrategy.PayoutSummary[] payoutSummary, address sender
+        uint256[] recipientIds, IDistributionStrategy.PayoutSummary[] payoutSummary, address sender
     );
     event PoolFundingIncreased(uint256 amount);
 

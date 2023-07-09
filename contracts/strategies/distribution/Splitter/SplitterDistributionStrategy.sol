@@ -30,7 +30,7 @@ contract SplitterDistributionStrategy is IDistributionStrategy, Transfer, Reentr
     /// === Custom Storage Variables ====
     /// =================================
 
-    /// Recipent.id -> amount paid
+    /// Recipient.id -> amount paid
     mapping(uint256 => uint256) public paidAmounts;
 
     /// ======================
@@ -38,7 +38,7 @@ contract SplitterDistributionStrategy is IDistributionStrategy, Transfer, Reentr
     /// ======================
 
     event Initialized(address allo, bytes32 identityId, uint256 indexed poolId, address token, bytes data);
-    event PayoutsDistributed(uint256[] recipentIds, PayoutSummary[] payoutSummary, address sender);
+    event PayoutsDistributed(uint256[] recipientIds, PayoutSummary[] payoutSummary, address sender);
     event PoolFundingIncreased(uint256 amount);
 
     /// ====================================
@@ -88,10 +88,10 @@ contract SplitterDistributionStrategy is IDistributionStrategy, Transfer, Reentr
     }
 
     /// @notice Distribute the payouts to the recipients
-    /// @param _recipentIds The recipentIds to distribute to
+    /// @param _recipientIds The recipientIds to distribute to
     /// @param _data encoded bytes passed to the allocation strategy
     /// @param _sender The sender of the payouts
-    function distribute(uint256[] memory _recipentIds, bytes calldata _data, address _sender)
+    function distribute(uint256[] memory _recipientIds, bytes calldata _data, address _sender)
         external
         onlyAllo
         nonReentrant
@@ -102,20 +102,20 @@ contract SplitterDistributionStrategy is IDistributionStrategy, Transfer, Reentr
             revert PAYOUT_NOT_READY();
         }
 
-        PayoutSummary[] memory payouts = allocationStrategy.getPayout(_recipentIds, _data);
+        PayoutSummary[] memory payouts = allocationStrategy.getPayout(_recipientIds, _data);
 
-        uint256 recipentIdsLength = _recipentIds.length;
+        uint256 recipientIdsLength = _recipientIds.length;
 
-        for (uint256 i = 0; i < recipentIdsLength;) {
-            uint256 recipentId = _recipentIds[i];
+        for (uint256 i = 0; i < recipientIdsLength;) {
+            uint256 recipientId = _recipientIds[i];
 
-            if (paidAmounts[recipentId] > 0) {
+            if (paidAmounts[recipientId] > 0) {
                 revert ALREADY_DISTRIBUTED();
             }
 
             uint256 amountToTransfer = (amount * payouts[i].percentage) / 1e18;
 
-            paidAmounts[recipentId] = amountToTransfer;
+            paidAmounts[recipientId] = amountToTransfer;
 
             _transferAmount(token, payouts[i].recipient, amountToTransfer);
             unchecked {
@@ -123,7 +123,7 @@ contract SplitterDistributionStrategy is IDistributionStrategy, Transfer, Reentr
             }
         }
 
-        emit PayoutsDistributed(_recipentIds, payouts, _sender);
+        emit PayoutsDistributed(_recipientIds, payouts, _sender);
     }
 
     /// @notice invoked via allo.fundPool to update pool's amount

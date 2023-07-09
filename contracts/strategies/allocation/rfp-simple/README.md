@@ -19,9 +19,9 @@ This strategy will need the following custom variables:
 - `poolOpen` - boolean value that represents whether the pool is accepting new proposals
 - `rfpMetadata` - off-chain metadata about the rfp (details, etc)
 - `decisionMaker` - single address that is allowed to vote
-- `proposal` — contains the recipent's proposal for the rfp
+- `proposal` — contains the recipient's proposal for the rfp
 - `proposalBid` - amount of the pool's token that is being requested for the proposal
-- `localStatus` - the local recipent status. Can be any of the following values:
+- `localStatus` - the local recipient status. Can be any of the following values:
     - `pending` — maps to `pending` global status
     - `accepted` - maps to `accepted` global status
     - `rejected` - maps to `rejected` global status
@@ -35,8 +35,8 @@ The identity admin creates a new pool via `createPool`. At this time, the admin 
 - `rfpMetadata`
 - `decisionMaker`
 
-#### `registerRecipents()`
-Potential applicants can apply to the pool via `registerRecipents`. When the recipent is submitted, the strategy uses the following decision tree to determine eligibility:
+#### `registerRecipients()`
+Potential applicants can apply to the pool via `registerRecipients`. When the recipient is submitted, the strategy uses the following decision tree to determine eligibility:
 
 - Is `poolOpen` true?
     - If yes, proceed
@@ -48,10 +48,10 @@ Potential applicants can apply to the pool via `registerRecipents`. When the rec
     - If yes, proceed
     - If no, revert with message that pool requires a proposal
 - Does `proposalBid` contain a value?
-    - If yes, the recipent is eligible
+    - If yes, the recipient is eligible
     - If no, revert with message that specific bid must be requested
 
-If the recipent is eligible, the strategy stores the recipent and programmatically assigns the `Pending` local status.
+If the recipient is eligible, the strategy stores the recipient and programmatically assigns the `Pending` local status.
 
 #### `allocate()`
 The decision maker is able to choose which proposal (if any) will win the RFP using the `allocate` function. When a new allocate transaction is submitted, the following checks are made:
@@ -60,14 +60,14 @@ The decision maker is able to choose which proposal (if any) will win the RFP us
     - If no, revert with message that voter is not eligible
 
 Within the `allocate` function, the decision maker is able to give one of two commands:
-- Select a winning recipent —> this marks the recipent as `accepted` and all other recipents as `rejected`.
-- Choose not to accept bids —> this marks all recipents as `rejected`
+- Select a winning recipient —> this marks the recipient as `accepted` and all other recipients as `rejected`.
+- Choose not to accept bids —> this marks all recipients as `rejected`
 
 #### `generatePayouts()`
-The `generatePayouts` function checks if there is an accepted recipent.
-- If there is an `accepted` recipent, that recipent is moved to the distribution process
-- If all recipents are `pending`, the transaction reverts with the message that a winner has not been selected yet
-- If all recipents are `rejected`, the funds are made available to be reclaimed by the pool admin
+The `generatePayouts` function checks if there is an accepted recipient.
+- If there is an `accepted` recipient, that recipient is moved to the distribution process
+- If all recipients are `pending`, the transaction reverts with the message that a winner has not been selected yet
+- If all recipients are `rejected`, the funds are made available to be reclaimed by the pool admin
 
 ### Open questions
 - do we need a global "ineligible" status?

@@ -17,7 +17,7 @@ abstract contract AllocationGating is BaseAllocationStrategy {
 
     bool public payoutReady;
 
-    ///@notice recipentId -> PayoutSummary
+    ///@notice recipientId -> PayoutSummary
     mapping(uint256 => PayoutSummary) public payoutSummaries;
 
     /// ======================
@@ -31,16 +31,16 @@ abstract contract AllocationGating is BaseAllocationStrategy {
     /// ====================================
 
     /// @notice not implemented
-    function registerRecipents(bytes memory, address) external payable override returns (uint256) {
+    function registerRecipients(bytes memory, address) external payable override returns (uint256) {
         revert NOT_IMPLEMENTED();
     }
 
     /// @notice Checks if msg.sender is eligible for allocation
-    function getRecipentStatus(uint256) external view override returns (RecipentStatus) {
+    function getRecipientStatus(uint256) external view override returns (RecipientStatus) {
         if (_isEligibleForAllocation(msg.sender)) {
-            return RecipentStatus.Accepted;
+            return RecipientStatus.Accepted;
         }
-        return RecipentStatus.Rejected;
+        return RecipientStatus.Rejected;
     }
 
     /// @notice Set allocations by pool manager
@@ -72,19 +72,19 @@ abstract contract AllocationGating is BaseAllocationStrategy {
         emit Allocated(_data, _sender);
     }
 
-    /// @notice Get the payout summary for recipents
-    /// @param _recipentId Array of recipent ids
-    function getPayout(uint256[] memory _recipentId, bytes memory)
+    /// @notice Get the payout summary for recipients
+    /// @param _recipientId Array of recipient ids
+    function getPayout(uint256[] memory _recipientId, bytes memory)
         external
         view
         override
         returns (PayoutSummary[] memory summaries)
     {
-        uint256 recipentIdLength = _recipentId.length;
-        summaries = new PayoutSummary[](recipentIdLength);
+        uint256 recipientIdLength = _recipientId.length;
+        summaries = new PayoutSummary[](recipientIdLength);
 
-        for (uint256 i = 0; i < recipentIdLength;) {
-            summaries[i] = payoutSummaries[_recipentId[i]];
+        for (uint256 i = 0; i < recipientIdLength;) {
+            summaries[i] = payoutSummaries[_recipientId[i]];
             unchecked {
                 i++;
             }

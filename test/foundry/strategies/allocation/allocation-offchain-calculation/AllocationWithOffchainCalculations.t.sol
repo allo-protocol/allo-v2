@@ -7,28 +7,32 @@ import {Metadata} from "../../../../../contracts/core/libraries/Metadata.sol";
 import {BaseAllocationStrategy} from "../../../../../contracts/strategies/allocation/BaseAllocationStrategy.sol";
 
 contract AllocationWithOffchainCalculationsTest is Test {
-    uint256 public recipentStartTime;
-    uint256 public recipentEndTime;
+    uint256 public recipientStartTime;
+    uint256 public recipientEndTime;
     uint256 public votingStartTime;
     uint256 public votingEndTime;
 
     bool public identityRequired;
 
-    event RecipentSubmitted(
-        uint256 indexed recipentId, bytes32 indexed identityId, address recipient, Metadata metadata, address sender
+    event RecipientSubmitted(
+        uint256 indexed recipientId,
+        bytes32 indexed identityId,
+        address payoutAddress,
+        Metadata metadata,
+        address sender
     );
-    event RecipentStatusUpdated(
-        address indexed applicant, uint256 indexed recipentId, BaseAllocationStrategy.Status status
+    event RecipientStatusUpdated(
+        address indexed applicant, uint256 indexed recipientId, BaseAllocationStrategy.Status status
     );
     event Allocated(bytes data, address indexed allocator);
-    event Claimed(uint256 indexed recipentId, address receipient, uint256 amount);
+    event Claimed(uint256 indexed recipientId, address receipient, uint256 amount);
     event TimestampsUpdated(
-        uint256 recipentStartTime, uint256 recipentEndTime, uint256 votingStartTime, uint256 votingEndTime
+        uint256 recipientStartTime, uint256 recipientEndTime, uint256 votingStartTime, uint256 votingEndTime
     );
 
     function setUp() public {
-        recipentStartTime = 0;
-        recipentEndTime = 0;
+        recipientStartTime = 0;
+        recipientEndTime = 0;
         votingStartTime = 0;
         votingEndTime = 0;
         identityRequired = false;
@@ -36,17 +40,17 @@ contract AllocationWithOffchainCalculationsTest is Test {
 
     function test_initialize() public {}
 
-    function test_registerRecipents_new_recipent() public {}
+    function test_registerRecipients_new_recipient() public {}
 
-    function test_registerRecipents_update_recipent() public {}
+    function test_registerRecipients_update_recipient() public {}
 
-    function testRevert_registerRecipents_APPLICATIONS_NOT_OPEN() public {}
+    function testRevert_registerRecipients_APPLICATIONS_NOT_OPEN() public {}
 
-    function testRevert_registerRecipents_new_recipent_UNAUTHORIZED() public {}
+    function testRevert_registerRecipients_new_recipient_UNAUTHORIZED() public {}
 
-    function testRevert_registerRecipents_update_recipent_UNAUTHORIZED() public {}
+    function testRevert_registerRecipients_update_recipient_UNAUTHORIZED() public {}
 
-    function test_getRecipentStatus() public {}
+    function test_getRecipientStatus() public {}
 
     function test_allocate_native() public {}
 
@@ -62,9 +66,9 @@ contract AllocationWithOffchainCalculationsTest is Test {
 
     function test_getPayout() public {}
 
-    function test_reviewRecipents() public {}
+    function test_reviewRecipients() public {}
 
-    function testRevert_reviewRecipents_UNAUTHORIZED() public {}
+    function testRevert_reviewRecipients_UNAUTHORIZED() public {}
 
     function test_setPayout() public {}
 
@@ -83,7 +87,7 @@ contract AllocationWithOffchainCalculationsTest is Test {
     }
 
     // INVALID_TIME
-    /// @notice recipentStartTime must be before recipentEndTime
+    /// @notice recipientStartTime must be before recipientEndTime
     function testRevert_updateTimestamps_ASBAE_INVALID_TIME() public {
         // Todo: test revert if invalid time
     }
@@ -93,7 +97,7 @@ contract AllocationWithOffchainCalculationsTest is Test {
         // Todo: test revert if invalid time
     }
 
-    /// @notice recipentStartTime must be in the future
+    /// @notice recipientStartTime must be in the future
     function testRevert_updateTimestamps_ASINFUTURE_INVALID_TIME() public {
         // Todo: test revert if invalid time
     }

@@ -16,24 +16,24 @@ abstract contract AltRegistryGating is BaseAllocationStrategy {
     /// === Custom Storage Variables ====
     /// =================================
 
-    /// @notice Struct to hold details of an recipent
-    struct Recipent {
+    /// @notice Struct to hold details of an recipient
+    struct Recipient {
         // TODO:Add
-        address recipent;
+        address recipient;
     }
 
-    /// @notice Simple registry to auto approve recipents
+    /// @notice Simple registry to auto approve recipients
     SimpleProjectRegistry public simpleProjectRegistry;
 
-    /// @notice recipentId - Status
-    mapping(uint256 => RecipentStatus) public recipentStatus;
+    /// @notice recipientId - Status
+    mapping(uint256 => RecipientStatus) public recipientStatus;
 
-    /// @notice recipentId -> Recipent
-    mapping(uint256 => Recipent) public recipents;
+    /// @notice recipientId -> Recipient
+    mapping(uint256 => Recipient) public recipients;
 
     bool public payoutReady;
 
-    ///@notice recipentId -> PayoutSummary
+    ///@notice recipientId -> PayoutSummary
     mapping(uint256 => PayoutSummary) public payoutSummaries;
 
     /// ======================
@@ -61,7 +61,7 @@ abstract contract AltRegistryGating is BaseAllocationStrategy {
     }
 
     // /// @notice apply to the pool
-    // function registerRecipents(bytes memory _data, address) external payable override returns (uint256) {
+    // function registerRecipients(bytes memory _data, address) external payable override returns (uint256) {
     //     address projectId = abi.decode(_data, (address));
     //     if (!simpleProjectRegistry.projects[projectId]) {
     //         // TODO: Add to pool
@@ -69,10 +69,10 @@ abstract contract AltRegistryGating is BaseAllocationStrategy {
     //     revert NOT_ELIGIBLE();
     // }
 
-    // /// @notice Returns the status of the recipent
-    // /// @param _recipentId The recipentId of the recipent
-    // function getRecipentStatus(uint256 _recipentId) external view override returns (RecipentStatus) {
-    //     return recipentStatus[_recipentId];
+    // /// @notice Returns the status of the recipient
+    // /// @param _recipientId The recipientId of the recipient
+    // function getRecipientStatus(uint256 _recipientId) external view override returns (RecipientStatus) {
+    //     return recipientStatus[_recipientId];
     // }
 
     // /// @notice Set allocations by pool manager
@@ -86,7 +86,7 @@ abstract contract AltRegistryGating is BaseAllocationStrategy {
     //     uint256 allocationsLength = allocations.length;
     //     for (uint256 i = 0; i < allocationsLength;) {
 
-    //         // TODO: check if recipent is approved
+    //         // TODO: check if recipient is approved
 
     //         // TODO: Fix this logic
     //         payoutSummaries[i] = allocations[i];
@@ -99,19 +99,19 @@ abstract contract AltRegistryGating is BaseAllocationStrategy {
     //     emit Allocated(_data, _sender);
     // }
 
-    // /// @notice Get the payout summary for recipents
-    // /// @param _recipentId Array of recipent ids
-    // function getPayout(uint256[] memory _recipentId, bytes memory)
+    // /// @notice Get the payout summary for recipients
+    // /// @param _recipientId Array of recipient ids
+    // function getPayout(uint256[] memory _recipientId, bytes memory)
     //     external
     //     view
     //     override
     //     returns (PayoutSummary[] memory summaries)
     // {
-    //     uint256 recipentIdLength = _recipentId.length;
-    //     summaries = new PayoutSummary[](recipentIdLength);
+    //     uint256 recipientIdLength = _recipientId.length;
+    //     summaries = new PayoutSummary[](recipientIdLength);
 
-    //     for (uint256 i = 0; i < recipentIdLength;) {
-    //         summaries[i] = payoutSummaries[_recipentId[i]];
+    //     for (uint256 i = 0; i < recipientIdLength;) {
+    //         summaries[i] = payoutSummaries[_recipientId[i]];
     //         unchecked {
     //             i++;
     //         }

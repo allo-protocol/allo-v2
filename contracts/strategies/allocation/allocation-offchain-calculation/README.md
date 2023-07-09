@@ -23,57 +23,57 @@ As laid out in the [components overview](https://docs.google.com/document/d/1qoO
 ## Spec
 ### Custom Variables
 This strategy will need the following custom variables:
-- `recipentStartTime` — the time at which recipents can start being submitted
-- `recipentEndTime` - the time at which recipents can no longer be submitted
+- `recipientStartTime` — the time at which recipients can start being submitted
+- `recipientEndTime` - the time at which recipients can no longer be submitted
 - `votingStartTime` - the time at which votes can start being submitted
 - `votingEndTime` - the time at which votes can no longer be submitted
-- `identityRequired` - boolean property for whether or not a valid Allo Identity is required for recipent
+- `identityRequired` - boolean property for whether or not a valid Allo Identity is required for recipient
 - `acceptedDonationToken` - the list of tokens (can include the chain's native token) that are accepted for donations
 - `poolMetadata` - Additional pool information stored offchain. This will likely include: 
     - minimum Contribution
     - matchingCap
     - donor matching eligibility requirements (i.e. Passport)
     - Pool details (name, details, etc)
-- `localStatus` - the recipent statuses specific to this strategy. Valid statuses are:
-    - `Pending` - a valid recipent has been submitted, but no decision has been made
+- `localStatus` - the recipient statuses specific to this strategy. Valid statuses are:
+    - `Pending` - a valid recipient has been submitted, but no decision has been made
         - maps to `Pending` global status
     - `Rejected` - not accepted to the pool, and not eligible for fund allocation.
         - Maps to `Rejected` global status.
     - `Accepted` - accepted to the pool, and eligible for fund allocation.
         - Maps to `Accepted` global status.
-    - `Re-applied` — the recipent was originally `Rejected`, but a new recipent has been submitted. No decision has been made on the rerecipent. 
+    - `Re-applied` — the recipient was originally `Rejected`, but a new recipient has been submitted. No decision has been made on the rerecipient. 
         - Maps to `Pending` global status.
 
 ### Standard Functions
 All standard functions are functions that the given user can call from the `Allo.sol` contract.
 #### `createPool()`
 The identity admin creates a new pool via `createPool`. At this time, the admin can set the following variables:
-- `recipentStartTime` 
-- `recipentEndTime` 
+- `recipientStartTime` 
+- `recipientEndTime` 
 - `votingStartTime`
 - `votingEndTime`
 - `identityRequired`
 - `acceptedDonationToken`
 - `poolMetadata`
 
-#### `registerRecipents()`
-Potential applicants can apply to the pool via `registerRecipents`. When the recipent is submitted, the strategy uses the following decision tree to determine eligibility:
+#### `registerRecipients()`
+Potential applicants can apply to the pool via `registerRecipients`. When the recipient is submitted, the strategy uses the following decision tree to determine eligibility:
 
 - Is `identityRequired` true? 
-    - If yes, does the recipent have valid Allo registry identity?
+    - If yes, does the recipient have valid Allo registry identity?
         - If yes, proceed
         - If no, revert with message that pool requires a valid Allo registry identity
-    - If no, does the recipent have valid Allo registry identity?
+    - If no, does the recipient have valid Allo registry identity?
         - If yes, proceed with registry identity
         - If no, assign unique identity and proceed
-- Is the recipent timestamp between `recipentStartTime` and `recipentEndTime`?
-    - If no, revert with message that recipent period is closed
-    - If yes, the recipent is eligible.
+- Is the recipient timestamp between `recipientStartTime` and `recipientEndTime`?
+    - If no, revert with message that recipient period is closed
+    - If yes, the recipient is eligible.
 
 
-If the recipent is eligible, the strategy stores the recipent and assigns one of the following local statuses:
-- `Pending` — the identity has not already submitted an recipent OR the identity has an existing recipent currently marked as `Pending`
-- `Re-applied` — the identity has already submitted an recipent that is currently marked as `Rejected`
+If the recipient is eligible, the strategy stores the recipient and assigns one of the following local statuses:
+- `Pending` — the identity has not already submitted an recipient OR the identity has an existing recipient currently marked as `Pending`
+- `Re-applied` — the identity has already submitted an recipient that is currently marked as `Rejected`
 
 #### `allocate()`
 Donors are able to submit donations to specific recipients via the `allocate` function. The transaction can include donations to one or to multiple recipients. When a new donation is submitted, the following checks are made:
@@ -82,7 +82,7 @@ Donors are able to submit donations to specific recipients via the `allocate` fu
     - If no, revert with message that donation period is closed
 - Do the donation recipients have the `Accepted` status?
     - If yes, proceed
-    - If no, revert with message that the recipients are not valid recipents
+    - If no, revert with message that the recipients are not valid recipients
 - Is the donation in a valid token from the `acceptedDonationToken` list?
     - If yes, proceed
     - If no, revert with message that donation must be in approved token
@@ -101,8 +101,8 @@ The pool admin can begin the distribution process by calling the `generatePayout
 ### Custom Functions
 These are functions that are called via the allocation strategy contract.
 
-#### `reviewRecipents()`
-This function enables the pool admin to decided whether or not an eligible recipent is accepted into the pool. The admin is able to call this function to assign an `Accepted` or `Rejected` status to any eligible recipent (regardless of current status). Note that the admin should be able to bulk assign statuses. 
+#### `reviewRecipients()`
+This function enables the pool admin to decided whether or not an eligible recipient is accepted into the pool. The admin is able to call this function to assign an `Accepted` or `Rejected` status to any eligible recipient (regardless of current status). Note that the admin should be able to bulk assign statuses. 
 
 #### `setAllocation()`
 Since all voter eligibility and calculations are occuring off-chain, the pool admin needs a way to record their calculated allocation on chain. Using this function, the admin can upload an allocation mapping to the contract, which can be referenced from the `generatePayouts` function. 

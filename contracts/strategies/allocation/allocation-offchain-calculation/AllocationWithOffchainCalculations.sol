@@ -8,7 +8,7 @@ import {Transfer} from "../../../core/libraries/Transfer.sol";
 import {ReentrancyGuard} from "@openzeppelin/security/ReentrancyGuard.sol";
 
 /// @title AllocationWithOffchainCalculations
-/// @notice A strategy that allows users to apply to a pool and vote on recipents
+/// @notice A strategy that allows users to apply to a pool and vote on recipients
 /// @dev This strategy is used for QF pools that have offchain calculations
 /// @author allo-team
 contract AllocationWithOffchainCalculations is BaseAllocationStrategy, Transfer, ReentrancyGuard {
@@ -25,11 +25,11 @@ contract AllocationWithOffchainCalculations is BaseAllocationStrategy, Transfer,
     error VOTING_NOT_OPEN();
     error VOTING_NOT_ENDED();
 
-    /// @notice Struct to hold details of an recipent
-    struct Recipent {
+    /// @notice Struct to hold details of an recipient
+    struct Recipient {
         bytes32 identityId;
-        address recipient;
-        uint256 recipentId;
+        address payoutAddress;
+        uint256 recipientId;
         mapping(address => uint256) tokenAmounts;
         Status status;
         Metadata metadata;
@@ -38,7 +38,7 @@ contract AllocationWithOffchainCalculations is BaseAllocationStrategy, Transfer,
 
     /// @notice Struct to hold details of an Allocation
     struct Allocation {
-        uint256 recipentId;
+        uint256 recipientId;
         uint256 amount;
     }
 
@@ -51,7 +51,7 @@ contract AllocationWithOffchainCalculations is BaseAllocationStrategy, Transfer,
 
     /// @notice Struct to hold details of the allocations to claim
     struct Claim {
-        uint256 recipentId;
+        uint256 recipientId;
         address token;
     }
 
@@ -61,8 +61,8 @@ contract AllocationWithOffchainCalculations is BaseAllocationStrategy, Transfer,
 
     Registry public registry;
 
-    uint256 public recipentStartTime;
-    uint256 public recipentEndTime;
+    uint256 public recipientStartTime;
+    uint256 public recipientEndTime;
     uint256 public votingStartTime;
     uint256 public votingEndTime;
     uint256 private _index;
@@ -70,27 +70,27 @@ contract AllocationWithOffchainCalculations is BaseAllocationStrategy, Transfer,
     bool public identityRequired;
     bool public payoutReady;
 
-    /// @notice recipentId - Status
-    mapping(uint256 => RecipentStatus) public recipentStatus;
+    /// @notice recipientId - Status
+    mapping(uint256 => RecipientStatus) public recipientStatus;
 
-    /// @notice recipentId -> Recipent
-    mapping(uint256 => Recipent) public recipents;
+    /// @notice recipientId -> Recipient
+    mapping(uint256 => Recipient) public recipients;
 
-    ///@notice recipentId -> PayoutSummary
+    ///@notice recipientId -> PayoutSummary
     mapping(uint256 => PayoutSummary) public payoutSummaries;
 
     /// ======================
     /// ======= Events =======
     /// ======================
 
-    event RecipentSubmitted(
-        uint256 indexed recipentId, bytes32 indexed identityId, address recipient, Metadata metadata, address sender
+    event RecipientSubmitted(
+        uint256 indexed recipientId, bytes32 indexed identityId, address recipient, Metadata metadata, address sender
     );
-    event RecipentStatusUpdated(address indexed applicant, uint256 indexed recipentId, Status status);
+    event RecipientStatusUpdated(address indexed applicant, uint256 indexed recipientId, Status status);
     event Allocated(bytes data, address indexed allocator);
-    event Claimed(uint256 indexed recipentId, address receipient, uint256 amount);
+    event Claimed(uint256 indexed recipientId, address receipient, uint256 amount);
     event TimestampsUpdated(
-        uint256 recipentStartTime, uint256 recipentEndTime, uint256 votingStartTime, uint256 votingEndTime
+        uint256 recipientStartTime, uint256 recipientEndTime, uint256 votingStartTime, uint256 votingEndTime
     );
 
     /// @notice Initialize the contract
@@ -111,70 +111,70 @@ contract AllocationWithOffchainCalculations is BaseAllocationStrategy, Transfer,
     /// @notice Apply to the pool
     /// @param _data The data to be decoded
     /// @param _sender The sender of the transaction
-    function registerRecipents(bytes memory _data, address _sender)
+    function registerRecipients(bytes memory _data, address _sender)
         external
         payable
         override
         onlyAllo
         returns (uint256)
     {
-        if (recipentStartTime <= block.timestamp || recipentEndTime >= block.timestamp) {
+        if (recipientStartTime <= block.timestamp || recipientEndTime >= block.timestamp) {
             revert APPLICATIONS_NOT_OPEN();
         }
 
-        (uint256 recipentId, address recipient, bytes32 _identityId, Metadata memory metadata) =
+        (uint256 recipientId, address payoutAddress, bytes32 _identityId, Metadata memory metadata) =
             abi.decode(_data, (uint256, address, bytes32, Metadata));
 
         if (identityRequired && !registry.isOwnerOrMemberOfIdentity(identityId, _sender)) {
             revert UNAUTHORIZED();
         }
 
-        Recipent storage recipent;
+        Recipient storage recipient;
 
-        if (recipentId == 0) {
-            // Create a new recipent
-            recipentId = ++_index;
+        if (recipientId == 0) {
+            // Create a new recipient
+            recipientId = ++_index;
 
-            recipent = recipents[recipentId];
-            recipent.identityId = _identityId;
-            recipent.recipentId = recipentId;
-            recipent.recipient = recipient;
-            recipent.status = Status.PENDING;
-            recipent.metadata = metadata;
-            recipent.creator = _sender;
+            recipient = recipients[recipientId];
+            recipient.identityId = _identityId;
+            recipient.recipientId = recipientId;
+            recipient.payoutAddress = payoutAddress;
+            recipient.status = Status.PENDING;
+            recipient.metadata = metadata;
+            recipient.creator = _sender;
         } else {
-            // Update an existing recipent
-            recipent = recipents[recipentId];
+            // Update an existing recipient
+            recipient = recipients[recipientId];
 
-            if (identityRequired && !registry.isOwnerOrMemberOfIdentity(recipent.identityId, _sender)) {
-                // if identityRequired is true, the indentity owner/member can update the recipent
+            if (identityRequired && !registry.isOwnerOrMemberOfIdentity(recipient.identityId, _sender)) {
+                // if identityRequired is true, the indentity owner/member can update the recipient
                 revert UNAUTHORIZED();
-            } else if (recipent.creator != _sender) {
-                // if identityRequired is false, only the creator of the recipent can update it
+            } else if (recipient.creator != _sender) {
+                // if identityRequired is false, only the creator of the recipient can update it
                 revert UNAUTHORIZED();
             }
 
-            // Update the recipent
-            recipent.recipient = recipient;
-            recipent.status = Status.REAPPLIED;
-            recipent.metadata = metadata;
+            // Update the recipient
+            recipient.payoutAddress = payoutAddress;
+            recipient.status = Status.REAPPLIED;
+            recipient.metadata = metadata;
         }
 
-        // Add the recipent to the recipents mapping
-        recipentStatus[recipentId] = IAllocationStrategy.RecipentStatus.Pending;
+        // Add the recipient to the recipients mapping
+        recipientStatus[recipientId] = IAllocationStrategy.RecipientStatus.Pending;
 
-        emit RecipentSubmitted(recipentId, identityId, recipient, metadata, _sender);
+        emit RecipientSubmitted(recipientId, identityId, payoutAddress, metadata, _sender);
 
-        return recipentId;
+        return recipientId;
     }
 
-    /// @notice Returns the status of the recipent
-    /// @param _recipentId The recipentId of the recipent
-    function getRecipentStatus(uint256 _recipentId) external view override returns (RecipentStatus) {
-        return recipentStatus[_recipentId];
+    /// @notice Returns the status of the recipient
+    /// @param _recipientId The recipientId of the recipient
+    function getRecipientStatus(uint256 _recipientId) external view override returns (RecipientStatus) {
+        return recipientStatus[_recipientId];
     }
 
-    /// @notice Allocates votes to the recipent(s)
+    /// @notice Allocates votes to the recipient(s)
     /// @param _data The data to be decoded
     /// @param _sender The sender of the transaction
     function allocate(bytes memory _data, address _sender) external payable override onlyAllo nonReentrant {
@@ -203,8 +203,8 @@ contract AllocationWithOffchainCalculations is BaseAllocationStrategy, Transfer,
                 uint256 amount = allocations.data[j].amount;
                 allocationsTotalAmount -= amount;
 
-                Recipent storage recipent = recipents[allocations.data[j].recipentId];
-                recipent.tokenAmounts[allocations.token] += amount;
+                Recipient storage recipient = recipients[allocations.data[j].recipientId];
+                recipient.tokenAmounts[allocations.token] += amount;
 
                 unchecked {
                     j++;
@@ -222,19 +222,19 @@ contract AllocationWithOffchainCalculations is BaseAllocationStrategy, Transfer,
         emit Allocated(_data, _sender);
     }
 
-    /// @notice Retrieves recipent payout amount
-    /// @param _recipentId recipentId array of the recipents
-    /// @return summaries PayoutSummary array of the recipents
-    function getPayout(uint256[] memory _recipentId, bytes memory)
+    /// @notice Retrieves recipient payout amount
+    /// @param _recipientId recipientId array of the recipients
+    /// @return summaries PayoutSummary array of the recipients
+    function getPayout(uint256[] memory _recipientId, bytes memory)
         external
         view
         returns (PayoutSummary[] memory summaries)
     {
-        uint256 recipentIdLength = _recipentId.length;
-        summaries = new PayoutSummary[](recipentIdLength);
+        uint256 recipientIdLength = _recipientId.length;
+        summaries = new PayoutSummary[](recipientIdLength);
 
-        for (uint256 i = 0; i < recipentIdLength;) {
-            summaries[i] = payoutSummaries[_recipentId[i]];
+        for (uint256 i = 0; i < recipientIdLength;) {
+            summaries[i] = payoutSummaries[_recipientId[i]];
             unchecked {
                 i++;
             }
@@ -245,18 +245,18 @@ contract AllocationWithOffchainCalculations is BaseAllocationStrategy, Transfer,
     /// ========= Custom Functions =========
     /// ====================================
 
-    /// @notice Review recipents
+    /// @notice Review recipients
     /// @param _data The data to be decoded
     /// @dev
-    function reviewRecipents(bytes memory _data) external onlyPoolManager {
-        (uint256[] memory recipentIds, Status[] memory statuses) = abi.decode(_data, (uint256[], Status[]));
+    function reviewRecipients(bytes memory _data) external onlyPoolManager {
+        (uint256[] memory recipientIds, Status[] memory statuses) = abi.decode(_data, (uint256[], Status[]));
 
-        for (uint256 i; i < recipentIds.length;) {
-            recipents[recipentIds[i]].status = statuses[i];
+        for (uint256 i; i < recipientIds.length;) {
+            recipients[recipientIds[i]].status = statuses[i];
             // map to the Allo global status's
-            recipentStatus[recipentIds[i]] = IAllocationStrategy.RecipentStatus.Accepted;
+            recipientStatus[recipientIds[i]] = IAllocationStrategy.RecipientStatus.Accepted;
 
-            emit RecipentStatusUpdated(msg.sender, recipentIds[i], statuses[i]);
+            emit RecipientStatusUpdated(msg.sender, recipientIds[i], statuses[i]);
 
             unchecked {
                 i++;
@@ -264,29 +264,29 @@ contract AllocationWithOffchainCalculations is BaseAllocationStrategy, Transfer,
         }
     }
 
-    /// @notice Set the payout amounts for all the recipents and marks the contract as ready for payout
+    /// @notice Set the payout amounts for all the recipients and marks the contract as ready for payout
     /// @param _data The data to be decoded
-    /// @dev Pool admin can only set payout amounts for `ACCEPTED` recipents
+    /// @dev Pool admin can only set payout amounts for `ACCEPTED` recipients
     function setPayout(bytes memory _data) external onlyPoolManager {
         if (votingEndTime > block.timestamp) {
             revert VOTING_NOT_ENDED();
         }
 
-        (uint256[] memory recipentIds, PayoutSummary[] memory payout) = abi.decode(_data, (uint256[], PayoutSummary[]));
+        (uint256[] memory recipientIds, PayoutSummary[] memory payout) = abi.decode(_data, (uint256[], PayoutSummary[]));
 
-        uint256 recipentIdsLength = recipentIds.length;
-        if (recipentIdsLength != payout.length) {
+        uint256 recipientIdsLength = recipientIds.length;
+        if (recipientIdsLength != payout.length) {
             revert INVALID_INPUT();
         }
 
-        for (uint256 i; i < recipentIdsLength;) {
-            uint256 recipentId = recipentIds[i];
+        for (uint256 i; i < recipientIdsLength;) {
+            uint256 recipientId = recipientIds[i];
 
-            if (recipents[recipentId].status != Status.ACCEPTED) {
+            if (recipients[recipientId].status != Status.ACCEPTED) {
                 revert INVALID_INPUT();
             }
 
-            payoutSummaries[recipentId] = payout[i];
+            payoutSummaries[recipientId] = payout[i];
 
             unchecked {
                 i++;
@@ -296,55 +296,55 @@ contract AllocationWithOffchainCalculations is BaseAllocationStrategy, Transfer,
         payoutReady = true;
     }
 
-    /// @notice Claim the payout for the recipents
+    /// @notice Claim the payout for the recipients
     /// @param _claims The claims to be processed
     function claim(Claim[] calldata _claims) external nonReentrant {
         if (votingEndTime > block.timestamp) {
             revert VOTING_NOT_ENDED();
         }
 
-        uint256 recipentIdsLength = _claims.length;
-        for (uint256 i; i < recipentIdsLength;) {
+        uint256 recipientIdsLength = _claims.length;
+        for (uint256 i; i < recipientIdsLength;) {
             Claim memory singleClaim = _claims[i];
-            Recipent storage recipent = recipents[singleClaim.recipentId];
-            uint256 amount = recipent.tokenAmounts[singleClaim.token];
+            Recipient storage recipient = recipients[singleClaim.recipientId];
+            uint256 amount = recipient.tokenAmounts[singleClaim.token];
 
-            recipent.tokenAmounts[singleClaim.token] = 0;
-            _transferAmount(singleClaim.token, recipent.recipient, amount);
+            recipient.tokenAmounts[singleClaim.token] = 0;
+            _transferAmount(singleClaim.token, recipient.payoutAddress, amount);
 
-            emit Claimed(singleClaim.recipentId, recipent.recipient, amount);
+            emit Claimed(singleClaim.recipientId, recipient.payoutAddress, amount);
             unchecked {
                 i++;
             }
         }
     }
 
-    /// @notice Set the recipent & voting times
-    /// @param _recipentStartTime The recipentStartTime of the pool
-    /// @param _recipentEndTime The recipentEndTime of the pool
+    /// @notice Set the recipient & voting times
+    /// @param _recipientStartTime The recipientStartTime of the pool
+    /// @param _recipientEndTime The recipientEndTime of the pool
     /// @param _votingStartTime The votingStartTime of the pool
     /// @param _votingEndTime The votingEndTime of the pool
     function updateTimestamps(
-        uint256 _recipentStartTime,
-        uint256 _recipentEndTime,
+        uint256 _recipientStartTime,
+        uint256 _recipientEndTime,
         uint256 _votingStartTime,
         uint256 _votingEndTime
     ) external onlyPoolManager {
         if (
-            _recipentStartTime > _recipentEndTime // recipentStartTime must be before recipentEndTime
+            _recipientStartTime > _recipientEndTime // recipientStartTime must be before recipientEndTime
                 || _votingStartTime > _votingEndTime // votingStartTime must be before votingEndTime
-                || _recipentStartTime < block.timestamp // recipentStartTime must be in the future
+                || _recipientStartTime < block.timestamp // recipientStartTime must be in the future
                 || _votingStartTime < block.timestamp // votingStartTime must be in the future
         ) {
             revert INVALID_TIME();
         }
 
-        recipentStartTime = _recipentStartTime;
-        recipentEndTime = _recipentEndTime;
+        recipientStartTime = _recipientStartTime;
+        recipientEndTime = _recipientEndTime;
         votingStartTime = _votingStartTime;
         votingEndTime = _votingEndTime;
 
-        emit TimestampsUpdated(_recipentStartTime, _recipentEndTime, _votingStartTime, _votingEndTime);
+        emit TimestampsUpdated(_recipientStartTime, _recipientEndTime, _votingStartTime, _votingEndTime);
     }
 
     /// @notice Check if the pool is ready to payout
