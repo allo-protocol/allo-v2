@@ -26,8 +26,9 @@ The identity admin creates a new pool via `createPool`. At this time, the admin 
 - `poolOpen`
 - `alternateRegistry`
 
-#### `applytoPool()`
-Potential recipients can apply to the pool via `applyToPool`. When the application is submitted, the strategy uses the following decision tree to determine eligibility:
+#### `registerRecipients()`
+
+Potential recipients can register to the pool via `registerRecipients`. When the registration is submitted, the strategy uses the following decision tree to determine eligibility:
 
 - Is `poolOpen` true?
     - If yes, proceed

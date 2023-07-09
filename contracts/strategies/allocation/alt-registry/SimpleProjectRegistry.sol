@@ -58,6 +58,7 @@ contract SimpleProjectRegistry is Ownable {
             revert ProjectAlreadyInRegistry();
         }
         projects[_project] = true;
+        emit ProjectAdded(_project);
     }
 
     /// @notice Add an array projects to the registry
@@ -68,6 +69,7 @@ contract SimpleProjectRegistry is Ownable {
                 revert ProjectAlreadyInRegistry();
             }
             projects[_projects[i]] = true;
+            emit ProjectAdded(_projects[i]);
         }
     }
 
@@ -75,6 +77,7 @@ contract SimpleProjectRegistry is Ownable {
     /// @param _project The project to remove
     function removeProject(address _project) external onlyOwner {
         projects[_project] = false;
+        emit ProjectRemoved(_project);
     }
 
     /// @notice Remove an array of projects from the registry
@@ -82,6 +85,7 @@ contract SimpleProjectRegistry is Ownable {
     function removeProjects(address[] calldata _projects) external onlyOwner {
         for (uint256 i = 0; i < _projects.length; i++) {
             projects[_projects[i]] = false;
+            emit ProjectRemoved(_projects[i]);
         }
     }
 }

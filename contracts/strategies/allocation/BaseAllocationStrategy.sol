@@ -11,6 +11,7 @@ abstract contract BaseAllocationStrategy is IAllocationStrategy {
 
     error UNAUTHORIZED();
     error STRATEGY_ALREADY_INITIALIZED();
+    error INVALID_ADDRESS();
 
     /// ======================
     /// ======= Events =======
@@ -66,6 +67,10 @@ abstract contract BaseAllocationStrategy is IAllocationStrategy {
     {
         if (initialized) {
             revert STRATEGY_ALREADY_INITIALIZED();
+        }
+
+        if(_allo == address(0)) {
+            revert INVALID_ADDRESS();
         }
 
         initialized = true;
