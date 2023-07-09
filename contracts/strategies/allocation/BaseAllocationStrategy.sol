@@ -18,15 +18,6 @@ abstract contract BaseAllocationStrategy is IAllocationStrategy {
 
     event Initialized(address allo, bytes32 identityId, uint256 poolId, bytes data);
 
-    // Note: this is mapped to the Allo global status's in the mapping below.
-    /// @notice Enum for the local status of the recipient
-    enum Status {
-        PENDING,
-        ACCEPTED,
-        REJECTED,
-        REAPPLIED
-    }
-
     /// ==========================
     /// === Storage Variables ====
     /// ==========================

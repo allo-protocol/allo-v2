@@ -25,6 +25,16 @@ contract AllocationWithOffchainCalculations is BaseAllocationStrategy, Transfer,
     error VOTING_NOT_OPEN();
     error VOTING_NOT_ENDED();
 
+    // Note: this is mapped to the Allo global status's in the mapping below.
+    /// @notice Enum for the local status of the recipient
+    enum Status {
+        NONE,
+        PENDING,
+        ACCEPTED,
+        REJECTED,
+        REAPPLIED
+    }
+
     /// @notice Struct to hold details of an recipient
     struct Recipient {
         bytes32 identityId;
