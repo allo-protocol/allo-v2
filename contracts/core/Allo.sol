@@ -14,14 +14,26 @@ import "../interfaces/IAllocationStrategy.sol";
 import "../interfaces/IDistributionStrategy.sol";
 import "./Registry.sol";
 
+/// @title Allo
+/// @notice Allo contract
+/// @dev This contract is used to create and manage pools
+/// @author allo-team
 contract Allo is Initializable, Ownable, AccessControl {
     using SafeERC20Upgradeable for IERC20Upgradeable;
+
+    /// =======================
+    /// ==== Custom Errors ====
+    /// =======================
 
     /// @notice Custom errors
     error UNAUTHORIZED();
     error TRANSFER_FAILED();
     error NOT_ENOUGH_FUNDS();
     error NOT_APPROVED_STRATEGY();
+
+    /// ==========================
+    /// === Structs & Enums ======
+    /// ==========================
 
     /// @notice Struct to hold details of an Pool
     struct Pool {
@@ -32,6 +44,10 @@ contract Allo is Initializable, Ownable, AccessControl {
         bytes32 managerRole;
         bytes32 adminRole;
     }
+
+    /// =======================
+    /// ====== Constants ======
+    /// =======================
 
     /// @notice Fee denominator
     uint256 public constant FEE_DENOMINATOR = 1e18;
@@ -127,6 +143,7 @@ contract Allo is Initializable, Ownable, AccessControl {
     /// ====================================
 
     /// @notice Checks if the msg sender is the pool owner
+    /// @param _poolId The pool id
     modifier onlyPoolOwner(uint256 _poolId) {
         if (!hasRole(keccak256(abi.encodePacked(_poolId)), msg.sender)) {
             revert UNAUTHORIZED();
@@ -135,6 +152,7 @@ contract Allo is Initializable, Ownable, AccessControl {
     }
 
     /// @notice Checks if the msg sender is a pool admin
+    /// @param _poolId The pool id
     modifier onlyPoolAdmin(uint256 _poolId) {
         if (!_isPoolAdmin(_poolId, msg.sender)) {
             revert UNAUTHORIZED();
@@ -143,6 +161,7 @@ contract Allo is Initializable, Ownable, AccessControl {
     }
 
     /// @notice Checks if the msg sender is a pool manager
+    /// @param _poolId The pool id
     modifier onlyPoolManager(uint256 _poolId) {
         if (!_isPoolManager(_poolId, msg.sender)) {
             revert UNAUTHORIZED();

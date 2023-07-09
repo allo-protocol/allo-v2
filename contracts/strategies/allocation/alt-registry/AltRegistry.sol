@@ -23,16 +23,23 @@ import "@openzeppelin/access/Ownable.sol";
 //an owner, like a DAO, with explicit permission to add and remove projects from
 //the registry.
 contract SimpleProjectRegistry is Ownable {
-    ///////////////////////////////
-    ////////// Variables //////////
-    ///////////////////////////////
+    /// =======================
+    /// ==== Custom Errors ====
+    /// =======================
+
+    /// @notice Error when a project is already in the registry
+    error ProjectAlreadyInRegistry();
+
+    /// ==========================
+    /// === Storage Variables ====
+    /// ==========================
 
     /// @notice The projects in the registry
     mapping(address => bool) public projects;
 
-    ////////////////////////////
-    ////////// Events //////////
-    ////////////////////////////
+    /// ======================
+    /// ======= Events =======
+    /// ======================
 
     /// @notice Emitted when a project is added to the Registry
     /// @param project The project that was added
@@ -42,14 +49,11 @@ contract SimpleProjectRegistry is Ownable {
     /// @param project The project that was removed
     event ProjectRemoved(address indexed project);
 
-    ////////////////////////////
-    ////////// Errors //////////
-    ////////////////////////////
-
-    /// @notice Error when a project is already in the registry
-    error ProjectAlreadyInRegistry();
-
     constructor(address _initialOwner) Ownable(_initialOwner) {}
+
+    /// ====================================
+    /// ==== External/Public Functions =====
+    /// ====================================
 
     /// @notice Add a project to the registry
     /// @param _project The project to add
