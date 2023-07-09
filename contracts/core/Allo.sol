@@ -22,6 +22,7 @@ contract Allo is Initializable, Ownable, AccessControl {
     error TRANSFER_FAILED();
     error NOT_ENOUGH_FUNDS();
     error NOT_APPROVED_STRATEGY();
+    error AMOUNT_MISMATCH();
 
     /// @notice Struct to hold details of an Pool
     struct Pool {
@@ -305,6 +306,9 @@ contract Allo is Initializable, Ownable, AccessControl {
         }
 
         if (_amount > 0) {
+            if (_token == address(0) && msg.value != (_amount + baseFee)) {
+                revert AMOUNT_MISMATCH();
+            }
             _fundPool(_token, _amount, poolId, _distributionStrategy);
         }
 
@@ -338,6 +342,10 @@ contract Allo is Initializable, Ownable, AccessControl {
     function fundPool(uint256 _poolId, uint256 _amount, address _token) external payable {
         if (_amount == 0) {
             revert NOT_ENOUGH_FUNDS();
+        }
+
+        if (_token == address(0) && msg.value != _amount) {
+            revert AMOUNT_MISMATCH();
         }
 
         _fundPool(_token, _amount, _poolId, pools[_poolId].distributionStrategy);

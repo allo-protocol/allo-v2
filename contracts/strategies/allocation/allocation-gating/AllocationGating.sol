@@ -91,6 +91,11 @@ abstract contract AllocationGating is BaseAllocationStrategy {
         }
     }
 
+    /// @notice Set ready for payout
+    function setReadyForPayout(bool _ready) external onlyPoolManager {
+        payoutReady = _ready;
+    }
+
     /// @notice Check if the strategy is ready to payout
     function readyToPayout(bytes memory) external view override returns (bool) {
         return payoutReady;
