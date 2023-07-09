@@ -467,6 +467,15 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
         return address(pools[_poolId].distributionStrategy);
     }
 
+    /// @notice Transfer thefunds recovered  to the recipient
+    /// @param _token The address of the token to transfer
+    /// @param _recipient The address of the recipient
+    function recoverFunds(address _token, address _recipient) external onlyOwner {
+        uint256 amount =
+            _token == address(0) ? address(this).balance : IERC20Upgradeable(_token).balanceOf(address(this));
+        _transferAmount(_token, _recipient, amount);
+    }
+
     /// ====================================
     /// ======= Internal Functions =========
     /// ====================================
@@ -529,11 +538,5 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     /// @return bool
     function _isPoolManager(uint256 _poolId, address _address) internal view returns (bool) {
         return hasRole(pools[_poolId].managerRole, _address);
-    }
-
-    function recoverFunds(address _token, address _recipient) external onlyOwner {
-        uint256 amount =
-            _token == address(0) ? address(this).balance : IERC20Upgradeable(_token).balanceOf(address(this));
-        _transferAmount(_token, _recipient, amount);
     }
 }
