@@ -1,54 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
+import "../BaseStrategy.sol";
 import "../../interfaces/IAllocationStrategy.sol";
-import "../../core/Allo.sol";
 
-abstract contract BaseAllocationStrategy is IAllocationStrategy {
-    /// ======================
-    /// ======= Errors =======
-    /// ======================
-
-    error UNAUTHORIZED();
-    error STRATEGY_ALREADY_INITIALIZED();
-    error INVALID_ADDRESS();
-
-    /// ======================
-    /// ======= Events =======
-    /// ======================
-
-    event Initialized(address allo, bytes32 identityId, uint256 poolId, bytes data);
-
-    /// ==========================
-    /// === Storage Variables ====
-    /// ==========================
-
-    bytes32 public identityId;
-    Allo public allo;
-
-    uint256 public poolId;
-    bool public initialized;
-
-    /// ====================================
-    /// =========== Modifier ===============
-    /// ====================================
-
-    /// @notice Modifier to check if the caller is the Allo contract
-    modifier onlyAllo() {
-        if (msg.sender != address(allo) || address(allo) == address(0)) {
-            revert UNAUTHORIZED();
-        }
-        _;
-    }
-
-    /// @notice Modifier to check if the caller is a pool manager
-    modifier onlyPoolManager() {
-        if (!allo.isPoolManager(poolId, msg.sender)) {
-            revert UNAUTHORIZED();
-        }
-        _;
-    }
-
+abstract contract BaseAllocationStrategy is BaseStrategy, IAllocationStrategy {
     /// ====================================
     /// =========== Functions ==============
     /// ====================================
@@ -65,20 +21,6 @@ abstract contract BaseAllocationStrategy is IAllocationStrategy {
         override
         onlyAllo
     {
-        if (initialized) {
-            revert STRATEGY_ALREADY_INITIALIZED();
-        }
-
-        if (_allo == address(0)) {
-            revert INVALID_ADDRESS();
-        }
-
-        initialized = true;
-
-        allo = Allo(_allo);
-        identityId = _identityId;
-        poolId = _poolId;
-
-        emit Initialized(_allo, _identityId, _poolId, _data);
+        __BaseStrategy_init(_allo, _identityId, _poolId, _data);
     }
 }

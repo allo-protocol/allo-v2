@@ -1,30 +1,15 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import {IAllocationStrategy} from "../../../interfaces/IAllocationStrategy.sol";
-import {IDistributionStrategy} from "../../../interfaces/IDistributionStrategy.sol";
-import {Allo} from "../../../core/Allo.sol";
+import "../BaseDistributionStrategy.sol";
 import {Transfer} from "../../../core/libraries/Transfer.sol";
 import {ReentrancyGuard} from "@openzeppelin/security/ReentrancyGuard.sol";
 
-contract SplitterDistributionStrategy is IDistributionStrategy, Transfer, ReentrancyGuard {
+contract SplitterDistributionStrategy is BaseDistributionStrategy, Transfer, ReentrancyGuard {
     /// @notice Custom errors
-    error STRATEGY_ALREADY_INITIALIZED();
-    error UNAUTHORIZED();
     error PAYOUT_NOT_READY();
     error PAYOUT_FINALIZED();
     error ALREADY_DISTRIBUTED();
-
-    /// ==========================
-    /// === Storage Variables ====
-    /// ==========================
-
-    Allo public allo;
-    bool public initialized;
-    bytes32 public identityId;
-    uint256 public poolId;
-    uint256 public amount;
-    address public token;
 
     /// =================================
     /// === Custom Storage Variables ====
@@ -37,29 +22,7 @@ contract SplitterDistributionStrategy is IDistributionStrategy, Transfer, Reentr
     /// ======= Events =======
     /// ======================
 
-    event Initialized(address allo, bytes32 identityId, uint256 indexed poolId, address token, bytes data);
     event PayoutsDistributed(address[] recipientIds, PayoutSummary[] payoutSummary, address sender);
-    event PoolFundingIncreased(uint256 amount);
-
-    /// ====================================
-    /// =========== Modifier ===============
-    /// ====================================
-
-    /// @notice Modifier to check if the caller is the Allo contract
-    modifier onlyAllo() {
-        if (msg.sender != address(allo) || address(allo) == address(0)) {
-            revert UNAUTHORIZED();
-        }
-        _;
-    }
-
-    /// @notice Modifier to check if the caller is a pool manager
-    modifier onlyPoolManager() {
-        if (!allo.isPoolManager(poolId, msg.sender)) {
-            revert UNAUTHORIZED();
-        }
-        _;
-    }
 
     /// @notice Initialize the contract
     /// @param _allo The address of the Allo contract
@@ -69,22 +32,10 @@ contract SplitterDistributionStrategy is IDistributionStrategy, Transfer, Reentr
     /// @param _data unused for this strategy
     /// @dev This function is called by the Allo contract
     function initialize(address _allo, bytes32 _identityId, uint256 _poolId, address _token, bytes memory _data)
-        external
+        public
         override
-        onlyAllo
     {
-        if (initialized) {
-            revert STRATEGY_ALREADY_INITIALIZED();
-        }
-
-        initialized = true;
-
-        allo = Allo(_allo);
-        identityId = _identityId;
-        poolId = _poolId;
-        token = _token;
-
-        emit Initialized(_allo, _identityId, _poolId, _token, _data);
+        super.initialize(_allo, _identityId, _poolId, _token, _data);
     }
 
     /// @notice Distribute the payouts to the recipients
@@ -128,12 +79,11 @@ contract SplitterDistributionStrategy is IDistributionStrategy, Transfer, Reentr
 
     /// @notice invoked via allo.fundPool to update pool's amount
     /// @param _amount amount by which pool is increased
-    function poolFunded(uint256 _amount) external onlyAllo {
+    function poolFunded(uint256 _amount) public override onlyAllo {
         if (IAllocationStrategy(allo.getAllocationStrategy(poolId)).readyToPayout("0x")) {
             revert PAYOUT_FINALIZED();
         }
-        amount += _amount;
-        emit PoolFundingIncreased(amount);
+        super.poolFunded(_amount);
     }
 
     receive() external payable onlyAllo {}
