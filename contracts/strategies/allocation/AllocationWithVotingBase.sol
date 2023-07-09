@@ -71,7 +71,7 @@ contract AllocationWithVotingBase is BaseAllocationStrategy, Transfer, Reentranc
     bool public payoutReady;
 
     /// @notice recipentId - Status
-    mapping(uint256 => ApplicationStatus) public applicationStatus;
+    mapping(uint256 => RecipentStatus) public recipentStatus;
 
     /// @notice recipentId -> Application
     mapping(uint256 => Application) public applications;
@@ -86,7 +86,7 @@ contract AllocationWithVotingBase is BaseAllocationStrategy, Transfer, Reentranc
     event ApplicationSubmitted(
         uint256 indexed recipentId, bytes32 indexed identityId, address recipient, Metadata metadata, address sender
     );
-    event ApplicationStatusUpdated(address indexed applicant, uint256 indexed recipentId, Status status);
+    event RecipentStatusUpdated(address indexed applicant, uint256 indexed recipentId, Status status);
     event Allocated(bytes data, address indexed allocator);
     event Claimed(uint256 indexed recipentId, address receipient, uint256 amount);
     event TimestampsUpdated(
@@ -161,7 +161,7 @@ contract AllocationWithVotingBase is BaseAllocationStrategy, Transfer, Reentranc
         }
 
         // Add the application to the applications mapping
-        applicationStatus[recipentId] = IAllocationStrategy.ApplicationStatus.Pending;
+        recipentStatus[recipentId] = IAllocationStrategy.RecipentStatus.Pending;
 
         emit ApplicationSubmitted(recipentId, identityId, recipient, metadata, _sender);
 
@@ -170,8 +170,8 @@ contract AllocationWithVotingBase is BaseAllocationStrategy, Transfer, Reentranc
 
     /// @notice Returns the status of the application
     /// @param _recipentId The recipentId of the application
-    function getRecipentStatus(uint256 _recipentId) external view override returns (ApplicationStatus) {
-        return applicationStatus[_recipentId];
+    function getRecipentStatus(uint256 _recipentId) external view override returns (RecipentStatus) {
+        return recipentStatus[_recipentId];
     }
 
     /// @notice Allocates votes to the application(s)
@@ -254,9 +254,9 @@ contract AllocationWithVotingBase is BaseAllocationStrategy, Transfer, Reentranc
         for (uint256 i; i < recipentIds.length;) {
             applications[recipentIds[i]].status = statuses[i];
             // map to the Allo global status's
-            applicationStatus[recipentIds[i]] = IAllocationStrategy.ApplicationStatus.Accepted;
+            recipentStatus[recipentIds[i]] = IAllocationStrategy.RecipentStatus.Accepted;
 
-            emit ApplicationStatusUpdated(msg.sender, recipentIds[i], statuses[i]);
+            emit RecipentStatusUpdated(msg.sender, recipentIds[i], statuses[i]);
 
             unchecked {
                 i++;

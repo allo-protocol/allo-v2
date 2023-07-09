@@ -36,11 +36,11 @@ abstract contract AllocationGating is BaseAllocationStrategy {
     }
 
     /// @notice Checks if msg.sender is eligible for allocation
-    function getRecipentStatus(uint256) external view override returns (ApplicationStatus) {
+    function getRecipentStatus(uint256) external view override returns (RecipentStatus) {
         if (_isEligibleForAllocation(msg.sender)) {
-            return ApplicationStatus.Accepted;
+            return RecipentStatus.Accepted;
         }
-        return ApplicationStatus.Rejected;
+        return RecipentStatus.Rejected;
     }
 
     /// @notice Set allocations by pool manager
@@ -71,8 +71,8 @@ abstract contract AllocationGating is BaseAllocationStrategy {
         emit Allocated(_data, _sender);
     }
 
-    /// @notice Get the payout summary for applications
-    /// @param _recipentId Array of application ids
+    /// @notice Get the payout summary for recipents
+    /// @param _recipentId Array of recipent ids
     function getPayout(uint256[] memory _recipentId, bytes memory)
         external
         view

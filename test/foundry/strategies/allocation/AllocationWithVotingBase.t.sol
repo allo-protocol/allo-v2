@@ -17,7 +17,7 @@ contract AllocationWithVotingBaseTest is Test {
     event ApplicationSubmitted(
         uint256 indexed recipentId, bytes32 indexed identityId, address recipient, Metadata metadata, address sender
     );
-    event ApplicationStatusUpdated(
+    event RecipentStatusUpdated(
         address indexed applicant, uint256 indexed recipentId, BaseAllocationStrategy.Status status
     );
     event Allocated(bytes data, address indexed allocator);

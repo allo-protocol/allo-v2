@@ -26,7 +26,7 @@ abstract contract AltRegistryGating is BaseAllocationStrategy {
     SimpleProjectRegistry public simpleProjectRegistry;
 
     /// @notice recipentId - Status
-    mapping(uint256 => ApplicationStatus) public applicationStatus;
+    mapping(uint256 => RecipentStatus) public recipentStatus;
 
     /// @notice recipentId -> Application
     mapping(uint256 => Application) public applications;
@@ -71,8 +71,8 @@ abstract contract AltRegistryGating is BaseAllocationStrategy {
 
     // /// @notice Returns the status of the application
     // /// @param _recipentId The recipentId of the application
-    // function getRecipentStatus(uint256 _recipentId) external view override returns (ApplicationStatus) {
-    //     return applicationStatus[_recipentId];
+    // function getRecipentStatus(uint256 _recipentId) external view override returns (RecipentStatus) {
+    //     return recipentStatus[_recipentId];
     // }
 
     // /// @notice Set allocations by pool manager
