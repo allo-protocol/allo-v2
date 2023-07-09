@@ -2,11 +2,11 @@ pragma solidity 0.8.19;
 
 import "forge-std/Test.sol";
 
-import "../../../../contracts/interfaces/IAllocationStrategy.sol";
-import {Metadata} from "../../../../contracts/core/libraries/Metadata.sol";
-import {BaseAllocationStrategy} from "../../../../contracts/strategies/allocation/BaseAllocationStrategy.sol";
+import "../../../../../contracts/interfaces/IAllocationStrategy.sol";
+import {Metadata} from "../../../../../contracts/core/libraries/Metadata.sol";
+import {BaseAllocationStrategy} from "../../../../../contracts/strategies/allocation/BaseAllocationStrategy.sol";
 
-contract AllocationWithVotingBaseTest is Test {
+contract AllocationWithOffchainCalculationsTest is Test {
     uint256 public recipentStartTime;
     uint256 public recipentEndTime;
     uint256 public votingStartTime;

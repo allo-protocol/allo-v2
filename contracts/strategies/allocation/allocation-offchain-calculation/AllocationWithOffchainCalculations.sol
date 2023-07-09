@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import "./BaseAllocationStrategy.sol";
-import {Registry} from "../../core/Registry.sol";
-import {Metadata} from "../../core/libraries/Metadata.sol";
-import {Transfer} from "../../core/libraries/Transfer.sol";
+import "../BaseAllocationStrategy.sol";
+import {Registry} from "../../../core/Registry.sol";
+import {Metadata} from "../../../core/libraries/Metadata.sol";
+import {Transfer} from "../../../core/libraries/Transfer.sol";
 import {ReentrancyGuard} from "@openzeppelin/security/ReentrancyGuard.sol";
 
-/// @title AllocationWithVotingBase
+/// @title AllocationWithOffchainCalculations
 /// @notice A strategy that allows users to apply to a pool and vote on recipents
 /// @dev This strategy is used for QF pools that have offchain calculations
 /// @author allo-team
-contract AllocationWithVotingBase is BaseAllocationStrategy, Transfer, ReentrancyGuard {
+contract AllocationWithOffchainCalculations is BaseAllocationStrategy, Transfer, ReentrancyGuard {
     /// ======================
     /// ======= Errors =======
     /// ======================

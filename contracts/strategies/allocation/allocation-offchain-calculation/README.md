@@ -1,4 +1,4 @@
-Spec: Donation Voting with Offchain Calculation
+Spec: Donation Allocation with Offchain Calculation
 ---------------------------------
 
 ## Overview 
