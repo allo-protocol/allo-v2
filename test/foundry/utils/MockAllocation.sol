@@ -29,13 +29,13 @@ contract MockAllocation is IAllocationStrategy {
         return 1;
     }
 
-    function getApplicationStatus(uint256 _applicationId) external view override returns (ApplicationStatus) {
+    function getApplicationStatus(uint256 _recipentId) external view override returns (ApplicationStatus) {
         // return ApplicationStatus.Applied;
     }
 
     function allocate(bytes memory _data, address _sender) external payable override {}
 
-    function getPayout(uint256[] memory _applicationId, bytes memory _data)
+    function getPayout(uint256[] memory _recipentId, bytes memory _data)
         external
         view
         override

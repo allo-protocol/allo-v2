@@ -29,7 +29,7 @@ contract AllocationWithVotingBase is BaseAllocationStrategy, Transfer, Reentranc
     struct Application {
         bytes32 identityId;
         address recipient;
-        uint256 applicationId;
+        uint256 recipentId;
         mapping(address => uint256) tokenAmounts;
         Status status;
         Metadata metadata;
@@ -38,7 +38,7 @@ contract AllocationWithVotingBase is BaseAllocationStrategy, Transfer, Reentranc
 
     /// @notice Struct to hold details of an Allocation
     struct Allocation {
-        uint256 applicationId;
+        uint256 recipentId;
         uint256 amount;
     }
 
@@ -51,7 +51,7 @@ contract AllocationWithVotingBase is BaseAllocationStrategy, Transfer, Reentranc
 
     /// @notice Struct to hold details of the allocations to claim
     struct Claim {
-        uint256 applicationId;
+        uint256 recipentId;
         address token;
     }
 
@@ -70,13 +70,13 @@ contract AllocationWithVotingBase is BaseAllocationStrategy, Transfer, Reentranc
     bool public identityRequired;
     bool public payoutReady;
 
-    /// @notice applicationId - Status
+    /// @notice recipentId - Status
     mapping(uint256 => ApplicationStatus) public applicationStatus;
 
-    /// @notice applicationId -> Application
+    /// @notice recipentId -> Application
     mapping(uint256 => Application) public applications;
 
-    ///@notice applicationId -> PayoutSummary
+    ///@notice recipentId -> PayoutSummary
     mapping(uint256 => PayoutSummary) public payoutSummaries;
 
     /// ======================
@@ -84,11 +84,11 @@ contract AllocationWithVotingBase is BaseAllocationStrategy, Transfer, Reentranc
     /// ======================
 
     event ApplicationSubmitted(
-        uint256 indexed applicationId, bytes32 indexed identityId, address recipient, Metadata metadata, address sender
+        uint256 indexed recipentId, bytes32 indexed identityId, address recipient, Metadata metadata, address sender
     );
-    event ApplicationStatusUpdated(address indexed applicant, uint256 indexed applicationId, Status status);
+    event ApplicationStatusUpdated(address indexed applicant, uint256 indexed recipentId, Status status);
     event Allocated(bytes data, address indexed allocator);
-    event Claimed(uint256 indexed applicationId, address receipient, uint256 amount);
+    event Claimed(uint256 indexed recipentId, address receipient, uint256 amount);
     event TimestampsUpdated(
         uint256 applicationStartTime, uint256 applicationEndTime, uint256 votingStartTime, uint256 votingEndTime
     );
@@ -116,7 +116,7 @@ contract AllocationWithVotingBase is BaseAllocationStrategy, Transfer, Reentranc
             revert APPLICATIONS_NOT_OPEN();
         }
 
-        (uint256 applicationId, address recipient, bytes32 _identityId, Metadata memory metadata) =
+        (uint256 recipentId, address recipient, bytes32 _identityId, Metadata memory metadata) =
             abi.decode(_data, (uint256, address, bytes32, Metadata));
 
         if (identityRequired && !registry.isOwnerOrMemberOfIdentity(identityId, _sender)) {
@@ -125,20 +125,20 @@ contract AllocationWithVotingBase is BaseAllocationStrategy, Transfer, Reentranc
 
         Application storage application;
 
-        if (applicationId == 0) {
+        if (recipentId == 0) {
             // Create a new application
-            applicationId = ++_index;
+            recipentId = ++_index;
 
-            application = applications[applicationId];
+            application = applications[recipentId];
             application.identityId = _identityId;
-            application.applicationId = applicationId;
+            application.recipentId = recipentId;
             application.recipient = recipient;
             application.status = Status.PENDING;
             application.metadata = metadata;
             application.creator = _sender;
         } else {
             // Update an existing application
-            application = applications[applicationId];
+            application = applications[recipentId];
 
             if (identityRequired && !registry.isOwnerOrMemberOfIdentity(application.identityId, _sender)) {
                 // if identityRequired is true, the indentity owner/member can update the application
@@ -155,17 +155,17 @@ contract AllocationWithVotingBase is BaseAllocationStrategy, Transfer, Reentranc
         }
 
         // Add the application to the applications mapping
-        applicationStatus[applicationId] = IAllocationStrategy.ApplicationStatus.Pending;
+        applicationStatus[recipentId] = IAllocationStrategy.ApplicationStatus.Pending;
 
-        emit ApplicationSubmitted(applicationId, identityId, recipient, metadata, _sender);
+        emit ApplicationSubmitted(recipentId, identityId, recipient, metadata, _sender);
 
-        return applicationId;
+        return recipentId;
     }
 
     /// @notice Returns the status of the application
-    /// @param _applicationId The applicationId of the application
-    function getApplicationStatus(uint256 _applicationId) external view override returns (ApplicationStatus) {
-        return applicationStatus[_applicationId];
+    /// @param _recipentId The recipentId of the application
+    function getApplicationStatus(uint256 _recipentId) external view override returns (ApplicationStatus) {
+        return applicationStatus[_recipentId];
     }
 
     /// @notice Allocates votes to the application(s)
@@ -197,7 +197,7 @@ contract AllocationWithVotingBase is BaseAllocationStrategy, Transfer, Reentranc
                 uint256 amount = allocations.data[j].amount;
                 allocationsTotalAmount -= amount;
 
-                Application storage application = applications[allocations.data[j].applicationId];
+                Application storage application = applications[allocations.data[j].recipentId];
                 application.tokenAmounts[allocations.token] += amount;
 
                 unchecked {
@@ -217,18 +217,18 @@ contract AllocationWithVotingBase is BaseAllocationStrategy, Transfer, Reentranc
     }
 
     /// @notice Retrieves application payout amount
-    /// @param _applicationId ApplicationId array of the applications
+    /// @param _recipentId recipentId array of the applications
     /// @return summaries PayoutSummary array of the applications
-    function getPayout(uint256[] memory _applicationId, bytes memory)
+    function getPayout(uint256[] memory _recipentId, bytes memory)
         external
         view
         returns (PayoutSummary[] memory summaries)
     {
-        uint256 applicationIdLength = _applicationId.length;
-        summaries = new PayoutSummary[](applicationIdLength);
+        uint256 recipentIdLength = _recipentId.length;
+        summaries = new PayoutSummary[](recipentIdLength);
 
-        for (uint256 i = 0; i < applicationIdLength;) {
-            summaries[i] = payoutSummaries[_applicationId[i]];
+        for (uint256 i = 0; i < recipentIdLength;) {
+            summaries[i] = payoutSummaries[_recipentId[i]];
             unchecked {
                 i++;
             }
@@ -243,14 +243,14 @@ contract AllocationWithVotingBase is BaseAllocationStrategy, Transfer, Reentranc
     /// @param _data The data to be decoded
     /// @dev
     function reviewApplications(bytes memory _data) external onlyPoolManager {
-        (uint256[] memory applicationIds, Status[] memory statuses) = abi.decode(_data, (uint256[], Status[]));
+        (uint256[] memory recipentIds, Status[] memory statuses) = abi.decode(_data, (uint256[], Status[]));
 
-        for (uint256 i; i < applicationIds.length;) {
-            applications[applicationIds[i]].status = statuses[i];
+        for (uint256 i; i < recipentIds.length;) {
+            applications[recipentIds[i]].status = statuses[i];
             // map to the Allo global status's
-            applicationStatus[applicationIds[i]] = IAllocationStrategy.ApplicationStatus.Accepted;
+            applicationStatus[recipentIds[i]] = IAllocationStrategy.ApplicationStatus.Accepted;
 
-            emit ApplicationStatusUpdated(msg.sender, applicationIds[i], statuses[i]);
+            emit ApplicationStatusUpdated(msg.sender, recipentIds[i], statuses[i]);
 
             unchecked {
                 i++;
@@ -266,22 +266,21 @@ contract AllocationWithVotingBase is BaseAllocationStrategy, Transfer, Reentranc
             revert VOTING_NOT_ENDED();
         }
 
-        (uint256[] memory applicationIds, PayoutSummary[] memory payout) =
-            abi.decode(_data, (uint256[], PayoutSummary[]));
+        (uint256[] memory recipentIds, PayoutSummary[] memory payout) = abi.decode(_data, (uint256[], PayoutSummary[]));
 
-        uint256 applicationIdsLength = applicationIds.length;
-        if (applicationIdsLength != payout.length) {
+        uint256 recipentIdsLength = recipentIds.length;
+        if (recipentIdsLength != payout.length) {
             revert INVALID_INPUT();
         }
 
-        for (uint256 i; i < applicationIdsLength;) {
-            uint256 applicationId = applicationIds[i];
+        for (uint256 i; i < recipentIdsLength;) {
+            uint256 recipentId = recipentIds[i];
 
-            if (applications[applicationId].status != Status.ACCEPTED) {
+            if (applications[recipentId].status != Status.ACCEPTED) {
                 revert INVALID_INPUT();
             }
 
-            payoutSummaries[applicationId] = payout[i];
+            payoutSummaries[recipentId] = payout[i];
 
             unchecked {
                 i++;
@@ -298,16 +297,16 @@ contract AllocationWithVotingBase is BaseAllocationStrategy, Transfer, Reentranc
             revert VOTING_NOT_ENDED();
         }
 
-        uint256 applicationIdsLength = _claims.length;
-        for (uint256 i; i < applicationIdsLength;) {
+        uint256 recipentIdsLength = _claims.length;
+        for (uint256 i; i < recipentIdsLength;) {
             Claim memory singleClaim = _claims[i];
-            Application storage application = applications[singleClaim.applicationId];
+            Application storage application = applications[singleClaim.recipentId];
             uint256 amount = application.tokenAmounts[singleClaim.token];
 
             application.tokenAmounts[singleClaim.token] = 0;
             _transferAmount(singleClaim.token, application.recipient, amount);
 
-            emit Claimed(singleClaim.applicationId, application.recipient, amount);
+            emit Claimed(singleClaim.recipentId, application.recipient, amount);
             unchecked {
                 i++;
             }

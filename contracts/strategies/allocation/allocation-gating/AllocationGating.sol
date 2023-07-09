@@ -17,7 +17,7 @@ abstract contract AllocationGating is BaseAllocationStrategy {
 
     bool public payoutReady;
 
-    ///@notice applicationId -> PayoutSummary
+    ///@notice recipentId -> PayoutSummary
     mapping(uint256 => PayoutSummary) public payoutSummaries;
 
     /// ======================
@@ -72,18 +72,18 @@ abstract contract AllocationGating is BaseAllocationStrategy {
     }
 
     /// @notice Get the payout summary for applications
-    /// @param _applicationId Array of application ids
-    function getPayout(uint256[] memory _applicationId, bytes memory)
+    /// @param _recipentId Array of application ids
+    function getPayout(uint256[] memory _recipentId, bytes memory)
         external
         view
         override
         returns (PayoutSummary[] memory summaries)
     {
-        uint256 applicationIdLength = _applicationId.length;
-        summaries = new PayoutSummary[](applicationIdLength);
+        uint256 recipentIdLength = _recipentId.length;
+        summaries = new PayoutSummary[](recipentIdLength);
 
-        for (uint256 i = 0; i < applicationIdLength;) {
-            summaries[i] = payoutSummaries[_applicationId[i]];
+        for (uint256 i = 0; i < recipentIdLength;) {
+            summaries[i] = payoutSummaries[_recipentId[i]];
             unchecked {
                 i++;
             }

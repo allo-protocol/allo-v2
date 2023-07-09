@@ -312,7 +312,7 @@ contract Allo is Initializable, Ownable, AccessControl {
     }
 
     /// @notice passes _data through to the allocation strategy for that pool
-    /// @notice returns the applicationId from the allocation strategy
+    /// @notice returns the recipentId from the allocation strategy
     /// @param _poolId id of the pool
     /// @param _data encoded data unique to the allocation strategy for that pool
     function applyToPool(uint256 _poolId, bytes memory _data) external payable returns (uint256) {
@@ -365,8 +365,8 @@ contract Allo is Initializable, Ownable, AccessControl {
     /// @notice passes _data & msg.sender through to the disribution strategy for that pool
     /// @param _poolId id of the pool
     /// @param _data encoded data unique to the distributionStrategy strategy for that pool
-    function distribute(uint256 _poolId, uint256[] memory _applicationIds, bytes memory _data) external {
-        pools[_poolId].distributionStrategy.distribute(_applicationIds, _data, msg.sender);
+    function distribute(uint256 _poolId, uint256[] memory _recipentIds, bytes memory _data) external {
+        pools[_poolId].distributionStrategy.distribute(_recipentIds, _data, msg.sender);
     }
 
     /// @notice Updates the registry address

@@ -15,13 +15,13 @@ contract AllocationWithVotingBaseTest is Test {
     bool public identityRequired;
 
     event ApplicationSubmitted(
-        uint256 indexed applicationId, bytes32 indexed identityId, address recipient, Metadata metadata, address sender
+        uint256 indexed recipentId, bytes32 indexed identityId, address recipient, Metadata metadata, address sender
     );
     event ApplicationStatusUpdated(
-        address indexed applicant, uint256 indexed applicationId, BaseAllocationStrategy.Status status
+        address indexed applicant, uint256 indexed recipentId, BaseAllocationStrategy.Status status
     );
     event Allocated(bytes data, address indexed allocator);
-    event Claimed(uint256 indexed applicationId, address receipient, uint256 amount);
+    event Claimed(uint256 indexed recipentId, address receipient, uint256 amount);
     event TimestampsUpdated(
         uint256 applicationStartTime, uint256 applicationEndTime, uint256 votingStartTime, uint256 votingEndTime
     );

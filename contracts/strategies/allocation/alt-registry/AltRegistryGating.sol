@@ -25,15 +25,15 @@ abstract contract AltRegistryGating is BaseAllocationStrategy {
     /// @notice Simple registry to auto approve applications
     SimpleProjectRegistry public simpleProjectRegistry;
 
-    /// @notice applicationId - Status
+    /// @notice recipentId - Status
     mapping(uint256 => ApplicationStatus) public applicationStatus;
 
-    /// @notice applicationId -> Application
+    /// @notice recipentId -> Application
     mapping(uint256 => Application) public applications;
 
     bool public payoutReady;
 
-    ///@notice applicationId -> PayoutSummary
+    ///@notice recipentId -> PayoutSummary
     mapping(uint256 => PayoutSummary) public payoutSummaries;
 
     /// ======================
@@ -70,9 +70,9 @@ abstract contract AltRegistryGating is BaseAllocationStrategy {
     // }
 
     // /// @notice Returns the status of the application
-    // /// @param _applicationId The applicationId of the application
-    // function getApplicationStatus(uint256 _applicationId) external view override returns (ApplicationStatus) {
-    //     return applicationStatus[_applicationId];
+    // /// @param _recipentId The recipentId of the application
+    // function getApplicationStatus(uint256 _recipentId) external view override returns (ApplicationStatus) {
+    //     return applicationStatus[_recipentId];
     // }
 
     // /// @notice Set allocations by pool manager
@@ -100,18 +100,18 @@ abstract contract AltRegistryGating is BaseAllocationStrategy {
     // }
 
     // /// @notice Get the payout summary for applications
-    // /// @param _applicationId Array of application ids
-    // function getPayout(uint256[] memory _applicationId, bytes memory)
+    // /// @param _recipentId Array of application ids
+    // function getPayout(uint256[] memory _recipentId, bytes memory)
     //     external
     //     view
     //     override
     //     returns (PayoutSummary[] memory summaries)
     // {
-    //     uint256 applicationIdLength = _applicationId.length;
-    //     summaries = new PayoutSummary[](applicationIdLength);
+    //     uint256 recipentIdLength = _recipentId.length;
+    //     summaries = new PayoutSummary[](recipentIdLength);
 
-    //     for (uint256 i = 0; i < applicationIdLength;) {
-    //         summaries[i] = payoutSummaries[_applicationId[i]];
+    //     for (uint256 i = 0; i < recipentIdLength;) {
+    //         summaries[i] = payoutSummaries[_recipentId[i]];
     //         unchecked {
     //             i++;
     //         }

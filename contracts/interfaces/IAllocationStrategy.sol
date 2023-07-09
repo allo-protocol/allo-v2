@@ -19,12 +19,12 @@ interface IAllocationStrategy is IStrategy {
 
     // decode the _data into what's relevant for this strategy
     // update whatever is needed to store the applicant
-    // return the applicationId
+    // return the recipentId
     function applyToPool(bytes memory _data, address _sender) external payable returns (uint256);
 
     // return whether application is pending, accepted, or rejected
     // strategies will need to add their own logic to translate to these categories if they use different ones
-    function getApplicationStatus(uint256 _applicationId) external view returns (ApplicationStatus);
+    function getApplicationStatus(uint256 _recipentId) external view returns (ApplicationStatus);
 
     // decode the _data into what's relevant for this strategy
     // perform whatever actions are necessary (token transfers, storage updates, etc)
@@ -34,7 +34,7 @@ interface IAllocationStrategy is IStrategy {
     function allocate(bytes memory _data, address _sender) external payable;
 
     // generate the payouts for the strategy
-    function getPayout(uint256[] memory _applicationId, bytes memory _data)
+    function getPayout(uint256[] memory _recipentId, bytes memory _data)
         external
         view
         returns (PayoutSummary[] memory summaries);
