@@ -305,9 +305,6 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
         }
 
         if (_amount > 0) {
-            if (_token == address(0) && msg.value != (_amount + baseFee)) {
-                revert AMOUNT_MISMATCH();
-            }
             _fundPool(_token, _amount, poolId, _distributionStrategy);
         }
 
@@ -342,11 +339,6 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
         if (_amount == 0) {
             revert NOT_ENOUGH_FUNDS();
         }
-
-        if (_token == address(0) && msg.value != _amount) {
-            revert AMOUNT_MISMATCH();
-        }
-
         _fundPool(_token, _amount, _poolId, pools[_poolId].distributionStrategy);
     }
 
