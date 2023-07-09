@@ -62,7 +62,7 @@ abstract contract AllocationGating is BaseAllocationStrategy {
                 revert NOT_ELIGIBLE();
             }
 
-            allocations[i] = allocation;
+            payoutSummaries[allocation.payoutAddress] = allocation;
 
             unchecked {
                 i++;

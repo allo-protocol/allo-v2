@@ -10,7 +10,9 @@ abstract contract AltRegistryGating is BaseAllocationStrategy {
     /// ======================
 
     error NOT_IMPLEMENTED();
-    error NOT_ELIGIBLE();
+    error REGISTRATION_FAILED();
+    error ALREADY_REGISTERED();
+    error INVALID_DATA();
 
     /// =================================
     /// === Custom Storage Variables ====
@@ -18,29 +20,27 @@ abstract contract AltRegistryGating is BaseAllocationStrategy {
 
     /// @notice Struct to hold details of an recipient
     struct Recipient {
-        // TODO:Add
-        address recipient;
+        address payoutAddress;
+        RecipientStatus recipientStatus;
+        uint256 percentage;
     }
 
     /// @notice Simple registry to auto approve recipients
     SimpleProjectRegistry public simpleProjectRegistry;
 
-    /// @notice recipientId - Status
-    mapping(uint256 => RecipientStatus) public recipientStatus;
-
-    /// @notice recipientId -> Recipient
-    mapping(uint256 => Recipient) public recipients;
+    /// @notice project -> Recipient
+    mapping(address => Recipient) public recipients;
 
     bool public payoutReady;
-
-    ///@notice recipientId -> PayoutSummary
-    mapping(uint256 => PayoutSummary) public payoutSummaries;
+    bool public poolOpen;
 
     /// ======================
     /// ======= Events =======
     /// ======================
 
     event Allocated(bytes data, address indexed allocator);
+    event PoolOpen(bool poolOpen);
+    event PayoutReady(bool payoutReady);
 
     /// ====================================
     /// =========== Functions ==============
@@ -57,69 +57,105 @@ abstract contract AltRegistryGating is BaseAllocationStrategy {
 
         // decode data custom to this strategy
         (address _simpleProjectRegistry) = abi.decode(_data, (address));
+        if (_simpleProjectRegistry == address(0)) {
+            revert INVALID_ADDRESS();
+        }
+
         simpleProjectRegistry = SimpleProjectRegistry(_simpleProjectRegistry);
     }
 
-    // /// @notice apply to the pool
-    // function registerRecipients(bytes memory _data, address) external payable override returns (uint256) {
-    //     address projectId = abi.decode(_data, (address));
-    //     if (!simpleProjectRegistry.projects[projectId]) {
-    //         // TODO: Add to pool
-    //     }
-    //     revert NOT_ELIGIBLE();
-    // }
+    /// @notice apply to the pool
+    function registerRecipients(bytes memory _data, address) external payable override returns (address) {
+        (address project, address payoutAddress) = abi.decode(_data, (address, address));
+        if (project == address(0) || payoutAddress == address(0)) {
+            revert INVALID_ADDRESS();
+        }
+        if (!poolOpen && !simpleProjectRegistry.projects(project)) {
+            revert REGISTRATION_FAILED();
+        }
+        if (recipients[project].payoutAddress == address(0)) {
+            revert ALREADY_REGISTERED();
+        }
 
-    // /// @notice Returns the status of the recipient
-    // /// @param _recipientId The recipientId of the recipient
-    // function getRecipientStatus(uint256 _recipientId) external view override returns (RecipientStatus) {
-    //     return recipientStatus[_recipientId];
-    // }
+        // auto approval
+        recipients[project] =
+            Recipient({payoutAddress: payoutAddress, recipientStatus: RecipientStatus.Accepted, percentage: 0});
 
-    // /// @notice Set allocations by pool manager
-    // /// @param _data The data to be decoded
-    // /// @param _sender The sender of the allocation
-    // function allocate(bytes memory _data, address _sender) external payable override onlyAllo {
+        return project;
+    }
 
-    //     // decode data
-    //     PayoutSummary[] memory allocations = abi.decode(_data, (PayoutSummary[]));
+    /// @notice Returns the status of the recipient
+    /// @param _recipientId The recipientId of the recipient
+    function getRecipientStatus(address _recipientId) external view override returns (RecipientStatus) {
+        return recipients[_recipientId].recipientStatus;
+    }
 
-    //     uint256 allocationsLength = allocations.length;
-    //     for (uint256 i = 0; i < allocationsLength;) {
+    /// @notice Set allocations by pool manager
+    /// @param _data The data to be decoded
+    /// @param _sender The sender of the allocation
+    function allocate(bytes memory _data, address _sender) external payable override onlyAllo {
+        // decode data
+        (address[] memory projects, uint256[] memory percentages) = abi.decode(_data, (address[], uint256[]));
 
-    //         // TODO: check if recipient is approved
+        uint256 allocationsLength = percentages.length;
 
-    //         // TODO: Fix this logic
-    //         payoutSummaries[i] = allocations[i];
+        if (projects.length != allocationsLength) {
+            revert INVALID_DATA();
+        }
 
-    //         unchecked {
-    //             i++;
-    //         }
-    //     }
+        for (uint256 i = 0; i < allocationsLength;) {
+            address project = projects[i];
+            if (recipients[project].recipientStatus != RecipientStatus.Accepted) {
+                revert INVALID_DATA();
+            }
 
-    //     emit Allocated(_data, _sender);
-    // }
+            recipients[project].percentage = percentages[i];
 
-    // /// @notice Get the payout summary for recipients
-    // /// @param _recipientId Array of recipient ids
-    // function getPayout(uint256[] memory _recipientId, bytes memory)
-    //     external
-    //     view
-    //     override
-    //     returns (PayoutSummary[] memory summaries)
-    // {
-    //     uint256 recipientIdLength = _recipientId.length;
-    //     summaries = new PayoutSummary[](recipientIdLength);
+            unchecked {
+                i++;
+            }
+        }
 
-    //     for (uint256 i = 0; i < recipientIdLength;) {
-    //         summaries[i] = payoutSummaries[_recipientId[i]];
-    //         unchecked {
-    //             i++;
-    //         }
-    //     }
-    // }
+        emit Allocated(_data, _sender);
+    }
+
+    /// @notice Get the payout summary for recipients
+    /// @param _recipientId Array of recipient ids
+    function getPayout(address[] memory _recipientId, bytes memory)
+        external
+        view
+        override
+        returns (PayoutSummary[] memory summaries)
+    {
+        uint256 recipientIdLength = _recipientId.length;
+        summaries = new PayoutSummary[](recipientIdLength);
+
+        for (uint256 i = 0; i < recipientIdLength;) {
+            Recipient memory recipient = recipients[_recipientId[i]];
+            summaries[i] = PayoutSummary({payoutAddress: recipient.payoutAddress, percentage: recipient.percentage});
+
+            unchecked {
+                i++;
+            }
+        }
+    }
 
     /// @notice Check if the strategy is ready to payout
     function readyToPayout(bytes memory) external view override returns (bool) {
-        return payoutReady;
+        return payoutReady && !poolOpen;
+    }
+
+    /// @notice Set if the pool is open
+    /// @param _poolOpen The status of the pool
+    function setIsPoolOpen(bool _poolOpen) external onlyPoolManager {
+        poolOpen = _poolOpen;
+        emit PoolOpen(_poolOpen);
+    }
+
+    /// @notice Set if the pool is ready to payout
+    /// @param _payoutReady The status of the pool
+    function setIsPayoutReady(bool _payoutReady) external onlyPoolManager {
+        payoutReady = _payoutReady;
+        emit PayoutReady(_payoutReady);
     }
 }
