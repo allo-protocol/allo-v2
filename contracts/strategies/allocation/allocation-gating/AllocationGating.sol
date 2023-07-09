@@ -31,7 +31,7 @@ abstract contract AllocationGating is BaseAllocationStrategy {
     /// ====================================
 
     /// @notice not implemented
-    function applyToPool(bytes memory, address) external payable override returns (uint256) {
+    function registerRecipents(bytes memory, address) external payable override returns (uint256) {
         revert NOT_IMPLEMENTED();
     }
 

@@ -36,15 +36,15 @@ contract AllocationWithVotingBaseTest is Test {
 
     function test_initialize() public {}
 
-    function test_applyToPool_new_application() public {}
+    function test_registerRecipents_new_application() public {}
 
-    function test_applyToPool_update_application() public {}
+    function test_registerRecipents_update_application() public {}
 
-    function testRevert_applyToPool_APPLICATIONS_NOT_OPEN() public {}
+    function testRevert_registerRecipents_APPLICATIONS_NOT_OPEN() public {}
 
-    function testRevert_applyToPool_new_application_UNAUTHORIZED() public {}
+    function testRevert_registerRecipents_new_application_UNAUTHORIZED() public {}
 
-    function testRevert_applyToPool_update_application_UNAUTHORIZED() public {}
+    function testRevert_registerRecipents_update_application_UNAUTHORIZED() public {}
 
     function test_getRecipentStatus() public {}
 

@@ -22,7 +22,7 @@ contract MockAllocation is IAllocationStrategy {
         _data;
     }
 
-    function applyToPool(bytes memory _data, address _sender) external payable override returns (uint256) {
+    function registerRecipents(bytes memory _data, address _sender) external payable override returns (uint256) {
         // surpress compiler warnings:
         _data;
         _sender;

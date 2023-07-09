@@ -61,7 +61,7 @@ abstract contract AltRegistryGating is BaseAllocationStrategy {
     }
 
     // /// @notice apply to the pool
-    // function applyToPool(bytes memory _data, address) external payable override returns (uint256) {
+    // function registerRecipents(bytes memory _data, address) external payable override returns (uint256) {
     //     address projectId = abi.decode(_data, (address));
     //     if (!simpleProjectRegistry.projects[projectId]) {
     //         // TODO: Add to pool

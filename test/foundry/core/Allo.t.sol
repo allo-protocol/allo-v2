@@ -348,11 +348,11 @@ contract AlloTest is Test {
         assertEq(address(_utilGetPoolInfo(poolId).allocationStrategy), allocationStrategy);
     }
 
-    function test_applyToPool() public {
+    function test_registerRecipents() public {
         uint256 poolId = _utilCreatePool(0);
 
         // apply to the pool
-        uint256 recipentId = allo.applyToPool(poolId, bytes(""));
+        uint256 recipentId = allo.registerRecipents(poolId, bytes(""));
         assertEq(recipentId, 1);
     }
 

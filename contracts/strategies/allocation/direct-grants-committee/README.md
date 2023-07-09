@@ -40,8 +40,8 @@ The identity admin creates a new pool via `createPool`. At this time, the admin 
 - `poolMetadata`
 - `eligibilityVerification`
 
-#### `applytoPool()`
-Potential applicants can apply to the pool via `applyToPool`. When the application is submitted, the strategy uses the following decision tree to determine eligibility:
+#### `registerRecipents()`
+Potential applicants can apply to the pool via `registerRecipents`. When the application is submitted, the strategy uses the following decision tree to determine eligibility:
 
 - Is `poolOpen` true?
     - If yes, proceed

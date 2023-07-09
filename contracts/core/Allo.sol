@@ -315,8 +315,8 @@ contract Allo is Initializable, Ownable, AccessControl {
     /// @notice returns the recipentId from the allocation strategy
     /// @param _poolId id of the pool
     /// @param _data encoded data unique to the allocation strategy for that pool
-    function applyToPool(uint256 _poolId, bytes memory _data) external payable returns (uint256) {
-        return pools[_poolId].allocationStrategy.applyToPool(_data, msg.sender);
+    function registerRecipents(uint256 _poolId, bytes memory _data) external payable returns (uint256) {
+        return pools[_poolId].allocationStrategy.registerRecipents(_data, msg.sender);
     }
 
     /// @notice Update pool metadata
