@@ -46,7 +46,7 @@ contract AllocationWithVotingBaseTest is Test {
 
     function testRevert_applyToPool_update_application_UNAUTHORIZED() public {}
 
-    function test_getApplicationStatus() public {}
+    function test_getRecipentStatus() public {}
 
     function test_allocate_native() public {}
 

@@ -164,7 +164,7 @@ contract AllocationWithVotingBase is BaseAllocationStrategy, Transfer, Reentranc
 
     /// @notice Returns the status of the application
     /// @param _recipentId The recipentId of the application
-    function getApplicationStatus(uint256 _recipentId) external view override returns (ApplicationStatus) {
+    function getRecipentStatus(uint256 _recipentId) external view override returns (ApplicationStatus) {
         return applicationStatus[_recipentId];
     }
 

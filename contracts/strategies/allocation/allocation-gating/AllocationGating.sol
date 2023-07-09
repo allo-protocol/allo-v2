@@ -36,7 +36,7 @@ abstract contract AllocationGating is BaseAllocationStrategy {
     }
 
     /// @notice Checks if msg.sender is eligible for allocation
-    function getApplicationStatus(uint256) external view override returns (ApplicationStatus) {
+    function getRecipentStatus(uint256) external view override returns (ApplicationStatus) {
         if (_isEligibleForAllocation(msg.sender)) {
             return ApplicationStatus.Accepted;
         }

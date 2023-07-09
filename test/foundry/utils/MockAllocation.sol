@@ -29,7 +29,7 @@ contract MockAllocation is IAllocationStrategy {
         return 1;
     }
 
-    function getApplicationStatus(uint256 _recipentId) external view override returns (ApplicationStatus) {
+    function getRecipentStatus(uint256 _recipentId) external view override returns (ApplicationStatus) {
         // return ApplicationStatus.Applied;
     }
 

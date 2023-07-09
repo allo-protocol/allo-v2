@@ -24,7 +24,7 @@ interface IAllocationStrategy is IStrategy {
 
     // return whether application is pending, accepted, or rejected
     // strategies will need to add their own logic to translate to these categories if they use different ones
-    function getApplicationStatus(uint256 _recipentId) external view returns (ApplicationStatus);
+    function getRecipentStatus(uint256 _recipentId) external view returns (ApplicationStatus);
 
     // decode the _data into what's relevant for this strategy
     // perform whatever actions are necessary (token transfers, storage updates, etc)
