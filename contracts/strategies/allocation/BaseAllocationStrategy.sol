@@ -69,7 +69,7 @@ abstract contract BaseAllocationStrategy is IAllocationStrategy {
             revert STRATEGY_ALREADY_INITIALIZED();
         }
 
-        if(_allo == address(0)) {
+        if (_allo == address(0)) {
             revert INVALID_ADDRESS();
         }
 
