@@ -22,11 +22,13 @@ contract Transfer {
         uint256 msgValue = msg.value;
 
         for (uint256 i = 0; i < _transferData.length;) {
+            TransferData memory transferData = _transferData[i];
             if (_token == address(0)) {
-                msgValue -= _transferData[i].amount;
+                msgValue -= transferData.amount;
+                _transferNative(transferData.to, transferData.amount);
+            } else {
+                IERC20(_token).safeTransferFrom(transferData.from, transferData.to, transferData.amount);
             }
-
-            _transferAmountFrom(_token, _transferData[i]);
 
             unchecked {
                 i++;
@@ -54,14 +56,7 @@ contract Transfer {
             if (msg.value < amount) {
                 revert AMOUNT_MISMATCH();
             }
-
-            (bool sent,) = _transferData.to.call{value: amount}("");
-
-            if (!sent) {
-                revert TRANSFER_FAILED();
-            }
-
-            return sent;
+            return _transferNative(_transferData.to, amount);
         } else {
             // ERC20 Token
             IERC20(_token).safeTransferFrom(_transferData.from, _transferData.to, amount);
@@ -71,16 +66,26 @@ contract Transfer {
         }
     }
 
+    function _transferNative(address _to, uint256 _amount) internal returns (bool) {
+        if (_amount == 0) {
+            revert TRANSFER_FAILED();
+        }
+
+        (bool sent,) = _to.call{value: _amount}("");
+
+        if (!sent) {
+            revert TRANSFER_FAILED();
+        }
+
+        return sent;
+    }
+
     function _transferAmount(address _token, address _to, uint256 _amount) internal {
         if (_amount == 0) {
             revert TRANSFER_FAILED();
         }
         if (_token == address(0)) {
-            (bool sent,) = _to.call{value: _amount}("");
-
-            if (!sent) {
-                revert TRANSFER_FAILED();
-            }
+            _transferNative(_to, _amount);
         } else {
             // ERC20 Token
             IERC20(_token).safeTransfer(_to, _amount);

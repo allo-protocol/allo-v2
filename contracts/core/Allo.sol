@@ -10,19 +10,18 @@ import "@solady/auth/Ownable.sol";
 
 import {Metadata} from "./libraries/Metadata.sol";
 import {Clone} from "./libraries/Clone.sol";
+import "./libraries/Transfer.sol";
 import "../interfaces/IAllocationStrategy.sol";
 import "../interfaces/IDistributionStrategy.sol";
 import "./Registry.sol";
 
-contract Allo is Initializable, Ownable, AccessControl {
+contract Allo is Transfer, Initializable, Ownable, AccessControl {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
     /// @notice Custom errors
     error UNAUTHORIZED();
-    error TRANSFER_FAILED();
     error NOT_ENOUGH_FUNDS();
     error NOT_APPROVED_STRATEGY();
-    error AMOUNT_MISMATCH();
 
     /// @notice Struct to hold details of an Pool
     struct Pool {
@@ -301,7 +300,7 @@ contract Allo is Initializable, Ownable, AccessControl {
         }
 
         if (baseFee > 0) {
-            _transferAmount(treasury, baseFee, address(0));
+            _transferAmount(address(0), treasury, baseFee);
             emit BaseFeePaid(poolId, baseFee);
         }
 
@@ -487,33 +486,26 @@ contract Allo is Initializable, Ownable, AccessControl {
     function _fundPool(address _token, uint256 _amount, uint256 _poolId, IDistributionStrategy _distributionStrategy)
         internal
     {
-        uint256 feeAmount = (_amount * feePercentage) / FEE_DENOMINATOR;
-
-        // Pay the protocol fee
-        _transferAmount(treasury, feeAmount, _token);
-
-        // Send the remaining amount to the distribution strategy
-        uint256 amountAfterFee = _amount - feeAmount;
-        _transferAmount(payable(address(_distributionStrategy)), amountAfterFee, _token);
-        _distributionStrategy.poolFunded(amountAfterFee);
-
-        emit PoolFunded(_poolId, amountAfterFee, feeAmount);
-    }
-
-    /// @notice Transfers the amount to the address
-    /// @param _to The address to transfer to
-    /// @param _amount The amount to transfer
-    /// @param _token The address of the token to transfer
-    function _transferAmount(address payable _to, uint256 _amount, address _token) internal {
-        if (_token == address(0)) {
-            // Native Token
-            (bool sent,) = _to.call{value: _amount}("");
-            if (!sent) {
-                revert TRANSFER_FAILED();
-            }
+        if (feePercentage == 0) {
+            _transferAmountFrom(
+                _token, TransferData({from: msg.sender, to: address(_distributionStrategy), amount: _amount})
+            );
+            _distributionStrategy.poolFunded(_amount);
+            emit PoolFunded(_poolId, _amount, 0);
         } else {
-            // ERC20 Token
-            IERC20Upgradeable(_token).safeTransfer(_to, _amount);
+            uint256 feeAmount = (_amount * feePercentage) / FEE_DENOMINATOR;
+            uint256 amountAfterFee = _amount - feeAmount;
+
+            TransferData[] memory transfers = new TransferData[](2);
+
+            // protocol fee
+            transfers[0] = TransferData({from: msg.sender, to: treasury, amount: feeAmount});
+            // fund pool
+            transfers[1] = TransferData({from: msg.sender, to: address(_distributionStrategy), amount: amountAfterFee});
+            _transferAmountsFrom(_token, transfers);
+
+            _distributionStrategy.poolFunded(amountAfterFee);
+            emit PoolFunded(_poolId, amountAfterFee, feeAmount);
         }
     }
 
@@ -537,5 +529,11 @@ contract Allo is Initializable, Ownable, AccessControl {
     /// @return bool
     function _isPoolManager(uint256 _poolId, address _address) internal view returns (bool) {
         return hasRole(pools[_poolId].managerRole, _address);
+    }
+
+    function recoverFunds(address _token, address _recipient) external onlyOwner {
+        uint256 amount =
+            _token == address(0) ? address(this).balance : IERC20Upgradeable(_token).balanceOf(address(this));
+        _transferAmount(_token, _recipient, amount);
     }
 }
