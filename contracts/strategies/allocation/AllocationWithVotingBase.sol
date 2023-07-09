@@ -8,7 +8,7 @@ import {Transfer} from "../../core/libraries/Transfer.sol";
 import {ReentrancyGuard} from "@openzeppelin/security/ReentrancyGuard.sol";
 
 /// @title AllocationWithVotingBase
-/// @notice A strategy that allows users to apply to a pool and vote on applications
+/// @notice A strategy that allows users to apply to a pool and vote on recipents
 /// @dev This strategy is used for QF pools that have offchain calculations
 /// @author allo-team
 contract AllocationWithVotingBase is BaseAllocationStrategy, Transfer, ReentrancyGuard {
@@ -25,8 +25,8 @@ contract AllocationWithVotingBase is BaseAllocationStrategy, Transfer, Reentranc
     error VOTING_NOT_OPEN();
     error VOTING_NOT_ENDED();
 
-    /// @notice Struct to hold details of an application
-    struct Application {
+    /// @notice Struct to hold details of an recipent
+    struct Recipent {
         bytes32 identityId;
         address recipient;
         uint256 recipentId;
@@ -61,8 +61,8 @@ contract AllocationWithVotingBase is BaseAllocationStrategy, Transfer, Reentranc
 
     Registry public registry;
 
-    uint256 public applicationStartTime;
-    uint256 public applicationEndTime;
+    uint256 public recipentStartTime;
+    uint256 public recipentEndTime;
     uint256 public votingStartTime;
     uint256 public votingEndTime;
     uint256 private _index;
@@ -73,8 +73,8 @@ contract AllocationWithVotingBase is BaseAllocationStrategy, Transfer, Reentranc
     /// @notice recipentId - Status
     mapping(uint256 => RecipentStatus) public recipentStatus;
 
-    /// @notice recipentId -> Application
-    mapping(uint256 => Application) public applications;
+    /// @notice recipentId -> Recipent
+    mapping(uint256 => Recipent) public recipents;
 
     ///@notice recipentId -> PayoutSummary
     mapping(uint256 => PayoutSummary) public payoutSummaries;
@@ -83,14 +83,14 @@ contract AllocationWithVotingBase is BaseAllocationStrategy, Transfer, Reentranc
     /// ======= Events =======
     /// ======================
 
-    event ApplicationSubmitted(
+    event RecipentSubmitted(
         uint256 indexed recipentId, bytes32 indexed identityId, address recipient, Metadata metadata, address sender
     );
     event RecipentStatusUpdated(address indexed applicant, uint256 indexed recipentId, Status status);
     event Allocated(bytes data, address indexed allocator);
     event Claimed(uint256 indexed recipentId, address receipient, uint256 amount);
     event TimestampsUpdated(
-        uint256 applicationStartTime, uint256 applicationEndTime, uint256 votingStartTime, uint256 votingEndTime
+        uint256 recipentStartTime, uint256 recipentEndTime, uint256 votingStartTime, uint256 votingEndTime
     );
 
     /// @notice Initialize the contract
@@ -118,7 +118,7 @@ contract AllocationWithVotingBase is BaseAllocationStrategy, Transfer, Reentranc
         onlyAllo
         returns (uint256)
     {
-        if (applicationStartTime <= block.timestamp || applicationEndTime >= block.timestamp) {
+        if (recipentStartTime <= block.timestamp || recipentEndTime >= block.timestamp) {
             revert APPLICATIONS_NOT_OPEN();
         }
 
@@ -129,52 +129,52 @@ contract AllocationWithVotingBase is BaseAllocationStrategy, Transfer, Reentranc
             revert UNAUTHORIZED();
         }
 
-        Application storage application;
+        Recipent storage recipent;
 
         if (recipentId == 0) {
-            // Create a new application
+            // Create a new recipent
             recipentId = ++_index;
 
-            application = applications[recipentId];
-            application.identityId = _identityId;
-            application.recipentId = recipentId;
-            application.recipient = recipient;
-            application.status = Status.PENDING;
-            application.metadata = metadata;
-            application.creator = _sender;
+            recipent = recipents[recipentId];
+            recipent.identityId = _identityId;
+            recipent.recipentId = recipentId;
+            recipent.recipient = recipient;
+            recipent.status = Status.PENDING;
+            recipent.metadata = metadata;
+            recipent.creator = _sender;
         } else {
-            // Update an existing application
-            application = applications[recipentId];
+            // Update an existing recipent
+            recipent = recipents[recipentId];
 
-            if (identityRequired && !registry.isOwnerOrMemberOfIdentity(application.identityId, _sender)) {
-                // if identityRequired is true, the indentity owner/member can update the application
+            if (identityRequired && !registry.isOwnerOrMemberOfIdentity(recipent.identityId, _sender)) {
+                // if identityRequired is true, the indentity owner/member can update the recipent
                 revert UNAUTHORIZED();
-            } else if (application.creator != _sender) {
-                // if identityRequired is false, only the creator of the application can update it
+            } else if (recipent.creator != _sender) {
+                // if identityRequired is false, only the creator of the recipent can update it
                 revert UNAUTHORIZED();
             }
 
-            // Update the application
-            application.recipient = recipient;
-            application.status = Status.REAPPLIED;
-            application.metadata = metadata;
+            // Update the recipent
+            recipent.recipient = recipient;
+            recipent.status = Status.REAPPLIED;
+            recipent.metadata = metadata;
         }
 
-        // Add the application to the applications mapping
+        // Add the recipent to the recipents mapping
         recipentStatus[recipentId] = IAllocationStrategy.RecipentStatus.Pending;
 
-        emit ApplicationSubmitted(recipentId, identityId, recipient, metadata, _sender);
+        emit RecipentSubmitted(recipentId, identityId, recipient, metadata, _sender);
 
         return recipentId;
     }
 
-    /// @notice Returns the status of the application
-    /// @param _recipentId The recipentId of the application
+    /// @notice Returns the status of the recipent
+    /// @param _recipentId The recipentId of the recipent
     function getRecipentStatus(uint256 _recipentId) external view override returns (RecipentStatus) {
         return recipentStatus[_recipentId];
     }
 
-    /// @notice Allocates votes to the application(s)
+    /// @notice Allocates votes to the recipent(s)
     /// @param _data The data to be decoded
     /// @param _sender The sender of the transaction
     function allocate(bytes memory _data, address _sender) external payable override onlyAllo nonReentrant {
@@ -203,8 +203,8 @@ contract AllocationWithVotingBase is BaseAllocationStrategy, Transfer, Reentranc
                 uint256 amount = allocations.data[j].amount;
                 allocationsTotalAmount -= amount;
 
-                Application storage application = applications[allocations.data[j].recipentId];
-                application.tokenAmounts[allocations.token] += amount;
+                Recipent storage recipent = recipents[allocations.data[j].recipentId];
+                recipent.tokenAmounts[allocations.token] += amount;
 
                 unchecked {
                     j++;
@@ -222,9 +222,9 @@ contract AllocationWithVotingBase is BaseAllocationStrategy, Transfer, Reentranc
         emit Allocated(_data, _sender);
     }
 
-    /// @notice Retrieves application payout amount
-    /// @param _recipentId recipentId array of the applications
-    /// @return summaries PayoutSummary array of the applications
+    /// @notice Retrieves recipent payout amount
+    /// @param _recipentId recipentId array of the recipents
+    /// @return summaries PayoutSummary array of the recipents
     function getPayout(uint256[] memory _recipentId, bytes memory)
         external
         view
@@ -245,14 +245,14 @@ contract AllocationWithVotingBase is BaseAllocationStrategy, Transfer, Reentranc
     /// ========= Custom Functions =========
     /// ====================================
 
-    /// @notice Review applications
+    /// @notice Review recipents
     /// @param _data The data to be decoded
     /// @dev
-    function reviewApplications(bytes memory _data) external onlyPoolManager {
+    function reviewRecipents(bytes memory _data) external onlyPoolManager {
         (uint256[] memory recipentIds, Status[] memory statuses) = abi.decode(_data, (uint256[], Status[]));
 
         for (uint256 i; i < recipentIds.length;) {
-            applications[recipentIds[i]].status = statuses[i];
+            recipents[recipentIds[i]].status = statuses[i];
             // map to the Allo global status's
             recipentStatus[recipentIds[i]] = IAllocationStrategy.RecipentStatus.Accepted;
 
@@ -264,9 +264,9 @@ contract AllocationWithVotingBase is BaseAllocationStrategy, Transfer, Reentranc
         }
     }
 
-    /// @notice Set the payout amounts for all the applications and marks the contract as ready for payout
+    /// @notice Set the payout amounts for all the recipents and marks the contract as ready for payout
     /// @param _data The data to be decoded
-    /// @dev Pool admin can only set payout amounts for `ACCEPTED` applications
+    /// @dev Pool admin can only set payout amounts for `ACCEPTED` recipents
     function setPayout(bytes memory _data) external onlyPoolManager {
         if (votingEndTime > block.timestamp) {
             revert VOTING_NOT_ENDED();
@@ -282,7 +282,7 @@ contract AllocationWithVotingBase is BaseAllocationStrategy, Transfer, Reentranc
         for (uint256 i; i < recipentIdsLength;) {
             uint256 recipentId = recipentIds[i];
 
-            if (applications[recipentId].status != Status.ACCEPTED) {
+            if (recipents[recipentId].status != Status.ACCEPTED) {
                 revert INVALID_INPUT();
             }
 
@@ -296,7 +296,7 @@ contract AllocationWithVotingBase is BaseAllocationStrategy, Transfer, Reentranc
         payoutReady = true;
     }
 
-    /// @notice Claim the payout for the applications
+    /// @notice Claim the payout for the recipents
     /// @param _claims The claims to be processed
     function claim(Claim[] calldata _claims) external nonReentrant {
         if (votingEndTime > block.timestamp) {
@@ -306,45 +306,45 @@ contract AllocationWithVotingBase is BaseAllocationStrategy, Transfer, Reentranc
         uint256 recipentIdsLength = _claims.length;
         for (uint256 i; i < recipentIdsLength;) {
             Claim memory singleClaim = _claims[i];
-            Application storage application = applications[singleClaim.recipentId];
-            uint256 amount = application.tokenAmounts[singleClaim.token];
+            Recipent storage recipent = recipents[singleClaim.recipentId];
+            uint256 amount = recipent.tokenAmounts[singleClaim.token];
 
-            application.tokenAmounts[singleClaim.token] = 0;
-            _transferAmount(singleClaim.token, application.recipient, amount);
+            recipent.tokenAmounts[singleClaim.token] = 0;
+            _transferAmount(singleClaim.token, recipent.recipient, amount);
 
-            emit Claimed(singleClaim.recipentId, application.recipient, amount);
+            emit Claimed(singleClaim.recipentId, recipent.recipient, amount);
             unchecked {
                 i++;
             }
         }
     }
 
-    /// @notice Set the application & voting times
-    /// @param _applicationStartTime The applicationStartTime of the pool
-    /// @param _applicationEndTime The applicationEndTime of the pool
+    /// @notice Set the recipent & voting times
+    /// @param _recipentStartTime The recipentStartTime of the pool
+    /// @param _recipentEndTime The recipentEndTime of the pool
     /// @param _votingStartTime The votingStartTime of the pool
     /// @param _votingEndTime The votingEndTime of the pool
     function updateTimestamps(
-        uint256 _applicationStartTime,
-        uint256 _applicationEndTime,
+        uint256 _recipentStartTime,
+        uint256 _recipentEndTime,
         uint256 _votingStartTime,
         uint256 _votingEndTime
     ) external onlyPoolManager {
         if (
-            _applicationStartTime > _applicationEndTime // applicationStartTime must be before applicationEndTime
+            _recipentStartTime > _recipentEndTime // recipentStartTime must be before recipentEndTime
                 || _votingStartTime > _votingEndTime // votingStartTime must be before votingEndTime
-                || _applicationStartTime < block.timestamp // applicationStartTime must be in the future
+                || _recipentStartTime < block.timestamp // recipentStartTime must be in the future
                 || _votingStartTime < block.timestamp // votingStartTime must be in the future
         ) {
             revert INVALID_TIME();
         }
 
-        applicationStartTime = _applicationStartTime;
-        applicationEndTime = _applicationEndTime;
+        recipentStartTime = _recipentStartTime;
+        recipentEndTime = _recipentEndTime;
         votingStartTime = _votingStartTime;
         votingEndTime = _votingEndTime;
 
-        emit TimestampsUpdated(_applicationStartTime, _applicationEndTime, _votingStartTime, _votingEndTime);
+        emit TimestampsUpdated(_recipentStartTime, _recipentEndTime, _votingStartTime, _votingEndTime);
     }
 
     /// @notice Check if the pool is ready to payout

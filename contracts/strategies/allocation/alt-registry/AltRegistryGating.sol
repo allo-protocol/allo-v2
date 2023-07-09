@@ -16,20 +16,20 @@ abstract contract AltRegistryGating is BaseAllocationStrategy {
     /// === Custom Storage Variables ====
     /// =================================
 
-    /// @notice Struct to hold details of an application
-    struct Application {
+    /// @notice Struct to hold details of an recipent
+    struct Recipent {
         // TODO:Add
         address recipent;
     }
 
-    /// @notice Simple registry to auto approve applications
+    /// @notice Simple registry to auto approve recipents
     SimpleProjectRegistry public simpleProjectRegistry;
 
     /// @notice recipentId - Status
     mapping(uint256 => RecipentStatus) public recipentStatus;
 
-    /// @notice recipentId -> Application
-    mapping(uint256 => Application) public applications;
+    /// @notice recipentId -> Recipent
+    mapping(uint256 => Recipent) public recipents;
 
     bool public payoutReady;
 
@@ -69,8 +69,8 @@ abstract contract AltRegistryGating is BaseAllocationStrategy {
     //     revert NOT_ELIGIBLE();
     // }
 
-    // /// @notice Returns the status of the application
-    // /// @param _recipentId The recipentId of the application
+    // /// @notice Returns the status of the recipent
+    // /// @param _recipentId The recipentId of the recipent
     // function getRecipentStatus(uint256 _recipentId) external view override returns (RecipentStatus) {
     //     return recipentStatus[_recipentId];
     // }
@@ -86,7 +86,7 @@ abstract contract AltRegistryGating is BaseAllocationStrategy {
     //     uint256 allocationsLength = allocations.length;
     //     for (uint256 i = 0; i < allocationsLength;) {
 
-    //         // TODO: check if application is approved
+    //         // TODO: check if recipent is approved
 
     //         // TODO: Fix this logic
     //         payoutSummaries[i] = allocations[i];
@@ -99,8 +99,8 @@ abstract contract AltRegistryGating is BaseAllocationStrategy {
     //     emit Allocated(_data, _sender);
     // }
 
-    // /// @notice Get the payout summary for applications
-    // /// @param _recipentId Array of application ids
+    // /// @notice Get the payout summary for recipents
+    // /// @param _recipentId Array of recipent ids
     // function getPayout(uint256[] memory _recipentId, bytes memory)
     //     external
     //     view

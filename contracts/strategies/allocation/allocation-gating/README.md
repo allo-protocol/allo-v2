@@ -2,7 +2,7 @@ Allocation Gating
 ---------------------------------
 
 ## Overview 
-Some builders have flagged that they want the ability create pools that don't require applications, where anyone who has taken some action is automatically an eligible recipient in their pool. This is a strategy stub to test that format. Gating would be done during allocation and the means of gating could be 
+Some builders have flagged that they want the ability create pools that don't require recipents, where anyone who has taken some action is automatically an eligible recipient in their pool. This is a strategy stub to test that format. Gating would be done during allocation and the means of gating could be 
 - A recipient owings an ERC721
 - A recipient having a token balance above a threshold
 

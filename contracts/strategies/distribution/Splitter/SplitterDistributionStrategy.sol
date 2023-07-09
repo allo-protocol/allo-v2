@@ -30,7 +30,7 @@ contract SplitterDistributionStrategy is IDistributionStrategy, Transfer, Reentr
     /// === Custom Storage Variables ====
     /// =================================
 
-    /// Application.id -> amount paid
+    /// Recipent.id -> amount paid
     mapping(uint256 => uint256) public paidAmounts;
 
     /// ======================

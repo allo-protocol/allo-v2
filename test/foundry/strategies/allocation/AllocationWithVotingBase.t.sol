@@ -7,14 +7,14 @@ import {Metadata} from "../../../../contracts/core/libraries/Metadata.sol";
 import {BaseAllocationStrategy} from "../../../../contracts/strategies/allocation/BaseAllocationStrategy.sol";
 
 contract AllocationWithVotingBaseTest is Test {
-    uint256 public applicationStartTime;
-    uint256 public applicationEndTime;
+    uint256 public recipentStartTime;
+    uint256 public recipentEndTime;
     uint256 public votingStartTime;
     uint256 public votingEndTime;
 
     bool public identityRequired;
 
-    event ApplicationSubmitted(
+    event RecipentSubmitted(
         uint256 indexed recipentId, bytes32 indexed identityId, address recipient, Metadata metadata, address sender
     );
     event RecipentStatusUpdated(
@@ -23,12 +23,12 @@ contract AllocationWithVotingBaseTest is Test {
     event Allocated(bytes data, address indexed allocator);
     event Claimed(uint256 indexed recipentId, address receipient, uint256 amount);
     event TimestampsUpdated(
-        uint256 applicationStartTime, uint256 applicationEndTime, uint256 votingStartTime, uint256 votingEndTime
+        uint256 recipentStartTime, uint256 recipentEndTime, uint256 votingStartTime, uint256 votingEndTime
     );
 
     function setUp() public {
-        applicationStartTime = 0;
-        applicationEndTime = 0;
+        recipentStartTime = 0;
+        recipentEndTime = 0;
         votingStartTime = 0;
         votingEndTime = 0;
         identityRequired = false;
@@ -36,15 +36,15 @@ contract AllocationWithVotingBaseTest is Test {
 
     function test_initialize() public {}
 
-    function test_registerRecipents_new_application() public {}
+    function test_registerRecipents_new_recipent() public {}
 
-    function test_registerRecipents_update_application() public {}
+    function test_registerRecipents_update_recipent() public {}
 
     function testRevert_registerRecipents_APPLICATIONS_NOT_OPEN() public {}
 
-    function testRevert_registerRecipents_new_application_UNAUTHORIZED() public {}
+    function testRevert_registerRecipents_new_recipent_UNAUTHORIZED() public {}
 
-    function testRevert_registerRecipents_update_application_UNAUTHORIZED() public {}
+    function testRevert_registerRecipents_update_recipent_UNAUTHORIZED() public {}
 
     function test_getRecipentStatus() public {}
 
@@ -62,9 +62,9 @@ contract AllocationWithVotingBaseTest is Test {
 
     function test_getPayout() public {}
 
-    function test_reviewApplications() public {}
+    function test_reviewRecipents() public {}
 
-    function testRevert_reviewApplications_UNAUTHORIZED() public {}
+    function testRevert_reviewRecipents_UNAUTHORIZED() public {}
 
     function test_setPayout() public {}
 
@@ -83,7 +83,7 @@ contract AllocationWithVotingBaseTest is Test {
     }
 
     // INVALID_TIME
-    /// @notice applicationStartTime must be before applicationEndTime
+    /// @notice recipentStartTime must be before recipentEndTime
     function testRevert_updateTimestamps_ASBAE_INVALID_TIME() public {
         // Todo: test revert if invalid time
     }
@@ -93,7 +93,7 @@ contract AllocationWithVotingBaseTest is Test {
         // Todo: test revert if invalid time
     }
 
-    /// @notice applicationStartTime must be in the future
+    /// @notice recipentStartTime must be in the future
     function testRevert_updateTimestamps_ASINFUTURE_INVALID_TIME() public {
         // Todo: test revert if invalid time
     }
