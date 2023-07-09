@@ -3,17 +3,17 @@ pragma solidity 0.8.19;
 import "forge-std/Test.sol";
 
 import {SplitterDistributionStrategy} from
-    "../../../../contracts/strategies/distribution/SplitterDistributionStrategy.sol";
-import {Allo} from "../../../../contracts/core/Allo.sol";
-import {Registry} from "../../../../contracts/core/Registry.sol";
-import {Metadata} from "../../../../contracts/core/libraries/Metadata.sol";
-import {TestUtilities} from "../../utils/TestUtilities.sol";
-import "../../../../contracts/interfaces/IAllocationStrategy.sol";
-import "../../../../contracts/interfaces/IDistributionStrategy.sol";
+    "../../../../../contracts/strategies/distribution/Splitter/SplitterDistributionStrategy.sol";
+import {Allo} from "../../../../../contracts/core/Allo.sol";
+import {Registry} from "../../../../../contracts/core/Registry.sol";
+import {Metadata} from "../../../../../contracts/core/libraries/Metadata.sol";
+import {TestUtilities} from "../../../utils/TestUtilities.sol";
+import "../../../../../contracts/interfaces/IAllocationStrategy.sol";
+import "../../../../../contracts/interfaces/IDistributionStrategy.sol";
 
-import {MockAllocation} from "../../utils/MockAllocation.sol";
-import {MockDistribution} from "../../utils/MockDistribution.sol";
-import {MockToken} from "../../utils/MockToken.sol";
+import {MockAllocation} from "../../../utils/MockAllocation.sol";
+import {MockDistribution} from "../../../utils/MockDistribution.sol";
+import {MockToken} from "../../../utils/MockToken.sol";
 
 contract SplitterDistributionStrategyTest is Test {
     event Initialized(address allo, bytes32 identityId, uint256 indexed poolId, address token, bytes data);

@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import {IAllocationStrategy} from "../../interfaces/IAllocationStrategy.sol";
-import {IDistributionStrategy} from "../../interfaces/IDistributionStrategy.sol";
-import {Allo} from "../../core/Allo.sol";
-import {Transfer} from "../../core/libraries/Transfer.sol";
+import {IAllocationStrategy} from "../../../interfaces/IAllocationStrategy.sol";
+import {IDistributionStrategy} from "../../../interfaces/IDistributionStrategy.sol";
+import {Allo} from "../../../core/Allo.sol";
+import {Transfer} from "../../../core/libraries/Transfer.sol";
 import {ReentrancyGuard} from "@openzeppelin/security/ReentrancyGuard.sol";
 
 contract SplitterDistributionStrategy is IDistributionStrategy, Transfer, ReentrancyGuard {

@@ -1,4 +1,4 @@
-Spec: Simple Push (Distribution)
+Spec: Splitter (Distribution)
 ---------------------------------
 
 ## Overview 
@@ -10,10 +10,9 @@ Out of scope for this contract:
 
 ## Spec
 ### Standard Functions
-#### `activateDistribution()`
-With this function, the pool admin is able to pull the allocation list from the allocation strategy to the distribution strategy. 
+
 #### `distribute()`
-The pool admin is able to submit a transaction that bulk distributes the total amount of allocated tokens to the specific recipients. 
+The pool admin is able to submit a transaction that bulk distributes the total amount of allocated tokens to the specific recipients. It retieves the amount to be split to a recipient from an allocation strategy
 
 ## Open questions
 - How will pool owners be able to revise the `payoutToken` or `amount`?
