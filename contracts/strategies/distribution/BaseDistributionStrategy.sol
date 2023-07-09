@@ -23,18 +23,21 @@ abstract contract BaseDistributionStrategy is BaseStrategy, IDistributionStrateg
     /// ====================================
 
     /// @notice Initializes the allocation strategy
+    /// @param _strategyIdentifier The identifier of the strategy
     /// @param _allo Address of the Allo contract
     /// @param _identityId Id of the identity
     /// @param _poolId Id of the pool
     /// @param _data The data to be decoded
     /// @dev This function is called by the Allo contract
-    function initialize(address _allo, bytes32 _identityId, uint256 _poolId, address _token, bytes memory _data)
-        public
-        virtual
-        override
-        onlyAllo
-    {
-        __BaseStrategy_init(_allo, _identityId, _poolId, _data);
+    function __BaseDistributionStrategy_init(
+        string memory _strategyIdentifier,
+        address _allo,
+        bytes32 _identityId,
+        uint256 _poolId,
+        address _token,
+        bytes memory _data
+    ) internal onlyAllo {
+        __BaseStrategy_init(_strategyIdentifier, _allo, _identityId, _poolId, _data);
         token = _token;
         emit TokenSet(_token);
     }

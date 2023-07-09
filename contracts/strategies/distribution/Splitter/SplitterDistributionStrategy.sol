@@ -32,10 +32,10 @@ contract SplitterDistributionStrategy is BaseDistributionStrategy, Transfer, Ree
     /// @param _data unused for this strategy
     /// @dev This function is called by the Allo contract
     function initialize(address _allo, bytes32 _identityId, uint256 _poolId, address _token, bytes memory _data)
-        public
+        external
         override
     {
-        super.initialize(_allo, _identityId, _poolId, _token, _data);
+        __BaseDistributionStrategy_init("SplitterDistributionStrategyV1", _allo, _identityId, _poolId, _token, _data);
     }
 
     /// @notice Distribute the payouts to the recipients

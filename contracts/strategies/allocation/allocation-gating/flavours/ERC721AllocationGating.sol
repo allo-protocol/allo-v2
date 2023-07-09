@@ -24,7 +24,7 @@ contract ERC721AllocationGating is AllocationGating {
     /// @param _data The data to be decoded
     /// @dev This function is called by the Allo contract
     function initialize(address _allo, bytes32 _identityId, uint256 _poolId, bytes memory _data) public override {
-        super.initialize(_allo, _identityId, _poolId, _data);
+        __BaseAllocationStrategy_init("ERC721AllocationGatingV1", _allo, _identityId, _poolId, _data);
 
         // decode data custom to this strategy
         (address _token) = abi.decode(_data, (address));
