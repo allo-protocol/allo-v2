@@ -58,7 +58,7 @@ abstract contract AllocationGating is BaseAllocationStrategy {
         for (uint256 i = 0; i < allocationsLength;) {
             PayoutSummary memory allocation = allocations[i];
 
-            if (!_isEligibleForAllocation(allocation.recipient)) {
+            if (!_isEligibleForAllocation(allocation.payoutAddress)) {
                 revert NOT_ELIGIBLE();
             }
 

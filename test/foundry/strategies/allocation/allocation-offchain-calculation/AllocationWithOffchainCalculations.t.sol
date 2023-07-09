@@ -7,8 +7,8 @@ import {Metadata} from "../../../../../contracts/core/libraries/Metadata.sol";
 import {BaseAllocationStrategy} from "../../../../../contracts/strategies/allocation/BaseAllocationStrategy.sol";
 
 contract AllocationWithOffchainCalculationsTest is Test {
-    uint256 public recipientStartTime;
-    uint256 public recipientEndTime;
+    uint256 public registerStartTime;
+    uint256 public registerEndTime;
     uint256 public votingStartTime;
     uint256 public votingEndTime;
 
@@ -27,12 +27,12 @@ contract AllocationWithOffchainCalculationsTest is Test {
     event Allocated(bytes data, address indexed allocator);
     event Claimed(uint256 indexed recipientId, address receipient, uint256 amount);
     event TimestampsUpdated(
-        uint256 recipientStartTime, uint256 recipientEndTime, uint256 votingStartTime, uint256 votingEndTime
+        uint256 registerStartTime, uint256 registerEndTime, uint256 votingStartTime, uint256 votingEndTime
     );
 
     function setUp() public {
-        recipientStartTime = 0;
-        recipientEndTime = 0;
+        registerStartTime = 0;
+        registerEndTime = 0;
         votingStartTime = 0;
         votingEndTime = 0;
         identityRequired = false;
@@ -44,7 +44,7 @@ contract AllocationWithOffchainCalculationsTest is Test {
 
     function test_registerRecipients_update_recipient() public {}
 
-    function testRevert_registerRecipients_APPLICATIONS_NOT_OPEN() public {}
+    function testRevert_registerRecipients_REGISTRATION_NOT_OPEN() public {}
 
     function testRevert_registerRecipients_new_recipient_UNAUTHORIZED() public {}
 
@@ -76,7 +76,7 @@ contract AllocationWithOffchainCalculationsTest is Test {
 
     function test_setPayout_INVALID_INPUT() public {}
 
-    function test_setPayout_INVALID_APPLICATION() public {}
+    function test_setPayout_INVALID_RECIPIENT() public {}
 
     function test_claim() public {}
 
@@ -87,7 +87,7 @@ contract AllocationWithOffchainCalculationsTest is Test {
     }
 
     // INVALID_TIME
-    /// @notice recipientStartTime must be before recipientEndTime
+    /// @notice registerStartTime must be before registerEndTime
     function testRevert_updateTimestamps_ASBAE_INVALID_TIME() public {
         // Todo: test revert if invalid time
     }
@@ -97,7 +97,7 @@ contract AllocationWithOffchainCalculationsTest is Test {
         // Todo: test revert if invalid time
     }
 
-    /// @notice recipientStartTime must be in the future
+    /// @notice registerStartTime must be in the future
     function testRevert_updateTimestamps_ASINFUTURE_INVALID_TIME() public {
         // Todo: test revert if invalid time
     }

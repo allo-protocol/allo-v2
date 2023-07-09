@@ -23,8 +23,8 @@ As laid out in the [components overview](https://docs.google.com/document/d/1qoO
 ## Spec
 ### Custom Variables
 This strategy will need the following custom variables:
-- `recipientStartTime` — the time at which recipients can start being submitted
-- `recipientEndTime` - the time at which recipients can no longer be submitted
+- `registerStartTime` — the time at which recipients can start being submitted
+- `registerEndTime` - the time at which recipients can no longer be submitted
 - `votingStartTime` - the time at which votes can start being submitted
 - `votingEndTime` - the time at which votes can no longer be submitted
 - `identityRequired` - boolean property for whether or not a valid Allo Identity is required for recipient
@@ -48,8 +48,8 @@ This strategy will need the following custom variables:
 All standard functions are functions that the given user can call from the `Allo.sol` contract.
 #### `createPool()`
 The identity admin creates a new pool via `createPool`. At this time, the admin can set the following variables:
-- `recipientStartTime` 
-- `recipientEndTime` 
+- `registerStartTime` 
+- `registerEndTime` 
 - `votingStartTime`
 - `votingEndTime`
 - `identityRequired`
@@ -66,7 +66,7 @@ Potential applicants can apply to the pool via `registerRecipients`. When the re
     - If no, does the recipient have valid Allo registry identity?
         - If yes, proceed with registry identity
         - If no, assign unique identity and proceed
-- Is the recipient timestamp between `recipientStartTime` and `recipientEndTime`?
+- Is the recipient timestamp between `registerStartTime` and `registerEndTime`?
     - If no, revert with message that recipient period is closed
     - If yes, the recipient is eligible.
 

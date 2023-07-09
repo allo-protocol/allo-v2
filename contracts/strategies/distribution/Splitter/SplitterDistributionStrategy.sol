@@ -117,7 +117,7 @@ contract SplitterDistributionStrategy is IDistributionStrategy, Transfer, Reentr
 
             paidAmounts[recipientId] = amountToTransfer;
 
-            _transferAmount(token, payouts[i].recipient, amountToTransfer);
+            _transferAmount(token, payouts[i].payoutAddress, amountToTransfer);
             unchecked {
                 i++;
             }

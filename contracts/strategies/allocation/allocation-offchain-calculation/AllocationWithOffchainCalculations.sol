@@ -18,7 +18,7 @@ contract AllocationWithOffchainCalculations is BaseAllocationStrategy, Transfer,
 
     error ALLOCATION_AMOUNT_UNDERFLOW();
     error ALLOCATION_AMOUNT_MISMATCH();
-    error APPLICATIONS_NOT_OPEN();
+    error REGISTRATION_NOT_OPEN();
     error IDENTITY_REQUIRED();
     error INVALID_TIME();
     error INVALID_INPUT();
@@ -61,8 +61,8 @@ contract AllocationWithOffchainCalculations is BaseAllocationStrategy, Transfer,
 
     Registry public registry;
 
-    uint256 public recipientStartTime;
-    uint256 public recipientEndTime;
+    uint256 public registerStartTime;
+    uint256 public registerEndTime;
     uint256 public votingStartTime;
     uint256 public votingEndTime;
     uint256 private _index;
@@ -90,7 +90,7 @@ contract AllocationWithOffchainCalculations is BaseAllocationStrategy, Transfer,
     event Allocated(bytes data, address indexed allocator);
     event Claimed(uint256 indexed recipientId, address receipient, uint256 amount);
     event TimestampsUpdated(
-        uint256 recipientStartTime, uint256 recipientEndTime, uint256 votingStartTime, uint256 votingEndTime
+        uint256 registerStartTime, uint256 registerEndTime, uint256 votingStartTime, uint256 votingEndTime
     );
 
     /// @notice Initialize the contract
@@ -118,8 +118,8 @@ contract AllocationWithOffchainCalculations is BaseAllocationStrategy, Transfer,
         onlyAllo
         returns (uint256)
     {
-        if (recipientStartTime <= block.timestamp || recipientEndTime >= block.timestamp) {
-            revert APPLICATIONS_NOT_OPEN();
+        if (registerStartTime <= block.timestamp || registerEndTime >= block.timestamp) {
+            revert REGISTRATION_NOT_OPEN();
         }
 
         (uint256 recipientId, address payoutAddress, bytes32 _identityId, Metadata memory metadata) =
@@ -320,31 +320,31 @@ contract AllocationWithOffchainCalculations is BaseAllocationStrategy, Transfer,
     }
 
     /// @notice Set the recipient & voting times
-    /// @param _recipientStartTime The recipientStartTime of the pool
-    /// @param _recipientEndTime The recipientEndTime of the pool
+    /// @param _registerStartTime The registerStartTime of the pool
+    /// @param _registerEndTime The registerEndTime of the pool
     /// @param _votingStartTime The votingStartTime of the pool
     /// @param _votingEndTime The votingEndTime of the pool
     function updateTimestamps(
-        uint256 _recipientStartTime,
-        uint256 _recipientEndTime,
+        uint256 _registerStartTime,
+        uint256 _registerEndTime,
         uint256 _votingStartTime,
         uint256 _votingEndTime
     ) external onlyPoolManager {
         if (
-            _recipientStartTime > _recipientEndTime // recipientStartTime must be before recipientEndTime
+            _registerStartTime > _registerEndTime // registerStartTime must be before registerEndTime
                 || _votingStartTime > _votingEndTime // votingStartTime must be before votingEndTime
-                || _recipientStartTime < block.timestamp // recipientStartTime must be in the future
+                || _registerStartTime < block.timestamp // registerStartTime must be in the future
                 || _votingStartTime < block.timestamp // votingStartTime must be in the future
         ) {
             revert INVALID_TIME();
         }
 
-        recipientStartTime = _recipientStartTime;
-        recipientEndTime = _recipientEndTime;
+        registerStartTime = _registerStartTime;
+        registerEndTime = _registerEndTime;
         votingStartTime = _votingStartTime;
         votingEndTime = _votingEndTime;
 
-        emit TimestampsUpdated(_recipientStartTime, _recipientEndTime, _votingStartTime, _votingEndTime);
+        emit TimestampsUpdated(_registerStartTime, _registerEndTime, _votingStartTime, _votingEndTime);
     }
 
     /// @notice Check if the pool is ready to payout

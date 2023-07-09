@@ -11,7 +11,7 @@ interface IStrategy {
      */
 
     struct PayoutSummary {
-        address recipient;
+        address payoutAddress;
         uint256 percentage;
     }
 }
