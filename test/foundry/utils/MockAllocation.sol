@@ -22,29 +22,20 @@ contract MockAllocation is IAllocationStrategy {
         _data;
     }
 
-    function registerRecipient(bytes memory _data, address _sender) external payable returns (uint256) {
-        // surpress compiler warnings:
-        _data;
-        _sender;
-        return 1;
+    function registerRecipients(bytes memory, address) external payable override returns (address) {
+        return address(1);
     }
 
-    function getApplicationStatus(uint256 _applicationId) external view override returns (ApplicationStatus) {
-        // return ApplicationStatus.Applied;
-    }
+    function getRecipientStatus(address) external view override returns (RecipientStatus) {}
 
-    function allocate(bytes memory _data, address _sender) external payable override {}
+    function allocate(bytes memory, address) external payable override {}
 
-    function getPayout(uint256[] memory _applicationId, bytes memory _data)
+    function getPayout(address[] memory, bytes memory)
         external
         view
         override
         returns (PayoutSummary[] memory summaries)
-    {
-        // todo:
-    }
+    {}
 
-    function readyToPayout(bytes calldata) external view returns (bool) {
-        // todo:
-    }
+    function readyToPayout(bytes calldata) external view returns (bool) {}
 }

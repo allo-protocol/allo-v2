@@ -26,8 +26,9 @@ The identity admin creates a new pool via `createPool`. At this time, the admin 
 - `poolOpen`
 - `alternateRegistry`
 
-#### `applytoPool()`
-Potential recipients can apply to the pool via `applyToPool`. When the application is submitted, the strategy uses the following decision tree to determine eligibility:
+#### `registerRecipients()`
+
+Potential recipients can register to the pool via `registerRecipients`. When the registration is submitted, the strategy uses the following decision tree to determine eligibility:
 
 - Is `poolOpen` true?
     - If yes, proceed
@@ -41,7 +42,8 @@ If the recipient is eligible, the strategy stores the application and programmat
 #### `allocate()`
 The admins of the pool manually assign allocations to recipients via the `allocate` function. Any pool admin can call `allocate()` on Allo.sol and pass in the amount of the pool to allocate to the specific recipient.
 
-#### `generatePayouts()`
-The pool admin can transfer an accepted proposal to the distribution process by calling the `generatePayouts` function. Any proposal marked as `accepted` is considered eligible to begin the distribution process. The proposal is recorded as eligible to receive their `amountRequested`. 
+#### `getPayout()`
+
+The pool admin can transfer an accepted proposal to the distribution process by calling the `getPayout` function. Any proposal marked as `accepted` is considered eligible to begin the distribution process. The proposal is recorded as eligible to receive their `amountRequested`.
 
 ### Open questions

@@ -2,7 +2,7 @@ Spec: Direct Grants Pool with Committee Voting
 ---------------------------------
 
 ## Overview 
-Many web3 projects and traditional orgs operate a direct grants program, where they set aside funds and enable small committees to decide how to distribute those funds for a given purpose. Applications are solicited for projects that support the pool's goal.
+Many web3 projects and traditional orgs operate a direct grants program, where they set aside funds and enable small committees to decide how to distribute those funds for a given purpose. Recipients are solicited for projects that support the pool's goal.
 
 ## Component Quickview
 As laid out in the [components overview](https://docs.google.com/document/d/1qoOP07oMKzUCyfb4HbnyeD6ZYEQa004i5Zwqoy7-Ox8/edit), each allocation strategy consists of some key components. This is a quick overview of the relevant components for this strategy.
@@ -16,14 +16,14 @@ As laid out in the [components overview](https://docs.google.com/document/d/1qoO
 ## Spec
 ### Custom Variables
 This strategy will need the following custom variables:
-- `poolOpen` - boolean value that represents whether the pool is accepting new applications
+- `poolOpen` - boolean value that represents whether the pool is accepting new recipients
 - `poolMetadata` - off-chain metadata about the pool
 - `committee` - allowlist of eligible voters for the pool
 - `acceptanceThreshold` - number of eligible voters who must vote yes on a proposal to unlock the funds. Number must be >=1 and <=the total number of committee voters. 
 - `eligibilityVerification` - the list of on-chain verifications that must be present on the applicant's identity address to be eligible
-- `proposal` — contains the application's proposal for grant funding
+- `proposal` — contains the recipient's proposal for grant funding
 - `amountRequested` - amount of the pool's token that is being requested as part of the proposal
-- `localStatus` - the local application status. Can be any of the following values:
+- `localStatus` - the local recipient status. Can be any of the following values:
     - `pending` — maps to `pending` global status
     - `review` - maps to `pending` global status
     - `accepted` - maps to `accepted` global status
@@ -40,8 +40,8 @@ The identity admin creates a new pool via `createPool`. At this time, the admin 
 - `poolMetadata`
 - `eligibilityVerification`
 
-#### `applytoPool()`
-Potential applicants can apply to the pool via `applyToPool`. When the application is submitted, the strategy uses the following decision tree to determine eligibility:
+#### `registerRecipients()`
+Potential applicants can apply to the pool via `registerRecipients`. When the recipient is submitted, the strategy uses the following decision tree to determine eligibility:
 
 - Is `poolOpen` true?
     - If yes, proceed
@@ -60,7 +60,7 @@ Potential applicants can apply to the pool via `applyToPool`. When the applicati
         - If yes, proposal is eligible —> set msg.sender as identity for pool
         - If no, revert with message that proposal is ineligible
 
-If the application is eligible, the strategy stores the application and programmatically assigns the `Pending` local status.
+If the recipient is eligible, the strategy stores the recipient and programmatically assigns the `Pending` local status.
 
 #### `allocate()`
 Eligible voters are able to vote yes or no on a given proposal using the `allocate` function. When a new vote transaction is submitted, the following checks are made:

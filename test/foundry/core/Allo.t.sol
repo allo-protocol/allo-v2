@@ -348,12 +348,12 @@ contract AlloTest is Test {
         assertEq(address(_utilGetPoolInfo(poolId).allocationStrategy), allocationStrategy);
     }
 
-    function test_applyToPool() public {
+    function test_registerRecipients() public {
         uint256 poolId = _utilCreatePool(0);
 
         // apply to the pool
-        uint256 applicationId = allo.registerRecipient(poolId, bytes(""));
-        assertEq(applicationId, 1);
+        address recipientId = allo.registerRecipients(poolId, bytes(""));
+        assertEq(recipientId, address(1));
     }
 
     function test_updatePoolMetadata() public {
@@ -430,8 +430,9 @@ contract AlloTest is Test {
     function test_distribute() public {
         uint256 poolId = _utilCreatePool(0);
         // distribution to the pool should not revert
-        uint256[] memory applicationIds = new uint[](1);
-        allo.distribute(poolId, applicationIds, bytes(""));
+
+        address[] memory recipientIds = new address[](1);
+        allo.distribute(poolId, recipientIds, bytes(""));
     }
 
     function test_updateRegistry() public {

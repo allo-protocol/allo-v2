@@ -4,7 +4,7 @@ pragma solidity 0.8.19;
 import "./IStrategy.sol";
 
 interface IAllocationStrategy is IStrategy {
-    enum ApplicationStatus {
+    enum RecipientStatus {
         None,
         Pending,
         Accepted,
@@ -18,13 +18,13 @@ interface IAllocationStrategy is IStrategy {
     function initialize(address _allo, bytes32 _identityId, uint256 _poolId, bytes memory _data) external;
 
     // decode the _data into what's relevant for this strategy
-    // update whatever is needed to store the applicant
-    // return the applicationId
-    function registerRecipient(bytes memory _data, address sender) external payable returns (uint256);
+    // update whatever is needed to store the recipient
+    // return the recipientId as address
+    function registerRecipients(bytes memory _data, address _sender) external payable returns (address);
 
-    // return whether application is pending, accepted, or rejected
+    // return whether recipient is pending, accepted, or rejected
     // strategies will need to add their own logic to translate to these categories if they use different ones
-    function getApplicationStatus(uint256 _applicationId) external view returns (ApplicationStatus);
+    function getRecipientStatus(address _recipientId) external view returns (RecipientStatus);
 
     // decode the _data into what's relevant for this strategy
     // perform whatever actions are necessary (token transfers, storage updates, etc)
@@ -34,7 +34,7 @@ interface IAllocationStrategy is IStrategy {
     function allocate(bytes memory _data, address _sender) external payable;
 
     // generate the payouts for the strategy
-    function getPayout(uint256[] memory _applicationId, bytes memory _data)
+    function getPayout(address[] memory _recipientId, bytes memory _data)
         external
         view
         returns (PayoutSummary[] memory summaries);
@@ -42,6 +42,6 @@ interface IAllocationStrategy is IStrategy {
     // signal that pool is ready for distribution
     function readyToPayout(bytes memory _data) external view returns (bool);
 
-    // many owners will probably want a way to add custom application approval logic
+    // many owners will probably want a way to add custom recipient approval logic
     // but all of that will be in specific implementations, not requried interface
 }

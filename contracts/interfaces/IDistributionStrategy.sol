@@ -13,7 +13,7 @@ interface IDistributionStrategy is IStrategy {
 
     // distribution a payout based on the strategy's needs
     // this could include merkle proofs, etc or just nothing
-    function distribute(uint256[] memory _applicationIds, bytes memory _data, address _sender) external;
+    function distribute(address[] memory _recipientIds, bytes memory _data, address _sender) external;
 
     // invoked by Allo.fundPool
     function poolFunded(uint256 _amount) external;

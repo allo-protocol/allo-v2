@@ -30,6 +30,7 @@ contract Allo is Initializable, Ownable, AccessControl {
     error TRANSFER_FAILED();
     error NOT_ENOUGH_FUNDS();
     error NOT_APPROVED_STRATEGY();
+    error AMOUNT_MISMATCH();
 
     /// ==========================
     /// === Structs & Enums ======
@@ -142,10 +143,15 @@ contract Allo is Initializable, Ownable, AccessControl {
     /// =========== Modifier ===============
     /// ====================================
 
-    /// @notice Checks if the msg sender is the pool owner
-    /// @param _poolId The pool id
-    modifier onlyPoolOwner(uint256 _poolId) {
-        if (!hasRole(keccak256(abi.encodePacked(_poolId)), msg.sender)) {
+    modifier onlyPoolManager(uint256 _poolId) {
+        if (!_isPoolManager(_poolId, msg.sender)) {
+            revert UNAUTHORIZED();
+        }
+        _;
+    }
+
+    modifier onlyPoolAdmin(uint256 _poolId) {
+        if (!_isPoolAdmin(_poolId, msg.sender)) {
             revert UNAUTHORIZED();
         }
         _;
@@ -334,6 +340,9 @@ contract Allo is Initializable, Ownable, AccessControl {
         }
 
         if (_amount > 0) {
+            if (_token == address(0) && msg.value != (_amount + baseFee)) {
+                revert AMOUNT_MISMATCH();
+            }
             _fundPool(_token, _amount, poolId, _distributionStrategy);
         }
 
@@ -341,11 +350,11 @@ contract Allo is Initializable, Ownable, AccessControl {
     }
 
     /// @notice passes _data through to the allocation strategy for that pool
-    /// @notice returns the applicationId from the allocation strategy
+    /// @notice returns the recipientId from the allocation strategy
     /// @param _poolId id of the pool
     /// @param _data encoded data unique to the allocation strategy for that pool
-    function registerRecipient(uint256 _poolId, bytes memory _data) external payable returns (uint256) {
-        return pools[_poolId].allocationStrategy.registerRecipient(_data, msg.sender);
+    function registerRecipients(uint256 _poolId, bytes memory _data) external payable returns (address) {
+        return pools[_poolId].allocationStrategy.registerRecipients(_data, msg.sender);
     }
 
     /// @notice Update pool metadata
@@ -367,6 +376,10 @@ contract Allo is Initializable, Ownable, AccessControl {
     function fundPool(uint256 _poolId, uint256 _amount, address _token) external payable {
         if (_amount == 0) {
             revert NOT_ENOUGH_FUNDS();
+        }
+
+        if (_token == address(0) && msg.value != _amount) {
+            revert AMOUNT_MISMATCH();
         }
 
         _fundPool(_token, _amount, _poolId, pools[_poolId].distributionStrategy);
@@ -394,8 +407,8 @@ contract Allo is Initializable, Ownable, AccessControl {
     /// @notice passes _data & msg.sender through to the disribution strategy for that pool
     /// @param _poolId id of the pool
     /// @param _data encoded data unique to the distributionStrategy strategy for that pool
-    function distribute(uint256 _poolId, uint256[] memory _applicationIds, bytes memory _data) external {
-        pools[_poolId].distributionStrategy.distribute(_applicationIds, _data, msg.sender);
+    function distribute(uint256 _poolId, address[] memory _recipientIds, bytes memory _data) external {
+        pools[_poolId].distributionStrategy.distribute(_recipientIds, _data, msg.sender);
     }
 
     /// @notice Updates the registry address
