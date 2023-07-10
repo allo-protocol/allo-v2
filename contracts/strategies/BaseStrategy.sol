@@ -2,8 +2,9 @@
 pragma solidity 0.8.19;
 
 import "../core/Allo.sol";
+import "../interfaces/IStrategy.sol";
 
-abstract contract BaseStrategy {
+abstract contract BaseStrategy is IStrategy {
     /// ======================
     /// ======= Errors =======
     /// ======================
@@ -22,12 +23,12 @@ abstract contract BaseStrategy {
     /// === Storage Variables ====
     /// ==========================
 
-    bytes32 public STRATEGY_IDENTIFIER;
+    bytes32 internal STRATEGY_IDENTIFIER;
 
-    bytes32 public identityId;
-    Allo public allo;
+    bytes32 internal identityId;
+    Allo internal allo;
 
-    uint256 public poolId;
+    uint256 internal poolId;
     bool public initialized;
 
     /// ====================================
@@ -36,7 +37,7 @@ abstract contract BaseStrategy {
 
     /// @notice Modifier to check if the caller is the Allo contract
     modifier onlyAllo() {
-        if (msg.sender != address(allo) || address(allo) == address(0)) {
+        if (msg.sender != address(allo) && address(allo) != address(0)) {
             revert UNAUTHORIZED();
         }
         _;
@@ -84,6 +85,24 @@ abstract contract BaseStrategy {
         poolId = _poolId;
 
         emit Initialized(_allo, _identityId, _poolId, _data);
+    }
+
+    /// @notice Get the identity id
+    /// @return bytes32 The identity id
+    function getIdentityId() external view returns (bytes32) {
+        return identityId;
+    }
+
+    /// @notice Get the pool id
+    /// @return uint256 The pool id
+    function getPoolId() external view returns (uint256) {
+        return poolId;
+    }
+
+    /// @notice Get the Allo address
+    /// @return address The Allo address
+    function getAllo() external view returns (address) {
+        return address(allo);
     }
 
     /// @notice Returns the strategy identifier
