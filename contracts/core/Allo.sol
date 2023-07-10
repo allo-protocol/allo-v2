@@ -133,18 +133,14 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     /// =========== Modifier ===============
     /// ====================================
 
-    // NOTE: We have two onlyPoolManager modifiers in the same contract, one without parameters and one with a parameter (_poolId). The other one
-    // is in the BaseStrategy.sol contract. This is not allowed in Solidity. Caught this trying to use the protocol in a demo.
-    // I appended WithPoolId to the modifier name to make it unique. Happy to rename to what the team decides.
-    modifier onlyPoolManagerWithPoolId(uint256 _poolId) virtual {
+    modifier onlyPoolManager(uint256 _poolId) {
         if (!_isPoolManager(_poolId, msg.sender)) {
             revert UNAUTHORIZED();
         }
         _;
     }
 
-    // NOTE: see above ^^
-    modifier onlyPoolAdminWithPoolId(uint256 _poolId) virtual {
+    modifier onlyPoolAdmin(uint256 _poolId) {
         if (!_isPoolAdmin(_poolId, msg.sender)) {
             revert UNAUTHORIZED();
         }
@@ -354,10 +350,7 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     /// @param _poolId id of the pool
     /// @param _metadata new metadata of the pool
     /// @dev Only callable by the pool managers
-    function updatePoolMetadata(uint256 _poolId, Metadata memory _metadata)
-        external
-        onlyPoolManagerWithPoolId(_poolId)
-    {
+    function updatePoolMetadata(uint256 _poolId, Metadata memory _metadata) external onlyPoolManager(_poolId) {
         Pool storage pool = pools[_poolId];
         pool.metadata = _metadata;
 
@@ -482,7 +475,7 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     /// @notice Add a pool manager
     /// @param _poolId The pool id
     /// @param _manager The address to add
-    function addPoolManager(uint256 _poolId, address _manager) external onlyPoolAdminWithPoolId(_poolId) {
+    function addPoolManager(uint256 _poolId, address _manager) external onlyPoolAdmin(_poolId) {
         if (_manager == address(0)) {
             revert ZERO_ADDRESS();
         }
@@ -492,7 +485,7 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     /// @notice Remove a pool manager
     /// @param _poolId The pool id
     /// @param _manager The address remove
-    function removePoolManager(uint256 _poolId, address _manager) external onlyPoolAdminWithPoolId(_poolId) {
+    function removePoolManager(uint256 _poolId, address _manager) external onlyPoolAdmin(_poolId) {
         _revokeRole(pools[_poolId].managerRole, _manager);
     }
 
