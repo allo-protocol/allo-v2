@@ -93,7 +93,7 @@ abstract contract AltRegistryGating is BaseAllocationStrategy {
     /// @notice Set allocations by pool manager
     /// @param _data The data to be decoded
     /// @param _sender The sender of the allocation
-    function allocate(bytes memory _data, address _sender) external payable override onlyAllo {
+    function allocate(bytes memory _data, address _sender) external payable override onlyPoolManager {
         // decode data
         (address[] memory projects, uint256[] memory percentages) = abi.decode(_data, (address[], uint256[]));
 
@@ -142,7 +142,7 @@ abstract contract AltRegistryGating is BaseAllocationStrategy {
 
     /// @notice Check if the strategy is ready to payout
     function readyToPayout(bytes memory) external view override returns (bool) {
-        return payoutReady && !poolOpen;
+        return payoutReady;
     }
 
     /// @notice Set if the pool is open
@@ -153,9 +153,10 @@ abstract contract AltRegistryGating is BaseAllocationStrategy {
     }
 
     /// @notice Set if the pool is ready to payout
-    /// @param _payoutReady The status of the pool
-    function setIsPayoutReady(bool _payoutReady) external onlyPoolManager {
-        payoutReady = _payoutReady;
-        emit PayoutReady(_payoutReady);
+    function setIsPayoutReady() external onlyPoolManager {
+        poolOpen = false;
+        payoutReady = true;
+        emit PoolOpen(false);
+        emit PayoutReady(true);
     }
 }

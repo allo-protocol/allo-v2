@@ -85,6 +85,4 @@ contract SplitterDistributionStrategy is BaseDistributionStrategy, Transfer, Ree
         }
         super.poolFunded(_amount);
     }
-
-    receive() external payable onlyAllo {}
 }

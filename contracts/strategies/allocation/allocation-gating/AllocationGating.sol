@@ -25,6 +25,7 @@ abstract contract AllocationGating is BaseAllocationStrategy {
     /// ======================
 
     event Allocated(bytes data, address indexed allocator);
+    event PayoutReady();
 
     /// ====================================
     /// =========== Functions ==============
@@ -92,8 +93,9 @@ abstract contract AllocationGating is BaseAllocationStrategy {
     }
 
     /// @notice Set ready for payout
-    function setReadyForPayout(bool _ready) external onlyPoolManager {
-        payoutReady = _ready;
+    function setReadyForPayout() external onlyPoolManager {
+        payoutReady = true;
+        emit PayoutReady();
     }
 
     /// @notice Check if the strategy is ready to payout

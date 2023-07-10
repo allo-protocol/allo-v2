@@ -48,4 +48,6 @@ abstract contract BaseDistributionStrategy is BaseStrategy, IDistributionStrateg
         amount += _amount;
         emit PoolFundingIncreased(amount);
     }
+
+    receive() external payable onlyAllo {}
 }
