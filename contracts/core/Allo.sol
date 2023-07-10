@@ -136,7 +136,7 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     // NOTE: We have two onlyPoolManager modifiers in the same contract, one without parameters and one with a parameter (_poolId). The other one
     // is in the BaseStrategy.sol contract. This is not allowed in Solidity. Caught this trying to use the protocol in a demo.
     // I appended WithPoolId to the modifier name to make it unique. Happy to rename to what the team decides.
-    modifier onlyPoolManagerWithPoolId(uint256 _poolId) {
+    modifier onlyPoolManagerWithPoolId(uint256 _poolId) virtual {
         if (!_isPoolManager(_poolId, msg.sender)) {
             revert UNAUTHORIZED();
         }
@@ -144,7 +144,7 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     }
 
     // NOTE: see above ^^
-    modifier onlyPoolAdminWithPoolId(uint256 _poolId) {
+    modifier onlyPoolAdminWithPoolId(uint256 _poolId) virtual {
         if (!_isPoolAdmin(_poolId, msg.sender)) {
             revert UNAUTHORIZED();
         }
