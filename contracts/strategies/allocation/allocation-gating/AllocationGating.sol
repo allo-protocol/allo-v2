@@ -49,7 +49,7 @@ abstract contract AllocationGating is BaseAllocationStrategy {
     /// @param _sender The sender of the allocation
     function allocate(bytes memory _data, address _sender) external payable override onlyAllo {
         if (!allo.isPoolManager(poolId, _sender)) {
-            revert UNAUTHORIZED();
+            revert BaseStrategy_UNAUTHORIZED();
         }
 
         // decode data

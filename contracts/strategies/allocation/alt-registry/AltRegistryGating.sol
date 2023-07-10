@@ -58,7 +58,7 @@ abstract contract AltRegistryGating is BaseAllocationStrategy {
         // decode data custom to this strategy
         (address _simpleProjectRegistry) = abi.decode(_data, (address));
         if (_simpleProjectRegistry == address(0)) {
-            revert INVALID_ADDRESS();
+            revert BaseStrategy_INVALID_ADDRESS();
         }
 
         simpleProjectRegistry = SimpleProjectRegistry(_simpleProjectRegistry);
@@ -68,7 +68,7 @@ abstract contract AltRegistryGating is BaseAllocationStrategy {
     function registerRecipients(bytes memory _data, address) external payable override returns (address) {
         (address project, address payoutAddress) = abi.decode(_data, (address, address));
         if (project == address(0) || payoutAddress == address(0)) {
-            revert INVALID_ADDRESS();
+            revert BaseStrategy_INVALID_ADDRESS();
         }
         if (!poolOpen && !simpleProjectRegistry.projects(project)) {
             revert REGISTRATION_FAILED();

@@ -9,9 +9,9 @@ abstract contract BaseStrategy is IStrategy {
     /// ======= Errors =======
     /// ======================
 
-    error UNAUTHORIZED();
-    error STRATEGY_ALREADY_INITIALIZED();
-    error INVALID_ADDRESS();
+    error BaseStrategy_UNAUTHORIZED();
+    error BaseStrategy_STRATEGY_ALREADY_INITIALIZED();
+    error BaseStrategy_INVALID_ADDRESS();
 
     /// ======================
     /// ======= Events =======
@@ -38,7 +38,7 @@ abstract contract BaseStrategy is IStrategy {
     /// @notice Modifier to check if the caller is the Allo contract
     modifier onlyAllo() virtual {
         if (msg.sender != address(allo) && address(allo) != address(0)) {
-            revert UNAUTHORIZED();
+            revert BaseStrategy_UNAUTHORIZED();
         }
         _;
     }
@@ -46,7 +46,7 @@ abstract contract BaseStrategy is IStrategy {
     /// @notice Modifier to check if the caller is a pool manager
     modifier onlyPoolManager() virtual {
         if (!allo.isPoolManager(poolId, msg.sender)) {
-            revert UNAUTHORIZED();
+            revert BaseStrategy_UNAUTHORIZED();
         }
         _;
     }
@@ -69,11 +69,11 @@ abstract contract BaseStrategy is IStrategy {
         bytes memory _data
     ) internal {
         if (initialized) {
-            revert STRATEGY_ALREADY_INITIALIZED();
+            revert BaseStrategy_STRATEGY_ALREADY_INITIALIZED();
         }
 
         if (_allo == address(0)) {
-            revert INVALID_ADDRESS();
+            revert BaseStrategy_INVALID_ADDRESS();
         }
 
         initialized = true;

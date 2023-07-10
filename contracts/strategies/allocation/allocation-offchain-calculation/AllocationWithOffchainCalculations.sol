@@ -140,7 +140,7 @@ contract AllocationWithOffchainCalculations is BaseAllocationStrategy, Transfer,
             abi.decode(_data, (address, address, bytes32, Metadata));
 
         if (identityRequired && !registry.isOwnerOrMemberOfIdentity(identityId, _sender)) {
-            revert UNAUTHORIZED();
+            revert BaseStrategy_UNAUTHORIZED();
         }
 
         Recipient storage recipient;
@@ -162,10 +162,10 @@ contract AllocationWithOffchainCalculations is BaseAllocationStrategy, Transfer,
 
             if (identityRequired && !registry.isOwnerOrMemberOfIdentity(recipient.identityId, _sender)) {
                 // if identityRequired is true, the indentity owner/member can update the recipient
-                revert UNAUTHORIZED();
+                revert BaseStrategy_UNAUTHORIZED();
             } else if (recipient.creator != _sender) {
                 // if identityRequired is false, only the creator of the recipient can update it
-                revert UNAUTHORIZED();
+                revert BaseStrategy_UNAUTHORIZED();
             }
 
             // Update the recipient
