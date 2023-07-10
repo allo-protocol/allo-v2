@@ -23,6 +23,8 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     error NOT_ENOUGH_FUNDS();
     error NOT_APPROVED_STRATEGY();
     error MISMATCH();
+    error ZERO_ADDRESS();
+    error INVALID_FEE();
 
     /// @notice Struct to hold details of an Pool
     struct Pool {
@@ -95,6 +97,10 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     event BaseFeeUpdated(uint256 baseFee);
 
     event RegistryUpdated(address registry);
+
+    event StrategyApproved(address strategy);
+
+    event StrategyRemoved(address strategy);
 
     /// ====================================
     /// =========== Intializer =============
@@ -177,6 +183,10 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
         // - allow cloning of every contract (use the bool)
         // - or we force cloning of only approved contracts
 
+        if (_allocationStrategy == address(0) || _distributionStrategy == address(0) || _token == address(0)) {
+            revert ZERO_ADDRESS();
+        }
+
         if (_cloneAllocationStrategy) {
             if (!_isApprovedStrategy(_allocationStrategy)) {
                 revert NOT_APPROVED_STRATEGY();
@@ -229,6 +239,10 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
         Metadata memory _metadata,
         address[] memory _managers
     ) external payable returns (uint256 poolId) {
+        if (_allocationStrategy == address(0) || _distributionStrategy == address(0)) {
+            revert ZERO_ADDRESS();
+        }
+
         return _createPool(
             _identityId,
             IAllocationStrategy(_allocationStrategy),
@@ -302,7 +316,11 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
         // grant pool managers roles
         uint256 managersLength = _managers.length;
         for (uint256 i = 0; i < managersLength;) {
-            _grantRole(POOL_MANAGER_ROLE, _managers[i]);
+            address manager = _managers[i];
+            if (manager == address(0)) {
+                revert ZERO_ADDRESS();
+            }
+            _grantRole(POOL_MANAGER_ROLE, manager);
             unchecked {
                 i++;
             }
@@ -381,6 +399,9 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     /// @param _registry The new registry address
     /// @dev Only callable by the owner if the current registry cannot be used
     function updateRegistry(address _registry) external onlyOwner {
+        if (_registry == address(0)) {
+            revert ZERO_ADDRESS();
+        }
         registry = Registry(_registry);
         emit RegistryUpdated(_registry);
     }
@@ -389,6 +410,9 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     /// @param _treasury The new treasury address
     /// @dev Only callable by the owner
     function updateTreasury(address payable _treasury) external onlyOwner {
+        if (_treasury == address(0)) {
+            revert ZERO_ADDRESS();
+        }
         treasury = _treasury;
         emit TreasuryUpdated(treasury);
     }
@@ -397,6 +421,9 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     /// @param _feePercentage The new fee
     /// @dev Only callable by the owner
     function updateFee(uint256 _feePercentage) external onlyOwner {
+        if (_feePercentage > 1e18) {
+            revert INVALID_FEE();
+        }
         feePercentage = _feePercentage;
 
         emit FeePercentageUpdated(feePercentage);
@@ -406,7 +433,11 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     /// @param _strategy The address of the strategy
     /// @dev Only callable by the owner
     function addToApprovedStrategies(address _strategy) external onlyOwner {
+        if (_strategy == address(0)) {
+            revert ZERO_ADDRESS();
+        }
         approvedStrategies[_strategy] = true;
+        emit StrategyApproved(_strategy);
     }
 
     /// @notice Remove a strategy from the allowlist
@@ -414,6 +445,7 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     /// @dev Only callable by the owner
     function removeFromApprovedStrategies(address _strategy) external onlyOwner {
         approvedStrategies[_strategy] = false;
+        emit StrategyRemoved(_strategy);
     }
 
     /// @notice Updates the base fee
@@ -444,6 +476,9 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     /// @param _poolId The pool id
     /// @param _manager The address to add
     function addPoolManager(uint256 _poolId, address _manager) external onlyPoolAdmin(_poolId) {
+        if (_manager == address(0)) {
+            revert ZERO_ADDRESS();
+        }
         _grantRole(pools[_poolId].managerRole, _manager);
     }
 

@@ -14,6 +14,7 @@ contract Registry is AccessControl, Transfer {
     error NONCE_NOT_AVAILABLE();
     error NOT_PENDING_OWNER();
     error UNAUTHORIZED();
+    error ZERO_ADDRESS();
 
     /// @notice Struct to hold details of an identity
     struct Identity {
@@ -105,6 +106,10 @@ contract Registry is AccessControl, Transfer {
             revert NONCE_NOT_AVAILABLE();
         }
 
+        if (_owner == address(0)) {
+            revert ZERO_ADDRESS();
+        }
+
         Identity memory identity = Identity({
             nonce: _nonce,
             name: _name,
@@ -119,7 +124,11 @@ contract Registry is AccessControl, Transfer {
         // assign roles
         uint256 memberLength = _members.length;
         for (uint256 i = 0; i < memberLength;) {
-            _grantRole(identityId, _members[i]);
+            address member = _members[i];
+            if (member == address(0)) {
+                revert ZERO_ADDRESS();
+            }
+            _grantRole(identityId, member);
             unchecked {
                 i++;
             }
@@ -230,7 +239,11 @@ contract Registry is AccessControl, Transfer {
         uint256 memberLength = _members.length;
 
         for (uint256 i = 0; i < memberLength;) {
-            _grantRole(_identityId, _members[i]);
+            address member = _members[i];
+            if (member == address(0)) {
+                revert ZERO_ADDRESS();
+            }
+            _grantRole(_identityId, member);
             unchecked {
                 i++;
             }
