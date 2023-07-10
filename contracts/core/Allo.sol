@@ -183,7 +183,7 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
         // - allow cloning of every contract (use the bool)
         // - or we force cloning of only approved contracts
 
-        if (_allocationStrategy == address(0) || _distributionStrategy == address(0) || _token == address(0)) {
+        if (_allocationStrategy == address(0) || _distributionStrategy == address(0)) {
             revert ZERO_ADDRESS();
         }
 
