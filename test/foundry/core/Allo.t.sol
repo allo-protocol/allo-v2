@@ -54,7 +54,7 @@ contract AlloTest is Test {
 
     address public allocationStrategy;
     address public distributionStrategy;
-    address public token;
+    MockToken public token;
 
     Metadata public metadata;
     string public name;
@@ -90,16 +90,30 @@ contract AlloTest is Test {
 
         distributionStrategy = address(new MockDistribution());
         allocationStrategy = address(new MockAllocation());
-        MockToken mockToken = new MockToken();
-        token = address(mockToken);
-        mockToken.mint(0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f, 1000000 * 10 ** 18);
+        token = new MockToken();
+        token.mint(0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f, 1000000 * 10 ** 18);
+        token.mint(alloOwner, 1000000 * 10 ** 18);
+        token.mint(owner, 1000000 * 10 ** 18);
+        token.approve(address(allo), 1000000 * 10 ** 18);
+
+        vm.prank(owner);
+        token.approve(address(allo), 1000000 * 10 ** 18);
+
         identityId = registry.createIdentity(nonce, name, metadata, owner, members);
     }
 
     function _utilCreatePool(uint256 _amount) internal returns (uint256) {
         vm.prank(owner);
         return allo.createPool(
-            identityId, allocationStrategy, "0x", payable(distributionStrategy), "0x", token, _amount, metadata, members
+            identityId,
+            allocationStrategy,
+            "0x",
+            payable(distributionStrategy),
+            "0x",
+            address(token),
+            _amount,
+            metadata,
+            members
         );
     }
 
@@ -148,7 +162,7 @@ contract AlloTest is Test {
             identityId,
             IAllocationStrategy(allocationStrategy),
             IDistributionStrategy(distributionStrategy),
-            token,
+            address(token),
             0,
             metadata
         );
@@ -162,7 +176,7 @@ contract AlloTest is Test {
             payable(distributionStrategy),
             "0x",
             false,
-            token,
+            address(token),
             0,
             metadata,
             members
@@ -183,7 +197,7 @@ contract AlloTest is Test {
             identityId,
             IAllocationStrategy(allocationStrategy),
             IDistributionStrategy(distributionStrategy),
-            token,
+            address(token),
             0,
             metadata
         );
@@ -197,7 +211,7 @@ contract AlloTest is Test {
             payable(distributionStrategy),
             "0x",
             true,
-            token,
+            address(token),
             0,
             metadata,
             members
@@ -215,7 +229,7 @@ contract AlloTest is Test {
             identityId,
             IAllocationStrategy(allocationStrategy),
             IDistributionStrategy(distributionStrategy),
-            token,
+            address(token),
             0,
             metadata
         );
@@ -229,7 +243,7 @@ contract AlloTest is Test {
             payable(distributionStrategy),
             "0x",
             false,
-            token,
+            address(token),
             0,
             metadata,
             members
@@ -252,7 +266,7 @@ contract AlloTest is Test {
             payable(distributionStrategy),
             "0x",
             false,
-            token,
+            address(token),
             0,
             metadata,
             members
@@ -271,7 +285,7 @@ contract AlloTest is Test {
             payable(distributionStrategy),
             "0x",
             true,
-            token,
+            address(token),
             0,
             metadata,
             members
@@ -285,7 +299,7 @@ contract AlloTest is Test {
             identityId,
             IAllocationStrategy(allocationStrategy),
             IDistributionStrategy(distributionStrategy),
-            token,
+            address(token),
             0,
             metadata
         );
@@ -316,7 +330,15 @@ contract AlloTest is Test {
 
         vm.prank(owner);
         allo.createPool{value: baseFee}(
-            identityId, allocationStrategy, "0x", payable(distributionStrategy), "0x", token, 0, metadata, members
+            identityId,
+            allocationStrategy,
+            "0x",
+            payable(distributionStrategy),
+            "0x",
+            address(token),
+            0,
+            metadata,
+            members
         );
     }
 
@@ -325,7 +347,15 @@ contract AlloTest is Test {
         vm.expectRevert(Allo.UNAUTHORIZED.selector);
 
         allo.createPool(
-            identityId, allocationStrategy, "0x", payable(distributionStrategy), "0x", token, 0, metadata, members
+            identityId,
+            allocationStrategy,
+            "0x",
+            payable(distributionStrategy),
+            "0x",
+            address(token),
+            0,
+            metadata,
+            members
         );
     }
 
@@ -336,7 +366,7 @@ contract AlloTest is Test {
             identityId,
             IAllocationStrategy(allocationStrategy),
             IDistributionStrategy(distributionStrategy),
-            token,
+            address(token),
             10 * 10 ** 18,
             metadata
         );
@@ -390,7 +420,7 @@ contract AlloTest is Test {
         vm.expectEmit(true, false, false, true);
         emit PoolFunded(poolId, 9.9e18, 1e17);
 
-        allo.fundPool(poolId, 10 * 10 ** 18, token);
+        allo.fundPool(poolId, 10 * 10 ** 18, address(token));
     }
 
     function testRevert_fundPool_NOT_ENOUGH_FUNDS() public {
@@ -399,7 +429,7 @@ contract AlloTest is Test {
         vm.prank(makeAddr("broke chad"));
         vm.expectRevert(Allo.NOT_ENOUGH_FUNDS.selector);
 
-        allo.fundPool(poolId, 0, token);
+        allo.fundPool(poolId, 0, address(token));
     }
 
     function test_allocate() public {
@@ -417,7 +447,7 @@ contract AlloTest is Test {
         address mockDistribution = address(new MockDistribution());
         vm.prank(owner);
         poolIds[1] = allo.createPool(
-            identityId, mockAllocation, "0x", payable(mockDistribution), "0x", token, 0, metadata, members
+            identityId, mockAllocation, "0x", payable(mockDistribution), "0x", address(token), 0, metadata, members
         );
 
         bytes[] memory datas = new bytes[](2);
