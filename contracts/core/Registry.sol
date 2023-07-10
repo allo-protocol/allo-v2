@@ -66,6 +66,9 @@ contract Registry is AccessControl, Transfer {
     }
 
     constructor(address _owner) {
+        if (_owner == address(0)) {
+            revert ZERO_ADDRESS();
+        }
         _grantRole(ALLO_OWNER, _owner);
     }
 
@@ -274,7 +277,6 @@ contract Registry is AccessControl, Transfer {
     /// @param _name The name of the identity
     function _generateAnchor(bytes32 _identityId, string memory _name) internal pure returns (address) {
         bytes32 attestationHash = keccak256(abi.encodePacked(_identityId, _name));
-
         return address(uint160(uint256(attestationHash)));
     }
 
