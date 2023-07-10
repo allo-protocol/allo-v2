@@ -74,7 +74,7 @@ contract AlloTest is Test {
         name = "New Identity";
         nonce = 2;
 
-        registry = new Registry();
+        registry = new Registry(owner);
         allo.initialize(address(registry), treasury, 1e16, 0);
         // Note: OZ v5 will require this.
         // allo.transferOwnership(owner);

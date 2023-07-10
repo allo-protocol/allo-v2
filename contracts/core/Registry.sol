@@ -2,7 +2,6 @@
 pragma solidity 0.8.19;
 
 import {AccessControl} from "@openzeppelin/access/AccessControl.sol";
-import "@solady/auth/Ownable.sol";
 import {Metadata} from "./libraries/Metadata.sol";
 import "./libraries/Transfer.sol";
 
@@ -10,7 +9,7 @@ import "./libraries/Transfer.sol";
 /// @notice Registry contract for identities
 /// @dev This contract is used to create and manage identities
 /// @author allo-team
-contract Registry is AccessControl, Ownable, Transfer {
+contract Registry is AccessControl, Transfer {
     /// @notice Custom errors
     error NONCE_NOT_AVAILABLE();
     error NOT_PENDING_OWNER();
@@ -38,6 +37,9 @@ contract Registry is AccessControl, Ownable, Transfer {
     /// @notice Identity.id -> pending owner
     mapping(bytes32 => address) public identityIdToPendingOwner;
 
+    /// @notice Allo Owner Role for fund recovery
+    bytes32 public constant ALLO_OWNER = keccak256("ALLO_OWNER");
+
     /// ======================
     /// ======= Events =======
     /// ======================
@@ -60,6 +62,10 @@ contract Registry is AccessControl, Ownable, Transfer {
             revert UNAUTHORIZED();
         }
         _;
+    }
+
+    constructor(address _owner) {
+        _grantRole(ALLO_OWNER, _owner);
     }
 
     /// ====================================
@@ -268,7 +274,7 @@ contract Registry is AccessControl, Ownable, Transfer {
     /// @notice Transfer thefunds recovered  to the recipient
     /// @param _token The address of the token to transfer
     /// @param _recipient The address of the recipient
-    function recoverFunds(address _token, address _recipient) external onlyOwner {
+    function recoverFunds(address _token, address _recipient) external onlyIdentityOwner(ALLO_OWNER) {
         uint256 amount = _token == address(0) ? address(this).balance : IERC20(_token).balanceOf(address(this));
         _transferAmount(_token, _recipient, amount);
     }
