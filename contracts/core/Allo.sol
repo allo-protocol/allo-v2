@@ -22,6 +22,7 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     error UNAUTHORIZED();
     error NOT_ENOUGH_FUNDS();
     error NOT_APPROVED_STRATEGY();
+    error MISMATCH();
 
     /// @notice Struct to hold details of an Pool
     struct Pool {
@@ -289,6 +290,14 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
         // @dev Initialization is expect to revert when invoked more than once
         _allocationStrategy.initialize(address(this), _identityId, poolId, _initAllocationData);
         _distributionStrategy.initialize(address(this), _identityId, poolId, _token, _initDistributionData);
+
+        if (
+            _allocationStrategy.getIdentityId() != _identityId || _distributionStrategy.getIdentityId() != _identityId
+                || _allocationStrategy.getPoolId() != poolId || _distributionStrategy.getPoolId() != poolId
+                || _allocationStrategy.getAllo() != address(this) || _distributionStrategy.getAllo() != address(this)
+        ) {
+            revert MISMATCH();
+        }
 
         // grant pool managers roles
         uint256 managersLength = _managers.length;
