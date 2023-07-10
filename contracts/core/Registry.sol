@@ -2,14 +2,15 @@
 pragma solidity 0.8.19;
 
 import {AccessControl} from "@openzeppelin/access/AccessControl.sol";
-
+import "@solady/auth/Ownable.sol";
 import {Metadata} from "./libraries/Metadata.sol";
+import "./libraries/Transfer.sol";
 
 /// @title Registry
 /// @notice Registry contract for identities
 /// @dev This contract is used to create and manage identities
 /// @author allo-team
-contract Registry is AccessControl {
+contract Registry is AccessControl, Ownable, Transfer {
     /// @notice Custom errors
     error NONCE_NOT_AVAILABLE();
     error NOT_PENDING_OWNER();
@@ -262,5 +263,13 @@ contract Registry is AccessControl {
     /// @param _nonce Nonce used to generate identityId
     function _generateIdentityId(uint256 _nonce) internal view returns (bytes32) {
         return keccak256(abi.encodePacked(_nonce, msg.sender));
+    }
+
+    /// @notice Transfer thefunds recovered  to the recipient
+    /// @param _token The address of the token to transfer
+    /// @param _recipient The address of the recipient
+    function recoverFunds(address _token, address _recipient) external onlyOwner {
+        uint256 amount = _token == address(0) ? address(this).balance : IERC20(_token).balanceOf(address(this));
+        _transferAmount(_token, _recipient, amount);
     }
 }
