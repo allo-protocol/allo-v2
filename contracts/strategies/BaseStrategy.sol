@@ -36,7 +36,7 @@ abstract contract BaseStrategy is IStrategy {
     /// ====================================
 
     /// @notice Modifier to check if the caller is the Allo contract
-    modifier onlyAllo() virtual {
+    modifier onlyAllo() {
         if (msg.sender != address(allo) && address(allo) != address(0)) {
             revert BaseStrategy_UNAUTHORIZED();
         }
@@ -44,7 +44,7 @@ abstract contract BaseStrategy is IStrategy {
     }
 
     /// @notice Modifier to check if the caller is a pool manager
-    modifier onlyPoolManager() virtual {
+    modifier onlyPoolManager() {
         if (!allo.isPoolManager(poolId, msg.sender)) {
             revert BaseStrategy_UNAUTHORIZED();
         }

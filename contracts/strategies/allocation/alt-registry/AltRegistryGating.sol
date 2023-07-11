@@ -93,7 +93,11 @@ abstract contract AltRegistryGating is BaseAllocationStrategy {
     /// @notice Set allocations by pool manager
     /// @param _data The data to be decoded
     /// @param _sender The sender of the allocation
-    function allocate(bytes memory _data, address _sender) external payable override onlyPoolManager {
+    function allocate(bytes memory _data, address _sender) external payable override onlyAllo {
+        if (!allo.isPoolManager(poolId, _sender)) {
+            revert BaseStrategy_UNAUTHORIZED();
+        }
+
         // decode data
         (address[] memory projects, uint256[] memory percentages) = abi.decode(_data, (address[], uint256[]));
 
