@@ -379,7 +379,7 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     /// @notice allocate to multiple pools
     /// @param _poolIds ids of the pools
     /// @param _datas encoded data unique to the allocation strategy for that pool
-    function batchAllocate(uint256[] calldata _poolIds, bytes[] memory _datas) external payable {
+    function batchAllocate(uint256[] calldata _poolIds, bytes[] memory _datas) external {
         for (uint256 i = 0; i < _poolIds.length;) {
             _allocate(_poolIds[i], _datas[i]);
             unchecked {
