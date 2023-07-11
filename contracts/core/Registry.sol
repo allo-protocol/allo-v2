@@ -4,6 +4,7 @@ pragma solidity 0.8.19;
 import {AccessControl} from "@openzeppelin/access/AccessControl.sol";
 import {Metadata} from "./libraries/Metadata.sol";
 import "./libraries/Transfer.sol";
+import {ERC20} from "@solady/tokens/ERC20.sol";
 
 /// @title Registry
 /// @notice Registry contract for identities
@@ -290,7 +291,7 @@ contract Registry is AccessControl, Transfer {
     /// @param _token The address of the token to transfer
     /// @param _recipient The address of the recipient
     function recoverFunds(address _token, address _recipient) external onlyIdentityOwner(ALLO_OWNER) {
-        uint256 amount = _token == address(0) ? address(this).balance : IERC20(_token).balanceOf(address(this));
+        uint256 amount = _token == address(0) ? address(this).balance : ERC20(_token).balanceOf(address(this));
         _transferAmount(_token, _recipient, amount);
     }
 }
