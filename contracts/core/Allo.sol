@@ -531,27 +531,21 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     function _fundPool(address _token, uint256 _amount, uint256 _poolId, IDistributionStrategy _distributionStrategy)
         internal
     {
-        if (feePercentage == 0) {
-            _transferAmountFrom(
-                _token, TransferData({from: msg.sender, to: address(_distributionStrategy), amount: _amount})
-            );
-            _distributionStrategy.poolFunded(_amount);
-            emit PoolFunded(_poolId, _amount, 0);
-        } else {
-            uint256 feeAmount = (_amount * feePercentage) / FEE_DENOMINATOR;
-            uint256 amountAfterFee = _amount - feeAmount;
+        uint256 feeAmount = 0;
+        uint256 amountAfterFee = _amount;
 
-            TransferData[] memory transfers = new TransferData[](2);
+        if (feePercentage > 0) {
+            feeAmount = (_amount * feePercentage) / FEE_DENOMINATOR;
+            amountAfterFee = _amount - feeAmount;
 
-            // protocol fee
-            transfers[0] = TransferData({from: msg.sender, to: treasury, amount: feeAmount});
-            // fund pool
-            transfers[1] = TransferData({from: msg.sender, to: address(_distributionStrategy), amount: amountAfterFee});
-            _transferAmountsFrom(_token, transfers);
-
-            _distributionStrategy.poolFunded(amountAfterFee);
-            emit PoolFunded(_poolId, amountAfterFee, feeAmount);
+            _transferAmountFrom(_token, TransferData({from: msg.sender, to: treasury, amount: feeAmount}));
         }
+
+        _transferAmountFrom(
+            _token, TransferData({from: msg.sender, to: address(_distributionStrategy), amount: amountAfterFee})
+        );
+        _distributionStrategy.poolFunded(amountAfterFee);
+        emit PoolFunded(_poolId, amountAfterFee, feeAmount);
     }
 
     /// @notice Checks if the strategy is approved
