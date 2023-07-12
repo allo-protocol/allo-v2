@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import "./IDistributionModule.sol";
+import {IDistributionModule} from "./IDistributionModule.sol";
 import {Transfer} from "../../../core/libraries/Transfer.sol";
+import {ERC20} from "@openzeppelin/token/ERC20/ERC20.sol";
 
 contract SplitterDistributionStrategy is IDistributionModule, IStrategy {
     /// @notice Custom errors
@@ -13,6 +14,7 @@ contract SplitterDistributionStrategy is IDistributionModule, IStrategy {
     /// =================================
     /// === Custom Storage Variables ====
     /// =================================
+    ERC20 token;
 
     /// Recipient.id -> amount paid
     mapping(address => uint256) public paidAmounts;
@@ -23,27 +25,8 @@ contract SplitterDistributionStrategy is IDistributionModule, IStrategy {
 
     event PayoutsDistributed(address[] recipientIds, PayoutSummary[] payoutSummary, address sender);
 
-    /// @notice Initialize the contract
-    /// @param _allo The address of the Allo contract
-    /// @param _identityId The identityId of the pool
-    /// @param _poolId The poolId of the pool
-    /// @param _token The pool token
-    /// @param _data unused for this strategy
-    /// @dev This function is called by the Allo contract
-    function initialize(address _allo, bytes32 _identityId, uint256 _poolId, address _token, bytes memory _data)
-        external
-        override
-    {
-        _allo;
-        _identityId;
-        _poolId;
-        _token;
-        _initializeDistributionModule(_data);
-    }
-
-    function _initializeDistributionModule(bytes memory _data) internal override {
-        _data;
-        // todo:
+    function initializeDistributionModule(bytes memory _data) external {
+        token = ERC20(abi.decode(_data, (address)));
     }
 
     /// @notice Distribute the payouts to the recipients
