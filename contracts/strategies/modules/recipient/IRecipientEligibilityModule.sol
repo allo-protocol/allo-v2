@@ -1,10 +1,16 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import { IStrategy }  from "../../IStrategy.sol";
+import {IStrategy} from "../../IStrategy.sol";
 
 interface IRecipientEligibilityModule {
-    enum RecipientStatus { None, Pending, Accepted, Rejected }
+    enum RecipientStatus {
+        None,
+        Pending,
+        Accepted,
+        Rejected
+    }
+
     function initializeRecipientEligibilityModule(bytes memory _data) external;
     // used to set any initial variables, such as token address if there is token gating
 
