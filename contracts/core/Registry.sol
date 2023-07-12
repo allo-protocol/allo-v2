@@ -2,14 +2,20 @@
 pragma solidity 0.8.19;
 
 import {AccessControl} from "@openzeppelin/access/AccessControl.sol";
-
 import {Metadata} from "./libraries/Metadata.sol";
+import "./libraries/Transfer.sol";
+import {ERC20} from "@solady/tokens/ERC20.sol";
 
-contract Registry is AccessControl {
+/// @title Registry
+/// @notice Registry contract for identities
+/// @dev This contract is used to create and manage identities
+/// @author allo-team
+contract Registry is AccessControl, Transfer {
     /// @notice Custom errors
-    error UNAUTHORIZED();
     error NONCE_NOT_AVAILABLE();
     error NOT_PENDING_OWNER();
+    error UNAUTHORIZED();
+    error ZERO_ADDRESS();
 
     /// @notice Struct to hold details of an identity
     struct Identity {
@@ -24,14 +30,17 @@ contract Registry is AccessControl {
     /// === Storage Variables ====
     /// ==========================
 
-    /// @notice Identity.id -> Identity
-    mapping(bytes32 => Identity) public identitiesById;
-
     /// @notice anchor -> Identity.id
     mapping(address => bytes32) public anchorToIdentityId;
 
+    /// @notice Identity.id -> Identity
+    mapping(bytes32 => Identity) public identitiesById;
+
     /// @notice Identity.id -> pending owner
     mapping(bytes32 => address) public identityIdToPendingOwner;
+
+    /// @notice Allo Owner Role for fund recovery
+    bytes32 public constant ALLO_OWNER = keccak256("ALLO_OWNER");
 
     /// ======================
     /// ======= Events =======
@@ -49,11 +58,19 @@ contract Registry is AccessControl {
     /// =========== Modifier ===============
     /// ====================================
 
+    /// @notice Modifier to check if the caller is the owner of the identity
     modifier onlyIdentityOwner(bytes32 _identityId) {
         if (!isOwnerOfIdentity(_identityId, msg.sender)) {
             revert UNAUTHORIZED();
         }
         _;
+    }
+
+    constructor(address _owner) {
+        if (_owner == address(0)) {
+            revert ZERO_ADDRESS();
+        }
+        _grantRole(ALLO_OWNER, _owner);
     }
 
     /// ====================================
@@ -67,9 +84,9 @@ contract Registry is AccessControl {
     }
 
     /// @notice Retrieve identity by anchor
-    /// @param anchor The anchor of the identity
-    function getIdentityByAnchor(address anchor) public view returns (Identity memory) {
-        bytes32 identityId = anchorToIdentityId[anchor];
+    /// @param _anchor The anchor of the identity
+    function getIdentityByAnchor(address _anchor) public view returns (Identity memory) {
+        bytes32 identityId = anchorToIdentityId[_anchor];
         return identitiesById[identityId];
     }
 
@@ -93,6 +110,10 @@ contract Registry is AccessControl {
             revert NONCE_NOT_AVAILABLE();
         }
 
+        if (_owner == address(0)) {
+            revert ZERO_ADDRESS();
+        }
+
         Identity memory identity = Identity({
             nonce: _nonce,
             name: _name,
@@ -107,7 +128,11 @@ contract Registry is AccessControl {
         // assign roles
         uint256 memberLength = _members.length;
         for (uint256 i = 0; i < memberLength;) {
-            _grantRole(identityId, _members[i]);
+            address member = _members[i];
+            if (member == address(0)) {
+                revert ZERO_ADDRESS();
+            }
+            _grantRole(identityId, member);
             unchecked {
                 i++;
             }
@@ -218,7 +243,11 @@ contract Registry is AccessControl {
         uint256 memberLength = _members.length;
 
         for (uint256 i = 0; i < memberLength;) {
-            _grantRole(_identityId, _members[i]);
+            address member = _members[i];
+            if (member == address(0)) {
+                revert ZERO_ADDRESS();
+            }
+            _grantRole(_identityId, member);
             unchecked {
                 i++;
             }
@@ -249,7 +278,6 @@ contract Registry is AccessControl {
     /// @param _name The name of the identity
     function _generateAnchor(bytes32 _identityId, string memory _name) internal pure returns (address) {
         bytes32 attestationHash = keccak256(abi.encodePacked(_identityId, _name));
-
         return address(uint160(uint256(attestationHash)));
     }
 
@@ -257,5 +285,13 @@ contract Registry is AccessControl {
     /// @param _nonce Nonce used to generate identityId
     function _generateIdentityId(uint256 _nonce) internal view returns (bytes32) {
         return keccak256(abi.encodePacked(_nonce, msg.sender));
+    }
+
+    /// @notice Transfer thefunds recovered  to the recipient
+    /// @param _token The address of the token to transfer
+    /// @param _recipient The address of the recipient
+    function recoverFunds(address _token, address _recipient) external onlyIdentityOwner(ALLO_OWNER) {
+        uint256 amount = _token == address(0) ? address(this).balance : ERC20(_token).balanceOf(address(this));
+        _transferAmount(_token, _recipient, amount);
     }
 }

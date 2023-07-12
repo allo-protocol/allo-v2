@@ -1,24 +1,14 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import "../../../contracts/interfaces/IDistributionStrategy.sol";
+import "../../../contracts/strategies/distribution/BaseDistributionStrategy.sol";
 
-contract MockDistribution is IDistributionStrategy {
-    bytes32 public identityId;
-    address public allo;
-    uint256 public poolId;
-    bool public initialized;
-
-    function initialize(bytes32, uint256, address, bytes memory) external {
-        if (initialized) {
-            revert();
-        }
-        initialized = true;
+contract MockDistribution is BaseDistributionStrategy {
+    function initialize(address _allo, bytes32 _identityId, uint256 _poolId, address _token, bytes memory _data)
+        external
+    {
+        __BaseDistributionStrategy_init("MockDistribution", _allo, _identityId, _poolId, _token, _data);
     }
 
-    function getOwnerIdentity() external view returns (string memory) {}
-
-    function activateDistribution(bytes memory _inputData, bytes memory _allocStratData) external {}
-
-    function distribute(bytes memory _data, address sender) external {}
+    function distribute(address[] memory _recipientIds, bytes memory _data, address _sender) external {}
 }

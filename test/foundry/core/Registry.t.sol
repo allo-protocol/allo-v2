@@ -38,7 +38,7 @@ contract RegistryTest is Test {
         name = "New Identity";
         nonce = 2;
 
-        registry = new Registry();
+        registry = new Registry(owner);
 
         members = new address[](2);
         members[0] = member1;
