@@ -2,7 +2,7 @@
 pragma solidity 0.8.19;
 
 import "../core/Allo.sol";
-import "../interfaces/IStrategy.sol";
+import "../strategies/IStrategy.sol";
 
 abstract contract BaseStrategy is IStrategy {
     Allo public immutable allo;
@@ -17,10 +17,10 @@ abstract contract BaseStrategy is IStrategy {
     function initialize(
         bytes32 _identityId,
         uint256 _poolId,
-        bytes memory _recipientEligibilityData
-        bytes memory _voterEligibilityData
-        bytes memory _votingData
-        bytes memory _allocationData
+        bytes memory _recipientEligibilityData,
+        bytes memory _voterEligibilityData,
+        bytes memory _votingData,
+        bytes memory _allocationData,
         bytes memory _distributionData
     ) external {
         require(msg.sender == address(allo), "only allo");
@@ -41,7 +41,13 @@ abstract contract BaseStrategy is IStrategy {
 }
 
 interface IRecipientEligibilityModule {
-    enum RecipientStatus { None, Pending, Accepted, Rejected }
+    enum RecipientStatus {
+        None,
+        Pending,
+        Accepted,
+        Rejected
+    }
+
     function initializeRecipientEligibilityModule(bytes _data) external;
     function registerRecipients(bytes memory _data, address _sender) external payable returns (address);
     function getRecipientStatus(address _recipientId) public view returns (RecipientStatus);
@@ -55,21 +61,22 @@ interface IVoterEligibilityModule {
 
 interface IVotingModule {
     function initializeVotingModule(bytes _data) external;
-    function allocate(bytes memory _data, address _sender) external payable; //  is this the right name given module changes?
-    function getPayout(address[] memory _recipientId, bytes memory _data) external view returns (PayoutSummary[] memory summaries);
+    function vote(bytes memory _data, address _sender) external payable; //  is this the right name given module changes?
+    function getPayout(address[] memory _recipientId, bytes memory _data)
+        external
+        view
+        returns (PayoutSummary[] memory summaries);
     // maybe readyToPayout? although i think getPayout should just return 0? not sure yet.
 }
 
 interface IAllocationModule {
     function initializeAllocationModule(bytes _data) external;
-
 }
 
 interface IDistributionModule {
     function initializeDistributionModule(bytes _data) external;
     function distribute(address[] memory _recipientIds, bytes memory _data, address _sender) external;
 }
-
 
 contract WinnerTakesAll {
     mapping(address => uint256) public votes;
@@ -78,9 +85,9 @@ contract WinnerTakesAll {
         votes[recipient] += 1;
     }
 
-    function getResults(address[] memory recipientIds) public view returns (uint[]) {
-        uint[] memory results = new uint[](recipientIds.length);
-        for (uint i = 0; i < recipientIds.length; i++) {
+    function getResults(address[] memory recipientIds) public view returns (uint256[]) {
+        uint256[] memory results = new uint[](recipientIds.length);
+        for (uint256 i = 0; i < recipientIds.length; i++) {
             results[i] = votes[recipientIds[i]];
         }
         return results;
@@ -89,12 +96,12 @@ contract WinnerTakesAll {
     function getPayouts(address[] memory recipientIds) public view returns (PayoutSummary[]) {
         require(recipientIds.length == 0, "pass empty rec, will use all");
         address[] memory recipients = allRecipients();
-        uint[] memory results = getResults(recipients);
+        uint256[] memory results = getResults(recipients);
         require(recipients.length == results.length);
 
-        uint max;
-        uint winner;
-        for (uint i = 0; i < results.length; i++) {
+        uint256 max;
+        uint256 winner;
+        for (uint256 i = 0; i < results.length; i++) {
             if (results[i] > max) {
                 max = results[i];
                 winner = recipients[i];
@@ -102,7 +109,7 @@ contract WinnerTakesAll {
         }
 
         PayoutSummary[] memory payouts = new PayoutSummary[](1);
-        for (uint i = 0; i < recipientIds.length; i++) {
+        for (uint256 i = 0; i < recipientIds.length; i++) {
             if (recipients[i] == winner) {
                 payouts[0] = PayoutSummary(recipients[i], address(this).balance);
             }
@@ -112,22 +119,17 @@ contract WinnerTakesAll {
 
     function distribute(address[] memory recipientIds) external {
         PayoutSummary[] memory payouts = getPayouts(recipientIds);
-        for (uint i = 0; i < payouts.length; i++) {
+        for (uint256 i = 0; i < payouts.length; i++) {
             payouts[i].payoutAddress.transfer(payouts[i].amount);
         }
-
     }
 }
 
 contract RollingFun {
-    mapping(address => uint) public votes;
-    mapping(address => uint) public claimed;
+    mapping(address => uint256) public votes;
+    mapping(address => uint256) public claimed;
 
-    function allocate(address recipient, uint amount) external payable {
+    function allocate(address recipient, uint256 amount) external payable {
         votes[recipient] += amount;
     }
-
-
-
-
 }

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import { Allo } from "../core/Allo.sol";
-import { IStrategy } from "./IStrategy.sol";
+import {Allo} from "../core/Allo.sol";
+import {IStrategy} from "./IStrategy.sol";
 
 abstract contract BaseStrategy is IStrategy {
     /// ======================
@@ -23,7 +23,7 @@ abstract contract BaseStrategy is IStrategy {
     /// === Storage Variables ====
     /// ==========================
 
-    Allo immutable public allo;
+    Allo public immutable allo;
 
     uint256 public poolId;
     bytes32 public ownerIdentityId;
@@ -69,10 +69,10 @@ abstract contract BaseStrategy is IStrategy {
     function initialize(
         bytes32 _identityId,
         uint256 _poolId,
-        bytes memory _recipientEligibilityData
-        bytes memory _voterEligibilityData
-        bytes memory _votingData
-        bytes memory _allocationData
+        bytes memory _recipientEligibilityData,
+        bytes memory _voterEligibilityData,
+        bytes memory _votingData,
+        bytes memory _allocationData,
         bytes memory _distributionData
     ) external {
         require(msg.sender == address(allo), "only allo");

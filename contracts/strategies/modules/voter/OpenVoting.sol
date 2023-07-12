@@ -1,7 +1,7 @@
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+// SPDX-License-Identifier: AGPL-3.0-only
+pragma solidity 0.8.19;
 
-import { IVoterEligibilityModule }  from "./IVoterEligibilityModule.sol";
+import {IVoterEligibilityModule} from "./IVoterEligibilityModule.sol";
 
 contract OpenVoting is IVoterEligibilityModule {
     function initializeVoterEligibilityModule(bytes _data) external {}

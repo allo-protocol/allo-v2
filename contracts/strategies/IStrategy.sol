@@ -2,14 +2,14 @@
 pragma solidity 0.8.19;
 
 interface IStrategy {
-
     struct ResultsSummary {
         address recipientId;
-        uint votes;
+        uint256 votes;
     }
+
     struct PayoutSummary {
         address recipientId;
-        uint amount;
+        uint256 amount;
     }
 
     function initialize(
@@ -33,10 +33,13 @@ interface IStrategy {
 
     function initializeVotingModule(bytes _data) external;
     function allocate(bytes memory _data, address _sender) external payable;
-    function getResults(address[] memory _recipientId, bytes memory _data) external view returns (ResultSummary[] memory);
+    function getResults(address[] memory _recipientId, bytes memory _data)
+        external
+        view
+        returns (ResultSummary[] memory);
 
     function initializeAllocationModule(bytes _data) external;
-    function getPayouts(address[] memory recipientIds, bytes memory _data) public view returns (PayoutSummary[])
+    function getPayouts(address[] memory recipientIds, bytes memory _data) public view returns (PayoutSummary[]);
 
     function initializeDistributionModule(bytes _data) external;
     function distribute(address[] memory _recipientIds, bytes memory _data, address _sender) external;
