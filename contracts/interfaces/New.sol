@@ -2,7 +2,7 @@
 pragma solidity 0.8.19;
 
 import "../core/Allo.sol";
-import "../interfaces/IStrategy.sol";
+import "../strategies/IStrategy.sol";
 
 abstract contract BaseStrategy is IStrategy {
     Allo public immutable allo;
@@ -61,7 +61,7 @@ interface IVoterEligibilityModule {
 
 interface IVotingModule {
     function initializeVotingModule(bytes _data) external;
-    function allocate(bytes memory _data, address _sender) external payable; //  is this the right name given module changes?
+    function vote(bytes memory _data, address _sender) external payable; //  is this the right name given module changes?
     function getPayout(address[] memory _recipientId, bytes memory _data)
         external
         view
