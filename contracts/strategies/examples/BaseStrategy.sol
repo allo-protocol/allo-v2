@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import "../core/Allo.sol";
-import "../strategies/IStrategy.sol";
+import "../../core/Allo.sol";
+import "../IStrategy.sol";
 
 abstract contract BaseStrategy is IStrategy {
     Allo public immutable allo;
