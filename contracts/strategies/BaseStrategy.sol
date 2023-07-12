@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import "../core/Allo.sol";
-import "../interfaces/IStrategy.sol";
+import { Allo } from "../core/Allo.sol";
+import { IStrategy } from "./IStrategy.sol";
 
 abstract contract BaseStrategy is IStrategy {
     /// ======================
@@ -23,21 +23,27 @@ abstract contract BaseStrategy is IStrategy {
     /// === Storage Variables ====
     /// ==========================
 
-    bytes32 internal STRATEGY_IDENTIFIER;
+    Allo immutable public allo;
 
-    bytes32 internal identityId;
-    Allo internal allo;
-
-    uint256 internal poolId;
-    bool public initialized;
+    uint256 public poolId;
+    bytes32 public ownerIdentityId;
 
     /// ====================================
-    /// =========== Modifier ===============
+    /// ========== Constructor =============
+    /// ====================================
+
+    /// @param _allo Address of the Allo contract
+    constructor(address _allo) {
+        allo = Allo(_allo);
+    }
+
+    /// ====================================
+    /// =========== Modifiers ==============
     /// ====================================
 
     /// @notice Modifier to check if the caller is the Allo contract
     modifier onlyAllo() {
-        if (msg.sender != address(allo) && address(allo) != address(0)) {
+        if (msg.sender != address(allo)) {
             revert BaseStrategy_UNAUTHORIZED();
         }
         _;
@@ -56,63 +62,34 @@ abstract contract BaseStrategy is IStrategy {
     /// ====================================
 
     /// @notice Initializes the allocation strategy
-    /// @param _allo Address of the Allo contract
     /// @param _identityId Id of the identity
     /// @param _poolId Id of the pool
     /// @param _data The data to be decoded
     /// @dev This function is called internally by the strategy
-    function __BaseStrategy_init(
-        string memory _strategyIdentifier,
-        address _allo,
+    function initialize(
         bytes32 _identityId,
         uint256 _poolId,
-        bytes memory _data
-    ) internal {
-        if (initialized) {
-            revert BaseStrategy_STRATEGY_ALREADY_INITIALIZED();
-        }
+        bytes memory _recipientEligibilityData
+        bytes memory _voterEligibilityData
+        bytes memory _votingData
+        bytes memory _allocationData
+        bytes memory _distributionData
+    ) external {
+        require(msg.sender == address(allo), "only allo");
 
-        if (_allo == address(0)) {
-            revert BaseStrategy_INVALID_ADDRESS();
-        }
+        // note: is it the case that identity id will never be 0? any reason it'd be better to use pool?
+        require(_identityId != bytes32(0), "invalid identity id");
+        require(identityId == bytes32(0), "already initialized");
 
-        initialized = true;
-
-        _setStrategyIdentifier(_strategyIdentifier);
-
-        allo = Allo(_allo);
         identityId = _identityId;
         poolId = _poolId;
 
-        emit Initialized(_allo, _identityId, _poolId, _data);
+        initializeRecipientEligibilityModule(_recipientEligibilityData);
+        initializeVoterEligibilityModule(_voterEligibilityData);
+        initializeVotingModule(_votingData);
+        initializeAllocationModule(_allocationData);
+        initializeDistributionModule(_distributionData);
     }
 
-    /// @notice Get the identity id
-    /// @return bytes32 The identity id
-    function getIdentityId() external view returns (bytes32) {
-        return identityId;
-    }
-
-    /// @notice Get the pool id
-    /// @return uint256 The pool id
-    function getPoolId() external view returns (uint256) {
-        return poolId;
-    }
-
-    /// @notice Get the Allo address
-    /// @return address The Allo address
-    function getAllo() external view returns (address) {
-        return address(allo);
-    }
-
-    /// @notice Returns the strategy identifier
-    function getStrategyIdentifier() external view returns (bytes32) {
-        return STRATEGY_IDENTIFIER;
-    }
-
-    /// @notice sets the strategy identifier
-    /// @param _strategyIdentifier the strategy identifier
-    function _setStrategyIdentifier(string memory _strategyIdentifier) internal {
-        STRATEGY_IDENTIFIER = keccak256(abi.encode(_strategyIdentifier));
-    }
+    // why do we need the poolFunded function? i think we'll be fine without.
 }

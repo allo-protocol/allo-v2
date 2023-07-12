@@ -1,0 +1,31 @@
+core/
+    libraries/
+        Metadata.sol
+    Allo.sol
+    Aqueduct.sol
+    Registry.sol
+
+components/
+    IStrategy.sol
+    BaseStrategy.sol
+    recipients/
+        BaseRecipientsComponent.sol
+        common/
+            AllocationGating.sol
+        ERC721AllocationGating.sol
+        TokenBalanceAllocationGating.sol
+        ...
+    voters/
+        BaseVotersComponent.sol
+        common/
+        ...
+    allocation/
+        BaseAllocationComponent.sol
+        common/
+        OffchainCalculations.sol
+        ...
+    distribution/
+        BaseDistributionComponent.sol
+        common/
+        Splitter.sol
+        ...
