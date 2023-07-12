@@ -12,6 +12,17 @@ interface IStrategy {
         uint amount;
     }
 
+    function initialize(
+        bytes32 _identityId,
+        uint256 _poolId,
+        bytes memory _recipientEligibilityData,
+        bytes memory _voterEligibilityData,
+        bytes memory _votingData,
+        bytes memory _allocationData,
+        bytes memory _distributionData
+    ) external;
+    function skim(address token) external;
+
     function initializeRecipientEligibiilityModule(bytes _data) external;
     function registerRecipients(bytes memory _data, address _sender) external payable returns (address);
     function getRecipientStatus(address _recipientId) public view returns (RecipientStatus);
