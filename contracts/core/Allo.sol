@@ -464,16 +464,16 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     /// @notice passes _data & msg.sender through to the allocation strategy for that pool
     /// @param _poolId id of the pool
     /// @param _data encoded data unique to the allocation strategy for that pool
-    function allocate(uint256 _poolId, bytes memory _data) external payable {
-        _allocate(_poolId, _data);
+    function vote(uint256 _poolId, bytes memory _data) external payable {
+        _vote(_poolId, _data);
     }
 
-    /// @notice allocate to multiple pools
+    /// @notice vote to multiple pools
     /// @param _poolIds ids of the pools
     /// @param _datas encoded data unique to the allocation strategy for that pool
-    function batchAllocate(uint256[] calldata _poolIds, bytes[] memory _datas) external {
+    function batchVote(uint256[] calldata _poolIds, bytes[] memory _datas) external {
         for (uint256 i = 0; i < _poolIds.length;) {
-            _allocate(_poolIds[i], _datas[i]);
+            _vote(_poolIds[i], _datas[i]);
             unchecked {
                 i++;
             }
@@ -494,8 +494,8 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     /// @notice passes _data & msg.sender through to the strategy for that pool
     /// @param _poolId id of the pool
     /// @param _data encoded data unique to the strategy for that pool
-    function _allocate(uint256 _poolId, bytes memory _data) internal {
-        pools[_poolId].strategy.allocate{value: msg.value}(_data, msg.sender);
+    function _vote(uint256 _poolId, bytes memory _data) internal {
+        pools[_poolId].strategy.vote{value: msg.value}(_data, msg.sender);
     }
 
     /// @notice Deduct the fee and transfers the amount to the distribution strategy
