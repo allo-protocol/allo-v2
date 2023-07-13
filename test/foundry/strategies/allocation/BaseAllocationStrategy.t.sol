@@ -2,7 +2,7 @@ pragma solidity 0.8.19;
 
 import "forge-std/Test.sol";
 
-import "../../../../contracts/strategies/allocation/BaseAllocationStrategy.sol";
+import {BaseStrategy} from "../../../../contracts/strategies/BaseStrategy.sol";
 
 contract BaseAllocationStrategyTest is Test {
     function test_initialize() public {

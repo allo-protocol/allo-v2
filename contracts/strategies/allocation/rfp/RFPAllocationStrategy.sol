@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import {BaseAllocationStrategy} from "../BaseAllocationStrategy.sol";
+import {BaseStrategy} from "../../BaseStrategy.sol";
 import {Metadata} from "../../../core/libraries/Metadata.sol";
 import {ReentrancyGuard} from "@openzeppelin/security/ReentrancyGuard.sol";
 
-abstract contract RFPAllocationStrategy is BaseAllocationStrategy, ReentrancyGuard {
+abstract contract RFPAllocationStrategy is BaseStrategy, ReentrancyGuard {
     /// ======================
     /// ======= Errors =======
     /// ======================

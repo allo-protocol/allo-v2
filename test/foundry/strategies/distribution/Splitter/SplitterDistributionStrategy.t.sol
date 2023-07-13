@@ -8,8 +8,8 @@ import {Allo} from "../../../../../contracts/core/Allo.sol";
 import {Registry} from "../../../../../contracts/core/Registry.sol";
 import {Metadata} from "../../../../../contracts/core/libraries/Metadata.sol";
 import {TestUtilities} from "../../../utils/TestUtilities.sol";
-import "../../../../../contracts/interfaces/IAllocationStrategy.sol";
-import "../../../../../contracts/interfaces/IDistributionStrategy.sol";
+// import "../../../../../contracts/interfaces/IAllocationStrategy.sol";
+// import "../../../../../contracts/interfaces/IDistributionStrategy.sol";
 
 import {MockAllocation} from "../../../utils/MockAllocation.sol";
 import {MockDistribution} from "../../../utils/MockDistribution.sol";

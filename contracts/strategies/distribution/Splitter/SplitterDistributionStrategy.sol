@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import "../BaseDistributionStrategy.sol";
+import {BaseStrategy} from "../../BaseStrategy.sol";
 import {Transfer} from "../../../core/libraries/Transfer.sol";
 import {ReentrancyGuard} from "@openzeppelin/security/ReentrancyGuard.sol";
 
-contract SplitterDistributionStrategy is BaseDistributionStrategy, Transfer, ReentrancyGuard {
+contract SplitterDistributionStrategy is BaseStrategy, Transfer, ReentrancyGuard {
     /// @notice Custom errors
     error PAYOUT_NOT_READY();
     error PAYOUT_FINALIZED();

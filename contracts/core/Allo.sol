@@ -36,6 +36,10 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
         bytes32 adminRole;
     }
 
+    struct InitStrategyData {
+        address allocationStrategy;
+    }
+
     /// @notice Fee denominator
     uint256 public constant FEE_DENOMINATOR = 1e18;
 
