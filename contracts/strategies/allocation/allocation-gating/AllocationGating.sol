@@ -33,7 +33,7 @@ abstract contract AllocationGating is BaseStrategy {
     event Allocated(bytes data, address indexed allocator);
     event PayoutReady();
 
-    constructor(address _allo) public BaseStrategy(_allo) {}
+    constructor(address _allo) BaseStrategy(_allo) {}
 
     /// ====================================
     /// =========== Functions ==============
@@ -67,11 +67,11 @@ abstract contract AllocationGating is BaseStrategy {
         for (uint256 i = 0; i < allocationsLength;) {
             PayoutSummary memory allocation = allocations[i];
 
-            if (!_isEligibleForAllocation(allocation.payoutAddress)) {
+            if (!_isEligibleForAllocation(allocation.recipient)) {
                 revert NOT_ELIGIBLE();
             }
 
-            payoutSummaries[allocation.payoutAddress] = allocation;
+            payoutSummaries[allocation.recipient] = allocation;
 
             unchecked {
                 i++;

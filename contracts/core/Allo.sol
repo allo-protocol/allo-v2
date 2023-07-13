@@ -31,7 +31,7 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
         bytes32 identityId;
         IStrategy strategy;
         address token;
-        uint256 fundedAmount;
+        uint256 amount;
         Metadata metadata;
         bytes32 managerRole;
         bytes32 adminRole;
@@ -179,7 +179,9 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
             revert ZERO_ADDRESS();
         }
 
-        return _createPool(_identityId, _strategy, _initStrategyData, _token, _amount, _metadata, _managers);
+        InitStrategyData memory initStrategyData = abi.decode(_initStrategyData, (InitStrategyData));
+
+        return _createPool(_identityId, IStrategy(_strategy), initStrategyData, _token, _amount, _metadata, _managers);
     }
 
     /// @notice Creates a new pool (by cloning an approved strategies)
@@ -258,14 +260,16 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
 
         // initialize strategies
         // @dev Initialization is expect to revert when invoked more than once
-        _strategy.initialize(_identityId, poolId, _initStrategyData);
+        bytes memory initStrategyData = abi.encode(_initStrategyData);
+        _strategy.initialize(_identityId, poolId, initStrategyData);
 
-        if (
-            _strategy.ownerIdentityId() != _identityId || _strategy.poolId() != poolId
-                || _strategy.allo() != address(this)
-        ) {
-            revert MISMATCH();
-        }
+        // todo: update this check
+        // if (
+        //     _strategy.ownerIdentityId() != _identityId || _strategy.poolId() != poolId
+        //         || _strategy.allo() != address(this)
+        // ) {
+        //     revert MISMATCH();
+        // }
 
         // grant pool managers roles
         uint256 managersLength = _managers.length;

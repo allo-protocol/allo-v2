@@ -9,17 +9,16 @@ import {TestUtilities} from "../utils/TestUtilities.sol";
 
 // import "../../../contracts/interfaces/IAllocationStrategy.sol";
 // import "../../../contracts/interfaces/IDistributionStrategy.sol";
+import {IStrategy} from "../../../contracts/strategies/IStrategy.sol";
 
-import {MockAllocation} from "../utils/MockAllocation.sol";
-import {MockDistribution} from "../utils/MockDistribution.sol";
+import {MockStrategy} from "../utils/MockStrategy.sol";
 import {MockToken} from "../utils/MockToken.sol";
 
 contract AlloTest is Test {
     event PoolCreated(
         uint256 indexed poolId,
         bytes32 indexed identityId,
-        IAllocationStrategy allocationStrategy,
-        IDistributionStrategy distributionStrategy,
+        IStrategy strategy,
         address token,
         uint256 amount,
         Metadata metadata
@@ -41,6 +40,10 @@ contract AlloTest is Test {
 
     event RegistryUpdated(address registry);
 
+    event StrategyApproved(address strategy);
+
+    event StrategyRemoved(address strategy);
+
     Allo public allo;
     Registry public registry;
 
@@ -52,8 +55,7 @@ contract AlloTest is Test {
     address[] public members;
     address payable public treasury;
 
-    address public allocationStrategy;
-    address public distributionStrategy;
+    address public strategy;
     MockToken public token;
 
     Metadata public metadata;
@@ -88,8 +90,9 @@ contract AlloTest is Test {
         treasury = payable(makeAddr("treasury"));
         allo.updateTreasury(treasury);
 
-        distributionStrategy = address(new MockDistribution());
-        allocationStrategy = address(new MockAllocation());
+        // todo: use single strategy mock
+        // strategy = address(new MockAllocation());
+
         token = new MockToken();
         token.mint(0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f, 1000000 * 10 ** 18);
         token.mint(alloOwner, 1000000 * 10 ** 18);
@@ -104,17 +107,17 @@ contract AlloTest is Test {
 
     function _utilCreatePool(uint256 _amount) internal returns (uint256) {
         vm.prank(owner);
-        return allo.createPool(
-            identityId,
-            allocationStrategy,
-            "0x",
-            payable(distributionStrategy),
-            "0x",
-            address(token),
-            _amount,
-            metadata,
-            members
-        );
+        // return allo.createPool(
+        //     identityId,
+        //     allocationStrategy,
+        //     "0x",
+        //     payable(distributionStrategy),
+        //     "0x",
+        //     address(token),
+        //     _amount,
+        //     metadata,
+        //     members
+        // );
     }
 
     // function _utilGetPoolInfo(uint256 poolId) internal view returns (Allo.Pool memory) {

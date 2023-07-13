@@ -10,17 +10,19 @@ import {Metadata} from "../../../../../contracts/core/libraries/Metadata.sol";
 import {TestUtilities} from "../../../utils/TestUtilities.sol";
 // import "../../../../../contracts/interfaces/IAllocationStrategy.sol";
 // import "../../../../../contracts/interfaces/IDistributionStrategy.sol";
+import {IStrategy} from "../../../../../contracts/strategies/IStrategy.sol";
 
-import {MockAllocation} from "../../../utils/MockAllocation.sol";
-import {MockDistribution} from "../../../utils/MockDistribution.sol";
+import {MockStrategy} from "../../../utils/MockStrategy.sol";
 import {MockToken} from "../../../utils/MockToken.sol";
 
 contract SplitterDistributionStrategyTest is Test {
-    event Initialized(address allo, bytes32 identityId, uint256 indexed poolId, address token, bytes data);
-    event PayoutsDistributed(
-        uint256[] recipientIds, IDistributionStrategy.PayoutSummary[] payoutSummary, address sender
-    );
-    event PoolFundingIncreased(uint256 amount);
+    struct PayoutSummary {
+        address recipient;
+        uint256 amount;
+        uint256 percentage;
+    }
+
+    event PayoutsDistributed(address[] recipientIds, PayoutSummary[] payoutSummary, address sender);
 
     Allo public allo;
     Registry public registry;
@@ -33,8 +35,7 @@ contract SplitterDistributionStrategyTest is Test {
     address[] public members;
     address payable public treasury;
 
-    address public allocationStrategy;
-    address public distributionStrategy;
+    address public strategy;
     address public token;
 
     Metadata public metadata;
@@ -73,13 +74,13 @@ contract SplitterDistributionStrategyTest is Test {
         treasury = payable(makeAddr("treasury"));
         allo.updateTreasury(treasury);
 
-        distributionStrategy = address(new MockDistribution());
-        allocationStrategy = address(new MockAllocation());
+        // todo: setup strategy
+
         MockToken mockToken = new MockToken();
         token = address(mockToken);
         mockToken.mint(0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f, 1000000 * 10 ** 18);
         identityId = registry.createIdentity(nonce, name, metadata, owner, members);
-        splitter = new SplitterDistributionStrategy();
+        // splitter = new SplitterDistributionStrategy();
         initialized = false;
     }
 

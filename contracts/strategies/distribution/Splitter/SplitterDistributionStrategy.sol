@@ -2,6 +2,7 @@
 pragma solidity 0.8.19;
 
 import {BaseStrategy} from "../../BaseStrategy.sol";
+import {IBaseStrategy} from "../../IBaseStrategy.sol";
 import {Transfer} from "../../../core/libraries/Transfer.sol";
 import {ReentrancyGuard} from "@openzeppelin/security/ReentrancyGuard.sol";
 
@@ -22,7 +23,9 @@ contract SplitterDistributionStrategy is BaseStrategy, Transfer, ReentrancyGuard
     /// ======= Events =======
     /// ======================
 
-    event PayoutsDistributed(address[] recipientIds, PayoutSummary[] payoutSummary, address sender);
+    event PayoutsDistributed(address[] recipientIds, IBaseStrategy.PayoutSummary[] payoutSummary, address sender);
+
+    constructor(address _allo) BaseStrategy(_allo) {}
 
     /// @notice Initialize the contract
     /// @param _allo The address of the Allo contract
@@ -33,9 +36,9 @@ contract SplitterDistributionStrategy is BaseStrategy, Transfer, ReentrancyGuard
     /// @dev This function is called by the Allo contract
     function initialize(address _allo, bytes32 _identityId, uint256 _poolId, address _token, bytes memory _data)
         external
-        override
     {
-        __BaseDistributionStrategy_init("SplitterDistributionStrategyV1", _allo, _identityId, _poolId, _token, _data);
+        // __BaseDistributionStrategy_init("SplitterDistributionStrategyV1", _allo, _identityId, _poolId, _token, _data);
+        BaseStrategy(_allo).initialize(_identityId, _poolId, _data);
     }
 
     /// @notice Distribute the payouts to the recipients
@@ -47,13 +50,14 @@ contract SplitterDistributionStrategy is BaseStrategy, Transfer, ReentrancyGuard
         onlyAllo
         nonReentrant
     {
-        IAllocationStrategy allocationStrategy = IAllocationStrategy(allo.getAllocationStrategy(poolId));
+        IBaseStrategy strategy = IBaseStrategy(allo.getStrategy(poolId));
 
-        if (!allocationStrategy.readyToPayout("0x")) {
-            revert PAYOUT_NOT_READY();
-        }
+        // todo: update this logic
+        // if (!strategy.readyToPayout("0x")) {
+        //     revert PAYOUT_NOT_READY();
+        // }
 
-        PayoutSummary[] memory payouts = allocationStrategy.getPayout(_recipientIds, _data);
+        (IBaseStrategy.PayoutSummary[] memory payouts) = strategy.getPayout(_recipientIds, _data);
 
         uint256 recipientIdsLength = _recipientIds.length;
 
@@ -64,11 +68,13 @@ contract SplitterDistributionStrategy is BaseStrategy, Transfer, ReentrancyGuard
                 revert ALREADY_DISTRIBUTED();
             }
 
-            uint256 amountToTransfer = (amount * payouts[i].percentage) / 1e18;
+            // todo: update this math
+            uint256 amountToTransfer = (payouts[i].amount * payouts[i].percentage) / 1e18;
 
             paidAmounts[recipientId] = amountToTransfer;
 
-            _transferAmount(token, payouts[i].payoutAddress, amountToTransfer);
+            // todo: where did we get the token from?
+            // _transferAmount(token, payouts[i].payoutAddress, amountToTransfer);
             unchecked {
                 i++;
             }
@@ -79,10 +85,20 @@ contract SplitterDistributionStrategy is BaseStrategy, Transfer, ReentrancyGuard
 
     /// @notice invoked via allo.fundPool to update pool's amount
     /// @param _amount amount by which pool is increased
-    function poolFunded(uint256 _amount) public override onlyAllo {
-        if (IAllocationStrategy(allo.getAllocationStrategy(poolId)).readyToPayout("0x")) {
+    function poolFunded(uint256 _amount) public onlyAllo {
+        if (IBaseStrategy(allo.getStrategy(poolId)).readyToPayout(address(0))) {
             revert PAYOUT_FINALIZED();
         }
-        super.poolFunded(_amount);
+
+        // todo: fix this
+        // super.poolFunded(_amount);
     }
+
+    function registerRecipients(bytes memory _data, address _sender) external payable returns (address) {}
+
+    function getRecipientStatus(address _recipientId) external view returns (RecipientStatus) {}
+
+    function isValidAllocater(address _voter) external view returns (bool) {}
+
+    function allocate(bytes memory _data, address _sender) external payable {}
 }

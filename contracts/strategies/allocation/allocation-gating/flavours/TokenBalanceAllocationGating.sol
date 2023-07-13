@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import "../AllocationGating.sol";
+import {AllocationGating} from "../AllocationGating.sol";
 import {Allo} from "../../../../core/Allo.sol";
+import {BaseStrategy} from "../../../../strategies/BaseStrategy.sol";
 import "@openzeppelin/token/ERC20/IERC20.sol";
 
 contract TokenBalanceAllocationGating is AllocationGating {
@@ -17,6 +18,9 @@ contract TokenBalanceAllocationGating is AllocationGating {
     /// =========== Functions ==============
     /// ====================================
 
+    // Note: not sure if this will work...
+    constructor() AllocationGating(address(BaseStrategy.allo)) {}
+
     /// @notice Initializes the allocation strategy
     /// @param _allo Address of the Allo contract
     /// @param _identityId Id of the identity
@@ -24,7 +28,7 @@ contract TokenBalanceAllocationGating is AllocationGating {
     /// @param _data The data to be decoded
     function initialize(address _allo, bytes32 _identityId, uint256 _poolId, bytes memory _data) public {
         // __BaseAllocationStrategy_init("TokenBalanceAllocationGatingV1", _allo, _identityId, _poolId, _data);
-        BaseStrategy.initialize(_allo, _identityId, _poolId, _data);
+        BaseStrategy(_allo).initialize(_identityId, _poolId, _data);
         AllocationGating(_allo);
 
         // decode data custom to this strategy
@@ -42,4 +46,10 @@ contract TokenBalanceAllocationGating is AllocationGating {
 
         return IERC20(token).balanceOf(_recipient) >= balanceThreshold;
     }
+
+    function skim(address _token) external override {}
+
+    function isValidAllocater(address _voter) external view override returns (bool) {}
+
+    function distribute(address[] memory _recipientIds, bytes memory _data, address _sender) external override {}
 }

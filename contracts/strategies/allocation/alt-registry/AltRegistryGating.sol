@@ -2,6 +2,7 @@
 pragma solidity 0.8.19;
 
 import {BaseStrategy} from "../../BaseStrategy.sol";
+import {IBaseStrategy} from "../../IBaseStrategy.sol";
 import {SimpleProjectRegistry} from "./SimpleProjectRegistry.sol";
 
 abstract contract AltRegistryGating is BaseStrategy {
@@ -52,8 +53,9 @@ abstract contract AltRegistryGating is BaseStrategy {
     /// @param _poolId Id of the pool
     /// @param _data The data to be decoded
     /// @dev This function is called by the Allo contract
-    function initialize(address _allo, bytes32 _identityId, uint256 _poolId, bytes memory _data) public override {
-        __BaseAllocationStrategy_init("AltRegistryGatingV1", _allo, _identityId, _poolId, _data);
+    function initialize(address _allo, bytes32 _identityId, uint256 _poolId, bytes memory _data) public {
+        // __BaseAllocationStrategy_init("AltRegistryGatingV1", _allo, _identityId, _poolId, _data);
+        BaseStrategy(_allo).initialize(_identityId, _poolId, _data);
 
         // decode data custom to this strategy
         (address _simpleProjectRegistry) = abi.decode(_data, (address));
@@ -128,16 +130,15 @@ abstract contract AltRegistryGating is BaseStrategy {
     function getPayout(address[] memory _recipientId, bytes memory)
         external
         view
-        override
-        returns (PayoutSummary[] memory summaries)
+        returns (IBaseStrategy.PayoutSummary[] memory summaries)
     {
         uint256 recipientIdLength = _recipientId.length;
-        summaries = new PayoutSummary[](recipientIdLength);
+        summaries = new IBaseStrategy.PayoutSummary[](recipientIdLength);
 
         for (uint256 i = 0; i < recipientIdLength;) {
             Recipient memory recipient = recipients[_recipientId[i]];
-            summaries[i] = PayoutSummary({
-                payoutAddress: recipient.payoutAddress,
+            summaries[i] = IBaseStrategy.PayoutSummary({
+                recipient: recipient.payoutAddress,
                 percentage: recipient.percentage,
                 amount: 0 // TODO: CHECK WITH TEAM
             });
@@ -149,7 +150,7 @@ abstract contract AltRegistryGating is BaseStrategy {
     }
 
     /// @notice Check if the strategy is ready to payout
-    function readyToPayout(bytes memory) external view override returns (bool) {
+    function readyToPayout(bytes memory) external view returns (bool) {
         return payoutReady;
     }
 

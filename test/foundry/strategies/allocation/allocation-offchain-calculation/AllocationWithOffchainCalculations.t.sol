@@ -21,7 +21,7 @@ contract AllocationWithOffchainCalculationsTest is Test {
         address sender
     );
     event RecipientStatusUpdated(
-        address indexed applicant, uint256 indexed recipientId, BaseAllocationStrategy.RecipientStatus status
+        address indexed applicant, uint256 indexed recipientId, BaseStrategy.RecipientStatus status
     );
     event Allocated(bytes data, address indexed allocator);
     event Claimed(uint256 indexed recipientId, address receipient, uint256 amount);

@@ -2,6 +2,7 @@
 pragma solidity 0.8.19;
 
 import {BaseStrategy} from "../../BaseStrategy.sol";
+import {IBaseStrategy} from "../../IBaseStrategy.sol";
 import {Metadata} from "../../../core/libraries/Metadata.sol";
 import {ReentrancyGuard} from "@openzeppelin/security/ReentrancyGuard.sol";
 
@@ -31,7 +32,7 @@ abstract contract RFPAllocationStrategy is BaseStrategy, ReentrancyGuard {
     }
 
     ///@notice recipientId -> PayoutSummary
-    mapping(address => PayoutSummary) public payoutSummaries;
+    mapping(address => IBaseStrategy.PayoutSummary) public payoutSummaries;
 
     /// @notice recipientId -> Recipient
     mapping(address => Recipient) public recipients;
@@ -122,19 +123,18 @@ abstract contract RFPAllocationStrategy is BaseStrategy, ReentrancyGuard {
     function getPayout(address[] memory, bytes memory)
         external
         view
-        override
-        returns (PayoutSummary[] memory summaries)
+        returns (IBaseStrategy.PayoutSummary[] memory summaries)
     {
-        summaries = new PayoutSummary[](1);
-        summaries[0] = PayoutSummary({
-            payoutAddress: recipients[acceptedRecipientId].payoutAddress,
+        summaries = new IBaseStrategy.PayoutSummary[](1);
+        summaries[0] = IBaseStrategy.PayoutSummary({
+            recipient: recipients[acceptedRecipientId].payoutAddress,
             percentage: 1e18,
             amount: recipients[acceptedRecipientId].proposalAmount
         });
     }
 
     /// @notice Check if the strategy is ready to payout
-    function readyToPayout(bytes memory) external view override returns (bool) {
+    function readyToPayout(bytes memory) external view returns (bool) {
         return payoutReady;
     }
 }

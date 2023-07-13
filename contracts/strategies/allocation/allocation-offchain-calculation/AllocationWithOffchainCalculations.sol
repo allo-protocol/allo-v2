@@ -2,6 +2,7 @@
 pragma solidity 0.8.19;
 
 import {BaseStrategy} from "../../BaseStrategy.sol";
+import {IBaseStrategy} from "../../IBaseStrategy.sol";
 import {Registry} from "../../../core/Registry.sol";
 import {Metadata} from "../../../core/libraries/Metadata.sol";
 import {Transfer} from "../../../core/libraries/Transfer.sol";
@@ -65,12 +66,6 @@ contract AllocationWithOffchainCalculations is BaseStrategy, Transfer, Reentranc
         address token;
     }
 
-    struct PayoutSummary {
-        address recipient;
-        uint256 amount;
-        uint256 percentage;
-    }
-
     /// =================================
     /// === Custom Storage Variables ====
     /// =================================
@@ -93,7 +88,7 @@ contract AllocationWithOffchainCalculations is BaseStrategy, Transfer, Reentranc
     mapping(address => Recipient) public recipients;
 
     ///@notice recipientId -> PayoutSummary
-    mapping(address => PayoutSummary) public payoutSummaries;
+    mapping(address => IBaseStrategy.PayoutSummary) public payoutSummaries;
 
     /// ======================
     /// ======= Events =======
@@ -113,15 +108,17 @@ contract AllocationWithOffchainCalculations is BaseStrategy, Transfer, Reentranc
         uint256 registerStartTime, uint256 registerEndTime, uint256 votingStartTime, uint256 votingEndTime
     );
 
+    constructor(address _allo) BaseStrategy(_allo) {}
+
     /// @notice Initialize the contract
     /// @param _allo The address of the Allo contract
     /// @param _identityId The identityId of the pool
     /// @param _poolId The poolId of the pool
     /// @param _data The data to be decoded
     /// @dev This function is called by the Allo contract
-    function initialize(address _allo, bytes32 _identityId, uint256 _poolId, bytes memory _data) public override {
+    function initialize(address _allo, bytes32 _identityId, uint256 _poolId, bytes memory _data) public {
         // __BaseAllocationStrategy_init("AllocationWithOffchainCalculationsV1", _allo, _identityId, _poolId, _data);
-        BaseStrategy.initialize(_allo, _identityId, _poolId, _data);
+        BaseStrategy(_allo).initialize(_identityId, _poolId, _data);
 
         // decode data custom to this strategy
         (bool _identityRequired, address _registry) = abi.decode(_data, (bool, address));
@@ -182,7 +179,7 @@ contract AllocationWithOffchainCalculations is BaseStrategy, Transfer, Reentranc
         }
 
         // Add the recipient to the recipients mapping
-        recipientStatus[recipientId] = IAllocationStrategy.RecipientStatus.Pending;
+        recipientStatus[recipientId] = RecipientStatus.Pending;
 
         emit RecipientSubmitted(recipientId, identityId, payoutAddress, metadata, _sender);
 
@@ -194,6 +191,8 @@ contract AllocationWithOffchainCalculations is BaseStrategy, Transfer, Reentranc
     function getRecipientStatus(address _recipientId) external view override returns (RecipientStatus) {
         return recipientStatus[_recipientId];
     }
+
+    function skim(address token) external override {}
 
     /// @notice Allocates votes to the recipient(s)
     /// @param _data The data to be decoded
@@ -249,10 +248,10 @@ contract AllocationWithOffchainCalculations is BaseStrategy, Transfer, Reentranc
     function getPayout(address[] memory _recipientId, bytes memory)
         external
         view
-        returns (PayoutSummary[] memory summaries)
+        returns (IBaseStrategy.PayoutSummary[] memory summaries)
     {
         uint256 recipientIdLength = _recipientId.length;
-        summaries = new PayoutSummary[](recipientIdLength);
+        summaries = new IBaseStrategy.PayoutSummary[](recipientIdLength);
 
         for (uint256 i = 0; i < recipientIdLength;) {
             summaries[i] = payoutSummaries[_recipientId[i]];
@@ -261,6 +260,10 @@ contract AllocationWithOffchainCalculations is BaseStrategy, Transfer, Reentranc
             }
         }
     }
+
+    function isValidAllocater(address _voter) external view returns (bool) {}
+
+    function distribute(address[] memory _recipientIds, bytes memory _data, address _sender) external {}
 
     /// ====================================
     /// ========= Custom Functions =========
@@ -275,7 +278,7 @@ contract AllocationWithOffchainCalculations is BaseStrategy, Transfer, Reentranc
         for (uint256 i; i < recipientIds.length;) {
             recipients[recipientIds[i]].status = statuses[i];
             // map to the Allo global status's
-            recipientStatus[recipientIds[i]] = IAllocationStrategy.RecipientStatus.Accepted;
+            recipientStatus[recipientIds[i]] = RecipientStatus.Accepted;
 
             emit RecipientStatusUpdated(msg.sender, recipientIds[i], statuses[i]);
 
@@ -293,7 +296,8 @@ contract AllocationWithOffchainCalculations is BaseStrategy, Transfer, Reentranc
             revert VOTING_NOT_ENDED();
         }
 
-        (address[] memory recipientIds, PayoutSummary[] memory payout) = abi.decode(_data, (address[], PayoutSummary[]));
+        (address[] memory recipientIds, IBaseStrategy.PayoutSummary[] memory payout) =
+            abi.decode(_data, (address[], IBaseStrategy.PayoutSummary[]));
 
         uint256 recipientIdsLength = recipientIds.length;
         if (recipientIdsLength != payout.length) {
