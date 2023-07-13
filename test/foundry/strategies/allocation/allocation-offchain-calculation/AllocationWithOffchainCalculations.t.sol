@@ -2,9 +2,8 @@ pragma solidity 0.8.19;
 
 import "forge-std/Test.sol";
 
-import "../../../../../contracts/interfaces/IAllocationStrategy.sol";
 import {Metadata} from "../../../../../contracts/core/libraries/Metadata.sol";
-import {BaseAllocationStrategy} from "../../../../../contracts/strategies/allocation/BaseAllocationStrategy.sol";
+import {BaseStrategy} from "../../../../../contracts/strategies/BaseStrategy.sol";
 
 contract AllocationWithOffchainCalculationsTest is Test {
     uint256 public registerStartTime;

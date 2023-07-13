@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import "../../../contracts/strategies/allocation/BaseAllocationStrategy.sol";
+import "../../../contracts/strategies/BaseStrategy.sol";
 
-contract MockAllocation is BaseAllocationStrategy {
+contract MockAllocation is BaseStrategy {
     function initialize(address _allo, bytes32 _identityId, uint256 _poolId, bytes memory _data) external override {
         __BaseAllocationStrategy_init("MockAllocation", _allo, _identityId, _poolId, _data);
     }

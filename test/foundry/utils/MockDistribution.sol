@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import "../../../contracts/strategies/distribution/BaseDistributionStrategy.sol";
+import "../../../contracts/strategies/BaseStrategy.sol";
 
-contract MockDistribution is BaseDistributionStrategy {
+contract MockDistribution is BaseStrategy {
     function initialize(address _allo, bytes32 _identityId, uint256 _poolId, address _token, bytes memory _data)
         external
     {
