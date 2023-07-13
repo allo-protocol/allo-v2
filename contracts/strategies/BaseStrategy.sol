@@ -65,31 +65,18 @@ abstract contract BaseStrategy is IStrategy {
     /// @param _identityId Id of the identity
     /// @param _poolId Id of the pool
     /// @param _data The data to be decoded
-    /// @dev This function is called internally by the strategy
+    /// @dev This function is called by Allo.sol
     function initialize(
         bytes32 _identityId,
         uint256 _poolId,
-        bytes memory _recipientEligibilityData,
-        bytes memory _voterEligibilityData,
-        bytes memory _votingData,
-        bytes memory _allocationData,
-        bytes memory _distributionData
-    ) external {
-        require(msg.sender == address(allo), "only allo");
-
-        // note: is it the case that identity id will never be 0? any reason it'd be better to use pool?
+        bytes memory _data
+    ) external override onlyAllo {
         require(_identityId != bytes32(0), "invalid identity id");
         require(identityId == bytes32(0), "already initialized");
 
         identityId = _identityId;
         poolId = _poolId;
-
-        initializeRecipientEligibilityModule(_recipientEligibilityData);
-        initializeVoterEligibilityModule(_voterEligibilityData);
-        initializeVotingModule(_votingData);
-        initializeAllocationModule(_allocationData);
-        initializeDistributionModule(_distributionData);
     }
 
-    // why do we need the poolFunded function? i think we'll be fine without.
+    // @todo insert skim() function here
 }
