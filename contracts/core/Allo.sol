@@ -29,18 +29,11 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     struct Pool {
         bytes32 identityId;
         IStrategy strategy;
+        address token;
+        uint256 fundedAmount;
         Metadata metadata;
         bytes32 managerRole;
         bytes32 adminRole;
-    }
-
-    /// @notice Struct to hold init strategy data
-    struct InitStrategyData {
-        bytes recipientEligibility;
-        bytes voterEligibility;
-        bytes voting;
-        bytes allocation;
-        bytes distribution;
     }
 
     /// @notice Fee denominator
@@ -49,9 +42,6 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     /// ==========================
     /// === Storage Variables ====
     /// ==========================
-
-    /// @notice Allow custom strategy
-    bool public allowCustomStrategy;
 
     /// @notice Fee percentage
     /// @dev 1e18 = 100%, 1e17 = 10%, 1e16 = 1%, 1e15 = 0.1%
@@ -171,16 +161,12 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     function createPoolWithCustomStrategy(
         bytes32 _identityId,
         address _strategy,
-        InitStrategyData memory _initStrategyData,
+        bytes memory _initStrategyData,
         address _token,
         uint256 _amount,
         Metadata memory _metadata,
         address[] memory _managers
     ) external payable returns (uint256 poolId) {
-        if (allowCustomStrategy) {
-            revert UNAUTHORIZED();
-        }
-
         if (_strategy == address(0)) {
             revert ZERO_ADDRESS();
         }
@@ -188,7 +174,7 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
         return _createPool(_identityId, _strategy, _initStrategyData, _token, _amount, _metadata, _managers);
     }
 
-    /// @notice Creates a new pool (with cloned approved strategies)
+    /// @notice Creates a new pool (by cloning an approved strategies)
     /// @param _identityId The identityId of the pool
     /// @param _initStrategyData The data to initialize the strategy
     /// @param _token The address of the token
@@ -204,10 +190,6 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
         Metadata memory _metadata,
         address[] memory _managers
     ) external payable returns (uint256 poolId) {
-        if (_strategy == address(0)) {
-            revert ZERO_ADDRESS();
-        }
-
         if (!_isApprovedStrategy(_strategy)) {
             revert NOT_APPROVED_STRATEGY();
         }
@@ -252,6 +234,8 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
             identityId: _identityId,
             strategy: _strategy,
             metadata: _metadata,
+            token: _token,
+            amount: 0, // this value is updated in _fundPool
             managerRole: POOL_MANAGER_ROLE,
             adminRole: POOL_ADMIN_ROLE
         });
@@ -267,19 +251,14 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
         // initialize strategies
         // @dev Initialization is expect to revert when invoked more than once
         _strategy.initialize(
-            address(this), // TODO: Do we need this
             _identityId,
             poolId,
-            _initStrategyData.recipientEligibility,
-            _initStrategyData.voterEligibility,
-            _initStrategyData.voting,
-            _initStrategyData.allocation,
-            _initStrategyData.distribution
+            _initStrategyData
         );
 
         if (
-            _strategy.getIdentityId() != _identityId || _strategy.getPoolId() != poolId
-                || _strategy.getAllo() != address(this)
+            _strategy.ownerIdentityId() != _identityId || _strategy.poolId() != poolId
+                || _strategy.allo() != address(this)
         ) {
             revert MISMATCH();
         }
@@ -381,13 +360,6 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
         emit BaseFeeUpdated(baseFee);
     }
 
-    /// @notice Updates the allowCustomStrategy
-    /// @param _allowCustomStrategy boolean
-    /// @dev Only callable by the owner
-    function updateAllowCustomStrategy(bool _allowCustomStrategy) external onlyOwner {
-        allowCustomStrategy = _allowCustomStrategy;
-    }
-
     /// @notice Checks if the address is a pool admin
     /// @param _poolId The pool id
     /// @param _address The address to check
@@ -464,16 +436,16 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     /// @notice passes _data & msg.sender through to the allocation strategy for that pool
     /// @param _poolId id of the pool
     /// @param _data encoded data unique to the allocation strategy for that pool
-    function vote(uint256 _poolId, bytes memory _data) external payable {
-        _vote(_poolId, _data);
+    function allocate(uint256 _poolId, bytes memory _data) external payable {
+        _allocate(_poolId, _data);
     }
 
     /// @notice vote to multiple pools
     /// @param _poolIds ids of the pools
     /// @param _datas encoded data unique to the allocation strategy for that pool
-    function batchVote(uint256[] calldata _poolIds, bytes[] memory _datas) external {
+    function batchAllocate(uint256[] calldata _poolIds, bytes[] memory _datas) external {
         for (uint256 i = 0; i < _poolIds.length;) {
-            _vote(_poolIds[i], _datas[i]);
+            _allocate(_poolIds[i], _datas[i]);
             unchecked {
                 i++;
             }
@@ -494,8 +466,8 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     /// @notice passes _data & msg.sender through to the strategy for that pool
     /// @param _poolId id of the pool
     /// @param _data encoded data unique to the strategy for that pool
-    function _vote(uint256 _poolId, bytes memory _data) internal {
-        pools[_poolId].strategy.vote{value: msg.value}(_data, msg.sender);
+    function _allocate(uint256 _poolId, bytes memory _data) internal {
+        pools[_poolId].strategy.allocate{value: msg.value}(_data, msg.sender);
     }
 
     /// @notice Deduct the fee and transfers the amount to the distribution strategy
@@ -515,8 +487,8 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
         }
 
         _transferAmountFrom(_token, TransferData({from: msg.sender, to: address(_strategy), amount: amountAfterFee}));
-        // TODO: Check if needed
-        // _strategy.poolFunded(amountAfterFee);
+        pools[_poolId].amount += amountAfterFee;
+
         emit PoolFunded(_poolId, amountAfterFee, feeAmount);
     }
 
