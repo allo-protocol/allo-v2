@@ -136,7 +136,11 @@ abstract contract AltRegistryGating is BaseAllocationStrategy {
 
         for (uint256 i = 0; i < recipientIdLength;) {
             Recipient memory recipient = recipients[_recipientId[i]];
-            summaries[i] = PayoutSummary({payoutAddress: recipient.payoutAddress, percentage: recipient.percentage});
+            summaries[i] = PayoutSummary({
+                payoutAddress: recipient.payoutAddress,
+                percentage: recipient.percentage,
+                amount: 0 // TODO: CHECK WITH TEAM
+            });
 
             unchecked {
                 i++;
