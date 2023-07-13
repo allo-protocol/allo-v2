@@ -70,7 +70,7 @@ abstract contract BaseStrategy is IStrategy {
         bytes32 _identityId,
         uint256 _poolId,
         bytes memory _data
-    ) external override onlyAllo {
+    ) external virtual onlyAllo {
         require(_identityId != bytes32(0), "invalid identity id");
         require(identityId == bytes32(0), "already initialized");
 
@@ -78,22 +78,19 @@ abstract contract BaseStrategy is IStrategy {
         poolId = _poolId;
     }
 
-<<<<<<< HEAD
-    // why do we need the poolFunded function? i think we'll be fine without.
-    // --- How do track amount / emit event when pool is funded? This might be duplicate code for everything right ?---
-    // who implements skim? what does it do ?
-    // allo will also have be to passed with initialize -> to support cloning scenarios
-    // do we need IStrategy ? it's an abstract contract
-    // is voting the right term ? it doesn't seem generic enough for Allo
-    // can we combine voting and allocation into one module ?
-
-    // Possible rename:
-    // - AllocationModule -> CalulationModule
-    // - VoterEligibilityModule -> AllocatorEligibilityModule
-    // - VotingModule -> AllocationModule
-    // - DistributionModule
-    // - RecipientEligibilityModule
-=======
-    // @todo insert skim() function here
->>>>>>> modules
+    function skim(address _token) external {
+        Allo.Pool memory pool = allo.pools(poolId);
+        uint fundedBalance;
+        if (pool.token == _token) {
+            fundedBalance = pool.fundedBalance;
+        }
+        uint256 balance = IERC20(_token).balanceOf(address(this));
+        if (balance > fundedBalance) {
+            uint excessFunds = balance - fundedBalance;
+            uint bounty = (excessFunds * allo.feeSkirtingBounty()) / allo.FEE_DENOMINATOR();
+            excessFunds -= bounty;
+            IERC20(_token).transfer(treasury, excessFunds);
+            IERC20(_token).transfer(msg.sender, bounty);
+        }
+    }
 }
