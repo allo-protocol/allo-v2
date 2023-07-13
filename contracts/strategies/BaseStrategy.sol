@@ -96,4 +96,6 @@ abstract contract BaseStrategy is IStrategy {
     // who implements skim? what does it do ?
     // allo will also have be to passed with initialize -> to support cloning scenarios
     // do we need IStrategy ? it's an abstract contract
+    // is voting the right term ? it doesn't seem generic enough for Allo
+    // can we combine voting and allocation into one module ?
 }
