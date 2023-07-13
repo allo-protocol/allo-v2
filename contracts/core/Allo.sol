@@ -515,8 +515,8 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
         }
 
         _transferAmountFrom(_token, TransferData({from: msg.sender, to: address(_strategy), amount: amountAfterFee}));
-        // TODO: CHECK
-        _strategy.poolFunded(amountAfterFee);
+        // TODO: Check if needed
+        // _strategy.poolFunded(amountAfterFee);
         emit PoolFunded(_poolId, amountAfterFee, feeAmount);
     }
 
