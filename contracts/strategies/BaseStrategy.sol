@@ -66,11 +66,7 @@ abstract contract BaseStrategy is IStrategy {
     /// @param _poolId Id of the pool
     /// @param _data The data to be decoded
     /// @dev This function is called by Allo.sol
-    function initialize(
-        bytes32 _identityId,
-        uint256 _poolId,
-        bytes memory _data
-    ) external virtual onlyAllo {
+    function initialize(bytes32 _identityId, uint256 _poolId, bytes memory _data) external virtual onlyAllo {
         require(_identityId != bytes32(0), "invalid identity id");
         require(identityId == bytes32(0), "already initialized");
 
@@ -80,14 +76,14 @@ abstract contract BaseStrategy is IStrategy {
 
     function skim(address _token) external {
         Allo.Pool memory pool = allo.pools(poolId);
-        uint fundedBalance;
+        uint256 fundedBalance;
         if (pool.token == _token) {
             fundedBalance = pool.fundedBalance;
         }
         uint256 balance = IERC20(_token).balanceOf(address(this));
         if (balance > fundedBalance) {
-            uint excessFunds = balance - fundedBalance;
-            uint bounty = (excessFunds * allo.feeSkirtingBounty()) / allo.FEE_DENOMINATOR();
+            uint256 excessFunds = balance - fundedBalance;
+            uint256 bounty = (excessFunds * allo.feeSkirtingBounty()) / allo.FEE_DENOMINATOR();
             excessFunds -= bounty;
             IERC20(_token).transfer(treasury, excessFunds);
             IERC20(_token).transfer(msg.sender, bounty);
