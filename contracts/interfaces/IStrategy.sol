@@ -13,6 +13,7 @@ interface IStrategy {
     struct PayoutSummary {
         address payoutAddress;
         uint256 percentage;
+        uint256 amount;
     }
 
     /// @notice Get the strategy identifier
