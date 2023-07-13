@@ -84,7 +84,7 @@ contract NFTVoteWinnerTakeAll is BaseStrategy {
     function distribute(address[] memory _recipientIds, bytes memory _data, address _sender) external {
         require(winner != address(0), "winner not determined");
         Allo.Pool memory pool = allo.pools(poolId);
-        // allo.setPoolFunding(poolId, 0);
+        // allo.decreasePoolFunding(poolId, pool.amount);
         _transferAmount(pool.token, winner, pool.amount);
     }
 }
