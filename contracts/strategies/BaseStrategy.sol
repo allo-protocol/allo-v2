@@ -92,4 +92,5 @@ abstract contract BaseStrategy is IStrategy {
     }
 
     // why do we need the poolFunded function? i think we'll be fine without.
+    // who implements skim? what does it do ?
 }

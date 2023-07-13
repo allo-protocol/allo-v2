@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import {IStrategy} from "../../IStrategy.sol";
-
 interface IAllocationModule {
     function initializeAllocationModule(bytes memory _data) external;
     // this will set any parameters needed for allocatio nmodules
