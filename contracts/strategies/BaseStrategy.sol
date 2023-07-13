@@ -98,4 +98,11 @@ abstract contract BaseStrategy is IStrategy {
     // do we need IStrategy ? it's an abstract contract
     // is voting the right term ? it doesn't seem generic enough for Allo
     // can we combine voting and allocation into one module ?
+
+    // Possible rename:
+    // - AllocationModule -> CalulationModule
+    // - VoterEligibilityModule -> AllocatorEligibilityModule
+    // - VotingModule -> AllocationModule
+    // - DistributionModule
+    // - RecipientEligibilityModule
 }
