@@ -78,5 +78,22 @@ abstract contract BaseStrategy is IStrategy {
         poolId = _poolId;
     }
 
+<<<<<<< HEAD
+    // why do we need the poolFunded function? i think we'll be fine without.
+    // --- How do track amount / emit event when pool is funded? This might be duplicate code for everything right ?---
+    // who implements skim? what does it do ?
+    // allo will also have be to passed with initialize -> to support cloning scenarios
+    // do we need IStrategy ? it's an abstract contract
+    // is voting the right term ? it doesn't seem generic enough for Allo
+    // can we combine voting and allocation into one module ?
+
+    // Possible rename:
+    // - AllocationModule -> CalulationModule
+    // - VoterEligibilityModule -> AllocatorEligibilityModule
+    // - VotingModule -> AllocationModule
+    // - DistributionModule
+    // - RecipientEligibilityModule
+=======
     // @todo insert skim() function here
+>>>>>>> modules
 }

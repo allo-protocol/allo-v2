@@ -11,8 +11,7 @@ import "@solady/auth/Ownable.sol";
 import {Metadata} from "./libraries/Metadata.sol";
 import {Clone} from "./libraries/Clone.sol";
 import "./libraries/Transfer.sol";
-import "../interfaces/IAllocationStrategy.sol";
-import "../interfaces/IDistributionStrategy.sol";
+import "../strategies/IStrategy.sol";
 import "./Registry.sol";
 
 contract Allo is Transfer, Initializable, Ownable, AccessControl {
@@ -29,8 +28,9 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     /// @notice Struct to hold details of an Pool
     struct Pool {
         bytes32 identityId;
-        IAllocationStrategy allocationStrategy;
-        IDistributionStrategy distributionStrategy;
+        IStrategy strategy;
+        address token;
+        uint256 fundedAmount;
         Metadata metadata;
         bytes32 managerRole;
         bytes32 adminRole;
@@ -53,14 +53,14 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     /// @notice Incremental index
     uint256 private _poolIndex;
 
-    /// @notice msg.sender -> nonce for cloning strategies
-    mapping(address => uint256) private _nonces;
-
     /// @notice Allo treasury
     address payable public treasury;
 
     /// @notice Registry of pool creators
     Registry public registry;
+
+    /// @notice msg.sender -> nonce for cloning strategies
+    mapping(address => uint256) private _nonces;
 
     /// @notice Pool.id -> Pool
     mapping(uint256 => Pool) public pools;
@@ -75,8 +75,7 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     event PoolCreated(
         uint256 indexed poolId,
         bytes32 indexed identityId,
-        IAllocationStrategy allocationStrategy,
-        IDistributionStrategy distributionStrategy,
+        IStrategy strategy,
         address token,
         uint256 amount,
         Metadata metadata
@@ -151,104 +150,54 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     /// ==== External/Public Functions =====
     /// ====================================
 
-    /// @notice Creates a new pool (with clone for approved strategies)
+    /// @notice Creates a new pool (with custom strategy)
     /// @param _identityId The identityId of the pool
-    /// @param _allocationStrategy The address of the allocation strategy
-    /// @param _initAllocationData The data to initialize the allocation strategy
-    /// @param _cloneAllocationStrategy Whether to clone the allocation strategy
-    /// @param _distributionStrategy The address of the distribution strategy
-    /// @param _initDistributionData The data to initialize the distribution strategy
-    /// @param _cloneDistributionStrategy Whether to clone the distribution strategy
+    /// @param _strategy The address of strategy
+    /// @param _initStrategyData The data to initialize the strategy
     /// @param _token The address of the token
     /// @param _amount The amount of the token
     /// @param _metadata The metadata of the pool
     /// @param _managers The managers of the pool
-    function createPoolWithClone(
+    function createPoolWithCustomStrategy(
         bytes32 _identityId,
-        address _allocationStrategy,
-        bytes memory _initAllocationData,
-        bool _cloneAllocationStrategy,
-        address _distributionStrategy,
-        bytes memory _initDistributionData,
-        bool _cloneDistributionStrategy,
+        address _strategy,
+        bytes memory _initStrategyData,
         address _token,
         uint256 _amount,
         Metadata memory _metadata,
         address[] memory _managers
     ) external payable returns (uint256 poolId) {
-        address allocationStrategy;
-        address distributionStrategy;
-
-        // DISCUSS: We either
-        // - allow cloning of every contract (use the bool)
-        // - or we force cloning of only approved contracts
-
-        if (_allocationStrategy == address(0) || _distributionStrategy == address(0)) {
+        if (_strategy == address(0)) {
             revert ZERO_ADDRESS();
         }
 
-        if (_cloneAllocationStrategy) {
-            if (!_isApprovedStrategy(_allocationStrategy)) {
-                revert NOT_APPROVED_STRATEGY();
-            }
-            allocationStrategy = Clone.createClone(_allocationStrategy, _nonces[msg.sender]++);
-        } else {
-            allocationStrategy = _allocationStrategy;
-        }
-
-        if (_cloneDistributionStrategy) {
-            if (!_isApprovedStrategy(_distributionStrategy)) {
-                revert NOT_APPROVED_STRATEGY();
-            }
-            distributionStrategy = Clone.createClone(_distributionStrategy, _nonces[msg.sender]++);
-        } else {
-            distributionStrategy = _distributionStrategy;
-        }
-
-        return _createPool(
-            _identityId,
-            IAllocationStrategy(allocationStrategy),
-            _initAllocationData,
-            IDistributionStrategy(distributionStrategy),
-            _initDistributionData,
-            _token,
-            _amount,
-            _metadata,
-            _managers
-        );
+        return _createPool(_identityId, _strategy, _initStrategyData, _token, _amount, _metadata, _managers);
     }
 
-    /// @notice Creates a new pool
-    /// @param _identityId The identityId of the pool creator in the registry
-    /// @param _allocationStrategy The address of the allocation strategy
-    /// @param _initAllocationData The data to initialize the allocation strategy
-    /// @param _distributionStrategy The address of the distribution strategy
-    /// @param _initDistributionData The data to initialize the distribution strategy
-    /// @param _token The address of the token that the pool is denominated in
-    /// @param _amount The amount of the token to be deposited into the pool
+    /// @notice Creates a new pool (by cloning an approved strategies)
+    /// @param _identityId The identityId of the pool
+    /// @param _initStrategyData The data to initialize the strategy
+    /// @param _token The address of the token
+    /// @param _amount The amount of the token
     /// @param _metadata The metadata of the pool
-    /// @param _managers The _managers of the pool
+    /// @param _managers The managers of the pool
     function createPool(
         bytes32 _identityId,
-        address _allocationStrategy,
-        bytes memory _initAllocationData,
-        address _distributionStrategy,
-        bytes memory _initDistributionData,
+        address _strategy,
+        InitStrategyData memory _initStrategyData,
         address _token,
         uint256 _amount,
         Metadata memory _metadata,
         address[] memory _managers
     ) external payable returns (uint256 poolId) {
-        if (_allocationStrategy == address(0) || _distributionStrategy == address(0)) {
-            revert ZERO_ADDRESS();
+        if (!_isApprovedStrategy(_strategy)) {
+            revert NOT_APPROVED_STRATEGY();
         }
 
         return _createPool(
             _identityId,
-            IAllocationStrategy(_allocationStrategy),
-            _initAllocationData,
-            IDistributionStrategy(_distributionStrategy),
-            _initDistributionData,
+            IBaseStrategy(Clone.createClone(_strategy, _nonces[msg.sender]++)),
+            _initStrategyData,
             _token,
             _amount,
             _metadata,
@@ -258,18 +207,16 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
 
     /// @notice Creates a new pool
     /// @param _identityId The identityId of the pool creator in the registry
-    /// @param _allocationStrategy The address of the allocation strategy
-    /// @param _distributionStrategy The address of the distribution strategy
+    /// @param _strategy The address of strategy
+    /// @param _initStrategyData The data to initialize the strategy
     /// @param _token The address of the token that the pool is denominated in
     /// @param _amount The amount of the token to be deposited into the pool
     /// @param _metadata The metadata of the pool
     /// @param _managers The managers of the pool
     function _createPool(
         bytes32 _identityId,
-        IAllocationStrategy _allocationStrategy,
-        bytes memory _initAllocationData,
-        IDistributionStrategy _distributionStrategy,
-        bytes memory _initDistributionData,
+        IStrategy _strategy,
+        InitStrategyData memory _initStrategyData,
         address _token,
         uint256 _amount,
         Metadata memory _metadata,
@@ -285,9 +232,10 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
 
         Pool memory pool = Pool({
             identityId: _identityId,
-            allocationStrategy: _allocationStrategy,
-            distributionStrategy: _distributionStrategy,
+            strategy: _strategy,
             metadata: _metadata,
+            token: _token,
+            amount: 0, // this value is updated in _fundPool
             managerRole: POOL_MANAGER_ROLE,
             adminRole: POOL_ADMIN_ROLE
         });
@@ -302,13 +250,15 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
 
         // initialize strategies
         // @dev Initialization is expect to revert when invoked more than once
-        _allocationStrategy.initialize(address(this), _identityId, poolId, _initAllocationData);
-        _distributionStrategy.initialize(address(this), _identityId, poolId, _token, _initDistributionData);
+        _strategy.initialize(
+            _identityId,
+            poolId,
+            _initStrategyData
+        );
 
         if (
-            _allocationStrategy.getIdentityId() != _identityId || _distributionStrategy.getIdentityId() != _identityId
-                || _allocationStrategy.getPoolId() != poolId || _distributionStrategy.getPoolId() != poolId
-                || _allocationStrategy.getAllo() != address(this) || _distributionStrategy.getAllo() != address(this)
+            _strategy.ownerIdentityId() != _identityId || _strategy.poolId() != poolId
+                || _strategy.allo() != address(this)
         ) {
             revert MISMATCH();
         }
@@ -332,18 +282,10 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
         }
 
         if (_amount > 0) {
-            _fundPool(_token, _amount, poolId, _distributionStrategy);
+            _fundPool(_token, _amount, poolId, _strategy);
         }
 
-        emit PoolCreated(poolId, _identityId, _allocationStrategy, _distributionStrategy, _token, _amount, _metadata);
-    }
-
-    /// @notice passes _data through to the allocation strategy for that pool
-    /// @notice returns the recipientId from the allocation strategy
-    /// @param _poolId id of the pool
-    /// @param _data encoded data unique to the allocation strategy for that pool
-    function registerRecipients(uint256 _poolId, bytes memory _data) external payable returns (address) {
-        return pools[_poolId].allocationStrategy.registerRecipients(_data, msg.sender);
+        emit PoolCreated(poolId, _identityId, _strategy, _token, _amount, _metadata);
     }
 
     /// @notice Update pool metadata
@@ -355,44 +297,6 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
         pool.metadata = _metadata;
 
         emit PoolMetadataUpdated(_poolId, _metadata);
-    }
-
-    /// @notice Fund a pool
-    /// @param _poolId id of the pool
-    /// @param _amount extra amount of the token to be deposited into the pool
-    /// @param _token The address of the token that the pool is denominated in
-    /// @dev Anyone can fund a pool
-    function fundPool(uint256 _poolId, uint256 _amount, address _token) external payable {
-        if (_amount == 0) {
-            revert NOT_ENOUGH_FUNDS();
-        }
-        _fundPool(_token, _amount, _poolId, pools[_poolId].distributionStrategy);
-    }
-
-    /// @notice passes _data & msg.sender through to the allocation strategy for that pool
-    /// @param _poolId id of the pool
-    /// @param _data encoded data unique to the allocation strategy for that pool
-    function allocate(uint256 _poolId, bytes memory _data) external payable {
-        _allocate(_poolId, _data);
-    }
-
-    /// @notice allocate to multiple pools
-    /// @param _poolIds ids of the pools
-    /// @param _datas encoded data unique to the allocation strategy for that pool
-    function batchAllocate(uint256[] calldata _poolIds, bytes[] memory _datas) external {
-        for (uint256 i = 0; i < _poolIds.length;) {
-            _allocate(_poolIds[i], _datas[i]);
-            unchecked {
-                i++;
-            }
-        }
-    }
-
-    /// @notice passes _data & msg.sender through to the disribution strategy for that pool
-    /// @param _poolId id of the pool
-    /// @param _data encoded data unique to the distributionStrategy strategy for that pool
-    function distribute(uint256 _poolId, address[] memory _recipientIds, bytes memory _data) external {
-        pools[_poolId].distributionStrategy.distribute(_recipientIds, _data, msg.sender);
     }
 
     /// @notice Updates the registry address
@@ -489,18 +393,11 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
         _revokeRole(pools[_poolId].managerRole, _manager);
     }
 
-    /// @notice Return the allocation strategy for a pool
+    /// @notice Return the strategy for a pool
     /// @param _poolId The pool id
     /// @return address
-    function getAllocationStrategy(uint256 _poolId) external view returns (address) {
-        return address(pools[_poolId].allocationStrategy);
-    }
-
-    /// @notice Return the distribution strategy for a pool
-    /// @param _poolId The pool id
-    /// @return address
-    function getDistributionStrategy(uint256 _poolId) external view returns (address) {
-        return address(pools[_poolId].distributionStrategy);
+    function getStrategy(uint256 _poolId) external view returns (address) {
+        return address(pools[_poolId].strategy);
     }
 
     /// @notice Transfer thefunds recovered  to the recipient
@@ -513,24 +410,72 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     }
 
     /// ====================================
-    /// ======= Internal Functions =========
+    /// ======= Strategy Functions =========
     /// ====================================
+
+    /// @notice passes _data through to the allocation strategy for that pool
+    /// @notice returns the recipientId from the allocation strategy
+    /// @param _poolId id of the pool
+    /// @param _data encoded data unique to the allocation strategy for that pool
+    function registerRecipients(uint256 _poolId, bytes memory _data) external payable returns (address) {
+        return pools[_poolId].strategy.registerRecipients(_data, msg.sender);
+    }
+
+    /// @notice Fund a pool
+    /// @param _poolId id of the pool
+    /// @param _amount extra amount of the token to be deposited into the pool
+    /// @param _token The address of the token that the pool is denominated in
+    /// @dev Anyone can fund a pool
+    function fundPool(uint256 _poolId, uint256 _amount, address _token) external payable {
+        if (_amount == 0) {
+            revert NOT_ENOUGH_FUNDS();
+        }
+        _fundPool(_token, _amount, _poolId, pools[_poolId].strategy);
+    }
 
     /// @notice passes _data & msg.sender through to the allocation strategy for that pool
     /// @param _poolId id of the pool
     /// @param _data encoded data unique to the allocation strategy for that pool
+    function allocate(uint256 _poolId, bytes memory _data) external payable {
+        _allocate(_poolId, _data);
+    }
+
+    /// @notice vote to multiple pools
+    /// @param _poolIds ids of the pools
+    /// @param _datas encoded data unique to the allocation strategy for that pool
+    function batchAllocate(uint256[] calldata _poolIds, bytes[] memory _datas) external {
+        for (uint256 i = 0; i < _poolIds.length;) {
+            _allocate(_poolIds[i], _datas[i]);
+            unchecked {
+                i++;
+            }
+        }
+    }
+
+    /// @notice passes _data & msg.sender through to the disribution strategy for that pool
+    /// @param _poolId id of the pool
+    /// @param _data encoded data unique to the strategy for that pool
+    function distribute(uint256 _poolId, address[] memory _recipientIds, bytes memory _data) external {
+        pools[_poolId].strategy.distribute(_recipientIds, _data, msg.sender);
+    }
+
+    /// ====================================
+    /// ======= Internal Functions =========
+    /// ====================================
+
+    /// @notice passes _data & msg.sender through to the strategy for that pool
+    /// @param _poolId id of the pool
+    /// @param _data encoded data unique to the strategy for that pool
     function _allocate(uint256 _poolId, bytes memory _data) internal {
-        pools[_poolId].allocationStrategy.allocate{value: msg.value}(_data, msg.sender);
+        pools[_poolId].strategy.allocate{value: msg.value}(_data, msg.sender);
     }
 
     /// @notice Deduct the fee and transfers the amount to the distribution strategy
     /// @param _token The address of the token to transfer
     /// @param _amount The amount to transfer
     /// @param _poolId The pool id
-    /// @param _distributionStrategy The address of the distribution strategy
-    function _fundPool(address _token, uint256 _amount, uint256 _poolId, IDistributionStrategy _distributionStrategy)
-        internal
-    {
+    /// @param _strategy The address of the strategy
+    function _fundPool(address _token, uint256 _amount, uint256 _poolId, IStrategy _strategy) internal {
         uint256 feeAmount = 0;
         uint256 amountAfterFee = _amount;
 
@@ -541,10 +486,9 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
             _transferAmountFrom(_token, TransferData({from: msg.sender, to: treasury, amount: feeAmount}));
         }
 
-        _transferAmountFrom(
-            _token, TransferData({from: msg.sender, to: address(_distributionStrategy), amount: amountAfterFee})
-        );
-        _distributionStrategy.poolFunded(amountAfterFee);
+        _transferAmountFrom(_token, TransferData({from: msg.sender, to: address(_strategy), amount: amountAfterFee}));
+        pools[_poolId].amount += amountAfterFee;
+
         emit PoolFunded(_poolId, amountAfterFee, feeAmount);
     }
 
