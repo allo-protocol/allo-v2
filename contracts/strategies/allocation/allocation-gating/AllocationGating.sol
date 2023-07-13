@@ -15,6 +15,12 @@ abstract contract AllocationGating is BaseStrategy {
     /// === Custom Storage Variables ====
     /// =================================
 
+    struct PayoutSummary {
+        address recipient;
+        uint256 amount;
+        uint256 percentage;
+    }
+
     bool public payoutReady;
 
     ///@notice recipientId -> PayoutSummary
@@ -26,6 +32,8 @@ abstract contract AllocationGating is BaseStrategy {
 
     event Allocated(bytes data, address indexed allocator);
     event PayoutReady();
+
+    constructor(address _allo) public BaseStrategy(_allo) {}
 
     /// ====================================
     /// =========== Functions ==============
@@ -78,7 +86,6 @@ abstract contract AllocationGating is BaseStrategy {
     function getPayout(address[] memory _recipientId, bytes memory)
         external
         view
-        override
         returns (PayoutSummary[] memory summaries)
     {
         uint256 recipientIdLength = _recipientId.length;
@@ -99,7 +106,7 @@ abstract contract AllocationGating is BaseStrategy {
     }
 
     /// @notice Check if the strategy is ready to payout
-    function readyToPayout(bytes memory) external view override returns (bool) {
+    function readyToPayout(bytes memory) external view returns (bool) {
         return payoutReady;
     }
 

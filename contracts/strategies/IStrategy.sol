@@ -23,13 +23,13 @@ interface IStrategy {
     // if there are more steps, additional functions should be added to allow the owner to check
     // this could also check attestations directly and then Accept
 
-    function getRecipientStatus(address _recipientId) public view returns (RecipientStatus);
+    function getRecipientStatus(address _recipientId) external view returns (RecipientStatus);
     // simply returns the status of a recipient
     // probably tracked in a mapping, but will depend on the implementation
     // for example, the OpenSelfRegistration only maps users to bool, and then assumes Accepted for those
     // since there is no need for Pending or Rejected
 
-    function isValidAllocator(address _voter) public view returns (bool);
+    function isValidAllocater(address _voter) external view returns (bool);
     // simply returns whether a voter is valid or not, will usually be true for all
 
     function allocate(bytes memory _data, address _sender) external payable;

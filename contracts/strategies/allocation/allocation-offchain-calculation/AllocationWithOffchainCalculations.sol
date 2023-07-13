@@ -65,6 +65,12 @@ contract AllocationWithOffchainCalculations is BaseStrategy, Transfer, Reentranc
         address token;
     }
 
+    struct PayoutSummary {
+        address recipient;
+        uint256 amount;
+        uint256 percentage;
+    }
+
     /// =================================
     /// === Custom Storage Variables ====
     /// =================================
@@ -114,7 +120,8 @@ contract AllocationWithOffchainCalculations is BaseStrategy, Transfer, Reentranc
     /// @param _data The data to be decoded
     /// @dev This function is called by the Allo contract
     function initialize(address _allo, bytes32 _identityId, uint256 _poolId, bytes memory _data) public override {
-        __BaseAllocationStrategy_init("AllocationWithOffchainCalculationsV1", _allo, _identityId, _poolId, _data);
+        // __BaseAllocationStrategy_init("AllocationWithOffchainCalculationsV1", _allo, _identityId, _poolId, _data);
+        BaseStrategy.initialize(_allo, _identityId, _poolId, _data);
 
         // decode data custom to this strategy
         (bool _identityRequired, address _registry) = abi.decode(_data, (bool, address));

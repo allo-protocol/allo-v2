@@ -10,9 +10,10 @@ import "@solady/auth/Ownable.sol";
 
 import {Metadata} from "./libraries/Metadata.sol";
 import {Clone} from "./libraries/Clone.sol";
-import "./libraries/Transfer.sol";
-import "../strategies/IStrategy.sol";
-import "./Registry.sol";
+import {Transfer} from "./libraries/Transfer.sol";
+import {IStrategy} from "../strategies/IStrategy.sol";
+import {IBaseStrategy} from "../strategies/IBaseStrategy.sol";
+import {Registry} from "./Registry.sol";
 
 contract Allo is Transfer, Initializable, Ownable, AccessControl {
     using SafeERC20Upgradeable for IERC20Upgradeable;

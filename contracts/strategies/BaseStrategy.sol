@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
+import {ERC20} from "@openzeppelin/token/ERC20/ERC20.sol";
+import {IERC20} from "@openzeppelin/token/ERC20/IERC20.sol";
+
 import {Allo} from "../core/Allo.sol";
 import {IStrategy} from "./IStrategy.sol";
 
@@ -26,7 +29,9 @@ abstract contract BaseStrategy is IStrategy {
     Allo public immutable allo;
 
     uint256 public poolId;
-    bytes32 public ownerIdentityId;
+    bytes32 public identityId;
+
+    address public treasury;
 
     /// ====================================
     /// ========== Constructor =============
@@ -68,7 +73,7 @@ abstract contract BaseStrategy is IStrategy {
     /// @dev This function is called by Allo.sol
     function initialize(bytes32 _identityId, uint256 _poolId, bytes memory _data) external virtual onlyAllo {
         require(_identityId != bytes32(0), "invalid identity id");
-        require(identityId == bytes32(0), "already initialized");
+        require(_identityId == bytes32(0), "already initialized");
 
         identityId = _identityId;
         poolId = _poolId;
