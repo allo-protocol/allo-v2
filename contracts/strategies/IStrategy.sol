@@ -35,7 +35,7 @@ interface IStrategy {
     function getRecipientStatus(address _recipientId) external view returns (RecipientStatus);
 
     // simply returns whether a voter is valid or not, will usually be true for all
-    function isValidAllocater(address _voter) external view returns (bool);
+    function isValidAllocater(address _allocator) external view returns (bool);
 
     // only called via allo.sol by users to allocate votes to a recipient
     // this will update some data in this contract to store votes, etc.

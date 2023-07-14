@@ -54,11 +54,11 @@ abstract contract Strategy is IStrategy {
     /// ====================================
 
     /// @notice Initializes the allocation strategy
-    /// @param _identityId Id of the identity
+    /// @param _ownerIdentityId Id of the identity
     /// @param _poolId Id of the pool
     /// @param _data The data to be decoded
     /// @dev This function is called internally by the strategy
-    function initialize(bytes32 _identityId, uint256 _poolId, bytes memory _data) external virtual onlyAllo {
+    function initialize(bytes32 _ownerIdentityId, uint256 _poolId, bytes memory _data) external virtual onlyAllo {
         if (initialized) {
             revert Strategy_ALREADY_INITIALIZED();
         }
@@ -66,10 +66,10 @@ abstract contract Strategy is IStrategy {
         initialized = true;
 
         allo = Allo(msg.sender);
-        identityId = _identityId;
+        ownerIdentityId = _ownerIdentityId;
         poolId = _poolId;
 
-        emit Initialized(_allo, _identityId, _poolId, _data);
+        emit Initialized(_allo, _ownerIdentityId, _poolId, _data);
     }
 
     /// @notice Can be called when contract balance is greater than the amount captured in Allo.pool
