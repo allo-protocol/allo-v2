@@ -15,6 +15,23 @@ import {IStrategy} from "../strategies/IStrategy.sol";
 import {IBaseStrategy} from "../strategies/IBaseStrategy.sol";
 import {Registry} from "./Registry.sol";
 
+/**
+*          ___           ___       ___       ___     
+*         /\  \         /\__\     /\__\     /\  \    
+*        /::\  \       /:/  /    /:/  /    /::\  \   
+*       /:/\:\  \     /:/  /    /:/  /    /:/\:\  \  
+*      /::\~\:\  \   /:/  /    /:/  /    /:/  \:\  \ 
+*     /:/\:\ \:\__\ /:/__/    /:/__/    /:/__/ \:\__\
+*     \/__\:\/:/  / \:\  \    \:\  \    \:\  \ /:/  /
+*          \::/  /   \:\  \    \:\  \    \:\  /:/  / 
+*          /:/  /     \:\  \    \:\  \    \:\/:/  /  
+*         /:/  /       \:\__\    \:\__\    \::/  /   
+*         \/__/         \/__/     \/__/     \/__/    
+*/
+
+/// @title Allo
+/// @notice The Allo contract
+/// @author allo-team
 contract Allo is Transfer, Initializable, Ownable, AccessControl {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
