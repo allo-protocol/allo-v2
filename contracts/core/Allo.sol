@@ -11,7 +11,7 @@ import "@solady/auth/Ownable.sol";
 import {Metadata} from "./libraries/Metadata.sol";
 import {Clone} from "./libraries/Clone.sol";
 import "./libraries/Transfer.sol";
-import "../strategies/IStrategy.sol";
+import "../strategies/Strategy.sol";
 import "./Registry.sol";
 
 contract Allo is Transfer, Initializable, Ownable, AccessControl {
@@ -28,7 +28,7 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     /// @notice Struct to hold details of an Pool
     struct Pool {
         bytes32 identityId;
-        IStrategy strategy;
+        Strategy strategy;
         address token;
         uint256 amount;
         Metadata metadata;
@@ -79,7 +79,7 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     event PoolCreated(
         uint256 indexed poolId,
         bytes32 indexed identityId,
-        IStrategy strategy,
+        Strategy strategy,
         address token,
         uint256 amount,
         Metadata metadata
@@ -178,7 +178,7 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
             revert UNAUTHORIZED();
         }
 
-        return _createPool(_identityId, IStrategy(_strategy), _initStrategyData, _token, _amount, _metadata, _managers);
+        return _createPool(_identityId, Strategy(_strategy), _initStrategyData, _token, _amount, _metadata, _managers);
     }
 
     /// @notice Creates a new pool (with approved strategy which is cloned)
@@ -206,7 +206,7 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
             revert NOT_APPROVED_STRATEGY();
         }
 
-        return _createPool(_identityId, IStrategy(_strategy), _initStrategyData, _token, _amount, _metadata, _managers);
+        return _createPool(_identityId, Strategy(_strategy), _initStrategyData, _token, _amount, _metadata, _managers);
     }
 
     /// @notice Creates a new pool
@@ -219,7 +219,7 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     /// @param _managers The managers of the pool
     function _createPool(
         bytes32 _identityId,
-        IStrategy _strategy,
+        Strategy _strategy,
         bytes memory _initStrategyData,
         address _token,
         uint256 _amount,
@@ -252,7 +252,7 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
         _setRoleAdmin(POOL_MANAGER_ROLE, POOL_ADMIN_ROLE);
 
         // @dev Initialization is expect to revert when invoked more than once
-        _strategy.initialize(address(this), _identityId, poolId, _initStrategyData);
+        _strategy.initialize(_identityId, poolId, _initStrategyData);
 
         if (
             _strategy.ownerIdentityId() != _identityId || _strategy.poolId() != poolId
@@ -473,7 +473,7 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     /// @param _amount The amount to transfer
     /// @param _poolId The pool id
     /// @param _strategy The address of the strategy
-    function _fundPool(address _token, uint256 _amount, uint256 _poolId, IStrategy _strategy) internal {
+    function _fundPool(address _token, uint256 _amount, uint256 _poolId, Strategy _strategy) internal {
         uint256 feeAmount = 0;
         uint256 amountAfterFee = _amount;
 

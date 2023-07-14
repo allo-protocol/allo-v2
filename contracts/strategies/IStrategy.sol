@@ -16,10 +16,10 @@ interface IStrategy {
 
     // the default BaseStrategy version will not use the data
     // if a strategy wants to use it, they will overwrite it, use it, and then call super.initialize()
-    function initialize(address _allo, bytes32 _identityId, uint256 _poolId, bytes memory _data) external;
+    function initialize(bytes32 _identityId, uint256 _poolId, bytes memory _data) external;
 
-    // this is used to check Allo.sol for the amount of funding there should be
-    // then checking the balance of the contract, and paying the difference
+    // this is used to check if balance in strategy is equal / lesser than pool.amount stored in Allo.sol
+    // If it is greater, the difference will be split between the treasury and the msg.sender
     function skim(address token) external;
 
     // this is called via allo.sol to register recipients
