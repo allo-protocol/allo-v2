@@ -19,18 +19,18 @@ contract NFTVoteWinnerTakeAll is BaseStrategy {
 
     address[] recipients;
     mapping(address => bool) public isRecipient;
-    mapping(uint256 => bool) public isVoted;
+    mapping(uint256 => bool) public hasAllocated;
     mapping(address => uint256) public votes;
 
     /// ===============================
     /// ========== Errors =============
     /// ===============================
 
-    error BadVotingTimes();
-    error NotWithinVotingPeriod();
-    error AlreadyVoted();
+    error BadTimes();
+    error NotWithinAllocationPeriod();
+    error AlreadyAllocated();
     error NotOwnerOfNFT();
-    error VotingHasntEnded();
+    error AllocationHasntEnded();
 
     /// ===============================
     /// ======== Constructor ==========
@@ -42,9 +42,9 @@ contract NFTVoteWinnerTakeAll is BaseStrategy {
     /// ========= Modifiers ===========
     /// ===============================
 
-    modifier onlyDuringVoting() {
+    modifier onlyDuringAllocationPeriod() {
         if (block.timestamp < startTime || block.timestamp > endTime) {
-            revert NotWithinVotingPeriod();
+            revert NotWithinAllocationPeriod();
         }
         _;
     }
@@ -58,14 +58,14 @@ contract NFTVoteWinnerTakeAll is BaseStrategy {
         (nft, startTime, endTime) = abi.decode(_data, (ERC721, uint256, uint256));
 
         if (startTime >= endTime || endTime < block.timestamp) {
-            revert BadVotingTimes();
+            revert BadTimes();
         }
     }
 
     function registerRecipients(bytes memory _data, address _sender)
         external
         payable
-        onlyDuringVoting
+        onlyDuringAllocationPeriod
         onlyAllo
         returns (address)
     {
@@ -88,21 +88,21 @@ contract NFTVoteWinnerTakeAll is BaseStrategy {
         }
     }
 
-    function isValidAllocator(address _voter) public view returns (bool) {
-        return nft.balanceOf(_voter) > 0;
+    function isValidAllocator(address _allocator) public view returns (bool) {
+        return nft.balanceOf(_allocator) > 0;
     }
 
-    function allocate(bytes memory _data, address _sender) external payable onlyDuringVoting onlyAllo {
+    function allocate(bytes memory _data, address _sender) external payable onlyDuringAllocationPeriod onlyAllo {
         (uint256[] memory ids, address recipient) = abi.decode(_data, (uint256[], address));
         uint256 numVotes = ids.length;
         for (uint256 i; i < numVotes;) {
-            if (isVoted[ids[i]]) {
-                revert AlreadyVoted();
+            if (hasAllocated[ids[i]]) {
+                revert AlreadyAllocated();
             }
             if (nft.ownerOf(ids[i]) != _sender) {
                 revert NotOwnerOfNFT();
             }
-            isVoted[ids[i]] = true;
+            hasAllocated[ids[i]] = true;
             unchecked {
                 ++i;
             }
@@ -134,11 +134,11 @@ contract NFTVoteWinnerTakeAll is BaseStrategy {
 
     function distribute(address[] memory _recipientIds, bytes memory _data, address _sender) external onlyAllo {
         if (block.timestamp < endTime) {
-            revert VotingHasntEnded();
+            revert AllocationHasntEnded();
         }
 
         (,, address tokenToDistribute, uint256 amountToDistribute,,,) = allo.pools(poolId);
-        // allo.decreasePoolFunding(poolId, pool.amount);
+        allo.decreasePoolFunding(poolId, amountToDistribute);
         _transferAmount(tokenToDistribute, currentWinner, amountToDistribute);
     }
 }

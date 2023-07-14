@@ -48,6 +48,9 @@ interface IStrategy {
         external
         returns (uint256[] memory);
 
+    // simply returns whether a voter is valid or not, will usually be true for all
+    function isValidAllocator(address _allocator) external view returns (bool);
+
     /// ======================
     /// ===== Functions ======
     /// ======================
@@ -71,9 +74,6 @@ interface IStrategy {
     // for example, the OpenSelfRegistration only maps users to bool, and then assumes Accepted for those
     // since there is no need for Pending or Rejected
     function getRecipientStatus(address _recipientId) external view returns (RecipientStatus);
-
-    // simply returns whether a voter is valid or not, will usually be true for all
-    function isValidAllocator(address _voter) external view returns (bool);
 
     // only called via allo.sol by users to allocate votes to a recipient
     // this will update some data in this contract to store votes, etc.
