@@ -10,10 +10,27 @@ import "@solady/auth/Ownable.sol";
 
 import {Metadata} from "./libraries/Metadata.sol";
 import {Clone} from "./libraries/Clone.sol";
-import "./libraries/Transfer.sol";
-import "../strategies/IStrategy.sol";
-import "./Registry.sol";
+import {Transfer} from "./libraries/Transfer.sol";
+import {IStrategy} from "../strategies/IStrategy.sol";
+import {Registry} from "./Registry.sol";
 
+/**
+ *          ___           ___       ___       ___
+ *         /\  \         /\__\     /\__\     /\  \
+ *        /::\  \       /:/  /    /:/  /    /::\  \
+ *       /:/\:\  \     /:/  /    /:/  /    /:/\:\  \
+ *      /::\~\:\  \   /:/  /    /:/  /    /:/  \:\  \
+ *     /:/\:\ \:\__\ /:/__/    /:/__/    /:/__/ \:\__\
+ *     \/__\:\/:/  / \:\  \    \:\  \    \:\  \ /:/  /
+ *          \::/  /   \:\  \    \:\  \    \:\  /:/  /
+ *          /:/  /     \:\  \    \:\  \    \:\/:/  /
+ *         /:/  /       \:\__\    \:\__\    \::/  /
+ *         \/__/         \/__/     \/__/     \/__/
+ */
+
+/// @title Allo
+/// @notice The Allo contract
+/// @author allo-team
 contract Allo is Transfer, Initializable, Ownable, AccessControl {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
@@ -21,6 +38,7 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     error UNAUTHORIZED();
     error NOT_ENOUGH_FUNDS();
     error NOT_APPROVED_STRATEGY();
+    error IS_APPROVED_STRATEGY();
     error MISMATCH();
     error ZERO_ADDRESS();
     error INVALID_FEE();
@@ -30,7 +48,7 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
         bytes32 identityId;
         IStrategy strategy;
         address token;
-        uint256 fundedAmount;
+        uint256 amount;
         Metadata metadata;
         bytes32 managerRole;
         bytes32 adminRole;
@@ -69,7 +87,7 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     mapping(address => bool) public approvedStrategies;
 
     /// @notice Reward for catching fee skirting (1e18 = 100%)
-    uint256 public feeSkirtingBounty;
+    uint256 public feeSkirtingBountyPercentage;
 
     /// ======================
     /// ======= Events =======
@@ -173,8 +191,11 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
         if (_strategy == address(0)) {
             revert ZERO_ADDRESS();
         }
+        if (_isApprovedStrategy(_strategy)) {
+            revert IS_APPROVED_STRATEGY();
+        }
 
-        return _createPool(_identityId, _strategy, _initStrategyData, _token, _amount, _metadata, _managers);
+        return _createPool(_identityId, IStrategy(_strategy), _initStrategyData, _token, _amount, _metadata, _managers);
     }
 
     /// @notice Creates a new pool (by cloning an approved strategies)
@@ -187,7 +208,7 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     function createPool(
         bytes32 _identityId,
         address _strategy,
-        InitStrategyData memory _initStrategyData,
+        bytes memory _initStrategyData,
         address _token,
         uint256 _amount,
         Metadata memory _metadata,
@@ -199,7 +220,7 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
 
         return _createPool(
             _identityId,
-            IBaseStrategy(Clone.createClone(_strategy, _nonces[msg.sender]++)),
+            IStrategy(Clone.createClone(_strategy, _nonces[msg.sender]++)),
             _initStrategyData,
             _token,
             _amount,
@@ -219,7 +240,7 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     function _createPool(
         bytes32 _identityId,
         IStrategy _strategy,
-        InitStrategyData memory _initStrategyData,
+        bytes memory _initStrategyData,
         address _token,
         uint256 _amount,
         Metadata memory _metadata,
@@ -253,12 +274,9 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
 
         // initialize strategies
         // @dev Initialization is expect to revert when invoked more than once
-        _strategy.initialize(_identityId, poolId, _initStrategyData);
+        _strategy.initialize(poolId, _initStrategyData);
 
-        if (
-            _strategy.ownerIdentityId() != _identityId || _strategy.poolId() != poolId
-                || _strategy.allo() != address(this)
-        ) {
+        if (_strategy.getPoolId() != poolId || address(_strategy.getAllo()) != address(this)) {
             revert MISMATCH();
         }
 
@@ -443,7 +461,11 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     /// @param _poolIds ids of the pools
     /// @param _datas encoded data unique to the allocation strategy for that pool
     function batchAllocate(uint256[] calldata _poolIds, bytes[] memory _datas) external {
-        for (uint256 i = 0; i < _poolIds.length;) {
+        uint256 numPools = _poolIds.length;
+        if (numPools != _datas.length) {
+            revert MISMATCH();
+        }
+        for (uint256 i = 0; i < numPools;) {
             _allocate(_poolIds[i], _datas[i]);
             unchecked {
                 i++;
