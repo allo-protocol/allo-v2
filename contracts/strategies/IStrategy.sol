@@ -62,7 +62,7 @@ interface IStrategy {
     // for example, the OpenSelfRegistration only maps users to bool, and then assumes Accepted for those
     // since there is no need for Pending or Rejected
 
-    function isValidAllocater(address _voter) external view returns (bool);
+    function isValidAllocator(address _voter) external view returns (bool);
     // simply returns whether a voter is valid or not, will usually be true for all
 
     function allocate(bytes memory _data, address _sender) external payable;
