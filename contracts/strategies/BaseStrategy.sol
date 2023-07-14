@@ -1,43 +1,38 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import "../core/Allo.sol";
-import "../interfaces/IStrategy.sol";
+import {ERC20} from "@openzeppelin/token/ERC20/ERC20.sol";
+import {IERC20} from "@openzeppelin/token/ERC20/IERC20.sol";
+import {Allo} from "../core/Allo.sol";
+import {IStrategy} from "./IStrategy.sol";
+import {Transfer} from "../core/libraries/Transfer.sol";
 
-abstract contract BaseStrategy is IStrategy {
-    /// ======================
-    /// ======= Errors =======
-    /// ======================
-
-    error BaseStrategy_UNAUTHORIZED();
-    error BaseStrategy_STRATEGY_ALREADY_INITIALIZED();
-    error BaseStrategy_INVALID_ADDRESS();
-
-    /// ======================
-    /// ======= Events =======
-    /// ======================
-
-    event Initialized(address allo, bytes32 identityId, uint256 poolId, bytes data);
-
+abstract contract BaseStrategy is IStrategy, Transfer {
     /// ==========================
     /// === Storage Variables ====
     /// ==========================
 
-    bytes32 internal STRATEGY_IDENTIFIER;
-
-    bytes32 internal identityId;
-    Allo internal allo;
-
-    uint256 internal poolId;
-    bool public initialized;
+    Allo private immutable allo;
+    uint256 private poolId;
+    string private strategyName;
 
     /// ====================================
-    /// =========== Modifier ===============
+    /// ========== Constructor =============
+    /// ====================================
+
+    /// @param _allo Address of the Allo contract
+    constructor(address _allo, string memory _name) {
+        allo = Allo(_allo);
+        strategyName = _name;
+    }
+
+    /// ====================================
+    /// =========== Modifiers ==============
     /// ====================================
 
     /// @notice Modifier to check if the caller is the Allo contract
     modifier onlyAllo() {
-        if (msg.sender != address(allo) && address(allo) != address(0)) {
+        if (msg.sender != address(allo)) {
             revert BaseStrategy_UNAUTHORIZED();
         }
         _;
@@ -51,68 +46,54 @@ abstract contract BaseStrategy is IStrategy {
         _;
     }
 
+    /// ================================
+    /// =========== Views ==============
+    /// ================================
+
+    function getAllo() external view override returns (Allo) {
+        return allo;
+    }
+
+    function getPoolId() external view override returns (uint256) {
+        return poolId;
+    }
+
+    function getStrategyName() external view override returns (string memory) {
+        return strategyName;
+    }
+
     /// ====================================
     /// =========== Functions ==============
     /// ====================================
 
     /// @notice Initializes the allocation strategy
-    /// @param _allo Address of the Allo contract
-    /// @param _identityId Id of the identity
     /// @param _poolId Id of the pool
     /// @param _data The data to be decoded
-    /// @dev This function is called internally by the strategy
-    function __BaseStrategy_init(
-        string memory _strategyIdentifier,
-        address _allo,
-        bytes32 _identityId,
-        uint256 _poolId,
-        bytes memory _data
-    ) internal {
-        if (initialized) {
-            revert BaseStrategy_STRATEGY_ALREADY_INITIALIZED();
-        }
-
-        if (_allo == address(0)) {
+    /// @dev This function is called by Allo.sol
+    function initialize(uint256 _poolId, bytes memory _data) external virtual onlyAllo {
+        if (_poolId == 0) {
             revert BaseStrategy_INVALID_ADDRESS();
         }
-
-        initialized = true;
-
-        _setStrategyIdentifier(_strategyIdentifier);
-
-        allo = Allo(_allo);
-        identityId = _identityId;
+        if (poolId != 0) {
+            revert BaseStrategy_STRATEGY_ALREADY_INITIALIZED();
+        }
         poolId = _poolId;
-
-        emit Initialized(_allo, _identityId, _poolId, _data);
     }
 
-    /// @notice Get the identity id
-    /// @return bytes32 The identity id
-    function getIdentityId() external view returns (bytes32) {
-        return identityId;
-    }
+    function skim(address _token) external virtual override {
+        (,, address token, uint256 amount,,,) = allo.pools(poolId);
+        uint256 balanceCapturedInPool = (token == _token) ? amount : 0;
 
-    /// @notice Get the pool id
-    /// @return uint256 The pool id
-    function getPoolId() external view returns (uint256) {
-        return poolId;
-    }
+        uint256 balanceInStrategy =
+            _token == address(0) ? address(this).balance : IERC20(_token).balanceOf(address(this));
 
-    /// @notice Get the Allo address
-    /// @return address The Allo address
-    function getAllo() external view returns (address) {
-        return address(allo);
-    }
-
-    /// @notice Returns the strategy identifier
-    function getStrategyIdentifier() external view returns (bytes32) {
-        return STRATEGY_IDENTIFIER;
-    }
-
-    /// @notice sets the strategy identifier
-    /// @param _strategyIdentifier the strategy identifier
-    function _setStrategyIdentifier(string memory _strategyIdentifier) internal {
-        STRATEGY_IDENTIFIER = keccak256(abi.encode(_strategyIdentifier));
+        if (balanceInStrategy > balanceCapturedInPool) {
+            uint256 excessFunds = balanceInStrategy - balanceCapturedInPool;
+            uint256 bounty = (excessFunds * allo.feeSkirtingBountyPercentage()) / allo.FEE_DENOMINATOR();
+            excessFunds -= bounty;
+            _transferAmount(_token, allo.treasury(), excessFunds);
+            _transferAmount(_token, msg.sender, bounty);
+            emit Skim(msg.sender, _token, excessFunds, bounty);
+        }
     }
 }
