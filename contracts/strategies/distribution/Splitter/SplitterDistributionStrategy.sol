@@ -4,6 +4,7 @@ pragma solidity 0.8.19;
 import {BaseStrategy} from "../../BaseStrategy.sol";
 import {IBaseStrategy} from "../../IBaseStrategy.sol";
 import {Transfer} from "../../../core/libraries/Transfer.sol";
+import {Payouts} from "../../../core/libraries/Payouts.sol";
 import {ReentrancyGuard} from "@openzeppelin/security/ReentrancyGuard.sol";
 
 contract SplitterDistributionStrategy is BaseStrategy, Transfer, ReentrancyGuard {
@@ -23,7 +24,7 @@ contract SplitterDistributionStrategy is BaseStrategy, Transfer, ReentrancyGuard
     /// ======= Events =======
     /// ======================
 
-    event PayoutsDistributed(address[] recipientIds, IBaseStrategy.PayoutSummary[] payoutSummary, address sender);
+    event PayoutsDistributed(address[] recipientIds, Payouts.PayoutSummary[] payoutSummary, address sender);
 
     constructor(address _allo) BaseStrategy(_allo) {}
 
@@ -57,7 +58,7 @@ contract SplitterDistributionStrategy is BaseStrategy, Transfer, ReentrancyGuard
         //     revert PAYOUT_NOT_READY();
         // }
 
-        (IBaseStrategy.PayoutSummary[] memory payouts) = strategy.getPayout(_recipientIds, _data);
+        (Payouts.PayoutSummary[] memory payouts) = strategy.getPayout(_recipientIds, _data);
 
         uint256 recipientIdsLength = _recipientIds.length;
 

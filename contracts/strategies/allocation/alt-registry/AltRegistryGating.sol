@@ -2,7 +2,7 @@
 pragma solidity 0.8.19;
 
 import {BaseStrategy} from "../../BaseStrategy.sol";
-import {IBaseStrategy} from "../../IBaseStrategy.sol";
+import {Payouts} from "../../../core/libraries/Payouts.sol";
 import {SimpleProjectRegistry} from "./SimpleProjectRegistry.sol";
 
 abstract contract AltRegistryGating is BaseStrategy {
@@ -130,14 +130,14 @@ abstract contract AltRegistryGating is BaseStrategy {
     function getPayout(address[] memory _recipientId, bytes memory)
         external
         view
-        returns (IBaseStrategy.PayoutSummary[] memory summaries)
+        returns (Payouts.PayoutSummary[] memory summaries)
     {
         uint256 recipientIdLength = _recipientId.length;
-        summaries = new IBaseStrategy.PayoutSummary[](recipientIdLength);
+        summaries = new Payouts.PayoutSummary[](recipientIdLength);
 
         for (uint256 i = 0; i < recipientIdLength;) {
             Recipient memory recipient = recipients[_recipientId[i]];
-            summaries[i] = IBaseStrategy.PayoutSummary({
+            summaries[i] = Payouts.PayoutSummary({
                 recipient: recipient.payoutAddress,
                 percentage: recipient.percentage,
                 amount: 0 // TODO: CHECK WITH TEAM

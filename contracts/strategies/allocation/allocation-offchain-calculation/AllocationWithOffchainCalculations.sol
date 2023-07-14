@@ -6,6 +6,7 @@ import {IBaseStrategy} from "../../IBaseStrategy.sol";
 import {Registry} from "../../../core/Registry.sol";
 import {Metadata} from "../../../core/libraries/Metadata.sol";
 import {Transfer} from "../../../core/libraries/Transfer.sol";
+import {Payouts} from "../../../core/libraries/Payouts.sol";
 import {ReentrancyGuard} from "@openzeppelin/security/ReentrancyGuard.sol";
 
 /// @title AllocationWithOffchainCalculations
@@ -88,7 +89,7 @@ contract AllocationWithOffchainCalculations is BaseStrategy, Transfer, Reentranc
     mapping(address => Recipient) public recipients;
 
     ///@notice recipientId -> PayoutSummary
-    mapping(address => IBaseStrategy.PayoutSummary) public payoutSummaries;
+    mapping(address => Payouts.PayoutSummary) public payoutSummaries;
 
     /// ======================
     /// ======= Events =======
@@ -248,10 +249,10 @@ contract AllocationWithOffchainCalculations is BaseStrategy, Transfer, Reentranc
     function getPayout(address[] memory _recipientId, bytes memory)
         external
         view
-        returns (IBaseStrategy.PayoutSummary[] memory summaries)
+        returns (Payouts.PayoutSummary[] memory summaries)
     {
         uint256 recipientIdLength = _recipientId.length;
-        summaries = new IBaseStrategy.PayoutSummary[](recipientIdLength);
+        summaries = new Payouts.PayoutSummary[](recipientIdLength);
 
         for (uint256 i = 0; i < recipientIdLength;) {
             summaries[i] = payoutSummaries[_recipientId[i]];
@@ -296,8 +297,8 @@ contract AllocationWithOffchainCalculations is BaseStrategy, Transfer, Reentranc
             revert VOTING_NOT_ENDED();
         }
 
-        (address[] memory recipientIds, IBaseStrategy.PayoutSummary[] memory payout) =
-            abi.decode(_data, (address[], IBaseStrategy.PayoutSummary[]));
+        (address[] memory recipientIds, Payouts.PayoutSummary[] memory payout) =
+            abi.decode(_data, (address[], Payouts.PayoutSummary[]));
 
         uint256 recipientIdsLength = recipientIds.length;
         if (recipientIdsLength != payout.length) {

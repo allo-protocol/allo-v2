@@ -2,7 +2,7 @@
 pragma solidity 0.8.19;
 
 import {BaseStrategy} from "../../BaseStrategy.sol";
-import {IBaseStrategy} from "../../IBaseStrategy.sol";
+import {Payouts} from "../../../core/libraries/Payouts.sol";
 import {Metadata} from "../../../core/libraries/Metadata.sol";
 import {ReentrancyGuard} from "@openzeppelin/security/ReentrancyGuard.sol";
 
@@ -32,7 +32,7 @@ abstract contract RFPAllocationStrategy is BaseStrategy, ReentrancyGuard {
     }
 
     ///@notice recipientId -> PayoutSummary
-    mapping(address => IBaseStrategy.PayoutSummary) public payoutSummaries;
+    mapping(address => Payouts.PayoutSummary) public payoutSummaries;
 
     /// @notice recipientId -> Recipient
     mapping(address => Recipient) public recipients;
@@ -123,10 +123,10 @@ abstract contract RFPAllocationStrategy is BaseStrategy, ReentrancyGuard {
     function getPayout(address[] memory, bytes memory)
         external
         view
-        returns (IBaseStrategy.PayoutSummary[] memory summaries)
+        returns (Payouts.PayoutSummary[] memory summaries)
     {
-        summaries = new IBaseStrategy.PayoutSummary[](1);
-        summaries[0] = IBaseStrategy.PayoutSummary({
+        summaries = new Payouts.PayoutSummary[](1);
+        summaries[0] = Payouts.PayoutSummary({
             recipient: recipients[acceptedRecipientId].payoutAddress,
             percentage: 1e18,
             amount: recipients[acceptedRecipientId].proposalAmount
