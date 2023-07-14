@@ -191,7 +191,8 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
             revert ZERO_ADDRESS();
         }
 
-        return _createPool(_identityId, BaseStrategy(_strategy), _initStrategyData, _token, _amount, _metadata, _managers);
+        return
+            _createPool(_identityId, BaseStrategy(_strategy), _initStrategyData, _token, _amount, _metadata, _managers);
     }
 
     /// @notice Creates a new pool (by cloning an approved strategies)
