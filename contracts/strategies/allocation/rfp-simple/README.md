@@ -2,72 +2,37 @@ Spec: Simple Request for Proposal (RFP)
 ---------------------------------
 
 ## Overview 
-Many organizations accomplish tasks by outsourcing the work to expert teams. In this model, they create a Request for Proposal (RFP), where they outline the specifications of the work they would like done and solicit proposals. Ultimately, a decision maker awards the RFP to one proposal. 
-
-## Component Quickview
-As laid out in the [components overview](https://docs.google.com/document/d/1qoOP07oMKzUCyfb4HbnyeD6ZYEQa004i5Zwqoy7-Ox8/edit), each allocation strategy consists of some key components. This is a quick overview of the relevant components for this strategy.
-- **Recipient eligibility**: must be in registry and have proposal
-- **Acceptance method**: programmatic
-- **Voter eligibility**: allowlist
-- **Voting method**: single decision
-- **Calculation method**: none
-- **Allocation shape**: discrete amount
+Many organizations accomplish tasks by outsourcing the work to expert teams. In this model, they create a Request for Proposal (RFP), where they outline the specifications of the work they would like done and solicit proposals. This RFP strategy allows one decision maker to award a winner, then pay out in milestones. 
 
 ## Spec
-### Custom Variables
-This strategy will need the following custom variables:
-- `poolOpen` - boolean value that represents whether the pool is accepting new proposals
-- `rfpMetadata` - off-chain metadata about the rfp (details, etc)
-- `decisionMaker` - single address that is allowed to vote
-- `proposal` — contains the recipient's proposal for the rfp
-- `proposalBid` - amount of the pool's token that is being requested for the proposal
-- `localStatus` - the local recipient status. Can be any of the following values:
-    - `pending` — maps to `pending` global status
-    - `accepted` - maps to `accepted` global status
-    - `rejected` - maps to `rejected` global status
-    - `canceled` - maps to `null` global status
+### Recipient logic
+In this strategy, prospective recipients only need to apply for a grant. There isn't an approval step before voting. 
+- `registerRecipient` - function for recipient to submit application
+    - if a recipient submits an application that meets all requirements, then the recipient status is set to `Pending`
+    - **Customizable Settings**
+        - pool admin can require recipients to have Allo registry identity in order to apply
+            - if pool admin doesn't require Allo identity and the recipient doesn't have one, then `msg.sender` is used as recipient id
+        - pool admin can include the full RFP, as well as optional and required questions in an application, stored in metadata
+            - pool admin must specify the maximum amount they are willing to pay — this is the pool amount stored on the contract. 
+            - recipient must answer questions as specified by pool admin
+        - pool admin can require that the recipient include a proposed bid for the work
+            - if they do, the proposed bid cannot be more than the pool amount stored on the contract
 
-### Standard Functions
-All standard functions are functions that the given user can call from the `Allo.sol` contract.
-#### `createPool()`
-The identity admin creates a new pool via `createPool`. At this time, the admin can set the following custom variables:
-- `poolOpen`
-- `rfpMetadata`
-- `decisionMaker`
+### Voter eligibility logic
+One address is recorded as the eligible decision maker. All other addresses are marked `ineligible`. 
 
-#### `registerRecipients()`
-Potential applicants can apply to the pool via `registerRecipients`. When the recipient is submitted, the strategy uses the following decision tree to determine eligibility:
+### Voting logic
+In this strategy, pool admins are able to review the applications and choose a single winner. 
+- `allocate` — function for decision-maker (i.e. wallet marked as `eligible`) to select the winning bid
+    - When selecting the winning bid, that recipient is marked as `Accepted` and all other recipients are marked as `Rejected`
+    - When the winning bid is selected, their proposed bid amount is what is recorded as the amount of the pool they receive. 
 
-- Is `poolOpen` true?
-    - If yes, proceed
-    - If no, revert with message that pool is not accepting proposals
-- Does the applicant have a valid Allo registry identity?
-    - If yes, proceed
-    - If no, revert that valid registry identity is required
-- Does `proposal` contain data? 
-    - If yes, proceed
-    - If no, revert with message that pool requires a proposal
-- Does `proposalBid` contain a value?
-    - If yes, the recipient is eligible
-    - If no, revert with message that specific bid must be requested
+### Allocation shape
+The winning recipient will receive the specific amount that was in their accepted bid. If there is money left over from the max pool amount, the pool admin can reclaim the funds. 
 
-If the recipient is eligible, the strategy stores the recipient and programmatically assigns the `Pending` local status.
-
-#### `allocate()`
-The decision maker is able to choose which proposal (if any) will win the RFP using the `allocate` function. When a new allocate transaction is submitted, the following checks are made:
-- Does msg.sender == `decisionMaker`?
-    - If yes, record vote
-    - If no, revert with message that voter is not eligible
-
-Within the `allocate` function, the decision maker is able to give one of two commands:
-- Select a winning recipient —> this marks the recipient as `accepted` and all other recipients as `rejected`.
-- Choose not to accept bids —> this marks all recipients as `rejected`
-
-#### `generatePayouts()`
-The `generatePayouts` function checks if there is an accepted recipient.
-- If there is an `accepted` recipient, that recipient is moved to the distribution process
-- If all recipients are `pending`, the transaction reverts with the message that a winner has not been selected yet
-- If all recipients are `rejected`, the funds are made available to be reclaimed by the pool admin
-
-### Open questions
-- do we need a global "ineligible" status?
+### Distribution
+This strategy will use a milestone-based payout approach, where the recipient must meet certain criteria to unlock the full grant payments. Any pool admin (not just the designated decision-maker) should have the ability to configure the milestones for each recipient, and to approve the distribution at each gate. 
+- `setMilestones` - function for the pool admin to configure the recipient's funding distribution milestones
+    - this should allow them to set N number of payout gates, indicate the percentage of funds that will be unlocked by each gate, and save metadata that records details about each payment gate.
+- `submitMilestone` - function for the recipient to request the payment of the next gate. They should have the ability to submit metadata with details about the gate. 
+- `unlockMilestone` - function for the pool admin to accept the recipient's submission and pay out the next gate. They should have the ability to release the gate regardless of whether the recipient has submitted a request for the next gate. 
