@@ -30,7 +30,10 @@ abstract contract Splitter is ReentrancyGuard {
     /// @param _recipientIds The recipientIds to distribute to
     /// @param _data encoded bytes passed to the allocation strategy
     /// @param _sender The sender of the payouts
-    function _distribute(address[] memory _recipientIds, bytes _data, address _sender) internal nonReentrant {
+    function _distribute(address _token, address[] memory _recipientIds, bytes _data, address _sender)
+        internal
+        nonReentrant
+    {
         PayoutSummary[] memory payouts = abi.decode(_data, (PayoutSummary[]));
 
         uint256 recipientIdsLength = _recipientIds.length;
@@ -46,7 +49,7 @@ abstract contract Splitter is ReentrancyGuard {
 
             paidAmounts[recipientId] = amountToTransfer;
 
-            _transferAmount(token, payouts[i].payoutAddress, amountToTransfer);
+            _transferAmount(_token, payouts[i].payoutAddress, amountToTransfer);
             unchecked {
                 i++;
             }

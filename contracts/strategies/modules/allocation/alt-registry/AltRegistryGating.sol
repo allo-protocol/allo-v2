@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import {BaseAllocationStrategy} from "../Base.sol";
+import {Strategy} from "../../../Strategy.sol";
 import {SimpleProjectRegistry} from "./SimpleProjectRegistry.sol";
 
-abstract contract AltRegistryGating is BaseAllocationStrategy {
+abstract contract AltRegistryGating is Strategy {
     /// ======================
     /// ======= Errors =======
     /// ======================
