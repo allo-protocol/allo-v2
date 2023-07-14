@@ -71,7 +71,7 @@ abstract contract BaseStrategy is IStrategy, Transfer {
 
         if (balanceInContract > balanceCapturedInPool) {
             uint256 excessFunds = balanceInStrategy - balanceCapturedInPool;
-            uint256 bounty = (excessFunds * allo.feeSkirtingBounty()) / allo.FEE_DENOMINATOR();
+            uint256 bounty = (excessFunds * allo.feeSkirtingBountyPercentage()) / allo.FEE_DENOMINATOR();
             excessFunds -= bounty;
             _transferAmount(_token, allo.treasury(), excessFunds);
             _transferAmount(_token, msg.sender, bounty);

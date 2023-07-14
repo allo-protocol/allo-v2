@@ -38,6 +38,7 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     error UNAUTHORIZED();
     error NOT_ENOUGH_FUNDS();
     error NOT_APPROVED_STRATEGY();
+    error IS_APPROVED_STRATEGY();
     error MISMATCH();
     error ZERO_ADDRESS();
     error INVALID_FEE();
@@ -86,7 +87,7 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     mapping(address => bool) public approvedStrategies;
 
     /// @notice Reward for catching fee skirting (1e18 = 100%)
-    uint256 public feeSkirtingBounty;
+    uint256 public feeSkirtingBountyPercentage;
 
     /// ======================
     /// ======= Events =======
@@ -189,6 +190,9 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     ) external payable returns (uint256 poolId) {
         if (_strategy == address(0)) {
             revert ZERO_ADDRESS();
+        }
+        if (_isApprovedStrategy(_strategy)) {
+            revert IS_APPROVED_STRATEGY();
         }
 
         return
