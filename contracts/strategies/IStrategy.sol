@@ -1,13 +1,46 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
+import {Allo} from "../core/Allo.sol";
+
 interface IStrategy {
+    /// ======================
+    /// ======= Storage ======
+    /// ======================
+
     enum RecipientStatus {
         None,
         Pending,
         Accepted,
         Rejected
     }
+
+    /// ======================
+    /// ======= Errors =======
+    /// ======================
+
+    error BaseStrategy_UNAUTHORIZED();
+    error BaseStrategy_STRATEGY_ALREADY_INITIALIZED();
+    error BaseStrategy_INVALID_ADDRESS();
+
+    /// ======================
+    /// ======= Events =======
+    /// ======================
+
+    event Initialized(address allo, bytes32 identityId, uint256 poolId, bytes data);
+    event Skim(address skimmer, address token, uint256 amountToTreasury, uint256 amountToSkimmer);
+
+    /// ======================
+    /// ======= Views ========
+    /// ======================
+
+    function allo() external view returns (Allo);
+    function poolId() external view returns (uint256);
+    function identityId() external view returns (bytes32);
+
+    /// ======================
+    /// ===== Functions ======
+    /// ======================
 
     function initialize(bytes32 _identityId, uint256 _poolId, bytes memory _data) external;
     // the default BaseStrategy version will not use the data

@@ -4,34 +4,17 @@ pragma solidity 0.8.19;
 import {ERC20} from "@openzeppelin/token/ERC20/ERC20.sol";
 import {IERC20} from "@openzeppelin/token/ERC20/IERC20.sol";
 
-import {Allo} from "../core/Allo.sol";
 import {IStrategy} from "./IStrategy.sol";
+import {Transfer} from "../core/libraries/Transfer.sol";
 
-abstract contract BaseStrategy is IStrategy {
-    /// ======================
-    /// ======= Errors =======
-    /// ======================
-
-    error BaseStrategy_UNAUTHORIZED();
-    error BaseStrategy_STRATEGY_ALREADY_INITIALIZED();
-    error BaseStrategy_INVALID_ADDRESS();
-
-    /// ======================
-    /// ======= Events =======
-    /// ======================
-
-    event Initialized(address allo, bytes32 identityId, uint256 poolId, bytes data);
-
+abstract contract BaseStrategy is IStrategy, Transfer {
     /// ==========================
     /// === Storage Variables ====
     /// ==========================
 
     Allo public immutable allo;
-
     uint256 public poolId;
     bytes32 public identityId;
-
-    address public treasury;
 
     /// ====================================
     /// ========== Constructor =============
@@ -79,7 +62,7 @@ abstract contract BaseStrategy is IStrategy {
         poolId = _poolId;
     }
 
-    function skim(address _token) external virtual override onlyAllo {
+    function skim(address _token) external virtual override {
         (,, address token, uint256 amount,,,) = allo.pools(poolId);
         uint256 fundedBalance;
         if (token == _token) {
@@ -90,8 +73,9 @@ abstract contract BaseStrategy is IStrategy {
             uint256 excessFunds = balance - fundedBalance;
             uint256 bounty = (excessFunds * allo.feeSkirtingBounty()) / allo.FEE_DENOMINATOR();
             excessFunds -= bounty;
-            IERC20(_token).transfer(treasury, excessFunds);
-            IERC20(_token).transfer(msg.sender, bounty);
+            _transferAmount(_token, allo.treasury(), excessFunds);
+            _transferAmount(_token, msg.sender, bounty);
+            emit Skim(msg.sender, _token, excessFunds, bounty);
         }
     }
 }
