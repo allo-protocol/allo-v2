@@ -22,8 +22,8 @@ In this strategy, prospective recipients only need to apply for a grant. There i
 One address is recorded as the eligible decision maker. All other addresses are marked `ineligible`. 
 
 ### Voting logic
-In this strategy, pool admins are able to review the applications and choose a single winner. 
-- `allocate` — function for decision-maker (i.e. wallet marked as `eligible`) to select the winning bid
+In this strategy, anyone can view the applications but only the pool admins and the decision maker can view the bid amounts. Only the decision maker can choose the single winner. 
+- `allocate` — function for decision maker (i.e. wallet marked as `eligible`) to select the winning bid
     - When selecting the winning bid, that recipient is marked as `Accepted` and all other recipients are marked as `Rejected`
     - When the winning bid is selected, their proposed bid amount is what is recorded as the amount of the pool they receive. 
 
