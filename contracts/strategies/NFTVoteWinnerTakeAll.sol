@@ -7,36 +7,62 @@ import { BaseStrategy } from "./BaseStrategy.sol";
 import { Transfer } from "../core/libraries/Transfer.sol";
 
 contract NFTVoteWinnerTakeAll is BaseStrategy {
+
+    /// ================================
+    /// ========== Storage =============
+    /// ================================
+
     uint startTime;
     uint endTime;
     ERC721 nft;
-    address winner;
+    address currentWinner;
 
     address[] memory recipients;
     mapping(address => bool) public isRecipient;
     mapping(uint => bool) public isVoted;
     mapping(address => uint) public votes;
 
+    /// ===============================
+    /// ========== Errors =============
+    /// ===============================
+
+    error BadVotingTimes();
+    error NotWithinVotingPeriod();
+    error AlreadyVoted();
+    error NotOwnerOfNFT();
+    error VotingHasntEnded();
+
+    /// ===============================
+    /// ========= Modifiers ===========
+    /// ===============================
+
+    modifier onlyDuringVoting() {
+        if (block.timestamp < startTime || block.timestamp > endTime) {
+            revert NotWithinVotingPeriod();
+        }
+        _;
+    }
+
+    /// ===============================
+    /// ========= Functions ===========
+    /// ===============================
+
     function initialize(bytes32 _identityId, uint256 _poolId, bytes memory _data) external override {
         super.initialize(_identityId, _poolId, _data);
         (nft, startTime, endTime) = ERC721(abi.decode(_data, (address, uint, uint)));
 
-        require(startTime < endTime, "start time must be before end time");
-        require(endTime > block.timestamp, "end time must be in the future");
+        if (startTime >= endTime || endTime < block.timestamp) {
+            revert BadVotingTimes();
+        }
     }
 
-    function registerRecipients(bytes memory _data, address _sender) external payable returns (address) {
-        require(block.timestamp >= startTime, "voting has not started");
-        require(block.timestamp <= endTime, "voting has ended");
-
+    function registerRecipients(bytes memory _data, address _sender) external payable onlyDuringVoting onlyAllo returns (address) {
         address[] memory newRecipients = abi.decode(_data, (address[]));
 
-        // check to ensure gas for determining winner doesn't exceed block gas limit (just made up number for now)
-        require(recipients.length + newRecipients.length < 1000, "max 1000 recipients");
-
-        for (uint i; i < newRecipients.length; i++) {
+        for (uint i; i < newRecipients.length;) {
             isRecipient[newRecipients[i]] = true;
             recipients.push(newRecipients[i]);
+            unchecked { ++i }
         }
     }
 
@@ -52,39 +78,32 @@ contract NFTVoteWinnerTakeAll is BaseStrategy {
         return nft.balanceOf(_voter) > 0;
     }
 
-    function allocate(bytes memory _data, address _sender) external payable {
-        require(block.timestamp >= startTime, "voting has not started");
-        require(block.timestamp <= endTime, "voting has ended");
-
+    function allocate(bytes memory _data, address _sender) external payable onlyDuringVoting onlyAllo {
         (uint256[] memory ids, address recipient) = abi.decode(_data, (uint256[], address));
         uint numVotes = ids.length;
-        for (uint i; i < numVotes; i++) {
-            require(!isVoted[ids[i]], "already voted");
-            require(nft.ownerOf(ids[i]) == msg.sender, "not owner of NFT");
-            isVoted[votes[i]] = true;
+        for (uint i; i < numVotes;) {
+            if (isVoted[ids[i]]) {
+                revert AlreadyVoted();
+            }
+            if (nft.ownerOf(ids[i]) != _sender) {
+                revert NotOwnerOfNFT();
+            }
+            isVoted[ids[i]] = true;
+            unchecked { ++i }
         }
         votes[recipient] += numVotes;
-    }
-
-    function determineWinner() external view returns (address) {
-        require(block.timestamp > endTime, "voting has not ended");
-        require(winner == address(0), "winner already determined");
-
-        uint256 maxVotes;
-        address winner;
-        for (uint i; i < recipients.length; i++) {
-            if (votes[i] > maxVotes) {
-                maxVotes = votes[i];
-                winner = i;
-            }
+        if (votes[recipient] > votes[currentWinner]) {
+            currentWinner = recipient;
         }
-        return winner;
     }
 
-    function distribute(address[] memory _recipientIds, bytes memory _data, address _sender) external {
-        require(winner != address(0), "winner not determined");
+    function distribute(address[] memory _recipientIds, bytes memory _data, address _sender) external onlyAllo {
+        if (block.timestamp < endTime) {
+            revert VotingHasntEnded();
+        }
+
         Allo.Pool memory pool = allo.pools(poolId);
         // allo.decreasePoolFunding(poolId, pool.amount);
-        _transferAmount(pool.token, winner, pool.amount);
+        _transferAmount(pool.token, currentWinner, pool.amount);
     }
 }
