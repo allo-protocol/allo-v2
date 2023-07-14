@@ -74,7 +74,7 @@ abstract contract BaseStrategy is IStrategy {
     function initialize(bytes32 _identityId, uint256 _poolId, bytes memory _data) external virtual onlyAllo {
         _data;
         require(_identityId != bytes32(0), "invalid identity id");
-        require(_identityId == bytes32(0), "already initialized");
+        require(identityId == bytes32(0), "already initialized");
 
         identityId = _identityId;
         poolId = _poolId;

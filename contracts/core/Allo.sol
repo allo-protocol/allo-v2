@@ -11,8 +11,7 @@ import "@solady/auth/Ownable.sol";
 import {Metadata} from "./libraries/Metadata.sol";
 import {Clone} from "./libraries/Clone.sol";
 import {Transfer} from "./libraries/Transfer.sol";
-import {IStrategy} from "../strategies/IStrategy.sol";
-import {IBaseStrategy} from "../strategies/IBaseStrategy.sol";
+import {BaseStrategy} from "../strategies/BaseStrategy.sol";
 import {Registry} from "./Registry.sol";
 
 /**
@@ -46,16 +45,12 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     /// @notice Struct to hold details of an Pool
     struct Pool {
         bytes32 identityId;
-        IStrategy strategy;
+        BaseStrategy strategy;
         address token;
         uint256 amount;
         Metadata metadata;
         bytes32 managerRole;
         bytes32 adminRole;
-    }
-
-    struct InitStrategyData {
-        address allocationStrategy;
     }
 
     /// @notice Fee denominator
@@ -100,7 +95,7 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     event PoolCreated(
         uint256 indexed poolId,
         bytes32 indexed identityId,
-        IStrategy strategy,
+        BaseStrategy strategy,
         address token,
         uint256 amount,
         Metadata metadata
@@ -196,9 +191,7 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
             revert ZERO_ADDRESS();
         }
 
-        InitStrategyData memory initStrategyData = abi.decode(_initStrategyData, (InitStrategyData));
-
-        return _createPool(_identityId, IStrategy(_strategy), initStrategyData, _token, _amount, _metadata, _managers);
+        return _createPool(_identityId, BaseStrategy(_strategy), _initStrategyData, _token, _amount, _metadata, _managers);
     }
 
     /// @notice Creates a new pool (by cloning an approved strategies)
@@ -211,7 +204,7 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     function createPool(
         bytes32 _identityId,
         address _strategy,
-        InitStrategyData memory _initStrategyData,
+        bytes memory _initStrategyData,
         address _token,
         uint256 _amount,
         Metadata memory _metadata,
@@ -223,7 +216,7 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
 
         return _createPool(
             _identityId,
-            IBaseStrategy(Clone.createClone(_strategy, _nonces[msg.sender]++)),
+            BaseStrategy(Clone.createClone(_strategy, _nonces[msg.sender]++)),
             _initStrategyData,
             _token,
             _amount,
@@ -242,8 +235,8 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     /// @param _managers The managers of the pool
     function _createPool(
         bytes32 _identityId,
-        IStrategy _strategy,
-        InitStrategyData memory _initStrategyData,
+        BaseStrategy _strategy,
+        bytes memory _initStrategyData,
         address _token,
         uint256 _amount,
         Metadata memory _metadata,
@@ -277,16 +270,14 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
 
         // initialize strategies
         // @dev Initialization is expect to revert when invoked more than once
-        bytes memory initStrategyData = abi.encode(_initStrategyData);
-        _strategy.initialize(_identityId, poolId, initStrategyData);
+        _strategy.initialize(_identityId, poolId, _initStrategyData);
 
-        // todo: update this check
-        // if (
-        //     _strategy.ownerIdentityId() != _identityId || _strategy.poolId() != poolId
-        //         || _strategy.allo() != address(this)
-        // ) {
-        //     revert MISMATCH();
-        // }
+        if (
+            _strategy.identityId() != _identityId || _strategy.poolId() != poolId
+                || address(_strategy.allo()) != address(this)
+        ) {
+            revert MISMATCH();
+        }
 
         // grant pool managers roles
         uint256 managersLength = _managers.length;
@@ -500,7 +491,7 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     /// @param _amount The amount to transfer
     /// @param _poolId The pool id
     /// @param _strategy The address of the strategy
-    function _fundPool(address _token, uint256 _amount, uint256 _poolId, IStrategy _strategy) internal {
+    function _fundPool(address _token, uint256 _amount, uint256 _poolId, BaseStrategy _strategy) internal {
         uint256 feeAmount = 0;
         uint256 amountAfterFee = _amount;
 
