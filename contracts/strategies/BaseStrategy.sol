@@ -3,7 +3,7 @@ pragma solidity 0.8.19;
 
 import {ERC20} from "@openzeppelin/token/ERC20/ERC20.sol";
 import {IERC20} from "@openzeppelin/token/ERC20/IERC20.sol";
-
+import {Allo} from "../core/Allo.sol";
 import {IStrategy} from "./IStrategy.sol";
 import {Transfer} from "../core/libraries/Transfer.sol";
 
@@ -49,15 +49,16 @@ abstract contract BaseStrategy is IStrategy, Transfer {
     /// ====================================
 
     /// @notice Initializes the allocation strategy
-    /// @param _identityId Id of the identity
     /// @param _poolId Id of the pool
     /// @param _data The data to be decoded
     /// @dev This function is called by Allo.sol
-    function initialize(bytes32 _identityId, uint256 _poolId, bytes memory _data) external virtual onlyAllo {
-        require(_identityId != bytes32(0), "invalid identity id");
-        require(identityId == bytes32(0), "already initialized");
-
-        identityId = _identityId;
+    function initialize(uint256 _poolId, bytes memory _data) external virtual onlyAllo {
+        if (_poolId == 0) {
+            revert BaseStrategy_INVALID_ADDRESS();
+        }
+        if (poolId != 0) {
+            revert BaseStrategy_STRATEGY_ALREADY_INITIALIZED();
+        }
         poolId = _poolId;
     }
 
@@ -65,11 +66,10 @@ abstract contract BaseStrategy is IStrategy, Transfer {
         (,, address token, uint256 amount,,,) = allo.pools(poolId);
         uint256 balanceCapturedInPool = (token == _token) ? amount : 0;
 
-        uint256 balanceInStrategy = _token == address(0) ?
-            address(this).balance :
-            IERC20(_token).balanceOf(address(this));
+        uint256 balanceInStrategy =
+            _token == address(0) ? address(this).balance : IERC20(_token).balanceOf(address(this));
 
-        if (balanceInContract > balanceCapturedInPool) {
+        if (balanceInStrategy > balanceCapturedInPool) {
             uint256 excessFunds = balanceInStrategy - balanceCapturedInPool;
             uint256 bounty = (excessFunds * allo.feeSkirtingBountyPercentage()) / allo.FEE_DENOMINATOR();
             excessFunds -= bounty;

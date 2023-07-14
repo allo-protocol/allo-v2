@@ -46,7 +46,7 @@ interface IStrategy {
 
     // the default BaseStrategy version will not use the data
     // if a strtegy wants to use it, they will overwrite it, use it, and then call super.initialize()
-    function initialize(bytes32 _identityId, uint256 _poolId, bytes memory _data) external;
+    function initialize(uint256 _poolId, bytes memory _data) external;
 
     // this is used to check Allo.sol for the amount of funding there should be
     // then checking the balance of the contract, and paying the difference

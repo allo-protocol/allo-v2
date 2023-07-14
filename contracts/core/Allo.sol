@@ -195,8 +195,7 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
             revert IS_APPROVED_STRATEGY();
         }
 
-        return
-            _createPool(_identityId, IStrategy(_strategy), _initStrategyData, _token, _amount, _metadata, _managers);
+        return _createPool(_identityId, IStrategy(_strategy), _initStrategyData, _token, _amount, _metadata, _managers);
     }
 
     /// @notice Creates a new pool (by cloning an approved strategies)
@@ -275,7 +274,7 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
 
         // initialize strategies
         // @dev Initialization is expect to revert when invoked more than once
-        _strategy.initialize(_identityId, poolId, _initStrategyData);
+        _strategy.initialize(poolId, _initStrategyData);
 
         if (_strategy.poolId() != poolId || address(_strategy.allo()) != address(this)) {
             revert MISMATCH();
@@ -462,7 +461,7 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     /// @param _poolIds ids of the pools
     /// @param _datas encoded data unique to the allocation strategy for that pool
     function batchAllocate(uint256[] calldata _poolIds, bytes[] memory _datas) external {
-        uint numPools = _poolIds.length;
+        uint256 numPools = _poolIds.length;
         if (numPools != _datas.length) {
             revert MISMATCH();
         }
