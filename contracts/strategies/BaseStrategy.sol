@@ -14,7 +14,6 @@ abstract contract BaseStrategy is IStrategy, Transfer {
 
     Allo public immutable allo;
     uint256 public poolId;
-    bytes32 public identityId;
 
     /// ====================================
     /// ========== Constructor =============
