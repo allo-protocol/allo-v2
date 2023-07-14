@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import {BaseAllocationStrategy} from "../BaseAllocationStrategy.sol";
-import {Metadata} from "../../../core/libraries/Metadata.sol";
+import {Strategy} from "../../../Strategy.sol";
+import {Metadata} from "../../../../core/libraries/Metadata.sol";
 import {ReentrancyGuard} from "@openzeppelin/security/ReentrancyGuard.sol";
 
-abstract contract RFPAllocationStrategy is BaseAllocationStrategy, ReentrancyGuard {
+abstract contract RFPAllocation is Strategy, ReentrancyGuard {
     /// ======================
     /// ======= Errors =======
     /// ======================
@@ -30,8 +30,8 @@ abstract contract RFPAllocationStrategy is BaseAllocationStrategy, ReentrancyGua
         RecipientStatus recipientStatus;
     }
 
-    ///@notice recipientId -> PayoutSummary
-    mapping(address => PayoutSummary) public payoutSummaries;
+    ///@notice recipientId -> Payout
+    mapping(address => Payout) public payoutSummaries;
 
     /// @notice recipientId -> Recipient
     mapping(address => Recipient) public recipients;
@@ -119,16 +119,11 @@ abstract contract RFPAllocationStrategy is BaseAllocationStrategy, ReentrancyGua
     }
 
     /// @notice Get the payout summary for accepted recipient
-    function getPayout(address[] memory, bytes memory)
-        external
-        view
-        override
-        returns (PayoutSummary[] memory summaries)
-    {
-        summaries = new PayoutSummary[](1);
-        summaries[0] = PayoutSummary({
+    function getPayout(address[] memory, bytes memory) external view override returns (Payout[] memory payouts) {
+        payouts = new Payout[](1);
+        payouts[0] = Payout({
             payoutAddress: recipients[acceptedRecipientId].payoutAddress,
-            percentage: 1e18,
+            // percentage: 1e18,
             amount: recipients[acceptedRecipientId].proposalAmount
         });
     }

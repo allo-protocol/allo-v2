@@ -22,10 +22,9 @@ abstract contract Strategy is IStrategy {
     /// === Storage Variables ====
     /// ==========================
 
-    bytes32 public immutable STRATEGY_IDENTIFIER;
+    bytes32 internal immutable STRATEGY_IDENTIFIER;
     bytes32 internal ownerIdentityId;
-    Allo public immutable allo;
-
+    Allo internal immutable allo;
     uint256 internal poolId;
     bool public initialized;
 
@@ -65,7 +64,6 @@ abstract contract Strategy is IStrategy {
 
         initialized = true;
 
-        allo = Allo(msg.sender);
         ownerIdentityId = _ownerIdentityId;
         poolId = _poolId;
 
@@ -89,5 +87,37 @@ abstract contract Strategy is IStrategy {
             IERC20(_token).transfer(allo.treasury(), excessFunds);
             IERC20(_token).transfer(msg.sender, bounty);
         }
+    }
+
+    /// @notice Get the identity id
+    /// @return bytes32 The identity id
+    function getOwnerIdentityId() external view returns (bytes32) {
+        return ownerIdentityId;
+    }
+
+    /// @notice Get the pool id
+    /// @return uint256 The pool id
+    function getPoolId() external view returns (uint256) {
+        return poolId;
+    }
+
+    /// @return address The Allo address
+    function getAllo() external view returns (address) {
+        return address(allo);
+    }
+
+    /// @notice Returns the strategy identifier
+    function getStrategyIdentifier() external view returns (bytes32) {
+        return STRATEGY_IDENTIFIER;
+    }
+
+    /// ====================================
+    /// ======= Internal Functions =========
+    /// ====================================
+
+    /// @notice sets the strategy identifier
+    /// @param _strategyIdentifier the strategy identifier
+    function _setStrategyIdentifier(string memory _strategyIdentifier) internal {
+        STRATEGY_IDENTIFIER = keccak256(abi.encode(_strategyIdentifier));
     }
 }

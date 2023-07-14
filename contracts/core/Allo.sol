@@ -255,8 +255,8 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
         _strategy.initialize(_identityId, poolId, _initStrategyData);
 
         if (
-            _strategy.ownerIdentityId() != _identityId || _strategy.poolId() != poolId
-                || _strategy.allo() != address(this)
+            _strategy.getOwnerIdentityId() != _identityId || _strategy.getPoolId() != poolId
+                || _strategy.getAllo() != address(this)
         ) {
             revert MISMATCH();
         }
