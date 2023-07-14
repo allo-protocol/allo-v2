@@ -12,9 +12,9 @@ abstract contract BaseStrategy is IStrategy, Transfer {
     /// === Storage Variables ====
     /// ==========================
 
-    Allo private immutable allo;
-    uint256 private poolId;
-    string private strategyName;
+    Allo immutable allo;
+    uint256 poolId;
+    string strategyName;
 
     /// ====================================
     /// ========== Constructor =============
