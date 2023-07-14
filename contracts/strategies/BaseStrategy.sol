@@ -64,13 +64,14 @@ abstract contract BaseStrategy is IStrategy, Transfer {
 
     function skim(address _token) external virtual override {
         (,, address token, uint256 amount,,,) = allo.pools(poolId);
-        uint256 fundedBalance;
-        if (token == _token) {
-            fundedBalance = amount;
-        }
-        uint256 balance = IERC20(_token).balanceOf(address(this));
-        if (balance > fundedBalance) {
-            uint256 excessFunds = balance - fundedBalance;
+        uint256 balanceCapturedInPool = (token == _token) ? amount : 0;
+
+        uint256 balanceInStrategy = _token == address(0) ?
+            address(this).balance :
+            IERC20(_token).balanceOf(address(this));
+
+        if (balanceInContract > balanceCapturedInPool) {
+            uint256 excessFunds = balanceInStrategy - balanceCapturedInPool;
             uint256 bounty = (excessFunds * allo.feeSkirtingBounty()) / allo.FEE_DENOMINATOR();
             excessFunds -= bounty;
             _transferAmount(_token, allo.treasury(), excessFunds);
