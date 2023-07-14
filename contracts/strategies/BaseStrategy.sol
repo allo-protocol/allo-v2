@@ -70,7 +70,7 @@ abstract contract BaseStrategy is IStrategy, Transfer {
     /// @param _poolId Id of the pool
     /// @param _data The data to be decoded
     /// @dev This function is called by Allo.sol
-    function initialize(uint256 _poolId, bytes memory _data) external virtual onlyAllo {
+    function initialize(uint256 _poolId, bytes memory _data) public virtual onlyAllo {
         if (_poolId == 0) {
             revert BaseStrategy_INVALID_ADDRESS();
         }
