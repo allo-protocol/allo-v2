@@ -12,16 +12,18 @@ abstract contract BaseStrategy is IStrategy, Transfer {
     /// === Storage Variables ====
     /// ==========================
 
-    Allo public immutable allo;
-    uint256 public poolId;
+    Allo private immutable allo;
+    uint256 private poolId;
+    string private strategyName;
 
     /// ====================================
     /// ========== Constructor =============
     /// ====================================
 
     /// @param _allo Address of the Allo contract
-    constructor(address _allo) {
+    constructor(address _allo, string memory _name) {
         allo = Allo(_allo);
+        strategyName = _name;
     }
 
     /// ====================================
@@ -42,6 +44,22 @@ abstract contract BaseStrategy is IStrategy, Transfer {
             revert BaseStrategy_UNAUTHORIZED();
         }
         _;
+    }
+
+    /// ================================
+    /// =========== Views ==============
+    /// ================================
+
+    function getAllo() external view override returns (Allo) {
+        return allo;
+    }
+
+    function getPoolId() external view override returns (uint256) {
+        return poolId;
+    }
+
+    function getStrategyName() external view override returns (string memory) {
+        return strategyName;
     }
 
     /// ====================================

@@ -276,7 +276,7 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
         // @dev Initialization is expect to revert when invoked more than once
         _strategy.initialize(poolId, _initStrategyData);
 
-        if (_strategy.poolId() != poolId || address(_strategy.allo()) != address(this)) {
+        if (_strategy.getPoolId() != poolId || address(_strategy.getAllo()) != address(this)) {
             revert MISMATCH();
         }
 

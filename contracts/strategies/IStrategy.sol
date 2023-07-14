@@ -35,10 +35,18 @@ interface IStrategy {
     /// ======================
 
     /// @return Address of the Allo contract
-    function allo() external view returns (Allo);
+    function getAllo() external view returns (Allo);
 
     /// @return Pool ID for this strategy
-    function poolId() external view returns (uint256);
+    function getPoolId() external view returns (uint256);
+
+    /// @return the name of the strategy
+    function getStrategyName() external view returns (string memory);
+
+    /// @return Input the values you would send to distribute(), get the amounts each recipient in the array would receive
+    function getPayouts(address[] memory _recipientIds, bytes memory _data, address _sender)
+        external
+        returns (uint256[] memory);
 
     /// ======================
     /// ===== Functions ======
