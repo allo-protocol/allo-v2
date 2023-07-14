@@ -42,8 +42,8 @@ If the recipient is eligible, the strategy stores the application and programmat
 #### `allocate()`
 The admins of the pool manually assign allocations to recipients via the `allocate` function. Any pool admin can call `allocate()` on Allo.sol and pass in the amount of the pool to allocate to the specific recipient.
 
-#### `getPayout()`
+#### `getRecipientPayouts()`
 
-The pool admin can transfer an accepted proposal to the distribution process by calling the `getPayout` function. Any proposal marked as `accepted` is considered eligible to begin the distribution process. The proposal is recorded as eligible to receive their `amountRequested`.
+The pool admin can transfer an accepted proposal to the distribution process by calling the `getRecipientPayouts` function. Any proposal marked as `accepted` is considered eligible to begin the distribution process. The proposal is recorded as eligible to receive their `amountRequested`.
 
 ### Open questions

@@ -18,7 +18,7 @@ contract MockStrategy is Strategy {
 
     function allocate(bytes memory, address) external payable override {}
 
-    function getRecipientPayout(address[] memory, bytes memory) external view returns (Payout[] memory summaries) {}
+    function getRecipientPayouts(address[] memory, bytes memory) external view returns (Payout[] memory summaries) {}
 
     function distribute(address[] memory _recipientIds, bytes memory _data, address _sender) external override {}
 }

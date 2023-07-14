@@ -15,7 +15,7 @@ contract RFPSingleTransferStartegy is Strategy, RFPAllocation, SingleTransfer {
     function distribute(address[] memory, bytes memory, address _sender) external {
         (,, address token,,,,) = allo.pools(poolId);
 
-        Payout payouts = getPayout(acceptedRecipientId, token);
+        Payout payouts = getRecipientPayouts(acceptedRecipientId, token);
 
         SingleTransfer._distribute(token, acceptedRecipientId, payouts[0], _sender);
     }

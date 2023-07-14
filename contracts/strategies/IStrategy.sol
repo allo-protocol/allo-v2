@@ -42,7 +42,7 @@ interface IStrategy {
     function allocate(bytes memory _data, address _sender) external payable;
 
     // this will return the payout for recipients
-    function getRecipientPayout(address[] memory _recipientId, bytes memory _data)
+    function getRecipientPayouts(address[] memory _recipientId, bytes memory _data)
         external
         view
         returns (Payout[] memory summaries);

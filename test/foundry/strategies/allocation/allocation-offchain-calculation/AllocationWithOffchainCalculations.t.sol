@@ -64,7 +64,7 @@ contract AllocationWithOffchainCalculationsTest is Test {
 
     function testRevert_allocate_TRANSFER_FAILED() public {}
 
-    function test_getPayout() public {}
+    function test_getRecipientPayouts() public {}
 
     function test_reviewRecipients() public {}
 

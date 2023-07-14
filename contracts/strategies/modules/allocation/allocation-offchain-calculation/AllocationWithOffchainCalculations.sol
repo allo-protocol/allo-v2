@@ -239,7 +239,7 @@ contract AllocationWithOffchainCalculations is BaseAllocationStrategy, Transfer,
     /// @notice Retrieves recipient payout amount
     /// @param _recipientId recipientId array of the recipients
     /// @return summaries PayoutSummary array of the recipients
-    function getPayout(address[] memory _recipientId, bytes memory)
+    function getRecipientPayouts(address[] memory _recipientId, bytes memory)
         external
         view
         returns (PayoutSummary[] memory summaries)

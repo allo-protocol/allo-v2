@@ -75,7 +75,7 @@ abstract contract AllocationGating is BaseAllocationStrategy {
 
     /// @notice Get the payout summary for recipients
     /// @param _recipientId Array of recipient ids
-    function getPayout(address[] memory _recipientId, bytes memory)
+    function getRecipientPayouts(address[] memory _recipientId, bytes memory)
         external
         view
         override

@@ -119,7 +119,12 @@ abstract contract RFPAllocation is Strategy, ReentrancyGuard {
     }
 
     /// @notice Get the payout summary for accepted recipient
-    function getPayout(address[] memory, bytes memory) external view override returns (Payout[] memory payouts) {
+    function getRecipientPayouts(address[] memory, bytes memory)
+        external
+        view
+        override
+        returns (Payout[] memory payouts)
+    {
         payouts = new Payout[](1);
         payouts[0] = Payout({
             payoutAddress: recipients[acceptedRecipientId].payoutAddress,

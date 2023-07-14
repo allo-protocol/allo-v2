@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import {BaseAllocationStrategy} from "../BaseAllocationStrategy.sol";
+import {BaseAllocationStrategy} from "../Base.sol";
 import {SimpleProjectRegistry} from "./SimpleProjectRegistry.sol";
 
 abstract contract AltRegistryGating is BaseAllocationStrategy {
@@ -125,7 +125,7 @@ abstract contract AltRegistryGating is BaseAllocationStrategy {
 
     /// @notice Get the payout summary for recipients
     /// @param _recipientId Array of recipient ids
-    function getPayout(address[] memory _recipientId, bytes memory)
+    function getRecipientPayouts(address[] memory _recipientId, bytes memory)
         external
         view
         override
