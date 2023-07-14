@@ -138,7 +138,7 @@ contract NFTVoteWinnerTakeAll is BaseStrategy {
         }
 
         (,, address tokenToDistribute, uint256 amountToDistribute,,,) = allo.pools(poolId);
-        allo.decreasePoolFunding(poolId, amountToDistribute);
+        allo.decreasePoolTotalFunding(poolId, amountToDistribute);
         _transferAmount(tokenToDistribute, currentWinner, amountToDistribute);
     }
 }
