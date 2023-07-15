@@ -110,6 +110,8 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
 
     event PoolClosed(uint256 indexed poolId);
 
+    event PoolTotalFundingDecreased(uint256 indexed poolId, uint256 prevAmount, uint256 newAmount);
+
     event TreasuryUpdated(address treasury);
 
     event FeePercentageUpdated(uint256 feePercentage);
@@ -424,6 +426,17 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
         uint256 amount =
             _token == address(0) ? address(this).balance : IERC20Upgradeable(_token).balanceOf(address(this));
         _transferAmount(_token, _recipient, amount);
+    }
+
+    function decreasePoolTotalFunding(uint256 _poolId, uint256 _amountToDecrease) external {
+        Pool storage pool = pools[_poolId];
+        if (address(pool.strategy) != msg.sender) {
+            revert UNAUTHORIZED();
+        }
+        uint256 oldAmount = pool.amount;
+        uint256 newAmount = oldAmount - _amountToDecrease;
+        pool.amount = newAmount;
+        emit PoolTotalFundingDecreased(_poolId, oldAmount, newAmount);
     }
 
     /// ====================================
