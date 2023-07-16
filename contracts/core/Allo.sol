@@ -103,8 +103,6 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
 
     event BaseFeePaid(uint256 indexed poolId, uint256 amount);
 
-    event PoolClosed(uint256 indexed poolId);
-
     event PoolTotalFundingDecreased(uint256 indexed poolId, uint256 prevAmount, uint256 newAmount);
 
     event TreasuryUpdated(address treasury);
@@ -130,20 +128,15 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     /// @param _feePercentage The fee percentage
     /// @param _baseFee The base fee
     function initialize(address _registry, address payable _treasury, uint256 _feePercentage, uint256 _baseFee)
-        public
+        external
         reinitializer(1)
     {
         _initializeOwner(msg.sender);
 
-        registry = Registry(_registry);
-        treasury = _treasury;
-        feePercentage = _feePercentage;
-        baseFee = _baseFee;
-
-        emit RegistryUpdated(_registry);
-        emit TreasuryUpdated(_treasury);
-        emit FeePercentageUpdated(_feePercentage);
-        emit BaseFeeUpdated(_baseFee);
+        _updateRegistry(_registry);
+        _updateTreasury(_treasury);
+        _updateFeePercentage(_feePercentage);
+        _updateBaseFee(_baseFee);
     }
 
     /// ====================================
@@ -317,42 +310,28 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     /// @param _registry The new registry address
     /// @dev Only callable by the owner if the current registry cannot be used
     function updateRegistry(address _registry) external onlyOwner {
-        if (_registry == address(0)) {
-            revert ZERO_ADDRESS();
-        }
-        registry = Registry(_registry);
-        emit RegistryUpdated(_registry);
+        _updateRegistry(_registry);
     }
 
     /// @notice Updates the treasury address
     /// @param _treasury The new treasury address
     /// @dev Only callable by the owner
     function updateTreasury(address payable _treasury) external onlyOwner {
-        if (_treasury == address(0)) {
-            revert ZERO_ADDRESS();
-        }
-        treasury = _treasury;
-        emit TreasuryUpdated(treasury);
+        _updateTreasury(_treasury);
     }
 
     /// @notice Updates the fee percentage
     /// @param _feePercentage The new fee
     /// @dev Only callable by the owner
-    function updateFee(uint256 _feePercentage) external onlyOwner {
-        if (_feePercentage > 1e18) {
-            revert INVALID_FEE();
-        }
-        feePercentage = _feePercentage;
-
-        emit FeePercentageUpdated(feePercentage);
+    function updateFeePercentage(uint256 _feePercentage) external onlyOwner {
+        _updateFeePercentage(_feePercentage);
     }
 
     /// @notice Updates the base fee
     /// @param _baseFee The new base fee
     /// @dev Only callable by the owner
     function updateBaseFee(uint256 _baseFee) external onlyOwner {
-        baseFee = _baseFee;
-        emit BaseFeeUpdated(baseFee);
+        _updateBaseFee(_baseFee);
     }
 
     /// @notice Add a strategy to the allowlist
@@ -541,5 +520,47 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     /// @return bool
     function _isPoolManager(uint256 _poolId, address _address) internal view returns (bool) {
         return hasRole(pools[_poolId].managerRole, _address);
+    }
+
+        /// @notice Updates the registry address
+    /// @param _registry The new registry address
+    /// @dev Only callable by the owner if the current registry cannot be used
+    function _updateRegistry(address _registry) internal {
+        if (_registry == address(0)) {
+            revert ZERO_ADDRESS();
+        }
+        registry = Registry(_registry);
+        emit RegistryUpdated(_registry);
+    }
+
+    /// @notice Updates the treasury address
+    /// @param _treasury The new treasury address
+    /// @dev Only callable by the owner
+    function _updateTreasury(address payable _treasury) internal {
+        if (_treasury == address(0)) {
+            revert ZERO_ADDRESS();
+        }
+        treasury = _treasury;
+        emit TreasuryUpdated(treasury);
+    }
+
+    /// @notice Updates the fee percentage
+    /// @param _feePercentage The new fee
+    /// @dev Only callable by the owner
+    function _updateFeePercentage(uint256 _feePercentage) internal {
+        if (_feePercentage > 1e18) {
+            revert INVALID_FEE();
+        }
+        feePercentage = _feePercentage;
+
+        emit FeePercentageUpdated(feePercentage);
+    }
+
+    /// @notice Updates the base fee
+    /// @param _baseFee The new base fee
+    /// @dev Only callable by the owner
+    function _updateBaseFee(uint256 _baseFee) internal {
+        baseFee = _baseFee;
+        emit BaseFeeUpdated(baseFee);
     }
 }
