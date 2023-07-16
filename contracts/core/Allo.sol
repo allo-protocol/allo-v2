@@ -14,17 +14,17 @@ import {IStrategy} from "../strategies/IStrategy.sol";
 import {Registry} from "./Registry.sol";
 
 /**
- *          ___            ___       ___       ___
- *         /\  \          /\__\     /\__\     /\  \
- *        /::\  \        /:/  /    /:/  /    /::\  \
- *       /:/\:\  \      /:/  /    /:/  /    /:/\:\  \
- *      /::\~\:\  \    /:/  /    /:/  /    /:/  \:\  \
- *     /:/\:\ \:\__\  /:/__/    /:/__/    /:/__/ \:\__\
- *     \/__\:\/:/  /  \:\  \    \:\  \    \:\  \ /:/  /
- *          \::/  /    \:\  \    \:\  \    \:\  /:/  /
- *          /:/  /      \:\  \    \:\  \    \:\/:/  /
- *         /:/  /        \:\__\    \:\__\    \::/  /
- *         \/__/          \/__/     \/__/     \/__/
+ *          ___            ___        ___        ___
+ *         /\  \          /\__\      /\__\      /\  \
+ *        /::\  \        /:/  /     /:/  /     /::\  \
+ *       /:/\:\  \      /:/  /     /:/  /     /:/\:\  \
+ *      /::\~\:\  \    /:/  /     /:/  /     /:/  \:\  \
+ *     /:/\:\ \:\__\  /:/__/     /:/__/     /:/__/ \:\__\
+ *     \/__\:\/:/  /  \:\  \     \:\  \     \:\  \ /:/  /
+ *          \::/  /    \:\  \     \:\  \     \:\  /:/  /
+ *          /:/  /      \:\  \     \:\  \     \:\/:/  /
+ *         /:/  /        \:\__\     \:\__\     \::/  /
+ *         \/__/          \/__/      \/__/      \/__/
  */
 
 /// @title Allo
@@ -513,7 +513,7 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
 
         Pool storage pool = pools[_poolId];
 
-        if(pool.token != _token) {
+        if (pool.token != _token) {
             revert INVALID_TOKEN();
         }
 
@@ -549,7 +549,7 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     /// @param _address The address to check
     /// @return bool
     function _isPoolManager(uint256 _poolId, address _address) internal view returns (bool) {
-        return hasRole(pools[_poolId].managerRole, _address);
+        return hasRole(pools[_poolId].managerRole, _address) || _isPoolAdmin(_poolId, _address);
     }
 
     /// @notice Updates the registry address
