@@ -1,11 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import {ERC721} from "@solady/tokens/ERC721.sol";
-import {ERC20} from "@solady/tokens/ERC20.sol";
-import {Allo} from "../core/Allo.sol";
+import {IAllo} from "../core/IAllo.sol";
 import {BaseStrategy} from "./BaseStrategy.sol";
-import {Transfer} from "../core/libraries/Transfer.sol";
+import {ERC721} from "@solady/tokens/ERC721.sol";
 
 contract NFTVoteWinnerTakeAll is BaseStrategy {
     /// ================================
@@ -17,7 +15,6 @@ contract NFTVoteWinnerTakeAll is BaseStrategy {
     ERC721 nft;
     address currentWinner;
 
-    address[] recipients;
     mapping(address => bool) public isRecipient;
     mapping(uint256 => bool) public hasAllocated;
     mapping(address => uint256) public votes;
@@ -31,6 +28,7 @@ contract NFTVoteWinnerTakeAll is BaseStrategy {
     error AlreadyAllocated();
     error NotOwnerOfNFT();
     error AllocationHasntEnded();
+    error ZERO_AMOUNT();
 
     /// ===============================
     /// ======== Constructor ==========
@@ -67,17 +65,19 @@ contract NFTVoteWinnerTakeAll is BaseStrategy {
         payable
         onlyDuringAllocationPeriod
         onlyAllo
+        onlyPoolManager(_sender)
         returns (address)
     {
         address[] memory newRecipients = abi.decode(_data, (address[]));
 
-        for (uint256 i; i < newRecipients.length;) {
+        uint256 numRecipientsLength = newRecipients.length;
+        for (uint256 i; i < numRecipientsLength;) {
             isRecipient[newRecipients[i]] = true;
-            recipients.push(newRecipients[i]);
             unchecked {
                 ++i;
             }
         }
+        return address(0);
     }
 
     function getRecipientStatus(address _recipientId) public view returns (RecipientStatus) {
@@ -113,15 +113,19 @@ contract NFTVoteWinnerTakeAll is BaseStrategy {
         }
     }
 
-    function getPayouts(address[] memory _recipientIds, bytes memory _data, address _sender)
+    function getPayouts(address[] memory _recipientIds, bytes memory, address)
         external
         view
         returns (uint256[] memory)
     {
-        uint256[] memory payouts = new uint[](_recipientIds.length);
-        for (uint256 i; i < _recipientIds.length;) {
+        uint256 recipientLength = _recipientIds.length;
+        uint256[] memory payouts = new uint[](recipientLength);
+
+        uint256 poolAmount = allo.getPool(poolId).amount;
+        for (uint256 i; i < recipientLength;) {
             if (_recipientIds[i] == currentWinner) {
-                (,,, payouts[i],,,) = allo.pools(poolId);
+                payouts[i] = poolAmount;
+                poolAmount = 0; // Ensure the poolAmount is not double assigned
             } else {
                 payouts[i] = 0;
             }
@@ -132,13 +136,19 @@ contract NFTVoteWinnerTakeAll is BaseStrategy {
         return payouts;
     }
 
-    function distribute(address[] memory _recipientIds, bytes memory _data, address _sender) external onlyAllo {
+    function distribute(address[] memory, bytes memory, address) external onlyAllo {
         if (block.timestamp < endTime) {
             revert AllocationHasntEnded();
         }
 
-        (,, address tokenToDistribute, uint256 amountToDistribute,,,) = allo.pools(poolId);
+        IAllo.Pool memory pool = allo.getPool(poolId);
+        uint256 amountToDistribute = pool.amount;
+
+        if (amountToDistribute == 0) {
+            revert ZERO_AMOUNT();
+        }
+
         allo.decreasePoolTotalFunding(poolId, amountToDistribute);
-        _transferAmount(tokenToDistribute, currentWinner, amountToDistribute);
+        _transferAmount(pool.token, currentWinner, amountToDistribute);
     }
 }
