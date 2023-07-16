@@ -2,6 +2,7 @@ pragma solidity ^0.8.19;
 
 import "forge-std/Test.sol";
 import {Registry} from "../../../contracts/core/Registry.sol";
+import {IRegistry} from "../../../contracts/core/IRegistry.sol";
 import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
 import {TestUtilities} from "../utils/TestUtilities.sol";
 
@@ -74,7 +75,7 @@ contract RegistryTest is Test {
         // create identity
         registry.createIdentity(nonce, name, metadata, owner, members);
 
-        vm.expectRevert(Registry.NONCE_NOT_AVAILABLE.selector);
+        vm.expectRevert(IRegistry.NONCE_NOT_AVAILABLE.selector);
 
         // create identity with same index and name
         registry.createIdentity(nonce, name, metadata, owner, members);
@@ -102,7 +103,7 @@ contract RegistryTest is Test {
         bytes32 invalidIdentityId = TestUtilities._testUtilGenerateIdentityId(nonce, address(this));
         string memory newName = "New Name";
 
-        vm.expectRevert(Registry.UNAUTHORIZED.selector);
+        vm.expectRevert(IRegistry.UNAUTHORIZED.selector);
 
         vm.prank(owner);
         registry.updateIdentityName(invalidIdentityId, newName);
@@ -111,7 +112,7 @@ contract RegistryTest is Test {
     function testRevert_updateIdentityName_UNAUTHORIZED() public {
         bytes32 newIdentityId = registry.createIdentity(nonce, name, metadata, owner, members);
 
-        vm.expectRevert(Registry.UNAUTHORIZED.selector);
+        vm.expectRevert(IRegistry.UNAUTHORIZED.selector);
 
         string memory newName = "New Name";
 
@@ -122,7 +123,7 @@ contract RegistryTest is Test {
     function testRevert_updateIdentityName_UNAUTHORIZED_byMember() public {
         bytes32 newIdentityId = registry.createIdentity(nonce, name, metadata, owner, members);
 
-        vm.expectRevert(Registry.UNAUTHORIZED.selector);
+        vm.expectRevert(IRegistry.UNAUTHORIZED.selector);
 
         string memory newName = "New Name";
 
@@ -147,7 +148,7 @@ contract RegistryTest is Test {
     }
 
     function test_updateIdentityMetadataForInvalidId() public {
-        vm.expectRevert(Registry.UNAUTHORIZED.selector);
+        vm.expectRevert(IRegistry.UNAUTHORIZED.selector);
         bytes32 invalidIdentityId = TestUtilities._testUtilGenerateIdentityId(nonce, address(this));
         Metadata memory newMetadata = Metadata({protocol: 1, pointer: "new metadata"});
 
@@ -160,7 +161,7 @@ contract RegistryTest is Test {
 
         Metadata memory newMetadata = Metadata({protocol: 1, pointer: "new metadata"});
 
-        vm.expectRevert(Registry.UNAUTHORIZED.selector);
+        vm.expectRevert(IRegistry.UNAUTHORIZED.selector);
 
         vm.prank(notAMember);
         registry.updateIdentityMetadata(newIdentityId, newMetadata);
@@ -206,7 +207,7 @@ contract RegistryTest is Test {
         bytes32 newIdentityId = registry.createIdentity(nonce, name, metadata, owner, new address[](0));
 
         vm.prank(member1);
-        vm.expectRevert(Registry.UNAUTHORIZED.selector);
+        vm.expectRevert(IRegistry.UNAUTHORIZED.selector);
         registry.addMembers(newIdentityId, members);
     }
 
@@ -227,7 +228,7 @@ contract RegistryTest is Test {
         bytes32 newIdentityId = registry.createIdentity(nonce, name, metadata, owner, new address[](0));
 
         vm.prank(member1);
-        vm.expectRevert(Registry.UNAUTHORIZED.selector);
+        vm.expectRevert(IRegistry.UNAUTHORIZED.selector);
         registry.removeMembers(newIdentityId, members);
     }
 
@@ -248,7 +249,7 @@ contract RegistryTest is Test {
         bytes32 newIdentityId = registry.createIdentity(nonce, name, metadata, owner, new address[](0));
 
         vm.prank(member1);
-        vm.expectRevert(Registry.UNAUTHORIZED.selector);
+        vm.expectRevert(IRegistry.UNAUTHORIZED.selector);
         registry.updateIdentityPendingOwner(newIdentityId, notAMember);
     }
 
@@ -281,7 +282,7 @@ contract RegistryTest is Test {
         registry.updateIdentityPendingOwner(newIdentityId, notAMember);
 
         vm.prank(owner);
-        vm.expectRevert(Registry.NOT_PENDING_OWNER.selector);
+        vm.expectRevert(IRegistry.NOT_PENDING_OWNER.selector);
         registry.acceptIdentityOwnership(newIdentityId);
     }
 }
