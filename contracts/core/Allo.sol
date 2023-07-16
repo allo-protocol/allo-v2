@@ -3,7 +3,7 @@ pragma solidity 0.8.19;
 
 import "@openzeppelin-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import {AccessControl} from "@openzeppelin/access/AccessControl.sol";
+import "@openzeppelin/access/AccessControl.sol";
 
 import "@solady/auth/Ownable.sol";
 
@@ -11,7 +11,7 @@ import {Metadata} from "./libraries/Metadata.sol";
 import {Clone} from "./libraries/Clone.sol";
 import {Transfer} from "./libraries/Transfer.sol";
 import {IStrategy} from "../strategies/IStrategy.sol";
-import {Registry} from "./Registry.sol";
+import {IRegistry} from "./IRegistry.sol";
 
 /**
  *          ___            ___        ___        ___
@@ -74,7 +74,7 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     address payable public treasury;
 
     /// @notice Registry of pool creators
-    Registry public registry;
+    IRegistry public registry;
 
     /// @notice msg.sender -> nonce for cloning strategies
     mapping(address => uint256) private _nonces;
@@ -558,7 +558,7 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
         if (_registry == address(0)) {
             revert ZERO_ADDRESS();
         }
-        registry = Registry(_registry);
+        registry = IRegistry(_registry);
         emit RegistryUpdated(_registry);
     }
 
