@@ -58,6 +58,7 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     /// === Storage Variables ====
     /// ==========================
 
+    address constant NATIVE = address(0);
     /// @notice Fee percentage
     /// @dev 1e18 = 100%, 1e17 = 10%, 1e16 = 1%, 1e15 = 0.1%
     uint256 public feePercentage;
@@ -131,16 +132,21 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     /// @param _treasury The address of the treasury
     /// @param _feePercentage The fee percentage
     /// @param _baseFee The base fee
-    function initialize(address _registry, address payable _treasury, uint256 _feePercentage, uint256 _baseFee)
-        external
-        reinitializer(1)
-    {
+    /// @param _feeSkirtingBountyPercentage The fee skirting bounty percentage
+    function initialize(
+        address _registry,
+        address payable _treasury,
+        uint256 _feePercentage,
+        uint256 _baseFee,
+        uint256 _feeSkirtingBountyPercentage
+    ) external reinitializer(1) {
         _initializeOwner(msg.sender);
 
         _updateRegistry(_registry);
         _updateTreasury(_treasury);
         _updateFeePercentage(_feePercentage);
         _updateBaseFee(_baseFee);
+        _updateFeeSkirtingBountyPercentage(_feeSkirtingBountyPercentage);
     }
 
     /// ====================================
@@ -332,8 +338,7 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     /// @param _token The address of the token to transfer
     /// @param _recipient The address of the recipient
     function recoverFunds(address _token, address _recipient) external onlyOwner {
-        uint256 amount =
-            _token == address(0) ? address(this).balance : IERC20Upgradeable(_token).balanceOf(address(this));
+        uint256 amount = _token == NATIVE ? address(this).balance : IERC20Upgradeable(_token).balanceOf(address(this));
         _transferAmount(_token, _recipient, amount);
     }
 
@@ -472,7 +477,13 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
         }
 
         if (baseFee > 0) {
-            _transferAmount(address(0), treasury, baseFee);
+            // To prevent paying the baseFee from the Allo contract's balance
+            // If _token is NATIVE, then baseFee + _amount should be >= than msg.value.
+            // If _token is not NATIVE, then baseFee should be >= than msg.value.
+            if ((_token == NATIVE && (baseFee + _amount >= msg.value)) || (_token != NATIVE && baseFee >= msg.value)) {
+                revert NOT_ENOUGH_FUNDS();
+            }
+            _transferAmount(NATIVE, treasury, baseFee);
             emit BaseFeePaid(poolId, baseFee);
         }
 
@@ -501,7 +512,7 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
 
         if (feePercentage > 0) {
             feeAmount = (_amount * feePercentage) / FEE_DENOMINATOR;
-            amountAfterFee = _amount - feeAmount;
+            amountAfterFee -= feeAmount;
 
             _transferAmountFrom(_token, TransferData({from: msg.sender, to: treasury, amount: feeAmount}));
         }
