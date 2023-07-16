@@ -40,16 +40,17 @@ interface IStrategy {
     /// @return Pool ID for this strategy
     function getPoolId() external view returns (uint256);
 
-    /// @return the name of the strategy
+    /// @return The name of the strategy
     function getStrategyName() external view returns (string memory);
 
-    /// @return Input the values you would send to distribute(), get the amounts each recipient in the array would receive
-    function getPayouts(address[] memory _recipientIds, bytes memory _data, address _sender)
-        external
-        returns (uint256[] memory);
-
-    // simply returns whether a voter is valid or not, will usually be true for all
+    // simply returns whether a allocator is valid or not, will usually be true for all
     function isValidAllocator(address _allocator) external view returns (bool);
+
+    // simply returns the status of a recipient
+    // probably tracked in a mapping, but will depend on the implementation
+    // for example, the OpenSelfRegistration only maps users to bool, and then assumes Accepted for those
+    // since there is no need for Pending or Rejected
+    function getRecipientStatus(address _recipientId) external view returns (RecipientStatus);
 
     /// ======================
     /// ===== Functions ======
@@ -63,19 +64,18 @@ interface IStrategy {
     // then checking the balance of the contract, and paying the difference
     function skim(address token) external;
 
+    /// @return Input the values you would send to distribute(), get the amounts each recipient in the array would receive
+    function getPayouts(address[] memory _recipientIds, bytes memory _data, address _sender)
+        external
+        returns (uint256[] memory);
+
     // this is called via allo.sol to register recipients
     // it can change their status all the way to Accepted, or to Pending if there are more steps
     // if there are more steps, additional functions should be added to allow the owner to check
     // this could also check attestations directly and then Accept
     function registerRecipients(bytes memory _data, address _sender) external payable returns (address);
 
-    // simply returns the status of a recipient
-    // probably tracked in a mapping, but will depend on the implementation
-    // for example, the OpenSelfRegistration only maps users to bool, and then assumes Accepted for those
-    // since there is no need for Pending or Rejected
-    function getRecipientStatus(address _recipientId) external view returns (RecipientStatus);
-
-    // only called via allo.sol by users to allocate votes to a recipient
+    // only called via allo.sol by users to allocate to a recipient
     // this will update some data in this contract to store votes, etc.
     function allocate(bytes memory _data, address _sender) external payable;
 
