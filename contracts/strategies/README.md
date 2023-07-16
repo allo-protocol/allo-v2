@@ -15,6 +15,20 @@ Provide a brief overview of the strategy and its purpose. Describe the high-leve
 
 ## General Specifications
 
+### Recipient Eligibility Logic
+
+Explain the logic for determining the eligibility of a recipient within the strategy. Specify any custom functions or conditions used to verify if a recipient is eligible to register.
+
+#### Questions to answer
+
+1. What criteria determine the eligibility of a recipient to register in this strategy? Are there any specific requirements or conditions?
+2. How does a recipient identify themselves? Is it through an address like msg.sender, do they need an identity registered at the `Registry` contract, or another mechanism? If through the Registry, can the pool creator set a custom registry?
+3. Can recipients register themselves or do they require approval from a pool manager or admin?
+4. Are there any additional custom functions or conditions for verifying recipient eligibility?
+5. Are there any specific considerations or requirements related to recipient registration, such as providing additional information or meeting certain criteria?
+6. How does the strategy handle ineligible registrations? Are they automatically rejected, or is there a specific process in place?
+7. Are there any limits on the number of recipients that can be registered? If so, what are those limits and how are they enforced?
+
 ### Register Recipient Logic
 
 Describe the logic for registering recipients within the strategy. Explain the recipient status workflow, including the possible statuses (e.g., `None`, `Pending`, `Accepted`, `Rejected`) and the conditions under which the status changes. If additional functions are added to check or modify recipient status, mention them here.
@@ -25,13 +39,12 @@ Describe the logic for registering recipients within the strategy. Explain the r
 2. What happens in case of a second registration, either in the case of a single registration or multiple registrations?
 3. Can the address that receives the fund need to be different from the recipient's identity?
 4. Which address is returned by `registerRecipient` and represents the `receipientId`?
-5. How does a recipient identify themselves? Is it through an address like msg.sender, do they need an identity registered at the `Registry` contract, or another mechanism? If through the Registry, can the pool creator set a custom registry?
-6. Does the pool manager need to approve the registration, or is it automatically approved? If automatically, How? Describe in detail.
-7. What additional data is needed and passed during the registration process, apart from the recipient's address?
-8. Is the `registerRecipient` function accessible to anyone, or is it restricted to specific roles or addresses?
-9. Are there any specific conditions under which the `registerRecipient` function can or cannot be called?
-10. What steps are involved in changing the recipient's status from one state to another?
-11. Are there any additional functions available to check or modify the recipient's status?
+5. Does the pool manager need to approve the registration, or is it automatically approved? If automatically, How? Describe in detail.
+6. What additional data is needed and passed during the registration process, apart from the recipient's address?
+7. Is the `registerRecipient` function accessible to anyone, or is it restricted to specific roles or addresses?
+8. Are there any specific conditions under which the `registerRecipient` function can or cannot be called?
+9. What steps are involved in changing the recipient's status from one state to another?
+10. Are there any additional functions available to check or modify the recipient's status?
 
 ### Allocator Eligibility Logic
 
