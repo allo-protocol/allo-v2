@@ -39,6 +39,7 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     error MISMATCH();
     error ZERO_ADDRESS();
     error INVALID_FEE();
+    error INVALID_TOKEN();
 
     /// @notice Struct to hold details of an Pool
     struct Pool {
@@ -510,6 +511,12 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
         uint256 feeAmount = 0;
         uint256 amountAfterFee = _amount;
 
+        Pool storage pool = pools[_poolId];
+
+        if(pool.token != _token) {
+            revert INVALID_TOKEN();
+        }
+
         if (feePercentage > 0) {
             feeAmount = (_amount * feePercentage) / FEE_DENOMINATOR;
             amountAfterFee -= feeAmount;
@@ -518,7 +525,7 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
         }
 
         _transferAmountFrom(_token, TransferData({from: msg.sender, to: address(_strategy), amount: amountAfterFee}));
-        pools[_poolId].amount += amountAfterFee;
+        pool.amount += amountAfterFee;
 
         emit PoolFunded(_poolId, amountAfterFee, feeAmount);
     }
