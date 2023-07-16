@@ -3,7 +3,6 @@ pragma solidity 0.8.19;
 
 import "@openzeppelin-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import "@openzeppelin-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import {AccessControl} from "@openzeppelin/access/AccessControl.sol";
 
 import "@solady/auth/Ownable.sol";
@@ -15,24 +14,23 @@ import {IStrategy} from "../strategies/IStrategy.sol";
 import {Registry} from "./Registry.sol";
 
 /**
- *          ___           ___       ___       ___
- *         /\  \         /\__\     /\__\     /\  \
- *        /::\  \       /:/  /    /:/  /    /::\  \
- *       /:/\:\  \     /:/  /    /:/  /    /:/\:\  \
- *      /::\~\:\  \   /:/  /    /:/  /    /:/  \:\  \
- *     /:/\:\ \:\__\ /:/__/    /:/__/    /:/__/ \:\__\
- *     \/__\:\/:/  / \:\  \    \:\  \    \:\  \ /:/  /
- *          \::/  /   \:\  \    \:\  \    \:\  /:/  /
- *          /:/  /     \:\  \    \:\  \    \:\/:/  /
- *         /:/  /       \:\__\    \:\__\    \::/  /
- *         \/__/         \/__/     \/__/     \/__/
+ *          ___            ___       ___       ___
+ *         /\  \          /\__\     /\__\     /\  \
+ *        /::\  \        /:/  /    /:/  /    /::\  \
+ *       /:/\:\  \      /:/  /    /:/  /    /:/\:\  \
+ *      /::\~\:\  \    /:/  /    /:/  /    /:/  \:\  \
+ *     /:/\:\ \:\__\  /:/__/    /:/__/    /:/__/ \:\__\
+ *     \/__\:\/:/  /  \:\  \    \:\  \    \:\  \ /:/  /
+ *          \::/  /    \:\  \    \:\  \    \:\  /:/  /
+ *          /:/  /      \:\  \    \:\  \    \:\/:/  /
+ *         /:/  /        \:\__\    \:\__\    \::/  /
+ *         \/__/          \/__/     \/__/     \/__/
  */
 
 /// @title Allo
 /// @notice The Allo contract
 /// @author allo-team
 contract Allo is Transfer, Initializable, Ownable, AccessControl {
-    using SafeERC20Upgradeable for IERC20Upgradeable;
 
     /// @notice Custom errors
     error UNAUTHORIZED();
@@ -352,6 +350,14 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
         emit FeePercentageUpdated(feePercentage);
     }
 
+    /// @notice Updates the base fee
+    /// @param _baseFee The new base fee
+    /// @dev Only callable by the owner
+    function updateBaseFee(uint256 _baseFee) external onlyOwner {
+        baseFee = _baseFee;
+        emit BaseFeeUpdated(baseFee);
+    }
+
     /// @notice Add a strategy to the allowlist
     /// @param _strategy The address of the strategy
     /// @dev Only callable by the owner
@@ -369,14 +375,6 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     function removeFromApprovedStrategies(address _strategy) external onlyOwner {
         approvedStrategies[_strategy] = false;
         emit StrategyRemoved(_strategy);
-    }
-
-    /// @notice Updates the base fee
-    /// @param _baseFee The new base fee
-    /// @dev Only callable by the owner
-    function updateBaseFee(uint256 _baseFee) external onlyOwner {
-        baseFee = _baseFee;
-        emit BaseFeeUpdated(baseFee);
     }
 
     /// @notice Checks if the address is a pool admin
