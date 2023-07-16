@@ -40,8 +40,8 @@ interface IStrategy {
     /// @return Pool ID for this strategy
     function getPoolId() external view returns (uint256);
 
-    /// @return The name of the strategy
-    function getStrategyName() external view returns (string memory);
+    /// @return The id of the strategy
+    function getStrategyId() external view returns (bytes32);
 
     // simply returns whether a allocator is valid or not, will usually be true for all
     function isValidAllocator(address _allocator) external view returns (bool);

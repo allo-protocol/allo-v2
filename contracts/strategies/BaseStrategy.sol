@@ -14,7 +14,7 @@ abstract contract BaseStrategy is IStrategy, Transfer {
 
     Allo internal immutable allo;
     uint256 internal poolId;
-    string internal strategyName;
+    bytes32 internal strategyId;
 
     /// ====================================
     /// ========== Constructor =============
@@ -23,7 +23,7 @@ abstract contract BaseStrategy is IStrategy, Transfer {
     /// @param _allo Address of the Allo contract
     constructor(address _allo, string memory _name) {
         allo = Allo(_allo);
-        strategyName = _name;
+        strategyId = keccak256(abi.encode(_name));
     }
 
     /// ====================================
@@ -58,8 +58,8 @@ abstract contract BaseStrategy is IStrategy, Transfer {
         return poolId;
     }
 
-    function getStrategyName() external view override returns (string memory) {
-        return strategyName;
+    function getStrategyId() external view override returns (bytes32) {
+        return strategyId;
     }
 
     /// ====================================
@@ -78,6 +78,7 @@ abstract contract BaseStrategy is IStrategy, Transfer {
             revert BaseStrategy_STRATEGY_ALREADY_INITIALIZED();
         }
         poolId = _poolId;
+        _data; // Silence unused parameter warning: _data
     }
 
     function skim(address _token) external virtual override {
