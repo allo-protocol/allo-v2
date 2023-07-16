@@ -83,6 +83,9 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     /// @notice Strategy -> bool
     mapping(address => bool) public approvedStrategies;
 
+    /// @notice Reward for catching fee skirting (1e18 = 100%)
+    uint256 public feeSkirtingBountyPercentage;
+
     /// ======================
     /// ======= Events =======
     /// ======================
@@ -115,6 +118,8 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     event StrategyApproved(address strategy);
 
     event StrategyRemoved(address strategy);
+
+    event FeeSkirtingBountyPercentageUpdated(uint256 feeSkirtingBountyPercentage);
 
     /// ====================================
     /// =========== Intializer =============
@@ -255,6 +260,13 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     /// @dev Only callable by the owner
     function updateBaseFee(uint256 _baseFee) external onlyOwner {
         _updateBaseFee(_baseFee);
+    }
+
+    /// @notice Updates the feeSkirtingBountyPercentage
+    /// @param _feeSkirtingBountyPercentage The new feeSkirtingBountyPercentage
+    /// @dev Only callable by the owner
+    function updateFeeSkirtingBountyPercentage(uint256 _feeSkirtingBountyPercentage) external onlyOwner {
+        _updateFeeSkirtingBountyPercentage(_feeSkirtingBountyPercentage);
     }
 
     /// @notice Add a strategy to the allowlist
@@ -524,7 +536,6 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
 
     /// @notice Updates the registry address
     /// @param _registry The new registry address
-    /// @dev Only callable by the owner if the current registry cannot be used
     function _updateRegistry(address _registry) internal {
         if (_registry == address(0)) {
             revert ZERO_ADDRESS();
@@ -535,7 +546,6 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
 
     /// @notice Updates the treasury address
     /// @param _treasury The new treasury address
-    /// @dev Only callable by the owner
     function _updateTreasury(address payable _treasury) internal {
         if (_treasury == address(0)) {
             revert ZERO_ADDRESS();
@@ -546,7 +556,6 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
 
     /// @notice Updates the fee percentage
     /// @param _feePercentage The new fee
-    /// @dev Only callable by the owner
     function _updateFeePercentage(uint256 _feePercentage) internal {
         if (_feePercentage > 1e18) {
             revert INVALID_FEE();
@@ -558,9 +567,19 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
 
     /// @notice Updates the base fee
     /// @param _baseFee The new base fee
-    /// @dev Only callable by the owner
     function _updateBaseFee(uint256 _baseFee) internal {
         baseFee = _baseFee;
         emit BaseFeeUpdated(baseFee);
+    }
+
+    /// @notice Updates the feeSkirtingBountyPercentage
+    /// @param _feeSkirtingBountyPercentage The new feeSkirtingBountyPercentage
+    function _updateFeeSkirtingBountyPercentage(uint256 _feeSkirtingBountyPercentage) internal {
+        if (_feeSkirtingBountyPercentage > 1e18) {
+            revert INVALID_FEE();
+        }
+        feeSkirtingBountyPercentage = _feeSkirtingBountyPercentage;
+
+        emit FeeSkirtingBountyPercentageUpdated(feeSkirtingBountyPercentage);
     }
 }
