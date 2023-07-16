@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
+import "./IStrategy.sol";
+
 import {ERC20} from "@openzeppelin/token/ERC20/ERC20.sol";
 import {IERC20} from "@openzeppelin/token/ERC20/IERC20.sol";
-import {Allo} from "../core/Allo.sol";
-import {IStrategy} from "./IStrategy.sol";
 import {Transfer} from "../core/libraries/Transfer.sol";
 
 abstract contract BaseStrategy is IStrategy, Transfer {
@@ -12,7 +12,7 @@ abstract contract BaseStrategy is IStrategy, Transfer {
     /// === Storage Variables ====
     /// ==========================
 
-    Allo internal immutable allo;
+    IAllo internal immutable allo;
     uint256 internal poolId;
     bytes32 internal strategyId;
 
@@ -22,7 +22,7 @@ abstract contract BaseStrategy is IStrategy, Transfer {
 
     /// @param _allo Address of the Allo contract
     constructor(address _allo, string memory _name) {
-        allo = Allo(_allo);
+        allo = IAllo(_allo);
         strategyId = keccak256(abi.encode(_name));
     }
 
@@ -50,7 +50,7 @@ abstract contract BaseStrategy is IStrategy, Transfer {
     /// =========== Views ==============
     /// ================================
 
-    function getAllo() external view override returns (Allo) {
+    function getAllo() external view override returns (IAllo) {
         return allo;
     }
 
@@ -82,17 +82,17 @@ abstract contract BaseStrategy is IStrategy, Transfer {
     }
 
     function skim(address _token) external virtual override {
-        (,, address token, uint256 amount,,,) = allo.pools(poolId);
-        uint256 balanceCapturedInPool = (token == _token) ? amount : 0;
+        IAllo.Pool memory pool = allo.getPool(poolId);
+        uint256 balanceCapturedInPool = (pool.token == _token) ? pool.amount : 0;
 
         uint256 balanceInStrategy =
             _token == address(0) ? address(this).balance : IERC20(_token).balanceOf(address(this));
 
         if (balanceInStrategy > balanceCapturedInPool) {
             uint256 excessFunds = balanceInStrategy - balanceCapturedInPool;
-            uint256 bounty = (excessFunds * allo.feeSkirtingBountyPercentage()) / allo.FEE_DENOMINATOR();
+            uint256 bounty = (excessFunds * allo.getFeeSkirtingBountyPercentage()) / allo.FEE_DENOMINATOR();
             excessFunds -= bounty;
-            _transferAmount(_token, allo.treasury(), excessFunds);
+            _transferAmount(_token, allo.getTreasury(), excessFunds);
             _transferAmount(_token, msg.sender, bounty);
             emit Skim(msg.sender, _token, excessFunds, bounty);
         }

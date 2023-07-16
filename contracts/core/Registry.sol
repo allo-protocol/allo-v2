@@ -12,7 +12,6 @@ import {ERC20} from "@solady/tokens/ERC20.sol";
 /// @dev This contract is used to create and manage identities
 /// @author allo-team
 contract Registry is IRegistry, AccessControl, Transfer {
-
     /// ==========================
     /// === Storage Variables ====
     /// ==========================

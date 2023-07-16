@@ -1,17 +1,16 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
+import "./IAllo.sol";
+
 import "@openzeppelin-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/access/AccessControl.sol";
 
 import "@solady/auth/Ownable.sol";
 
-import {Metadata} from "./libraries/Metadata.sol";
 import {Clone} from "./libraries/Clone.sol";
 import {Transfer} from "./libraries/Transfer.sol";
-import {IStrategy} from "../strategies/IStrategy.sol";
-import {IRegistry} from "./IRegistry.sol";
 
 /**
  *          ___            ___        ___        ___
@@ -30,28 +29,7 @@ import {IRegistry} from "./IRegistry.sol";
 /// @title Allo
 /// @notice The Allo contract
 /// @author allo-team
-contract Allo is Transfer, Initializable, Ownable, AccessControl {
-    /// @notice Custom errors
-    error UNAUTHORIZED();
-    error NOT_ENOUGH_FUNDS();
-    error NOT_APPROVED_STRATEGY();
-    error IS_APPROVED_STRATEGY();
-    error MISMATCH();
-    error ZERO_ADDRESS();
-    error INVALID_FEE();
-    error INVALID_TOKEN();
-
-    /// @notice Struct to hold details of an Pool
-    struct Pool {
-        bytes32 identityId;
-        IStrategy strategy;
-        address token;
-        uint256 amount;
-        Metadata metadata;
-        bytes32 managerRole;
-        bytes32 adminRole;
-    }
-
+contract Allo is IAllo, Transfer, Initializable, Ownable, AccessControl {
     /// @notice Fee denominator
     uint256 public constant FEE_DENOMINATOR = 1e18;
 
@@ -62,66 +40,31 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     address constant NATIVE = address(0);
     /// @notice Fee percentage
     /// @dev 1e18 = 100%, 1e17 = 10%, 1e16 = 1%, 1e15 = 0.1%
-    uint256 public feePercentage;
+    uint256 private feePercentage;
 
     /// @notice Base fee
-    uint256 public baseFee;
+    uint256 internal baseFee;
 
     /// @notice Incremental index
     uint256 private _poolIndex;
 
     /// @notice Allo treasury
-    address payable public treasury;
+    address payable private treasury;
 
     /// @notice Registry of pool creators
-    IRegistry public registry;
+    IRegistry private registry;
 
     /// @notice msg.sender -> nonce for cloning strategies
     mapping(address => uint256) private _nonces;
 
     /// @notice Pool.id -> Pool
-    mapping(uint256 => Pool) public pools;
+    mapping(uint256 => Pool) private pools;
 
     /// @notice Strategy -> bool
-    mapping(address => bool) public approvedStrategies;
+    mapping(address => bool) private approvedStrategies;
 
     /// @notice Reward for catching fee skirting (1e18 = 100%)
-    uint256 public feeSkirtingBountyPercentage;
-
-    /// ======================
-    /// ======= Events =======
-    /// ======================
-
-    event PoolCreated(
-        uint256 indexed poolId,
-        bytes32 indexed identityId,
-        IStrategy strategy,
-        address token,
-        uint256 amount,
-        Metadata metadata
-    );
-
-    event PoolMetadataUpdated(uint256 indexed poolId, Metadata metadata);
-
-    event PoolFunded(uint256 indexed poolId, uint256 amount, uint256 fee);
-
-    event BaseFeePaid(uint256 indexed poolId, uint256 amount);
-
-    event PoolTotalFundingDecreased(uint256 indexed poolId, uint256 prevAmount, uint256 newAmount);
-
-    event TreasuryUpdated(address treasury);
-
-    event FeePercentageUpdated(uint256 feePercentage);
-
-    event BaseFeeUpdated(uint256 baseFee);
-
-    event RegistryUpdated(address registry);
-
-    event StrategyApproved(address strategy);
-
-    event StrategyRemoved(address strategy);
-
-    event FeeSkirtingBountyPercentageUpdated(uint256 feeSkirtingBountyPercentage);
+    uint256 private feeSkirtingBountyPercentage;
 
     /// ====================================
     /// =========== Intializer =============
@@ -295,22 +238,6 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
         emit StrategyRemoved(_strategy);
     }
 
-    /// @notice Checks if the address is a pool admin
-    /// @param _poolId The pool id
-    /// @param _address The address to check
-    /// @return bool
-    function isPoolAdmin(uint256 _poolId, address _address) external view returns (bool) {
-        return _isPoolAdmin(_poolId, _address);
-    }
-
-    /// @notice Checks if the address is a pool manager
-    /// @param _poolId The pool id
-    /// @param _address The address to check
-    /// @return bool
-    function isPoolManager(uint256 _poolId, address _address) external view returns (bool) {
-        return _isPoolManager(_poolId, _address);
-    }
-
     /// @notice Add a pool manager
     /// @param _poolId The pool id
     /// @param _manager The address to add
@@ -326,13 +253,6 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     /// @param _manager The address remove
     function removePoolManager(uint256 _poolId, address _manager) external onlyPoolAdmin(_poolId) {
         _revokeRole(pools[_poolId].managerRole, _manager);
-    }
-
-    /// @notice Return the strategy for a pool
-    /// @param _poolId The pool id
-    /// @return address
-    function getStrategy(uint256 _poolId) external view returns (address) {
-        return address(pools[_poolId].strategy);
     }
 
     /// @notice Transfer thefunds recovered  to the recipient
@@ -599,5 +519,67 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
         feeSkirtingBountyPercentage = _feeSkirtingBountyPercentage;
 
         emit FeeSkirtingBountyPercentageUpdated(feeSkirtingBountyPercentage);
+    }
+
+    /// =========================
+    /// ==== View Functions =====
+    /// =========================
+
+    /// @notice Checks if the address is a pool admin
+    /// @param _poolId The pool id
+    /// @param _address The address to check
+    /// @return bool
+    function isPoolAdmin(uint256 _poolId, address _address) external view returns (bool) {
+        return _isPoolAdmin(_poolId, _address);
+    }
+
+    /// @notice Checks if the address is a pool manager
+    /// @param _poolId The pool id
+    /// @param _address The address to check
+    /// @return bool
+    function isPoolManager(uint256 _poolId, address _address) external view returns (bool) {
+        return _isPoolManager(_poolId, _address);
+    }
+
+    /// @notice Return the strategy for a pool
+    /// @param _poolId The pool id
+    /// @return address
+    function getStrategy(uint256 _poolId) external view returns (address) {
+        return address(pools[_poolId].strategy);
+    }
+
+    /// @notice return fee percentage
+    function getFeePercentage() external view returns (uint256) {
+        return feePercentage;
+    }
+
+    /// @notice return base fee
+    function getBaseFee() external view returns (uint256) {
+        return baseFee;
+    }
+
+    /// @notice return feeSkirtingBountyPercentage
+    function getTreasury() external view returns (address payable) {
+        return treasury;
+    }
+
+    /// @notice return feeSkirtingBountyPercentage
+    function getRegistry() external view returns (IRegistry) {
+        return registry;
+    }
+
+    /// @notice return boolean if strategy is approved
+    function isApprovedStrategies(address _strategy) external view returns (bool) {
+        return approvedStrategies[_strategy];
+    }
+
+    /// @notice return feeSkirtingBountyPercentage
+    function getFeeSkirtingBountyPercentage() external view returns (uint256) {
+        return feeSkirtingBountyPercentage;
+    }
+
+    /// @notice return the pool
+    function getPool(uint256 _poolId) external view returns (Pool memory) {
+        return pools[_poolId];
     }
 }

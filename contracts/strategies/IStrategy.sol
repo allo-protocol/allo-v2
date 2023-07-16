@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import {Allo} from "../core/Allo.sol";
+import {IAllo} from "../core/IAllo.sol";
 
 interface IStrategy {
     /// ======================
@@ -35,7 +35,7 @@ interface IStrategy {
     /// ======================
 
     /// @return Address of the Allo contract
-    function getAllo() external view returns (Allo);
+    function getAllo() external view returns (IAllo);
 
     /// @return Pool ID for this strategy
     function getPoolId() external view returns (uint256);
