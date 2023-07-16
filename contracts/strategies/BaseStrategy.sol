@@ -39,8 +39,8 @@ abstract contract BaseStrategy is IStrategy, Transfer {
     }
 
     /// @notice Modifier to check if the caller is a pool manager
-    modifier onlyPoolManager() {
-        if (!allo.isPoolManager(poolId, msg.sender)) {
+    modifier onlyPoolManager(address _sender) {
+        if (!allo.isPoolManager(poolId, _sender)) {
             revert BaseStrategy_UNAUTHORIZED();
         }
         _;
