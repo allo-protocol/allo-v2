@@ -37,7 +37,7 @@ Describe the logic for registering recipients within the strategy. Explain the r
 
 1. Are multiple registrations for a recipient allowed or just one?
 2. What happens in case of a second registration, either in the case of a single registration or multiple registrations?
-3. Can the address that receives the fund need to be different from the recipient's identity?
+3. Can the address that receives the funds be different from the recipient's identity?
 4. Which address is returned by `registerRecipient` and represents the `receipientId`?
 5. Does the pool manager need to approve the registration, or is it automatically approved? If automatically, How? Describe in detail.
 6. What additional data is needed and passed during the registration process, apart from the recipient's address?
