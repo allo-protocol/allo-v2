@@ -12,11 +12,6 @@ import {ERC20} from "@solady/tokens/ERC20.sol";
 /// @dev This contract is used to create and manage identities
 /// @author allo-team
 contract Registry is IRegistry, AccessControl, Transfer {
-    /// @notice Custom errors
-    error NONCE_NOT_AVAILABLE();
-    error NOT_PENDING_OWNER();
-    error UNAUTHORIZED();
-    error ZERO_ADDRESS();
 
     /// ==========================
     /// === Storage Variables ====

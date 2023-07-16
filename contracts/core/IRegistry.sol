@@ -17,6 +17,14 @@ interface IRegistry {
     }
 
     /// ======================
+    /// ======= Errors =======
+    /// ======================
+    error NONCE_NOT_AVAILABLE();
+    error NOT_PENDING_OWNER();
+    error UNAUTHORIZED();
+    error ZERO_ADDRESS();
+
+    /// ======================
     /// ======= Events =======
     /// ======================
 
