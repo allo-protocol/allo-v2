@@ -31,7 +31,6 @@ import {Registry} from "./Registry.sol";
 /// @notice The Allo contract
 /// @author allo-team
 contract Allo is Transfer, Initializable, Ownable, AccessControl {
-
     /// @notice Custom errors
     error UNAUTHORIZED();
     error NOT_ENOUGH_FUNDS();
@@ -219,82 +218,6 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
         );
     }
 
-    /// @notice Creates a new pool
-    /// @param _identityId The identityId of the pool creator in the registry
-    /// @param _strategy The address of strategy
-    /// @param _initStrategyData The data to initialize the strategy
-    /// @param _token The address of the token that the pool is denominated in
-    /// @param _amount The amount of the token to be deposited into the pool
-    /// @param _metadata The metadata of the pool
-    /// @param _managers The managers of the pool
-    function _createPool(
-        bytes32 _identityId,
-        IStrategy _strategy,
-        bytes memory _initStrategyData,
-        address _token,
-        uint256 _amount,
-        Metadata memory _metadata,
-        address[] memory _managers
-    ) internal returns (uint256 poolId) {
-        if (!registry.isOwnerOrMemberOfIdentity(_identityId, msg.sender)) {
-            revert UNAUTHORIZED();
-        }
-
-        // access control
-        bytes32 POOL_MANAGER_ROLE = bytes32(poolId);
-        bytes32 POOL_ADMIN_ROLE = keccak256(abi.encodePacked(poolId, "admin"));
-
-        Pool memory pool = Pool({
-            identityId: _identityId,
-            strategy: _strategy,
-            metadata: _metadata,
-            token: _token,
-            amount: 0, // this value is updated in _fundPool
-            managerRole: POOL_MANAGER_ROLE,
-            adminRole: POOL_ADMIN_ROLE
-        });
-
-        poolId = ++_poolIndex;
-        pools[poolId] = pool;
-
-        // grant admin roles to pool creator
-        _grantRole(POOL_ADMIN_ROLE, msg.sender);
-        // set admin role for POOL_MANAGER_ROLE
-        _setRoleAdmin(POOL_MANAGER_ROLE, POOL_ADMIN_ROLE);
-
-        // initialize strategies
-        // @dev Initialization is expect to revert when invoked more than once
-        _strategy.initialize(poolId, _initStrategyData);
-
-        if (_strategy.getPoolId() != poolId || address(_strategy.getAllo()) != address(this)) {
-            revert MISMATCH();
-        }
-
-        // grant pool managers roles
-        uint256 managersLength = _managers.length;
-        for (uint256 i = 0; i < managersLength;) {
-            address manager = _managers[i];
-            if (manager == address(0)) {
-                revert ZERO_ADDRESS();
-            }
-            _grantRole(POOL_MANAGER_ROLE, manager);
-            unchecked {
-                i++;
-            }
-        }
-
-        if (baseFee > 0) {
-            _transferAmount(address(0), treasury, baseFee);
-            emit BaseFeePaid(poolId, baseFee);
-        }
-
-        if (_amount > 0) {
-            _fundPool(_token, _amount, poolId, _strategy);
-        }
-
-        emit PoolCreated(poolId, _identityId, _strategy, _token, _amount, _metadata);
-    }
-
     /// @notice Update pool metadata
     /// @param _poolId id of the pool
     /// @param _metadata new metadata of the pool
@@ -471,6 +394,83 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
     /// ======= Internal Functions =========
     /// ====================================
 
+    /// @notice Creates a new pool
+    /// @param _identityId The identityId of the pool creator in the registry
+    /// @param _strategy The address of strategy
+    /// @param _initStrategyData The data to initialize the strategy
+    /// @param _token The address of the token that the pool is denominated in
+    /// @param _amount The amount of the token to be deposited into the pool
+    /// @param _metadata The metadata of the pool
+    /// @param _managers The managers of the pool
+    function _createPool(
+        bytes32 _identityId,
+        IStrategy _strategy,
+        bytes memory _initStrategyData,
+        address _token,
+        uint256 _amount,
+        Metadata memory _metadata,
+        address[] memory _managers
+    ) internal returns (uint256 poolId) {
+        if (!registry.isOwnerOrMemberOfIdentity(_identityId, msg.sender)) {
+            revert UNAUTHORIZED();
+        }
+
+        poolId = ++_poolIndex;
+
+        // access control
+        bytes32 POOL_MANAGER_ROLE = bytes32(poolId);
+        bytes32 POOL_ADMIN_ROLE = keccak256(abi.encodePacked(poolId, "admin"));
+
+        Pool memory pool = Pool({
+            identityId: _identityId,
+            strategy: _strategy,
+            metadata: _metadata,
+            token: _token,
+            amount: 0, // this value is updated in _fundPool
+            managerRole: POOL_MANAGER_ROLE,
+            adminRole: POOL_ADMIN_ROLE
+        });
+
+        pools[poolId] = pool;
+
+        // grant admin roles to pool creator
+        _grantRole(POOL_ADMIN_ROLE, msg.sender);
+        // set admin role for POOL_MANAGER_ROLE
+        _setRoleAdmin(POOL_MANAGER_ROLE, POOL_ADMIN_ROLE);
+
+        // initialize strategies
+        // @dev Initialization is expect to revert when invoked more than once
+        _strategy.initialize(poolId, _initStrategyData);
+
+        if (_strategy.getPoolId() != poolId || address(_strategy.getAllo()) != address(this)) {
+            revert MISMATCH();
+        }
+
+        // grant pool managers roles
+        uint256 managersLength = _managers.length;
+        for (uint256 i = 0; i < managersLength;) {
+            address manager = _managers[i];
+            if (manager == address(0)) {
+                revert ZERO_ADDRESS();
+            }
+            _grantRole(POOL_MANAGER_ROLE, manager);
+            unchecked {
+                i++;
+            }
+        }
+
+        if (baseFee > 0) {
+            _transferAmount(address(0), treasury, baseFee);
+            emit BaseFeePaid(poolId, baseFee);
+        }
+
+        if (_amount > 0) {
+            _fundPool(_token, _amount, poolId, _strategy);
+        }
+
+        emit PoolCreated(poolId, _identityId, _strategy, _token, _amount, _metadata);
+    }
+
     /// @notice passes _data & msg.sender through to the strategy for that pool
     /// @param _poolId id of the pool
     /// @param _data encoded data unique to the strategy for that pool
@@ -522,7 +522,7 @@ contract Allo is Transfer, Initializable, Ownable, AccessControl {
         return hasRole(pools[_poolId].managerRole, _address);
     }
 
-        /// @notice Updates the registry address
+    /// @notice Updates the registry address
     /// @param _registry The new registry address
     /// @dev Only callable by the owner if the current registry cannot be used
     function _updateRegistry(address _registry) internal {
