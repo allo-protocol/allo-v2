@@ -1,11 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import {ERC721} from "@solady/tokens/ERC721.sol";
-import {ERC20} from "@solady/tokens/ERC20.sol";
-import {Allo} from "../core/Allo.sol";
+import {IAllo} from "../core/IAllo.sol";
 import {BaseStrategy} from "./BaseStrategy.sol";
-import {Transfer} from "../core/libraries/Transfer.sol";
+import {ERC721} from "@solady/tokens/ERC721.sol";
 
 contract NFTVoteWinnerTakeAll is BaseStrategy {
     /// ================================
@@ -17,7 +15,6 @@ contract NFTVoteWinnerTakeAll is BaseStrategy {
     ERC721 nft;
     address currentWinner;
 
-    address[] recipients;
     mapping(address => bool) public isRecipient;
     mapping(uint256 => bool) public hasAllocated;
     mapping(address => uint256) public votes;
@@ -31,6 +28,7 @@ contract NFTVoteWinnerTakeAll is BaseStrategy {
     error AlreadyAllocated();
     error NotOwnerOfNFT();
     error AllocationHasntEnded();
+    error ZERO_AMOUNT();
 
     /// ===============================
     /// ======== Constructor ==========
@@ -50,7 +48,7 @@ contract NFTVoteWinnerTakeAll is BaseStrategy {
     }
 
     /// ===============================
-    /// ========= Functions ===========
+    /// ========= Initialize ==========
     /// ===============================
 
     function initialize(uint256 _poolId, bytes memory _data) public override {
@@ -62,23 +60,9 @@ contract NFTVoteWinnerTakeAll is BaseStrategy {
         }
     }
 
-    function registerRecipients(bytes memory _data, address _sender)
-        external
-        payable
-        onlyDuringAllocationPeriod
-        onlyAllo
-        returns (address)
-    {
-        address[] memory newRecipients = abi.decode(_data, (address[]));
-
-        for (uint256 i; i < newRecipients.length;) {
-            isRecipient[newRecipients[i]] = true;
-            recipients.push(newRecipients[i]);
-            unchecked {
-                ++i;
-            }
-        }
-    }
+    /// ===============================
+    /// ============ Views ============
+    /// ===============================
 
     function getRecipientStatus(address _recipientId) public view returns (RecipientStatus) {
         if (isRecipient[_recipientId]) {
@@ -88,57 +72,79 @@ contract NFTVoteWinnerTakeAll is BaseStrategy {
         }
     }
 
+    function getPayouts(address[] memory, bytes memory, address) external view returns (PayoutSummary[] memory) {
+        PayoutSummary[] memory payouts = new PayoutSummary[](1);
+        payouts[0] = PayoutSummary(currentWinner, allo.getPool(poolId).amount);
+        return payouts;
+    }
+
     function isValidAllocator(address _allocator) public view returns (bool) {
         return nft.balanceOf(_allocator) > 0;
     }
 
-    function allocate(bytes memory _data, address _sender) external payable onlyDuringAllocationPeriod onlyAllo {
-        (uint256[] memory ids, address recipient) = abi.decode(_data, (uint256[], address));
-        uint256 numVotes = ids.length;
+    /// ===============================
+    /// ========= Functions ===========
+    /// ===============================
+
+    function _registerRecipient(bytes memory _data, address _sender)
+        internal
+        override
+        onlyDuringAllocationPeriod
+        returns (address)
+    {
+        address recipientId = abi.decode(_data, (address));
+
+        isRecipient[recipientId] = true;
+
+        emit Registered(recipientId, "", _sender);
+
+        return recipientId;
+    }
+
+    function _allocate(bytes memory _data, address _sender) internal override onlyDuringAllocationPeriod {
+        (uint256[] memory nftIds, address recipientId) = abi.decode(_data, (uint256[], address));
+        uint256 numVotes = nftIds.length;
         for (uint256 i; i < numVotes;) {
-            if (hasAllocated[ids[i]]) {
-                revert AlreadyAllocated();
-            }
-            if (nft.ownerOf(ids[i]) != _sender) {
+            uint256 nftId = nftIds[i];
+
+            if (nft.ownerOf(nftId) != _sender) {
                 revert NotOwnerOfNFT();
             }
-            hasAllocated[ids[i]] = true;
+
+            if (hasAllocated[nftId]) {
+                revert AlreadyAllocated();
+            }
+
+            hasAllocated[nftId] = true;
+
             unchecked {
                 ++i;
             }
         }
-        votes[recipient] += numVotes;
-        if (votes[recipient] > votes[currentWinner]) {
-            currentWinner = recipient;
+
+        votes[recipientId] += numVotes;
+        if (votes[recipientId] > votes[currentWinner]) {
+            currentWinner = recipientId;
         }
+
+        emit Allocated(recipientId, numVotes, address(0), _sender);
     }
 
-    function getPayouts(address[] memory _recipientIds, bytes memory _data, address _sender)
-        external
-        view
-        returns (uint256[] memory)
-    {
-        uint256[] memory payouts = new uint[](_recipientIds.length);
-        for (uint256 i; i < _recipientIds.length;) {
-            if (_recipientIds[i] == currentWinner) {
-                (,,, payouts[i],,,) = allo.pools(poolId);
-            } else {
-                payouts[i] = 0;
-            }
-            unchecked {
-                ++i;
-            }
-        }
-        return payouts;
-    }
-
-    function distribute(address[] memory _recipientIds, bytes memory _data, address _sender) external onlyAllo {
+    function _distribute(address[] memory, bytes memory, address _sender) internal override {
         if (block.timestamp < endTime) {
             revert AllocationHasntEnded();
         }
 
-        (,, address tokenToDistribute, uint256 amountToDistribute,,,) = allo.pools(poolId);
+        IAllo.Pool memory pool = allo.getPool(poolId);
+        uint256 amountToDistribute = pool.amount;
+
+        if (amountToDistribute == 0) {
+            revert ZERO_AMOUNT();
+        }
+
         allo.decreasePoolTotalFunding(poolId, amountToDistribute);
-        _transferAmount(tokenToDistribute, currentWinner, amountToDistribute);
+        _transferAmount(pool.token, currentWinner, amountToDistribute);
+
+        emit Distributed(currentWinner, currentWinner, amountToDistribute, _sender);
     }
 }

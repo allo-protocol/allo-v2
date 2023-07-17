@@ -1,31 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
+import "./IRegistry.sol";
 import {AccessControl} from "@openzeppelin/access/AccessControl.sol";
 import {Metadata} from "./libraries/Metadata.sol";
 import "./libraries/Transfer.sol";
+import "./libraries/Native.sol";
 import {ERC20} from "@solady/tokens/ERC20.sol";
 
 /// @title Registry
 /// @notice Registry contract for identities
 /// @dev This contract is used to create and manage identities
 /// @author allo-team
-contract Registry is AccessControl, Transfer {
-    /// @notice Custom errors
-    error NONCE_NOT_AVAILABLE();
-    error NOT_PENDING_OWNER();
-    error UNAUTHORIZED();
-    error ZERO_ADDRESS();
-
-    /// @notice Struct to hold details of an identity
-    struct Identity {
-        uint256 nonce;
-        string name;
-        Metadata metadata;
-        address owner;
-        address anchor;
-    }
-
+contract Registry is IRegistry, Native, AccessControl, Transfer {
     /// ==========================
     /// === Storage Variables ====
     /// ==========================
@@ -41,18 +28,6 @@ contract Registry is AccessControl, Transfer {
 
     /// @notice Allo Owner Role for fund recovery
     bytes32 public constant ALLO_OWNER = keccak256("ALLO_OWNER");
-
-    /// ======================
-    /// ======= Events =======
-    /// ======================
-
-    event IdentityCreated(
-        bytes32 indexed identityId, uint256 nonce, string name, Metadata metadata, address owner, address anchor
-    );
-    event IdentityNameUpdated(bytes32 indexed identityId, string name, address anchor);
-    event IdentityMetadataUpdated(bytes32 indexed identityId, Metadata metadata);
-    event IdentityOwnerUpdated(bytes32 indexed identityId, address owner);
-    event IdentityPendingOwnerUpdated(bytes32 indexed identityId, address pendingOwner);
 
     /// ====================================
     /// =========== Modifier ===============
@@ -291,7 +266,7 @@ contract Registry is AccessControl, Transfer {
     /// @param _token The address of the token to transfer
     /// @param _recipient The address of the recipient
     function recoverFunds(address _token, address _recipient) external onlyIdentityOwner(ALLO_OWNER) {
-        uint256 amount = _token == address(0) ? address(this).balance : ERC20(_token).balanceOf(address(this));
+        uint256 amount = _token == NATIVE ? address(this).balance : ERC20(_token).balanceOf(address(this));
         _transferAmount(_token, _recipient, amount);
     }
 }
