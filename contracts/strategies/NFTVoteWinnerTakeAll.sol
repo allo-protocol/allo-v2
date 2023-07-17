@@ -86,12 +86,10 @@ contract NFTVoteWinnerTakeAll is BaseStrategy {
     /// ========= Functions ===========
     /// ===============================
 
-    function registerRecipient(bytes memory _data, address _sender)
-        external
-        payable
+    function _registerRecipient(bytes memory _data, address _sender)
+        internal
+        override
         onlyDuringAllocationPeriod
-        onlyAllo
-        onlyPoolManager(_sender)
         returns (address)
     {
         address recipientId = abi.decode(_data, (address));
@@ -103,7 +101,7 @@ contract NFTVoteWinnerTakeAll is BaseStrategy {
         return recipientId;
     }
 
-    function allocate(bytes memory _data, address _sender) external payable onlyDuringAllocationPeriod onlyAllo {
+    function _allocate(bytes memory _data, address _sender) internal override onlyDuringAllocationPeriod {
         (uint256[] memory nftIds, address recipientId) = abi.decode(_data, (uint256[], address));
         uint256 numVotes = nftIds.length;
         for (uint256 i; i < numVotes;) {
@@ -132,7 +130,7 @@ contract NFTVoteWinnerTakeAll is BaseStrategy {
         emit Allocated(recipientId, numVotes, address(0), _sender);
     }
 
-    function distribute(address[] memory, bytes memory, address _sender) external onlyAllo {
+    function _distribute(address[] memory, bytes memory, address _sender) internal override {
         if (block.timestamp < endTime) {
             revert AllocationHasntEnded();
         }

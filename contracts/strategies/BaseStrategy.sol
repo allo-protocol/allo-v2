@@ -97,4 +97,35 @@ abstract contract BaseStrategy is IStrategy, Transfer {
             emit Skim(msg.sender, _token, excessFunds, bounty);
         }
     }
+
+    function registerRecipient(bytes memory _data, address _sender) external payable onlyAllo returns (address) {
+        return _registerRecipient(_data, _sender);
+    }
+
+    function allocate(bytes memory _data, address _sender) external payable onlyAllo {
+        return _allocate(_data, _sender);
+    }
+
+    function distribute(address[] memory _recipientIds, bytes memory _data, address _sender) external onlyAllo {
+        return _distribute(_recipientIds, _data, _sender);
+    }
+
+    /// ====================================
+    /// ============ Internal ==============
+    /// ====================================
+
+    // this is called via allo.sol to register recipients
+    // it can change their status all the way to Accepted, or to Pending if there are more steps
+    // if there are more steps, additional functions should be added to allow the owner to check
+    // this could also check attestations directly and then Accept
+    function _registerRecipient(bytes memory _data, address _sender) internal virtual returns (address);
+
+    // only called via allo.sol by users to allocate to a recipient
+    // this will update some data in this contract to store votes, etc.
+    function _allocate(bytes memory _data, address _sender) internal virtual;
+
+    // this will distribute tokens to recipients
+    // most strategies will track a TOTAL amount per recipient, and a PAID amount, and pay the difference
+    // this contract will need to track the amount paid already, so that it doesn't double pay
+    function _distribute(address[] memory _recipientIds, bytes memory _data, address _sender) internal virtual;
 }
