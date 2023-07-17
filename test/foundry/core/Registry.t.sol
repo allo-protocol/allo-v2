@@ -62,6 +62,7 @@ contract RegistryTest is Test {
 
         assertEq(testIdentityId, newIdentityId, "identityId");
 
+        assertEq(identity.id, newIdentityId, "newIdentityId");
         assertEq(identity.name, name, "name");
         assertEq(identity.metadata.protocol, metadata.protocol, "metadata.protocol");
         assertEq(identity.metadata.pointer, metadata.pointer, "metadata.pointer");

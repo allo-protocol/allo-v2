@@ -67,9 +67,8 @@ contract NFTVoteWinnerTakeAll is BaseStrategy {
     function getRecipientStatus(address _recipientId) public view returns (RecipientStatus) {
         if (isRecipient[_recipientId]) {
             return RecipientStatus.Accepted;
-        } else {
-            return RecipientStatus.None;
         }
+        return RecipientStatus.None;
     }
 
     function getPayouts(address[] memory, bytes memory, address) external view returns (PayoutSummary[] memory) {

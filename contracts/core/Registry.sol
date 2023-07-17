@@ -90,6 +90,7 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
         }
 
         Identity memory identity = Identity({
+            id: identityId,
             nonce: _nonce,
             name: _name,
             metadata: _metadata,

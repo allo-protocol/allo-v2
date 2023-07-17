@@ -16,7 +16,7 @@ interface IStrategy {
     }
 
     struct PayoutSummary {
-        address payoutAddress;
+        address recipientAddress;
         uint256 amount;
     }
 
