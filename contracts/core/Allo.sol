@@ -278,12 +278,37 @@ contract Allo is IAllo, Transfer, Initializable, Ownable, AccessControl {
     /// ======= Strategy Functions =========
     /// ====================================
 
-    /// @notice passes _data through to the allocation strategy for that pool
-    /// @notice returns the recipientId from the allocation strategy
+    /// @notice passes _data through to the strategy for that pool
+    /// @notice returns the recipientId from the strategy
     /// @param _poolId id of the pool
-    /// @param _data encoded data unique to the allocation strategy for that pool
-    function registerRecipients(uint256 _poolId, bytes memory _data) external payable returns (address) {
-        return pools[_poolId].strategy.registerRecipients(_data, msg.sender);
+    /// @param _data encoded data unique to the strategy for that pool
+    function registerRecipient(uint256 _poolId, bytes memory _data) external payable returns (address) {
+        return pools[_poolId].strategy.registerRecipient(_data, msg.sender);
+    }
+
+    /// @notice register to multiple pools
+    /// @notice returns the recipientIds from the strategy
+    /// @param _poolIds id of the pools
+    /// @param _data encoded data unique to strategy for each pool
+    function batchRegisterRecipient(uint256[] memory _poolIds, bytes[] memory _data)
+        external
+        returns (address[] memory)
+    {
+        uint256 poolIdLength = _poolIds.length;
+        address[] memory recipientIds = new address[](poolIdLength);
+
+        if (poolIdLength != _data.length) {
+            revert MISMATCH();
+        }
+
+        for (uint256 i = 0; i < poolIdLength;) {
+            recipientIds[i] = pools[_poolIds[i]].strategy.registerRecipient(_data[i], msg.sender);
+            unchecked {
+                i++;
+            }
+        }
+
+        return recipientIds;
     }
 
     /// @notice Fund a pool
@@ -298,16 +323,16 @@ contract Allo is IAllo, Transfer, Initializable, Ownable, AccessControl {
         _fundPool(_token, _amount, _poolId, pools[_poolId].strategy);
     }
 
-    /// @notice passes _data & msg.sender through to the allocation strategy for that pool
+    /// @notice passes _data & msg.sender through to the strategy for that pool
     /// @param _poolId id of the pool
-    /// @param _data encoded data unique to the allocation strategy for that pool
+    /// @param _data encoded data unique to the strategy for that pool
     function allocate(uint256 _poolId, bytes memory _data) external payable {
         _allocate(_poolId, _data);
     }
 
     /// @notice vote to multiple pools
     /// @param _poolIds ids of the pools
-    /// @param _datas encoded data unique to the allocation strategy for that pool
+    /// @param _datas encoded data unique to the strategy for that pool
     function batchAllocate(uint256[] calldata _poolIds, bytes[] memory _datas) external {
         uint256 numPools = _poolIds.length;
         if (numPools != _datas.length) {

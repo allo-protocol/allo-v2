@@ -15,6 +15,11 @@ interface IStrategy {
         Rejected
     }
 
+    struct PayoutSummary {
+        address payoutAddress;
+        uint256 amount;
+    }
+
     /// ======================
     /// ======= Errors =======
     /// ======================
@@ -29,6 +34,9 @@ interface IStrategy {
 
     event Initialized(address allo, bytes32 identityId, uint256 poolId, bytes data);
     event Skim(address skimmer, address token, uint256 amountToTreasury, uint256 amountToSkimmer);
+    event Registered(address indexed recipientId, bytes data, address sender);
+    event Allocated(address indexed recipientId, uint256 amount, address token, address sender);
+    event Distributed(address indexed recipientId, address recipientAddress, uint256 amount, address sender);
 
     /// ======================
     /// ======= Views ========
@@ -52,6 +60,12 @@ interface IStrategy {
     // since there is no need for Pending or Rejected
     function getRecipientStatus(address _recipientId) external view returns (RecipientStatus);
 
+    /// @return Input the values you would send to distribute(), get the amounts each recipient in the array would receive
+    function getPayouts(address[] memory _recipientIds, bytes memory _data, address _sender)
+        external
+        view
+        returns (PayoutSummary[] memory);
+
     /// ======================
     /// ===== Functions ======
     /// ======================
@@ -64,16 +78,11 @@ interface IStrategy {
     // then checking the balance of the contract, and paying the difference
     function skim(address token) external;
 
-    /// @return Input the values you would send to distribute(), get the amounts each recipient in the array would receive
-    function getPayouts(address[] memory _recipientIds, bytes memory _data, address _sender)
-        external
-        returns (uint256[] memory);
-
     // this is called via allo.sol to register recipients
     // it can change their status all the way to Accepted, or to Pending if there are more steps
     // if there are more steps, additional functions should be added to allow the owner to check
     // this could also check attestations directly and then Accept
-    function registerRecipients(bytes memory _data, address _sender) external payable returns (address);
+    function registerRecipient(bytes memory _data, address _sender) external payable returns (address);
 
     // only called via allo.sol by users to allocate to a recipient
     // this will update some data in this contract to store votes, etc.

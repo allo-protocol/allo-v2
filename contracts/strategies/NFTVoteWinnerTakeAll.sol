@@ -48,7 +48,7 @@ contract NFTVoteWinnerTakeAll is BaseStrategy {
     }
 
     /// ===============================
-    /// ========= Functions ===========
+    /// ========= Initialize ==========
     /// ===============================
 
     function initialize(uint256 _poolId, bytes memory _data) public override {
@@ -60,25 +60,9 @@ contract NFTVoteWinnerTakeAll is BaseStrategy {
         }
     }
 
-    function registerRecipients(bytes memory _data, address _sender)
-        external
-        payable
-        onlyDuringAllocationPeriod
-        onlyAllo
-        onlyPoolManager(_sender)
-        returns (address)
-    {
-        address[] memory newRecipients = abi.decode(_data, (address[]));
-
-        uint256 numRecipientsLength = newRecipients.length;
-        for (uint256 i; i < numRecipientsLength;) {
-            isRecipient[newRecipients[i]] = true;
-            unchecked {
-                ++i;
-            }
-        }
-        return address(0);
-    }
+    /// ===============================
+    /// ============ Views ============
+    /// ===============================
 
     function getRecipientStatus(address _recipientId) public view returns (RecipientStatus) {
         if (isRecipient[_recipientId]) {
@@ -88,55 +72,67 @@ contract NFTVoteWinnerTakeAll is BaseStrategy {
         }
     }
 
+    function getPayouts(address[] memory, bytes memory, address) external view returns (PayoutSummary[] memory) {
+        PayoutSummary[] memory payouts = new PayoutSummary[](1);
+        payouts[0] = PayoutSummary(currentWinner, allo.getPool(poolId).amount);
+        return payouts;
+    }
+
     function isValidAllocator(address _allocator) public view returns (bool) {
         return nft.balanceOf(_allocator) > 0;
     }
 
+    /// ===============================
+    /// ========= Functions ===========
+    /// ===============================
+
+    function registerRecipient(bytes memory _data, address _sender)
+        external
+        payable
+        onlyDuringAllocationPeriod
+        onlyAllo
+        onlyPoolManager(_sender)
+        returns (address)
+    {
+        address recipientId = abi.decode(_data, (address));
+
+        isRecipient[recipientId] = true;
+
+        emit Registered(recipientId, "", _sender);
+
+        return recipientId;
+    }
+
     function allocate(bytes memory _data, address _sender) external payable onlyDuringAllocationPeriod onlyAllo {
-        (uint256[] memory ids, address recipient) = abi.decode(_data, (uint256[], address));
-        uint256 numVotes = ids.length;
+        (uint256[] memory nftIds, address recipientId) = abi.decode(_data, (uint256[], address));
+        uint256 numVotes = nftIds.length;
         for (uint256 i; i < numVotes;) {
-            if (hasAllocated[ids[i]]) {
-                revert AlreadyAllocated();
-            }
-            if (nft.ownerOf(ids[i]) != _sender) {
+            uint256 nftId = nftIds[i];
+
+            if (nft.ownerOf(nftId) != _sender) {
                 revert NotOwnerOfNFT();
             }
-            hasAllocated[ids[i]] = true;
+
+            if (hasAllocated[nftId]) {
+                revert AlreadyAllocated();
+            }
+
+            hasAllocated[nftId] = true;
+
             unchecked {
                 ++i;
             }
         }
-        votes[recipient] += numVotes;
-        if (votes[recipient] > votes[currentWinner]) {
-            currentWinner = recipient;
+
+        votes[recipientId] += numVotes;
+        if (votes[recipientId] > votes[currentWinner]) {
+            currentWinner = recipientId;
         }
+
+        emit Allocated(recipientId, numVotes, address(0), _sender);
     }
 
-    function getPayouts(address[] memory _recipientIds, bytes memory, address)
-        external
-        view
-        returns (uint256[] memory)
-    {
-        uint256 recipientLength = _recipientIds.length;
-        uint256[] memory payouts = new uint[](recipientLength);
-
-        uint256 poolAmount = allo.getPool(poolId).amount;
-        for (uint256 i; i < recipientLength;) {
-            if (_recipientIds[i] == currentWinner) {
-                payouts[i] = poolAmount;
-                poolAmount = 0; // Ensure the poolAmount is not double assigned
-            } else {
-                payouts[i] = 0;
-            }
-            unchecked {
-                ++i;
-            }
-        }
-        return payouts;
-    }
-
-    function distribute(address[] memory, bytes memory, address) external onlyAllo {
+    function distribute(address[] memory, bytes memory, address _sender) external onlyAllo {
         if (block.timestamp < endTime) {
             revert AllocationHasntEnded();
         }
@@ -150,5 +146,7 @@ contract NFTVoteWinnerTakeAll is BaseStrategy {
 
         allo.decreasePoolTotalFunding(poolId, amountToDistribute);
         _transferAmount(pool.token, currentWinner, amountToDistribute);
+
+        emit Distributed(currentWinner, currentWinner, amountToDistribute, _sender);
     }
 }

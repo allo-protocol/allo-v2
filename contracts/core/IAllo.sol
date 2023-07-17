@@ -9,6 +9,7 @@ interface IAllo {
     /// ======================
     /// ======= Structs ======
     /// ======================
+
     struct Pool {
         bytes32 identityId;
         IStrategy strategy;
@@ -22,6 +23,7 @@ interface IAllo {
     /// ======================
     /// ======= Errors =======
     /// ======================
+
     error UNAUTHORIZED();
     error NOT_ENOUGH_FUNDS();
     error NOT_APPROVED_STRATEGY();
@@ -34,6 +36,7 @@ interface IAllo {
     /// ======================
     /// ======= Events =======
     /// ======================
+
     event PoolCreated(
         uint256 indexed poolId,
         bytes32 indexed identityId,
@@ -78,7 +81,10 @@ interface IAllo {
     function removePoolManager(uint256 _poolId, address _manager) external;
     function recoverFunds(address _token, address _recipient) external;
     function decreasePoolTotalFunding(uint256 _poolId, uint256 _amountToDecrease) external;
-    function registerRecipients(uint256 _poolId, bytes memory _data) external payable returns (address);
+    function registerRecipient(uint256 _poolId, bytes memory _data) external payable returns (address);
+    function batchRegisterRecipient(uint256[] memory _poolIds, bytes[] memory _data)
+        external
+        returns (address[] memory);
     function fundPool(uint256 _poolId, uint256 _amount, address _token) external payable;
     function allocate(uint256 _poolId, bytes memory _data) external payable;
     function batchAllocate(uint256[] calldata _poolIds, bytes[] memory _datas) external;
