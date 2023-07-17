@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import {ERC20} from "@solady/tokens/ERC20.sol";
 import {SafeTransferLib} from "@solady/utils/SafeTransferLib.sol";
+import "./Native.sol";
 
-contract Transfer {
+contract Transfer is Native {
     error AMOUNT_MISMATCH();
 
     struct TransferData {
@@ -22,7 +22,7 @@ contract Transfer {
         for (uint256 i = 0; i < _transferData.length;) {
             TransferData memory transferData = _transferData[i];
 
-            if (_token == address(0)) {
+            if (_token == NATIVE) {
                 msgValue -= transferData.amount;
                 SafeTransferLib.safeTransferETH(transferData.to, transferData.amount);
             } else {
@@ -46,7 +46,7 @@ contract Transfer {
     /// @param _transferData Individual TransferData
     function _transferAmountFrom(address _token, TransferData memory _transferData) internal returns (bool) {
         uint256 amount = _transferData.amount;
-        if (_token == address(0)) {
+        if (_token == NATIVE) {
             // Native Token
             if (msg.value < amount) {
                 revert AMOUNT_MISMATCH();
@@ -59,7 +59,7 @@ contract Transfer {
     }
 
     function _transferAmount(address _token, address _to, uint256 _amount) internal {
-        if (_token == address(0)) {
+        if (_token == NATIVE) {
             SafeTransferLib.safeTransferETH(_to, _amount);
         } else {
             SafeTransferLib.safeTransfer(_token, _to, _amount);

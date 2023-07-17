@@ -5,13 +5,14 @@ import "./IRegistry.sol";
 import {AccessControl} from "@openzeppelin/access/AccessControl.sol";
 import {Metadata} from "./libraries/Metadata.sol";
 import "./libraries/Transfer.sol";
+import "./libraries/Native.sol";
 import {ERC20} from "@solady/tokens/ERC20.sol";
 
 /// @title Registry
 /// @notice Registry contract for identities
 /// @dev This contract is used to create and manage identities
 /// @author allo-team
-contract Registry is IRegistry, AccessControl, Transfer {
+contract Registry is IRegistry, Native, AccessControl, Transfer {
     /// ==========================
     /// === Storage Variables ====
     /// ==========================
@@ -265,7 +266,7 @@ contract Registry is IRegistry, AccessControl, Transfer {
     /// @param _token The address of the token to transfer
     /// @param _recipient The address of the recipient
     function recoverFunds(address _token, address _recipient) external onlyIdentityOwner(ALLO_OWNER) {
-        uint256 amount = _token == address(0) ? address(this).balance : ERC20(_token).balanceOf(address(this));
+        uint256 amount = _token == NATIVE ? address(this).balance : ERC20(_token).balanceOf(address(this));
         _transferAmount(_token, _recipient, amount);
     }
 }

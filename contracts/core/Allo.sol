@@ -11,6 +11,7 @@ import "@solady/auth/Ownable.sol";
 
 import {Clone} from "./libraries/Clone.sol";
 import {Transfer} from "./libraries/Transfer.sol";
+import "./libraries/Native.sol";
 
 /**
  *          ___            ___        ___        ___
@@ -29,7 +30,7 @@ import {Transfer} from "./libraries/Transfer.sol";
 /// @title Allo
 /// @notice The Allo contract
 /// @author allo-team
-contract Allo is IAllo, Transfer, Initializable, Ownable, AccessControl {
+contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl {
     /// @notice Fee denominator
     uint256 public constant FEE_DENOMINATOR = 1e18;
 
@@ -37,7 +38,6 @@ contract Allo is IAllo, Transfer, Initializable, Ownable, AccessControl {
     /// === Storage Variables ====
     /// ==========================
 
-    address constant NATIVE = address(0);
     /// @notice Fee percentage
     /// @dev 1e18 = 100%, 1e17 = 10%, 1e16 = 1%, 1e15 = 0.1%
     uint256 private feePercentage;

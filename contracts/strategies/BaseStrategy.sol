@@ -85,8 +85,7 @@ abstract contract BaseStrategy is IStrategy, Transfer {
         IAllo.Pool memory pool = allo.getPool(poolId);
         uint256 balanceCapturedInPool = (pool.token == _token) ? pool.amount : 0;
 
-        uint256 balanceInStrategy =
-            _token == address(0) ? address(this).balance : IERC20(_token).balanceOf(address(this));
+        uint256 balanceInStrategy = _token == NATIVE ? address(this).balance : IERC20(_token).balanceOf(address(this));
 
         if (balanceInStrategy > balanceCapturedInPool) {
             uint256 excessFunds = balanceInStrategy - balanceCapturedInPool;
