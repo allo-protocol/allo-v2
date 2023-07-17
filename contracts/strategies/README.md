@@ -32,7 +32,7 @@ Explain the logic for determining how recipients are added to the strategy's poo
     - What additional data is needed and passed during the registration process, apart from the recipient's address?
 - **Registering recipients**
     - Is the `registerRecipient` function accessible to anyone, or is it restricted to specific roles or addresses?
-        - Are there any specific conditions under which the `registerRecipient` function can or cannot be called?
+    - Are there any specific conditions under which the `registerRecipient` function can or cannot be called?
     - How does the strategy handle ineligible registrations? Are they automatically rejected, or is there a specific process in place?
     - Does the pool manager need to approve the registration, or is it automatically approved? 
         - If automatically, how? Describe in detail.
