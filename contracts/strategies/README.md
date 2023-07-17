@@ -15,75 +15,77 @@ Provide a brief overview of the strategy and its purpose. Describe the high-leve
 
 ## General Specifications
 
-### Recipient Eligibility Logic
+### Recipient Logic
 
-Explain the logic for determining the eligibility of a recipient within the strategy. Specify any custom functions or conditions used to verify if a recipient is eligible to register.
-
-#### Questions to answer
-
-1. What criteria determine the eligibility of a recipient to register in this strategy? Are there any specific requirements or conditions?
-2. How does a recipient identify themselves? Is it through an address like msg.sender, do they need an identity registered at the `Registry` contract, or another mechanism? If through the Registry, can the pool creator set a custom registry?
-3. Can recipients register themselves or do they require approval from a pool manager or admin?
-4. Are there any additional custom functions or conditions for verifying recipient eligibility?
-5. Are there any specific considerations or requirements related to recipient registration, such as providing additional information or meeting certain criteria?
-6. How does the strategy handle ineligible registrations? Are they automatically rejected, or is there a specific process in place?
-7. Are there any limits on the number of recipients that can be registered? If so, what are those limits and how are they enforced?
-
-### Register Recipient Logic
-
-Describe the logic for registering recipients within the strategy. Explain the recipient status workflow, including the possible statuses (e.g., `None`, `Pending`, `Accepted`, `Rejected`) and the conditions under which the status changes. If additional functions are added to check or modify recipient status, mention them here.
+Explain the logic for determining how recipients are added to the strategy's pool. This should include how the eligibility of a recipient is determined, the logic for registering eligible recipients, the recipient status workflow (including a list of available statuses such as `None`, `Pending`, `Accepted`, `Rejected`), and the conditions under which status changes. . Specify any custom functions or conditions that will be required. 
 
 #### Questions to answer
 
-1. Are multiple registrations for a recipient allowed or just one?
-2. What happens in case of a second registration, either in the case of a single registration or multiple registrations?
-3. Can the address that receives the funds be different from the recipient's identity?
-4. Which address is returned by `registerRecipient` and represents the `receipientId`?
-5. Does the pool manager need to approve the registration, or is it automatically approved? If automatically, How? Describe in detail.
-6. What additional data is needed and passed during the registration process, apart from the recipient's address?
-7. Is the `registerRecipient` function accessible to anyone, or is it restricted to specific roles or addresses?
-8. Are there any specific conditions under which the `registerRecipient` function can or cannot be called?
-9. What steps are involved in changing the recipient's status from one state to another?
-10. Are there any additional functions available to check or modify the recipient's status?
+- **Recipient eligibility**
+    - What criteria determine the eligibility of a recipient to register in this strategy? Are there any specific requirements or conditions?
+    - Are there any additional custom functions or conditions for verifying recipient eligibility?
+- **Recipient information**
+    - How does a recipient identify themselves? Is it through an address like msg.sender, do they need an identity registered at the `Registry` contract, or another mechanism? 
+        - If through the Registry, can the pool creator set a custom registry?
+        - Which address is returned by `registerRecipient` and represents the `recipientId`?
+        - Can the address that receives the funds be different from the recipient's identity?
+    - What additional data is needed and passed during the registration process, apart from the recipient's address?
+- **Registering recipients**
+    - Is the `registerRecipient` function accessible to anyone, or is it restricted to specific roles or addresses?
+    - Are there any specific conditions under which the `registerRecipient` function can or cannot be called?
+    - How does the strategy handle ineligible registrations? Are they automatically rejected, or is there a specific process in place?
+    - Does the pool manager need to approve the registration, or is it automatically approved? 
+        - If automatically, how? Describe in detail.
+        - If manually, how? Who needs to approve?   
+    - Are there any limits on the number of recipients that can be registered? If so, what are those limits and how are they enforced?
+    - Are multiple registrations for a recipient allowed or just one?
+        - What happens in case of a second registration, either in the case of a single registration or multiple registrations?
+    - What steps are involved in changing the recipient's status from one state to another?
+    - Are there any additional functions available to check or modify the recipient's status?
 
-### Allocator Eligibility Logic
+### Allocate Function Logic (i.e. voting)
 
-Explain the logic for determining the eligibility of an allocator within the strategy. Specify any custom functions or conditions used to verify if an allocator is eligible to allocate.
+Explain the logic for how the strategy will allow eligible entities to express an opinion about how the pool's funds should be allocated. This should include how entities are determined to be eligible to express an opinion, the logic for the allocate function, and any special considerations or conditions.
 
 #### Questions to answer
 
-1. How is the eligibility of an allocator determined in this strategy? Is it through a third party, or can anyone allocate? If there are specific roles or addresses allowed to allocate, mention them here.
-2. Are there any custom functions or conditions for verifying allocator eligibility? If so, describe them and their purpose in determining eligibility.
-3. Can an allocator allocate multiple times or just once? Is there any restriction on the number of allocations per allocator?
-4. How does the strategy handle ineligible allocators who attempt to allocate? What actions or outcomes are triggered when an ineligible allocator tries to allocate?
+- **Allocator Eligibility**
+    - How is the eligibility of an allocator determined in this strategy? Is it through a third party, or can anyone allocate? If there are specific roles or addresses allowed to allocate, mention them here.
+    - Are there any custom functions or conditions for verifying allocator eligibility? If so, describe them and their purpose in determining eligibility.
+- **Allocate function**
+    - Are there any conditions on when the `allocate` function is callable or not? 
+        - Is there an allocation period?
+        - Can an allocator allocate multiple times or just once? Is there any restriction on the number of allocations per allocator?
+        - How does the strategy handle ineligible allocators who attempt to allocate? What actions or outcomes are triggered when an ineligible allocator tries to allocate?
+        - How is the data from allocate calls stored in the strategy? Describe the data structure or mechanism used to track and store the allocate data. What information is important to capture?
+    - In case of allocations that require token donations, are the tokens stored in the strategy or are they sent directly to a specific recipient? If they are stored, who can withdraw funds?
+    - Are there any specific rules or conditions for allocations? For example, are there limits on the amount that can be allocated to each recipient or any other constraints that need to be considered?
 
-### Allocation Logic
+### Final Allocation Logic
 
-Describe the logic for allocating to recipients within the strategy. Explain the process of updating the contract's data to store allocations and any associated information. If there are any special considerations or conditions, mention them here.
+Explain the logic for how the strategy will calculate the pool's fund allocation. This should include any calculation formulas, the shape of the allocation, and any special considerations.
 
 #### Questions to answer
-
-1. Are there any conditions on when the `allocate` function is callable or not? Eg. a allocation period.
-2. How are allocations stored in the strategy? Describe the data structure or mechanism used to track and store the allocations. What information is important to capture for each allocation?
-3. How are allocations assigned to recipients? Explain the process of allocating funds, tokens or votes to the recipients. Are there any transfers or other events triggered during the allocation process?
-4. In case of token allocations, are the tokens stored in the strategy and who can withdraw funds or are they sent directly to a specific recipient?
-5. Are there any specific rules or conditions for allocations? For example, are there limits on the amount that can be allocated to each recipient or any other constraints that need to be considered?
+- How are final allocations assigned to recipients? Are they calculated?
+    - If they're calculated, include the formula for calculation. 
+- What is the shape of the final allocation? Is it proportional, winner-take-all, etc?
+- Are there any transfers or other events triggered during the allocation process?
 
 ### Distribution Logic
 
-Outline the logic for distributing the pool amount to recipients within the strategy. Describe how the distribution amount per recipient is determined and any mechanisms in place to prevent double payments.
+Outline the logic for distributing the pool amount to recipients within the strategy. Describe any mechanisms in place to prevent double payments.
 
 #### Questions to answer
 
-1. Who is eligible to receive a payout? Specify the criteria or conditions that determine whether a recipient is eligible to receive a distribution from the pool.
-2. What factors determine the distribution amount for each recipient? Explain the criteria or calculations used to determine the amount that each recipient should receive from the pool. Provide details on the formula or method used to calculate the payout amount for each recipient.
-3. Are any additional functions needed to set the payout amounts or enable the distribution? Describe any helper functions or steps required before calling the distribute function.
-4. Who can call the distribute function? In case there are restrictions, explain why they are needed and who has the authorization to invoke the distribution process.
-5. Are there any conditions on when the distribute function can be called? Specify any prerequisites or constraints that need to be satisfied before calling the function.
-6. Are there multiple distributions or just a single distribution? Clarify whether there are multiple rounds of distribution or if it's a one-time distribution process.
-7. How are tokens distributed to recipients in this strategy? Explain the mechanism or steps involved in transferring tokens to the recipients.
-8. Are any third-party services involved in the distribution process? If there are any external dependencies or integrations, provide additional information or relevant links.
-9. Are there any mechanisms in place to prevent double payments? Describe any safeguards or mechanisms implemented to ensure that recipients do not receive duplicate or excessive payments.
+- Who is eligible to receive a payout? Specify the criteria or conditions that determine whether a recipient is eligible to receive a distribution from the pool.
+- What factors determine the distribution amount for each recipient? Explain the criteria or calculations used to determine the amount that each recipient should receive from the pool. Provide details on the formula or method used to calculate the payout amount for each recipient.
+- Are any additional functions needed to set the payout amounts or enable the distribution? Describe any helper functions or steps required before calling the distribute function.
+- Who can call the distribute function? In case there are restrictions, explain why they are needed and who has the authorization to invoke the distribution process.
+- Are there any conditions on when the distribute function can be called? Specify any prerequisites or constraints that need to be satisfied before calling the function.
+- Are there multiple distributions or just a single distribution? Clarify whether there are multiple rounds of distribution or if it's a one-time distribution process.
+- How are tokens distributed to recipients in this strategy? Explain the mechanism or steps involved in transferring tokens to the recipients.
+- Are any third-party services involved in the distribution process? If there are any external dependencies or integrations, provide additional information or relevant links.
+- Are there any mechanisms in place to prevent double payments? Describe any safeguards or mechanisms implemented to ensure that recipients do not receive duplicate or excessive payments.
 
 ## Developer Specifications
 
