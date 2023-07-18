@@ -32,7 +32,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
     error RECIPIENT_ALREADY_ACCEPTED();
     error INVALID_RECIPIENT();
-    error UNAUTHORIZED();
+    error votedForOld();
     error INVALID_MILESTONE();
     error MILESTONE_ALREADY_ACCEPTED();
     error EXCEEDING_MAX_BID();
@@ -72,7 +72,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// ========= Initialize ==========
     /// ===============================
 
-    function initialize(uint256 _poolId, bytes memory _data) public override {
+    function initialize(uint256 _poolId, bytes memory _data) public virtual override {
         super.initialize(_poolId, _data);
 
         (maxBid, registryGating) = abi.decode(_data, (uint256, bool));
@@ -149,7 +149,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _metadata The proof of work
     function submitMilestone(Metadata calldata _metadata) external {
         if (acceptedRecipientId != msg.sender && !_isIdentityManager(acceptedRecipientId, msg.sender)) {
-            revert UNAUTHORIZED();
+            revert votedForOld();
         }
 
         if (upcomingMilestone > milestones.length) {
@@ -211,7 +211,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
                 abi.decode(_data, (address, address, uint256, Metadata));
 
             if (!_isIdentityManager(recipientId, _sender)) {
-                revert UNAUTHORIZED();
+                revert votedForOld();
             }
         } else {
             (recipientAddress, proposalBid, metadata) = abi.decode(_data, (address, uint256, Metadata));
@@ -240,7 +240,13 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Select recipient for RFP allocation
     /// @param _data The data to be decoded
     /// @param _sender The sender of the allocation
-    function _allocate(bytes memory _data, address _sender) internal override nonReentrant onlyPoolManager(_sender) {
+    function _allocate(bytes memory _data, address _sender)
+        internal
+        virtual
+        override
+        nonReentrant
+        onlyPoolManager(_sender)
+    {
         if (acceptedRecipientId != address(0)) {
             revert RECIPIENT_ALREADY_ACCEPTED();
         }
@@ -265,7 +271,12 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Distribute the upcoming milestone
     /// @param _sender The sender of the distribution
-    function _distribute(address[] memory, bytes memory, address _sender) internal override onlyPoolManager(_sender) {
+    function _distribute(address[] memory, bytes memory, address _sender)
+        internal
+        virtual
+        override
+        onlyPoolManager(_sender)
+    {
         if (acceptedRecipientId == address(0)) {
             revert INVALID_RECIPIENT();
         }

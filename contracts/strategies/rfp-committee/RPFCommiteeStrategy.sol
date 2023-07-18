@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import {IAllo} from "../../core/IAllo.sol";
-import {IRegistry} from "../../core/IRegistry.sol";
-import {BaseStrategy} from "../BaseStrategy.sol";
 import {RFPSimpleStrategy} from "../rfp-simple/RFPSimpleStrategy.sol";
 
 contract RFPCommiteeStrategy is RFPSimpleStrategy {
@@ -17,8 +14,15 @@ contract RFPCommiteeStrategy is RFPSimpleStrategy {
     /// ================================
 
     uint256 public voteThreshold;
-    mapping(address => bool) public hasVoted;
+    // committee member address => recipient
+    mapping(address => address) public votedFor;
     mapping(address => uint256) public votes;
+
+    /// ===============================
+    /// ======== Constructor ==========
+    /// ===============================
+
+    constructor(address _allo, string memory _name) RFPSimpleStrategy(_allo, _name) {}
 
     /// ===============================
     /// ========= Initialize ==========
@@ -44,13 +48,15 @@ contract RFPCommiteeStrategy is RFPSimpleStrategy {
             revert RECIPIENT_ALREADY_ACCEPTED();
         }
 
-        if (hasVoted[msg.sender]) {
-            revert UNAUTHORIZED();
+        address votedForOld = votedFor[_sender];
+        if (votedForOld == address(0)) {
+            votes[votedForOld] -= 1;
         }
 
         address recipientId = abi.decode(_data, (address));
 
         votes[recipientId] += 1;
+        votedFor[_sender] = recipientId;
         emit Voted(recipientId, _sender);
 
         if (votes[recipientId] == voteThreshold) {
