@@ -9,6 +9,7 @@ interface IRegistry {
     /// ======================
 
     struct Identity {
+        bytes32 id;
         uint256 nonce;
         string name;
         Metadata metadata;
