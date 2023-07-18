@@ -32,7 +32,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
     error RECIPIENT_ALREADY_ACCEPTED();
     error INVALID_RECIPIENT();
-    error UNAUTHORIZED();
+    error votedForOld();
     error INVALID_MILESTONE();
     error MILESTONE_ALREADY_ACCEPTED();
     error EXCEEDING_MAX_BID();
@@ -60,7 +60,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     Milestone[] public milestones;
 
     /// @notice recipientId -> Recipient
-    mapping(address => Recipient) private recipients;
+    mapping(address => Recipient) private _recipients;
 
     /// ===============================
     /// ======== Constructor ==========
@@ -72,7 +72,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// ========= Initialize ==========
     /// ===============================
 
-    function initialize(uint256 _poolId, bytes memory _data) public override {
+    function initialize(uint256 _poolId, bytes memory _data) public virtual override {
         super.initialize(_poolId, _data);
 
         (maxBid, registryGating) = abi.decode(_data, (uint256, bool));
@@ -98,7 +98,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Returns the payout summary for the accepted recipient
     function getPayouts(address[] memory, bytes memory, address) external view returns (PayoutSummary[] memory) {
         PayoutSummary[] memory payouts = new PayoutSummary[](1);
-        payouts[0] = PayoutSummary(acceptedRecipientId, recipients[acceptedRecipientId].proposalBid);
+        payouts[0] = PayoutSummary(acceptedRecipientId, _recipients[acceptedRecipientId].proposalBid);
 
         return payouts;
     }
@@ -149,7 +149,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _metadata The proof of work
     function submitMilestone(Metadata calldata _metadata) external {
         if (acceptedRecipientId != msg.sender && !_isIdentityManager(acceptedRecipientId, msg.sender)) {
-            revert UNAUTHORIZED();
+            revert votedForOld();
         }
 
         if (upcomingMilestone > milestones.length) {
@@ -211,7 +211,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
                 abi.decode(_data, (address, address, uint256, Metadata));
 
             if (!_isIdentityManager(recipientId, _sender)) {
-                revert UNAUTHORIZED();
+                revert votedForOld();
             }
         } else {
             (recipientAddress, proposalBid, metadata) = abi.decode(_data, (address, uint256, Metadata));
@@ -231,7 +231,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
             recipientStatus: RecipientStatus.Pending
         });
 
-        recipients[recipientId] = recipient;
+        _recipients[recipientId] = recipient;
         _recipientIds.push(recipientId);
 
         emit Registered(recipientId, _data, _sender);
@@ -240,7 +240,13 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Select recipient for RFP allocation
     /// @param _data The data to be decoded
     /// @param _sender The sender of the allocation
-    function _allocate(bytes memory _data, address _sender) internal override nonReentrant onlyPoolManager(_sender) {
+    function _allocate(bytes memory _data, address _sender)
+        internal
+        virtual
+        override
+        nonReentrant
+        onlyPoolManager(_sender)
+    {
         if (acceptedRecipientId != address(0)) {
             revert RECIPIENT_ALREADY_ACCEPTED();
         }
@@ -249,9 +255,9 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
         // update status of acceptedRecipientId to accepted
         if (acceptedRecipientId != address(0)) {
-            Recipient storage recipient = recipients[acceptedRecipientId];
+            Recipient storage recipient = _recipients[acceptedRecipientId];
 
-            if (recipients[acceptedRecipientId].recipientStatus != RecipientStatus.Pending) {
+            if (recipient.recipientStatus != RecipientStatus.Pending) {
                 revert INVALID_RECIPIENT();
             }
 
@@ -265,7 +271,12 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Distribute the upcoming milestone
     /// @param _sender The sender of the distribution
-    function _distribute(address[] memory, bytes memory, address _sender) internal override onlyPoolManager(_sender) {
+    function _distribute(address[] memory, bytes memory, address _sender)
+        internal
+        virtual
+        override
+        onlyPoolManager(_sender)
+    {
         if (acceptedRecipientId == address(0)) {
             revert INVALID_RECIPIENT();
         }
@@ -276,7 +287,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
         IAllo.Pool memory pool = allo.getPool(poolId);
         Milestone storage milestone = milestones[upcomingMilestone];
-        Recipient memory recipient = recipients[acceptedRecipientId];
+        Recipient memory recipient = _recipients[acceptedRecipientId];
 
         uint256 amount = recipient.proposalBid * milestone.amountPercentage / 1e18;
 
@@ -301,7 +312,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Get the recipient
     /// @param _recipientId Id of the recipient
     function _getRecipient(address _recipientId) internal view returns (Recipient memory recipient) {
-        recipient = recipients[_recipientId];
+        recipient = _recipients[_recipientId];
 
         if (acceptedRecipientId != address(0) && acceptedRecipientId != _recipientId) {
             recipient.recipientStatus =
