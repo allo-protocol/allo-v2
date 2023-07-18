@@ -24,9 +24,12 @@ interface IStrategy {
     /// ======= Errors =======
     /// ======================
 
+    // BaseStrategy errors
     error BaseStrategy_UNAUTHORIZED();
-    error BaseStrategy_STRATEGY_ALREADY_INITIALIZED();
+    error BaseStrategy_ALREADY_INITIALIZED();
+    error BaseStrategy_NOT_INITIALIZED();
     error BaseStrategy_INVALID_ADDRESS();
+    error BaseStrategy_POOL_INACTIVE();
 
     /// ======================
     /// ======= Events =======
@@ -37,6 +40,7 @@ interface IStrategy {
     event Registered(address indexed recipientId, bytes data, address sender);
     event Allocated(address indexed recipientId, uint256 amount, address token, address sender);
     event Distributed(address indexed recipientId, address recipientAddress, uint256 amount, address sender);
+    event PoolActive(bool active);
 
     /// ======================
     /// ======= Views ========

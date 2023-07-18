@@ -14,6 +14,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Struct to hold details of an recipient
     struct Recipient {
+        bool isRegistryIdentity;
         address recipientAddress;
         uint256 proposalBid;
         RecipientStatus recipientStatus;
@@ -32,11 +33,12 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
     error RECIPIENT_ALREADY_ACCEPTED();
     error INVALID_RECIPIENT();
-    error votedForOld();
+    error UNAUTHORIZED();
     error INVALID_MILESTONE();
     error MILESTONE_ALREADY_ACCEPTED();
     error EXCEEDING_MAX_BID();
     error MILESTONES_ALREADY_SET();
+    error INVALID_METADATA();
 
     /// ===============================
     /// ========== Events =============
@@ -52,6 +54,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// ================================
 
     bool public registryGating;
+    bool public metadataRequired;
     uint256 public maxBid;
     uint256 public upcomingMilestone;
     address public acceptedRecipientId;
@@ -73,12 +76,18 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// ===============================
 
     function initialize(uint256 _poolId, bytes memory _data) public virtual override {
-        super.initialize(_poolId, _data);
+        (uint256 _maxBid, bool _registryGating, bool _metadataRequired) = abi.decode(_data, (uint256, bool, bool));
+        __RFPSimpleStrategy_init(_poolId, _maxBid, _registryGating, _metadataRequired);
+    }
 
-        (maxBid, registryGating) = abi.decode(_data, (uint256, bool));
-        poolActive = true;
-
-        emit MAX_BID_UPDATED(maxBid);
+    function __RFPSimpleStrategy_init(uint256 _poolId, uint256 _maxBid, bool _registryGating, bool _metadataRequired)
+        internal
+    {
+        __BaseStrategy_init(_poolId);
+        registryGating = _registryGating;
+        metadataRequired = _metadataRequired;
+        _setPoolActive(true);
+        _updateMaxBid(_maxBid);
     }
 
     /// ===============================
@@ -149,8 +158,8 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Submit milestone to RFP pool
     /// @param _metadata The proof of work
     function submitMilestone(Metadata calldata _metadata) external {
-        if (acceptedRecipientId != msg.sender && !_isIdentityManager(acceptedRecipientId, msg.sender)) {
-            revert votedForOld();
+        if (acceptedRecipientId != msg.sender && !_isIdentityMember(acceptedRecipientId, msg.sender)) {
+            revert UNAUTHORIZED();
         }
 
         if (upcomingMilestone > milestones.length) {
@@ -167,9 +176,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Update max bid for RFP pool
     /// @param _maxBid The max bid to be set
     function updateMaxBid(uint256 _maxBid) external onlyPoolManager(msg.sender) {
-        maxBid = _maxBid;
-
-        emit MAX_BID_UPDATED(maxBid);
+        _updateMaxBid(_maxBid);
     }
 
     /// @notice Reject pending milestone
@@ -197,12 +204,18 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Submit proposal to RFP pool
     /// @param _data The data to be decoded
     /// @param _sender The sender of the transaction
-    function _registerRecipient(bytes memory _data, address _sender) internal override returns (address recipientId) {
+    function _registerRecipient(bytes memory _data, address _sender)
+        internal
+        override
+        onlyActivePool
+        returns (address recipientId)
+    {
         if (acceptedRecipientId != address(0)) {
             revert RECIPIENT_ALREADY_ACCEPTED();
         }
 
         address recipientAddress;
+        bool isRegistryIdentity;
         uint256 proposalBid;
         Metadata memory metadata;
 
@@ -211,12 +224,20 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
             (recipientId, recipientAddress, proposalBid, metadata) =
                 abi.decode(_data, (address, address, uint256, Metadata));
 
-            if (!_isIdentityManager(recipientId, _sender)) {
-                revert votedForOld();
+            if (!_isIdentityMember(recipientId, _sender)) {
+                revert UNAUTHORIZED();
             }
         } else {
-            (recipientAddress, proposalBid, metadata) = abi.decode(_data, (address, uint256, Metadata));
+            (recipientAddress, isRegistryIdentity, proposalBid, metadata) =
+                abi.decode(_data, (address, bool, uint256, Metadata));
             recipientId = _sender;
+            if (isRegistryIdentity && !_isIdentityMember(recipientId, _sender)) {
+                revert UNAUTHORIZED();
+            }
+        }
+
+        if (metadataRequired && (bytes(metadata.pointer).length == 0 || metadata.protocol == 0)) {
+            revert INVALID_METADATA();
         }
 
         // check if proposal bid is less than max bid
@@ -228,6 +249,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
         Recipient memory recipient = Recipient({
             recipientAddress: recipientAddress,
+            isRegistryIdentity: registryGating ? true : isRegistryIdentity,
             proposalBid: proposalBid,
             recipientStatus: RecipientStatus.Pending
         });
@@ -263,6 +285,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
             }
 
             recipient.recipientStatus = RecipientStatus.Accepted;
+            _setPoolActive(false);
 
             IAllo.Pool memory pool = allo.getPool(poolId);
 
@@ -286,10 +309,6 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
             revert INVALID_MILESTONE();
         }
 
-        if (upcomingMilestone == milestones.length) {
-            poolActive = false;
-        }
-
         IAllo.Pool memory pool = allo.getPool(poolId);
         Milestone storage milestone = milestones[upcomingMilestone];
         Recipient memory recipient = _recipients[acceptedRecipientId];
@@ -308,7 +327,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Check if sender is identity owner or member
     /// @param _anchor Anchor of the identity
     /// @param _sender The sender of the transaction
-    function _isIdentityManager(address _anchor, address _sender) internal view returns (bool) {
+    function _isIdentityMember(address _anchor, address _sender) internal view returns (bool) {
         IRegistry registry = allo.getRegistry();
         IRegistry.Identity memory identity = registry.getIdentityByAnchor(_anchor);
         return registry.isOwnerOrMemberOfIdentity(identity.id, _sender);
@@ -323,5 +342,13 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
             recipient.recipientStatus =
                 recipient.recipientStatus > RecipientStatus.None ? RecipientStatus.Rejected : RecipientStatus.None;
         }
+    }
+
+    /// @notice Update max bid for RFP pool
+    /// @param _maxBid The max bid to be set
+    function _updateMaxBid(uint256 _maxBid) internal {
+        maxBid = _maxBid;
+
+        emit MAX_BID_UPDATED(maxBid);
     }
 }

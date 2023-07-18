@@ -47,6 +47,21 @@ abstract contract BaseStrategy is IStrategy, Transfer {
         _;
     }
 
+    /// @notice Modifier to check if the pool is active
+    modifier onlyActivePool() {
+        if (!poolActive) {
+            revert BaseStrategy_POOL_INACTIVE();
+        }
+        _;
+    }
+
+    modifier onlyInitialized() {
+        if (poolId == 0) {
+            revert BaseStrategy_NOT_INITIALIZED();
+        }
+        _;
+    }
+
     /// ================================
     /// =========== Views ==============
     /// ================================
@@ -73,17 +88,12 @@ abstract contract BaseStrategy is IStrategy, Transfer {
 
     /// @notice Initializes the allocation strategy
     /// @param _poolId Id of the pool
-    /// @param _data The data to be decoded
     /// @dev This function is called by Allo.sol
-    function initialize(uint256 _poolId, bytes memory _data) public virtual onlyAllo {
-        if (_poolId == 0) {
-            revert BaseStrategy_INVALID_ADDRESS();
-        }
+    function __BaseStrategy_init(uint256 _poolId) internal virtual {
         if (poolId != 0) {
-            revert BaseStrategy_STRATEGY_ALREADY_INITIALIZED();
+            revert BaseStrategy_ALREADY_INITIALIZED();
         }
         poolId = _poolId;
-        _data; // Silence unused parameter warning: _data
     }
 
     function skim(address _token) external virtual override {
@@ -102,21 +112,27 @@ abstract contract BaseStrategy is IStrategy, Transfer {
         }
     }
 
-    function registerRecipient(bytes memory _data, address _sender) external payable onlyAllo returns (address) {
+    function registerRecipient(bytes memory _data, address _sender) external payable onlyAllo onlyInitialized returns (address) {
         return _registerRecipient(_data, _sender);
     }
 
-    function allocate(bytes memory _data, address _sender) external payable onlyAllo {
+    function allocate(bytes memory _data, address _sender) external payable onlyAllo onlyInitialized {
         return _allocate(_data, _sender);
     }
 
-    function distribute(address[] memory _recipientIds, bytes memory _data, address _sender) external onlyAllo {
+    function distribute(address[] memory _recipientIds, bytes memory _data, address _sender) external onlyAllo onlyInitialized {
         return _distribute(_recipientIds, _data, _sender);
     }
 
     /// ====================================
     /// ============ Internal ==============
     /// ====================================
+
+    // set the pool to active or inactive
+    function _setPoolActive(bool _active) internal {
+        poolActive = _active;
+        emit PoolActive(_active);
+    }
 
     // this is called via allo.sol to register recipients
     // it can change their status all the way to Accepted, or to Pending if there are more steps

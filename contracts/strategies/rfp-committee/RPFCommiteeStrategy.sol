@@ -29,11 +29,19 @@ contract RFPCommiteeStrategy is RFPSimpleStrategy {
     /// ===============================
 
     function initialize(uint256 _poolId, bytes memory _data) public override {
-        super.initialize(_poolId, _data);
+        (uint256 _maxBid, bool _registryGating, bool _metadataRequired, uint256 _voteThreshold) = abi.decode(_data, (uint256, bool, bool, uint256));
+        __RPFCommiteeStrategy_init(_poolId, _maxBid, _registryGating, _metadataRequired, _voteThreshold);
+    }
 
-        (maxBid, voteThreshold, registryGating) = abi.decode(_data, (uint256, uint256, bool));
-
-        emit MAX_BID_UPDATED(maxBid);
+    function __RPFCommiteeStrategy_init(
+        uint256 _poolId,
+        uint256 _maxBid,
+        bool _registryGating,
+        bool _metadataRequired,
+        uint256 _voteThreshold
+    ) internal {
+        __RFPSimpleStrategy_init(_poolId, _maxBid, _registryGating, _metadataRequired);
+        voteThreshold = _voteThreshold;
     }
 
     /// ====================================
