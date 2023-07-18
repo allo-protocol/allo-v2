@@ -1,4 +1,4 @@
-Spec: Donation Voting with Passport and Offchain Calculation
+Spec: Open Donation Voting with Offchain Calculation
 ---------------------------------
 
 ## Overview 
@@ -9,7 +9,6 @@ At time of writing (June 2023), most prominent QF formulas are too computational
 * the allocation is calculated **off-chain**
 * the final distribution is recorded **on-chain**
 
-This strategy also uses Passport as a voter eligibility signal as outlined below. 
 
 ## Spec
 ### Recipient logic
@@ -37,16 +36,14 @@ In this strategy, recipients must submit an application and be approved by pool 
         - If a recipient's current status is `Accepted`, then their application info is updated and their status is changed to `Pending` (global and local)
 
 ### Allocate function logic
-In this strategy, eligible participants are able to express their preferences by donating tokens to the recipients they want to receive allocations. Pool managers can opt to use Passport to determine participant eligibility. 
+In this strategy, allocators are able to express their preferences by donating tokens to the recipients they want to receive allocations. All wallets are considered eligible allocators by the contract, as actual eligibility is determined in the offchain payout calculation.
 
-- the pool is able to configure Passport for voter eligibility signalling
-    - If they choose to configure, all voters will be marked as `eligible` or `ineligible` depending on the Passport score
-    - If they do not configure, all voters will be marked as `eligible`
+- all addresses will be marked as `eligible` allocators
 - `allocate` is callable by any user, and donates tokens to accepted recipients
-    - users can donate regardless of their eligibility status
+    - allocators can donate regardless of their eligibility status
     - pool manager can create an allowlist of tokens that will be accepted for donations
-        - If a user tries to submit unapproved tokens the transaction should revert
-    - if a user tries to donate to a recipient that is not listed as accepted, then the transaction should revert
+        - If an allocator tries to submit unapproved tokens the transaction should revert
+    - if an allocator tries to donate to a recipient that is not listed as accepted, then the transaction should revert
     - pool manager must set an allocation start and end date on the strategy. 
         - `allocate` can only be called in the allocation window, otherwise it reverts
     - when a donation is made via `allocate`, the contract must store or emit:
@@ -58,19 +55,19 @@ In this strategy, eligible participants are able to express their preferences by
         - the time at which the donation was made
     - the donated tokens are held on the contract until the end of the round.
         - the held tokens are automatically released when the allocation window ends
-    - users are able to donate to multiple recipients in one transaction
-    - users are able to donate as many times as they want as long as the allocation window is open
+    - allocators are able to donate to multiple recipients in one transaction
+    - allocators are able to donate as many times as they want as long as the allocation window is open
 
-### Final allocation logic
-In this strategy, the funding pool is technically distributed proportionally to votes but everything is calculated offchain. The pool manager will need to upload a final allocation to the contract, which should be the amount of the pool token that each recipient should receive. 
+### Payout calculation logic
+In this strategy, the funding pool is technically distributed proportionally to votes but everything is calculated offchain. The pool manager will need to upload a final `payout` to the contract, which should include the amount of the pool token that each recipient should receive. 
 
-- `uploadAllocation` - function for pool admins to upload final allocation
+- a function must exist for pool managers to set the `payout` for the pool
 
 ### Distribution logic
 In this strategy, the pool admins are able to push pool funds to recipients.
 
-- pool managers must have a function with which to indicate that recipients are ready for distribution. This function should be able to bulk apply that status to recipients.
+- pool managers must have a function with which to indicate that recipients are ready to receive their `payout`. This function should be able to bulk apply that status to recipients.
 - `distribute` - function for anyone to distribute pool funds to recipients.
-    - This function distributes the allocated funds to any recipients that are marked as ready for distribution
+    - This function distributes the allocated funds to any recipients that are marked as ready for `payout`
     - The pool manager should have the ability to distribute the pool in batches
 - the pool manager must have a function with which to reclaim any undistributed pool funds. This can only be called 30 days after the allocation window ends. 
