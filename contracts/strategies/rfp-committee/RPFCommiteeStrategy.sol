@@ -49,7 +49,7 @@ contract RFPCommiteeStrategy is RFPSimpleStrategy {
         }
 
         address votedForOld = votedFor[_sender];
-        if (votedForOld == address(0)) {
+        if (votedForOld != address(0)) {
             votes[votedForOld] -= 1;
         }
 
