@@ -52,14 +52,21 @@ contract NFTVoteWinnerTakeAll is BaseStrategy {
     /// ===============================
 
     function initialize(uint256 _poolId, bytes memory _data) public override {
-        __BaseStrategy_init(_poolId);
-        (nft, startTime, endTime) = abi.decode(_data, (ERC721, uint256, uint256));
+        (ERC721 _nft, uint256 _startTime, uint256 _endTime) = abi.decode(_data, (ERC721, uint256, uint256));
+        __NFTVoteWinnerStrategy_init(_poolId, _nft, _startTime, _endTime);
+    }
 
-        if (startTime >= endTime || endTime < block.timestamp) {
+    function __NFTVoteWinnerStrategy_init(uint256 _poolId, ERC721 _nft, uint256 _startTime, uint256 _endTime)
+        internal
+    {
+        if (_startTime >= _endTime || _endTime < block.timestamp) {
             revert BadTimes();
         }
-
-        poolActive = true;
+        __BaseStrategy_init(_poolId);
+        nft = _nft;
+        startTime = _startTime;
+        endTime = _endTime;
+        _setPoolActive(true);
     }
 
     /// ===============================
@@ -146,7 +153,7 @@ contract NFTVoteWinnerTakeAll is BaseStrategy {
         allo.decreasePoolTotalFunding(poolId, amountToDistribute);
         _transferAmount(pool.token, currentWinner, amountToDistribute);
 
-        poolActive = false;
+        _setPoolActive(false);
 
         emit Distributed(currentWinner, currentWinner, amountToDistribute, _sender);
     }
