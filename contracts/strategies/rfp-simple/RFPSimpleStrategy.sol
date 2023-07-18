@@ -39,6 +39,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     error EXCEEDING_MAX_BID();
     error MILESTONES_ALREADY_SET();
     error INVALID_METADATA();
+    error AMOUNT_TOO_LOW();
 
     /// ===============================
     /// ========== Events =============
@@ -347,6 +348,9 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Update max bid for RFP pool
     /// @param _maxBid The max bid to be set
     function _updateMaxBid(uint256 _maxBid) internal {
+        if (_maxBid < maxBid) {
+            revert AMOUNT_TOO_LOW();
+        }
         maxBid = _maxBid;
 
         emit MAX_BID_UPDATED(maxBid);
