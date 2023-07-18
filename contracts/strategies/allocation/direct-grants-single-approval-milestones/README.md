@@ -16,15 +16,15 @@ In this strategy, prospective recipients only need to apply for a grant. There i
             - recipient must answer questions as specified by pool manager
         - pool manager can require that the recipient include a requested grant amount
 
-### Allocate function logic
-In this strategy, pool managers are able to review and approve grants for specific amounts. Only pool managers should be able to call `allocate`.
+### Allocation logic
+In this strategy, pool managers are able to review and approve grants for specific amounts. Only pool managers should be considered eligible allocators that can call `allocate`.
 - `allocate` — function for pool managers (i.e. wallets marked as `eligible`) to either approve or reject a grant application
     - If approving, the pool manager needs to set the amount of the pool that the recipient will receive as part of the grant. When approving, this also updates both global and local status to `Approved`
     - If rejecting, this should update both global and local status to `Rejected`
 - `updateApplicationStatus` - function for pool managers to update the status of the recipient's application to signal that the application has been seen but no decision has been made. This action should keep the global status as `Pending` but set the local status to `In Review`
 
-### Final allocation logic
-The recipient will receive the amount set by the pool manager with the `allocate` function. 
+### Payout calculation logic
+The amount set by the pool manager with `allocate` should also be set as the recipient's `payout`.
 
 ### Distribution
 This strategy will use a milestone-based payout approach, where the recipient must meet certain criteria to unlock the full grant payments. The pool manager should have the ability to configure the milestones for each recipient, and to approve the distribution at each gate. 
