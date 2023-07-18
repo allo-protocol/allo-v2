@@ -15,7 +15,7 @@ At time of writing (June 2023), most prominent QF formulas are too computational
 In this strategy, recipients must submit an application and be approved by pool admins. 
 - **Recipient information**
     - prospective recipients must provide an address where they can receive funds
-    - prospective recipients must provide a `recipientId` to be the unique identifier for their application
+    - prospective recipients must provide an address as `recipientId`, which serves as the unique identifier for their registration
         - if the Allo registry is required, the `anchorId` is used is used as `recipientId`
         - if the Allo registry is not required, the recipient has the option of using their `anchorId` or `msg.sender`
 - **Recipient eligibility**
