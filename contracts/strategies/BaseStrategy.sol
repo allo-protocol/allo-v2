@@ -112,7 +112,13 @@ abstract contract BaseStrategy is IStrategy, Transfer {
         }
     }
 
-    function registerRecipient(bytes memory _data, address _sender) external payable onlyAllo onlyInitialized returns (address) {
+    function registerRecipient(bytes memory _data, address _sender)
+        external
+        payable
+        onlyAllo
+        onlyInitialized
+        returns (address)
+    {
         return _registerRecipient(_data, _sender);
     }
 
@@ -120,7 +126,11 @@ abstract contract BaseStrategy is IStrategy, Transfer {
         return _allocate(_data, _sender);
     }
 
-    function distribute(address[] memory _recipientIds, bytes memory _data, address _sender) external onlyAllo onlyInitialized {
+    function distribute(address[] memory _recipientIds, bytes memory _data, address _sender)
+        external
+        onlyAllo
+        onlyInitialized
+    {
         return _distribute(_recipientIds, _data, _sender);
     }
 

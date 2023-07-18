@@ -52,7 +52,7 @@ contract NFTVoteWinnerTakeAll is BaseStrategy {
     /// ===============================
 
     function initialize(uint256 _poolId, bytes memory _data) public override {
-        super.initialize(_poolId, _data);
+        __BaseStrategy_init(_poolId);
         (nft, startTime, endTime) = abi.decode(_data, (ERC721, uint256, uint256));
 
         if (startTime >= endTime || endTime < block.timestamp) {
