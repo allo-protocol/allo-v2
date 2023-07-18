@@ -31,11 +31,12 @@ contract RFPStrategy is BaseStrategy, ReentrancyGuard {
     /// ===============================
 
     error RECIPIENT_ALREADY_ACCEPTED();
-    error NO_ACCEPTED_RECIPIENT();
+    error INVALID_RECIPIENT();
     error UNAUTHORIZED();
     error INVALID_MILESTONE();
     error MILESTONE_ALREADY_ACCEPTED();
     error EXCEEDING_MAX_BID();
+    error MILESTONES_ALREADY_SET();
 
     /// ===============================
     /// ========== Events =============
@@ -59,7 +60,7 @@ contract RFPStrategy is BaseStrategy, ReentrancyGuard {
     Milestone[] public milestones;
 
     /// @notice recipientId -> Recipient
-    mapping(address => Recipient) public recipients;
+    mapping(address => Recipient) private recipients;
 
     /// ===============================
     /// ======== Constructor ==========
@@ -83,10 +84,15 @@ contract RFPStrategy is BaseStrategy, ReentrancyGuard {
     /// ============ Views ============
     /// ===============================
 
+    /// @notice Get the recipient
+    function getRecipient(address _recipientId) external view returns (Recipient memory) {
+        return _getRecipient(_recipientId);
+    }
+
     /// @notice Checks if msg.sender is eligible for RFP allocation
     /// @param _recipientId Id of the recipient
-    function getRecipientStatus(address _recipientId) public view override returns (RecipientStatus status) {
-        return recipients[_recipientId].recipientStatus;
+    function getRecipientStatus(address _recipientId) external view override returns (RecipientStatus) {
+        return _getRecipient(_recipientId).recipientStatus;
     }
 
     /// @notice Returns the payout summary for the accepted recipient
@@ -99,7 +105,7 @@ contract RFPStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Checks if address is elgible allocator
     /// @param _allocator Address of the allocator
-    function isValidAllocator(address _allocator) public view returns (bool) {
+    function isValidAllocator(address _allocator) external view returns (bool) {
         return allo.isPoolManager(poolId, _allocator);
     }
 
@@ -116,13 +122,24 @@ contract RFPStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Set milestones for RFP pool
     /// @param _milestones The milestones to be set
     function setMilestones(Milestone[] memory _milestones) external onlyPoolManager(msg.sender) {
+        if (upcomingMilestone != 0) {
+            revert MILESTONES_ALREADY_SET();
+        }
+
+        uint256 totalAmountPercentage;
+
         uint256 milestonesLength = _milestones.length;
         for (uint256 i = 0; i < milestonesLength;) {
+            totalAmountPercentage += _milestones[i].amountPercentage;
             milestones.push(_milestones[i]);
 
             unchecked {
                 i++;
             }
+        }
+
+        if (totalAmountPercentage != 1e18) {
+            revert INVALID_MILESTONE();
         }
 
         emit MILESTONES_SET();
@@ -139,8 +156,9 @@ contract RFPStrategy is BaseStrategy, ReentrancyGuard {
             revert INVALID_MILESTONE();
         }
 
-        milestones[upcomingMilestone].metadata = _metadata;
-        milestones[upcomingMilestone].milestoneStatus = RecipientStatus.Pending;
+        Milestone storage milestone = milestones[upcomingMilestone];
+        milestone.metadata = _metadata;
+        milestone.milestoneStatus = RecipientStatus.Pending;
 
         emit MILESTONE_SUBMITTED(upcomingMilestone);
     }
@@ -162,6 +180,13 @@ contract RFPStrategy is BaseStrategy, ReentrancyGuard {
 
         milestones[_milestoneId].milestoneStatus = RecipientStatus.Rejected;
         emit MILESTONE_REJECTED(_milestoneId);
+    }
+
+    /// @notice Withdraw funds from RFP pool
+    /// @param _amount The amount to be withdrawn
+    function withdraw(uint256 _amount) external onlyPoolManager(msg.sender) {
+        allo.decreasePoolTotalFunding(poolId, _amount);
+        _transferAmount(allo.getPool(poolId).token, msg.sender, _amount);
     }
 
     /// ====================================
@@ -222,22 +247,14 @@ contract RFPStrategy is BaseStrategy, ReentrancyGuard {
 
         acceptedRecipientId = abi.decode(_data, (address));
 
-        uint256 _recipientsCounter = _recipientIds.length;
-        for (uint256 i = 0; i < _recipientsCounter;) {
-            // update status of all other recipients to rejected
-            address recipientId = _recipientIds[i];
-            if (recipientId != acceptedRecipientId) {
-                recipients[recipientId].recipientStatus = RecipientStatus.Rejected;
-            }
-
-            unchecked {
-                i++;
-            }
-        }
-
         // update status of acceptedRecipientId to accepted
         if (acceptedRecipientId != address(0)) {
             Recipient storage recipient = recipients[acceptedRecipientId];
+
+            if (recipients[acceptedRecipientId].recipientStatus != RecipientStatus.Pending) {
+                revert INVALID_RECIPIENT();
+            }
+
             recipient.recipientStatus = RecipientStatus.Accepted;
 
             IAllo.Pool memory pool = allo.getPool(poolId);
@@ -246,9 +263,11 @@ contract RFPStrategy is BaseStrategy, ReentrancyGuard {
         }
     }
 
+    /// @notice Distribute the upcoming milestone
+    /// @param _sender The sender of the distribution
     function _distribute(address[] memory, bytes memory, address _sender) internal override onlyPoolManager(_sender) {
         if (acceptedRecipientId == address(0)) {
-            revert NO_ACCEPTED_RECIPIENT();
+            revert INVALID_RECIPIENT();
         }
 
         if (upcomingMilestone > milestones.length) {
@@ -270,9 +289,23 @@ contract RFPStrategy is BaseStrategy, ReentrancyGuard {
         emit Distributed(acceptedRecipientId, recipient.recipientAddress, amount, _sender);
     }
 
+    /// @notice Check if sender is identity owner or member
+    /// @param _anchor Anchor of the identity
+    /// @param _sender The sender of the transaction
     function _isIdentityManager(address _anchor, address _sender) internal view returns (bool) {
         IRegistry registry = allo.getRegistry();
         IRegistry.Identity memory identity = registry.getIdentityByAnchor(_anchor);
         return registry.isOwnerOrMemberOfIdentity(identity.id, _sender);
+    }
+
+    /// @notice Get the recipient
+    /// @param _recipientId Id of the recipient
+    function _getRecipient(address _recipientId) internal view returns (Recipient memory recipient) {
+        recipient = recipients[_recipientId];
+
+        if (acceptedRecipientId != address(0) && acceptedRecipientId != _recipientId) {
+            recipient.recipientStatus =
+                recipient.recipientStatus > RecipientStatus.None ? RecipientStatus.Rejected : RecipientStatus.None;
+        }
     }
 }
