@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import {IAllo} from "../core/IAllo.sol";
-import {IRegistry} from "../core/IRegistry.sol";
-import {BaseStrategy} from "./BaseStrategy.sol";
-import {Metadata} from "../core/libraries/Metadata.sol";
+import {IAllo} from "../../core/IAllo.sol";
+import {IRegistry} from "../../core/IRegistry.sol";
+import {BaseStrategy} from "../BaseStrategy.sol";
+import {Metadata} from "../../core/libraries/Metadata.sol";
 import {ReentrancyGuard} from "@openzeppelin/security/ReentrancyGuard.sol";
 
-contract RFPStrategy is BaseStrategy, ReentrancyGuard {
+contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// ================================
     /// ========== Storage =============
     /// ================================
