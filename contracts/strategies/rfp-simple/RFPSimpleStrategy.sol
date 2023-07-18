@@ -45,7 +45,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// ========== Events =============
     /// ===============================
 
-    event MAX_BID_UPDATED(uint256 maxBid);
+    event MAX_BID_INCREASED(uint256 maxBid);
     event MILESTONE_SUBMITTED(uint256 milestoneId);
     event MILESTONE_REJECTED(uint256 milestoneId);
     event MILESTONES_SET();
@@ -88,7 +88,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         registryGating = _registryGating;
         metadataRequired = _metadataRequired;
         _setPoolActive(true);
-        _updateMaxBid(_maxBid);
+        _increaseMaxBid(_maxBid);
     }
 
     /// ===============================
@@ -176,8 +176,8 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Update max bid for RFP pool
     /// @param _maxBid The max bid to be set
-    function updateMaxBid(uint256 _maxBid) external onlyPoolManager(msg.sender) {
-        _updateMaxBid(_maxBid);
+    function increaseMaxBid(uint256 _maxBid) external onlyPoolManager(msg.sender) {
+        _increaseMaxBid(_maxBid);
     }
 
     /// @notice Reject pending milestone
@@ -347,12 +347,12 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Update max bid for RFP pool
     /// @param _maxBid The max bid to be set
-    function _updateMaxBid(uint256 _maxBid) internal {
+    function _increaseMaxBid(uint256 _maxBid) internal {
         if (_maxBid < maxBid) {
             revert AMOUNT_TOO_LOW();
         }
         maxBid = _maxBid;
 
-        emit MAX_BID_UPDATED(maxBid);
+        emit MAX_BID_INCREASED(maxBid);
     }
 }
