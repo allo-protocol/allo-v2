@@ -60,7 +60,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     Milestone[] public milestones;
 
     /// @notice recipientId -> Recipient
-    mapping(address => Recipient) private recipients;
+    mapping(address => Recipient) private _recipients;
 
     /// ===============================
     /// ======== Constructor ==========
@@ -98,7 +98,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Returns the payout summary for the accepted recipient
     function getPayouts(address[] memory, bytes memory, address) external view returns (PayoutSummary[] memory) {
         PayoutSummary[] memory payouts = new PayoutSummary[](1);
-        payouts[0] = PayoutSummary(acceptedRecipientId, recipients[acceptedRecipientId].proposalBid);
+        payouts[0] = PayoutSummary(acceptedRecipientId, _recipients[acceptedRecipientId].proposalBid);
 
         return payouts;
     }
@@ -231,7 +231,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
             recipientStatus: RecipientStatus.Pending
         });
 
-        recipients[recipientId] = recipient;
+        _recipients[recipientId] = recipient;
         _recipientIds.push(recipientId);
 
         emit Registered(recipientId, _data, _sender);
@@ -249,9 +249,9 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
         // update status of acceptedRecipientId to accepted
         if (acceptedRecipientId != address(0)) {
-            Recipient storage recipient = recipients[acceptedRecipientId];
+            Recipient storage recipient = _recipients[acceptedRecipientId];
 
-            if (recipients[acceptedRecipientId].recipientStatus != RecipientStatus.Pending) {
+            if (recipient.recipientStatus != RecipientStatus.Pending) {
                 revert INVALID_RECIPIENT();
             }
 
@@ -276,7 +276,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
         IAllo.Pool memory pool = allo.getPool(poolId);
         Milestone storage milestone = milestones[upcomingMilestone];
-        Recipient memory recipient = recipients[acceptedRecipientId];
+        Recipient memory recipient = _recipients[acceptedRecipientId];
 
         uint256 amount = recipient.proposalBid * milestone.amountPercentage / 1e18;
 
@@ -301,7 +301,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Get the recipient
     /// @param _recipientId Id of the recipient
     function _getRecipient(address _recipientId) internal view returns (Recipient memory recipient) {
-        recipient = recipients[_recipientId];
+        recipient = _recipients[_recipientId];
 
         if (acceptedRecipientId != address(0) && acceptedRecipientId != _recipientId) {
             recipient.recipientStatus =
