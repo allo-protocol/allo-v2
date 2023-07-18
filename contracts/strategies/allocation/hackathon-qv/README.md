@@ -1,37 +1,42 @@
-Spec: Hackathon Quadratic Voting (QV)
+Spec: Hackathon Quadratic allocation (QV)
 ---------------------------------
 
 ## Overview 
-Quadratic Voting is a popular method for democratic decision-making. This strategy is designed to facilitate voting for the winners of a hackathon. An organizer is able to programmatically say who is an eligible recipient and decide to gate voting using Passport. The pool funds are distributed in tiers based on each recipients place in the quadratic vote. 
+Quadratic allocation is a popular method for democratic decision-making. This strategy is designed to facilitate allocation for the winners of a hackathon. An organizer is able to programmatically say who is an eligible recipient and decide to gate allocation using Passport. The pool funds are distributed in tiers based on each recipients place in the quadratic vote. 
 
 ## Spec
 ### Recipient logic
-In this strategy, the pool admin uses an Allo identity and an EAS attestation to indicate eligible recipients. Any Allo identities that have the admin-designated attestation are eligible recipients. 
-- `registerRecipient` - function for pool admin to indicate the attestation that a recipient must have to be eligible. 
-- `updateRecipientList` — function that anyone can call to pull the latest list of eligible recipients
-- `updateRecipient` — function that the identity admin can use to add metadata about their project
+In this strategy, recipients do not need to apply — they are automatically added to the pool if they are eligible. The pool admin uses an Allo identity and an EAS attestation to indicate eligible recipients. Any Allo identities that have the admin-designated attestation are eligible recipients. 
+- **Recipient Eligibility**
+    - Pool managers need a function to indicate which attestations are required for eligibility. They should have the ability to require multiple attestations. 
+        - QUESTION FOR ENG: should this be the purpose of `registerRecipient` for this strategy?
+- **Register recipients**
+    - There isn't an action where anyone will submit a specific recipient to the pool, but front-ends / users will need a way to get a list of all eligible recipients
+    - Eligible recipients will also need functions to: 
+        - add a payout address for this pool
+        - update metadata for this pool
 
-### Voter eligibility logic
-Pool admins are able configure Passport to gate voting. A voter must meet the community's Passport requirements in order to be marked as eligible. 
+### Allocation logic
+In this strategy, only wallets that hold a specific NFT are eligible to allocate. Allocations can only be submitted during a allocation window that is set by the pool admin. Each allocator gets a budget of "voice credits", which they can use to "purchase" votes on as many recipients as they would like. The number of votes each allocator can give to a recipient is equal to the square root of the number of voice credits they spend on that specific recipient. Votes can be fractional. 
+- **Allocator Eligibility**
+    - Wallets are only eligible if they hold a specific NFT.
+        - Pool managers must have the ability to configure which NFT is required in order to vote. 
+- **Allocate Function**
+    - `allocate` — function for eligible allocators to spend their voice credits
+        - the pool admin is able to designate the number of voice credits that each user gets 
+        - voice credits can be spent in batches — the contract should be aware of how many voice credits each allocator has available. 
+            - The contract should also know if that allocator has spent voice credits on a recipient already, so that the total number of votes given is equal to the square root of the total number of voice credits. For example: A allocator submitting two separate transactions of 4 voice credits each to the same recipient should receive 2.83 votes, not 4.
+    - voice credits can be spent in bulk — allocators can spend voice credits on multiple recipients in one transaction
+    - allocate can only be called while the allocation window is open
+    - the contract should emit an event indicating how many votes each allocator has purchased for each recipient. 
 
-### Voting logic
-In this strategy, only the eligible wallets are able to vote. Votes can only be cast during a voting window that is set by the pool admin. Each voter gets a budget of "voice credits", which they can use to "purchase" votes on as many recipients as they would like. The number of votes each voter can give to a recipient is equal to the square root of the number of voice credits they spend on that specific recipient. Votes can be fractional. 
-- `allocate` — function for eligible voters to spend their voice credits
-    - the pool admin is able to designate the number of voice credits that each user gets 
-    - voice credits can be spent in batches — the contract should be aware of how many voice credits each voter has available. 
-        - The contract should also know if that voter has spent voice credits on a recipient already, so that the total number of votes given is equal to the square root of the total number of voice credits. 
-            - For example: A voter submitting two separate transactions of 8 voice credits each to the same recipient should receive 4 votes, not 5.65.
-    - voice credits can be spent in bulk — voters can spend voice credits on multiple recipients in one transaction
-    - allocate can only be called while the voting window is open
-    - the contract should emit an event indicating how many votes each voter has purchased for each recipient. 
-
-### Allocation shape
-The pool funds are distributed based on recipients' rank in total number of received votes (NOT VOICE CREDITS). 
+### Payout calculation logic
+The `payout` for each recipient is determined by their rank in total number of received votes (NOT VOICE CREDITS). 
 - the pool admin can configure which rank positions receive funds and what percentage of the pool each place gets.
     - For example, the pool admin can say that first place gets 50%, second place gets 30%, and so on.
 
-### Distribution
+### Distribution logic
 In this strategy, the pool admins are able to push pool funds to recipients.
 
-- `distribute` - function for pool admin to distribute pool funds to recipients, as indicated by the calculated allocation. 
+- `distribute` - function for pool admin to distribute pool funds to recipients, as indicated by the calculated payouts. 
     - The pool admin should have the ability to distribute the pool in batches
