@@ -14,8 +14,10 @@ At time of writing (June 2023), most prominent QF formulas are too computational
 ### Recipient logic
 In this strategy, recipients must submit an application and be approved by pool admins. 
 - **Recipient information**
-    - In this strategy, recipients must provide a recipientID and a payout address at which they can receive funds. 
-        - If the Allo registry setting is required, then the Allo identityID is used as the recipientID
+    - prospective recipients must provide an address where they can receive funds
+    - prospective recipients must provide a `recipientId` to be the unique identifier for their application
+        - if the Allo registry is required, the `anchorId` is used is used as `recipientId`
+        - if the Allo registry is not required, the recipient has the option of using their `anchorId` or `msg.sender`
 - **Recipient eligibility**
     - Pool manager has the option to enable two separate eligibility requirements on this contract:
         - Requiring recipients to have an Allo registry identity in order to apply
