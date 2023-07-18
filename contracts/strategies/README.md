@@ -43,9 +43,9 @@ Explain the logic for determining how recipients are added to the strategy's poo
     - What steps are involved in changing the recipient's status from one state to another?
     - Are there any additional functions available to check or modify the recipient's status?
 
-### Allocate Function Logic (i.e. voting)
+### Allocation Logic 
 
-Explain the logic for how the strategy will allow eligible entities to express an opinion about how the pool's funds should be allocated. This should include how entities are determined to be eligible to express an opinion, the logic for the allocate function, and any special considerations or conditions.
+Explain the logic for how the strategy will allow eligible allocators to express an opinion about how the pool's funds should be allocated. This should include how allocators are determined to be eligible, the logic for the allocate function, and any special considerations or conditions.
 
 #### Questions to answer
 
@@ -61,25 +61,24 @@ Explain the logic for how the strategy will allow eligible entities to express a
     - In case of allocations that require token donations, are the tokens stored in the strategy or are they sent directly to a specific recipient? If they are stored, who can withdraw funds?
     - Are there any specific rules or conditions for allocations? For example, are there limits on the amount that can be allocated to each recipient or any other constraints that need to be considered?
 
-### Final Allocation Logic
+### Payout Calculation Logic
 
-Explain the logic for how the strategy will calculate the pool's fund allocation. This should include any calculation formulas, the shape of the allocation, and any special considerations.
+Explain the logic for how the strategy will calculate the pool's final `payout` from the allocations expressed by allocators. This should include any calculation formulas, the shape of the final payouts, and special considerations.
 
 #### Questions to answer
-- How are final allocations assigned to recipients? Are they calculated?
-    - If they're calculated, include the formula for calculation. 
-- What is the shape of the final allocation? Is it proportional, winner-take-all, etc?
-- Are there any transfers or other events triggered during the allocation process?
+- What factors determine the payout amount for each recipient? Explain the criteria or calculations used to determine the amount that each recipient should receive from the pool. Provide details on the formula or method used to calculate the payout amount for each recipient.
+- What is the shape of the final payouts? Are they proportional, winner-take-all, etc?
+- Are there any transfers or other events triggered during the calculation process?
+- Are any additional functions needed to set the final `payout` amounts? Describe any helper functions or steps required.
+
 
 ### Distribution Logic
 
-Outline the logic for distributing the pool amount to recipients within the strategy. Describe any mechanisms in place to prevent double payments.
+Outline the logic for how the `payout` amounts will be distributed to recipients. Describe any mechanisms in place to prevent double payments.
 
 #### Questions to answer
 
 - Who is eligible to receive a payout? Specify the criteria or conditions that determine whether a recipient is eligible to receive a distribution from the pool.
-- What factors determine the distribution amount for each recipient? Explain the criteria or calculations used to determine the amount that each recipient should receive from the pool. Provide details on the formula or method used to calculate the payout amount for each recipient.
-- Are any additional functions needed to set the payout amounts or enable the distribution? Describe any helper functions or steps required before calling the distribute function.
 - Who can call the distribute function? In case there are restrictions, explain why they are needed and who has the authorization to invoke the distribution process.
 - Are there any conditions on when the distribute function can be called? Specify any prerequisites or constraints that need to be satisfied before calling the function.
 - Are there multiple distributions or just a single distribution? Clarify whether there are multiple rounds of distribution or if it's a one-time distribution process.
