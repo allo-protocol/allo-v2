@@ -76,6 +76,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         super.initialize(_poolId, _data);
 
         (maxBid, registryGating) = abi.decode(_data, (uint256, bool));
+        poolActive = true;
 
         emit MAX_BID_UPDATED(maxBid);
     }
@@ -283,6 +284,10 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
         if (upcomingMilestone > milestones.length) {
             revert INVALID_MILESTONE();
+        }
+
+        if (upcomingMilestone == milestones.length) {
+            poolActive = false;
         }
 
         IAllo.Pool memory pool = allo.getPool(poolId);

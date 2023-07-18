@@ -15,6 +15,7 @@ abstract contract BaseStrategy is IStrategy, Transfer {
     IAllo internal immutable allo;
     uint256 internal poolId;
     bytes32 internal strategyId;
+    bool internal poolActive;
 
     /// ====================================
     /// ========== Constructor =============
@@ -60,6 +61,10 @@ abstract contract BaseStrategy is IStrategy, Transfer {
 
     function getStrategyId() external view override returns (bytes32) {
         return strategyId;
+    }
+
+    function isPoolActive() external view override returns (bool) {
+        return poolActive;
     }
 
     /// ====================================

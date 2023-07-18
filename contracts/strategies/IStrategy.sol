@@ -54,6 +54,9 @@ interface IStrategy {
     // simply returns whether a allocator is valid or not, will usually be true for all
     function isValidAllocator(address _allocator) external view returns (bool);
 
+    // simply returns whether pool is active
+    function isPoolActive() external view returns (bool);
+
     // simply returns the status of a recipient
     // probably tracked in a mapping, but will depend on the implementation
     // for example, the OpenSelfRegistration only maps users to bool, and then assumes Accepted for those

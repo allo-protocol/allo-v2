@@ -58,6 +58,8 @@ contract NFTVoteWinnerTakeAll is BaseStrategy {
         if (startTime >= endTime || endTime < block.timestamp) {
             revert BadTimes();
         }
+
+        poolActive = true;
     }
 
     /// ===============================
@@ -143,6 +145,8 @@ contract NFTVoteWinnerTakeAll is BaseStrategy {
 
         allo.decreasePoolTotalFunding(poolId, amountToDistribute);
         _transferAmount(pool.token, currentWinner, amountToDistribute);
+
+        poolActive = false;
 
         emit Distributed(currentWinner, currentWinner, amountToDistribute, _sender);
     }
