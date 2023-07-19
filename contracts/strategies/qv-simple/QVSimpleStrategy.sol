@@ -378,7 +378,7 @@ contract QVSimpleStrategy is BaseStrategy {
         uint256 votesCastToRecipient = allocator.votesCastToRecipient[recipientId];
 
         uint256 totalCredits = voiceCreditsToAllocate + creditsCastToRecipient;
-        uint256 voteResult = _sqrt(totalCredits * 1e18);
+        uint256 voteResult = _calculateVotes(totalCredits * 1e18);
         voteResult -= votesCastToRecipient;
         totalRecipientVotes += voteResult;
         recipient.totalVotes += voteResult;
@@ -389,6 +389,9 @@ contract QVSimpleStrategy is BaseStrategy {
         emit Allocated(_sender, voteResult, address(0), msg.sender);
     }
 
+    /// @notice Distribute the tokens to the recipients
+    /// @param _recipientIds The recipient ids
+    /// @param _sender The sender of the transaction
     function _distribute(address[] memory _recipientIds, bytes memory, address _sender)
         internal
         virtual
@@ -440,21 +443,16 @@ contract QVSimpleStrategy is BaseStrategy {
     /// ============ QV Helper ==============
     /// ====================================
 
+    /// @notice Calculate the votes for a given amount
+    /// @param amount The amount to calculate votes for
+    /// @return votes
     function _calculateVotes(uint256 amount) internal pure returns (uint256) {
         return _sqrt(amount);
     }
 
-    function _calculatePayoutAmount(uint256 totalVotes, uint256 recipientVotes) internal pure returns (uint256) {
-        // Calculate the percentage of total votes
-        uint256 percentage = (recipientVotes * 100) / totalVotes;
-        // Calculate the payout amount based on the percentage of total pool funds
-        // ...
-
-        return percentage;
-    }
-
     /// @notice Calculate the square root of a number (Babylonian method)
     /// @param x The number
+    /// @return y The square root
     function _sqrt(uint256 x) internal pure returns (uint256 y) {
         uint256 z = (x + 1) / 2;
         y = x;
