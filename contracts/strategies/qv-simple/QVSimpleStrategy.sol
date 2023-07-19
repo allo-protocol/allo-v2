@@ -47,9 +47,9 @@ contract QVSimpleStrategy is BaseStrategy {
     }
 
     struct Allocator {
-        uint256 voiceCreditsCasted;
-        mapping(address => uint256) voiceCreditsCastedToRecipient;
-        mapping(address => uint256) votesCastedToRecipient;
+        uint256 voiceCredits;
+        mapping(address => uint256) voiceCreditsCastToRecipient;
+        mapping(address => uint256) votesCastToRecipient;
     }
 
     bool public registryGating;
@@ -349,13 +349,40 @@ contract QVSimpleStrategy is BaseStrategy {
     /// @param _sender The sender of the transaction
     /// @dev Only the pool manager(s) can call this function
     function _allocate(bytes memory _data, address _sender) internal override onlyPoolManager(_sender) {
-        // (, address recipientId) = abi.decode(_data, (PayoutSummary, address));
+        (address recipientId, uint256 voiceCreditsToAllocate) = abi.decode(_data, (address, uint256));
 
-        // // Recipient storage recipient = recipients[recipientId];
-        // Application storage application = applications[recipientId];
-        // if (application.status != RecipientStatus.Accepted) {
-        //     revert QVSimple_NOT_ACCEPTED();
-        // }
+        // check the voiceCreditsToAllocate is > 0
+        if (voiceCreditsToAllocate <= 0) {
+            revert INVALID();
+        }
+
+        // check the time periods for allocation
+        if (block.timestamp < allocationStartTime || block.timestamp > allocationEndTime) {
+            revert ALLOCATION_NOT_ACTIVE();
+        }
+
+        // check that the sender can allocate votes
+        if (!allowedAllocators[_sender]) {
+            revert UNAUTHORIZED();
+        }
+
+        // spin up the structs in storage for updating
+        Recipient storage recipient = recipients[recipientId];
+        Allocator storage allocator = allocators[_sender];
+
+        // calculate the votes
+        uint256 votesToAllocate = 0;
+
+        // check that the sender has the votes to allocate and amount is not 0
+        if (allocator.votesCastToRecipient[recipientId] < votesToAllocate || votesToAllocate == 0) {
+            revert INVALID();
+        }
+
+        // remove the votes from the allocator
+        allocator.votesCastToRecipient[recipientId] -= votesToAllocate;
+
+        // add the votes to the recipient
+        recipient.totalVotes += votesToAllocate;
 
         // uint256 amount = msg.value;
         // require(amount > 0, "Amount must be greater than zero");
