@@ -42,6 +42,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     error REGISTRATION_NOT_ACTIVE();
     error ALLOCATION_NOT_ACTIVE();
     error ALLOCATION_NOT_ENDED();
+    error RECIPIENT_ERROR(address recipientId);
     error INVALID();
     error DISTRIBUTION_STARTED();
     error NOT_ALLOWED();
@@ -64,6 +65,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     uint256 public registrationEndTime;
     uint256 public allocationStartTime;
     uint256 public allocationEndTime;
+    uint256 public totalPayoutAmount;
 
     /// @notice token -> bool
     mapping(address => bool) public allowedTokens;
@@ -233,15 +235,12 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
         }
 
         for (uint256 i = 0; i < recipientLength;) {
-            if (
-                _recipientStatuses[i] == InternalRecipientStatus.None
-                    || _recipientStatuses[i] == InternalRecipientStatus.Appealed
-            ) {
-                revert INVALID();
-            }
-
-            address recipientId = _recipientIds[i];
             InternalRecipientStatus recipientStatus = _recipientStatuses[i];
+            address recipientId = _recipientIds[i];
+            if (recipientStatus == InternalRecipientStatus.None || recipientStatus == InternalRecipientStatus.Appealed)
+            {
+                revert RECIPIENT_ERROR(recipientId);
+            }
 
             Recipient storage recipient = _recipients[recipientId];
 
@@ -337,10 +336,6 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
         onlyActiveRegistration
         returns (address recipientId)
     {
-        if (_recipients[recipientId].recipientStatus == InternalRecipientStatus.Accepted) {
-            revert RECIPIENT_ALREADY_ACCEPTED();
-        }
-
         address recipientAddress;
         bool isRegistryIdentity;
         Metadata memory metadata;
@@ -361,26 +356,21 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
         }
 
         if (recipientAddress == address(0)) {
-            revert INVALID();
+            revert RECIPIENT_ERROR(recipientId);
         }
 
         Recipient storage recipient = _recipients[recipientId];
 
-        if (_recipients[recipientId].recipientAddress == address(0)) {
-            // new recipient
-            recipient.recipientAddress = recipientAddress;
-            recipient.isRegistryIdentity = registryGating ? true : isRegistryIdentity;
-            recipient.recipientStatus = InternalRecipientStatus.Pending;
+        // update the recipients data
+        recipient.recipientAddress = recipientAddress;
+        recipient.isRegistryIdentity = registryGating ? true : isRegistryIdentity;
+
+        if (recipient.recipientStatus == InternalRecipientStatus.Rejected) {
+            recipient.recipientStatus = InternalRecipientStatus.Appealed;
+            emit Appealed(recipientId, _data, _sender);
         } else {
-            // existing recipient
-            recipient.recipientAddress = recipientAddress;
-            if (recipient.recipientStatus == InternalRecipientStatus.Rejected) {
-                recipient.recipientStatus = InternalRecipientStatus.Appealed;
-                emit Appealed(recipientId, _data, _sender);
-            } else {
-                recipient.recipientStatus = InternalRecipientStatus.Pending;
-                emit Registered(recipientId, _data, _sender);
-            }
+            recipient.recipientStatus = InternalRecipientStatus.Pending;
+            emit Registered(recipientId, _data, _sender);
         }
     }
 
@@ -396,7 +386,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
         Recipient storage recipient = _recipients[recipientId];
 
         if (recipient.recipientStatus != InternalRecipientStatus.Accepted) {
-            revert INVALID();
+            revert RECIPIENT_ERROR(recipientId);
         }
 
         if (!allowedTokens[token] && !allowedTokens[address(0)]) {
@@ -424,7 +414,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
             Recipient storage recipient = _recipients[recipientId];
 
             if (recipient.recipientStatus != InternalRecipientStatus.Accepted) {
-                revert INVALID();
+                revert RECIPIENT_ERROR(recipientId);
             }
 
             uint256 amount = payoutSummaries[recipientId].amount;
