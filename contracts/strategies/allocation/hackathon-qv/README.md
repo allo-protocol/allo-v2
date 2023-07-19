@@ -8,10 +8,9 @@ Quadratic allocation is a popular method for democratic decision-making. This st
 ### Recipient logic
 In this strategy, recipients do not need to apply — they are automatically added to the pool if they are eligible. The pool admin uses an Allo identity and an EAS attestation to indicate eligible recipients. Any Allo identities that have the admin-designated attestation are eligible recipients. 
 - **Recipient Eligibility**
-    - Pool managers need a function to indicate which attestations are required for eligibility. They should have the ability to require multiple attestations. 
-        - QUESTION FOR ENG: should this be the purpose of `registerRecipient` for this strategy?
+    - Pool managers will manually add recipients to the pool. 
 - **Register recipients**
-    - There isn't an action where anyone will submit a specific recipient to the pool, but front-ends / users will need a way to get a list of all eligible recipients
+    - `registerRecipients` - Function for pool managers to add addresses to their pool. When they are added, an EAS attestation is automatically minted that they are part of the hackathon. 
     - Eligible recipients will also need functions to: 
         - add a payout address for this pool
         - update metadata for this pool
