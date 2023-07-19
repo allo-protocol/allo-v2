@@ -14,7 +14,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Struct to hold details of an recipient
     struct Recipient {
-        bool isRegistryIdentity;
+        bool useRegistryAnchor;
         address recipientAddress;
         uint256 proposalBid;
         RecipientStatus recipientStatus;
@@ -217,7 +217,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         }
 
         address recipientAddress;
-        bool isRegistryIdentity;
+        bool useRegistryAnchor;
         uint256 proposalBid;
         Metadata memory metadata;
 
@@ -230,10 +230,10 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
                 revert UNAUTHORIZED();
             }
         } else {
-            (recipientAddress, isRegistryIdentity, proposalBid, metadata) =
+            (recipientAddress, useRegistryAnchor, proposalBid, metadata) =
                 abi.decode(_data, (address, bool, uint256, Metadata));
             recipientId = _sender;
-            if (isRegistryIdentity && !_isIdentityMember(recipientId, _sender)) {
+            if (useRegistryAnchor && !_isIdentityMember(recipientId, _sender)) {
                 revert UNAUTHORIZED();
             }
         }
@@ -251,7 +251,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
         Recipient memory recipient = Recipient({
             recipientAddress: recipientAddress,
-            isRegistryIdentity: registryGating ? true : isRegistryIdentity,
+            useRegistryAnchor: registryGating ? true : useRegistryAnchor,
             proposalBid: proposalBid,
             recipientStatus: RecipientStatus.Pending
         });
