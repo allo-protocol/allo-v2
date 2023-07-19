@@ -269,8 +269,20 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
 
         for (uint256 i = 0; i < recipientLength;) {
             address recipientId = _recipientIds[i];
+            PayoutSummary storage payoutSummary = payoutSummaries[recipientId];
+            if (payoutSummary.amount != 0) {
+                revert RECIPIENT_ERROR(recipientId);
+            }
 
-            payoutSummaries[recipientId] = PayoutSummary(_recipients[recipientId].recipientAddress, _amounts[i]);
+            uint256 amount = _amounts[i];
+            totalPayoutAmount += amount;
+
+            if (totalPayoutAmount > allo.getPool(poolId).amount) {
+                revert INVALID();
+            }
+
+            payoutSummary.amount = amount;
+            payoutSummary.recipientAddress = _recipients[recipientId].recipientAddress;
 
             unchecked {
                 i++;
@@ -305,7 +317,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
         }
 
         IAllo.Pool memory pool = allo.getPool(poolId);
-        if (pool.amount < _amount) {
+        if (pool.amount - totalPayoutAmount < _amount) {
             revert UNAUTHORIZED();
         }
 
