@@ -78,8 +78,8 @@ abstract contract BaseStrategy is IStrategy, Transfer {
         return strategyId;
     }
 
-    function isPoolActive() external view override returns (bool) {
-        return poolActive;
+    function isPoolActive() external virtual override returns (bool) {
+        return _isPoolActive();
     }
 
     /// ====================================
@@ -142,6 +142,11 @@ abstract contract BaseStrategy is IStrategy, Transfer {
     function _setPoolActive(bool _active) internal {
         poolActive = _active;
         emit PoolActive(_active);
+    }
+
+    // this will hold logic to determine if a pool is active or not
+    function _isPoolActive() internal virtual returns (bool) {
+        return poolActive;
     }
 
     // this is called via allo.sol to register recipients

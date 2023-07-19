@@ -96,6 +96,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// ===============================
 
     /// @notice Get the recipient
+    /// @param _recipientId Id of the recipient
     function getRecipient(address _recipientId) external view returns (Recipient memory) {
         return _getRecipient(_recipientId);
     }
