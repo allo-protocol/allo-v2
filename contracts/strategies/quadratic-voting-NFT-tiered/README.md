@@ -41,7 +41,7 @@ In this strategy, pool managers are able to set multiple NFTs as their eligibili
     - `allocate` — function for eligible allocators to spend their voice credits
         - voice credits can be spent in batches — the contract should be aware of how many voice credits each allocator has available. 
             - The contract should also know if that allocator has spent voice credits on a recipient already, so that the total number of votes given is equal to the square root of the total number of voice credits. 
-                - For example: A allocator submitting two separate transactions of 4 voice credits each to the same recipient should receive 2.82 votes, not 4.
+                - For example: A allocator submitting two separate transactions of 4 voice credits each to the same recipient should receive 2.83 votes, not 4.
         - voice credits can be spent in bulk — allocators can spend voice credits on multiple recipients in one transaction
         - allocate can only be called while the voting window is open
         - the contract should emit an event indicating how many votes each allocator has purchased for each recipient. 
