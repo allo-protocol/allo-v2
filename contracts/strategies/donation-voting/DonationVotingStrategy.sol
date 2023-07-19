@@ -64,14 +64,13 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     uint256 public registrationEndTime;
     uint256 public allocationStartTime;
     uint256 public allocationEndTime;
-    address[] public allowedTokens;
-    address[] private recipientIds_;
 
+    /// @notice token -> bool
+    mapping(address => bool) public allowedTokens;
     /// @notice recipientId -> Recipient
     mapping(address => Recipient) private _recipients;
     /// @notice recipientId -> PayoutSummary
     mapping(address => PayoutSummary) public payoutSummaries;
-
     /// @notice recipientId -> token -> amount
     mapping(address => mapping(address => uint256)) public claims;
 
@@ -154,9 +153,15 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
         allocationStartTime = _allocationStartTime;
         allocationEndTime = _allocationEndTime;
 
-        uint256 allowedTokensLength = allowedTokens.length;
+        uint256 allowedTokensLength = _allowedTokens.length;
+
+        if (allowedTokensLength == 0) {
+            // all tokens
+            allowedTokens[address(0)] = true;
+        }
+
         for (uint256 i = 0; i < allowedTokensLength; i++) {
-            allowedTokens.push(_allowedTokens[i]);
+            allowedTokens[_allowedTokens[i]] = true;
         }
     }
 
@@ -390,7 +395,11 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
 
         Recipient storage recipient = _recipients[recipientId];
 
-        if (!_isTokenAllowed(token) || recipient.recipientStatus != InternalRecipientStatus.Accepted) {
+        if (recipient.recipientStatus != InternalRecipientStatus.Accepted) {
+            revert INVALID();
+        }
+
+        if (!allowedTokens[token] && !allowedTokens[address(0)]) {
             revert INVALID();
         }
 
@@ -443,21 +452,5 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _recipientId Id of the recipient
     function _getRecipient(address _recipientId) internal view returns (Recipient memory) {
         return _recipients[_recipientId];
-    }
-
-    /// @notice Check if token is allowed for allocation
-    function _isTokenAllowed(address _token) internal view returns (bool) {
-        uint256 allowedTokensLength = allowedTokens.length;
-
-        if (allowedTokensLength == 0) {
-            return true;
-        }
-
-        for (uint256 i = 0; i < allowedTokensLength; i++) {
-            if (allowedTokens[i] == _token) {
-                return true;
-            }
-        }
-        return false;
     }
 }
