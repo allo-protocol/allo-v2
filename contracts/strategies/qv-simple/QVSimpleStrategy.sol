@@ -371,7 +371,7 @@ contract QVSimpleStrategy is BaseStrategy {
         Allocator storage allocator = allocators[_sender];
 
         // calculate the votes
-        uint256 votesToAllocate = 0;
+        uint256 votesToAllocate = _calculateVotes(voiceCreditsToAllocate);
 
         // check that the sender has the votes to allocate and amount is not 0
         if (allocator.votesCastToRecipient[recipientId] < votesToAllocate || votesToAllocate == 0) {
@@ -461,7 +461,7 @@ contract QVSimpleStrategy is BaseStrategy {
         return percentage;
     }
 
-    /// @notice Calculate the square root of a number
+    /// @notice Calculate the square root of a number (Babylonian method)
     /// @param x The number
     function _sqrt(uint256 x) internal pure returns (uint256 y) {
         uint256 z = (x + 1) / 2;
