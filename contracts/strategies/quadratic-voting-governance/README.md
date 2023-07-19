@@ -43,7 +43,7 @@ Pool managers are able to designate a governance token that they want to use as 
         - each eligible allocator gets a number of voice credits equal to the number of governance tokens they hold in the snapshot. 
         - voice credits can be spent in batches — the contract should be aware of how many voice credits each allocator has available. 
             - The contract should also know if that allocator has spent voice credits on a recipient already, so that the total number of votes given is equal to the square root of the total number of voice credits. 
-                - For example: A allocator submitting two separate transactions of 4 voice credits each to the same recipient should receive 2.82 votes, not 4.
+                - For example: A allocator submitting two separate transactions of 4 voice credits each to the same recipient should receive 2.83 votes, not 4.
         - voice credits can be spent in bulk — allocators can spend voice credits on multiple recipients in one transaction
         - allocate can only be called while the allocation window is open
         - the contract should emit an event indicating how many votes each allocator has purchased for each recipient. 
