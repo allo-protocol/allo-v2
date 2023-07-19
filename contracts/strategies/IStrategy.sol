@@ -59,7 +59,7 @@ interface IStrategy {
     function isValidAllocator(address _allocator) external view returns (bool);
 
     // simply returns whether pool is active
-    function isPoolActive() external view returns (bool);
+    function isPoolActive() external returns (bool);
 
     // simply returns the status of a recipient
     // probably tracked in a mapping, but will depend on the implementation
