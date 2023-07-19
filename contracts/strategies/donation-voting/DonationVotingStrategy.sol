@@ -141,6 +141,14 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     ) internal {
         __BaseStrategy_init(_poolId);
         registryGating = _registryGating;
+
+        if (
+            block.timestamp > _registrationStartTime || _registrationStartTime > _registrationEndTime
+                || _registrationStartTime > _allocationStartTime || _allocationStartTime > _allocationEndTime
+        ) {
+            revert INVALID();
+        }
+
         registrationStartTime = _registrationStartTime;
         registrationEndTime = _registrationEndTime;
         allocationStartTime = _allocationStartTime;
@@ -227,10 +235,14 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
                 revert INVALID();
             }
 
-            Recipient storage recipient = _recipients[__recipientIds[i]];
-            recipient.recipientStatus = _recipientStatuses[i];
+            address recipientId = __recipientIds[i];
+            InternalRecipientStatus recipientStatus = _recipientStatuses[i];
 
-            emit Reviewed(__recipientIds[i], recipient.recipientStatus, msg.sender);
+            Recipient storage recipient = _recipients[recipientId];
+
+            recipient.recipientStatus = recipientStatus;
+
+            emit Reviewed(recipientId, recipientStatus, msg.sender);
 
             unchecked {
                 i++;
@@ -320,7 +332,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
         onlyActiveRegistration
         returns (address recipientId)
     {
-        if (_recipients[recipientId].recipientStatus != InternalRecipientStatus.Accepted) {
+        if (_recipients[recipientId].recipientStatus == InternalRecipientStatus.Accepted) {
             revert RECIPIENT_ALREADY_ACCEPTED();
         }
 
