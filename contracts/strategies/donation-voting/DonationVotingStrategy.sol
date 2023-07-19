@@ -5,6 +5,7 @@ import {IAllo} from "../../core/IAllo.sol";
 import {IRegistry} from "../../core/IRegistry.sol";
 import {BaseStrategy} from "../BaseStrategy.sol";
 import {Metadata} from "../../core/libraries/Metadata.sol";
+import {Native} from "../../core/libraries/Native.sol";
 import {ReentrancyGuard} from "@openzeppelin/security/ReentrancyGuard.sol";
 
 contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
@@ -300,9 +301,12 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
             uint256 amount = claims[singleClaim.recipientId][singleClaim.token];
 
             claims[singleClaim.recipientId][singleClaim.token] = 0;
-            _transferAmount(singleClaim.token, recipient.recipientAddress, amount);
 
-            emit Claimed(singleClaim.recipientId, recipient.recipientAddress, amount, singleClaim.token);
+            address token = singleClaim.token;
+
+            _transferAmount(token, recipient.recipientAddress, amount);
+
+            emit Claimed(singleClaim.recipientId, recipient.recipientAddress, amount, token);
             unchecked {
                 i++;
             }
@@ -402,6 +406,10 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
         }
 
         if (!allowedTokens[token] && !allowedTokens[address(0)]) {
+            revert INVALID();
+        }
+
+        if (token == NATIVE && msg.value != amount) {
             revert INVALID();
         }
 
