@@ -25,6 +25,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     struct Recipient {
         bool useRegistryAnchor;
         address recipientAddress;
+        Metadata metadata;
         InternalRecipientStatus recipientStatus;
     }
 

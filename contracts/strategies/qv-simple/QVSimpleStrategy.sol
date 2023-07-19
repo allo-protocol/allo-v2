@@ -11,21 +11,20 @@ contract QVSimpleStrategy is BaseStrategy {
     /// ======= Errors ======
     /// ======================
 
-    error UNAUTHORIZED();
-    error ALLOCATION_WINDOW_CLOSED();
-    error ALLOCATION_WINDOW_OPEN();
-    error ALREADY_ACCEPTED();
-    error IDENTITY_REQUIRED();
-    error NOT_ACCEPTED();
-    error NOT_ENOUGH_VOICE_CREDITS();
+    error ALLOCATION_NOT_ACTIVE();
+    error ALLOCATION_NOT_ENDED();
     error INVALID();
     error INVALID_METADATA();
+    error RECIPIENT_ERROR(address recipientId);
+    error REGISTRATION_NOT_ACTIVE();
+    error UNAUTHORIZED();
 
     /// ======================
     /// ======= Events =======
     /// ======================
 
     event Appealed(address indexed recipientId, bytes data, address sender);
+    event Reviewed(address indexed recipientId, InternalRecipientStatus status, address sender);
 
     /// ======================
     /// ======= Storage ======
@@ -222,7 +221,7 @@ contract QVSimpleStrategy is BaseStrategy {
                 revert RECIPIENT_ERROR(recipientId);
             }
 
-            Recipient storage recipient = _recipients[recipientId];
+            Recipient storage recipient = recipients[recipientId];
 
             recipient.recipientStatus = recipientStatus;
 
@@ -238,7 +237,7 @@ contract QVSimpleStrategy is BaseStrategy {
     /// @param _recipientIds The recipient ids
     /// @return The payouts as an array of PayoutSummary structs
     function getPayouts(address[] memory _recipientIds, bytes memory, address)
-        external
+        public
         view
         override
         returns (PayoutSummary[] memory)
@@ -329,7 +328,7 @@ contract QVSimpleStrategy is BaseStrategy {
             revert RECIPIENT_ERROR(recipientId);
         }
 
-        Recipient storage recipient = _recipients[recipientId];
+        Recipient storage recipient = recipients[recipientId];
 
         // update the recipients data
         recipient.recipientAddress = recipientAddress;
@@ -383,7 +382,7 @@ contract QVSimpleStrategy is BaseStrategy {
         uint256 payoutLength = payouts.length;
         for (uint256 i; i < payoutLength;) {
             address recipientId = _recipientIds[i];
-            Recipient storage recipient = _recipients[recipientId];
+            Recipient storage recipient = recipients[recipientId];
 
             if (recipient.recipientStatus != InternalRecipientStatus.Accepted) {
                 revert RECIPIENT_ERROR(recipientId);
@@ -415,7 +414,7 @@ contract QVSimpleStrategy is BaseStrategy {
     /// @notice Get the recipient
     /// @param _recipientId Id of the recipient
     function _getRecipient(address _recipientId) internal view returns (Recipient memory) {
-        return _recipients[_recipientId];
+        return recipients[_recipientId];
     }
 
     /// ====================================
