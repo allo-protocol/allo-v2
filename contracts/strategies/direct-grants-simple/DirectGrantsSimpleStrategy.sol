@@ -120,6 +120,8 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
             return RecipientStatus.Accepted;
         } else if (recipient.recipientStatus == InternalRecipientStatus.Rejected) {
             return RecipientStatus.Rejected;
+        } else if (recipient.recipientStatus == InternalRecipientStatus.None) {
+            return RecipientStatus.None;
         } else {
             return RecipientStatus.Pending;
         }
