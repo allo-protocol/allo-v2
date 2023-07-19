@@ -370,31 +370,23 @@ contract QVSimpleStrategy is BaseStrategy {
         Recipient storage recipient = recipients[recipientId];
         Allocator storage allocator = allocators[_sender];
 
-        // calculate the votes
-        uint256 votesToAllocate = _calculateVotes(voiceCreditsToAllocate);
-
-        // check that the sender has the votes to allocate and amount is not 0
-        if (allocator.votesCastToRecipient[recipientId] < votesToAllocate || votesToAllocate == 0) {
-            revert INVALID();
+        if (voiceCreditsToAllocate + allocator.voiceCredits > maxVoiceCreditsPerAllocator) {
+            revert();
         }
 
-        // remove the votes from the allocator
-        allocator.votesCastToRecipient[recipientId] -= votesToAllocate;
+        uint256 creditsCastToRecipient = allocator.voiceCreditsCastToRecipient[recipientId];
+        uint256 votesCastToRecipient = allocator.votesCastToRecipient[recipientId];
 
-        // add the votes to the recipient
-        recipient.totalVotes += votesToAllocate;
+        uint256 totalCredits = voiceCreditsToAllocate + creditsCastToRecipient;
+        uint256 voteResult = _sqrt(totalCredits * 1e18);
+        voteResult -= votesCastToRecipient;
+        totalRecipientVotes += voteResult;
+        recipient.totalVotes += voteResult;
 
-        // uint256 amount = msg.value;
-        // require(amount > 0, "Amount must be greater than zero");
+        allocator.voiceCreditsCastToRecipient[recipientId] += totalCredits;
+        allocator.votesCastToRecipient[recipientId] += voteResult;
 
-        // uint256 remainingVoiceCredits = voiceCredits[msg.sender];
-        // require(remainingVoiceCredits >= amount, "Insufficient voice credits");
-
-        // uint256 votes = _calculateVotes(amount);
-        // application.votes.push(votes + 1);
-        // voiceCredits[msg.sender] -= amount;
-
-        // emit Allocated(_sender, amount, address(0), msg.sender);
+        emit Allocated(_sender, voteResult, address(0), msg.sender);
     }
 
     function _distribute(address[] memory _recipientIds, bytes memory, address _sender)
