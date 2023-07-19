@@ -348,7 +348,7 @@ contract QVSimpleStrategy is BaseStrategy {
     /// @param _data The data
     /// @param _sender The sender of the transaction
     /// @dev Only the pool manager(s) can call this function
-    function _allocate(bytes memory _data, address _sender) internal override onlyPoolManager(_sender) {
+    function _allocate(bytes memory _data, address _sender) internal override {
         (address recipientId, uint256 voiceCreditsToAllocate) = abi.decode(_data, (address, uint256));
 
         // check the voiceCreditsToAllocate is > 0
