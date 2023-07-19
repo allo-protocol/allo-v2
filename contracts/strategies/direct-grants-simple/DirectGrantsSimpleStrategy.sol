@@ -22,7 +22,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Struct to hold details of an recipient
     struct Recipient {
-        bool isRegistryIdentity;
+        bool useRegistryAnchor;
         address recipientAddress;
         uint256 grantAmount;
         Metadata metadata;
@@ -267,7 +267,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         returns (address recipientId)
     {
         address recipientAddress;
-        bool isRegistryIdentity;
+        bool useRegistryAnchor;
         uint256 grantAmount;
         Metadata memory metadata;
 
@@ -280,10 +280,10 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
                 revert UNAUTHORIZED();
             }
         } else {
-            (recipientAddress, isRegistryIdentity, grantAmount, metadata) =
+            (recipientAddress, useRegistryAnchor, grantAmount, metadata) =
                 abi.decode(_data, (address, bool, uint256, Metadata));
             recipientId = _sender;
-            if (isRegistryIdentity && !_isIdentityMember(recipientId, _sender)) {
+            if (useRegistryAnchor && !_isIdentityMember(recipientId, _sender)) {
                 revert UNAUTHORIZED();
             }
         }
@@ -297,7 +297,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
         Recipient memory recipient = Recipient({
             recipientAddress: recipientAddress,
-            isRegistryIdentity: registryGating ? true : isRegistryIdentity,
+            useRegistryAnchor: registryGating ? true : useRegistryAnchor,
             grantAmount: grantAmount,
             metadata: metadata,
             recipientStatus: InternalRecipientStatus.Pending
