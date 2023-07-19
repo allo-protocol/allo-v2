@@ -64,7 +64,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
     bool public registryGating;
     bool public grantAmountRequired;
-    uint256 internal _allocatedGrantAmount;
+    uint256 public allocatedGrantAmount;
     address[] private _acceptedRecipientIds;
 
     /// @notice recipientId -> Recipient
@@ -332,9 +332,9 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
                 && recipientStatus == InternalRecipientStatus.Accepted
         ) {
             IAllo.Pool memory pool = allo.getPool(poolId);
-            _allocatedGrantAmount += grantAmount;
+            allocatedGrantAmount += grantAmount;
 
-            if (_allocatedGrantAmount > pool.amount) {
+            if (allocatedGrantAmount > pool.amount) {
                 revert ALLOCATION_EXCEEDS_POOL_AMOUNT();
             }
 
@@ -378,7 +378,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
         if (
             milestoneToBeDistributed > recipientMilestones.length
-                || milestone.milestoneStatus == RecipientStatus.Rejected
+                || milestone.milestoneStatus != RecipientStatus.Pending
         ) {
             revert INVALID_MILESTONE();
         }
