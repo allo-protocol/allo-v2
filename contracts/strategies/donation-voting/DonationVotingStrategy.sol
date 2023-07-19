@@ -65,7 +65,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     uint256 public allocationStartTime;
     uint256 public allocationEndTime;
     address[] public allowedTokens;
-    address[] private _recipientIds;
+    address[] private recipientIds_;
 
     /// @notice recipientId -> Recipient
     mapping(address => Recipient) private _recipients;
@@ -188,17 +188,17 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     }
 
     /// @notice Returns the payout summary for the accepted recipient
-    function getPayouts(address[] memory __recipientIds, bytes memory, address)
+    function getPayouts(address[] memory _recipientIds, bytes memory, address)
         external
         view
         returns (PayoutSummary[] memory payouts)
     {
-        uint256 recipientLength = __recipientIds.length;
+        uint256 recipientLength = _recipientIds.length;
 
         payouts = new PayoutSummary[](recipientLength);
 
         for (uint256 i = 0; i < recipientLength;) {
-            payouts[i] = payoutSummaries[__recipientIds[i]];
+            payouts[i] = payoutSummaries[_recipientIds[i]];
             unchecked {
                 i++;
             }
@@ -215,14 +215,14 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     /// ===============================
 
     /// @notice Review recipient application
-    /// @param __recipientIds Ids of the recipients
+    /// @param _recipientIds Ids of the recipients
     /// @param _recipientStatuses Statuses of the recipients
-    function reviewRecipients(address[] calldata __recipientIds, InternalRecipientStatus[] calldata _recipientStatuses)
+    function reviewRecipients(address[] calldata _recipientIds, InternalRecipientStatus[] calldata _recipientStatuses)
         external
         onlyPoolManager(msg.sender)
         onlyActiveRegistration
     {
-        uint256 recipientLength = __recipientIds.length;
+        uint256 recipientLength = _recipientIds.length;
         if (recipientLength != _recipientStatuses.length) {
             revert INVALID();
         }
@@ -235,7 +235,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
                 revert INVALID();
             }
 
-            address recipientId = __recipientIds[i];
+            address recipientId = _recipientIds[i];
             InternalRecipientStatus recipientStatus = _recipientStatuses[i];
 
             Recipient storage recipient = _recipients[recipientId];
@@ -251,20 +251,20 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     }
 
     /// @notice Set payout for the recipients
-    /// @param __recipientIds Ids of the recipients
+    /// @param _recipientIds Ids of the recipients
     /// @param _amounts Amounts to be paid out
-    function setPayout(address[] memory __recipientIds, uint256[] memory _amounts)
+    function setPayout(address[] memory _recipientIds, uint256[] memory _amounts)
         external
         onlyPoolManager(msg.sender)
         onlyAfterAllocation
     {
-        uint256 recipientLength = __recipientIds.length;
+        uint256 recipientLength = _recipientIds.length;
         if (recipientLength != _amounts.length) {
             revert INVALID();
         }
 
         for (uint256 i = 0; i < recipientLength;) {
-            address recipientId = __recipientIds[i];
+            address recipientId = _recipientIds[i];
 
             payoutSummaries[recipientId] = PayoutSummary(_recipients[recipientId].recipientAddress, _amounts[i]);
 
@@ -401,16 +401,16 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
         emit Allocated(recipientId, amount, token, _sender);
     }
 
-    function _distribute(address[] memory __recipientIds, bytes memory, address _sender)
+    function _distribute(address[] memory _recipientIds, bytes memory, address _sender)
         internal
         virtual
         override
         onlyPoolManager(_sender)
         onlyAfterAllocation
     {
-        uint256 recipientLength = __recipientIds.length;
+        uint256 recipientLength = _recipientIds.length;
         for (uint256 i; i < recipientLength;) {
-            address recipientId = __recipientIds[i];
+            address recipientId = _recipientIds[i];
 
             Recipient storage recipient = _recipients[recipientId];
 
