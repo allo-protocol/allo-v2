@@ -6,6 +6,8 @@ import {IRegistry} from "../../../core/IRegistry.sol";
 import {QVSimpleStrategy} from "../../qv-simple/QVSimpleStrategy.sol";
 import {Metadata} from "../../../core/libraries/Metadata.sol";
 
+import {EnumerableSet} from "@openzeppelin/utils/structs/EnumerableSet.sol";
+
 // Note: EAS Contracts
 import {
     AttestationRequest,
@@ -18,6 +20,7 @@ import {
 import {ISchemaRegistry, ISchemaResolver, SchemaRecord} from "@ethereum-attestation-service/ISchemaRegistry.sol";
 
 contract HackathonQVStrategy is QVSimpleStrategy {
+    using EnumerableSet for EnumerableSet.AddressSet;
     error ALREADY_ADDED();
 
     // The instance of the EAS and SchemaRegistry contracts.
@@ -29,6 +32,9 @@ contract HackathonQVStrategy is QVSimpleStrategy {
     // Who can call submitAttestation
     mapping(address => bool) public attestationSigners;
 
+    EnumerableSet.AddressSet private hackers;
+
+    event EASAddressUpdated(address indexed easAddress);
     event VerifierAdded(address indexed verifier);
     event VerifierRemoved(address indexed verifier);
 
@@ -68,7 +74,16 @@ contract HackathonQVStrategy is QVSimpleStrategy {
             allocationStartTime,
             allocationEndTime
         ) = abi.decode(_data, (bool, bool, uint256, uint256, uint256, uint256, uint256));
-        super.initialize(_poolId, _data);
+        __QVSimpleStrategy_init(
+            _poolId,
+            registryGating,
+            metadataRequired,
+            maxVoiceCreditsPerAllocator,
+            registrationStartTime,
+            registrationEndTime,
+            allocationStartTime,
+            allocationEndTime
+        );
 
         eas = IEAS(_easContractAddress);
         schemaRegistry = ISchemaRegistry(_schemaRegistryAddress);
@@ -77,6 +92,7 @@ contract HackathonQVStrategy is QVSimpleStrategy {
         // todo: setup a default schema they can use for now.
         // https://optimism-goerli.easscan.org/schema/create
         // https://docs.attest.sh/docs/tutorials/create-a-schema
+        // https://github.com/ethereum-attestation-service/eas-contracts/blob/master/contracts/
 
         _registerSchema(_schema, ISchemaResolver(address(this)), _revocable);
     }
@@ -88,7 +104,16 @@ contract HackathonQVStrategy is QVSimpleStrategy {
     /// @dev Registers a recipient with the EAS contract.
     /// @param _data The data to register the recipient with.
     /// @param _sender The address of the sender.
-    function _registerRecipient(bytes memory _data, address _sender) internal override returns (address recipientId) {}
+    function _registerRecipient(bytes memory _data, address _sender)
+        internal
+        override
+        onlyPoolManager(_sender)
+        returns (address recipientId)
+    {
+        // checks...
+        // attest...
+        // register...
+    }
 
     /// @dev Allocates tokens to a recipient.
     /// @param _recipientId The ID of the recipient to allocate tokens to.
@@ -113,6 +138,16 @@ contract HackathonQVStrategy is QVSimpleStrategy {
         return uid;
     }
 
+    /// @dev Getter for the hackers set.
+    function getHackers() public view returns (address[] memory) {
+        // todo: refactor if possible.
+        address[] memory hackersArray = new address[](hackers.length());
+        for (uint256 i = 0; i < hackers.length(); i++) {
+            hackersArray[i] = hackers.at(i);
+        }
+        return hackersArray;
+    }
+
     /// =========================
     /// ==== EAS Functions =====
     /// =========================
@@ -127,9 +162,9 @@ contract HackathonQVStrategy is QVSimpleStrategy {
     //    Schema Registry: 0x7b24C7f8AF365B4E308b6acb0A7dfc85d034Cb3f
 
     /// @dev Gets an attestation from the EAS contract.
-    /// @param uuid The UUID of the attestation to get.
-    function getAttestation(bytes32 uuid) public payable virtual returns (Attestation memory) {
-        Attestation memory attestation = eas.getAttestation(uuid);
+    /// @param uid The UUID of the attestation to get.
+    function getAttestation(bytes32 uid) public payable virtual returns (Attestation memory) {
+        Attestation memory attestation = eas.getAttestation(uid);
         return attestation;
     }
 
@@ -172,6 +207,8 @@ contract HackathonQVStrategy is QVSimpleStrategy {
     /// @param _easContractAddress The address of the EAS contract.
     function setEASAddress(address _easContractAddress) public onlyPoolManager(msg.sender) {
         eas = IEAS(_easContractAddress);
+
+        emit EASAddressUpdated(_easContractAddress);
     }
 
     /// @dev Submit an attestation request to the EAS contract.
