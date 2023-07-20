@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import {IAllo} from "../../../core/IAllo.sol";
-import {IRegistry} from "../../../core/IRegistry.sol";
-import {QVSimpleStrategy} from "../../qv-simple/QVSimpleStrategy.sol";
-import {Metadata} from "../../../core/libraries/Metadata.sol";
+import {IAllo} from "../../core/IAllo.sol";
+import {IRegistry} from "../../core/IRegistry.sol";
+import {QVSimpleStrategy} from "../qv-simple/QVSimpleStrategy.sol";
+import {Metadata} from "../../core/libraries/Metadata.sol";
 
 import {EnumerableSet} from "@openzeppelin/utils/structs/EnumerableSet.sol";
 
