@@ -23,8 +23,9 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Struct to hold details of the recipients
     struct Recipient {
-        bool isRegistryIdentity;
+        bool useRegistryAnchor;
         address recipientAddress;
+        Metadata metadata;
         InternalRecipientStatus recipientStatus;
     }
 
@@ -353,7 +354,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
         returns (address recipientId)
     {
         address recipientAddress;
-        bool isRegistryIdentity;
+        bool useRegistryAnchor;
         Metadata memory metadata;
 
         // decode data custom to this strategy
@@ -364,9 +365,9 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
                 revert UNAUTHORIZED();
             }
         } else {
-            (recipientAddress, isRegistryIdentity, metadata) = abi.decode(_data, (address, bool, Metadata));
+            (recipientAddress, useRegistryAnchor, metadata) = abi.decode(_data, (address, bool, Metadata));
             recipientId = _sender;
-            if (isRegistryIdentity && !_isIdentityMember(recipientId, _sender)) {
+            if (useRegistryAnchor && !_isIdentityMember(recipientId, _sender)) {
                 revert UNAUTHORIZED();
             }
         }
@@ -379,7 +380,8 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
 
         // update the recipients data
         recipient.recipientAddress = recipientAddress;
-        recipient.isRegistryIdentity = registryGating ? true : isRegistryIdentity;
+        recipient.useRegistryAnchor = registryGating ? true : useRegistryAnchor;
+        recipient.metadata = metadata;
 
         if (recipient.recipientStatus == InternalRecipientStatus.Rejected) {
             recipient.recipientStatus = InternalRecipientStatus.Appealed;
