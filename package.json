@@ -16,6 +16,8 @@
     "storage-check": "npx @openzeppelin/upgrades-core validate"
   },
   "devDependencies": {
+    "@ethereum-attestation-service/eas-contracts": "^0.28.1",
+    "@ethereum-attestation-service/eas-sdk": "^0.29.1",
     "@openzeppelin/contracts": "^4.9.1",
     "@openzeppelin/contracts-upgradeable": "^4.9.1",
     "@openzeppelin/upgrades-core": "^1.27.1",

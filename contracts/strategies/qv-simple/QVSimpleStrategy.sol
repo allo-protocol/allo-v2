@@ -305,6 +305,7 @@ contract QVSimpleStrategy is BaseStrategy {
     /// @param _sender The sender of the transaction
     function _registerRecipient(bytes memory _data, address _sender)
         internal
+        virtual
         override
         onlyActiveRegistration
         returns (address recipientId)
