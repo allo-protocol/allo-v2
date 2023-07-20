@@ -117,7 +117,7 @@ contract QVSimpleStrategy is BaseStrategy {
     /// @notice Initialize the strategy
     /// @param _poolId The pool id
     /// @param _data The data
-    function initialize(uint256 _poolId, bytes memory _data) public override {
+    function initialize(uint256 _poolId, bytes memory _data) public virtual override {
         (
             bool _registryGating,
             bool _metadataRequired,
@@ -216,6 +216,7 @@ contract QVSimpleStrategy is BaseStrategy {
     /// @param _recipientStatuses Statuses of the recipients
     function reviewRecipients(address[] calldata _recipientIds, InternalRecipientStatus[] calldata _recipientStatuses)
         external
+        virtual
         onlyPoolManager(msg.sender)
         onlyActiveRegistration
     {
