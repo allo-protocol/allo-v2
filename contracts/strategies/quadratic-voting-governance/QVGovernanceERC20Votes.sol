@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import {QVSimpleStrategy} from "../../qv-simple/QVSimpleStrategy.sol";
+import {QVSimpleStrategy} from "../qv-simple/QVSimpleStrategy.sol";
 import "@openzeppelin/governance/utils/IVotes.sol";
 
 contract QVGovernanceERC20Votes is QVSimpleStrategy {
@@ -23,12 +23,11 @@ contract QVGovernanceERC20Votes is QVSimpleStrategy {
             uint256 _reviewThreshold,
             bool _registryGating,
             bool _metadataRequired,
-            uint256 _maxVoiceCreditsPerAllocator,
             uint256 _registrationStartTime,
             uint256 _registrationEndTime,
             uint256 _allocationStartTime,
             uint256 _allocationEndTime
-        ) = abi.decode(_data, (address, uint256, uint256, bool, bool, uint256, uint256, uint256, uint256, uint256));
+        ) = abi.decode(_data, (address, uint256, uint256, bool, bool, uint256, uint256, uint256, uint256));
         __QVGovernanceERC20Votes_init(
             _govToken,
             _timestamp,
@@ -36,7 +35,6 @@ contract QVGovernanceERC20Votes is QVSimpleStrategy {
             _poolId,
             _registryGating,
             _metadataRequired,
-            _maxVoiceCreditsPerAllocator,
             _registrationStartTime,
             _registrationEndTime,
             _allocationStartTime,
@@ -51,7 +49,6 @@ contract QVGovernanceERC20Votes is QVSimpleStrategy {
         uint256 _poolId,
         bool _registryGating,
         bool _metadataRequired,
-        uint256 _maxVoiceCreditsPerAllocator,
         uint256 _registrationStartTime,
         uint256 _registrationEndTime,
         uint256 _allocationStartTime,
@@ -61,7 +58,7 @@ contract QVGovernanceERC20Votes is QVSimpleStrategy {
             _poolId,
             _registryGating,
             _metadataRequired,
-            _maxVoiceCreditsPerAllocator,
+            0,
             _registrationStartTime,
             _registrationEndTime,
             _allocationStartTime,
@@ -72,7 +69,8 @@ contract QVGovernanceERC20Votes is QVSimpleStrategy {
         reviewThreshold = _reviewThreshold;
 
         // todo: test if it actually works
-        // sanity check if token is ERC20Votes, should revert if function is not available
+        // sanity check if token implements getPastVotes
+        // should revert if function is not available
         govToken.getPastVotes(address(this), 0);
     }
 
@@ -116,5 +114,58 @@ contract QVGovernanceERC20Votes is QVSimpleStrategy {
                 i++;
             }
         }
+    }
+
+    /// @notice Checks if the allocator is valid
+    /// @param _allocator The allocator address
+    /// @return true if the allocator is valid
+    function isValidAllocator(address _allocator) external view override returns (bool) {
+        return govToken.getPastVotes(_allocator, timestamp) > 0;
+    }
+
+    /// ====================================
+    /// ============ Internal ==============
+    /// ====================================
+
+    /// @notice Allocate votes to a recipient
+    /// @param _data The data
+    /// @param _sender The sender of the transaction
+    /// @dev Only the pool manager(s) can call this function
+    function _allocate(bytes memory _data, address _sender) internal virtual override {
+        (address recipientId, uint256 voiceCreditsToAllocate) = abi.decode(_data, (address, uint256));
+
+        uint256 votePower = govToken.getPastVotes(_sender, timestamp);
+
+        // check the voiceCreditsToAllocate is > 0
+        if (voiceCreditsToAllocate == 0 || votePower == 0) {
+            revert INVALID();
+        }
+
+        // check the time periods for allocation
+        if (block.timestamp < allocationStartTime || block.timestamp > allocationEndTime) {
+            revert ALLOCATION_NOT_ACTIVE();
+        }
+
+        // spin up the structs in storage for updating
+        Recipient storage recipient = recipients[recipientId];
+        Allocator storage allocator = allocators[_sender];
+
+        if (voiceCreditsToAllocate + allocator.voiceCredits > votePower) {
+            revert INVALID();
+        }
+
+        uint256 creditsCastToRecipient = allocator.voiceCreditsCastToRecipient[recipientId];
+        uint256 votesCastToRecipient = allocator.votesCastToRecipient[recipientId];
+
+        uint256 totalCredits = voiceCreditsToAllocate + creditsCastToRecipient;
+        uint256 voteResult = _calculateVotes(totalCredits * 1e18);
+        voteResult -= votesCastToRecipient;
+        totalRecipientVotes += voteResult;
+        recipient.totalVotes += voteResult;
+
+        allocator.voiceCreditsCastToRecipient[recipientId] += totalCredits;
+        allocator.votesCastToRecipient[recipientId] += voteResult;
+
+        emit Allocated(_sender, voteResult, address(govToken), msg.sender);
     }
 }

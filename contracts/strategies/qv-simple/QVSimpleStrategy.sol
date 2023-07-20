@@ -203,7 +203,7 @@ contract QVSimpleStrategy is BaseStrategy {
     /// @notice Checks if the allocator is valid
     /// @param _allocator The allocator address
     /// @return true if the allocator is valid
-    function isValidAllocator(address _allocator) external view returns (bool) {
+    function isValidAllocator(address _allocator) external view virtual returns (bool) {
         return allowedAllocators[_allocator];
     }
 
@@ -364,11 +364,11 @@ contract QVSimpleStrategy is BaseStrategy {
     /// @param _data The data
     /// @param _sender The sender of the transaction
     /// @dev Only the pool manager(s) can call this function
-    function _allocate(bytes memory _data, address _sender) internal override {
+    function _allocate(bytes memory _data, address _sender) internal virtual override {
         (address recipientId, uint256 voiceCreditsToAllocate) = abi.decode(_data, (address, uint256));
 
         // check the voiceCreditsToAllocate is > 0
-        if (voiceCreditsToAllocate <= 0) {
+        if (voiceCreditsToAllocate == 0) {
             revert INVALID();
         }
 
