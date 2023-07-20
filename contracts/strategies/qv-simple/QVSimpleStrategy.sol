@@ -25,6 +25,13 @@ contract QVSimpleStrategy is BaseStrategy {
 
     event Appealed(address indexed recipientId, bytes data, address sender);
     event Reviewed(address indexed recipientId, InternalRecipientStatus status, address sender);
+    event TimestampsUpdated(
+        uint256 registrationStartTime,
+        uint256 registrationEndTime,
+        uint256 allocationStartTime,
+        uint256 allocationEndTime,
+        address sender
+    );
 
     /// ======================
     /// ======= Storage ======
@@ -160,6 +167,10 @@ contract QVSimpleStrategy is BaseStrategy {
         registrationEndTime = _registrationEndTime;
         allocationStartTime = _allocationStartTime;
         allocationEndTime = _allocationEndTime;
+
+        emit TimestampsUpdated(
+            registrationStartTime, registrationEndTime, allocationStartTime, allocationEndTime, msg.sender
+        );
     }
 
     /// =========================
@@ -286,6 +297,10 @@ contract QVSimpleStrategy is BaseStrategy {
         registrationEndTime = _registrationEndTime;
         allocationStartTime = _allocationStartTime;
         allocationEndTime = _allocationEndTime;
+
+        emit TimestampsUpdated(
+            registrationStartTime, registrationEndTime, allocationStartTime, allocationEndTime, msg.sender
+        );
     }
 
     /// ====================================
@@ -371,7 +386,7 @@ contract QVSimpleStrategy is BaseStrategy {
         Allocator storage allocator = allocators[_sender];
 
         if (voiceCreditsToAllocate + allocator.voiceCredits > maxVoiceCreditsPerAllocator) {
-            revert();
+            revert INVALID();
         }
 
         uint256 creditsCastToRecipient = allocator.voiceCreditsCastToRecipient[recipientId];
@@ -460,16 +475,5 @@ contract QVSimpleStrategy is BaseStrategy {
             y = z;
             z = (x / z + z) / 2;
         }
-    }
-
-    /// @notice Calculate the square root of a number in wei
-    /// @param weiX The number in wei
-    // Note: overflow is not checked and can occur if weiX is too large
-    function _sqrtWei(uint256 weiX) internal pure returns (uint256 weiY) {
-        // Convert to "fixed-point" representation with 18 decimal places
-        uint256 x = weiX * 1e18;
-        uint256 y = _sqrt(x);
-        // Convert back to wei
-        return y / 1e9;
     }
 }
