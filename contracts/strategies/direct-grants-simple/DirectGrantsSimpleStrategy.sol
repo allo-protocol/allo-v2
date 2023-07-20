@@ -48,6 +48,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     error MILESTONES_ALREADY_SET();
     error INVALID_REGISTRATION();
     error ALLOCATION_EXCEEDS_POOL_AMOUNT();
+    error INVALID_METADATA();
 
     /// ===============================
     /// ========== Events =============
@@ -63,6 +64,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// ================================
 
     bool public registryGating;
+    bool public metadataRequired;
     bool public grantAmountRequired;
     uint256 public allocatedGrantAmount;
     address[] private _acceptedRecipientIds;
@@ -87,15 +89,20 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// ===============================
 
     function initialize(uint256 _poolId, bytes memory _data) public virtual override {
-        (bool _registryGating, bool _grantAmountRequired) = abi.decode(_data, (bool, bool));
-        __DirectGrantsSimpleStrategy_init(_poolId, _registryGating, _grantAmountRequired);
+        (bool _registryGating, bool _metadataRequired, bool _grantAmountRequired) =
+            abi.decode(_data, (bool, bool, bool));
+        __DirectGrantsSimpleStrategy_init(_poolId, _registryGating, _metadataRequired, _grantAmountRequired);
     }
 
-    function __DirectGrantsSimpleStrategy_init(uint256 _poolId, bool _registryGating, bool _grantAmountRequired)
-        internal
-    {
+    function __DirectGrantsSimpleStrategy_init(
+        uint256 _poolId,
+        bool _registryGating,
+        bool _metadataRequired,
+        bool _grantAmountRequired
+    ) internal {
         __BaseStrategy_init(_poolId);
         registryGating = _registryGating;
+        _metadataRequired = _metadataRequired;
         grantAmountRequired = _grantAmountRequired;
         _setPoolActive(true);
     }
@@ -293,6 +300,10 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         }
         if (_recipients[recipientId].recipientStatus == InternalRecipientStatus.Accepted) {
             revert RECIPIENT_ALREADY_ACCEPTED();
+        }
+
+        if (metadataRequired && (bytes(metadata.pointer).length == 0 || metadata.protocol == 0)) {
+            revert INVALID_METADATA();
         }
 
         Recipient memory recipient = Recipient({

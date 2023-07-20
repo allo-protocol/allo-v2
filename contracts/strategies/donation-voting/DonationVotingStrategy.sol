@@ -48,6 +48,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     error INVALID();
     error DISTRIBUTION_STARTED();
     error NOT_ALLOWED();
+    error INVALID_METADATA();
 
     /// ===============================
     /// ========== Events =============
@@ -62,6 +63,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     /// ================================
 
     bool public registryGating;
+    bool public metadataRequired;
     bool public distributionStarted;
     uint256 public registrationStartTime;
     uint256 public registrationEndTime;
@@ -116,15 +118,17 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     function initialize(uint256 _poolId, bytes memory _data) public virtual override {
         (
             bool _registryGating,
+            bool _metadataRequired,
             uint256 _registrationStartTime,
             uint256 _registrationEndTime,
             uint256 _allocationStartTime,
             uint256 _allocationEndTime,
             address[] memory _allowedTokens
-        ) = abi.decode(_data, (bool, uint256, uint256, uint256, uint256, address[]));
+        ) = abi.decode(_data, (bool, bool, uint256, uint256, uint256, uint256, address[]));
         __DonationVotingStrategy_init(
             _poolId,
             _registryGating,
+            _metadataRequired,
             _registrationStartTime,
             _registrationEndTime,
             _allocationStartTime,
@@ -136,6 +140,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     function __DonationVotingStrategy_init(
         uint256 _poolId,
         bool _registryGating,
+        bool _metadataRequired,
         uint256 _registrationStartTime,
         uint256 _registrationEndTime,
         uint256 _allocationStartTime,
@@ -144,6 +149,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     ) internal {
         __BaseStrategy_init(_poolId);
         registryGating = _registryGating;
+        metadataRequired = _metadataRequired;
 
         if (
             block.timestamp > _registrationStartTime || _registrationStartTime > _registrationEndTime
@@ -374,6 +380,9 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
 
         if (recipientAddress == address(0)) {
             revert RECIPIENT_ERROR(recipientId);
+        }
+        if (metadataRequired && (bytes(metadata.pointer).length == 0 || metadata.protocol == 0)) {
+            revert INVALID_METADATA();
         }
 
         Recipient storage recipient = _recipients[recipientId];
