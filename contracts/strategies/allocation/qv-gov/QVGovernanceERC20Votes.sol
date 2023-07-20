@@ -72,7 +72,7 @@ contract QVGovernanceERC20Votes is QVSimpleStrategy {
         reviewThreshold = _reviewThreshold;
 
         // todo: test if it actually works
-        // sanity check if token is ERC20Votes, should revert is function is not available
+        // sanity check if token is ERC20Votes, should revert if function is not available
         govToken.getPastVotes(address(this), 0);
     }
 
