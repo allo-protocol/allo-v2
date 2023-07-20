@@ -402,7 +402,7 @@ contract QVSimpleStrategy is BaseStrategy {
         allocator.voiceCreditsCastToRecipient[recipientId] += totalCredits;
         allocator.votesCastToRecipient[recipientId] += voteResult;
 
-        emit Allocated(_sender, voteResult, address(0), msg.sender);
+        emit Allocated(recipientId, voteResult, address(0), _sender);
     }
 
     /// @notice Distribute the tokens to the recipients
