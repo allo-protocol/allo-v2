@@ -39,8 +39,13 @@ contract HackathonQVStrategy is QVSimpleStrategy {
     /// @param _data The data to initialize the strategy with
     function initialize(uint256 _poolId, bytes memory _data) public override {
         // decode the _data -> the second data has the timestamps and QVSimpleStrategy data
-        (address easContractAddress, address schemaRegistryAddress, string memory schema, bool revocable, bytes memory data) =
-            abi.decode(_data, (address, address, string, bool, bytes));
+        (
+            address easContractAddress,
+            address schemaRegistryAddress,
+            string memory schema,
+            bool revocable,
+            bytes memory data
+        ) = abi.decode(_data, (address, address, string, bool, bytes));
 
         __HackathonQVStrategy_init(easContractAddress, schemaRegistryAddress, schema, revocable, _poolId, data);
     }
@@ -72,7 +77,7 @@ contract HackathonQVStrategy is QVSimpleStrategy {
         // todo: setup a default schema they can use for now.
         // https://optimism-goerli.easscan.org/schema/create
         // https://docs.attest.sh/docs/tutorials/create-a-schema
-        
+
         _registerSchema(_schema, ISchemaResolver(address(this)), _revocable);
     }
 
