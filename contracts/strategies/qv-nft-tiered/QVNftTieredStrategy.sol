@@ -12,6 +12,7 @@ contract QVNftTieredStrategy is QVSimpleStrategy {
     /// ======= Storage ======
     /// ======================
 
+    // NFTs that can be used to allocate votes
     ERC721[] public nfts;
 
     // NFT -> maxVoiceCredits
