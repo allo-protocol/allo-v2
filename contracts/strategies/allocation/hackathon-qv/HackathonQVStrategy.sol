@@ -21,6 +21,7 @@ import {ISchemaRegistry, ISchemaResolver, SchemaRecord} from "@ethereum-attestat
 
 contract HackathonQVStrategy is QVSimpleStrategy {
     using EnumerableSet for EnumerableSet.AddressSet;
+
     error ALREADY_ADDED();
 
     // The instance of the EAS and SchemaRegistry contracts.
