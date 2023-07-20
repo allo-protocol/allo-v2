@@ -2,9 +2,9 @@
 pragma solidity 0.8.19;
 
 // External Libraries
-import {AccessControl} from "@openzeppelin/access/AccessControl.sol";
-import {CREATE3} from "@solady/utils/CREATE3.sol";
-import {ERC20} from "@solady/tokens/ERC20.sol";
+import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
+import {CREATE3} from "solady/src/utils/CREATE3.sol";
+import {ERC20} from "solady/src/tokens/ERC20.sol";
 // Interfaces
 import "./IRegistry.sol";
 // Internal Libraries

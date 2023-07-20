@@ -1,0 +1,300 @@
+{
+  "manifestVersion": "3.2",
+  "admin": {
+    "address": "0x1072304022203029a6237eb7B87F23f8c5E4679D",
+    "txHash": "0xc1664c359d2791ff011819859337996edc4145d1bdc815c1ae367de29f4abbaa"
+  },
+  "proxies": [
+    {
+      "address": "0x943AFE8A6f6B6f5172B70f5c4F0805e7063f8905",
+      "txHash": "0x4fc7c2cd7a011c800530de04d9a4ea19f03755e50c4f58c4c26f501db6b28132",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x1551D5Ff5586cCF45B6CD6349f0339c850481b34",
+      "txHash": "0x4e38b9e94d8b6647c2c26a0d72c5fff7490f72b7210a583bc7d90add83786665",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x3b783dae9acF41FB67E0D883B0240676e56Aea85",
+      "txHash": "0x5d312e21fde6305ef6175abe1a4b12a1d2b4030fca979e7e981c39d2f7fabae6",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x44665c718B57f3b780d1cddE30C32281C18Fa8ce",
+      "txHash": "0xe366c8932f81114bd85428cc3072443690ab972c692acd71a676e1825cd5db1e",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x174b26eD4DF62A21189fF498834DE05077531EBD",
+      "txHash": "0xd177fe922a08bd97b9d75e3a7b3608a0a582e9021d992dc6153a8a63cfd96232",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x5c073F643a8171F0eE3F0582bee5178c003c84fF",
+      "txHash": "0x98d5c2bfa115f02dee55f9664fb595d8d3aaa45abe3f571330dea0689a153f52",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xaaA4bc2E24cFF92Da4a06808abef4aB9c5E20868",
+      "txHash": "0x34f110d91c5a41a6e550218109d835d5b4244cb290637838e85b0b1c283e2948",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xF5A5B0Ad8fCB094cB9205A1c7C81E69a85C8d5E4",
+      "txHash": "0xdc4e508b4a12791f9716f072f2da40467d7889ad9ef561f3692fdac7922c8b0a",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x7d626C9E93B9Fe5d17892BC41e1C73c46706F374",
+      "txHash": "0x8a8693cf45cf938ce74bb264939cf693dd329c83141f74a49eb4a69ab6aacce6",
+      "kind": "transparent"
+    }
+  ],
+  "impls": {
+    "a1344bbb8b10696d1da67f53c5315de2f41a88768334f16211235e067c7adb01": {
+      "address": "0xb38f7b412eA4cf921554b57A1bE5743eC0696E9b",
+      "txHash": "0x08d2fea3b5b6817f02d50e901400278a9ff10ecf055cac970281431564622943",
+      "layout": {
+        "solcVersion": "0.8.19",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:63",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:68"
+          },
+          {
+            "label": "_roles",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)676_storage)",
+            "contract": "AccessControl",
+            "src": "@openzeppelin/contracts/access/AccessControl.sol:56"
+          },
+          {
+            "label": "feePercentage",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_uint256",
+            "contract": "Allo",
+            "src": "contracts/core/Allo.sol:43"
+          },
+          {
+            "label": "baseFee",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_uint256",
+            "contract": "Allo",
+            "src": "contracts/core/Allo.sol:46"
+          },
+          {
+            "label": "_poolIndex",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_uint256",
+            "contract": "Allo",
+            "src": "contracts/core/Allo.sol:49"
+          },
+          {
+            "label": "treasury",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_address_payable",
+            "contract": "Allo",
+            "src": "contracts/core/Allo.sol:52"
+          },
+          {
+            "label": "registry",
+            "offset": 0,
+            "slot": "6",
+            "type": "t_contract(IRegistry)4967",
+            "contract": "Allo",
+            "src": "contracts/core/Allo.sol:55"
+          },
+          {
+            "label": "_nonces",
+            "offset": 0,
+            "slot": "7",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "Allo",
+            "src": "contracts/core/Allo.sol:58"
+          },
+          {
+            "label": "pools",
+            "offset": 0,
+            "slot": "8",
+            "type": "t_mapping(t_uint256,t_struct(Pool)4477_storage)",
+            "contract": "Allo",
+            "src": "contracts/core/Allo.sol:61"
+          },
+          {
+            "label": "approvedStrategies",
+            "offset": 0,
+            "slot": "9",
+            "type": "t_mapping(t_address,t_bool)",
+            "contract": "Allo",
+            "src": "contracts/core/Allo.sol:64"
+          },
+          {
+            "label": "feeSkirtingBountyPercentage",
+            "offset": 0,
+            "slot": "10",
+            "type": "t_uint256",
+            "contract": "Allo",
+            "src": "contracts/core/Allo.sol:67"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_address_payable": {
+            "label": "address payable",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_contract(IRegistry)4967": {
+            "label": "contract IRegistry",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IStrategy)6414": {
+            "label": "contract IStrategy",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)676_storage)": {
+            "label": "mapping(bytes32 => struct AccessControl.RoleData)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(Pool)4477_storage)": {
+            "label": "mapping(uint256 => struct IAllo.Pool)",
+            "numberOfBytes": "32"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_struct(Metadata)5682_storage": {
+            "label": "struct Metadata",
+            "members": [
+              {
+                "label": "protocol",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "pointer",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(Pool)4477_storage": {
+            "label": "struct IAllo.Pool",
+            "members": [
+              {
+                "label": "identityId",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "strategy",
+                "type": "t_contract(IStrategy)6414",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "token",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "amount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "metadata",
+                "type": "t_struct(Metadata)5682_storage",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "managerRole",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "6"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "7"
+              }
+            ],
+            "numberOfBytes": "256"
+          },
+          "t_struct(RoleData)676_storage": {
+            "label": "struct AccessControl.RoleData",
+            "members": [
+              {
+                "label": "members",
+                "type": "t_mapping(t_address,t_bool)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    }
+  }
+}
