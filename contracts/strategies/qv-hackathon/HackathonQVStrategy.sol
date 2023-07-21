@@ -95,7 +95,8 @@ contract HackathonQVStrategy is QVSimpleStrategy {
         // https://docs.attest.sh/docs/tutorials/create-a-schema
         // https://github.com/ethereum-attestation-service/eas-contracts/blob/master/contracts/
 
-        _registerSchema(_schema, ISchemaResolver(address(this)), _revocable);
+        // todo: we will want to make a default one and then let the user override it if they want.
+        // _registerSchema(_schema, ISchemaResolver(address(this)), _revocable);
     }
 
     /// =========================
@@ -111,9 +112,38 @@ contract HackathonQVStrategy is QVSimpleStrategy {
         onlyPoolManager(_sender)
         returns (address recipientId)
     {
-        // checks...
-        // attest...
-        // register...
+        // decode _data
+        // Note: this _data will also contain another data bytes array to pass to _registerRecipient()
+        (address recipient, uint256 amount, address token, bytes memory data) =
+            abi.decode(_data, (address, uint256, address, bytes));
+
+        // check if already added
+        if (hackers.contains(_sender)) {
+            revert ALREADY_ADDED();
+        }
+        // attest the recipient
+        // todo: update the following values to be passed in
+        uint64 expirationTime = uint64(block.timestamp + 100 days);
+        bool revocable = true;
+
+        // create the request
+        AttestationRequest memory attestationRequest = AttestationRequest(
+            // todo: add schema
+            "",
+            AttestationRequestData({
+                recipient: recipient,
+                expirationTime: expirationTime,
+                revocable: revocable,
+                refUID: EMPTY_UID,
+                data: data,
+                value: amount
+            })
+        );
+
+        eas.attest(attestationRequest);
+
+        // register the recipient
+        return _registerRecipient(data, _sender);
     }
 
     /// @dev Allocates tokens to a recipient.
@@ -141,7 +171,6 @@ contract HackathonQVStrategy is QVSimpleStrategy {
 
     /// @dev Getter for the hackers set.
     function getHackers() public view returns (address[] memory) {
-        // todo: refactor if possible.
         address[] memory hackersArray = new address[](hackers.length());
         for (uint256 i = 0; i < hackers.length(); i++) {
             hackersArray[i] = hackers.at(i);
