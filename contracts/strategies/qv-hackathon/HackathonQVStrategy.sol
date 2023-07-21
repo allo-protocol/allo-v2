@@ -47,9 +47,9 @@ contract HackathonQVStrategy is QVSimpleStrategy {
     /// ====== Events ========
     /// ======================
 
-    event EASAddressUpdated(address indexed easAddress);
-    event VerifierAdded(address indexed verifier);
-    event VerifierRemoved(address indexed verifier);
+    // event EASAddressUpdated(address indexed easAddress);
+    // event VerifierAdded(address indexed verifier);
+    // event VerifierRemoved(address indexed verifier);
 
     /// ======================
     /// ===== Constructor ====
@@ -122,6 +122,8 @@ contract HackathonQVStrategy is QVSimpleStrategy {
         onlyPoolManager(msg.sender)
         onlyActiveRegistration
     {
+        // REVOKE OLDER ATTEASTIONS.
+
         uint256 recipientLength = _recipientIds.length;
         for (uint256 i = 0; i < recipientLength;) {
             allowedRecipients[i] = _recipientIds[i];
@@ -202,7 +204,7 @@ contract HackathonQVStrategy is QVSimpleStrategy {
         }
 
         // check that the sender can allocate votes
-        if (!nft.balanceOf(_sender) == 0) {
+        if (nft.balanceOf(_sender) == 0) {
             revert UNAUTHORIZED();
         }
 
