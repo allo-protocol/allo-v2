@@ -24,7 +24,7 @@ contract QVSimpleStrategy is BaseStrategy {
     /// ======================
 
     event Appealed(address indexed recipientId, bytes data, address sender);
-    event Reviewed(address indexed recipientId, InternalRecipientStatus status, address sender);
+    event RecipientStatusUpdated(address indexed recipientId, InternalRecipientStatus status, address sender);
     event TimestampsUpdated(
         uint256 registrationStartTime,
         uint256 registrationEndTime,
@@ -237,7 +237,7 @@ contract QVSimpleStrategy is BaseStrategy {
 
             recipient.recipientStatus = recipientStatus;
 
-            emit Reviewed(recipientId, recipientStatus, msg.sender);
+            emit RecipientStatusUpdated(recipientId, recipientStatus, msg.sender);
 
             unchecked {
                 i++;

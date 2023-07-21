@@ -5,13 +5,31 @@ import {QVSimpleStrategy} from "../qv-simple/QVSimpleStrategy.sol";
 import "@openzeppelin/governance/utils/IVotes.sol";
 
 contract QVGovernanceERC20Votes is QVSimpleStrategy {
-    constructor(address _allo, string memory _name) QVSimpleStrategy(_allo, _name) {}
+    /// ======================
+    /// ======= Storage ======
+    /// ======================
 
     IVotes public govToken;
     uint256 public timestamp;
     uint256 public reviewThreshold;
 
+    // recipientId -> status -> count
     mapping(address => mapping(InternalRecipientStatus => uint256)) public reviewsByStatus;
+
+    /// ======================
+    /// ======= Events =======
+    /// ======================
+
+    event Reviewed(address indexed recipientId, InternalRecipientStatus status, address sender);
+
+    /// ===============================
+    /// ======== Constructor ==========
+    /// ===============================
+    constructor(address _allo, string memory _name) QVSimpleStrategy(_allo, _name) {}
+
+    /// ===============================
+    /// ========= Initialize ==========
+    /// ===============================
 
     /// @notice Initialize the strategy
     /// @param _poolId The pool id
@@ -106,6 +124,8 @@ contract QVGovernanceERC20Votes is QVSimpleStrategy {
             if (reviewsByStatus[recipientId][recipientStatus] >= reviewThreshold) {
                 Recipient storage recipient = recipients[recipientId];
                 recipient.recipientStatus = recipientStatus;
+
+                emit RecipientStatusUpdated(recipientId, recipientStatus, address(0));
             }
 
             emit Reviewed(recipientId, recipientStatus, msg.sender);
