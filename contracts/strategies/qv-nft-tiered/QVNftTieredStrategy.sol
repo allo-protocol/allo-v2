@@ -1,10 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import {IAllo} from "../../core/IAllo.sol";
-import {IRegistry} from "../../core/IRegistry.sol";
 import {QVSimpleStrategy} from "../qv-simple/QVSimpleStrategy.sol";
-import {Metadata} from "../../core/libraries/Metadata.sol";
 import {ERC721} from "@solady/tokens/ERC721.sol";
 
 contract QVNftTieredStrategy is QVSimpleStrategy {
@@ -134,7 +131,7 @@ contract QVNftTieredStrategy is QVSimpleStrategy {
             abi.decode(_data, (address, ERC721, uint256, uint256));
 
         // check the voiceCreditsToAllocate is > 0
-        if (voiceCreditsToAllocate <= 0) {
+        if (voiceCreditsToAllocate == 0) {
             revert INVALID();
         }
 
@@ -144,7 +141,7 @@ contract QVNftTieredStrategy is QVSimpleStrategy {
         }
 
         // check that the sender can allocate votes
-        if (!_isValidAllocator(_sender)) {
+        if (nft.ownerOf(nftId) != _sender) {
             revert UNAUTHORIZED();
         }
 
@@ -171,6 +168,6 @@ contract QVNftTieredStrategy is QVSimpleStrategy {
         // update credits used by nftId
         voiceCreditsUsedPerNftId[nft][nftId] += voiceCreditsToAllocate;
 
-        emit Allocated(_sender, voteResult, address(0), msg.sender);
+        emit Allocated(recipientId, voteResult, address(nft), _sender);
     }
 }
