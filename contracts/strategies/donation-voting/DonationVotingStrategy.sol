@@ -55,7 +55,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     /// ===============================
 
     event Appealed(address indexed recipientId, bytes data, address sender);
-    event Reviewed(address indexed recipientId, InternalRecipientStatus recipientStatus, address sender);
+    event RecipientStatusUpdated(address indexed recipientId, InternalRecipientStatus recipientStatus, address sender);
     event Claimed(address indexed recipientId, address recipientAddress, uint256 amount, address token);
 
     /// ================================
@@ -254,7 +254,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
 
             recipient.recipientStatus = recipientStatus;
 
-            emit Reviewed(recipientId, recipientStatus, msg.sender);
+            emit RecipientStatusUpdated(recipientId, recipientStatus, msg.sender);
 
             unchecked {
                 i++;

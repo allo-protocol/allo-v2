@@ -4,6 +4,8 @@ Spec: Governance Token Quadratic Voting (QV)
 ## Overview 
 Quadratic Voting is a popular method for democratic decision-making. This strategy gates allocations using a governance token, and gives eligible allocators a number of voice credits equal to their token holdings. The pool's funds are distributed proportionally to the number of votes each project receives. 
 
+The token used for this strategy must implement the `getPastVotes(address account, uint256 timepoint)` function as specified in `EIP-5808`.
+
 ## Spec
 ### Recipient logic
 In this strategy, prospective recipients need to apply and be approved by a number of pool managers dictated by the strategy. The pool managers must set a time window in which applications must be received.
@@ -35,7 +37,7 @@ In this strategy, prospective recipients need to apply and be approved by a numb
         - If a recipient's current status is `Accepted`, then their application info is updated and their status is changed to `Pending` (global and local)
 
 ### Allocation logic
-Pool managers are able to designate a governance token that they want to use as their source of truth. The strategy takes a snapshot of token holdings on an manager-specified date and uses that as its source of truth for the allocation round. Allocators must hold tokens in that snapshot in order to be eligible. Each allocator gets a budget of "voice credits", which they can use to "purchase" votes on as many recipients as they would like. The number of votes each allocator can give to a recipient is equal to the square root of the number of voice credits they spend on that specific recipient. Votes can be fractional. Allocations can only be cast during a voting window that is set by the pool manager.  
+Pool managers are able to designate a governance token that they want to use as their source of truth. The pool manager defines the timestamp of the token snapshot. Allocators must hold tokens in that snapshot in order to be eligible. Each allocator gets a budget of "voice credits", which they can use to "purchase" votes on as many recipients as they would like. The number of votes each allocator can give to a recipient is equal to the square root of the number of voice credits they spend on that specific recipient. Votes can be fractional. Allocations can only be cast during a voting window that is set by the pool manager.  
 - **Allocator Eligibility**
     - only wallets that hold the required governance token in the strategy's snapshot are considered `eligible`. All other wallets are `ineligible`. 
 - **Allocate function**
