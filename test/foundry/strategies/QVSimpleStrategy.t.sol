@@ -2,17 +2,9 @@ pragma solidity 0.8.19;
 
 import "forge-std/Test.sol";
 
-<<<<<<<< HEAD:test/foundry/strategies/QVSimpleStrategy.t.sol
 import {Accounts} from "../shared/Accounts.sol";
 import {RegistrySetupFull} from "../shared/RegistrySetup.sol";
 import {AlloSetup} from "../shared/AlloSetup.sol";
-========
-import {BaseStrategy} from "../../../../../../contracts/strategies/BaseStrategy.sol";
-import {QVSimpleStrategy} from "../../../../../../contracts/strategies/qv-simple/QVSimpleStrategy.sol";
-import {Metadata} from "../../../../../../contracts/core/libraries/Metadata.sol";
-import {Allo} from "../../../../../../contracts/core/Allo.sol";
-import {Registry} from "../../../../../../contracts/core/Registry.sol";
->>>>>>>> 3ec9c0a (chore: setup new strategy/eas):test/foundry/strategies/allocation/quadratic-voting/qv-simple/QVSimpleStrategy.t.sol
 
 import {QVSimpleStrategy} from "../../../contracts/strategies/qv-simple/QVSimpleStrategy.sol";
 import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
