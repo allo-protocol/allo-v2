@@ -2,19 +2,11 @@ pragma solidity 0.8.19;
 
 import "forge-std/Test.sol";
 
-<<<<<<<< HEAD:test/foundry/strategies/allocation/quadratic-voting/qv-simple/QVSimpleStrategy.t.sol
 import {BaseStrategy} from "../../../../../../contracts/strategies/BaseStrategy.sol";
 import {QVSimpleStrategy} from "../../../../../../contracts/strategies/qv-simple/QVSimpleStrategy.sol";
 import {Metadata} from "../../../../../../contracts/core/libraries/Metadata.sol";
 import {Allo} from "../../../../../../contracts/core/Allo.sol";
 import {Registry} from "../../../../../../contracts/core/Registry.sol";
-========
-import {BaseStrategy} from "../../../contracts/strategies/BaseStrategy.sol";
-import {QVSimpleStrategy} from "../../../contracts/strategies/qv-simple/QVSimpleStrategy.sol";
-import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
-import {Allo} from "../../../contracts/core/Allo.sol";
-import {Registry} from "../../../contracts/core/Registry.sol";
->>>>>>>> ed9f3c0 (QV Governance ERC20 Votes Strategy (#113)):test/foundry/strategies/QVSimpleStrategy.t.sol
 
 contract QVSimpleStrategyTest is Test {
     error ALLOCATION_NOT_ACTIVE();
