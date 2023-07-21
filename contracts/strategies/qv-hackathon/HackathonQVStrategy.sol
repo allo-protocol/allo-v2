@@ -7,6 +7,7 @@ import {QVSimpleStrategy} from "../qv-simple/QVSimpleStrategy.sol";
 import {Metadata} from "../../core/libraries/Metadata.sol";
 
 import {EnumerableSet} from "@openzeppelin/utils/structs/EnumerableSet.sol";
+import {ERC721} from "@solady/tokens/ERC721.sol";
 
 // Note: EAS Contracts
 import {
@@ -39,9 +40,20 @@ contract HackathonQVStrategy is QVSimpleStrategy {
     /// ====== Storage =======
     /// ======================
 
+    // The instance of the EAS and SchemaRegistry contracts.
+    IEAS public eas;
+    ISchemaRegistry public schemaRegistry;
+    ERC721 public nft;
+
+    bytes32 constant EMPTY_UID = 0;
+
+    // Who can call submitAttestation
+    mapping(address => bool) public attestationSigners;
+
+    address[] private allowedRecipients;
+
     EASInfo public easInfo;
     bytes32 constant _RELATED_ATTESTATION_UID = 0;
-    address[] public allowedRecipients;
 
     /// ======================
     /// ====== Events ========
@@ -117,7 +129,7 @@ contract HackathonQVStrategy is QVSimpleStrategy {
 
     /// Set the allowed recipient IDs
     /// @param _recipientIds The recipient IDs to allow
-    function setAllowedRecipientIds(address[] _recipientIds)
+    function setAllowedRecipientIds(address[] memory _recipientIds)
         external
         onlyPoolManager(msg.sender)
         onlyActiveRegistration
@@ -128,7 +140,8 @@ contract HackathonQVStrategy is QVSimpleStrategy {
         for (uint256 i = 0; i < recipientLength;) {
             allowedRecipients[i] = _recipientIds[i];
 
-            _grantEASAttestation(_recipientId);
+            // todo: where is the rest of the data?
+            _grantEASAttestation(_recipientIds[i], 0, "", 0);
 
             unchecked {
                 i++;
@@ -233,16 +246,20 @@ contract HackathonQVStrategy is QVSimpleStrategy {
 
     /// @dev Grant EAS attestation to recipient with the EAS contract.
     // TODO: VERIFY THIS LOGIC
-    function _grantEASAttestation(address _recipientId) internal {
+    function _grantEASAttestation(address _recipientId, uint64 _expirationTime, bytes memory _data, uint256 _value)
+        internal
+    {
+        bytes32 schema = bytes32(abi.encodePacked(easInfo.schema));
+
         AttestationRequest memory attestationRequest = AttestationRequest(
-            easInfo.schema,
+            schema,
             AttestationRequestData({
                 recipient: _recipientId,
-                expirationTime: expirationTime,
+                expirationTime: _expirationTime,
                 revocable: easInfo.revocable,
                 refUID: _RELATED_ATTESTATION_UID,
-                data: data,
-                value: amount
+                data: _data,
+                value: _value
             })
         );
 
@@ -252,19 +269,20 @@ contract HackathonQVStrategy is QVSimpleStrategy {
     /// =========================
     /// ==== DO WE NEED THIS ========
     /// =========================
+    // Note: yes we do need this to register the schema the pool manager wants to use for the attestations
 
-    // /// @dev Registers a schema with the SchemaRegistry contract.
-    // /// @param _schema The schema to register.
-    // /// @param _resolver The address of the resolver contract.
-    // /// @param _revocable Whether the schema is revocable.
-    // function _registerSchema(string memory _schema, ISchemaResolver _resolver, bool _revocable)
-    //     internal
-    //     returns (bytes32)
-    // {
-    //     bytes32 uid = schemaRegistry.register(_schema, _resolver, _revocable);
+    /// @dev Registers a schema with the SchemaRegistry contract.
+    /// @param _schema The schema to register.
+    /// @param _resolver The address of the resolver contract.
+    /// @param _revocable Whether the schema is revocable.
+    function _registerSchema(string memory _schema, ISchemaResolver _resolver, bool _revocable)
+        internal
+        returns (bytes32)
+    {
+        bytes32 uid = schemaRegistry.register(_schema, _resolver, _revocable);
 
-    //     return uid;
-    // }
+        return uid;
+    }
 
     /// =========================
     /// ==== EAS Functions =====
