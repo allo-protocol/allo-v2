@@ -380,7 +380,7 @@ contract QVSimpleStrategy is BaseStrategy {
         Allocator storage allocator = allocators[_sender];
 
         if (voiceCreditsToAllocate + allocator.voiceCredits > maxVoiceCreditsPerAllocator) {
-            revert();
+            revert INVALID();
         }
 
         uint256 creditsCastToRecipient = allocator.voiceCreditsCastToRecipient[recipientId];
@@ -469,16 +469,5 @@ contract QVSimpleStrategy is BaseStrategy {
             y = z;
             z = (x / z + z) / 2;
         }
-    }
-
-    /// @notice Calculate the square root of a number in wei
-    /// @param weiX The number in wei
-    // Note: overflow is not checked and can occur if weiX is too large
-    function _sqrtWei(uint256 weiX) internal pure returns (uint256 weiY) {
-        // Convert to "fixed-point" representation with 18 decimal places
-        uint256 x = weiX * 1e18;
-        uint256 y = _sqrt(x);
-        // Convert back to wei
-        return y / 1e9;
     }
 }

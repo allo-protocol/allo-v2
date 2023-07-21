@@ -118,7 +118,7 @@ contract HackathonQVStrategy is QVSimpleStrategy {
             abi.decode(_data, (address, uint256, address, bytes));
 
         // check if already added
-        if (hackers.contains(_sender)) {
+        if (hackers.contains(recipient)) {
             revert ALREADY_ADDED();
         }
         // attest the recipient
@@ -143,7 +143,7 @@ contract HackathonQVStrategy is QVSimpleStrategy {
         eas.attest(attestationRequest);
 
         // register the recipient
-        return _registerRecipient(data, _sender);
+        recipientId = _registerRecipient(data, _sender);
     }
 
     /// @dev Allocates tokens to a recipient.
@@ -239,22 +239,6 @@ contract HackathonQVStrategy is QVSimpleStrategy {
         eas = IEAS(_easContractAddress);
 
         emit EASAddressUpdated(_easContractAddress);
-    }
-
-    /// @dev Submit an attestation request to the EAS contract.
-    /// @param _attestationRequestData An array of `AttestationRequestData` structures containing the attestation request data.
-    function submitAttestation(MultiAttestationRequest[] calldata _attestationRequestData)
-        public
-        payable
-        virtual
-        onlyPoolManager(msg.sender)
-        returns (bytes32[] memory)
-    {
-        if (!attestationSigners[msg.sender]) {
-            revert INVALID();
-        }
-
-        return eas.multiAttest(_attestationRequestData);
     }
 
     /// @dev Revoke attestations by schema and uid
