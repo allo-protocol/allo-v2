@@ -22,62 +22,71 @@ import {ISchemaRegistry, ISchemaResolver, SchemaRecord} from "@ethereum-attestat
 contract HackathonQVStrategy is QVSimpleStrategy {
     using EnumerableSet for EnumerableSet.AddressSet;
 
+    struct EASInfo {
+        IEAS eas;
+        ISchemaRegistry schemaRegistry;
+        string schema;
+        bool revocable;
+    }
+
+    /// ======================
+    /// ==== Custom Error =====
+    /// ======================
+
     error ALREADY_ADDED();
 
-    // The instance of the EAS and SchemaRegistry contracts.
-    IEAS public eas;
-    ISchemaRegistry public schemaRegistry;
+    /// ======================
+    /// ====== Storage =======
+    /// ======================
 
-    bytes32 constant EMPTY_UID = 0;
+    EASInfo public easInfo;
+    bytes32 constant _RELATED_ATTESTATION_UID = 0;
+    address[] public allowedRecipients;
 
-    // Who can call submitAttestation
-    mapping(address => bool) public attestationSigners;
-
-    EnumerableSet.AddressSet private hackers;
+    /// ======================
+    /// ====== Events ========
+    /// ======================
 
     event EASAddressUpdated(address indexed easAddress);
     event VerifierAdded(address indexed verifier);
     event VerifierRemoved(address indexed verifier);
 
+    /// ======================
+    /// ===== Constructor ====
+    /// ======================
+
     constructor(address _allo, string memory _name) QVSimpleStrategy(_allo, _name) {}
+
+    /// ======================
+    /// ====== Initialize ====
+    /// ======================
 
     /// @dev Initializes the strategy
     /// @param _poolId The pool ID for this strategy
     /// @param _data The data to initialize the strategy with
     function initialize(uint256 _poolId, bytes memory _data) public override {
-        // decode the _data -> the second data has the timestamps and QVSimpleStrategy data
-        (
-            address easContractAddress,
-            address schemaRegistryAddress,
-            string memory schema,
-            bool revocable,
-            bytes memory data
-        ) = abi.decode(_data, (address, address, string, bool, bytes));
+        (EASInfo memory _easInfo, address _nft, bytes memory _qvSimpleInitData) =
+            abi.decode(_data, (EASInfo, address, bytes));
 
-        __HackathonQVStrategy_init(easContractAddress, schemaRegistryAddress, schema, revocable, _poolId, data);
+        __HackathonQVStrategy_init(_poolId, _easInfo, _nft, _qvSimpleInitData);
     }
 
     /// @dev Initializes the strategy.
-    function __HackathonQVStrategy_init(
-        address _easContractAddress,
-        address _schemaRegistryAddress,
-        string memory _schema,
-        bool _revocable,
-        uint256 _poolId,
-        bytes memory _data
-    ) public {
+    function __HackathonQVStrategy_init(uint256 _poolId, EASInfo memory _easInfo, address _nft, bytes memory _data)
+        internal
+    {
         (
-            registryGating,
             metadataRequired,
             maxVoiceCreditsPerAllocator,
             registrationStartTime,
             registrationEndTime,
             allocationStartTime,
             allocationEndTime
-        ) = abi.decode(_data, (bool, bool, uint256, uint256, uint256, uint256, uint256));
+        ) = abi.decode(_data, (bool, uint256, uint256, uint256, uint256, uint256));
+
         __QVSimpleStrategy_init(
             _poolId,
-            registryGating,
+            true, // registryGating
             metadataRequired,
             maxVoiceCreditsPerAllocator,
             registrationStartTime,
@@ -86,97 +95,174 @@ contract HackathonQVStrategy is QVSimpleStrategy {
             allocationEndTime
         );
 
-        eas = IEAS(_easContractAddress);
-        schemaRegistry = ISchemaRegistry(_schemaRegistryAddress);
+        easInfo = EASInfo({
+            eas: _easInfo.eas,
+            schemaRegistry: _easInfo.schemaRegistry,
+            schema: _easInfo.schema,
+            revocable: _easInfo.revocable
+        });
+
+        nft = ERC721(_nft);
 
         // Register the schema with the SchemaRegistry contract.
-        // todo: setup a default schema they can use for now.
         // https://optimism-goerli.easscan.org/schema/create
         // https://docs.attest.sh/docs/tutorials/create-a-schema
         // https://github.com/ethereum-attestation-service/eas-contracts/blob/master/contracts/
+        _registerSchema(_easInfo.schema, ISchemaResolver(address(this)), _easInfo.revocable);
+    }
 
-        // todo: we will want to make a default one and then let the user override it if they want.
-        // _registerSchema(_schema, ISchemaResolver(address(this)), _revocable);
+    /// ======================
+    /// ====== External ======
+    /// ======================
+
+    /// Set the allowed recipient IDs
+    /// @param _recipientIds The recipient IDs to allow
+    function setAllowedRecipientIds(address[] _recipientIds)
+        external
+        onlyPoolManager(msg.sender)
+        onlyActiveRegistration
+    {
+        uint256 recipientLength = _recipientIds.length;
+        for (uint256 i = 0; i < recipientLength;) {
+            allowedRecipients[i] = _recipientIds[i];
+
+            _grantEASAttestation(_recipientId);
+
+            unchecked {
+                i++;
+            }
+        }
     }
 
     /// =========================
     /// == Internal Functions ===
     /// =========================
 
-    /// @dev Registers a recipient with the EAS contract.
-    /// @param _data The data to register the recipient with.
-    /// @param _sender The address of the sender.
+    /// @notice Submit application to pool
+    /// @param _data The data to be decoded
+    /// @param _sender The sender of the transaction
     function _registerRecipient(bytes memory _data, address _sender)
         internal
         override
-        onlyPoolManager(_sender)
+        onlyActiveRegistration
         returns (address recipientId)
     {
-        // decode _data
-        // Note: this _data will also contain another data bytes array to pass to _registerRecipient()
-        (address recipient, uint256 amount, address token, bytes memory data) =
-            abi.decode(_data, (address, uint256, address, bytes));
+        address recipientAddress;
+        bool useRegistryAnchor;
+        Metadata memory metadata;
 
-        // check if already added
-        if (hackers.contains(recipient)) {
-            revert ALREADY_ADDED();
+        (recipientId, recipientAddress, metadata) = abi.decode(_data, (address, address, Metadata));
+
+        if (
+            // TODO: HOW TO CHECK IF RECIPIENT ID has attestation from EAS contract?
+            !_isIdentityMember(recipientId, _sender)
+        ) {
+            revert UNAUTHORIZED();
         }
-        // attest the recipient
-        // todo: update the following values to be passed in
-        uint64 expirationTime = uint64(block.timestamp + 100 days);
-        bool revocable = true;
 
-        // create the request
+        if (metadataRequired && (bytes(metadata.pointer).length == 0 || metadata.protocol == 0)) {
+            revert INVALID_METADATA();
+        }
+
+        if (recipientAddress == address(0)) {
+            revert RECIPIENT_ERROR(recipientId);
+        }
+
+        Recipient storage recipient = recipients[recipientId];
+
+        // update the recipients data
+        recipient.recipientAddress = recipientAddress;
+        recipient.metadata = metadata;
+        recipient.useRegistryAnchor = registryGating ? true : useRegistryAnchor;
+
+        if (recipient.recipientStatus == InternalRecipientStatus.Rejected) {
+            recipient.recipientStatus = InternalRecipientStatus.Appealed;
+            emit Appealed(recipientId, _data, _sender);
+        } else {
+            recipient.recipientStatus = InternalRecipientStatus.Pending;
+            emit Registered(recipientId, _data, _sender);
+        }
+    }
+
+    /// @notice Allocate votes to a recipient
+    /// @param _data The data
+    /// @param _sender The sender of the transaction
+    /// @dev Only the pool manager(s) can call this function
+    function _allocate(bytes memory _data, address _sender) internal override {
+        (address recipientId, uint256 voiceCreditsToAllocate) = abi.decode(_data, (address, uint256));
+
+        // check the voiceCreditsToAllocate is > 0
+        if (voiceCreditsToAllocate <= 0) {
+            revert INVALID();
+        }
+
+        // check the time periods for allocation
+        if (block.timestamp < allocationStartTime || block.timestamp > allocationEndTime) {
+            revert ALLOCATION_NOT_ACTIVE();
+        }
+
+        // check that the sender can allocate votes
+        if (!nft.balanceOf(_sender) == 0) {
+            revert UNAUTHORIZED();
+        }
+
+        // spin up the structs in storage for updating
+        Recipient storage recipient = recipients[recipientId];
+        Allocator storage allocator = allocators[_sender];
+
+        if (voiceCreditsToAllocate + allocator.voiceCredits > maxVoiceCreditsPerAllocator) {
+            revert INVALID();
+        }
+
+        uint256 creditsCastToRecipient = allocator.voiceCreditsCastToRecipient[recipientId];
+        uint256 votesCastToRecipient = allocator.votesCastToRecipient[recipientId];
+
+        uint256 totalCredits = voiceCreditsToAllocate + creditsCastToRecipient;
+        uint256 voteResult = _calculateVotes(totalCredits * 1e18);
+        voteResult -= votesCastToRecipient;
+        totalRecipientVotes += voteResult;
+        recipient.totalVotes += voteResult;
+
+        allocator.voiceCreditsCastToRecipient[recipientId] += totalCredits;
+        allocator.votesCastToRecipient[recipientId] += voteResult;
+
+        emit Allocated(_sender, voteResult, address(0), msg.sender);
+    }
+
+    /// @dev Grant EAS attestation to recipient with the EAS contract.
+    // TODO: VERIFY THIS LOGIC
+    function _grantEASAttestation(address _recipientId) internal {
         AttestationRequest memory attestationRequest = AttestationRequest(
-            // todo: add schema
-            "",
+            easInfo.schema,
             AttestationRequestData({
-                recipient: recipient,
+                recipient: _recipientId,
                 expirationTime: expirationTime,
-                revocable: revocable,
-                refUID: EMPTY_UID,
+                revocable: easInfo.revocable,
+                refUID: _RELATED_ATTESTATION_UID,
                 data: data,
                 value: amount
             })
         );
 
         eas.attest(attestationRequest);
-
-        // register the recipient
-        recipientId = _registerRecipient(data, _sender);
     }
 
-    /// @dev Allocates tokens to a recipient.
-    /// @param _recipientId The ID of the recipient to allocate tokens to.
-    /// @param _amount The amount of tokens to allocate.
-    /// @param _token The address of the token to allocate.
-    /// @param _data The data to allocate the tokens with.
-    /// @param _sender The address of the sender.
-    function _allocate(address _recipientId, uint256 _amount, address _token, bytes memory _data, address _sender)
-        internal
-    {}
+    /// =========================
+    /// ==== DO WE NEED THIS ========
+    /// =========================
 
-    /// @dev Registers a schema with the SchemaRegistry contract.
-    /// @param _schema The schema to register.
-    /// @param _resolver The address of the resolver contract.
-    /// @param _revocable Whether the schema is revocable.
-    function _registerSchema(string memory _schema, ISchemaResolver _resolver, bool _revocable)
-        internal
-        returns (bytes32)
-    {
-        bytes32 uid = schemaRegistry.register(_schema, _resolver, _revocable);
+    // /// @dev Registers a schema with the SchemaRegistry contract.
+    // /// @param _schema The schema to register.
+    // /// @param _resolver The address of the resolver contract.
+    // /// @param _revocable Whether the schema is revocable.
+    // function _registerSchema(string memory _schema, ISchemaResolver _resolver, bool _revocable)
+    //     internal
+    //     returns (bytes32)
+    // {
+    //     bytes32 uid = schemaRegistry.register(_schema, _resolver, _revocable);
 
-        return uid;
-    }
-
-    /// @dev Getter for the hackers set.
-    function getHackers() public view returns (address[] memory) {
-        address[] memory hackersArray = new address[](hackers.length());
-        for (uint256 i = 0; i < hackers.length(); i++) {
-            hackersArray[i] = hackers.at(i);
-        }
-        return hackersArray;
-    }
+    //     return uid;
+    // }
 
     /// =========================
     /// ==== EAS Functions =====
@@ -193,61 +279,57 @@ contract HackathonQVStrategy is QVSimpleStrategy {
 
     /// @dev Gets an attestation from the EAS contract.
     /// @param uid The UUID of the attestation to get.
-    function getAttestation(bytes32 uid) public payable virtual returns (Attestation memory) {
-        Attestation memory attestation = eas.getAttestation(uid);
-        return attestation;
-    }
+    // function getAttestation(bytes32 uid) public payable virtual returns (Attestation memory) {
+    //     Attestation memory attestation = eas.getAttestation(uid);
+    //     return attestation;
+    // }
 
-    /// @dev Gets a schema from the SchemaRegistry contract.
-    /// @param uid The UID of the schema to get.
-    function getSchema(bytes32 uid) public payable virtual returns (SchemaRecord memory) {
-        SchemaRecord memory schemaRecord = schemaRegistry.getSchema(uid);
-        return schemaRecord;
-    }
+    // /// @dev Gets a schema from the SchemaRegistry contract.
+    // /// @param uid The UID of the schema to get.
+    // function getSchema(bytes32 uid) public payable virtual returns (SchemaRecord memory) {
+    //     SchemaRecord memory schemaRecord = schemaRegistry.getSchema(uid);
+    //     return schemaRecord;
+    // }
 
-    function _getAllo() internal view returns (IAllo) {
-        return IAllo(allo);
-    }
+    // /// @dev Adds a verifier to the list of authorized verifiers.
+    // /// @param _verifier The address of the verifier to add.
+    // function addVerifier(address _verifier) public onlyPoolManager(msg.sender) {
+    //     if (attestationSigners[_verifier]) {
+    //         revert ALREADY_ADDED();
+    //     }
 
-    /// @dev Adds a verifier to the list of authorized verifiers.
-    /// @param _verifier The address of the verifier to add.
-    function addVerifier(address _verifier) public onlyPoolManager(msg.sender) {
-        if (attestationSigners[_verifier]) {
-            revert ALREADY_ADDED();
-        }
+    //     attestationSigners[_verifier] = true;
 
-        attestationSigners[_verifier] = true;
+    //     emit VerifierAdded(_verifier);
+    // }
 
-        emit VerifierAdded(_verifier);
-    }
+    // /// @dev Removes a verifier from the list of authorized verifiers.
+    // /// @param _verifier The address of the verifier to remove.
+    // function removeVerifier(address _verifier) public onlyPoolManager(msg.sender) {
+    //     if (!attestationSigners[_verifier]) {
+    //         revert INVALID();
+    //     }
 
-    /// @dev Removes a verifier from the list of authorized verifiers.
-    /// @param _verifier The address of the verifier to remove.
-    function removeVerifier(address _verifier) public onlyPoolManager(msg.sender) {
-        if (!attestationSigners[_verifier]) {
-            revert INVALID();
-        }
+    //     attestationSigners[_verifier] = false;
 
-        attestationSigners[_verifier] = false;
+    //     emit VerifierRemoved(_verifier);
+    // }
 
-        emit VerifierRemoved(_verifier);
-    }
+    // /// @dev Sets the address of the EAS contract.
+    // /// @param _easContractAddress The address of the EAS contract.
+    // function setEASAddress(address _easContractAddress) public onlyPoolManager(msg.sender) {
+    //     eas = IEAS(_easContractAddress);
 
-    /// @dev Sets the address of the EAS contract.
-    /// @param _easContractAddress The address of the EAS contract.
-    function setEASAddress(address _easContractAddress) public onlyPoolManager(msg.sender) {
-        eas = IEAS(_easContractAddress);
+    //     emit EASAddressUpdated(_easContractAddress);
+    // }
 
-        emit EASAddressUpdated(_easContractAddress);
-    }
+    // /// @dev Revoke attestations by schema and uid
+    // /// @param _attestationRequestData An array of `MultiRevocationRequest` structures containing the attestations to revoke.
+    // function revokeAttestations(MultiRevocationRequest[] calldata _attestationRequestData) public payable virtual {
+    //     if (!attestationSigners[msg.sender]) {
+    //         revert INVALID();
+    //     }
 
-    /// @dev Revoke attestations by schema and uid
-    /// @param _attestationRequestData An array of `MultiRevocationRequest` structures containing the attestations to revoke.
-    function revokeAttestations(MultiRevocationRequest[] calldata _attestationRequestData) public payable virtual {
-        if (!attestationSigners[msg.sender]) {
-            revert INVALID();
-        }
-
-        eas.multiRevoke(_attestationRequestData);
-    }
+    //     eas.multiRevoke(_attestationRequestData);
+    // }
 }
