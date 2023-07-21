@@ -20,6 +20,9 @@ contract QVNftTieredStrategy is QVSimpleStrategy {
     // NFT -> nftId -> voiceCreditsUsed
     mapping(ERC721 => mapping(uint256 => uint256)) public voiceCreditsUsedPerNftId;
 
+    // NFT => NFT ID => Redeemed
+    mapping(ERC721 => mapping(uint256 => bool)) public redeemed;
+
     /// ===============================
     /// ======== Constructor ==========
     /// ===============================
@@ -95,25 +98,67 @@ contract QVNftTieredStrategy is QVSimpleStrategy {
         }
     }
 
+    /// @notice Public function to Allocate NFT voiceCredits in batches
+    /// @param _poolIds The pool ids
+    /// @param _datas The data
+    function batchAllocate(uint256[] calldata _poolIds, bytes[] memory _datas) external {
+        _batchAllocate(_poolIds, _datas);
+    }
+
+    /// @notice Internal Batch Allocate NFTs
+    /// @param _poolIds The pool ids
+    /// @param _datas The data
+    function _batchAllocate(uint256[] calldata _poolIds, bytes[] memory _datas) internal {
+        uint256 poolIdsLength = _poolIds.length;
+        uint256 datasLength = _datas.length;
+
+        if (poolIdsLength != datasLength) {
+            revert INVALID();
+        }
+
+        for (uint256 i = 0; i < poolIdsLength;) {
+            for (uint256 j = 0; j < datasLength;) {
+                _allocate(_datas[j], msg.sender);
+
+                unchecked {
+                    j++;
+                }
+            }
+
+            unchecked {
+                i++;
+            }
+        }
+    }
+
     /// =========================
     /// ==== View Functions =====
     /// =========================
 
     /// @notice Checks if the allocator is valid
     /// @param _allocator The allocator address
+    /// @param _nftId The NFT Id
     /// @return true if the allocator is valid
-    function isValidAllocator(address _allocator) external view override returns (bool) {
-        return _isValidAllocator(_allocator);
+    function isValidAllocator(address _allocator, uint256 _nftId) external view returns (bool) {
+        return _isValidAllocator(_allocator, _nftId);
     }
 
     /// =============================
     /// ==== Internal Functions =====
     /// =============================
 
-    function _isValidAllocator(address _allocator) internal view returns (bool) {
+    /// @notice Checks if the allocator is valid by checking the balance of the NFT and if the owner has already redeemed their voiceCredits
+    /// @param _allocator The allocator address
+    /// @param _nftId The NFT Id
+    /// @return true if the allocator is valid
+    function _isValidAllocator(address _allocator, uint256 _nftId) internal view returns (bool) {
         uint256 nftsLength = nfts.length;
         for (uint256 i = 0; i < nftsLength;) {
             if (nfts[i].balanceOf(_allocator) > 0) {
+                if (redeemed[nfts[i]][_nftId] == true) {
+                    return false;
+                }
+
                 return true;
             }
 
@@ -133,18 +178,13 @@ contract QVNftTieredStrategy is QVSimpleStrategy {
         (address recipientId, ERC721 nft, uint256 nftId, uint256 voiceCreditsToAllocate) =
             abi.decode(_data, (address, ERC721, uint256, uint256));
 
-        // check the voiceCreditsToAllocate is > 0
-        if (voiceCreditsToAllocate <= 0) {
-            revert INVALID();
-        }
-
         // check the time periods for allocation
         if (block.timestamp < allocationStartTime || block.timestamp > allocationEndTime) {
             revert ALLOCATION_NOT_ACTIVE();
         }
 
         // check that the sender can allocate votes
-        if (!_isValidAllocator(_sender)) {
+        if (!_isValidAllocator(_sender, nftId)) {
             revert UNAUTHORIZED();
         }
 
@@ -168,8 +208,11 @@ contract QVNftTieredStrategy is QVSimpleStrategy {
         allocator.voiceCreditsCastToRecipient[recipientId] += totalCredits;
         allocator.votesCastToRecipient[recipientId] += voteResult;
 
-        // update credits used by nftId
+        // update credits redeemed by nftId
         voiceCreditsUsedPerNftId[nft][nftId] += voiceCreditsToAllocate;
+
+        // Add to redeemed NFT list
+        redeemed[nft][nftId] = true;
 
         emit Allocated(_sender, voteResult, address(0), msg.sender);
     }
