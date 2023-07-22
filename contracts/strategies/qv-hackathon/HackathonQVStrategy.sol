@@ -1,12 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import {IAllo} from "../../core/IAllo.sol";
-import {IRegistry} from "../../core/IRegistry.sol";
 import {QVSimpleStrategy} from "../qv-simple/QVSimpleStrategy.sol";
 import {Metadata} from "../../core/libraries/Metadata.sol";
 
-import {EnumerableSet} from "@openzeppelin/utils/structs/EnumerableSet.sol";
 import {ERC721} from "@solady/tokens/ERC721.sol";
 
 // Note: EAS Contracts
@@ -15,18 +12,21 @@ import {
     AttestationRequestData,
     IEAS,
     Attestation,
-    MultiAttestationRequest,
-    MultiRevocationRequest
+    RevocationRequest,
+    RevocationRequestData
 } from "@ethereum-attestation-service/IEAS.sol";
 import {ISchemaRegistry, ISchemaResolver, SchemaRecord} from "@ethereum-attestation-service/ISchemaRegistry.sol";
+import {SchemaResolver} from "@ethereum-attestation-service/resolver/SchemaResolver.sol";
 
-contract HackathonQVStrategy is QVSimpleStrategy {
-    using EnumerableSet for EnumerableSet.AddressSet;
-
+contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
+    // Note: There are two ways to use/create a schema
+    // 1. The user passes in a schema UID and the strategy uses that schema
+    // 2. The user passes in a schema string and the strategy registers that schema with the SchemaRegistry contract
     struct EASInfo {
         IEAS eas;
         ISchemaRegistry schemaRegistry;
-        string schema;
+        bytes32 schemaUid; // the schema UID they madek previously
+        string schema; //  the schema they wish to create
         bool revocable;
     }
 
@@ -35,39 +35,41 @@ contract HackathonQVStrategy is QVSimpleStrategy {
     /// ======================
 
     error ALREADY_ADDED();
+    error OUT_OF_BOUNDS();
 
     /// ======================
     /// ====== Storage =======
     /// ======================
 
     // The instance of the EAS and SchemaRegistry contracts.
-    IEAS public eas;
     ISchemaRegistry public schemaRegistry;
     ERC721 public nft;
-
-    bytes32 constant EMPTY_UID = 0;
-
-    // Who can call submitAttestation
-    mapping(address => bool) public attestationSigners;
 
     address[] private allowedRecipients;
 
     EASInfo public easInfo;
     bytes32 constant _RELATED_ATTESTATION_UID = 0;
 
+    // will the attestation be payable?
+    // uint256 private immutable _incentive;
+
+    // Who can call submitAttestation
+    mapping(address => bool) public attestationSigners;
+
+    // Who has attested
+    mapping(address => Attestation) public attestations;
+
     /// ======================
     /// ====== Events ========
     /// ======================
 
-    // event EASAddressUpdated(address indexed easAddress);
-    // event VerifierAdded(address indexed verifier);
-    // event VerifierRemoved(address indexed verifier);
+    event EAS_UPDATED(address easAddress);
 
     /// ======================
     /// ===== Constructor ====
     /// ======================
 
-    constructor(address _allo, string memory _name) QVSimpleStrategy(_allo, _name) {}
+    constructor(address _allo, string memory _name, IEAS _eas) QVSimpleStrategy(_allo, _name) SchemaResolver(_eas) {}
 
     /// ======================
     /// ====== Initialize ====
@@ -84,6 +86,7 @@ contract HackathonQVStrategy is QVSimpleStrategy {
     }
 
     /// @dev Initializes the strategy.
+    // @solhint disable-next-line func-name-mixedcase
     function __HackathonQVStrategy_init(uint256 _poolId, EASInfo memory _easInfo, address _nft, bytes memory _data)
         internal
     {
@@ -111,21 +114,99 @@ contract HackathonQVStrategy is QVSimpleStrategy {
             eas: _easInfo.eas,
             schemaRegistry: _easInfo.schemaRegistry,
             schema: _easInfo.schema,
+            schemaUid: _easInfo.schemaUid,
             revocable: _easInfo.revocable
         });
 
         nft = ERC721(_nft);
 
-        // Register the schema with the SchemaRegistry contract.
+        // Register the schema with the SchemaRegistry contract when required.
         // https://optimism-goerli.easscan.org/schema/create
         // https://docs.attest.sh/docs/tutorials/create-a-schema
         // https://github.com/ethereum-attestation-service/eas-contracts/blob/master/contracts/
-        _registerSchema(_easInfo.schema, ISchemaResolver(address(this)), _easInfo.revocable);
+
+        // Note: Check if the user needs to create a new schema or use an existing one
+        if (_easInfo.schemaUid == _RELATED_ATTESTATION_UID && bytes(_easInfo.schema).length > 0) {
+            _registerSchema(_easInfo.schema, ISchemaResolver(address(this)), _easInfo.revocable);
+        }
     }
+
+    // TODO: ====== REMOVE THIS / FOR REFERENCE ONLY ==========
+    // struct Attestation {
+    //     bytes32 uid; // A unique identifier of the attestation.
+    //     bytes32 schema; // The unique identifier of the schema.
+    //     uint64 time; // The time when the attestation was created (Unix timestamp).
+    //     uint64 expirationTime; // The time when the attestation expires (Unix timestamp).
+    //     uint64 revocationTime; // The time when the attestation was revoked (Unix timestamp).
+    //     bytes32 refUID; // The UID of the related attestation.
+    //     address recipient; // The recipient of the attestation.
+    //     address attester; // The attester/sender of the attestation.
+    //     bool revocable; // Whether the attestation is revocable.
+    //     bytes data; // Custom attestation data.
+    // }
 
     /// ======================
     /// ====== External ======
     /// ======================
+
+    /// @notice Returns if the attestation is payable or not
+    /// @return True if the attestation is payable, false otherwise
+    function isPayable() public pure override returns (bool) {
+        // Note: return the _incentive if we want more flexibility
+        return false;
+    }
+
+    /// @notice Returns if the attestation is expired or not
+    /// @param _recipientId The recipient ID to check
+    /// @return True if the attestation is expired, false otherwise
+    function isAttestationExpired(address _recipientId) public view returns (bool) {
+        if (attestations[_recipientId].expirationTime < block.timestamp) {
+            return true;
+        }
+
+        return false;
+    }
+
+    function revokeAttestation(address _recipientId) public {
+        RevocationRequestData memory revocationRequestData =
+            RevocationRequestData({uid: attestations[_recipientId].uid, value: 0});
+        RevocationRequest memory revocationRequest =
+            RevocationRequest({schema: attestations[_recipientId].schema, data: revocationRequestData});
+
+        _revokeAttestation(revocationRequest);
+    }
+
+    /// @notice These are the resolver function for the attestions
+
+    // TODO: Finish these functions with a simple example for the hackathon.
+
+    // Note: if a payable attestation is required, we can use the uint256 _value to send the incentive
+    /// @notice This is the resolver function for the attestion
+    /// @param _attestation The attestation to resolve
+    function onAttest(Attestation calldata _attestation, uint256) internal override returns (bool) {
+        // Note: we can pretty much do whatever we want here...
+        // example here is adding the attestation to the attestations mapping for later use.
+        attestations[_attestation.attester] = _attestation;
+
+        // TODO: mint the NFT?
+        // Note: not sure how to pull this off yet, ERC721 does not expose a public mint funciton by default and
+        // can be named just about anything by the token creator.
+        // A default 1155 token may work better in this use-case/example, then we don't need an id to send the mint funciton.
+        // nft.mint(_attestation.attester, 1);
+
+        return easInfo.eas.isAttestationValid(_toBytes32(_attestation.data, 0));
+    }
+
+    /// @notice This is the resolver function for the revocation
+    function onRevoke(Attestation calldata _attestation, uint256) internal override returns (bool) {
+        // Note: we can pretty much do whatever we want here also...
+        // example here is updating the attestation in the attestations mapping.
+        attestations[_attestation.attester] = _attestation;
+
+        return easInfo.eas.isAttestationValid(_toBytes32(_attestation.data, 0));
+    }
+
+    /// @notice END Resolver Funcitons
 
     /// Set the allowed recipient IDs
     /// @param _recipientIds The recipient IDs to allow
@@ -149,9 +230,22 @@ contract HackathonQVStrategy is QVSimpleStrategy {
         }
     }
 
+    function toBytes32(bytes memory data, uint256 start) external pure returns (bytes32) {
+        return _toBytes32(data, start);
+    }
+
     /// =========================
     /// == Internal Functions ===
     /// =========================
+
+    /// @notice Check if the attestation is valid
+    /// @param _recipientId The recipient ID to check
+    /// @return True if the attestation is valid, false otherwise
+    function _isAttestationValid(address _recipientId) internal view returns (bool) {
+        Attestation memory attestation = attestations[_recipientId];
+
+        return easInfo.eas.isAttestationValid(_toBytes32(attestation.data, 0));
+    }
 
     /// @notice Submit application to pool
     /// @param _data The data to be decoded
@@ -168,10 +262,7 @@ contract HackathonQVStrategy is QVSimpleStrategy {
 
         (recipientId, recipientAddress, metadata) = abi.decode(_data, (address, address, Metadata));
 
-        if (
-            // TODO: HOW TO CHECK IF RECIPIENT ID has attestation from EAS contract?
-            !_isIdentityMember(recipientId, _sender)
-        ) {
+        if (_isAttestationValid(recipientId) && !_isIdentityMember(recipientId, _sender)) {
             revert UNAUTHORIZED();
         }
 
@@ -245,14 +336,15 @@ contract HackathonQVStrategy is QVSimpleStrategy {
     }
 
     /// @dev Grant EAS attestation to recipient with the EAS contract.
-    // TODO: VERIFY THIS LOGIC
+    /// @param _recipientId The recipient ID to grant the attestation to.
+    /// @param _expirationTime The expiration time of the attestation.
+    /// @param _data The data to include in the attestation.
+    /// @param _value The value to send with the attestation.
     function _grantEASAttestation(address _recipientId, uint64 _expirationTime, bytes memory _data, uint256 _value)
         internal
     {
-        bytes32 schema = bytes32(abi.encodePacked(easInfo.schema));
-
         AttestationRequest memory attestationRequest = AttestationRequest(
-            schema,
+            easInfo.schemaUid,
             AttestationRequestData({
                 recipient: _recipientId,
                 expirationTime: _expirationTime,
@@ -263,14 +355,10 @@ contract HackathonQVStrategy is QVSimpleStrategy {
             })
         );
 
-        eas.attest(attestationRequest);
+        easInfo.eas.attest(attestationRequest);
     }
 
-    /// =========================
-    /// ==== DO WE NEED THIS ========
-    /// =========================
-    // Note: yes we do need this to register the schema the pool manager wants to use for the attestations
-
+    // Note: We need this to register the schema the pool manager wants to use for the attestations when they don't have a UID
     /// @dev Registers a schema with the SchemaRegistry contract.
     /// @param _schema The schema to register.
     /// @param _resolver The address of the resolver contract.
@@ -288,7 +376,7 @@ contract HackathonQVStrategy is QVSimpleStrategy {
     /// ==== EAS Functions =====
     /// =========================
 
-    // Note: basic setup for using EAS
+    // Note: EAS Information - Supported Testnets
     // Version: 0.27
     // * OP Goerli
     //    EAS Contract: 0xC2679fBD37d54388Ce493F1DB75320D236e1815e
@@ -297,59 +385,53 @@ contract HackathonQVStrategy is QVSimpleStrategy {
     //    EAS Contract: 0x1a5650d0ecbca349dd84bafa85790e3e6955eb84
     //    Schema Registry: 0x7b24C7f8AF365B4E308b6acb0A7dfc85d034Cb3f
 
-    /// @dev Gets an attestation from the EAS contract.
+    /// @dev Gets an attestation from the EAS contract using the UID
     /// @param uid The UUID of the attestation to get.
-    // function getAttestation(bytes32 uid) public payable virtual returns (Attestation memory) {
-    //     Attestation memory attestation = eas.getAttestation(uid);
-    //     return attestation;
-    // }
+    function getAttestation(bytes32 uid) public payable virtual returns (Attestation memory) {
+        Attestation memory attestation = easInfo.eas.getAttestation(uid);
+        return attestation;
+    }
 
-    // /// @dev Gets a schema from the SchemaRegistry contract.
-    // /// @param uid The UID of the schema to get.
-    // function getSchema(bytes32 uid) public payable virtual returns (SchemaRecord memory) {
-    //     SchemaRecord memory schemaRecord = schemaRegistry.getSchema(uid);
-    //     return schemaRecord;
-    // }
+    /// @dev Gets a schema from the SchemaRegistry contract using the UID
+    /// @param uid The UID of the schema to get.
+    function getSchema(bytes32 uid) public payable virtual returns (SchemaRecord memory) {
+        SchemaRecord memory schemaRecord = schemaRegistry.getSchema(uid);
+        return schemaRecord;
+    }
 
-    // /// @dev Adds a verifier to the list of authorized verifiers.
-    // /// @param _verifier The address of the verifier to add.
-    // function addVerifier(address _verifier) public onlyPoolManager(msg.sender) {
-    //     if (attestationSigners[_verifier]) {
-    //         revert ALREADY_ADDED();
-    //     }
+    /// Note: Allows user to set the EAS contract address if they want to use a different one than the default.
+    /// @dev Sets the address of the EAS contract.
+    /// @param _easContractAddress The address of the EAS contract.
+    function setEASAddress(address _easContractAddress) public onlyPoolManager(msg.sender) {
+        easInfo.eas = IEAS(_easContractAddress);
 
-    //     attestationSigners[_verifier] = true;
+        emit EAS_UPDATED(_easContractAddress);
+    }
 
-    //     emit VerifierAdded(_verifier);
-    // }
+    // @dev Revoke attestations
+    /// @param _revocatonRequest An `RevocationRequest` structure containing the attestation to revoke.
+    function _revokeAttestation(RevocationRequest memory _revocatonRequest) internal virtual {
+        if (!attestationSigners[msg.sender]) {
+            revert INVALID();
+        }
 
-    // /// @dev Removes a verifier from the list of authorized verifiers.
-    // /// @param _verifier The address of the verifier to remove.
-    // function removeVerifier(address _verifier) public onlyPoolManager(msg.sender) {
-    //     if (!attestationSigners[_verifier]) {
-    //         revert INVALID();
-    //     }
+        easInfo.eas.revoke(_revocatonRequest);
+    }
 
-    //     attestationSigners[_verifier] = false;
+    function _toBytes32(bytes memory data, uint256 start) private pure returns (bytes32) {
+        unchecked {
+            if (data.length < start + 32) {
+                revert OUT_OF_BOUNDS();
+            }
+        }
 
-    //     emit VerifierRemoved(_verifier);
-    // }
+        bytes32 tempBytes32;
 
-    // /// @dev Sets the address of the EAS contract.
-    // /// @param _easContractAddress The address of the EAS contract.
-    // function setEASAddress(address _easContractAddress) public onlyPoolManager(msg.sender) {
-    //     eas = IEAS(_easContractAddress);
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            tempBytes32 := mload(add(add(data, 0x20), start))
+        }
 
-    //     emit EASAddressUpdated(_easContractAddress);
-    // }
-
-    // /// @dev Revoke attestations by schema and uid
-    // /// @param _attestationRequestData An array of `MultiRevocationRequest` structures containing the attestations to revoke.
-    // function revokeAttestations(MultiRevocationRequest[] calldata _attestationRequestData) public payable virtual {
-    //     if (!attestationSigners[msg.sender]) {
-    //         revert INVALID();
-    //     }
-
-    //     eas.multiRevoke(_attestationRequestData);
-    // }
+        return tempBytes32;
+    }
 }
