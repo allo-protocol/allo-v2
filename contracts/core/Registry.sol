@@ -266,7 +266,10 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
     /// @notice Transfer thefunds recovered  to the recipient
     /// @param _token The address of the token to transfer
     /// @param _recipient The address of the recipient
-    function recoverFunds(address _token, address _recipient) external onlyIdentityOwner(ALLO_OWNER) {
+    function recoverFunds(address _token, address _recipient) external onlyRole(ALLO_OWNER) {
+        if (_recipient == address(0)) {
+            revert ZERO_ADDRESS();
+        }
         uint256 amount = _token == NATIVE ? address(this).balance : ERC20(_token).balanceOf(address(this));
         _transferAmount(_token, _recipient, amount);
     }

@@ -8,6 +8,7 @@ import {Registry} from "../../../contracts/core/Registry.sol";
 import {IRegistry} from "../../../contracts/core/IRegistry.sol";
 import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
 import {TestUtilities} from "../utils/TestUtilities.sol";
+import {MockToken} from "../utils/MockToken.sol";
 
 contract RegistryTest is Test, RegistrySetup {
     event IdentityCreated(
@@ -23,11 +24,15 @@ contract RegistryTest is Test, RegistrySetup {
     string public name;
     uint256 public nonce;
 
+    MockToken public token;
+
     function setUp() public {
         __RegistrySetup();
         metadata = Metadata({protocol: 1, pointer: "test metadata"});
         name = "New Identity";
         nonce = 2;
+
+        token = new MockToken();
     }
 
     function test_createIdentity() public {
@@ -196,6 +201,13 @@ contract RegistryTest is Test, RegistrySetup {
         registry().addMembers(newIdentityId, identity1_members());
     }
 
+    function testRevert_addMembers_INVALID_ID() public {
+        vm.expectRevert(IRegistry.UNAUTHORIZED.selector);
+        bytes32 invalidIdentityId = TestUtilities._testUtilGenerateIdentityId(nonce + 1, address(this));
+        vm.prank(identity1_owner());
+        registry().addMembers(invalidIdentityId, identity1_members());
+    }
+
     function test_removeMembers() public {
         bytes32 newIdentityId = registry().createIdentity(nonce, name, metadata, identity1_owner(), identity1_members());
 
@@ -215,6 +227,22 @@ contract RegistryTest is Test, RegistrySetup {
         vm.prank(identity1_member1());
         vm.expectRevert(IRegistry.UNAUTHORIZED.selector);
         registry().removeMembers(newIdentityId, identity1_members());
+    }
+
+    function testRevert_removeMembers_INVALID_ID() public {
+        vm.expectRevert(IRegistry.UNAUTHORIZED.selector);
+        bytes32 invalidIdentityId = TestUtilities._testUtilGenerateIdentityId(nonce + 1, address(this));
+        vm.prank(identity1_owner());
+        registry().removeMembers(invalidIdentityId, identity1_members());
+    }
+
+    function test_removeMembers_NON_EXISTING_MEMBERS() public {
+        bytes32 newIdentityId = registry().createIdentity(nonce, name, metadata, identity1_owner(), identity1_members());
+        assertFalse(registry().isMemberOfIdentity(newIdentityId, identity2_member1()), "member1 not added");
+        assertFalse(registry().isMemberOfIdentity(newIdentityId, identity2_member2()), "member2 not added");
+        vm.prank(identity1_owner());
+        // Try to remove non-existing members
+        registry().removeMembers(newIdentityId, identity2_members());
     }
 
     function test_updateIdentityPendingidentity1_owner() public {
@@ -269,5 +297,37 @@ contract RegistryTest is Test, RegistrySetup {
         vm.prank(identity1_owner());
         vm.expectRevert(IRegistry.NOT_PENDING_OWNER.selector);
         registry().acceptIdentityOwnership(newIdentityId);
+    }
+
+    function testRevert_acceptIdentityOwnership_INVALID_ID() public {
+        bytes32 invalidIdentityId = TestUtilities._testUtilGenerateIdentityId(nonce + 1, address(this));
+        vm.expectRevert(IRegistry.NOT_PENDING_OWNER.selector);
+        vm.prank(identity1_notAMember());
+        registry().acceptIdentityOwnership(invalidIdentityId);
+    }
+
+    function testRevert_recoverFunds_INVALID_TOKEN_ADDRESS() public {
+        address nonExistentToken = address(0xAAA);
+        address recipient = address(0xBBB);
+        vm.expectRevert();
+        vm.prank(registry_owner());
+        registry().recoverFunds(nonExistentToken, recipient);
+    }
+
+    function testRevert_recoverFunds_ZERO_RECIPIENT() public {
+        address nonExistentToken = address(0xAAA);
+        vm.expectRevert(IRegistry.ZERO_ADDRESS.selector);
+        vm.prank(registry_owner());
+        registry().recoverFunds(nonExistentToken, address(0));
+    }
+
+    function test_recoverFunds_ERC20() public {
+        uint256 amount = 100;
+        token.mint(address(registry()), amount);
+        address recipient = address(0xBBB);
+
+        vm.prank(registry_owner());
+        registry().recoverFunds(address(token), recipient);
+        assertEq(token.balanceOf(recipient), amount, "amount");
     }
 }
