@@ -1,37 +1,73 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-// import "../../../contracts/strategies/BaseStrategy.sol";
+import "../../../contracts/strategies/BaseStrategy.sol";
 
-// contract MockStrategy is BaseStrategy {
-//     struct PayoutSummary {
-//         address recipient;
-//         uint256 amount;
-//         uint256 percentage;
-//     }
+contract MockStrategy is BaseStrategy {
+    uint256 internal surpressStateMutabilityWarning;
 
-//     constructor(address _allo) BaseStrategy(_allo) {}
+    constructor(address _allo) BaseStrategy(_allo, "MockStrategy") {}
 
-//     function initialize(address _allo, bytes32 _identityId, uint256 _poolId, bytes memory _data) external {
-//         // __BaseAllocationStrategy_init("MockAllocation", _allo, _identityId, _poolId, _data);
-//         BaseStrategy(_allo).initialize( _poolId, _data);
-//     }
+    function initialize(uint256 _poolId, bytes memory _data) external {
+        __BaseStrategy_init(_poolId);
+        _data;
+    }
 
-//     function skim(address _token) external override {}
+    // this is called via allo.sol to register recipients
+    // it can change their status all the way to Accepted, or to Pending if there are more steps
+    // if there are more steps, additional functions should be added to allow the owner to check
+    // this could also check attestations directly and then Accept
+    function _registerRecipient(bytes memory _data, address _sender) internal override returns (address) {
+        surpressStateMutabilityWarning++;
+        _data;
+        return _sender;
+    }
 
-//     function registerRecipients(bytes memory _data, address _sender) external payable returns (address) {
-//         return address(1);
-//     }
+    // only called via allo.sol by users to allocate to a recipient
+    // this will update some data in this contract to store votes, etc.
+    function _allocate(bytes memory _data, address _sender) internal override {
+        surpressStateMutabilityWarning++;
+        _data;
+        _sender;
+    }
 
-//     function getRecipientStatus(address) external view override returns (RecipientStatus) {}
+    // this will distribute tokens to recipients
+    // most strategies will track a TOTAL amount per recipient, and a PAID amount, and pay the difference
+    // this contract will need to track the amount paid already, so that it doesn't double pay
+    function _distribute(address[] memory _recipientIds, bytes memory _data, address _sender) internal override {
+        surpressStateMutabilityWarning++;
+        _recipientIds;
+        _data;
+        _sender;
+    }
 
-//     function isValidAllocater(address _voter) external view override returns (bool) {}
+    // simply returns whether a allocator is valid or not, will usually be true for all
+    function isValidAllocator(address _allocator) external view returns (bool) {
+        surpressStateMutabilityWarning;
+        return _allocator == address(0) ? false : true;
+    }
 
-//     function allocate(bytes memory, address) external payable override {}
+    // simply returns the status of a recipient
+    // probably tracked in a mapping, but will depend on the implementation
+    // for example, the OpenSelfRegistration only maps users to bool, and then assumes Accepted for those
+    // since there is no need for Pending or Rejected
+    function getRecipientStatus(address _recipientId) external view returns (RecipientStatus) {
+        surpressStateMutabilityWarning;
+        return _recipientId == address(0) ? RecipientStatus.Rejected : RecipientStatus.Accepted;
+    }
 
-//     function getPayout(address[] memory, bytes memory) external view returns (PayoutSummary[] memory summaries) {}
+    /// @return Input the values you would send to distribute(), get the amounts each recipient in the array would receive
+    function getPayouts(address[] memory _recipientIds, bytes memory _data, address _sender)
+        external
+        view
+        returns (PayoutSummary[] memory)
+    {
+        surpressStateMutabilityWarning;
+        (PayoutSummary[] memory payouts) = abi.decode(_data, (PayoutSummary[]));
 
-//     function readyToPayout(bytes calldata) external view returns (bool) {}
+        _recipientIds;
+        _sender;
 
-//     function distribute(address[] memory _recipientIds, bytes memory _data, address _sender) external override {}
-// }
+        return payouts;
+    }
+}

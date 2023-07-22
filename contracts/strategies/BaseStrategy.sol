@@ -92,7 +92,7 @@ abstract contract BaseStrategy is IStrategy, Transfer {
     /// @notice Initializes the allocation strategy
     /// @param _poolId Id of the pool
     /// @dev This function is called by Allo.sol
-    function __BaseStrategy_init(uint256 _poolId) internal virtual {
+    function __BaseStrategy_init(uint256 _poolId) internal virtual onlyAllo {
         if (poolId != 0) {
             revert BaseStrategy_ALREADY_INITIALIZED();
         }
