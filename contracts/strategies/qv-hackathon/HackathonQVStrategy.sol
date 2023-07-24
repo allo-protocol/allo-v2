@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
+import {IAllo} from "../../core/IAllo.sol";
 import {QVSimpleStrategy} from "../qv-simple/QVSimpleStrategy.sol";
 import {Metadata} from "../../core/libraries/Metadata.sol";
 
@@ -39,6 +40,7 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
     error ALREADY_ADDED();
     error OUT_OF_BOUNDS();
     error INVALID_SCHEMA();
+    error REGISTRATION_STARTED();
 
     /// ======================
     /// ====== Storage =======
@@ -53,6 +55,20 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
     mapping(address => bytes32) public attestations;
     // nftId -> voiceCreditsUsed
     mapping(uint256 => uint256) public voiceCreditsUsedPerNftId;
+
+    uint256[] public percentages;
+    address[] public currentWinners;
+
+    /// ======================
+    /// ===== Modifiers ======
+    /// ======================
+
+    modifier onlyBeforeRegistration() {
+        if (block.timestamp > registrationStartTime) {
+            revert REGISTRATION_STARTED();
+        }
+        _;
+    }
 
     /// ======================
     /// ===== Constructor ====
@@ -156,6 +172,30 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
         }
     }
 
+    /// @notice Set the winner percentages
+    /// @param _percentages The percentages to set
+    function setWinnerPercentages(uint256[] memory _percentages)
+        external
+        onlyPoolManager(msg.sender)
+        onlyBeforeRegistration
+    {
+        uint256 percentageLength = _percentages.length;
+        uint256 totalPercentages = 0;
+
+        for (uint256 i = 0; i < percentageLength;) {
+            uint256 percentage = _percentages[i];
+            percentages[i] = percentage;
+            totalPercentages += percentage;
+            unchecked {
+                i++;
+            }
+        }
+
+        if (totalPercentages != 1e18) {
+            revert INVALID();
+        }
+    }
+
     /// =========================
     /// == Internal Functions ===
     /// =========================
@@ -246,7 +286,47 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
 
         voiceCreditsUsedPerNftId[nftId] += voiceCreditsToAllocate;
 
+        // update current winners
+        uint256 totalWinners = percentages.length;
+        for (uint256 i = 0; i < totalWinners;) {
+            if (totalRecipientVotes > recipient.totalVotes) {
+                currentWinners[i] = recipientId;
+            }
+
+            unchecked {
+                i++;
+            }
+        }
+
         emit Allocated(_sender, voteResult, address(0), msg.sender);
+    }
+
+    /// @notice Distribute the tokens to the recipients
+    /// @param _sender The sender of the transaction
+    function _distribute(address[] memory, bytes memory, address _sender)
+        internal
+        override
+        onlyPoolManager(_sender)
+        onlyAfterAllocation
+    {
+        uint256 payoutLength = percentages.length;
+        for (uint256 i; i < payoutLength;) {
+            address recipientId = currentWinners[i];
+            Recipient memory recipient = recipients[recipientId];
+
+            IAllo.Pool memory pool = allo.getPool(poolId);
+
+            uint256 amount = pool.amount * percentages[i];
+
+            _transferAmount(pool.token, recipient.recipientAddress, amount);
+
+            paidOut[recipientId] = true;
+
+            emit Distributed(recipientId, recipient.recipientAddress, amount, _sender);
+            unchecked {
+                i++;
+            }
+        }
     }
 
     /// @dev Grant EAS attestation to recipient with the EAS contract.
