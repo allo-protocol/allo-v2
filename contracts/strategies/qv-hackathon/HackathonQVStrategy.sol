@@ -48,6 +48,8 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
 
     bytes32 constant _NO_RELATED_ATTESTATION_UID = 0;
     ISchemaRegistry public schemaRegistry;
+    uint256[] public payoutPercentages;
+    uint256[] public votesByRank;
     EASInfo public easInfo;
     ERC721 public nft;
 
@@ -55,15 +57,10 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
     mapping(address => bytes32) public attestations;
     // nftId -> voiceCreditsUsed
     mapping(uint256 => uint256) public voiceCreditsUsedPerNftId;
-
-    //recipientId => winner list index
-    mapping(address => uint256) public recipientToIndex;
-
-    // index => recipientId
-    mapping(uint256 => address) public indexToRecipient;
-
-    uint256[] public percentages;
-    uint256[] public votesByRank;
+    // recipientId => winner list index
+    mapping(address => uint256) public recipientIdToIndex;
+    // Winner list index => recipientId
+    mapping(uint256 => address) public indexToRecipientId;
 
     /// ======================
     /// ===== Modifiers ======
@@ -178,31 +175,31 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
         }
     }
 
-    /// @notice Set the winner percentages
-    /// @param _percentages The percentages to set
-    function setPayoutPercentages(uint256[] memory _percentages)
+    /// @notice Set the winner payoutPercentages
+    /// @param _payoutPercentages The payoutPercentages to set
+    function setPayoutPercentages(uint256[] memory _payoutPercentages)
         external
         onlyPoolManager(msg.sender)
         onlyBeforeAllocation
     {
-        uint256 percentageLength = _percentages.length;
-        uint256 totalPercentages = 0;
+        uint256 percentageLength = _payoutPercentages.length;
+        uint256 totalPayoutPercentages = 0;
 
         // ensure that the list is sorted in the right order (0: first place, 1: second place, etc.)
-        if (_percentages[0] < _percentages[percentageLength - 1]) {
+        if (_payoutPercentages[0] < _payoutPercentages[percentageLength - 1]) {
             revert INVALID();
         }
 
         for (uint256 i = 0; i < percentageLength;) {
-            uint256 percentage = _percentages[i];
-            percentages[i] = percentage;
-            totalPercentages += percentage;
+            uint256 payoutPercentage = _payoutPercentages[i];
+            payoutPercentages[i] = payoutPercentage;
+            totalPayoutPercentages += payoutPercentage;
             unchecked {
                 i++;
             }
         }
 
-        if (totalPercentages != 1e18) {
+        if (totalPayoutPercentages != 1e18) {
             revert INVALID();
         }
     }
@@ -302,14 +299,14 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
         uint256 foundListIndex;
 
         // cannot cache the length => stack too deep :'(
-        for (uint256 i = 0; i < percentages.length;) {
+        for (uint256 i = 0; i < payoutPercentages.length;) {
             // if a new winner was added, push the rest of the list by 1
             if (foundListIndex > 0 && tmpRecipient != address(0)) {
                 uint256 newIndex = i + 1;
 
                 // if we reached the last index, remove the last index from recipient and break
-                if (newIndex == percentages.length) {
-                    recipientToIndex[tmpRecipient] = 0;
+                if (newIndex == payoutPercentages.length) {
+                    recipientIdToIndex[tmpRecipient] = 0;
                     break;
                 }
 
@@ -317,12 +314,12 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
                 uint256 _tmpVoteRank;
                 address _tmpRecipient;
                 _tmpVoteRank = votesByRank[newIndex];
-                _tmpRecipient = indexToRecipient[newIndex];
+                _tmpRecipient = indexToRecipientId[newIndex];
 
                 // update the values of the next index to the temp values
                 votesByRank[newIndex] = tmpVoteRank;
-                indexToRecipient[newIndex] = tmpRecipient;
-                recipientToIndex[tmpRecipient] = newIndex;
+                indexToRecipientId[newIndex] = tmpRecipient;
+                recipientIdToIndex[tmpRecipient] = newIndex;
 
                 // if the recipient was part of the list (duplicate after adding him again) and got overwritten, we do not need to push the rest of the list
                 if (tmpRecipient == recipientId) {
@@ -338,11 +335,11 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
             if (foundListIndex == 0 && recipient.totalVotes > votesByRank[i]) {
                 foundListIndex = i;
                 tmpVoteRank = votesByRank[i];
-                tmpRecipient = indexToRecipient[i];
+                tmpRecipient = indexToRecipientId[i];
 
                 votesByRank[i] = recipient.totalVotes;
-                indexToRecipient[i] = recipientId;
-                recipientToIndex[recipientId] = i;
+                indexToRecipientId[i] = recipientId;
+                recipientIdToIndex[recipientId] = i;
             }
 
             unchecked {
@@ -361,9 +358,9 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
         onlyPoolManager(_sender)
         onlyAfterAllocation
     {
-        uint256 payoutLength = percentages.length;
+        uint256 payoutLength = payoutPercentages.length;
         for (uint256 i; i < payoutLength;) {
-            address recipientId = indexToRecipient[i];
+            address recipientId = indexToRecipientId[i];
             Recipient memory recipient = recipients[recipientId];
 
             if (paidOut[recipientId]) {
@@ -372,7 +369,7 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
 
             IAllo.Pool memory pool = allo.getPool(poolId);
 
-            uint256 amount = pool.amount * percentages[i];
+            uint256 amount = pool.amount * payoutPercentages[i];
 
             _transferAmount(pool.token, recipient.recipientAddress, amount);
 
