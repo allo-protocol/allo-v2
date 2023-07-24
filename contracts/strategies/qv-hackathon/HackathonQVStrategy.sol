@@ -287,17 +287,56 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
         voiceCreditsUsedPerNftId[nftId] += voiceCreditsToAllocate;
 
         // update current winners
-        uint256 totalWinners = percentages.length;
-        for (uint256 i = 0; i < totalWinners;) {
-            // TODO: HEAP SORT
-            if (totalRecipientVotes > recipient.totalVotes) {
-                currentWinners[i] = recipientId;
-            }
+        //uint256 totalWinners = percentages.length;
 
-            unchecked {
-                i++;
-            }
-        }
+        // recipientId => winner list index
+        // mapping (address => uint256) public recipientToIndex;
+
+        // // index => recipientId
+        // mapping (uint256 => address) public indexToRecipient;
+
+        // // 0: max => length-1: min
+        // uint256[] memory votesByRank; // actual list
+        // uint256[] memory tmpVoteRank;
+
+        // address tmpRecipient;
+        // bool inserted = false;
+        // for(index i = 0; index < votesByRank.length; i++) {
+        //     tmpVoteRank[i] = votesByRank[i];
+        //     if(!inserted && recipient.totalVotes > votesByRank[i]) {
+        //         tmpRecipient = indexToRecipient[i];
+        //         recipientToIndex[recipientId] = i;
+        //         indexToRecipient[i] = recipientId;
+        //         inserted = true;
+        //     }
+        //     if (inserted) {
+        //         address tmpRecipient2 = tmpRecipient;
+        //         tmpRecipient = indexToRecipient[i + 1];
+        //         recipientToIndex[tmpRecipient] = i + 1;
+        //         indexToRecipient[i + 1] = tmpRecipient;
+        //     }
+        // }
+
+        // TODO: check if the recipient is already in the currentWinners array
+
+        // uint256 recipientIdCurrentPosition = totalWinners + 1;
+
+        // loop through and see if recipient is already in the currentWinners array
+
+        // loop through to check recipient.totalVotes > currentWinners[i].totalVotes
+        // if yes -> you can update the list but everything else has to be pushed by 1
+        // additionaly if recipient is already in current winner list before the update,
+
+        // for (uint256 i = 0; i < totalWinners;) {
+        //     // TODO: HEAP SORT
+        //     if (totalRecipientVotes > recipient.totalVotes) {
+        //         currentWinners[i] = recipientId;
+        //     }
+
+        //     unchecked {
+        //         i++;
+        //     }
+        // }
 
         emit Allocated(_sender, voteResult, address(0), msg.sender);
     }
