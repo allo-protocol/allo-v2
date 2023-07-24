@@ -186,7 +186,7 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
         uint256 totalPayoutPercentages = 0;
 
         // ensure that the list is sorted in the right order (0: first place, 1: second place, etc.)
-        if (_payoutPercentages[0] < _payoutPercentages[percentageLength - 1]) {
+        if (_payoutPercentages[0] <= _payoutPercentages[percentageLength - 1]) {
             revert INVALID();
         }
 
