@@ -33,6 +33,12 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
         bool revocable;
     }
 
+    struct TmpRecipient {
+        uint256 voteRank;
+        address recipientId;
+        uint256 foundRecipientAtIndex;
+    }
+
     /// ======================
     /// ==== Custom Error ====
     /// ======================
@@ -294,59 +300,60 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
 
         voiceCreditsUsedPerNftId[nftId] += voiceCreditsToAllocate;
 
-        uint256 tmpVoteRank;
-        address tmpRecipient;
-        uint256 foundRecipientAtIndex;
+        TmpRecipient memory tmp = TmpRecipient({recipientId: address(0), voteRank: 0, foundRecipientAtIndex: 0});
 
-        // cannot cache the length => stack too deep :'(
-        for (uint256 i = 0; i < payoutPercentages.length;) {
-            // if a new winner was added, push the rest of the list by 1
-            if (foundRecipientAtIndex > 0 && tmpRecipient != address(0)) {
-                // if the recipient was part of the list (duplicate after adding him again) and got overwritten, we do not need to push the rest of the list
-                if (tmpRecipient == recipientId) {
-                    break;
+        uint256 totalWinners = payoutPercentages.length;
+
+        if (recipient.totalVotes > votesByRank[totalWinners - 1]) {
+            for (uint256 i = 0; i < totalWinners;) {
+                // if a new winner was added, push the rest of the list by 1
+                if (tmp.foundRecipientAtIndex > 0 && tmp.recipientId != address(0)) {
+                    // if the recipient was part of the list (duplicate after adding him again) and got overwritten, we do not need to push the rest of the list
+                    if (tmp.recipientId == recipientId) {
+                        break;
+                    }
+
+                    // get values of the next index
+                    // store the previous winner at index i in tmp variables
+                    uint256 _tmpVoteRank;
+                    address _tmpRecipient;
+                    _tmpVoteRank = votesByRank[i];
+                    _tmpRecipient = indexToRecipientId[i];
+
+                    // update the values of the next index to the tmp values
+                    // update winner at index i to tmp.recipientId (set at previous iteration)
+                    votesByRank[i] = tmp.voteRank;
+                    indexToRecipientId[i] = tmp.recipientId;
+
+                    recipientIdToIndex[tmp.recipientId] = i;
+
+                    // update the temp values to the next index values
+                    tmp.voteRank = _tmpVoteRank;
+                    tmp.recipientId = _tmpRecipient;
                 }
 
-                // get values of the next index
-                // store the previous winner at index i in tmp variables
-                uint256 _tmpVoteRank;
-                address _tmpRecipient;
-                _tmpVoteRank = votesByRank[i];
-                _tmpRecipient = indexToRecipientId[i];
+                // if recipient is in winner list add him and store the temp values to push the rest of the list by 1 in the next loop
+                if (tmp.foundRecipientAtIndex == 0 && recipient.totalVotes > votesByRank[i]) {
+                    tmp.foundRecipientAtIndex = i;
+                    // store the previous winner at index i in tmp variables
+                    tmp.voteRank = votesByRank[i];
+                    tmp.recipientId = indexToRecipientId[i];
 
-                // update the values of the next index to the tmp values
-                // update winner at index i to tmpRecipient (set at previous iteration)
-                votesByRank[i] = tmpVoteRank;
-                indexToRecipientId[i] = tmpRecipient;
+                    // update winner at index i to recipient
+                    votesByRank[i] = recipient.totalVotes;
+                    indexToRecipientId[i] = recipientId;
 
-                recipientIdToIndex[tmpRecipient] = i;
+                    recipientIdToIndex[recipientId] = i;
 
-                // update the temp values to the next index values
-                tmpVoteRank = _tmpVoteRank;
-                tmpRecipient = _tmpRecipient;
-            }
-
-            // if recipient is in winner list add him and store the temp values to push the rest of the list by 1 in the next loop
-            if (foundRecipientAtIndex == 0 && recipient.totalVotes > votesByRank[i]) {
-                foundRecipientAtIndex = i;
-                // store the previous winner at index i in tmp variables
-                tmpVoteRank = votesByRank[i];
-                tmpRecipient = indexToRecipientId[i];
-
-                // update winner at index i to recipient
-                votesByRank[i] = recipient.totalVotes;
-                indexToRecipientId[i] = recipientId;
-
-                recipientIdToIndex[recipientId] = i;
-
-                // break if rest of the list is empty
-                if (tmpRecipient == address(0)) {
-                    break;
+                    // break if rest of the list is empty
+                    if (tmp.recipientId == address(0)) {
+                        break;
+                    }
                 }
-            }
 
-            unchecked {
-                i++;
+                unchecked {
+                    i++;
+                }
             }
         }
 
