@@ -56,8 +56,14 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
     // nftId -> voiceCreditsUsed
     mapping(uint256 => uint256) public voiceCreditsUsedPerNftId;
 
+    //recipientId => winner list index
+    mapping(address => uint256) public recipientToIndex;
+
+    // index => recipientId
+    mapping(uint256 => address) public indexToRecipient;
+
     uint256[] public percentages;
-    address[] public currentWinners;
+    uint256[] public votesByRank;
 
     /// ======================
     /// ===== Modifiers ======
@@ -182,6 +188,11 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
         uint256 percentageLength = _percentages.length;
         uint256 totalPercentages = 0;
 
+        // ensure that the list is sorted in the right order (0: first place, 1: second place, etc.)
+        if (_percentages[0] < _percentages[percentageLength - 1]) {
+            revert INVALID();
+        }
+
         for (uint256 i = 0; i < percentageLength;) {
             uint256 percentage = _percentages[i];
             percentages[i] = percentage;
@@ -286,57 +297,58 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
 
         voiceCreditsUsedPerNftId[nftId] += voiceCreditsToAllocate;
 
-        // update current winners
-        //uint256 totalWinners = percentages.length;
+        uint256 tmpVoteRank;
+        address tmpRecipient;
+        uint256 foundListIndex;
 
-        // recipientId => winner list index
-        // mapping (address => uint256) public recipientToIndex;
+        // cannot cache the length => stack too deep :'(
+        for (uint256 i = 0; i < percentages.length;) {
+            // if a new winner was added, push the rest of the list by 1
+            if (foundListIndex > 0 && tmpRecipient != address(0)) {
+                uint256 newIndex = i + 1;
 
-        // // index => recipientId
-        // mapping (uint256 => address) public indexToRecipient;
+                // if we reached the last index, remove the last index from recipient and break
+                if (newIndex == percentages.length) {
+                    recipientToIndex[tmpRecipient] = 0;
+                    break;
+                }
 
-        // // 0: max => length-1: min
-        // uint256[] memory votesByRank; // actual list
-        // uint256[] memory tmpVoteRank;
+                // get values of the next index
+                uint256 _tmpVoteRank;
+                address _tmpRecipient;
+                _tmpVoteRank = votesByRank[newIndex];
+                _tmpRecipient = indexToRecipient[newIndex];
 
-        // address tmpRecipient;
-        // bool inserted = false;
-        // for(index i = 0; index < votesByRank.length; i++) {
-        //     tmpVoteRank[i] = votesByRank[i];
-        //     if(!inserted && recipient.totalVotes > votesByRank[i]) {
-        //         tmpRecipient = indexToRecipient[i];
-        //         recipientToIndex[recipientId] = i;
-        //         indexToRecipient[i] = recipientId;
-        //         inserted = true;
-        //     }
-        //     if (inserted) {
-        //         address tmpRecipient2 = tmpRecipient;
-        //         tmpRecipient = indexToRecipient[i + 1];
-        //         recipientToIndex[tmpRecipient] = i + 1;
-        //         indexToRecipient[i + 1] = tmpRecipient;
-        //     }
-        // }
+                // update the values of the next index to the temp values
+                votesByRank[newIndex] = tmpVoteRank;
+                indexToRecipient[newIndex] = tmpRecipient;
+                recipientToIndex[tmpRecipient] = newIndex;
 
-        // TODO: check if the recipient is already in the currentWinners array
+                // if the recipient was part of the list (duplicate after adding him again) and got overwritten, we do not need to push the rest of the list
+                if (tmpRecipient == recipientId) {
+                    break;
+                }
 
-        // uint256 recipientIdCurrentPosition = totalWinners + 1;
+                // update the temp values to the next index values
+                tmpVoteRank = _tmpVoteRank;
+                tmpRecipient = _tmpRecipient;
+            }
 
-        // loop through and see if recipient is already in the currentWinners array
+            // if recipient is in winner list add him and store the temp values to push the rest of the list by 1 in the next loop
+            if (foundListIndex == 0 && recipient.totalVotes > votesByRank[i]) {
+                foundListIndex = i;
+                tmpVoteRank = votesByRank[i];
+                tmpRecipient = indexToRecipient[i];
 
-        // loop through to check recipient.totalVotes > currentWinners[i].totalVotes
-        // if yes -> you can update the list but everything else has to be pushed by 1
-        // additionaly if recipient is already in current winner list before the update,
+                votesByRank[i] = recipient.totalVotes;
+                indexToRecipient[i] = recipientId;
+                recipientToIndex[recipientId] = i;
+            }
 
-        // for (uint256 i = 0; i < totalWinners;) {
-        //     // TODO: HEAP SORT
-        //     if (totalRecipientVotes > recipient.totalVotes) {
-        //         currentWinners[i] = recipientId;
-        //     }
-
-        //     unchecked {
-        //         i++;
-        //     }
-        // }
+            unchecked {
+                i++;
+            }
+        }
 
         emit Allocated(_sender, voteResult, address(0), msg.sender);
     }
@@ -351,7 +363,7 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
     {
         uint256 payoutLength = percentages.length;
         for (uint256 i; i < payoutLength;) {
-            address recipientId = currentWinners[i];
+            address recipientId = indexToRecipient[i];
             Recipient memory recipient = recipients[recipientId];
 
             if (paidOut[recipientId]) {
