@@ -423,7 +423,7 @@ contract QVSimpleStrategy is BaseStrategy {
             address recipientId = _recipientIds[i];
             Recipient storage recipient = recipients[recipientId];
 
-            if (recipient.recipientStatus != InternalRecipientStatus.Accepted) {
+            if (paidOut[recipientId] || recipient.recipientStatus != InternalRecipientStatus.Accepted) {
                 revert RECIPIENT_ERROR(recipientId);
             }
 

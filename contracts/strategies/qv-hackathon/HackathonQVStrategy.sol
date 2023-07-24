@@ -40,7 +40,7 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
     error ALREADY_ADDED();
     error OUT_OF_BOUNDS();
     error INVALID_SCHEMA();
-    error REGISTRATION_STARTED();
+    error ALLOCATION_STARTED();
 
     /// ======================
     /// ====== Storage =======
@@ -63,9 +63,9 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
     /// ===== Modifiers ======
     /// ======================
 
-    modifier onlyBeforeRegistration() {
-        if (block.timestamp > registrationStartTime) {
-            revert REGISTRATION_STARTED();
+    modifier onlyBeforeAllocation() {
+        if (block.timestamp > allocationStartTime) {
+            revert ALLOCATION_STARTED();
         }
         _;
     }
@@ -174,10 +174,10 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
 
     /// @notice Set the winner percentages
     /// @param _percentages The percentages to set
-    function setWinnerPercentages(uint256[] memory _percentages)
+    function setPayoutPercentages(uint256[] memory _percentages)
         external
         onlyPoolManager(msg.sender)
-        onlyBeforeRegistration
+        onlyBeforeAllocation
     {
         uint256 percentageLength = _percentages.length;
         uint256 totalPercentages = 0;
@@ -289,6 +289,7 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
         // update current winners
         uint256 totalWinners = percentages.length;
         for (uint256 i = 0; i < totalWinners;) {
+            // TODO: HEAP SORT
             if (totalRecipientVotes > recipient.totalVotes) {
                 currentWinners[i] = recipientId;
             }
@@ -301,7 +302,7 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
         emit Allocated(_sender, voteResult, address(0), msg.sender);
     }
 
-    /// @notice Distribute the tokens to the recipients
+    /// @notice Distribute the tokens to the winners
     /// @param _sender The sender of the transaction
     function _distribute(address[] memory, bytes memory, address _sender)
         internal
@@ -313,6 +314,10 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
         for (uint256 i; i < payoutLength;) {
             address recipientId = currentWinners[i];
             Recipient memory recipient = recipients[recipientId];
+
+            if (paidOut[recipientId]) {
+                revert RECIPIENT_ERROR(recipientId);
+            }
 
             IAllo.Pool memory pool = allo.getPool(poolId);
 
