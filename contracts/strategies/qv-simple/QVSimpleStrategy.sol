@@ -313,6 +313,7 @@ contract QVSimpleStrategy is BaseStrategy {
     /// @param _sender The sender of the transaction
     function _registerRecipient(bytes memory _data, address _sender)
         internal
+        virtual
         override
         onlyActiveRegistration
         returns (address recipientId)
@@ -422,7 +423,7 @@ contract QVSimpleStrategy is BaseStrategy {
             address recipientId = _recipientIds[i];
             Recipient storage recipient = recipients[recipientId];
 
-            if (recipient.recipientStatus != InternalRecipientStatus.Accepted) {
+            if (paidOut[recipientId] || recipient.recipientStatus != InternalRecipientStatus.Accepted) {
                 revert RECIPIENT_ERROR(recipientId);
             }
 
