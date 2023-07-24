@@ -302,6 +302,11 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
         for (uint256 i = 0; i < payoutPercentages.length;) {
             // if a new winner was added, push the rest of the list by 1
             if (foundRecipientAtIndex > 0 && tmpRecipient != address(0)) {
+                // if the recipient was part of the list (duplicate after adding him again) and got overwritten, we do not need to push the rest of the list
+                if (tmpRecipient == recipientId) {
+                    break;
+                }
+
                 // get values of the next index
                 // store the previous winner at index i in tmp variables
                 uint256 _tmpVoteRank;
@@ -315,11 +320,6 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
                 indexToRecipientId[i] = tmpRecipient;
 
                 recipientIdToIndex[tmpRecipient] = i;
-
-                // if the recipient was part of the list (duplicate after adding him again) and got overwritten, we do not need to push the rest of the list
-                if (tmpRecipient == recipientId) {
-                    break;
-                }
 
                 // update the temp values to the next index values
                 tmpVoteRank = _tmpVoteRank;
