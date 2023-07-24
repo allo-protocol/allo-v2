@@ -54,7 +54,7 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
     ERC721 public nft;
 
     // recipientId -> uid
-    mapping(address => bytes32) public attestations;
+    mapping(address => bytes32) public recipientIdToUID;
     // nftId -> voiceCreditsUsed
     mapping(uint256 => uint256) public voiceCreditsUsedPerNftId;
     // recipientId => winner list index
@@ -163,11 +163,11 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
         uint256 recipientLength = _recipientIds.length;
         for (uint256 i = 0; i < recipientLength;) {
             address recipientId = _recipientIds[i];
-            if (attestations[recipientId] != 0) {
+            if (recipientIdToUID[recipientId] != 0) {
                 revert ALREADY_ADDED();
             }
 
-            attestations[recipientId] = _grantEASAttestation(_recipientIds[i], _expirationTime, _data, 0);
+            recipientIdToUID[recipientId] = _grantEASAttestation(_recipientIds[i], _expirationTime, _data, 0);
 
             unchecked {
                 i++;
@@ -222,7 +222,7 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
 
         (recipientId, recipientAddress, metadata) = abi.decode(_data, (address, address, Metadata));
 
-        if (attestations[recipientId] == 0 || !_isIdentityMember(recipientId, _sender)) {
+        if (recipientIdToUID[recipientId] == 0 || !_isIdentityMember(recipientId, _sender)) {
             revert UNAUTHORIZED();
         }
 
@@ -440,7 +440,7 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
     /// @notice Returns if the attestation is expired or not
     /// @param _recipientId The recipient ID to check
     function isAttestationExpired(address _recipientId) public view returns (bool) {
-        if (easInfo.eas.getAttestation(attestations[_recipientId]).expirationTime < block.timestamp) {
+        if (easInfo.eas.getAttestation(recipientIdToUID[_recipientId]).expirationTime < block.timestamp) {
             return true;
         }
         return false;
