@@ -302,24 +302,19 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
         for (uint256 i = 0; i < payoutPercentages.length;) {
             // if a new winner was added, push the rest of the list by 1
             if (foundRecipientAtIndex > 0 && tmpRecipient != address(0)) {
-                uint256 newIndex = i + 1;
-
-                // if we reached the last index, remove the last index from recipient and break
-                if (newIndex == payoutPercentages.length) {
-                    recipientIdToIndex[tmpRecipient] = 0;
-                    break;
-                }
-
                 // get values of the next index
+                // store the previous winner at index i in tmp variables
                 uint256 _tmpVoteRank;
                 address _tmpRecipient;
-                _tmpVoteRank = votesByRank[newIndex];
-                _tmpRecipient = indexToRecipientId[newIndex];
+                _tmpVoteRank = votesByRank[i];
+                _tmpRecipient = indexToRecipientId[i];
 
-                // update the values of the next index to the temp values
-                votesByRank[newIndex] = tmpVoteRank;
-                indexToRecipientId[newIndex] = tmpRecipient;
-                recipientIdToIndex[tmpRecipient] = newIndex;
+                // update the values of the next index to the tmp values
+                // update winner at index i to tmpRecipient (set at previous iteration)
+                votesByRank[i] = tmpVoteRank;
+                indexToRecipientId[i] = tmpRecipient;
+
+                recipientIdToIndex[tmpRecipient] = i;
 
                 // if the recipient was part of the list (duplicate after adding him again) and got overwritten, we do not need to push the rest of the list
                 if (tmpRecipient == recipientId) {
@@ -343,6 +338,11 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
                 indexToRecipientId[i] = recipientId;
 
                 recipientIdToIndex[recipientId] = i;
+
+                // break if rest of the list is empty
+                if (tmpRecipient == address(0)) {
+                    break;
+                }
             }
 
             unchecked {
