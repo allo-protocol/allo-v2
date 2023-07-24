@@ -130,7 +130,6 @@ contract QVNftTieredStrategy is QVSimpleStrategy {
         (address recipientId, ERC721 nft, uint256 nftId, uint256 voiceCreditsToAllocate) =
             abi.decode(_data, (address, ERC721, uint256, uint256));
 
-        // check the voiceCreditsToAllocate is > 0
         if (voiceCreditsToAllocate == 0) {
             revert INVALID();
         }

@@ -10,7 +10,7 @@ In this strategy, recipients do not need to apply — they are automatically add
 - **Recipient Eligibility**
     - Pool managers will manually add recipients to the pool. 
 - **Register recipients**
-    - `registerRecipients` - Function for pool managers to add addresses to their pool. When they are added, an EAS attestation is automatically minted that they are part of the hackathon. 
+    - `registerRecipients` - Function for pool managers to add addresses to their pool. When they are added, an EAS attestation is automatically issued that they are part of the hackathon. 
     - Eligible recipients will also need functions to: 
         - add a payout address for this pool
         - update metadata for this pool
