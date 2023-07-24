@@ -40,6 +40,7 @@ interface IStrategy {
     event Registered(address indexed recipientId, bytes data, address sender);
     event Allocated(address indexed recipientId, uint256 amount, address token, address sender);
     event Distributed(address indexed recipientId, address recipientAddress, uint256 amount, address sender);
+    event Rejected(address indexed recipientId);
     event PoolActive(bool active);
 
     /// ======================

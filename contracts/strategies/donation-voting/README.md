@@ -2,9 +2,18 @@ Spec: Open Donation Voting with Offchain Calculation
 ---------------------------------
 
 ## Overview 
-There is a category of mechanisms (including Quadratic Funding or QF) allocate a funding pool based upon individual donations to eligible recipients. Essentially, the amount that an individual donates to a project is considered their "vote", which is weighted according to the type of voting calculation formula being used. 
 
-At time of writing (June 2023), most prominent QF formulas are too computationally expensive to be calculated on-chain at a reasonable cost. As a step towards an eventual fully on-chain QF solution, this strategy functions as a hybrid solution: 
+There is a category of mechanisms (including Quadratic Funding or QF) allocate
+a funding pool based upon individual donations to eligible recipients.
+Essentially, the amount that an individual donates to a project is considered
+their "vote", which is weighted according to the type of voting calculation
+formula being used. 
+
+At time of writing (June 2023), most prominent QF formulas are too
+computationally expensive to be calculated on-chain at a reasonable cost. As
+a step towards an eventual fully on-chain QF solution, this strategy functions
+as a hybrid solution: 
+
 * votes are recorded **on-chain**
 * the allocation is calculated **off-chain**
 * the final distribution is recorded **on-chain**
