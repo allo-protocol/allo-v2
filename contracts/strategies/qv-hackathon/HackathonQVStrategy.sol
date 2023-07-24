@@ -296,12 +296,12 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
 
         uint256 tmpVoteRank;
         address tmpRecipient;
-        uint256 foundListIndex;
+        uint256 foundRecipientAtIndex;
 
         // cannot cache the length => stack too deep :'(
         for (uint256 i = 0; i < payoutPercentages.length;) {
             // if a new winner was added, push the rest of the list by 1
-            if (foundListIndex > 0 && tmpRecipient != address(0)) {
+            if (foundRecipientAtIndex > 0 && tmpRecipient != address(0)) {
                 uint256 newIndex = i + 1;
 
                 // if we reached the last index, remove the last index from recipient and break
@@ -332,13 +332,16 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
             }
 
             // if recipient is in winner list add him and store the temp values to push the rest of the list by 1 in the next loop
-            if (foundListIndex == 0 && recipient.totalVotes > votesByRank[i]) {
-                foundListIndex = i;
+            if (foundRecipientAtIndex == 0 && recipient.totalVotes > votesByRank[i]) {
+                foundRecipientAtIndex = i;
+                // store the previous winner at index i in tmp variables
                 tmpVoteRank = votesByRank[i];
                 tmpRecipient = indexToRecipientId[i];
 
+                // update winner at index i to recipient
                 votesByRank[i] = recipient.totalVotes;
                 indexToRecipientId[i] = recipientId;
+
                 recipientIdToIndex[recipientId] = i;
             }
 
