@@ -167,6 +167,10 @@ contract QVSimpleStrategy is BaseStrategy {
         registrationEndTime = _registrationEndTime;
         allocationStartTime = _allocationStartTime;
         allocationEndTime = _allocationEndTime;
+
+        emit TimestampsUpdated(
+            registrationStartTime, registrationEndTime, allocationStartTime, allocationEndTime, msg.sender
+        );
     }
 
     /// =========================
@@ -294,6 +298,10 @@ contract QVSimpleStrategy is BaseStrategy {
         registrationEndTime = _registrationEndTime;
         allocationStartTime = _allocationStartTime;
         allocationEndTime = _allocationEndTime;
+
+        emit TimestampsUpdated(
+            registrationStartTime, registrationEndTime, allocationStartTime, allocationEndTime, msg.sender
+        );
     }
 
     /// ====================================

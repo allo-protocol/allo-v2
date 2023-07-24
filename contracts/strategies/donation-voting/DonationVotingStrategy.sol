@@ -57,6 +57,13 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     event Appealed(address indexed recipientId, bytes data, address sender);
     event RecipientStatusUpdated(address indexed recipientId, InternalRecipientStatus recipientStatus, address sender);
     event Claimed(address indexed recipientId, address recipientAddress, uint256 amount, address token);
+    event TimestampsUpdated(
+        uint256 registrationStartTime,
+        uint256 registrationEndTime,
+        uint256 allocationStartTime,
+        uint256 allocationEndTime,
+        address sender
+    );
 
     /// ================================
     /// ========== Storage =============
@@ -162,6 +169,10 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
         registrationEndTime = _registrationEndTime;
         allocationStartTime = _allocationStartTime;
         allocationEndTime = _allocationEndTime;
+
+        emit TimestampsUpdated(
+            registrationStartTime, registrationEndTime, allocationStartTime, allocationEndTime, msg.sender
+        );
 
         uint256 allowedTokensLength = _allowedTokens.length;
 
@@ -318,6 +329,35 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
                 i++;
             }
         }
+    }
+
+    /// @notice Set the start and end dates for the pool
+    /// @param _registrationStartTime The start time for the registration
+    /// @param _registrationEndTime The end time for the registration
+    /// @param _allocationStartTime The start time for the allocation
+    /// @param _allocationEndTime The end time for the allocation
+    function updatePoolTimestamps(
+        uint256 _registrationStartTime,
+        uint256 _registrationEndTime,
+        uint256 _allocationStartTime,
+        uint256 _allocationEndTime
+    ) external onlyPoolManager(msg.sender) {
+        if (
+            _registrationStartTime > registrationStartTime || block.timestamp > _registrationStartTime
+                || _registrationStartTime > _registrationEndTime || _registrationStartTime > _allocationStartTime
+                || _allocationStartTime > _allocationEndTime
+        ) {
+            revert INVALID();
+        }
+
+        registrationStartTime = _registrationStartTime;
+        registrationEndTime = _registrationEndTime;
+        allocationStartTime = _allocationStartTime;
+        allocationEndTime = _allocationEndTime;
+
+        emit TimestampsUpdated(
+            registrationStartTime, registrationEndTime, allocationStartTime, allocationEndTime, msg.sender
+        );
     }
 
     /// @notice Withdraw funds from pool
