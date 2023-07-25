@@ -24,8 +24,11 @@ contract RegistrySetup is Test, Accounts {
 /// @title RegistrySetupFull
 /// @notice This contract is used to setup a Registry contract with two identities for testing purposes.
 contract RegistrySetupFull is RegistrySetup {
+    bytes32 internal _alloIdentityId_;
+    address internal _alloIdentityAnchor_;
+
     bytes32 internal _poolIdentityId_;
-    address internal _poolItyAnchor_;
+    address internal _poolIdentityAnchor_;
 
     bytes32 internal _identity1Id_;
     address internal _identity1Anchor_;
@@ -36,12 +39,19 @@ contract RegistrySetupFull is RegistrySetup {
     function __RegistrySetupFull() internal {
         __RegistrySetup();
 
+        vm.prank(allo_owner());
+        _alloIdentityId_ = _registry_.createIdentity(
+            0, "Allo Identity", Metadata({protocol: 1, pointer: "AlloIdentity"}), allo_owner(), pool_managers()
+        );
+
+        _alloIdentityAnchor_ = _registry_.getIdentityById(_alloIdentityId_).anchor;
+
         vm.prank(pool_admin());
         _poolIdentityId_ = _registry_.createIdentity(
             0, "Pool Identity 1", Metadata({protocol: 1, pointer: "PoolIdentity1"}), pool_admin(), pool_managers()
         );
 
-        _poolItyAnchor_ = _registry_.getIdentityById(_poolIdentityId_).anchor;
+        _poolIdentityAnchor_ = _registry_.getIdentityById(_poolIdentityId_).anchor;
 
         vm.prank(identity1_owner());
         _identity1Id_ = _registry_.createIdentity(
@@ -56,12 +66,16 @@ contract RegistrySetupFull is RegistrySetup {
         _identity2Anchor_ = _registry_.getIdentityById(_identity2Id_).anchor;
     }
 
+    function alloIdentity_id() public view returns (bytes32) {
+        return _alloIdentityId_;
+    }
+
     function poolIdentity_id() public view returns (bytes32) {
         return _poolIdentityId_;
     }
 
     function poolIdentity_anchor() public view returns (address) {
-        return _poolItyAnchor_;
+        return _poolIdentityAnchor_;
     }
 
     function identity1_id() public view returns (bytes32) {

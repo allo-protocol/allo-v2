@@ -474,7 +474,7 @@ contract QVSimpleStrategy is BaseStrategy {
     /// @notice Calculate the square root of a number (Babylonian method)
     /// @param x The number
     /// @return y The square root
-    function _sqrt(uint256 x) internal pure returns (uint256 y) {
+    function _sqrt(uint256 x) public pure returns (uint256 y) {
         uint256 z = (x + 1) / 2;
         y = x;
         while (z < y) {
