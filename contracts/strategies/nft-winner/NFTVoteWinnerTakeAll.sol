@@ -1,9 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import {IAllo} from "../../core/IAllo.sol";
-import {BaseStrategy} from "../BaseStrategy.sol";
+// External Libraries
 import {ERC721} from "@solady/tokens/ERC721.sol";
+// Interfaces
+import {IAllo} from "../../core/IAllo.sol";
+// Core Contracts
+import {BaseStrategy} from "../BaseStrategy.sol";
 
 contract NFTVoteWinnerTakeAll is BaseStrategy {
     /// ================================

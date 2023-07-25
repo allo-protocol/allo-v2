@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import {IStrategy} from "../strategies/IStrategy.sol";
+// Interfaces
 import {IRegistry} from "./IRegistry.sol";
+import {IStrategy} from "../strategies/IStrategy.sol";
+// Internal Libraries
 import {Metadata} from "./libraries/Metadata.sol";
 
 interface IAllo {

@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import {QVSimpleStrategy} from "../qv-simple/QVSimpleStrategy.sol";
+// External Libraries
 import {ERC721} from "@solady/tokens/ERC721.sol";
+// Core Contracts
+import {QVSimpleStrategy} from "../qv-simple/QVSimpleStrategy.sol";
 
 contract QVNftTieredStrategy is QVSimpleStrategy {
     /// ======================

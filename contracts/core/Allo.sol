@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import "./IAllo.sol";
-
+// External Libraries
+import "@solady/auth/Ownable.sol";
 import "@openzeppelin-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/access/AccessControl.sol";
-
-import "@solady/auth/Ownable.sol";
-
+// Interfaces
+import "./IAllo.sol";
+// Internal Libraries
 import {Clone} from "./libraries/Clone.sol";
-import {Transfer} from "./libraries/Transfer.sol";
 import "./libraries/Native.sol";
+import {Transfer} from "./libraries/Transfer.sol";
 
 /**
  *          ___            ___        ___        ___

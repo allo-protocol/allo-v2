@@ -1,13 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import {IAllo} from "../../core/IAllo.sol";
-import {QVSimpleStrategy} from "../qv-simple/QVSimpleStrategy.sol";
-import {Metadata} from "../../core/libraries/Metadata.sol";
-
+// External Libraries
 import {ERC721} from "@solady/tokens/ERC721.sol";
-
-// Note: EAS Contracts
 import {
     Attestation,
     AttestationRequest,
@@ -17,7 +12,13 @@ import {
     RevocationRequestData
 } from "@ethereum-attestation-service/IEAS.sol";
 import {ISchemaRegistry, ISchemaResolver, SchemaRecord} from "@ethereum-attestation-service/ISchemaRegistry.sol";
+// Interfaces
+import {IAllo} from "../../core/IAllo.sol";
+// Core Contracts
 import {SchemaResolver} from "./SchemaResolver.sol";
+import {QVSimpleStrategy} from "../qv-simple/QVSimpleStrategy.sol";
+// Internal Libraries
+import {Metadata} from "../../core/libraries/Metadata.sol";
 
 // Register the schema with the SchemaRegistry contract when required.
 // https://optimism-goerli.easscan.org/schema/create
