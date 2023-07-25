@@ -1,9 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
+// Interfaces
 import {IAllo} from "../../core/IAllo.sol";
 import {IRegistry} from "../../core/IRegistry.sol";
+// Core Contracts
 import {BaseStrategy} from "../BaseStrategy.sol";
+// Internal Libraries
 import {Metadata} from "../../core/libraries/Metadata.sol";
 
 contract QVSimpleStrategy is BaseStrategy {
@@ -158,6 +161,7 @@ contract QVSimpleStrategy is BaseStrategy {
         if (
             block.timestamp > _registrationStartTime || _registrationStartTime > _registrationEndTime
                 || _registrationStartTime > _allocationStartTime || _allocationStartTime > _allocationEndTime
+                || _registrationEndTime > _allocationEndTime
         ) {
             revert INVALID();
         }
@@ -289,7 +293,7 @@ contract QVSimpleStrategy is BaseStrategy {
         if (
             _registrationStartTime > registrationStartTime || block.timestamp > _registrationStartTime
                 || _registrationStartTime > _registrationEndTime || _registrationStartTime > _allocationStartTime
-                || _allocationStartTime > _allocationEndTime
+                || _allocationStartTime > _allocationEndTime || _registrationEndTime > _allocationEndTime
         ) {
             revert INVALID();
         }

@@ -1,10 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import "./IStrategy.sol";
-
+// External Libraries
 import {ERC20} from "@openzeppelin/token/ERC20/ERC20.sol";
 import {IERC20} from "@openzeppelin/token/ERC20/IERC20.sol";
+// Interfaces
+import {IAllo} from "../core/IAllo.sol";
+import {IStrategy} from "./IStrategy.sol";
+// Internal Libraries
 import {Transfer} from "../core/libraries/Transfer.sol";
 
 abstract contract BaseStrategy is IStrategy, Transfer {

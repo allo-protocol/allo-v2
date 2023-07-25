@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
+// Internal Libraries
 import {Metadata} from "./libraries/Metadata.sol";
 
 interface IRegistry {

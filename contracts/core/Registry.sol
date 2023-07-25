@@ -1,12 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import "./IRegistry.sol";
+// External Libraries
 import {AccessControl} from "@openzeppelin/access/AccessControl.sol";
-import {Metadata} from "./libraries/Metadata.sol";
-import "./libraries/Transfer.sol";
-import "./libraries/Native.sol";
 import {ERC20} from "@solady/tokens/ERC20.sol";
+// Interfaces
+import "./IRegistry.sol";
+// Internal Libraries
+import {Metadata} from "./libraries/Metadata.sol";
+import "./libraries/Native.sol";
+import "./libraries/Transfer.sol";
 
 /// @title Registry
 /// @notice Registry contract for identities

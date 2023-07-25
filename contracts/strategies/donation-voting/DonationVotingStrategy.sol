@@ -1,12 +1,16 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
+// External Libraries
+import {ReentrancyGuard} from "@openzeppelin/security/ReentrancyGuard.sol";
+// Interfaces
 import {IAllo} from "../../core/IAllo.sol";
 import {IRegistry} from "../../core/IRegistry.sol";
+// Core Contracts
 import {BaseStrategy} from "../BaseStrategy.sol";
+// Internal Libraries
 import {Metadata} from "../../core/libraries/Metadata.sol";
 import {Native} from "../../core/libraries/Native.sol";
-import {ReentrancyGuard} from "@openzeppelin/security/ReentrancyGuard.sol";
 
 contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     /// ================================
@@ -161,6 +165,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
         if (
             block.timestamp > _registrationStartTime || _registrationStartTime > _registrationEndTime
                 || _registrationStartTime > _allocationStartTime || _allocationStartTime > _allocationEndTime
+                || _registrationEndTime > _allocationEndTime
         ) {
             revert INVALID();
         }
@@ -345,7 +350,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
         if (
             _registrationStartTime > registrationStartTime || block.timestamp > _registrationStartTime
                 || _registrationStartTime > _registrationEndTime || _registrationStartTime > _allocationStartTime
-                || _allocationStartTime > _allocationEndTime
+                || _allocationStartTime > _allocationEndTime || _registrationEndTime > _allocationEndTime
         ) {
             revert INVALID();
         }

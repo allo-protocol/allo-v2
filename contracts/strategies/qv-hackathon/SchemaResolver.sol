@@ -1,6 +1,14 @@
 // SPDX-License-Identifier: MIT
+
 pragma solidity 0.8.19;
 
+// Code sourced from: https://github.com/ethereum-attestation-service/eas-contracts/blob/b50148418ea930426084e5e0508159b590ee6202/contracts/resolver/SchemaResolver.sol
+// Changes made:
+//  - updated import paths
+//  - updated _eas to make it mutable
+//  - replaced constructor  __SchemaResolver_init()
+// Reason for change:
+//  - wanted it to set when HackathonQVStrategy.initialize() is invoked
 import {IEAS, Attestation} from "@ethereum-attestation-service/IEAS.sol";
 import {InvalidEAS, uncheckedInc} from "@ethereum-attestation-service/Common.sol";
 import {ISchemaResolver} from "@ethereum-attestation-service/resolver/ISchemaResolver.sol";
@@ -67,12 +75,10 @@ abstract contract SchemaResolver is ISchemaResolver {
     /**
      * @inheritdoc ISchemaResolver
      */
-    function multiAttest(Attestation[] calldata attestations, uint256[] calldata values)
-        external
-        payable
-        onlyEAS
-        returns (bool)
-    {
+    function multiAttest(
+        Attestation[] calldata attestations,
+        uint256[] calldata values
+    ) external payable onlyEAS returns (bool) {
         uint256 length = attestations.length;
 
         // We are keeping track of the remaining ETH amount that can be sent to resolvers and will keep deducting
@@ -112,12 +118,10 @@ abstract contract SchemaResolver is ISchemaResolver {
     /**
      * @inheritdoc ISchemaResolver
      */
-    function multiRevoke(Attestation[] calldata attestations, uint256[] calldata values)
-        external
-        payable
-        onlyEAS
-        returns (bool)
-    {
+    function multiRevoke(
+        Attestation[] calldata attestations,
+        uint256[] calldata values
+    ) external payable onlyEAS returns (bool) {
         uint256 length = attestations.length;
 
         // We are keeping track of the remaining ETH amount that can be sent to resolvers and will keep deducting

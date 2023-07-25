@@ -61,6 +61,21 @@ contract RegistryTest is Test, RegistrySetup {
         assertEq(identityByAnchor.name, name, "getIdentityByAnchor: name");
     }
 
+    function testRevert_createIdentity_owner_ZERO_ADDRESS() public {
+        vm.expectRevert(IRegistry.ZERO_ADDRESS.selector);
+
+        // create identity
+        registry().createIdentity(nonce, name, metadata, address(0), identity1_members());
+    }
+
+    function testRevert_createIdentity_member_ZERO_ADDRESS() public {
+        vm.expectRevert(IRegistry.ZERO_ADDRESS.selector);
+        address[] memory _members = new address[](1);
+        _members[0] = address(0);
+        // create identity
+        registry().createIdentity(nonce, name, metadata, identity1_owner(), _members);
+    }
+
     function testRevert_createIdentity_NONCE_NOT_AVAILABLE() public {
         // create identity
         registry().createIdentity(nonce, name, metadata, identity1_owner(), identity1_members());
@@ -206,6 +221,18 @@ contract RegistryTest is Test, RegistrySetup {
         bytes32 invalidIdentityId = TestUtilities._testUtilGenerateIdentityId(nonce + 1, address(this));
         vm.prank(identity1_owner());
         registry().addMembers(invalidIdentityId, identity1_members());
+    }
+
+    function testRevert_addMembers_ZERO_ADDRESS() public {
+        bytes32 newIdentityId = registry().createIdentity(nonce, name, metadata, identity1_owner(), new address[](0));
+
+        vm.expectRevert(IRegistry.ZERO_ADDRESS.selector);
+
+        address[] memory _members = new address[](1);
+        _members[0] = address(0);
+
+        vm.prank(identity1_owner());
+        registry().addMembers(newIdentityId, _members);
     }
 
     function test_removeMembers() public {
