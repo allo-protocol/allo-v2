@@ -68,14 +68,14 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
         uint256 allocationEndTime,
         address sender
     );
+    event PayoutSet(bytes recipientIds);
 
     /// ================================
     /// ========== Storage =============
     /// ================================
 
-    bool public registryGating;
+    bool public useRegistryAnchor;
     bool public metadataRequired;
-    bool public distributionStarted;
     uint256 public registrationStartTime;
     uint256 public registrationEndTime;
     uint256 public allocationStartTime;
@@ -96,21 +96,21 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     /// ================================
 
     modifier onlyActiveRegistration() {
-        if (registrationStartTime <= block.timestamp && block.timestamp <= registrationEndTime) {
+        if (registrationStartTime > block.timestamp || block.timestamp > registrationEndTime) {
             revert REGISTRATION_NOT_ACTIVE();
         }
         _;
     }
 
     modifier onlyActiveAllocation() {
-        if (allocationStartTime <= block.timestamp && block.timestamp <= allocationEndTime) {
+        if (allocationStartTime > block.timestamp || block.timestamp > allocationEndTime) {
             revert ALLOCATION_NOT_ACTIVE();
         }
         _;
     }
 
     modifier onlyAfterAllocation() {
-        if (block.timestamp <= allocationEndTime) {
+        if (block.timestamp < allocationEndTime) {
             revert ALLOCATION_NOT_ENDED();
         }
         _;
@@ -126,9 +126,9 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     /// ========= Initialize ==========
     /// ===============================
 
-    function initialize(uint256 _poolId, bytes memory _data) public virtual override {
+    function initialize(uint256 _poolId, bytes memory _data) public virtual override onlyAllo {
         (
-            bool _registryGating,
+            bool _useRegistryAnchor,
             bool _metadataRequired,
             uint256 _registrationStartTime,
             uint256 _registrationEndTime,
@@ -138,7 +138,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
         ) = abi.decode(_data, (bool, bool, uint256, uint256, uint256, uint256, address[]));
         __DonationVotingStrategy_init(
             _poolId,
-            _registryGating,
+            _useRegistryAnchor,
             _metadataRequired,
             _registrationStartTime,
             _registrationEndTime,
@@ -150,7 +150,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
 
     function __DonationVotingStrategy_init(
         uint256 _poolId,
-        bool _registryGating,
+        bool _useRegistryAnchor,
         bool _metadataRequired,
         uint256 _registrationStartTime,
         uint256 _registrationEndTime,
@@ -159,16 +159,10 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
         address[] memory _allowedTokens
     ) internal {
         __BaseStrategy_init(_poolId);
-        registryGating = _registryGating;
+        useRegistryAnchor = _useRegistryAnchor;
         metadataRequired = _metadataRequired;
 
-        if (
-            block.timestamp > _registrationStartTime || _registrationStartTime > _registrationEndTime
-                || _registrationStartTime > _allocationStartTime || _allocationStartTime > _allocationEndTime
-                || _registrationEndTime > _allocationEndTime
-        ) {
-            revert INVALID();
-        }
+        _isPoolTimestampValid(_registrationStartTime, _registrationEndTime, _allocationStartTime, _allocationEndTime);
 
         registrationStartTime = _registrationStartTime;
         registrationEndTime = _registrationEndTime;
@@ -293,6 +287,10 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
 
         for (uint256 i = 0; i < recipientLength;) {
             address recipientId = _recipientIds[i];
+            if (_recipients[recipientId].recipientStatus != InternalRecipientStatus.Accepted) {
+                revert INVALID();
+            }
+
             PayoutSummary storage payoutSummary = payoutSummaries[recipientId];
             if (payoutSummary.amount != 0) {
                 revert RECIPIENT_ERROR(recipientId);
@@ -312,6 +310,8 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
                 i++;
             }
         }
+
+        emit PayoutSet(abi.encode(_recipientIds));
     }
 
     /// @notice Claim allocated tokens
@@ -347,13 +347,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
         uint256 _allocationStartTime,
         uint256 _allocationEndTime
     ) external onlyPoolManager(msg.sender) {
-        if (
-            _registrationStartTime > registrationStartTime || block.timestamp > _registrationStartTime
-                || _registrationStartTime > _registrationEndTime || _registrationStartTime > _allocationStartTime
-                || _allocationStartTime > _allocationEndTime || _registrationEndTime > _allocationEndTime
-        ) {
-            revert INVALID();
-        }
+        _isPoolTimestampValid(_registrationStartTime, _registrationEndTime, _allocationStartTime, _allocationEndTime);
 
         registrationStartTime = _registrationStartTime;
         registrationEndTime = _registrationEndTime;
@@ -367,17 +361,17 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Withdraw funds from pool
     /// @param _amount The amount to be withdrawn
-    function withdraw(uint256 _amount) external onlyPoolManager(msg.sender) {
+    function withdraw(uint256 _amount) external onlyPoolManager(msg.sender) onlyAfterAllocation {
         if (block.timestamp <= allocationEndTime + 30 days) {
             revert NOT_ALLOWED();
         }
 
         IAllo.Pool memory pool = allo.getPool(poolId);
         if (pool.amount - totalPayoutAmount < _amount) {
-            revert UNAUTHORIZED();
+            revert NOT_ALLOWED();
         }
 
-        // TODO: This can cause pool owner stealing funds
+        // TODO: FIX pool manager can steal funds from vault
 
         allo.decreasePoolTotalFunding(poolId, _amount);
         _transferAmount(pool.token, msg.sender, _amount);
@@ -386,6 +380,21 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     /// ====================================
     /// ============ Internal ==============
     /// ====================================
+
+    function _isPoolTimestampValid(
+        uint256 _registrationStartTime,
+        uint256 _registrationEndTime,
+        uint256 _allocationStartTime,
+        uint256 _allocationEndTime
+    ) internal view {
+        if (
+            block.timestamp > _registrationStartTime || _registrationStartTime > _registrationEndTime
+                || _registrationStartTime > _allocationStartTime || _allocationStartTime > _allocationEndTime
+                || _registrationEndTime > _allocationEndTime
+        ) {
+            revert INVALID();
+        }
+    }
 
     /// @notice Returns status of the pool
     function _isPoolActive() internal view override returns (bool) {
@@ -405,20 +414,20 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
         returns (address recipientId)
     {
         address recipientAddress;
-        bool useRegistryAnchor;
+        bool _isUsingRegistryAnchor;
         Metadata memory metadata;
 
         // decode data custom to this strategy
-        if (registryGating) {
+        if (useRegistryAnchor) {
             (recipientId, recipientAddress, metadata) = abi.decode(_data, (address, address, Metadata));
 
             if (!_isIdentityMember(recipientId, _sender)) {
                 revert UNAUTHORIZED();
             }
         } else {
-            (recipientAddress, useRegistryAnchor, metadata) = abi.decode(_data, (address, bool, Metadata));
+            (recipientAddress, _isUsingRegistryAnchor, metadata) = abi.decode(_data, (address, bool, Metadata));
             recipientId = _sender;
-            if (useRegistryAnchor && !_isIdentityMember(recipientId, _sender)) {
+            if (_isUsingRegistryAnchor && !_isIdentityMember(recipientId, _sender)) {
                 revert UNAUTHORIZED();
             }
         }
@@ -434,7 +443,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
 
         // update the recipients data
         recipient.recipientAddress = recipientAddress;
-        recipient.useRegistryAnchor = registryGating ? true : useRegistryAnchor;
+        recipient.useRegistryAnchor = _isUsingRegistryAnchor ? true : useRegistryAnchor;
         recipient.metadata = metadata;
 
         if (recipient.recipientStatus == InternalRecipientStatus.Rejected) {

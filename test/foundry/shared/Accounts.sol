@@ -127,4 +127,11 @@ contract Accounts is StdCheats {
 
         return _members;
     }
+
+    ////////////////////////
+    // Random address
+    ////////////////////////
+    function randomAddress() public returns (address) {
+        return makeAddr("randomAddress");
+    }
 }
