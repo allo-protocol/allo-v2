@@ -10,3 +10,6 @@ cache_path  = 'cache_forge'
 # Storage layout compatibility 
 build_info = true
 extra_output = ["storageLayout"]
+
+[fmt]
+ignore = ['contracts/strategies/qv-hackathon/SchemaResolver.sol']
