@@ -1,19 +1,19 @@
 pragma solidity 0.8.19;
 
 // Interfaces
-import {IAllo} from "../../../../contracts/core/IAllo.sol";
-import {IStrategy} from "../../../../contracts/strategies/IStrategy.sol";
+import {IAllo} from "../../contracts/core/IAllo.sol";
+import {IStrategy} from "../../contracts/strategies/IStrategy.sol";
 
 // Core/Strategies
-import {QVSimpleStrategy} from "../../../../contracts/strategies/qv-simple/QVSimpleStrategy.sol";
+import {QVSimpleStrategy} from "../../contracts/strategies/qv-simple/QVSimpleStrategy.sol";
 
 // Internal Libraries
-import {Metadata} from "../../../../contracts/core/libraries/Metadata.sol";
+import {Metadata} from "../../contracts/core/libraries/Metadata.sol";
 
 // Test Helpers
-import {RegistrySetupFull} from "../../shared/RegistrySetup.sol";
-import {StrategySetup} from "../../shared/StrategySetup.sol";
-import {AlloSetup} from "../../shared/AlloSetup.sol";
+import {RegistrySetupFull} from "../shared/RegistrySetup.sol";
+import {StrategySetup} from "../shared/StrategySetup.sol";
+import {AlloSetup} from "../shared/AlloSetup.sol";
 
 contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup {
     error ALLOCATION_NOT_ACTIVE();
@@ -82,10 +82,10 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup {
         __RegistrySetupFull();
         __AlloSetup(address(registry()));
 
-        registrationStartTime = block.timestamp;
-        registrationEndTime = block.timestamp + 300;
-        allocationStartTime = block.timestamp + 301;
-        allocationEndTime = block.timestamp + 600;
+        registrationStartTime = today();
+        registrationEndTime = nextWeek();
+        allocationStartTime = weekAfterNext();
+        allocationEndTime = oneMonthFromNow();
 
         registryGating = false;
         metadataRequired = false;
@@ -165,4 +165,56 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup {
             )
         );
     }
+
+    // FIXME: Fuzz test the timestamp update conditions
+    // function testFuzz_updatePoolTimestamps(
+    //     uint256 _registrationStartTime,
+    //     uint256 _registrationEndTime,
+    //     uint256 _allocationStartTime,
+    //     uint256 _allocationEndTime
+    // ) public {
+    //     vm.assume(_registrationStartTime > block.timestamp);
+    //     vm.assume(_registrationStartTime < _registrationEndTime);
+    //     vm.assume(_registrationEndTime < _allocationStartTime);
+    //     vm.assume(_allocationStartTime < _allocationEndTime && _allocationStartTime < _allocationEndTime);
+
+    //     vm.prank(address(allo()));
+    //     strategy.initialize(
+    //         poolId,
+    //         abi.encode(
+    //             registryGating,
+    //             metadataRequired,
+    //             maxVoiceCreditsPerAllocator,
+    //             _registrationStartTime,
+    //             _registrationEndTime,
+    //             _allocationStartTime,
+    //             _allocationEndTime
+    //         )
+    //     );
+
+    //     vm.startPrank(pool_manager1());
+    //     poolId = allo().createPoolWithCustomStrategy(
+    //         alloIdentity_id(),
+    //         address(strategy),
+    //         abi.encode(
+    //             registryGating,
+    //             metadataRequired,
+    //             maxVoiceCreditsPerAllocator,
+    //             registrationStartTime,
+    //             registrationEndTime,
+    //             allocationStartTime,
+    //             allocationEndTime
+    //         ),
+    //         address(token),
+    //         0,
+    //         poolMetadata,
+    //         pool_managers()
+    //     );
+
+    //     vm.warp(1000);
+
+    //     strategy.updatePoolTimestamps(
+    //         _registrationStartTime, _registrationEndTime, _allocationStartTime, _allocationEndTime
+    //     );
+    // }
 }

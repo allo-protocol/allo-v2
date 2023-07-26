@@ -18,7 +18,7 @@ import {StrategySetup} from "../shared/StrategySetup.sol";
 import {AlloSetup} from "../shared/AlloSetup.sol";
 
 // Mocks
-import {MockToken} from "../utils/MockToken.sol";
+import {MockToken} from "../../utils/MockToken.sol";
 
 contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Native {
     error ALLOCATION_NOT_ACTIVE();

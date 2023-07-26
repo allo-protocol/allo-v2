@@ -291,9 +291,9 @@ contract QVSimpleStrategy is BaseStrategy {
         uint256 _allocationEndTime
     ) external onlyPoolManager(msg.sender) {
         if (
-            _registrationStartTime > registrationStartTime || block.timestamp > _registrationStartTime
-                || _registrationStartTime > _registrationEndTime || _registrationStartTime > _allocationStartTime
-                || _allocationStartTime > _allocationEndTime || _registrationEndTime > _allocationEndTime
+            block.timestamp > _registrationStartTime || _registrationStartTime > _registrationEndTime
+                || _registrationStartTime > _allocationStartTime || _allocationStartTime > _allocationEndTime
+                || _registrationEndTime > _allocationEndTime
         ) {
             revert INVALID();
         }
