@@ -3,15 +3,15 @@ pragma solidity 0.8.19;
 
 import {ReentrancyGuard} from "@openzeppelin/security/ReentrancyGuard.sol";
 import {IERC20} from "@sablier/v2-core/types/Tokens.sol";
-import {ISablierV2LockupLinear} from "@sablier/v2-core/interfaces/ISablierV2LockupLinear.sol";
-import {Broker, LockupLinear} from "@sablier/v2-core/types/DataTypes.sol";
+import {ISablierV2LockupDynamic} from "@sablier/v2-core/interfaces/ISablierV2LockupDynamic.sol";
+import {Broker, LockupDynamic} from "@sablier/v2-core/types/DataTypes.sol";
 
 import {IAllo} from "../../core/IAllo.sol";
 import {IRegistry} from "../../core/IRegistry.sol";
 import {BaseStrategy} from "../BaseStrategy.sol";
 import {Metadata} from "../../core/libraries/Metadata.sol";
 
-contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
+contract LockupDynamicStrategy is BaseStrategy, ReentrancyGuard {
     /// ===============================
     /// ========== Errors =============
     /// ===============================
@@ -45,7 +45,7 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
     bool public registryGating;
     bool public metadataRequired;
     bool public grantAmountRequired;
-    ISablierV2LockupLinear public lockupLinear;
+    ISablierV2LockupDynamic public lockupDynamic;
     // slot 1
     uint256 public allocatedGrantAmount;
 
@@ -63,21 +63,24 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
         bool useRegistryAnchor;
         bool cancelable;
         InternalRecipientStatus recipientStatus;
+        uint40 startTime;
         address recipientAddress;
         // slot 1
         uint256 grantAmount;
-        // slot 2
-        LockupLinear.Durations durations;
-        // slots [3..n]
+        // slots [2..m]
         Metadata metadata;
+        // slots [m..n]
+        LockupDynamic.Segment[] segments;
     }
 
     /// ===============================
     /// ======== Constructor ==========
     /// ===============================
 
-    constructor(ISablierV2LockupLinear _lockupLinear, address _allo, string memory _name) BaseStrategy(_allo, _name) {
-        lockupLinear = _lockupLinear;
+    constructor(ISablierV2LockupDynamic _lockupDynamic, address _allo, string memory _name)
+        BaseStrategy(_allo, _name)
+    {
+        lockupDynamic = _lockupDynamic;
     }
 
     /// ===============================
@@ -87,10 +90,10 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
     function initialize(uint256 _poolId, bytes memory _data) public virtual override {
         (bool _registryGating, bool _metadataRequired, bool _grantAmountRequired) =
             abi.decode(_data, (bool, bool, bool));
-        __LockupLinearStrategy_init(_poolId, _registryGating, _metadataRequired, _grantAmountRequired);
+        __LockupDynamicStrategy_init(_poolId, _registryGating, _metadataRequired, _grantAmountRequired);
     }
 
-    function __LockupLinearStrategy_init(
+    function __LockupDynamicStrategy_init(
         uint256 _poolId,
         bool _registryGating,
         bool _metadataRequired,
@@ -204,24 +207,25 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
         onlyActivePool
         returns (address recipientId)
     {
-        address recipientAddress;
-        bool useRegistryAnchor;
         bool cancelable;
         uint256 grantAmount;
-        LockupLinear.Durations memory durations;
         Metadata memory metadata;
+        address recipientAddress;
+        uint40 startTime;
+        LockupDynamic.Segment[] memory segments;
+        bool useRegistryAnchor;
 
         // decode data custom to this strategy
         if (registryGating) {
-            (recipientId, recipientAddress, cancelable, grantAmount, durations, metadata) =
-                abi.decode(_data, (address, address, bool, uint256, LockupLinear.Durations, Metadata));
+            (recipientId, recipientAddress, cancelable, grantAmount, startTime, segments, metadata) =
+                abi.decode(_data, (address, address, bool, uint256, uint40, LockupDynamic.Segment[], Metadata));
 
             if (!_isIdentityMember(recipientId, _sender)) {
                 revert UNAUTHORIZED();
             }
         } else {
-            (recipientAddress, useRegistryAnchor, cancelable, grantAmount, durations, metadata) =
-                abi.decode(_data, (address, bool, bool, uint256, LockupLinear.Durations, Metadata));
+            (recipientAddress, useRegistryAnchor, cancelable, grantAmount, startTime, segments, metadata) =
+                abi.decode(_data, (address, bool, bool, uint256, uint40, LockupDynamic.Segment[], Metadata));
             recipientId = _sender;
             if (useRegistryAnchor && !_isIdentityMember(recipientId, _sender)) {
                 revert UNAUTHORIZED();
@@ -240,17 +244,20 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
             revert INVALID_METADATA();
         }
 
-        Recipient memory recipient = Recipient({
-            cancelable: cancelable,
-            durations: durations,
-            grantAmount: grantAmount,
-            metadata: metadata,
-            recipientAddress: recipientAddress,
-            recipientStatus: InternalRecipientStatus.Pending,
-            useRegistryAnchor: registryGating ? true : useRegistryAnchor
-        });
+        Recipient storage recipient = _recipients[recipientId];
 
-        _recipients[recipientId] = recipient;
+        uint256 segmentCount = segments.length;
+        for (uint256 i = 0; i < segmentCount; ++i) {
+            recipient.segments.push(segments[i]);
+        }
+
+        recipient.cancelable = cancelable;
+        recipient.grantAmount = grantAmount;
+        recipient.metadata = metadata;
+        recipient.recipientAddress = recipientAddress;
+        recipient.recipientStatus = InternalRecipientStatus.Pending;
+        recipient.startTime = startTime;
+        recipient.useRegistryAnchor = registryGating ? true : useRegistryAnchor;
 
         emit Registered(recipientId, _data, _sender);
     }
@@ -305,32 +312,33 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
     {
         uint256 recipientLength = _recipientIds.length;
         for (uint256 i = 0; i < recipientLength;) {
-            _distributeLockupLinear(_recipientIds[i], _sender);
+            _distributeLockupDynamic(_recipientIds[i], _sender);
             unchecked {
                 i++;
             }
         }
     }
 
-    function _distributeLockupLinear(address _recipientId, address _sender) private {
+    function _distributeLockupDynamic(address _recipientId, address _sender) private {
         Recipient memory recipient = _recipients[_recipientId];
         IAllo.Pool memory pool = allo.getPool(poolId);
 
         uint128 amount = uint128(recipient.grantAmount);
 
-        LockupLinear.CreateWithDurations memory params = LockupLinear.CreateWithDurations({
+        LockupDynamic.CreateWithMilestones memory params = LockupDynamic.CreateWithMilestones({
             asset: IERC20(pool.token),
             broker: broker,
             cancelable: recipient.cancelable,
-            durations: recipient.durations,
             recipient: recipient.recipientAddress,
+            segments: recipient.segments,
             sender: address(this),
+            startTime: recipient.startTime,
             totalAmount: amount
         });
 
         poolAmount -= amount;
-        IERC20(pool.token).approve(address(lockupLinear), amount);
-        uint256 streamId = lockupLinear.createWithDurations(params);
+        IERC20(pool.token).approve(address(LockupDynamic), amount);
+        uint256 streamId = lockupDynamic.createWithMilestones(params);
         _recipientStreamIds[_recipientId].push(streamId);
 
         emit Distributed(_recipientId, recipient.recipientAddress, amount, _sender);
