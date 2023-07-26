@@ -16,11 +16,12 @@ import {Native} from "../../../contracts/core/libraries/Native.sol";
 import {RegistrySetupFull} from "../shared/RegistrySetup.sol";
 import {StrategySetup} from "../shared/StrategySetup.sol";
 import {AlloSetup} from "../shared/AlloSetup.sol";
+import {EventSetup} from "../shared/EventSetup.sol";
 
 // Mocks
 import {MockToken} from "../../utils/MockToken.sol";
 
-contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Native {
+contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, EventSetup, Native {
     error ALLOCATION_NOT_ACTIVE();
 
     struct Recipient {
@@ -50,27 +51,14 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Na
     uint256 public allocationEndTime;
 
     QVSimpleStrategy public strategy;
-
     MockToken public token;
-
     Metadata public poolMetadata;
+
+    address[] public allowedTokens;
 
     uint256 public poolId;
 
-    event Registered(address indexed recipientId, bytes data, address sender);
-    event Appealed(address indexed recipientId, bytes data, address sender);
     event Reviewed(address indexed recipientId, QVSimpleStrategy.InternalRecipientStatus status, address sender);
-    event RoleGranted(address indexed recipientId, address indexed account, bytes32 indexed role);
-    event RoleAdminChanged(
-        bytes32 indexed newAdminRole, address indexed recipientId, address indexed previousAdminRole
-    );
-    event TimestampsUpdated(
-        address indexed recipientId,
-        uint256 registrationStartTime,
-        uint256 registrationEndTime,
-        uint256 allocationStartTime,
-        uint256 allocationEndTime
-    );
     event RecipientStatusUpdated(
         address indexed recipientId, QVSimpleStrategy.InternalRecipientStatus status, address sender
     );
@@ -160,7 +148,6 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Na
         assertEq(strategy.allocationEndTime(), allocationEndTime);
     }
 
-    // FIXME
     function test_initialize_BaseStrategy_UNAUTHORIZED() public {
         vm.prank(allo_owner());
         strategy = new QVSimpleStrategy(address(allo()), "QVSimpleStrategy");
@@ -572,26 +559,91 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Na
 
     function testRevert_setPayout() public {}
 
-    function test_allocate() public {}
+    function test_allocate() public {
+        address recipientId = __register_accept_recipient();
 
-    function testRevert_allocate_ALLOCATION_NOT_ACTIVE() public {
-        vm.prank(address(allo()));
-        address recipientId = strategy.registerRecipient(__generateRecipientWithoutId(false), recipient1());
-        uint256 voiceCreditsToAllocate = 100;
+        vm.warp(allocationStartTime + 10);
 
-        bytes memory data = abi.encode(recipientId, voiceCreditsToAllocate);
+        // bytes memory allocateData = abi.encode(recipientId, 1e15, NATIVE);
 
-        vm.warp(allocationStartTime - 1);
+        address allocator = makeAddr("allocator");
+        deal(allocator, 1e18);
+        deal(address(allo()), 1e18);
 
-        vm.expectRevert(ALLOCATION_NOT_ACTIVE.selector);
-        allo().allocate(poolId, data);
+        // vm.expectEmit(true, false, false, true);
+        // emit Allocated(recipientId, 1e15, NATIVE, allocator);
+
+        // FIXME: UNAUTHORIZED() ??
+        // vm.prank(address(allo()));
+        // strategy.allocate{value: 1e15}(allocateData, allocator);
     }
 
-    function testRevert_allocate_UNAUTHORIZED() public {}
+    function testRevert_allocate_ALLOCATION_NOT_ACTIVE() public {
+        address recipientId = __register_accept_recipient();
 
-    function testRevert_allocate_NOT_ACCEPTED() public {}
+        vm.expectRevert(QVSimpleStrategy.ALLOCATION_NOT_ACTIVE.selector);
 
-    function testRevert_allocate_NOT_ENOUGH_VOICE_CREDITS() public {}
+        vm.prank(address(allo()));
+        bytes memory allocateData = abi.encode(recipientId, 1e18, NATIVE);
+        strategy.allocate(allocateData, msg.sender);
+    }
+
+    // FIXME:
+    function testRevert_allocate_RECIPIENT_ERROR() public {
+        // address recipientId = __register_reject_recipient();
+
+        // vm.expectRevert(abi.encodeWithSelector(QVSimpleStrategy.RECIPIENT_ERROR.selector, recipientId));
+        // vm.warp(allocationStartTime + 10);
+        // bytes memory allocateData = abi.encode(recipientId, 1e18, NATIVE);
+        // vm.prank(address(allo()));
+        // strategy.allocate(allocateData, msg.sender);
+    }
+
+    // FIXME:
+    function testRevert_allocate_INVALID_invalidToken() public {
+        // allowedTokens = new address[](1);
+        // allowedTokens[0] = address(token);
+
+        // strategy = new QVSimpleStrategy(address(allo()), "QVSimpleStrategy");
+        // vm.prank(address(allo()));
+        // strategy.initialize(
+        //     poolId,
+        //     abi.encode(
+        //         false,
+        //         metadataRequired,
+        //         maxVoiceCreditsPerAllocator,
+        //         registrationStartTime,
+        //         registrationEndTime,
+        //         allocationStartTime,
+        //         allocationEndTime
+        //     )
+        // );
+
+        // address recipientId = __register_accept_recipient();
+        // vm.expectRevert(QVSimpleStrategy.INVALID.selector);
+
+        // vm.warp(allocationStartTime + 10);
+
+        // address allocator = makeAddr("allocator");
+        // bytes memory allocateData = abi.encode(recipientId, 1e18, NATIVE);
+        // vm.prank(address(allo()));
+        // strategy.allocate(allocateData, allocator);
+    }
+
+    // FIXME:
+    function testRevert_allocate_INVALID_amountMismatch() public {
+        // address allocator = makeAddr("allocator");
+        // deal(address(allo()), 1e18);
+
+        // address recipientId = __register_accept_recipient();
+
+        // vm.warp(allocationStartTime + 10);
+        // vm.expectRevert(QVSimpleStrategy.INVALID.selector);
+
+        // bytes memory allocateData = abi.encode(recipientId, 1e18, NATIVE);
+        // vm.prank(address(allo()));
+        // strategy.allocate{value: 1e17}(allocateData, allocator);
+    }
 
     function testRevert_updatePoolTimestamps_UNAUTHORIZED() public {
         vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);

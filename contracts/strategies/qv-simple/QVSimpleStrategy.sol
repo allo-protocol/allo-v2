@@ -73,6 +73,8 @@ contract QVSimpleStrategy is BaseStrategy {
     uint256 public allocationStartTime;
     uint256 public allocationEndTime;
 
+    /// @notice token -> bool
+    mapping(address => bool) public allowedTokens;
     // recipientId => Recipient
     mapping(address => Recipient) public recipients;
     // allocator address => Allocator

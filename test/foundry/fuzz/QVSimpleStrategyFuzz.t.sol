@@ -1,14 +1,14 @@
 pragma solidity 0.8.19;
 
 // Interfaces
-import {IAllo} from "../../contracts/core/IAllo.sol";
-import {IStrategy} from "../../contracts/strategies/IStrategy.sol";
+import {IAllo} from "../../../contracts/core/IAllo.sol";
+import {IStrategy} from "../../../contracts/strategies/IStrategy.sol";
 
 // Core/Strategies
-import {QVSimpleStrategy} from "../../contracts/strategies/qv-simple/QVSimpleStrategy.sol";
+import {QVSimpleStrategy} from "../../../contracts/strategies/qv-simple/QVSimpleStrategy.sol";
 
 // Internal Libraries
-import {Metadata} from "../../contracts/core/libraries/Metadata.sol";
+import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
 
 // Test Helpers
 import {RegistrySetupFull} from "../shared/RegistrySetup.sol";
@@ -34,24 +34,22 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup {
 
     bool public registryGating;
     bool public metadataRequired;
+    bool public initialized;
 
     uint256 public totalRecipientVotes;
     uint256 public maxVoiceCreditsPerAllocator;
+    uint256 public poolId;
 
     uint256 public registrationStartTime;
     uint256 public registrationEndTime;
     uint256 public allocationStartTime;
     uint256 public allocationEndTime;
 
-    QVSimpleStrategy public strategy;
-
+    address[] public allowedTokens;
     address public token;
 
+    QVSimpleStrategy public strategy;
     Metadata public poolMetadata;
-
-    uint256 public poolId;
-
-    bool public initialized;
 
     event Appealed(address indexed recipientId, bytes data, address sender);
     event Reviewed(address indexed recipientId, QVSimpleStrategy.InternalRecipientStatus status, address sender);
