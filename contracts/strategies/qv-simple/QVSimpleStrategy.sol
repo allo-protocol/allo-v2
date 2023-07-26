@@ -87,7 +87,7 @@ contract QVSimpleStrategy is BaseStrategy {
     /// ================================
 
     modifier onlyActiveRegistration() {
-        if (registrationStartTime <= block.timestamp && block.timestamp > registrationEndTime) {
+        if (registrationStartTime > block.timestamp || block.timestamp > registrationEndTime) {
             revert REGISTRATION_NOT_ACTIVE();
         }
         _;
@@ -120,7 +120,7 @@ contract QVSimpleStrategy is BaseStrategy {
     /// @notice Initialize the strategy
     /// @param _poolId The pool id
     /// @param _data The data
-    function initialize(uint256 _poolId, bytes memory _data) public virtual override {
+    function initialize(uint256 _poolId, bytes memory _data) public virtual override onlyAllo {
         (
             bool _registryGating,
             bool _metadataRequired,

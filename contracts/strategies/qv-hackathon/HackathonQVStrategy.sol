@@ -93,7 +93,7 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
     /// @dev Initializes the strategy
     /// @param _poolId The pool ID for this strategy
     /// @param _data The data to initialize the strategy with
-    function initialize(uint256 _poolId, bytes memory _data) public override {
+    function initialize(uint256 _poolId, bytes memory _data) public override onlyAllo {
         (EASInfo memory _easInfo, address _nft, bytes memory _qvSimpleInitData) =
             abi.decode(_data, (EASInfo, address, bytes));
 

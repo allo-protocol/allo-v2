@@ -105,7 +105,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup {
         //     0x0000000000000000000000000000000000000000000000000000000000000001, address(0), address(strategy)
         // );
 
-        vm.prank(pool_admin());
+        vm.prank(address(allo()));
         strategy.initialize(
             poolId,
             abi.encode(
@@ -119,7 +119,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup {
             )
         );
 
-        vm.prank(allo_owner());
+        vm.prank(pool_manager1());
         poolId = allo().createPoolWithCustomStrategy(
             alloIdentity_id(),
             address(strategy),
@@ -151,7 +151,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup {
         vm.assume(_registrationEndTime < _allocationStartTime);
         vm.assume(_allocationStartTime < _allocationEndTime);
 
-        vm.prank(pool_admin());
+        vm.prank(address(allo()));
         strategy.initialize(
             poolId,
             abi.encode(
