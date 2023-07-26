@@ -143,4 +143,12 @@ contract Accounts is StdCheats {
     function recipient2() public returns (address) {
         return makeAddr("recipient2");
     }
+
+    // //////////////////////
+    // Random adresses
+    // //////////////////////
+
+    function randomAddress() public returns (address) {
+        return makeAddr("random chad");
+    }
 }

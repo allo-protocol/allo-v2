@@ -87,7 +87,7 @@ contract QVSimpleStrategy is BaseStrategy {
     /// ================================
 
     modifier onlyActiveRegistration() {
-        if (registrationStartTime <= block.timestamp && registrationStartTime > registrationEndTime) {
+        if (registrationStartTime <= block.timestamp && block.timestamp > registrationEndTime) {
             revert REGISTRATION_NOT_ACTIVE();
         }
         _;
