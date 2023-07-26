@@ -570,7 +570,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
     }
 
     function testRevert_withdraw_NOT_ALLOWED_30days() public {
-        vm.warp(block.timestamp + 31 days);
+        vm.warp(allocationEndTime + 1 days);
 
         vm.expectRevert(DonationVotingStrategy.NOT_ALLOWED.selector);
         vm.prank(pool_admin());
