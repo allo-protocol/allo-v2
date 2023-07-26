@@ -447,13 +447,19 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
 
     // todo: what is this test testing?
     function testRevert_setPayout_RECIPIENT_ERROR() public {
-        __register_accept_setPayout_recipient();
+        address recipientId = __register_accept_setPayout_recipient();
 
         address sender = makeAddr("recipient");
         vm.expectRevert(abi.encodeWithSelector(DonationVotingStrategy.RECIPIENT_ERROR.selector, sender));
 
-        // set payout for same recipient should revert
-        __register_accept_setPayout_recipient();
+        address[] memory recipientIds = new address[](1);
+        recipientIds[0] = recipientId;
+
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = 9.9e17; // fund amount: 1e18 - fee: 1e17 = 9.9e17
+
+        vm.prank(pool_admin());
+        strategy.setPayout(recipientIds, amounts);
     }
 
     function testRevert_setPayout_INVALID_amountExceeded() public {
@@ -721,22 +727,21 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
     }
 
     function test_allocate() public {
-        // TODO: FIX ETH TRANSFER FAIL
-        // address recipientId = __register_accept_recipient();
+        address recipientId = __register_accept_recipient();
 
-        // vm.warp(allocationStartTime + 10);
+        vm.warp(allocationStartTime + 10);
 
-        // bytes memory allocateData = abi.encode(recipientId, 1e15, NATIVE);
+        bytes memory allocateData = abi.encode(recipientId, 1e15, NATIVE);
 
-        // address allocator = makeAddr("allocator");
-        // deal(allocator, 1e18);
-        // deal(address(allo()), 1e18);
+        address allocator = makeAddr("allocator");
+        deal(allocator, 1e18);
+        deal(address(allo()), 1e18);
 
-        // vm.expectEmit(true, false, false, true);
-        // emit Allocated(recipientId, 1e15, NATIVE, allocator);
+        vm.expectEmit(true, false, false, true);
+        emit Allocated(recipientId, 1e15, NATIVE, allocator);
 
-        // vm.prank(address(allo()));
-        // strategy.allocate{value: 1e15}(allocateData, allocator);
+        vm.prank(address(allo()));
+        strategy.allocate{value: 1e15}(allocateData, allocator);
     }
 
     function testRevert_allocate_ALLOCATION_NOT_ACTIVE() public {
