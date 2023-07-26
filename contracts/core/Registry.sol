@@ -1,12 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import "./IRegistry.sol";
+// External Libraries
 import {AccessControl} from "@openzeppelin/access/AccessControl.sol";
-import {Metadata} from "./libraries/Metadata.sol";
-import "./libraries/Transfer.sol";
-import "./libraries/Native.sol";
 import {ERC20} from "@solady/tokens/ERC20.sol";
+// Interfaces
+import "./IRegistry.sol";
+// Internal Libraries
+import {Metadata} from "./libraries/Metadata.sol";
+import "./libraries/Native.sol";
+import "./libraries/Transfer.sol";
 
 /// @title Registry
 /// @notice Registry contract for identities
@@ -266,7 +269,10 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
     /// @notice Transfer thefunds recovered  to the recipient
     /// @param _token The address of the token to transfer
     /// @param _recipient The address of the recipient
-    function recoverFunds(address _token, address _recipient) external onlyIdentityOwner(ALLO_OWNER) {
+    function recoverFunds(address _token, address _recipient) external onlyRole(ALLO_OWNER) {
+        if (_recipient == address(0)) {
+            revert ZERO_ADDRESS();
+        }
         uint256 amount = _token == NATIVE ? address(this).balance : ERC20(_token).balanceOf(address(this));
         _transferAmount(_token, _recipient, amount);
     }

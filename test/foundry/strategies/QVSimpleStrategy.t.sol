@@ -2,13 +2,14 @@ pragma solidity 0.8.19;
 
 import "forge-std/Test.sol";
 
-import {BaseStrategy} from "../../../../../contracts/strategies/BaseStrategy.sol";
-import {QVSimpleStrategy} from "../../../../../contracts/strategies/qv-simple/QVSimpleStrategy.sol";
-import {Metadata} from "../../../../../contracts/core/libraries/Metadata.sol";
-import {Allo} from "../../../../../contracts/core/Allo.sol";
-import {Registry} from "../../../../../contracts/core/Registry.sol";
+import {Accounts} from "../shared/Accounts.sol";
+import {RegistrySetupFull} from "../shared/RegistrySetup.sol";
+import {AlloSetup} from "../shared/AlloSetup.sol";
 
-contract QVSimpleStrategyTest is Test {
+import {QVSimpleStrategy} from "../../../contracts/strategies/qv-simple/QVSimpleStrategy.sol";
+import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
+
+contract QVSimpleStrategyTest is Test, Accounts, RegistrySetupFull, AlloSetup {
     error ALLOCATION_NOT_ACTIVE();
 
     enum InternalRecipientStatus {
@@ -44,31 +45,23 @@ contract QVSimpleStrategyTest is Test {
     uint256 public allocationStartTime;
     uint256 public allocationEndTime;
 
-    Allo public allo;
-    Registry public registry;
     QVSimpleStrategy public strategy;
-
-    address public alloOwner;
-    address public owner;
-    address public member1;
-    address public member2;
-    address[] public members;
-    address payable public treasury;
 
     address public token;
 
-    Metadata public metadata;
-    string public name;
-    uint256 public nonce;
+    Metadata public poolMetadata;
+
     uint256 public poolId;
 
-    bytes32 public identityId;
     bool public initialized;
 
     event Appealed(address indexed recipientId, bytes data, address sender);
     event Reviewed(address indexed recipientId, InternalRecipientStatus status, address sender);
 
     function setUp() public {
+        __RegistrySetupFull();
+        __AlloSetup(address(registry()));
+
         registrationStartTime = block.timestamp;
         registrationEndTime = block.timestamp + 300;
         allocationStartTime = block.timestamp + 301;
@@ -77,39 +70,16 @@ contract QVSimpleStrategyTest is Test {
         registryGating = false;
         metadataRequired = false;
 
-        alloOwner = 0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496;
-        owner = makeAddr("owner");
-
-        allo = new Allo();
-
-        member1 = makeAddr("member1");
-        member2 = makeAddr("member2");
-
-        metadata = Metadata({protocol: 1, pointer: "test metadata"});
-        name = "New Identity";
-        nonce = 2;
-
-        registry = new Registry(owner);
-        treasury = payable(makeAddr("treasury"));
-        allo.initialize(address(registry), treasury, 1e16, 0, 0);
-
-        members = new address[](3);
-        members[0] = member1;
-        members[1] = member2;
-
-        members[2] = owner;
-
-        allo.updateTreasury(treasury);
+        poolMetadata = Metadata({protocol: 1, pointer: "PoolMetadata"});
 
         // todo: setup strategy
-        strategy = new QVSimpleStrategy(address(allo), "QVSimpleStrategy");
+        strategy = new QVSimpleStrategy(address(allo()), "QVSimpleStrategy");
 
-        identityId = registry.createIdentity(nonce, name, metadata, owner, members);
         initialized = false;
 
-        vm.prank(owner);
-        poolId = allo.createPoolWithCustomStrategy(
-            identityId,
+        vm.prank(pool_admin());
+        poolId = allo().createPoolWithCustomStrategy(
+            poolIdentity_id(),
             address(strategy),
             abi.encode(
                 registryGating,
@@ -122,8 +92,8 @@ contract QVSimpleStrategyTest is Test {
             ),
             address(0),
             0,
-            metadata,
-            members
+            poolMetadata,
+            pool_managers()
         );
     }
 
@@ -183,7 +153,7 @@ contract QVSimpleStrategyTest is Test {
 
         bytes memory data = abi.encode(recipientId, voiceCreditsToAllocate);
 
-        allo.allocate(1, data);
+        allo().allocate(1, data);
     }
 
     function testRevert_allocate_UNAUTHORIZED() public {}

@@ -1,9 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
+// Interfaces
 import {IAllo} from "../../core/IAllo.sol";
 import {IRegistry} from "../../core/IRegistry.sol";
+// Core Contracts
 import {BaseStrategy} from "../BaseStrategy.sol";
+// Internal Libraries
 import {Metadata} from "../../core/libraries/Metadata.sol";
 
 contract QVSimpleStrategy is BaseStrategy {
@@ -24,7 +27,7 @@ contract QVSimpleStrategy is BaseStrategy {
     /// ======================
 
     event Appealed(address indexed recipientId, bytes data, address sender);
-    event Reviewed(address indexed recipientId, InternalRecipientStatus status, address sender);
+    event RecipientStatusUpdated(address indexed recipientId, InternalRecipientStatus status, address sender);
     event TimestampsUpdated(
         uint256 registrationStartTime,
         uint256 registrationEndTime,
@@ -117,7 +120,7 @@ contract QVSimpleStrategy is BaseStrategy {
     /// @notice Initialize the strategy
     /// @param _poolId The pool id
     /// @param _data The data
-    function initialize(uint256 _poolId, bytes memory _data) public override {
+    function initialize(uint256 _poolId, bytes memory _data) public virtual override {
         (
             bool _registryGating,
             bool _metadataRequired,
@@ -158,6 +161,7 @@ contract QVSimpleStrategy is BaseStrategy {
         if (
             block.timestamp > _registrationStartTime || _registrationStartTime > _registrationEndTime
                 || _registrationStartTime > _allocationStartTime || _allocationStartTime > _allocationEndTime
+                || _registrationEndTime > _allocationEndTime
         ) {
             revert INVALID();
         }
@@ -203,7 +207,7 @@ contract QVSimpleStrategy is BaseStrategy {
     /// @notice Checks if the allocator is valid
     /// @param _allocator The allocator address
     /// @return true if the allocator is valid
-    function isValidAllocator(address _allocator) external view returns (bool) {
+    function isValidAllocator(address _allocator) external view virtual returns (bool) {
         return allowedAllocators[_allocator];
     }
 
@@ -216,6 +220,7 @@ contract QVSimpleStrategy is BaseStrategy {
     /// @param _recipientStatuses Statuses of the recipients
     function reviewRecipients(address[] calldata _recipientIds, InternalRecipientStatus[] calldata _recipientStatuses)
         external
+        virtual
         onlyPoolManager(msg.sender)
         onlyActiveRegistration
     {
@@ -236,7 +241,7 @@ contract QVSimpleStrategy is BaseStrategy {
 
             recipient.recipientStatus = recipientStatus;
 
-            emit Reviewed(recipientId, recipientStatus, msg.sender);
+            emit RecipientStatusUpdated(recipientId, recipientStatus, msg.sender);
 
             unchecked {
                 i++;
@@ -288,7 +293,7 @@ contract QVSimpleStrategy is BaseStrategy {
         if (
             _registrationStartTime > registrationStartTime || block.timestamp > _registrationStartTime
                 || _registrationStartTime > _registrationEndTime || _registrationStartTime > _allocationStartTime
-                || _allocationStartTime > _allocationEndTime
+                || _allocationStartTime > _allocationEndTime || _registrationEndTime > _allocationEndTime
         ) {
             revert INVALID();
         }
@@ -312,6 +317,7 @@ contract QVSimpleStrategy is BaseStrategy {
     /// @param _sender The sender of the transaction
     function _registerRecipient(bytes memory _data, address _sender)
         internal
+        virtual
         override
         onlyActiveRegistration
         returns (address recipientId)
@@ -363,11 +369,11 @@ contract QVSimpleStrategy is BaseStrategy {
     /// @param _data The data
     /// @param _sender The sender of the transaction
     /// @dev Only the pool manager(s) can call this function
-    function _allocate(bytes memory _data, address _sender) internal override {
+    function _allocate(bytes memory _data, address _sender) internal virtual override {
         (address recipientId, uint256 voiceCreditsToAllocate) = abi.decode(_data, (address, uint256));
 
         // check the voiceCreditsToAllocate is > 0
-        if (voiceCreditsToAllocate <= 0) {
+        if (voiceCreditsToAllocate == 0) {
             revert INVALID();
         }
 
@@ -401,7 +407,7 @@ contract QVSimpleStrategy is BaseStrategy {
         allocator.voiceCreditsCastToRecipient[recipientId] += totalCredits;
         allocator.votesCastToRecipient[recipientId] += voteResult;
 
-        emit Allocated(_sender, voteResult, address(0), msg.sender);
+        emit Allocated(recipientId, voteResult, address(0), _sender);
     }
 
     /// @notice Distribute the tokens to the recipients
@@ -421,7 +427,7 @@ contract QVSimpleStrategy is BaseStrategy {
             address recipientId = _recipientIds[i];
             Recipient storage recipient = recipients[recipientId];
 
-            if (recipient.recipientStatus != InternalRecipientStatus.Accepted) {
+            if (paidOut[recipientId] || recipient.recipientStatus != InternalRecipientStatus.Accepted) {
                 revert RECIPIENT_ERROR(recipientId);
             }
 

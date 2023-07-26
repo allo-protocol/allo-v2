@@ -1,12 +1,16 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
+// External Libraries
+import {ReentrancyGuard} from "@openzeppelin/security/ReentrancyGuard.sol";
+// Interfaces
 import {IAllo} from "../../core/IAllo.sol";
 import {IRegistry} from "../../core/IRegistry.sol";
+// Core Contracts
 import {BaseStrategy} from "../BaseStrategy.sol";
+// Internal Libraries
 import {Metadata} from "../../core/libraries/Metadata.sol";
 import {Native} from "../../core/libraries/Native.sol";
-import {ReentrancyGuard} from "@openzeppelin/security/ReentrancyGuard.sol";
 
 contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     /// ================================
@@ -48,20 +52,29 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     error INVALID();
     error DISTRIBUTION_STARTED();
     error NOT_ALLOWED();
+    error INVALID_METADATA();
 
     /// ===============================
     /// ========== Events =============
     /// ===============================
 
     event Appealed(address indexed recipientId, bytes data, address sender);
-    event Reviewed(address indexed recipientId, InternalRecipientStatus recipientStatus, address sender);
+    event RecipientStatusUpdated(address indexed recipientId, InternalRecipientStatus recipientStatus, address sender);
     event Claimed(address indexed recipientId, address recipientAddress, uint256 amount, address token);
+    event TimestampsUpdated(
+        uint256 registrationStartTime,
+        uint256 registrationEndTime,
+        uint256 allocationStartTime,
+        uint256 allocationEndTime,
+        address sender
+    );
 
     /// ================================
     /// ========== Storage =============
     /// ================================
 
     bool public registryGating;
+    bool public metadataRequired;
     bool public distributionStarted;
     uint256 public registrationStartTime;
     uint256 public registrationEndTime;
@@ -116,15 +129,17 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     function initialize(uint256 _poolId, bytes memory _data) public virtual override {
         (
             bool _registryGating,
+            bool _metadataRequired,
             uint256 _registrationStartTime,
             uint256 _registrationEndTime,
             uint256 _allocationStartTime,
             uint256 _allocationEndTime,
             address[] memory _allowedTokens
-        ) = abi.decode(_data, (bool, uint256, uint256, uint256, uint256, address[]));
+        ) = abi.decode(_data, (bool, bool, uint256, uint256, uint256, uint256, address[]));
         __DonationVotingStrategy_init(
             _poolId,
             _registryGating,
+            _metadataRequired,
             _registrationStartTime,
             _registrationEndTime,
             _allocationStartTime,
@@ -136,6 +151,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     function __DonationVotingStrategy_init(
         uint256 _poolId,
         bool _registryGating,
+        bool _metadataRequired,
         uint256 _registrationStartTime,
         uint256 _registrationEndTime,
         uint256 _allocationStartTime,
@@ -144,10 +160,12 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     ) internal {
         __BaseStrategy_init(_poolId);
         registryGating = _registryGating;
+        metadataRequired = _metadataRequired;
 
         if (
             block.timestamp > _registrationStartTime || _registrationStartTime > _registrationEndTime
                 || _registrationStartTime > _allocationStartTime || _allocationStartTime > _allocationEndTime
+                || _registrationEndTime > _allocationEndTime
         ) {
             revert INVALID();
         }
@@ -156,6 +174,10 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
         registrationEndTime = _registrationEndTime;
         allocationStartTime = _allocationStartTime;
         allocationEndTime = _allocationEndTime;
+
+        emit TimestampsUpdated(
+            registrationStartTime, registrationEndTime, allocationStartTime, allocationEndTime, msg.sender
+        );
 
         uint256 allowedTokensLength = _allowedTokens.length;
 
@@ -248,7 +270,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
 
             recipient.recipientStatus = recipientStatus;
 
-            emit Reviewed(recipientId, recipientStatus, msg.sender);
+            emit RecipientStatusUpdated(recipientId, recipientStatus, msg.sender);
 
             unchecked {
                 i++;
@@ -314,6 +336,35 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
         }
     }
 
+    /// @notice Set the start and end dates for the pool
+    /// @param _registrationStartTime The start time for the registration
+    /// @param _registrationEndTime The end time for the registration
+    /// @param _allocationStartTime The start time for the allocation
+    /// @param _allocationEndTime The end time for the allocation
+    function updatePoolTimestamps(
+        uint256 _registrationStartTime,
+        uint256 _registrationEndTime,
+        uint256 _allocationStartTime,
+        uint256 _allocationEndTime
+    ) external onlyPoolManager(msg.sender) {
+        if (
+            _registrationStartTime > registrationStartTime || block.timestamp > _registrationStartTime
+                || _registrationStartTime > _registrationEndTime || _registrationStartTime > _allocationStartTime
+                || _allocationStartTime > _allocationEndTime || _registrationEndTime > _allocationEndTime
+        ) {
+            revert INVALID();
+        }
+
+        registrationStartTime = _registrationStartTime;
+        registrationEndTime = _registrationEndTime;
+        allocationStartTime = _allocationStartTime;
+        allocationEndTime = _allocationEndTime;
+
+        emit TimestampsUpdated(
+            registrationStartTime, registrationEndTime, allocationStartTime, allocationEndTime, msg.sender
+        );
+    }
+
     /// @notice Withdraw funds from pool
     /// @param _amount The amount to be withdrawn
     function withdraw(uint256 _amount) external onlyPoolManager(msg.sender) {
@@ -374,6 +425,9 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
 
         if (recipientAddress == address(0)) {
             revert RECIPIENT_ERROR(recipientId);
+        }
+        if (metadataRequired && (bytes(metadata.pointer).length == 0 || metadata.protocol == 0)) {
+            revert INVALID_METADATA();
         }
 
         Recipient storage recipient = _recipients[recipientId];
