@@ -323,6 +323,10 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
             Recipient memory recipient = _recipients[singleClaim.recipientId];
             uint256 amount = claims[singleClaim.recipientId][singleClaim.token];
 
+            if (amount == 0) {
+                revert INVALID();
+            }
+
             claims[singleClaim.recipientId][singleClaim.token] = 0;
 
             address token = singleClaim.token;
@@ -370,8 +374,6 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
         if (pool.amount - totalPayoutAmount < _amount) {
             revert NOT_ALLOWED();
         }
-
-        // TODO: FIX pool manager can steal funds from vault
 
         allo.decreasePoolTotalFunding(poolId, _amount);
         _transferAmount(pool.token, msg.sender, _amount);
@@ -503,6 +505,11 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
             }
 
             uint256 amount = payoutSummaries[recipientId].amount;
+            payoutSummaries[recipientId].amount = 0;
+
+            if (amount == 0) {
+                revert INVALID();
+            }
 
             IAllo.Pool memory pool = allo.getPool(poolId);
             _transferAmount(pool.token, recipient.recipientAddress, amount);
