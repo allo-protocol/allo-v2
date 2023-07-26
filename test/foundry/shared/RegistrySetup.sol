@@ -43,14 +43,12 @@ contract RegistrySetupFull is RegistrySetup {
         _alloIdentityId_ = _registry_.createIdentity(
             0, "Allo Identity", Metadata({protocol: 1, pointer: "AlloIdentity"}), allo_owner(), pool_managers()
         );
-
         _alloIdentityAnchor_ = _registry_.getIdentityById(_alloIdentityId_).anchor;
 
         vm.prank(pool_admin());
         _poolIdentityId_ = _registry_.createIdentity(
             0, "Pool Identity 1", Metadata({protocol: 1, pointer: "PoolIdentity1"}), pool_admin(), pool_managers()
         );
-
         _poolIdentityAnchor_ = _registry_.getIdentityById(_poolIdentityId_).anchor;
 
         vm.prank(identity1_owner());

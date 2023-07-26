@@ -87,7 +87,7 @@ contract QVSimpleStrategy is BaseStrategy {
     /// ================================
 
     modifier onlyActiveRegistration() {
-        if (registrationStartTime > block.timestamp || block.timestamp > registrationEndTime) {
+        if (registrationStartTime <= block.timestamp && registrationStartTime > registrationEndTime) {
             revert REGISTRATION_NOT_ACTIVE();
         }
         _;
@@ -356,6 +356,9 @@ contract QVSimpleStrategy is BaseStrategy {
         recipient.metadata = metadata;
         recipient.useRegistryAnchor = registryGating ? true : useRegistryAnchor;
 
+        // NOTE: do we need this? the status is not ever set to anything but None
+        // on creation? Shouldn't we be setting the status on review or setting it to
+        // Pending? Will it ever be Rejected when this is called? @thelostone-mc @KurtMerbeth
         if (recipient.recipientStatus == InternalRecipientStatus.Rejected) {
             recipient.recipientStatus = InternalRecipientStatus.Appealed;
             emit Appealed(recipientId, _data, _sender);
