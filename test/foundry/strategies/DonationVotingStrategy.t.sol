@@ -302,12 +302,12 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
 
     function test_getPayouts() public {
         address recipientId = __register_accept_setPayout_recipient();
-        address[] recipients = new address[](1);
+        address[] memory recipients = new address[](1);
         recipients[0] = recipientId;
 
         IStrategy.PayoutSummary[] memory payouts = strategy.getPayouts(recipients, "", address(0));
-        assertEq(payouts[0].amount, 1e17);
-        assertEq(paouts[0].recipientAddress, makeAddr(string(abi.encodePacked("recipientAddress", recipientId))));
+        assertEq(payouts[0].amount, 9.9e17);
+        assertEq(payouts[0].recipientAddress, makeAddr(string(abi.encodePacked("recipientAddress"))));
     }
 
     function test_isValidAllocator() public {
@@ -397,10 +397,11 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         recipientIds[0] = recipientId;
 
         uint256[] memory amounts = new uint256[](1);
-        amounts[0] = 1e18;
+        amounts[0] = 9.9e17; // 1e17 pool amount - 1e17 fee
 
+        vm.warp(allocationEndTime + 10);
         // fund pool
-        allo().fundPool(poolId, 1e18, NATIVE);
+        allo().fundPool{value: 1e18}(poolId, 1e18, NATIVE);
 
         vm.prank(pool_admin());
 
@@ -444,6 +445,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         strategy.setPayout(new address[](1), new uint256[](2));
     }
 
+    // todo: what is this test testing?
     function testRevert_setPayout_RECIPIENT_ERROR() public {
         __register_accept_setPayout_recipient();
 
@@ -817,7 +819,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         internal
         returns (bytes memory)
     {
-        address recipientAddress = makeAddr(string(abi.encodePacked("recipientAddress", _recipientId)));
+        address recipientAddress = makeAddr(string(abi.encodePacked("recipientAddress")));
         Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
 
         return abi.encode(recipientAddress, _isUsingRegistryAnchor, metadata);
@@ -878,10 +880,12 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         recipientIds[0] = recipientId;
 
         uint256[] memory amounts = new uint256[](1);
-        amounts[0] = 2 * 1e18;
+        amounts[0] = 9.9e17; // fund amount: 1e18 - fee: 1e17 = 9.9e17
 
         // fund pool
         allo().fundPool{value: 1e18}(poolId, 1e18, NATIVE);
+
+        vm.warp(allocationEndTime + 10);
 
         vm.prank(pool_admin());
         strategy.setPayout(recipientIds, amounts);

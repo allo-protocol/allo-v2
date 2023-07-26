@@ -528,4 +528,6 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     function _getRecipient(address _recipientId) internal view returns (Recipient memory) {
         return _recipients[_recipientId];
     }
+
+    receive() external payable {}
 }
