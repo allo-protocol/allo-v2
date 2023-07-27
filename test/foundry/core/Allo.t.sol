@@ -15,6 +15,7 @@ import {Native} from "../../../contracts/core/libraries/Native.sol";
 import {AlloSetup} from "../shared/AlloSetup.sol";
 import {RegistrySetupFull} from "../shared/RegistrySetup.sol";
 import {TestUtilities} from "../utils/TestUtilities.sol";
+import {BadStrategy} from "../utils/BadStrategy.sol";
 import {MockStrategy} from "../utils/MockStrategy.sol";
 import {MockToken} from "../utils/MockToken.sol";
 
@@ -144,11 +145,25 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
     }
 
     function testRevert_createPool_poolId_MISMATCH() public {
-        // TODO
+        BadStrategy badStrategy = new BadStrategy();
+        badStrategy.setPoolId(0);
+
+        vm.expectRevert(IAllo.MISMATCH.selector);
+        vm.prank(pool_admin());
+        allo().createPoolWithCustomStrategy(
+            poolIdentity_id(), address(badStrategy), "0x", NATIVE, 0, metadata, pool_managers()
+        );
     }
 
     function testRevert_createPool_allo_MISMATCH() public {
-        // TODO
+        BadStrategy badStrategy = new BadStrategy();
+        badStrategy.setAllo(address(0));
+
+        vm.expectRevert(IAllo.MISMATCH.selector);
+        vm.prank(pool_admin());
+        allo().createPoolWithCustomStrategy(
+            poolIdentity_id(), address(badStrategy), "0x", NATIVE, 0, metadata, pool_managers()
+        );
     }
 
     function testRevert_createPool_ZERO_ADDRESS() public {
