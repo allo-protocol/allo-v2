@@ -183,7 +183,7 @@ contract QVGovernanceERC20Votes is QVSimpleStrategy {
         uint256 voteResult = _calculateVotes(totalCredits * 1e18);
         voteResult -= votesCastToRecipient;
         totalRecipientVotes += voteResult;
-        recipient.totalVotes += voteResult;
+        recipient.totalVotesReceived += voteResult;
 
         allocator.voiceCreditsCastToRecipient[recipientId] += totalCredits;
         allocator.votesCastToRecipient[recipientId] += voteResult;

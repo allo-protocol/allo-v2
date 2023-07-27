@@ -36,6 +36,7 @@ contract QVSimpleStrategy is BaseStrategy {
         address sender
     );
     event PayoutSet(bytes recipientIds);
+    event Allocated(address indexed recipientId, uint256 votes, address allocator);
 
     /// ======================
     /// ======= Storage ======
@@ -54,7 +55,8 @@ contract QVSimpleStrategy is BaseStrategy {
         address recipientAddress;
         Metadata metadata;
         InternalRecipientStatus recipientStatus;
-        uint256 totalVotes;
+        uint256 totalVotesReceived;
+        uint256 approvals; // This requires two approvals to be accepted
     }
 
     struct Allocator {
@@ -217,9 +219,39 @@ contract QVSimpleStrategy is BaseStrategy {
         return allowedAllocators[_allocator];
     }
 
+    /// @notice Returns status of the pool
+    function _isPoolActive() internal view override returns (bool) {
+        if (registrationStartTime <= block.timestamp && block.timestamp <= registrationEndTime) {
+            return true;
+        }
+        return false;
+    }
+
     /// ====================================
     /// ==== External/Public Functions =====
     /// ====================================
+
+    /// @notice Add allocator
+    /// @param _allocator The allocator address
+    function addAllocator(address _allocator) external onlyPoolManager(msg.sender) {
+        allowedAllocators[_allocator] = true;
+    }
+
+    /// @notice Remove allocator
+    /// @param _allocator The allocator address
+    function removeAllocator(address _allocator) external onlyPoolManager(msg.sender) {
+        allowedAllocators[_allocator] = false;
+    }
+
+    /// @notice Add voice credits to allocator
+    function addVoiceCredits(address _allocator, uint256 _voiceCreditsToAllocate)
+        external
+        onlyPoolManager(msg.sender)
+        onlyActiveAllocation
+    {
+        Allocator storage allocator = allocators[_allocator];
+        allocator.voiceCredits += _voiceCreditsToAllocate;
+    }
 
     /// @notice Review recipient application
     /// @param _recipientIds Ids of the recipients
@@ -247,6 +279,10 @@ contract QVSimpleStrategy is BaseStrategy {
 
             recipient.recipientStatus = recipientStatus;
 
+            if (recipientStatus == InternalRecipientStatus.Accepted) {
+                recipient.approvals += 1;
+            }
+
             emit RecipientStatusUpdated(recipientId, recipientStatus, msg.sender);
 
             unchecked {
@@ -273,7 +309,8 @@ contract QVSimpleStrategy is BaseStrategy {
             Recipient memory recipient = recipients[recipientId];
 
             // Calculate the payout amount based on the percentage of total votes
-            uint256 amount = paidOut[recipientId] ? 0 : (poolAmount * recipient.totalVotes / totalRecipientVotes);
+            uint256 amount =
+                paidOut[recipientId] ? 0 : (poolAmount * recipient.totalVotesReceived / totalRecipientVotes);
 
             payouts[i] = PayoutSummary(recipient.recipientAddress, amount);
 
@@ -285,6 +322,9 @@ contract QVSimpleStrategy is BaseStrategy {
         return payouts;
     }
 
+    /// @notice Set the payouts for the recipients
+    /// @param _recipientIds The recipient ids
+    /// @param _amounts The amounts
     function setPayout(address[] memory _recipientIds, uint256[] memory _amounts)
         external
         onlyPoolManager(msg.sender)
@@ -439,6 +479,10 @@ contract QVSimpleStrategy is BaseStrategy {
         Recipient storage recipient = recipients[recipientId];
         Allocator storage allocator = allocators[_sender];
 
+        if (recipient.recipientStatus != InternalRecipientStatus.Accepted) {
+            revert RECIPIENT_ERROR(recipientId);
+        }
+
         if (voiceCreditsToAllocate + allocator.voiceCredits > maxVoiceCreditsPerAllocator) {
             revert INVALID();
         }
@@ -450,12 +494,12 @@ contract QVSimpleStrategy is BaseStrategy {
         uint256 voteResult = _calculateVotes(totalCredits * 1e18);
         voteResult -= votesCastToRecipient;
         totalRecipientVotes += voteResult;
-        recipient.totalVotes += voteResult;
+        recipient.totalVotesReceived += voteResult;
 
         allocator.voiceCreditsCastToRecipient[recipientId] += totalCredits;
         allocator.votesCastToRecipient[recipientId] += voteResult;
 
-        emit Allocated(recipientId, voteResult, address(0), _sender);
+        emit Allocated(recipientId, voteResult, _sender);
     }
 
     /// @notice Distribute the tokens to the recipients

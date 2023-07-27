@@ -294,7 +294,7 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
         uint256 voteResult = _calculateVotes(totalCredits * 1e18);
         voteResult -= votesCastToRecipient;
         totalRecipientVotes += voteResult;
-        recipient.totalVotes += voteResult;
+        recipient.totalVotesReceived += voteResult;
 
         allocator.voiceCreditsCastToRecipient[recipientId] += totalCredits;
         allocator.votesCastToRecipient[recipientId] += voteResult;
@@ -305,7 +305,7 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
 
         uint256 totalWinners = payoutPercentages.length;
 
-        if (recipient.totalVotes > votesByRank[totalWinners - 1]) {
+        if (recipient.totalVotesReceived > votesByRank[totalWinners - 1]) {
             for (uint256 i = 0; i < totalWinners;) {
                 // if a new winner was added, push the rest of the list by 1
                 if (tmp.foundRecipientAtIndex > 0 && tmp.recipientId != address(0)) {
@@ -334,14 +334,14 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
                 }
 
                 // if recipient is in winner list add him and store the temp values to push the rest of the list by 1 in the next loop
-                if (tmp.foundRecipientAtIndex == 0 && recipient.totalVotes > votesByRank[i]) {
+                if (tmp.foundRecipientAtIndex == 0 && recipient.totalVotesReceived > votesByRank[i]) {
                     tmp.foundRecipientAtIndex = i;
                     // store the previous winner at index i in tmp variables
                     tmp.voteRank = votesByRank[i];
                     tmp.recipientId = indexToRecipientId[i];
 
                     // update winner at index i to recipient
-                    votesByRank[i] = recipient.totalVotes;
+                    votesByRank[i] = recipient.totalVotesReceived;
                     indexToRecipientId[i] = recipientId;
 
                     recipientIdToIndex[recipientId] = i;
