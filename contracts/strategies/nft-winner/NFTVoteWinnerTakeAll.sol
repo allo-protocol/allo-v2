@@ -146,18 +146,17 @@ contract NFTVoteWinnerTakeAll is BaseStrategy {
             revert AllocationHasntEnded();
         }
 
-        IAllo.Pool memory pool = allo.getPool(poolId);
-        uint256 amountToDistribute = pool.amount;
-
-        if (amountToDistribute == 0) {
+        if (poolAmount == 0) {
             revert ZERO_AMOUNT();
         }
+        IAllo.Pool memory pool = allo.getPool(poolId);
 
-        allo.decreasePoolTotalFunding(poolId, amountToDistribute);
-        _transferAmount(pool.token, currentWinner, amountToDistribute);
+        poolAmount = 0;
+
+        _transferAmount(pool.token, currentWinner, poolAmount);
 
         _setPoolActive(false);
 
-        emit Distributed(currentWinner, currentWinner, amountToDistribute, _sender);
+        emit Distributed(currentWinner, currentWinner, poolAmount, _sender);
     }
 }

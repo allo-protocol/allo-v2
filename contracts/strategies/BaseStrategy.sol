@@ -18,6 +18,7 @@ abstract contract BaseStrategy is IStrategy, Transfer {
     IAllo internal immutable allo;
     uint256 internal poolId;
     bytes32 internal strategyId;
+    uint256 internal poolAmount;
     bool internal poolActive;
 
     /// ====================================
@@ -81,7 +82,11 @@ abstract contract BaseStrategy is IStrategy, Transfer {
         return strategyId;
     }
 
-    function isPoolActive() external virtual override returns (bool) {
+    function getPoolAmount() external view virtual override returns (uint256) {
+        return poolAmount;
+    }
+
+    function isPoolActive() external override returns (bool) {
         return _isPoolActive();
     }
 
@@ -99,20 +104,8 @@ abstract contract BaseStrategy is IStrategy, Transfer {
         poolId = _poolId;
     }
 
-    function skim(address _token) external virtual override {
-        IAllo.Pool memory pool = allo.getPool(poolId);
-        uint256 balanceCapturedInPool = (pool.token == _token) ? pool.amount : 0;
-
-        uint256 balanceInStrategy = _token == NATIVE ? address(this).balance : IERC20(_token).balanceOf(address(this));
-
-        if (balanceInStrategy > balanceCapturedInPool) {
-            uint256 excessFunds = balanceInStrategy - balanceCapturedInPool;
-            uint256 bounty = (excessFunds * allo.getFeeSkirtingBountyPercentage()) / allo.FEE_DENOMINATOR();
-            excessFunds -= bounty;
-            _transferAmount(_token, allo.getTreasury(), excessFunds);
-            _transferAmount(_token, msg.sender, bounty);
-            emit Skim(msg.sender, _token, excessFunds, bounty);
-        }
+    function increasePoolAmount(uint256 _amount) external override onlyAllo {
+        poolAmount += _amount;
     }
 
     function registerRecipient(bytes memory _data, address _sender)

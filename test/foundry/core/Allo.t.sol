@@ -3,12 +3,14 @@ pragma solidity 0.8.19;
 import "forge-std/Test.sol";
 
 // Interfaces
+import {IAllo} from "../../../contracts/core/IAllo.sol";
 import {IStrategy} from "../../../contracts/strategies/IStrategy.sol";
 // Core contracts
 import {Allo} from "../../../contracts/core/Allo.sol";
 import {Registry} from "../../../contracts/core/Registry.sol";
 // Internal Libraries
 import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
+import {Native} from "../../../contracts/core/libraries/Native.sol";
 // Test libraries
 import {AlloSetup} from "../shared/AlloSetup.sol";
 import {RegistrySetupFull} from "../shared/RegistrySetup.sol";
@@ -16,7 +18,7 @@ import {TestUtilities} from "../utils/TestUtilities.sol";
 import {MockStrategy} from "../utils/MockStrategy.sol";
 import {MockToken} from "../utils/MockToken.sol";
 
-contract AlloTest is Test, AlloSetup, RegistrySetupFull {
+contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
     event PoolCreated(
         uint256 indexed poolId,
         bytes32 indexed identityId,
@@ -46,8 +48,6 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull {
     string public name;
     uint256 public nonce;
 
-    bytes32 public identityId;
-
     function setUp() public {
         __RegistrySetupFull();
         __AlloSetup(address(registry()));
@@ -67,7 +67,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull {
     function _utilCreatePool(uint256 _amount) internal returns (uint256) {
         vm.prank(pool_admin());
         return allo().createPoolWithCustomStrategy(
-            identityId, strategy, "0x", address(token), _amount, metadata, pool_managers()
+            poolIdentity_id(), strategy, "0x", address(token), _amount, metadata, pool_managers()
         );
     }
 
@@ -84,15 +84,13 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull {
             address(registry()), // _registry
             allo_treasury(), // _treasury
             1e16, // _feePercentage
-            1e15, // _baseFee
-            1e14 // _feeSkirtingBountyPercentage
+            1e15 // _baseFee
         );
 
         assertEq(address(coreContract.getRegistry()), address(registry()));
         assertEq(coreContract.getTreasury(), allo_treasury());
         assertEq(coreContract.getFeePercentage(), 1e16);
         assertEq(coreContract.getBaseFee(), 1e15);
-        assertEq(coreContract.getFeeSkirtingBountyPercentage(), 1e14);
     }
 
     function testRevert_initialize_ALREADY_INITIALIZED() public {
@@ -102,236 +100,100 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull {
             address(registry()), // _registry
             allo_treasury(), // _treasury
             1e16, // _feePercentage
-            1e15, // _baseFee
-            1e14 // _feeSkirtingBountyPercentage
+            1e15 // _baseFee
         );
     }
 
-    // function test_createPoolWithCloneWithApprovedAllocationStrategy() public {
-    //     vm.prank(alloOwner);
-    //     allo.addToApprovedStrategies(allocationStrategy);
+    function test_createPool() public {
+        allo().addToApprovedStrategies(strategy);
 
-    //     vm.expectEmit(true, true, false, false);
-    //     emit PoolCreated(
-    //         1,
-    //         identityId,
-    //         IAllocationStrategy(allocationStrategy),
-    //         IDistributionStrategy(distributionStrategy),
-    //         address(token),
-    //         0,
-    //         metadata
-    //     );
+        vm.expectEmit(true, true, false, false);
+        emit PoolCreated(1, poolIdentity_id(), IStrategy(strategy), NATIVE, 0, metadata);
 
-    //     vm.prank(owner);
-    //     uint256 poolId = allo.createPoolWithClone(
-    //         identityId,
-    //         allocationStrategy,
-    //         "0x",
-    //         true,
-    //         payable(distributionStrategy),
-    //         "0x",
-    //         false,
-    //         address(token),
-    //         0,
-    //         metadata,
-    //         members
-    //     );
+        vm.prank(pool_admin());
+        uint256 poolId = allo().createPool(poolIdentity_id(), strategy, "0x", NATIVE, 0, metadata, pool_managers());
 
-    //     assertEq(_utilGetPoolInfo(poolId).identityId, identityId);
-    //     assertEq(address(_utilGetPoolInfo(poolId).distributionStrategy), distributionStrategy);
-    //     assertNotEq(address(_utilGetPoolInfo(poolId).allocationStrategy), allocationStrategy);
-    // }
+        IAllo.Pool memory pool = allo().getPool(poolId);
 
-    // function test_createPoolWithCloneWithApprovedDistributionStrategy() public {
-    //     vm.prank(alloOwner);
-    //     allo.addToApprovedStrategies(distributionStrategy);
+        assertEq(pool.identityId, poolIdentity_id());
+        assertNotEq(address(pool.strategy), address(strategy));
+    }
 
-    //     vm.expectEmit(true, true, false, false);
-    //     emit PoolCreated(
-    //         1,
-    //         identityId,
-    //         IAllocationStrategy(allocationStrategy),
-    //         IDistributionStrategy(distributionStrategy),
-    //         address(token),
-    //         0,
-    //         metadata
-    //     );
+    function testRevert_createPool_NOT_APPROVED_STRATEGY() public {
+        vm.expectRevert(IAllo.NOT_APPROVED_STRATEGY.selector);
+        vm.prank(pool_admin());
+        allo().createPool(poolIdentity_id(), strategy, "0x", NATIVE, 0, metadata, pool_managers());
+    }
 
-    //     vm.prank(owner);
-    //     uint256 poolId = allo.createPoolWithClone(
-    //         identityId,
-    //         allocationStrategy,
-    //         "0x",
-    //         false,
-    //         payable(distributionStrategy),
-    //         "0x",
-    //         true,
-    //         address(token),
-    //         0,
-    //         metadata,
-    //         members
-    //     );
+    function testRevert_createPoolWithCustomStrategy_ZERO_ADDRESS() public {
+        vm.expectRevert(IAllo.ZERO_ADDRESS.selector);
+        vm.prank(pool_admin());
+        allo().createPoolWithCustomStrategy(poolIdentity_id(), address(0), "0x", NATIVE, 0, metadata, pool_managers());
+    }
 
-    //     assertEq(_utilGetPoolInfo(poolId).identityId, identityId);
-    //     assertNotEq(address(_utilGetPoolInfo(poolId).distributionStrategy), distributionStrategy);
-    //     assertEq(address(_utilGetPoolInfo(poolId).allocationStrategy), allocationStrategy);
-    // }
+    function testRevert_createPoolWithCustomStrategy_IS_APPROVED_STRATEGY() public {
+        allo().addToApprovedStrategies(strategy);
+        vm.expectRevert(IAllo.IS_APPROVED_STRATEGY.selector);
+        vm.prank(pool_admin());
+        allo().createPoolWithCustomStrategy(poolIdentity_id(), strategy, "0x", NATIVE, 0, metadata, pool_managers());
+    }
 
-    // function test_createPoolWithCloneWithoutApprovedStrategies() public {
-    //     vm.expectEmit(true, true, false, true);
-    //     emit PoolCreated(
-    //         1,
-    //         identityId,
-    //         IAllocationStrategy(allocationStrategy),
-    //         IDistributionStrategy(distributionStrategy),
-    //         address(token),
-    //         0,
-    //         metadata
-    //     );
+    function testRevert_createPool_UNAUTHORIZED() public {
+        vm.expectRevert(IAllo.UNAUTHORIZED.selector);
+        allo().createPoolWithCustomStrategy(poolIdentity_id(), strategy, "0x", NATIVE, 0, metadata, pool_managers());
+    }
 
-    //     vm.prank(owner);
-    //     uint256 poolId = allo.createPoolWithClone(
-    //         identityId,
-    //         allocationStrategy,
-    //         "0x",
-    //         false,
-    //         payable(distributionStrategy),
-    //         "0x",
-    //         false,
-    //         address(token),
-    //         0,
-    //         metadata,
-    //         members
-    //     );
+    function testRevert_createPool_poolId_MISMATCH() public {
+        // TODO
+    }
 
-    //     assertEq(_utilGetPoolInfo(poolId).identityId, identityId);
-    //     assertEq(address(_utilGetPoolInfo(poolId).distributionStrategy), distributionStrategy);
-    //     assertEq(address(_utilGetPoolInfo(poolId).allocationStrategy), allocationStrategy);
-    // }
+    function testRevert_createPool_allo_MISMATCH() public {
+        // TODO
+    }
 
-    // function testRevert_createPoolWithCloneWithUnapprovedAllocationStrategy_NOT_APPROVED_STRATEGY() public {
-    //     vm.expectRevert(Allo.NOT_APPROVED_STRATEGY.selector);
+    function testRevert_createPool_ZERO_ADDRESS() public {
+        address[] memory poolManagers = new address[](1);
+        poolManagers[0] = address(0);
+        vm.expectRevert(IAllo.ZERO_ADDRESS.selector);
+        vm.prank(pool_admin());
+        allo().createPoolWithCustomStrategy(poolIdentity_id(), strategy, "0x", NATIVE, 0, metadata, poolManagers);
+    }
 
-    //     vm.prank(owner);
-    //     allo.createPoolWithClone(
-    //         identityId,
-    //         allocationStrategy,
-    //         "0x",
-    //         true,
-    //         payable(distributionStrategy),
-    //         "0x",
-    //         false,
-    //         address(token),
-    //         0,
-    //         metadata,
-    //         members
-    //     );
-    // }
+    function test_createPoolWithBaseFee() public {
+        uint256 baseFee = 1e17;
 
-    // function testRevert_createPoolWithCloneWithUnapprovedDistributionStrategy_NOT_APPROVED_STRATEGY() public {
-    //     vm.expectRevert(Allo.NOT_APPROVED_STRATEGY.selector);
+        allo().updateBaseFee(baseFee);
 
-    //     vm.prank(owner);
-    //     allo.createPoolWithClone(
-    //         identityId,
-    //         allocationStrategy,
-    //         "0x",
-    //         false,
-    //         payable(distributionStrategy),
-    //         "0x",
-    //         true,
-    //         address(token),
-    //         0,
-    //         metadata,
-    //         members
-    //     );
-    // }
+        vm.expectEmit(true, false, false, true);
+        emit BaseFeePaid(1, baseFee);
 
-    // function test_createPool_shit() public {
-    //     vm.expectEmit(true, true, false, true);
-    //     emit PoolCreated(
-    //         1,
-    //         identityId,
-    //         IAllocationStrategy(allocationStrategy),
-    //         IDistributionStrategy(distributionStrategy),
-    //         address(token),
-    //         0,
-    //         metadata
-    //     );
+        vm.deal(address(pool_admin()), 1e18);
 
-    //     uint256 poolId = _utilCreatePool(0);
+        vm.prank(pool_admin());
+        allo().createPoolWithCustomStrategy{value: baseFee}(
+            poolIdentity_id(), strategy, "0x", NATIVE, 0, metadata, pool_managers()
+        );
+    }
 
-    //     assertEq(_utilGetPoolInfo(poolId).identityId, identityId);
-    //     assertEq(address(_utilGetPoolInfo(poolId).distributionStrategy), distributionStrategy);
-    //     assertEq(address(_utilGetPoolInfo(poolId).allocationStrategy), allocationStrategy);
+    function testRevert_createPool_withBaseFee_NOT_ENOUGH_FUNDS() public {
+        uint256 baseFee = 1e17;
+        allo().updateBaseFee(baseFee);
 
-    //     assertTrue(allo.isPoolAdmin(poolId, owner));
-    //     assertFalse(allo.isPoolAdmin(poolId, members[0]));
+        vm.expectRevert(IAllo.NOT_ENOUGH_FUNDS.selector);
+        _utilCreatePool(0);
+    }
 
-    //     assertTrue(allo.isPoolManager(poolId, members[0]));
-    //     assertTrue(allo.isPoolManager(poolId, members[1]));
-    // }
+    function test_createPool_WithAmount() public {
+        vm.expectEmit(true, false, false, true);
+        emit PoolCreated(1, poolIdentity_id(), IStrategy(strategy), address(token), 10 * 10 ** 18, metadata);
 
-    // function test_createPoolWithBaseFee() public {
-    //     uint256 baseFee = 1e17;
+        uint256 poolId = _utilCreatePool(10 * 10 ** 18);
 
-    //     vm.prank(alloOwner);
-    //     allo.updateBaseFee(baseFee);
+        IAllo.Pool memory pool = allo().getPool(poolId);
 
-    //     vm.expectEmit(true, false, false, true);
-    //     emit BaseFeePaid(1, baseFee);
-
-    //     vm.deal(address(owner), 1 ether);
-
-    //     vm.prank(owner);
-    //     allo.createPool{value: baseFee}(
-    //         identityId,
-    //         allocationStrategy,
-    //         "0x",
-    //         payable(distributionStrategy),
-    //         "0x",
-    //         address(token),
-    //         0,
-    //         metadata,
-    //         members
-    //     );
-    // }
-
-    // function testRevert_createPool_UNAUTHORIZED() public {
-    //     vm.prank(makeAddr("not owner"));
-    //     vm.expectRevert(Allo.UNAUTHORIZED.selector);
-
-    //     allo.createPool(
-    //         identityId,
-    //         allocationStrategy,
-    //         "0x",
-    //         payable(distributionStrategy),
-    //         "0x",
-    //         address(token),
-    //         0,
-    //         metadata,
-    //         members
-    //     );
-    // }
-
-    // function test_createPoolWithTokens() public {
-    //     vm.expectEmit(true, false, false, true);
-    //     emit PoolCreated(
-    //         1,
-    //         identityId,
-    //         IAllocationStrategy(allocationStrategy),
-    //         IDistributionStrategy(distributionStrategy),
-    //         address(token),
-    //         10 * 10 ** 18,
-    //         metadata
-    //     );
-
-    //     uint256 poolId = _utilCreatePool(10 * 10 ** 18);
-
-    //     assertEq(_utilGetPoolInfo(poolId).identityId, identityId);
-    //     assertEq(address(_utilGetPoolInfo(poolId).distributionStrategy), distributionStrategy);
-    //     assertEq(address(_utilGetPoolInfo(poolId).allocationStrategy), allocationStrategy);
-    // }
+        assertEq(pool.identityId, poolIdentity_id());
+        assertEq(address(pool.strategy), strategy);
+    }
 
     function test_updatePoolMetadata() public {
         uint256 poolId = _utilCreatePool(0);
@@ -343,10 +205,10 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull {
 
         // update the metadata
         vm.prank(pool_admin());
-        allo.updatePoolMetadata(poolId, updatedMetadata);
+        allo().updatePoolMetadata(poolId, updatedMetadata);
 
         // check that the metadata was updated
-        Allo.Pool memory pool = allo.getPool(poolId);
+        Allo.Pool memory pool = allo().getPool(poolId);
         Metadata memory poolMetadata = pool.metadata;
 
         assertEq(poolMetadata.protocol, updatedMetadata.protocol);
@@ -355,208 +217,291 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull {
 
     function testRevert_updatePoolMetadata_UNAUTHORIZED() public {
         uint256 poolId = _utilCreatePool(0);
-        vm.expectRevert(Allo.UNAUTHORIZED.selector);
+        vm.expectRevert(IAllo.UNAUTHORIZED.selector);
 
         vm.prank(makeAddr("not owner"));
-        allo.updatePoolMetadata(poolId, metadata);
+        allo().updatePoolMetadata(poolId, metadata);
     }
 
-    // function test_registerRecipients() public {
-    //     uint256 poolId = _utilCreatePool(0);
+    function test_updateRegistry() public {
+        vm.expectEmit(true, false, false, false);
+        address payable newRegistry = payable(makeAddr("new registry"));
+        emit RegistryUpdated(newRegistry);
 
-    //     // apply to the pool
-    //     address recipientId = allo.registerRecipients(poolId, bytes(""));
-    //     assertEq(recipientId, address(1));
-    // }
+        allo().updateRegistry(newRegistry);
 
-    // function test_fundPool() public {
-    //     uint256 poolId = _utilCreatePool(0);
+        assertEq(address(allo().getRegistry()), newRegistry);
+    }
 
-    //     vm.expectEmit(true, false, false, true);
-    //     emit PoolFunded(poolId, 9.9e18, 1e17);
+    function testRevert_updateRegistry_UNAUTHORIZED() public {
+        address payable newRegistry = payable(makeAddr("new registry"));
+        // expect revert from solady
+        vm.expectRevert();
 
-    //     allo.fundPool(poolId, 10 * 10 ** 18, address(token));
-    // }
+        vm.prank(makeAddr("not owner"));
+        allo().updateRegistry(newRegistry);
+    }
 
-    // function testRevert_fundPool_NOT_ENOUGH_FUNDS() public {
-    //     uint256 poolId = _utilCreatePool(0);
+    function test_updateTreasury() public {
+        vm.expectEmit(true, false, false, false);
+        address payable newTreasury = payable(makeAddr("new treasury"));
+        emit TreasuryUpdated(newTreasury);
 
-    //     vm.prank(makeAddr("broke chad"));
-    //     vm.expectRevert(Allo.NOT_ENOUGH_FUNDS.selector);
+        allo().updateTreasury(newTreasury);
 
-    //     allo.fundPool(poolId, 0, address(token));
-    // }
+        assertEq(allo().getTreasury(), newTreasury);
+    }
 
-    // function test_allocate() public {
-    //     uint256 poolId = _utilCreatePool(0);
-    //     // allocate to the pool should not revert
-    //     allo.allocate(poolId, bytes(""));
-    // }
+    function testRevert_updateTreasury_UNAUTHORIZED() public {
+        address payable newTreasury = payable(makeAddr("new treasury"));
 
-    // function test_batchAllocate() public {
-    //     uint256[] memory poolIds = new uint256[](2);
+        // expect revert from solady
+        vm.expectRevert();
 
-    //     poolIds[0] = _utilCreatePool(0);
+        vm.prank(makeAddr("anon"));
+        allo().updateTreasury(newTreasury);
+    }
 
-    //     address mockAllocation = address(new MockAllocation());
-    //     address mockDistribution = address(new MockDistribution());
-    //     vm.prank(owner);
-    //     poolIds[1] = allo.createPool(
-    //         identityId, mockAllocation, "0x", payable(mockDistribution), "0x", address(token), 0, metadata, members
-    //     );
+    function test_updateFeePercentage() public {
+        vm.expectEmit(true, false, false, false);
 
-    //     bytes[] memory datas = new bytes[](2);
-    //     datas[0] = bytes("data1");
-    //     datas[1] = "data2";
-    //     // allocate to the pool should not revert
-    //     allo.batchAllocate(poolIds, datas);
-    // }
+        uint256 newFee = 1e17;
+        emit FeePercentageUpdated(newFee);
 
-    // function test_distribute() public {
-    //     uint256 poolId = _utilCreatePool(0);
-    //     // distribution to the pool should not revert
-    //     address[] memory recipientIds = new address[](1);
-    //     allo.distribute(poolId, recipientIds, bytes(""));
-    // }
+        allo().updateFeePercentage(newFee);
 
-    // function test_updateRegistry() public {
-    //     vm.expectEmit(true, false, false, false);
-    //     address payable newRegistry = payable(makeAddr("new registry"));
-    //     emit RegistryUpdated(address(registry));
+        assertEq(allo().getFeePercentage(), newFee);
+    }
 
-    //     vm.prank(alloOwner);
-    //     allo.updateRegistry(newRegistry);
+    function test_updateFeePercentage_INVALID_FEE() public {
+        vm.expectRevert(IAllo.INVALID_FEE.selector);
+        allo().updateFeePercentage(2 * 1e18);
+    }
 
-    //     assertEq(address(allo.registry()), newRegistry);
-    // }
+    function testRevert_updateFeePercentage_UNAUTHORIZED() public {
+        vm.expectRevert();
 
-    // function testRevert_updateRegistry_UNAUTHORIZED() public {
-    //     address payable newRegistry = payable(makeAddr("new registry"));
-    //     // expect revert from solady
-    //     vm.expectRevert();
+        vm.prank(makeAddr("anon"));
+        allo().updateFeePercentage(2000);
+    }
 
-    //     vm.prank(makeAddr("anon"));
-    //     allo.updateRegistry(newRegistry);
-    // }
+    function test_updateBaseFee() public {
+        vm.expectEmit(true, false, false, false);
 
-    // function test_updateTreasury() public {
-    //     vm.expectEmit(true, false, false, false);
-    //     address payable newTreasury = payable(makeAddr("new treasury"));
-    //     emit TreasuryUpdated(treasury);
+        uint256 newBaseFee = 1e17;
+        emit BaseFeeUpdated(newBaseFee);
 
-    //     vm.prank(alloOwner);
-    //     allo.updateTreasury(newTreasury);
+        allo().updateBaseFee(newBaseFee);
 
-    //     assertEq(allo.treasury(), newTreasury);
-    // }
+        assertEq(allo().getBaseFee(), newBaseFee);
+    }
 
-    // function testRevert_updateTreasury_UNAUTHORIZED() public {
-    //     address payable newTreasury = payable(makeAddr("new treasury"));
+    function test_updateBaseFee_UNAUTHORIZED() public {
+        vm.expectRevert();
 
-    //     // expect revert from solady
-    //     vm.expectRevert();
+        vm.prank(makeAddr("anon"));
+        allo().updateBaseFee(1e16);
+    }
 
-    //     vm.prank(makeAddr("anon"));
-    //     allo.updateTreasury(newTreasury);
-    // }
+    function test_addToApprovedStrategies() public {
+        address _strategy = makeAddr("strategy");
+        assertFalse(allo().isApprovedStrategy(_strategy));
+        allo().addToApprovedStrategies(_strategy);
+        assertTrue(allo().isApprovedStrategy(_strategy));
+    }
 
-    // function test_updateFee() public {
-    //     vm.expectEmit(true, false, false, false);
+    function testRevert_addToApprovedStrategies_UNAUTHORIZED() public {
+        vm.expectRevert();
+        vm.prank(makeAddr("anon"));
+        address _strategy = makeAddr("strategy");
+        allo().addToApprovedStrategies(_strategy);
+    }
 
-    //     uint256 newFee = 1e17;
-    //     emit FeePercentageUpdated(newFee);
+    function test_removeFromApprovedStrategies() public {
+        address _strategy = makeAddr("strategy");
+        allo().addToApprovedStrategies(_strategy);
+        assertTrue(allo().isApprovedStrategy(_strategy));
+        allo().removeFromApprovedStrategies(_strategy);
+        assertFalse(allo().isApprovedStrategy(_strategy));
+    }
 
-    //     vm.prank(alloOwner);
-    //     allo.updateFee(newFee);
+    function testRevert_removeFromApprovedStrategies_UNAUTHORIZED() public {
+        address _strategy = makeAddr("strategy");
+        vm.expectRevert();
+        vm.prank(makeAddr("anon"));
+        allo().removeFromApprovedStrategies(_strategy);
+    }
 
-    //     assertEq(allo.feePercentage(), newFee);
-    // }
+    function test_addPoolManager() public {
+        uint256 poolId = _utilCreatePool(0);
 
-    // function testRevert_updateFee_UNAUTHORIZED() public {
-    //     vm.expectRevert();
+        assertFalse(allo().isPoolManager(poolId, makeAddr("add manager")));
+        vm.prank(pool_admin());
+        allo().addPoolManager(poolId, makeAddr("add manager"));
+        assertTrue(allo().isPoolManager(poolId, makeAddr("add manager")));
+    }
 
-    //     vm.prank(makeAddr("anon"));
-    //     allo.updateFee(2000);
-    // }
+    function testRevert_addPoolManager_UNAUTHORIZED() public {
+        uint256 poolId = _utilCreatePool(0);
+        vm.expectRevert(IAllo.UNAUTHORIZED.selector);
+        allo().addPoolManager(poolId, makeAddr("add manager"));
+    }
 
-    // function test_updateBaseFee() public {
-    //     vm.expectEmit(true, false, false, false);
+    function testRevert_addPoolManager_ZERO_ADDRESS() public {
+        uint256 poolId = _utilCreatePool(0);
+        vm.expectRevert(IAllo.ZERO_ADDRESS.selector);
+        vm.prank(pool_admin());
+        allo().addPoolManager(poolId, address(0));
+    }
 
-    //     uint256 newBaseFee = 1e17;
-    //     emit BaseFeeUpdated(newBaseFee);
+    function test_removePoolManager() public {
+        uint256 poolId = _utilCreatePool(0);
 
-    //     vm.prank(alloOwner);
-    //     allo.updateBaseFee(newBaseFee);
-    // }
+        assertTrue(allo().isPoolManager(poolId, pool_manager1()));
+        vm.prank(pool_admin());
+        allo().removePoolManager(poolId, pool_manager1());
+        assertFalse(allo().isPoolManager(poolId, pool_manager1()));
+    }
 
-    // function test_updateBaseFee_UNAUTHORIZED() public {
-    //     vm.expectRevert();
+    function testRevert_removePoolManager_UNAUTHORIZED() public {
+        uint256 poolId = _utilCreatePool(0);
+        vm.expectRevert(IAllo.UNAUTHORIZED.selector);
+        allo().removePoolManager(poolId, makeAddr("add manager"));
+    }
 
-    //     vm.prank(makeAddr("anon"));
-    //     allo.updateBaseFee(1e16);
-    // }
+    function test_recoverFunds() public {
+        // TODO
+    }
 
-    // function test_addToApprovedStrategies() public {
-    //     assertFalse(allo.approvedStrategies(distributionStrategy));
+    function testRevert_recoverFunds_UNAUTHORIZED() public {
+        vm.expectRevert();
+        vm.prank(makeAddr("anon"));
+        allo().recoverFunds(address(0), makeAddr("recipient"));
+    }
 
-    //     vm.prank(alloOwner);
-    //     allo.addToApprovedStrategies(distributionStrategy);
+    function test_registerRecipient() public {
+        uint256 poolId = _utilCreatePool(0);
 
-    //     assertTrue(allo.approvedStrategies(distributionStrategy));
-    // }
+        // apply to the pool
+        allo().registerRecipient(poolId, bytes(""));
+    }
 
-    // function testRevert_addToApprovedStrategies_UNAUTHORIZED() public {
-    //     vm.expectRevert();
-    //     vm.prank(makeAddr("anon"));
-    //     allo.addToApprovedStrategies(distributionStrategy);
-    // }
+    function test_batchRegisterRecipient() public {
+        uint256[] memory poolIds = new uint256[](2);
 
-    // function test_removeFromApprovedStrategies() public {
-    //     vm.prank(alloOwner);
-    //     allo.addToApprovedStrategies(distributionStrategy);
+        poolIds[0] = _utilCreatePool(0);
 
-    //     assertTrue(allo.approvedStrategies(distributionStrategy));
+        address mockStrategy = address(new MockStrategy(address(allo())));
+        vm.prank(pool_admin());
+        poolIds[1] = allo().createPoolWithCustomStrategy(
+            poolIdentity_id(), mockStrategy, "0x", address(token), 0, metadata, pool_managers()
+        );
 
-    //     vm.prank(alloOwner);
-    //     allo.removeFromApprovedStrategies(distributionStrategy);
-    //     assertFalse(allo.approvedStrategies(distributionStrategy));
-    // }
+        bytes[] memory datas = new bytes[](2);
+        datas[0] = bytes("data1");
+        datas[1] = "data2";
+        // batch register to the pool should not revert
+        allo().batchRegisterRecipient(poolIds, datas);
+    }
 
-    // function testRevert_removeFromApprovedStrategies_UNAUTHORIZED() public {
-    //     vm.expectRevert();
-    //     vm.prank(makeAddr("anon"));
-    //     allo.addToApprovedStrategies(distributionStrategy);
-    // }
+    function testRevert_batchRegister_MISMATCH() public {
+        uint256[] memory poolIds = new uint256[](2);
 
-    // function test_isPoolAdmin() public {
-    //     uint256 poolId = _utilCreatePool(0);
+        poolIds[0] = _utilCreatePool(0);
 
-    //     assertTrue(allo.isPoolAdmin(poolId, owner));
-    //     assertFalse(allo.isPoolAdmin(poolId, makeAddr("not admin")));
-    // }
+        address mockStrategy = address(new MockStrategy(address(allo())));
+        vm.prank(pool_admin());
+        poolIds[1] = allo().createPoolWithCustomStrategy(
+            poolIdentity_id(), mockStrategy, "0x", address(token), 0, metadata, pool_managers()
+        );
 
-    // function test_isPoolManager() public {
-    //     uint256 poolId = _utilCreatePool(0);
+        bytes[] memory datas = new bytes[](1);
+        datas[0] = bytes("data1");
 
-    //     assertTrue(allo.isPoolManager(poolId, members[0]));
-    //     assertFalse(allo.isPoolManager(poolId, makeAddr("not manager")));
-    // }
+        vm.expectRevert(IAllo.MISMATCH.selector);
 
-    // function test_addPoolManager() public {
-    //     uint256 poolId = _utilCreatePool(0);
+        allo().batchRegisterRecipient(poolIds, datas);
+    }
 
-    //     assertFalse(allo.isPoolManager(poolId, makeAddr("not manager")));
-    //     vm.prank(owner);
-    //     allo.addPoolManager(poolId, makeAddr("not manager"));
-    //     assertTrue(allo.isPoolManager(poolId, makeAddr("not manager")));
-    // }
+    function test_fundPool() public {
+        uint256 poolId = _utilCreatePool(0);
 
-    // function test_removePoolManager() public {
-    //     uint256 poolId = _utilCreatePool(0);
+        vm.expectEmit(true, false, false, true);
+        emit PoolFunded(poolId, 9.9e18, 1e17);
 
-    //     assertTrue(allo.isPoolManager(poolId, members[0]));
-    //     vm.prank(owner);
-    //     allo.removePoolManager(poolId, members[0]);
-    //     assertFalse(allo.isPoolManager(poolId, members[0]));
-    // }
+        allo().fundPool(poolId, 10 * 10 ** 18);
+    }
+
+    function testRevert_fundPool_NOT_ENOUGH_FUNDS() public {
+        uint256 poolId = _utilCreatePool(0);
+
+        vm.prank(makeAddr("broke chad"));
+        vm.expectRevert(IAllo.NOT_ENOUGH_FUNDS.selector);
+
+        allo().fundPool(poolId, 0);
+    }
+
+    function test_allocate() public {
+        uint256 poolId = _utilCreatePool(0);
+        // allocate to the pool should not revert
+        allo().allocate(poolId, bytes(""));
+    }
+
+    function test_batchAllocate() public {
+        uint256[] memory poolIds = new uint256[](2);
+
+        poolIds[0] = _utilCreatePool(0);
+
+        address mockStrategy = address(new MockStrategy(address(allo())));
+        vm.prank(pool_admin());
+        poolIds[1] = allo().createPoolWithCustomStrategy(
+            poolIdentity_id(), mockStrategy, "0x", address(token), 0, metadata, pool_managers()
+        );
+
+        bytes[] memory datas = new bytes[](2);
+        datas[0] = bytes("data1");
+        datas[1] = "data2";
+        // allocate to the pool should not revert
+        allo().batchAllocate(poolIds, datas);
+    }
+
+    function testRevert_batchAllocate_MISMATCH() public {
+        uint256[] memory poolIds = new uint256[](2);
+
+        poolIds[0] = _utilCreatePool(0);
+
+        address mockStrategy = address(new MockStrategy(address(allo())));
+        vm.prank(pool_admin());
+        poolIds[1] = allo().createPoolWithCustomStrategy(
+            poolIdentity_id(), mockStrategy, "0x", address(token), 0, metadata, pool_managers()
+        );
+
+        bytes[] memory datas = new bytes[](1);
+        datas[0] = bytes("data1");
+
+        vm.expectRevert(IAllo.MISMATCH.selector);
+
+        allo().batchAllocate(poolIds, datas);
+    }
+
+    function test_distribute() public {
+        uint256 poolId = _utilCreatePool(0);
+        // distribution to the pool should not revert
+        address[] memory recipientIds = new address[](1);
+        allo().distribute(poolId, recipientIds, bytes(""));
+    }
+
+    function test_isPoolAdmin() public {
+        uint256 poolId = _utilCreatePool(0);
+
+        assertTrue(allo().isPoolAdmin(poolId, pool_admin()));
+        assertFalse(allo().isPoolAdmin(poolId, makeAddr("not admin")));
+    }
+
+    function test_isPoolManager() public {
+        uint256 poolId = _utilCreatePool(0);
+
+        assertTrue(allo().isPoolManager(poolId, pool_manager1()));
+        assertFalse(allo().isPoolManager(poolId, makeAddr("not manager")));
+    }
 }

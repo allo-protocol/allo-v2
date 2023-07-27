@@ -288,13 +288,12 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
     /// @notice Fund a pool
     /// @param _poolId id of the pool
     /// @param _amount extra amount of the token to be deposited into the pool
-    /// @param _token The address of the token that the pool is denominated in
     /// @dev Anyone can fund a pool
-    function fundPool(uint256 _poolId, uint256 _amount, address _token) external payable {
+    function fundPool(uint256 _poolId, uint256 _amount) external payable {
         if (_amount == 0) {
             revert NOT_ENOUGH_FUNDS();
         }
-        _fundPool(_token, _amount, _poolId, pools[_poolId].strategy);
+        _fundPool(_amount, _poolId, pools[_poolId].strategy);
     }
 
     /// @notice passes _data & msg.sender through to the strategy for that pool
@@ -408,7 +407,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
         }
 
         if (_amount > 0) {
-            _fundPool(_token, _amount, poolId, _strategy);
+            _fundPool(_amount, poolId, _strategy);
         }
 
         emit PoolCreated(poolId, _identityId, _strategy, _token, _amount, _metadata);
@@ -422,19 +421,15 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
     }
 
     /// @notice Deduct the fee and transfers the amount to the distribution strategy
-    /// @param _token The address of the token to transfer
     /// @param _amount The amount to transfer
     /// @param _poolId The pool id
     /// @param _strategy The address of the strategy
-    function _fundPool(address _token, uint256 _amount, uint256 _poolId, IStrategy _strategy) internal {
+    function _fundPool(uint256 _amount, uint256 _poolId, IStrategy _strategy) internal {
         uint256 feeAmount = 0;
         uint256 amountAfterFee = _amount;
 
         Pool storage pool = pools[_poolId];
-
-        if (pool.token != _token) {
-            revert INVALID_TOKEN();
-        }
+        address _token = pool.token;
 
         if (feePercentage > 0) {
             feeAmount = (_amount * feePercentage) / FEE_DENOMINATOR;
@@ -445,6 +440,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
 
         _transferAmountFrom(_token, TransferData({from: msg.sender, to: address(_strategy), amount: amountAfterFee}));
         pool.amount += amountAfterFee;
+        _strategy.increasePoolAmount(amountAfterFee);
 
         emit PoolFunded(_poolId, amountAfterFee, feeAmount);
     }
@@ -557,8 +553,8 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
     }
 
     /// @notice return boolean if strategy is approved
-    function isApprovedStrategies(address _strategy) external view returns (bool) {
-        return approvedStrategies[_strategy];
+    function isApprovedStrategy(address _strategy) external view returns (bool) {
+        return _isApprovedStrategy(_strategy);
     }
 
     /// @notice return the pool

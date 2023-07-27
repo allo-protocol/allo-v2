@@ -33,7 +33,6 @@ interface IAllo {
     error MISMATCH();
     error ZERO_ADDRESS();
     error INVALID_FEE();
-    error INVALID_TOKEN();
 
     /// ======================
     /// ======= Events =======
@@ -74,12 +73,11 @@ interface IAllo {
     function addPoolManager(uint256 _poolId, address _manager) external;
     function removePoolManager(uint256 _poolId, address _manager) external;
     function recoverFunds(address _token, address _recipient) external;
-    function decreasePoolTotalFunding(uint256 _poolId, uint256 _amountToDecrease) external;
     function registerRecipient(uint256 _poolId, bytes memory _data) external payable returns (address);
     function batchRegisterRecipient(uint256[] memory _poolIds, bytes[] memory _data)
         external
         returns (address[] memory);
-    function fundPool(uint256 _poolId, uint256 _amount, address _token) external payable;
+    function fundPool(uint256 _poolId, uint256 _amount) external payable;
     function allocate(uint256 _poolId, bytes memory _data) external payable;
     function batchAllocate(uint256[] calldata _poolIds, bytes[] memory _datas) external;
     function distribute(uint256 _poolId, address[] memory _recipientIds, bytes memory _data) external;
@@ -90,7 +88,7 @@ interface IAllo {
 
     function isPoolAdmin(uint256 _poolId, address _address) external view returns (bool);
     function isPoolManager(uint256 _poolId, address _address) external view returns (bool);
-    function isApprovedStrategies(address) external view returns (bool);
+    function isApprovedStrategy(address) external view returns (bool);
 
     function getStrategy(uint256 _poolId) external view returns (address);
     function getFeePercentage() external view returns (uint256);
