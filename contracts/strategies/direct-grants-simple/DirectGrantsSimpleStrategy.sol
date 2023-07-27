@@ -106,7 +106,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     ) internal {
         __BaseStrategy_init(_poolId);
         registryGating = _registryGating;
-        _metadataRequired = _metadataRequired;
+        metadataRequired = _metadataRequired;
         grantAmountRequired = _grantAmountRequired;
         _setPoolActive(true);
     }
