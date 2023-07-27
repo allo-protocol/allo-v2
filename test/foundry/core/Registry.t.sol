@@ -39,7 +39,7 @@ contract RegistryTest is Test, RegistrySetup {
         vm.expectEmit(true, false, false, true);
 
         bytes32 testIdentityId = TestUtilities._testUtilGenerateIdentityId(nonce, address(this));
-        address testAnchor = TestUtilities._testUtilGenerateAnchor(testIdentityId, name);
+        address testAnchor = TestUtilities._testUtilGenerateAnchor(testIdentityId, name, address(registry()));
 
         emit IdentityCreated(testIdentityId, nonce, name, metadata, identity1_owner(), testAnchor);
 
@@ -90,7 +90,7 @@ contract RegistryTest is Test, RegistrySetup {
         bytes32 newIdentityId = registry().createIdentity(nonce, name, metadata, identity1_owner(), identity1_members());
 
         string memory newName = "New Name";
-        address testAnchor = TestUtilities._testUtilGenerateAnchor(newIdentityId, newName);
+        address testAnchor = TestUtilities._testUtilGenerateAnchor(newIdentityId, newName, address(registry()));
         vm.expectEmit(true, false, false, true);
         emit IdentityNameUpdated(newIdentityId, newName, testAnchor);
         Registry.Identity memory identity = registry().getIdentityById(newIdentityId);
@@ -100,7 +100,7 @@ contract RegistryTest is Test, RegistrySetup {
 
         assertEq(registry().getIdentityById(newIdentityId).name, newName, "name");
         // old and new anchor should be mapped to identityId
-        assertEq(registry().anchorToIdentityId(identity.anchor), bytes32(0), "old anchor");
+        assertEq(registry().anchorToIdentityId(identity.anchor), newIdentityId, "old anchor");
         assertEq(registry().anchorToIdentityId(newAnchor), newIdentityId, "new anchor");
     }
 
