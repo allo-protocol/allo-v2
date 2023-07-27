@@ -45,7 +45,6 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// ===============================
 
     error RECIPIENT_ALREADY_ACCEPTED();
-    error INVALID_RECIPIENT();
     error UNAUTHORIZED();
     error INVALID_MILESTONE();
     error MILESTONE_ALREADY_ACCEPTED();
