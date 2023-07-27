@@ -70,4 +70,8 @@ contract MockStrategy is BaseStrategy {
 
         return payouts;
     }
+
+    function setPoolActive(bool _active) external {
+        _setPoolActive(_active);
+    }
 }
