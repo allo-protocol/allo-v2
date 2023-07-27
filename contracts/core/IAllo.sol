@@ -50,33 +50,25 @@ interface IAllo {
     event PoolMetadataUpdated(uint256 indexed poolId, Metadata metadata);
     event PoolFunded(uint256 indexed poolId, uint256 amount, uint256 fee);
     event BaseFeePaid(uint256 indexed poolId, uint256 amount);
-    event PoolTotalFundingDecreased(uint256 indexed poolId, uint256 prevAmount, uint256 newAmount);
     event TreasuryUpdated(address treasury);
     event FeePercentageUpdated(uint256 feePercentage);
     event BaseFeeUpdated(uint256 baseFee);
     event RegistryUpdated(address registry);
     event StrategyApproved(address strategy);
     event StrategyRemoved(address strategy);
-    event FeeSkirtingBountyPercentageUpdated(uint256 feeSkirtingBountyPercentage);
 
     /// ====================================
     /// ==== External/Public Functions =====
     /// ====================================
 
-    function initialize(
-        address _registry,
-        address payable _treasury,
-        uint256 _feePercentage,
-        uint256 _baseFee,
-        uint256 _feeSkirtingBountyPercentage
-    ) external;
+    function initialize(address _registry, address payable _treasury, uint256 _feePercentage, uint256 _baseFee)
+        external;
 
     function updatePoolMetadata(uint256 _poolId, Metadata memory _metadata) external;
     function updateRegistry(address _registry) external;
     function updateTreasury(address payable _treasury) external;
     function updateFeePercentage(uint256 _feePercentage) external;
     function updateBaseFee(uint256 _baseFee) external;
-    function updateFeeSkirtingBountyPercentage(uint256 _feeSkirtingBountyPercentage) external;
     function addToApprovedStrategies(address _strategy) external;
     function removeFromApprovedStrategies(address _strategy) external;
     function addPoolManager(uint256 _poolId, address _manager) external;
@@ -105,7 +97,6 @@ interface IAllo {
     function getBaseFee() external view returns (uint256);
     function getTreasury() external view returns (address payable);
     function getRegistry() external view returns (IRegistry);
-    function getFeeSkirtingBountyPercentage() external view returns (uint256);
     function getPool(uint256) external view returns (Pool memory);
 
     function FEE_DENOMINATOR() external view returns (uint256);

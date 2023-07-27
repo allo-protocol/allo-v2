@@ -63,9 +63,6 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
     /// @notice Strategy -> bool
     mapping(address => bool) private approvedStrategies;
 
-    /// @notice Reward for catching fee skirting (1e18 = 100%)
-    uint256 private feeSkirtingBountyPercentage;
-
     /// ====================================
     /// =========== Intializer =============
     /// ====================================
@@ -76,21 +73,16 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
     /// @param _treasury The address of the treasury
     /// @param _feePercentage The fee percentage
     /// @param _baseFee The base fee
-    /// @param _feeSkirtingBountyPercentage The fee skirting bounty percentage
-    function initialize(
-        address _registry,
-        address payable _treasury,
-        uint256 _feePercentage,
-        uint256 _baseFee,
-        uint256 _feeSkirtingBountyPercentage
-    ) external reinitializer(1) {
+    function initialize(address _registry, address payable _treasury, uint256 _feePercentage, uint256 _baseFee)
+        external
+        reinitializer(1)
+    {
         _initializeOwner(msg.sender);
 
         _updateRegistry(_registry);
         _updateTreasury(_treasury);
         _updateFeePercentage(_feePercentage);
         _updateBaseFee(_baseFee);
-        _updateFeeSkirtingBountyPercentage(_feeSkirtingBountyPercentage);
     }
 
     /// ====================================
@@ -212,13 +204,6 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
         _updateBaseFee(_baseFee);
     }
 
-    /// @notice Updates the feeSkirtingBountyPercentage
-    /// @param _feeSkirtingBountyPercentage The new feeSkirtingBountyPercentage
-    /// @dev Only callable by the owner
-    function updateFeeSkirtingBountyPercentage(uint256 _feeSkirtingBountyPercentage) external onlyOwner {
-        _updateFeeSkirtingBountyPercentage(_feeSkirtingBountyPercentage);
-    }
-
     /// @notice Add a strategy to the allowlist
     /// @param _strategy The address of the strategy
     /// @dev Only callable by the owner
@@ -261,17 +246,6 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
     function recoverFunds(address _token, address _recipient) external onlyOwner {
         uint256 amount = _token == NATIVE ? address(this).balance : IERC20Upgradeable(_token).balanceOf(address(this));
         _transferAmount(_token, _recipient, amount);
-    }
-
-    function decreasePoolTotalFunding(uint256 _poolId, uint256 _amountToDecrease) external {
-        Pool storage pool = pools[_poolId];
-        if (address(pool.strategy) != msg.sender) {
-            revert UNAUTHORIZED();
-        }
-        uint256 oldAmount = pool.amount;
-        uint256 newAmount = oldAmount - _amountToDecrease;
-        pool.amount = newAmount;
-        emit PoolTotalFundingDecreased(_poolId, oldAmount, newAmount);
     }
 
     /// ====================================
@@ -535,17 +509,6 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
         emit BaseFeeUpdated(baseFee);
     }
 
-    /// @notice Updates the feeSkirtingBountyPercentage
-    /// @param _feeSkirtingBountyPercentage The new feeSkirtingBountyPercentage
-    function _updateFeeSkirtingBountyPercentage(uint256 _feeSkirtingBountyPercentage) internal {
-        if (_feeSkirtingBountyPercentage > 1e18) {
-            revert INVALID_FEE();
-        }
-        feeSkirtingBountyPercentage = _feeSkirtingBountyPercentage;
-
-        emit FeeSkirtingBountyPercentageUpdated(feeSkirtingBountyPercentage);
-    }
-
     /// =========================
     /// ==== View Functions =====
     /// =========================
@@ -583,12 +546,12 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
         return baseFee;
     }
 
-    /// @notice return feeSkirtingBountyPercentage
+    /// @notice return treasury
     function getTreasury() external view returns (address payable) {
         return treasury;
     }
 
-    /// @notice return feeSkirtingBountyPercentage
+    /// @notice return registry
     function getRegistry() external view returns (IRegistry) {
         return registry;
     }
@@ -596,11 +559,6 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
     /// @notice return boolean if strategy is approved
     function isApprovedStrategies(address _strategy) external view returns (bool) {
         return approvedStrategies[_strategy];
-    }
-
-    /// @notice return feeSkirtingBountyPercentage
-    function getFeeSkirtingBountyPercentage() external view returns (uint256) {
-        return feeSkirtingBountyPercentage;
     }
 
     /// @notice return the pool

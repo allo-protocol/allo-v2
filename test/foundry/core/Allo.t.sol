@@ -2,18 +2,17 @@ pragma solidity 0.8.19;
 
 import "forge-std/Test.sol";
 
-import {AlloSetup} from "../shared/AlloSetup.sol";
-import {RegistrySetupFull} from "../shared/RegistrySetup.sol";
-
+// Interfaces
+import {IStrategy} from "../../../contracts/strategies/IStrategy.sol";
+// Core contracts
 import {Allo} from "../../../contracts/core/Allo.sol";
 import {Registry} from "../../../contracts/core/Registry.sol";
+// Internal Libraries
 import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
+// Test libraries
+import {AlloSetup} from "../shared/AlloSetup.sol";
+import {RegistrySetupFull} from "../shared/RegistrySetup.sol";
 import {TestUtilities} from "../utils/TestUtilities.sol";
-
-// import "../../../contracts/interfaces/IAllocationStrategy.sol";
-// import "../../../contracts/interfaces/IDistributionStrategy.sol";
-import {IStrategy} from "../../../contracts/strategies/IStrategy.sol";
-
 import {MockStrategy} from "../utils/MockStrategy.sol";
 import {MockToken} from "../utils/MockToken.sol";
 
@@ -26,25 +25,14 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull {
         uint256 amount,
         Metadata metadata
     );
-
     event PoolMetadataUpdated(uint256 indexed poolId, Metadata metadata);
-
     event PoolFunded(uint256 indexed poolId, uint256 amount, uint256 fee);
-
     event BaseFeePaid(uint256 indexed poolId, uint256 amount);
-
-    event PoolClosed(uint256 indexed poolId);
-
     event TreasuryUpdated(address treasury);
-
     event FeePercentageUpdated(uint256 feePercentage);
-
     event BaseFeeUpdated(uint256 baseFee);
-
     event RegistryUpdated(address registry);
-
     event StrategyApproved(address strategy);
-
     event StrategyRemoved(address strategy);
 
     error AlreadyInitialized();
@@ -345,40 +333,40 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull {
     //     assertEq(address(_utilGetPoolInfo(poolId).allocationStrategy), allocationStrategy);
     // }
 
+    function test_updatePoolMetadata() public {
+        uint256 poolId = _utilCreatePool(0);
+
+        Metadata memory updatedMetadata = Metadata({protocol: 1, pointer: "updated metadata"});
+
+        vm.expectEmit(true, false, false, true);
+        emit PoolMetadataUpdated(poolId, updatedMetadata);
+
+        // update the metadata
+        vm.prank(pool_admin());
+        allo.updatePoolMetadata(poolId, updatedMetadata);
+
+        // check that the metadata was updated
+        Allo.Pool memory pool = allo.getPool(poolId);
+        Metadata memory poolMetadata = pool.metadata;
+
+        assertEq(poolMetadata.protocol, updatedMetadata.protocol);
+        assertEq(poolMetadata.pointer, updatedMetadata.pointer);
+    }
+
+    function testRevert_updatePoolMetadata_UNAUTHORIZED() public {
+        uint256 poolId = _utilCreatePool(0);
+        vm.expectRevert(Allo.UNAUTHORIZED.selector);
+
+        vm.prank(makeAddr("not owner"));
+        allo.updatePoolMetadata(poolId, metadata);
+    }
+
     // function test_registerRecipients() public {
     //     uint256 poolId = _utilCreatePool(0);
 
     //     // apply to the pool
     //     address recipientId = allo.registerRecipients(poolId, bytes(""));
     //     assertEq(recipientId, address(1));
-    // }
-
-    // function test_updatePoolMetadata() public {
-    //     uint256 poolId = _utilCreatePool(0);
-
-    //     Metadata memory updatedMetadata = Metadata({protocol: 1, pointer: "updated metadata"});
-
-    //     vm.expectEmit(true, false, false, true);
-    //     emit PoolMetadataUpdated(poolId, updatedMetadata);
-
-    //     // update the metadata
-    //     vm.prank(owner);
-    //     allo.updatePoolMetadata(poolId, updatedMetadata);
-
-    //     // check that the metadata was updated
-    //     Allo.Pool memory pool = _utilGetPoolInfo(poolId);
-    //     Metadata memory poolMetadata = pool.metadata;
-
-    //     assertEq(poolMetadata.protocol, updatedMetadata.protocol);
-    //     assertEq(poolMetadata.pointer, updatedMetadata.pointer);
-    // }
-
-    // function testRevert_updatePoolMetadata_UNAUTHORIZED() public {
-    //     uint256 poolId = _utilCreatePool(0);
-    //     vm.expectRevert(Allo.UNAUTHORIZED.selector);
-
-    //     vm.prank(makeAddr("not owner"));
-    //     allo.updatePoolMetadata(poolId, metadata);
     // }
 
     // function test_fundPool() public {
