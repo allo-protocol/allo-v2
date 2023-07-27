@@ -434,15 +434,33 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
     }
 
     // FIXME: this keeps returning INVALID_TOKEN()
-    function test_setPayouts() public {
-        // address recipientId = __register_accept_setPayout_recipient();
-        // address[] memory recipients = new address[](1);
-        // recipients[0] = recipientId;
+    function test_setPayout() public {
+        // address recipientId = __register_accept_recipient();
+        // vm.warp(registrationEndTime + 10);
 
-        // IStrategy.PayoutSummary[] memory payouts = strategy.getPayouts(recipients, "", address(0));
-        // assertEq(payouts[0].amount, 9.9e17);
-        // assertEq(payouts[0].recipientAddress, makeAddr(string(abi.encodePacked("recipientAddress"))));
+        // address[] memory recipientIds = new address[](1);
+        // recipientIds[0] = recipientId;
+
+        // uint256[] memory amounts = new uint256[](1);
+        // amounts[0] = 9.9e17; // 1e17 pool amount - 1e17 fee
+
+        // vm.warp(allocationEndTime + 10);
+
+        // // set the allowance for the transfer
+        // token.approve(address(allo()), 1e18);
+
+        // // fund pool
+        // allo().fundPool{value: 1e18}(poolId, 1e18);
+
+        // vm.prank(pool_admin());
+
+        // vm.expectEmit(false, false, false, true);
+        // emit PayoutSet(abi.encode(recipientIds));
+
+        // strategy.setPayout(recipientIds, amounts);
     }
+
+    function testRevert_setPayout() public {}
 
     function test_isValidAllocator() public {
         assertFalse(strategy.isValidAllocator(address(0)));
@@ -555,12 +573,8 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
 
     function testRevert_setMetadata_UNAUTHORIZED() public {}
 
-    function test_setPayout() public {}
-
-    function testRevert_setPayout() public {}
-
     function test_allocate() public {
-        address recipientId = __register_accept_recipient();
+        // address recipientId = __register_accept_recipient();
 
         vm.warp(allocationStartTime + 10);
 
@@ -721,7 +735,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         amounts[0] = 9.9e17; // fund amount: 1e18 - fee: 1e17 = 9.9e17
 
         // fund pool
-        allo().fundPool{value: 1e18}(poolId, 1e18, NATIVE);
+        allo().fundPool{value: 1e18}(poolId, 1e18);
 
         vm.warp(allocationEndTime + 10);
 

@@ -14,10 +14,10 @@ import {Native} from "../../../contracts/core/libraries/Native.sol";
 // Test libraries
 import {AlloSetup} from "../shared/AlloSetup.sol";
 import {RegistrySetupFull} from "../shared/RegistrySetup.sol";
-import {TestUtilities} from "../utils/TestUtilities.sol";
-import {BadStrategy} from "../utils/BadStrategy.sol";
-import {MockStrategy} from "../utils/MockStrategy.sol";
-import {MockToken} from "../utils/MockToken.sol";
+import {TestUtilities} from "../../utils/TestUtilities.sol";
+import {BadStrategy} from "../../utils/BadStrategy.sol";
+import {MockStrategy} from "../../utils/MockStrategy.sol";
+import {MockToken} from "../../utils/MockToken.sol";
 
 contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
     event PoolCreated(

@@ -20,4 +20,5 @@ contract EventSetup {
         uint256 allocationStartTime,
         uint256 allocationEndTime
     );
+    event PayoutSet(bytes recipientIds);
 }

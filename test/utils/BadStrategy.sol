@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {IAllo} from "../../../contracts/core/IAllo.sol";
-import {IStrategy} from "../../../contracts/strategies/IStrategy.sol";
+import {IAllo} from "../../contracts/core/IAllo.sol";
+import {IStrategy} from "../../contracts/strategies/IStrategy.sol";
 
 contract BadStrategy is IStrategy {
     // ======================

@@ -12,8 +12,8 @@ import {Registry} from "../../../contracts/core/Registry.sol";
 import {Native} from "../../../contracts/core/libraries/Native.sol";
 import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
 // Test libraries
-import {TestUtilities} from "../utils/TestUtilities.sol";
-import {MockToken} from "../utils/MockToken.sol";
+import {TestUtilities} from "../../utils/TestUtilities.sol";
+import {MockToken} from "../../utils/MockToken.sol";
 
 contract RegistryTest is Test, RegistrySetup, Native {
     event IdentityCreated(

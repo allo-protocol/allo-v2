@@ -35,6 +35,7 @@ contract QVSimpleStrategy is BaseStrategy {
         uint256 allocationEndTime,
         address sender
     );
+    event PayoutSet(bytes recipientIds);
 
     /// ======================
     /// ======= Storage ======
@@ -72,17 +73,20 @@ contract QVSimpleStrategy is BaseStrategy {
     uint256 public registrationEndTime;
     uint256 public allocationStartTime;
     uint256 public allocationEndTime;
+    uint256 public totalPayoutAmount;
 
     /// @notice token -> bool
     mapping(address => bool) public allowedTokens;
-    // recipientId => Recipient
+    /// @notice recipientId => Recipient
     mapping(address => Recipient) public recipients;
-    // allocator address => Allocator
+    /// @notice allocator address => Allocator
     mapping(address => Allocator) public allocators;
-    // allocator => bool
+    /// @notice allocator => bool
     mapping(address => bool) public allowedAllocators;
-    // recipientId => paid out
+    /// @notice recipientId => paid out
     mapping(address => bool) public paidOut;
+    /// @notice recipientId -> PayoutSummary
+    mapping(address => PayoutSummary) public payoutSummaries;
 
     /// ================================
     /// ========== Modifier ============
@@ -279,6 +283,45 @@ contract QVSimpleStrategy is BaseStrategy {
         }
 
         return payouts;
+    }
+
+    function setPayout(address[] memory _recipientIds, uint256[] memory _amounts)
+        external
+        onlyPoolManager(msg.sender)
+        onlyAfterAllocation
+    {
+        uint256 recipientLength = _recipientIds.length;
+        if (recipientLength != _amounts.length) {
+            revert INVALID();
+        }
+
+        for (uint256 i = 0; i < recipientLength;) {
+            address recipientId = _recipientIds[i];
+            if (recipients[recipientId].recipientStatus != InternalRecipientStatus.Accepted) {
+                revert INVALID();
+            }
+
+            PayoutSummary storage payoutSummary = payoutSummaries[recipientId];
+            if (payoutSummary.amount != 0) {
+                revert RECIPIENT_ERROR(recipientId);
+            }
+
+            uint256 amount = _amounts[i];
+            totalPayoutAmount += amount;
+
+            if (totalPayoutAmount > allo.getPool(poolId).amount) {
+                revert INVALID();
+            }
+
+            payoutSummary.amount = amount;
+            payoutSummary.recipientAddress = recipients[recipientId].recipientAddress;
+
+            unchecked {
+                i++;
+            }
+        }
+
+        emit PayoutSet(abi.encode(_recipientIds));
     }
 
     /// @notice Set the start and end dates for the pool

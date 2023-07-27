@@ -23,7 +23,6 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
     /// ========== Events =============
     /// ===============================
 
-    event Appealed(address indexed recipientId, bytes data, address sender);
     event RecipientStatusUpdated(
         address indexed recipientId, DonationVotingStrategy.InternalRecipientStatus recipientStatus, address sender
     );
@@ -35,7 +34,6 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         uint256 allocationEndTime,
         address sender
     );
-    event PayoutSet(bytes recipientIds);
 
     bool public useRegistryAnchor;
     bool public metadataRequired;
