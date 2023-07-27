@@ -63,9 +63,6 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
     /// @notice Strategy -> bool
     mapping(address => bool) private approvedStrategies;
 
-    /// @notice Reward for catching fee skirting (1e18 = 100%)
-    uint256 private feeSkirtingBountyPercentage;
-
     /// ====================================
     /// =========== Intializer =============
     /// ====================================
@@ -76,21 +73,16 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
     /// @param _treasury The address of the treasury
     /// @param _feePercentage The fee percentage
     /// @param _baseFee The base fee
-    /// @param _feeSkirtingBountyPercentage The fee skirting bounty percentage
-    function initialize(
-        address _registry,
-        address payable _treasury,
-        uint256 _feePercentage,
-        uint256 _baseFee,
-        uint256 _feeSkirtingBountyPercentage
-    ) external reinitializer(1) {
+    function initialize(address _registry, address payable _treasury, uint256 _feePercentage, uint256 _baseFee)
+        external
+        reinitializer(1)
+    {
         _initializeOwner(msg.sender);
 
         _updateRegistry(_registry);
         _updateTreasury(_treasury);
         _updateFeePercentage(_feePercentage);
         _updateBaseFee(_baseFee);
-        _updateFeeSkirtingBountyPercentage(_feeSkirtingBountyPercentage);
     }
 
     /// ====================================
@@ -212,13 +204,6 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
         _updateBaseFee(_baseFee);
     }
 
-    /// @notice Updates the feeSkirtingBountyPercentage
-    /// @param _feeSkirtingBountyPercentage The new feeSkirtingBountyPercentage
-    /// @dev Only callable by the owner
-    function updateFeeSkirtingBountyPercentage(uint256 _feeSkirtingBountyPercentage) external onlyOwner {
-        _updateFeeSkirtingBountyPercentage(_feeSkirtingBountyPercentage);
-    }
-
     /// @notice Add a strategy to the allowlist
     /// @param _strategy The address of the strategy
     /// @dev Only callable by the owner
@@ -263,17 +248,6 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
         _transferAmount(_token, _recipient, amount);
     }
 
-    function decreasePoolTotalFunding(uint256 _poolId, uint256 _amountToDecrease) external {
-        Pool storage pool = pools[_poolId];
-        if (address(pool.strategy) != msg.sender) {
-            revert UNAUTHORIZED();
-        }
-        uint256 oldAmount = pool.amount;
-        uint256 newAmount = oldAmount - _amountToDecrease;
-        pool.amount = newAmount;
-        emit PoolTotalFundingDecreased(_poolId, oldAmount, newAmount);
-    }
-
     /// ====================================
     /// ======= Strategy Functions =========
     /// ====================================
@@ -314,13 +288,12 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
     /// @notice Fund a pool
     /// @param _poolId id of the pool
     /// @param _amount extra amount of the token to be deposited into the pool
-    /// @param _token The address of the token that the pool is denominated in
     /// @dev Anyone can fund a pool
-    function fundPool(uint256 _poolId, uint256 _amount, address _token) external payable {
+    function fundPool(uint256 _poolId, uint256 _amount) external payable {
         if (_amount == 0) {
             revert NOT_ENOUGH_FUNDS();
         }
-        _fundPool(_token, _amount, _poolId, pools[_poolId].strategy);
+        _fundPool(_amount, _poolId, pools[_poolId].strategy);
     }
 
     /// @notice passes _data & msg.sender through to the strategy for that pool
@@ -434,7 +407,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
         }
 
         if (_amount > 0) {
-            _fundPool(_token, _amount, poolId, _strategy);
+            _fundPool(_amount, poolId, _strategy);
         }
 
         emit PoolCreated(poolId, _identityId, _strategy, _token, _amount, _metadata);
@@ -448,19 +421,15 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
     }
 
     /// @notice Deduct the fee and transfers the amount to the distribution strategy
-    /// @param _token The address of the token to transfer
     /// @param _amount The amount to transfer
     /// @param _poolId The pool id
     /// @param _strategy The address of the strategy
-    function _fundPool(address _token, uint256 _amount, uint256 _poolId, IStrategy _strategy) internal {
+    function _fundPool(uint256 _amount, uint256 _poolId, IStrategy _strategy) internal {
         uint256 feeAmount = 0;
         uint256 amountAfterFee = _amount;
 
         Pool storage pool = pools[_poolId];
-
-        if (pool.token != _token) {
-            revert INVALID_TOKEN();
-        }
+        address _token = pool.token;
 
         if (feePercentage > 0) {
             feeAmount = (_amount * feePercentage) / FEE_DENOMINATOR;
@@ -471,6 +440,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
 
         _transferAmountFrom(_token, TransferData({from: msg.sender, to: address(_strategy), amount: amountAfterFee}));
         pool.amount += amountAfterFee;
+        _strategy.increasePoolAmount(amountAfterFee);
 
         emit PoolFunded(_poolId, amountAfterFee, feeAmount);
     }
@@ -535,17 +505,6 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
         emit BaseFeeUpdated(baseFee);
     }
 
-    /// @notice Updates the feeSkirtingBountyPercentage
-    /// @param _feeSkirtingBountyPercentage The new feeSkirtingBountyPercentage
-    function _updateFeeSkirtingBountyPercentage(uint256 _feeSkirtingBountyPercentage) internal {
-        if (_feeSkirtingBountyPercentage > 1e18) {
-            revert INVALID_FEE();
-        }
-        feeSkirtingBountyPercentage = _feeSkirtingBountyPercentage;
-
-        emit FeeSkirtingBountyPercentageUpdated(feeSkirtingBountyPercentage);
-    }
-
     /// =========================
     /// ==== View Functions =====
     /// =========================
@@ -583,24 +542,19 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
         return baseFee;
     }
 
-    /// @notice return feeSkirtingBountyPercentage
+    /// @notice return treasury
     function getTreasury() external view returns (address payable) {
         return treasury;
     }
 
-    /// @notice return feeSkirtingBountyPercentage
+    /// @notice return registry
     function getRegistry() external view returns (IRegistry) {
         return registry;
     }
 
     /// @notice return boolean if strategy is approved
-    function isApprovedStrategies(address _strategy) external view returns (bool) {
-        return approvedStrategies[_strategy];
-    }
-
-    /// @notice return feeSkirtingBountyPercentage
-    function getFeeSkirtingBountyPercentage() external view returns (uint256) {
-        return feeSkirtingBountyPercentage;
+    function isApprovedStrategy(address _strategy) external view returns (bool) {
+        return _isApprovedStrategy(_strategy);
     }
 
     /// @notice return the pool

@@ -401,7 +401,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
 
         vm.warp(allocationEndTime + 10);
         // fund pool
-        allo().fundPool{value: 1e18}(poolId, 1e18, NATIVE);
+        allo().fundPool{value: 1e18}(poolId, 1e18);
 
         vm.prank(pool_admin());
 
@@ -557,7 +557,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
     }
 
     function test_withdraw() public {
-        allo().fundPool{value: 1e18}(poolId, 1e18, NATIVE);
+        allo().fundPool{value: 1e18}(poolId, 1e18);
         vm.warp(allocationEndTime + 31 days);
         vm.prank(pool_admin());
         strategy.withdraw(9.9e17); // 1e18 - 1e17 fee = 9.9e17
@@ -955,7 +955,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         amounts[0] = 9.9e17; // fund amount: 1e18 - fee: 1e17 = 9.9e17
 
         // fund pool
-        allo().fundPool{value: 1e18}(poolId, 1e18, NATIVE);
+        allo().fundPool{value: 1e18}(poolId, 1e18);
 
         vm.warp(allocationEndTime + 10);
 

@@ -37,7 +37,6 @@ interface IStrategy {
     /// ======================
 
     event Initialized(address allo, bytes32 identityId, uint256 poolId, bytes data);
-    event Skim(address skimmer, address token, uint256 amountToTreasury, uint256 amountToSkimmer);
     event Registered(address indexed recipientId, bytes data, address sender);
     event Allocated(address indexed recipientId, uint256 amount, address token, address sender);
     event Distributed(address indexed recipientId, address recipientAddress, uint256 amount, address sender);
@@ -56,11 +55,17 @@ interface IStrategy {
     /// @return The id of the strategy
     function getStrategyId() external view returns (bytes32);
 
-    // simply returns whether a allocator is valid or not, will usually be true for all
+    /// @return whether a allocator is valid or not, will usually be true for all
     function isValidAllocator(address _allocator) external view returns (bool);
 
-    // simply returns whether pool is active
+    /// @return whether pool is active
     function isPoolActive() external returns (bool);
+
+    /// @return returns the amount of tokens in the pool
+    function getPoolAmount() external view returns (uint256);
+
+    /// incrases the poolAmount which is set on invoking Allo.fundPool
+    function increasePoolAmount(uint256 _amount) external;
 
     // simply returns the status of a recipient
     // probably tracked in a mapping, but will depend on the implementation
@@ -81,10 +86,6 @@ interface IStrategy {
     // the default BaseStrategy version will not use the data
     // if a strtegy wants to use it, they will overwrite it, use it, and then call super.initialize()
     function initialize(uint256 _poolId, bytes memory _data) external;
-
-    // this is used to check Allo.sol for the amount of funding there should be
-    // then checking the balance of the contract, and paying the difference
-    function skim(address token) external;
 
     // this is called via allo.sol to register recipients
     // it can change their status all the way to Accepted, or to Pending if there are more steps

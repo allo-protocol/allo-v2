@@ -4,13 +4,18 @@ pragma solidity 0.8.19;
 import "forge-std/Test.sol";
 import "../shared/RegistrySetup.sol";
 
-import {Registry} from "../../../contracts/core/Registry.sol";
+// Interfaces
 import {IRegistry} from "../../../contracts/core/IRegistry.sol";
+// Core Contracts
+import {Registry} from "../../../contracts/core/Registry.sol";
+// Internal libraries
+import {Native} from "../../../contracts/core/libraries/Native.sol";
 import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
+// Test libraries
 import {TestUtilities} from "../utils/TestUtilities.sol";
 import {MockToken} from "../utils/MockToken.sol";
 
-contract RegistryTest is Test, RegistrySetup {
+contract RegistryTest is Test, RegistrySetup, Native {
     event IdentityCreated(
         bytes32 indexed identityId, uint256 nonce, string name, Metadata metadata, address owner, address anchor
     );
@@ -346,6 +351,21 @@ contract RegistryTest is Test, RegistrySetup {
         vm.expectRevert(IRegistry.ZERO_ADDRESS.selector);
         vm.prank(registry_owner());
         registry().recoverFunds(nonExistentToken, address(0));
+    }
+
+    function test_recoverFunds() public {
+        address user = makeAddr("recipient");
+
+        vm.deal(address(registry()), 1e18);
+
+        assertEq(address(registry()).balance, 1e18);
+        assertEq(user.balance, 0);
+
+        vm.prank(registry_owner());
+        registry().recoverFunds(NATIVE, user);
+
+        assertEq(address(registry()).balance, 0);
+        assertNotEq(user.balance, 0);
     }
 
     function test_recoverFunds_ERC20() public {

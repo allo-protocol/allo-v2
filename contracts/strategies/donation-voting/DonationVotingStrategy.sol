@@ -375,7 +375,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
             revert NOT_ALLOWED();
         }
 
-        allo.decreasePoolTotalFunding(poolId, _amount);
+        poolAmount -= _amount;
         _transferAmount(pool.token, msg.sender, _amount);
     }
 

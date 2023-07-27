@@ -18,6 +18,7 @@ abstract contract BaseStrategy is IStrategy, Transfer {
     IAllo internal immutable allo;
     uint256 internal poolId;
     bytes32 internal strategyId;
+    uint256 internal poolAmount;
     bool internal poolActive;
 
     /// ====================================
@@ -81,7 +82,11 @@ abstract contract BaseStrategy is IStrategy, Transfer {
         return strategyId;
     }
 
-    function isPoolActive() external virtual override returns (bool) {
+    function getPoolAmount() external view virtual override returns (uint256) {
+        return poolAmount;
+    }
+
+    function isPoolActive() external override returns (bool) {
         return _isPoolActive();
     }
 
@@ -92,27 +97,15 @@ abstract contract BaseStrategy is IStrategy, Transfer {
     /// @notice Initializes the allocation strategy
     /// @param _poolId Id of the pool
     /// @dev This function is called by Allo.sol
-    function __BaseStrategy_init(uint256 _poolId) internal virtual {
+    function __BaseStrategy_init(uint256 _poolId) internal virtual onlyAllo {
         if (poolId != 0) {
             revert BaseStrategy_ALREADY_INITIALIZED();
         }
         poolId = _poolId;
     }
 
-    function skim(address _token) external virtual override {
-        IAllo.Pool memory pool = allo.getPool(poolId);
-        uint256 balanceCapturedInPool = (pool.token == _token) ? pool.amount : 0;
-
-        uint256 balanceInStrategy = _token == NATIVE ? address(this).balance : IERC20(_token).balanceOf(address(this));
-
-        if (balanceInStrategy > balanceCapturedInPool) {
-            uint256 excessFunds = balanceInStrategy - balanceCapturedInPool;
-            uint256 bounty = (excessFunds * allo.getFeeSkirtingBountyPercentage()) / allo.FEE_DENOMINATOR();
-            excessFunds -= bounty;
-            _transferAmount(_token, allo.getTreasury(), excessFunds);
-            _transferAmount(_token, msg.sender, bounty);
-            emit Skim(msg.sender, _token, excessFunds, bounty);
-        }
+    function increasePoolAmount(uint256 _amount) external override onlyAllo {
+        poolAmount += _amount;
     }
 
     function registerRecipient(bytes memory _data, address _sender)
