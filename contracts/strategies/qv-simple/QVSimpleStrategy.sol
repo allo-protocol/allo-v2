@@ -87,21 +87,21 @@ contract QVSimpleStrategy is BaseStrategy {
     /// ================================
 
     modifier onlyActiveRegistration() {
-        if (registrationStartTime <= block.timestamp && block.timestamp <= registrationEndTime) {
+        if (registrationStartTime > block.timestamp || block.timestamp > registrationEndTime) {
             revert REGISTRATION_NOT_ACTIVE();
         }
         _;
     }
 
     modifier onlyActiveAllocation() {
-        if (allocationStartTime <= block.timestamp && block.timestamp <= allocationEndTime) {
+        if (allocationStartTime > block.timestamp || block.timestamp > allocationEndTime) {
             revert ALLOCATION_NOT_ACTIVE();
         }
         _;
     }
 
     modifier onlyAfterAllocation() {
-        if (block.timestamp <= allocationEndTime) {
+        if (block.timestamp < allocationEndTime) {
             revert ALLOCATION_NOT_ENDED();
         }
         _;

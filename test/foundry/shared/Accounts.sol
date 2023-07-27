@@ -127,4 +127,28 @@ contract Accounts is StdCheats {
 
         return _members;
     }
+
+    // //////////////////////
+    // Recipient adresses
+    // //////////////////////
+
+    function recipient() public returns (address) {
+        return makeAddr("recipient");
+    }
+
+    function recipientAddress() public returns (address) {
+        return makeAddr("recipientAddress");
+    }
+
+    function no_recipient() public returns (address) {
+        return makeAddr("no_recipient");
+    }
+
+    // //////////////////////
+    // Random address
+    // //////////////////////
+
+    function randomAddress() public returns (address) {
+        return makeAddr("randomAddress");
+    }
 }
