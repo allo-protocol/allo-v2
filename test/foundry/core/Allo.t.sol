@@ -170,7 +170,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
         vm.deal(address(pool_admin()), 1e18);
 
         vm.prank(pool_admin());
-        allo().createPoolWithCustomStrategy{value: baseFee}(
+        allo().createPoolWithCustomStrategy{value: 1e18}(
             poolIdentity_id(), strategy, "0x", NATIVE, 0, metadata, pool_managers()
         );
     }
@@ -242,6 +242,11 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
         allo().updateRegistry(newRegistry);
     }
 
+    function testRevert_updateRegistry_ZERO_ADDRESS() public {
+        vm.expectRevert(IAllo.ZERO_ADDRESS.selector);
+        allo().updateRegistry(address(0));
+    }
+
     function test_updateTreasury() public {
         vm.expectEmit(true, false, false, false);
         address payable newTreasury = payable(makeAddr("new treasury"));
@@ -250,6 +255,11 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
         allo().updateTreasury(newTreasury);
 
         assertEq(allo().getTreasury(), newTreasury);
+    }
+
+    function testRevert_updateTreasury_ZERO_ADDRESS() public {
+        vm.expectRevert(IAllo.ZERO_ADDRESS.selector);
+        allo().updateTreasury(payable(address(0)));
     }
 
     function testRevert_updateTreasury_UNAUTHORIZED() public {
@@ -308,6 +318,11 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
         assertFalse(allo().isApprovedStrategy(_strategy));
         allo().addToApprovedStrategies(_strategy);
         assertTrue(allo().isApprovedStrategy(_strategy));
+    }
+
+    function testRevert_addToApprovedStrategies_ZERO_ADDRESS() public {
+        vm.expectRevert(IAllo.ZERO_ADDRESS.selector);
+        allo().addToApprovedStrategies(address(0));
     }
 
     function testRevert_addToApprovedStrategies_UNAUTHORIZED() public {
@@ -370,7 +385,30 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
     }
 
     function test_recoverFunds() public {
-        // TODO
+        address user = makeAddr("recipient");
+
+        vm.deal(address(allo()), 1e18);
+        assertEq(address(allo()).balance, 1e18);
+        assertEq(user.balance, 0);
+
+        allo().recoverFunds(NATIVE, user);
+
+        assertEq(address(allo()).balance, 0);
+        assertNotEq(user.balance, 0);
+    }
+
+    function test_recoverFunds_ERC20() public {
+        uint256 amount = 100;
+        token.mint(address(allo()), amount);
+        address user = address(0xBBB);
+
+        assertEq(token.balanceOf(address(allo())), amount, "amount");
+        assertEq(token.balanceOf(user), 0, "amount");
+
+        allo().recoverFunds(address(token), user);
+
+        assertEq(token.balanceOf(address(allo())), 0, "amount");
+        assertEq(token.balanceOf(user), amount, "amount");
     }
 
     function testRevert_recoverFunds_UNAUTHORIZED() public {
@@ -503,5 +541,11 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
 
         assertTrue(allo().isPoolManager(poolId, pool_manager1()));
         assertFalse(allo().isPoolManager(poolId, makeAddr("not manager")));
+    }
+
+    function test_getStartegy() public {
+        uint256 poolId = _utilCreatePool(0);
+
+        assertEq(address(allo().getStrategy(poolId)), strategy);
     }
 }
