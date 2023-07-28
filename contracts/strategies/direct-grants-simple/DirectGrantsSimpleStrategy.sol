@@ -45,7 +45,6 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// ===============================
 
     error RECIPIENT_ALREADY_ACCEPTED();
-    error INVALID_RECIPIENT();
     error UNAUTHORIZED();
     error INVALID_MILESTONE();
     error MILESTONE_ALREADY_ACCEPTED();
@@ -106,7 +105,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     ) internal {
         __BaseStrategy_init(_poolId);
         registryGating = _registryGating;
-        _metadataRequired = _metadataRequired;
+        metadataRequired = _metadataRequired;
         grantAmountRequired = _grantAmountRequired;
         _setPoolActive(true);
     }
