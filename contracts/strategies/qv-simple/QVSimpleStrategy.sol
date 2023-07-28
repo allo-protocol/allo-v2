@@ -9,7 +9,7 @@ import {BaseStrategy} from "../BaseStrategy.sol";
 // Internal Libraries
 import {Metadata} from "../../core/libraries/Metadata.sol";
 
-contract QVSimpleStrategy is BaseStrategy {
+contract QVSimpleStrategy is BaseStrategy { 
     /// ======================
     /// ======= Errors ======
     /// ======================
@@ -28,6 +28,9 @@ contract QVSimpleStrategy is BaseStrategy {
 
     event Appealed(address indexed recipientId, bytes data, address sender);
     event RecipientStatusUpdated(address indexed recipientId, InternalRecipientStatus status, address sender);
+    event AllocatorAdded(address indexed allocator, address sender);
+    event AllocatorRemoved(address indexed allocator, address sender);
+    event VoiceCreditsUpdated(address indexed allocator, uint256 voiceCredits, address sender);
     event TimestampsUpdated(
         uint256 registrationStartTime,
         uint256 registrationEndTime,
@@ -235,15 +238,21 @@ contract QVSimpleStrategy is BaseStrategy {
     /// @param _allocator The allocator address
     function addAllocator(address _allocator) external onlyPoolManager(msg.sender) {
         allowedAllocators[_allocator] = true;
+
+        emit AllocatorAdded(_allocator, msg.sender);
     }
 
     /// @notice Remove allocator
     /// @param _allocator The allocator address
     function removeAllocator(address _allocator) external onlyPoolManager(msg.sender) {
         allowedAllocators[_allocator] = false;
+
+        emit AllocatorRemoved(_allocator, msg.sender);
     }
 
     /// @notice Add voice credits to allocator
+    /// @param _allocator The allocator address
+    /// @param _voiceCreditsToAllocate The voice credits to allocate
     function addVoiceCredits(address _allocator, uint256 _voiceCreditsToAllocate)
         external
         onlyPoolManager(msg.sender)
@@ -251,6 +260,8 @@ contract QVSimpleStrategy is BaseStrategy {
     {
         Allocator storage allocator = allocators[_allocator];
         allocator.voiceCredits += _voiceCreditsToAllocate;
+
+        emit VoiceCreditsUpdated(_allocator, allocator.voiceCredits, msg.sender);
     }
 
     /// @notice Review recipient application
