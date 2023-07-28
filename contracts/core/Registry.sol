@@ -140,7 +140,10 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
         Identity storage identity = identitiesById[_identityId];
         identity.name = _name;
 
-        // set new anchor while preserving old anchor
+        // remove old anchor
+        anchorToIdentityId[identity.anchor] = bytes32(0);
+
+        // set new anchor
         identity.anchor = anchor;
         anchorToIdentityId[anchor] = _identityId;
 
