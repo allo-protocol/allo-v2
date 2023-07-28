@@ -249,20 +249,6 @@ contract QVSimpleStrategy is BaseStrategy {
         emit AllocatorRemoved(_allocator, msg.sender);
     }
 
-    /// @notice Add voice credits to allocator
-    /// @param _allocator The allocator address
-    /// @param _voiceCreditsToAllocate The voice credits to allocate
-    function addVoiceCredits(address _allocator, uint256 _voiceCreditsToAllocate)
-        external
-        onlyPoolManager(msg.sender)
-        onlyActiveAllocation
-    {
-        Allocator storage allocator = allocators[_allocator];
-        allocator.voiceCredits += _voiceCreditsToAllocate;
-
-        emit VoiceCreditsUpdated(_allocator, allocator.voiceCredits, msg.sender);
-    }
-
     /// @notice Review recipient application
     /// @param _recipientIds Ids of the recipients
     /// @param _recipientStatuses Statuses of the recipients

@@ -1,7 +1,7 @@
+// SPDX-License Identifier: MIT
 pragma solidity 0.8.19;
 
 // Interfaces
-import {IAllo} from "../../../contracts/core/IAllo.sol";
 import {IStrategy} from "../../../contracts/strategies/IStrategy.sol";
 
 // Core/Strategies
@@ -54,7 +54,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
     uint256 public allocationStartTime;
     uint256 public allocationEndTime;
 
-    QVSimpleStrategy public strategy;
+    address public strategy;
     MockToken public token;
     Metadata public poolMetadata;
 
@@ -76,7 +76,12 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
     );
     event Allocated(address indexed recipientId, uint256 votes, address allocator);
 
-    function setUp() public {
+    function setUp() public virtual {
+        _setUp();
+        _initialize();
+    }
+
+    function _setUp() internal {
         __RegistrySetupFull();
         __AlloSetup(address(registry()));
 
@@ -94,14 +99,12 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         useRegistryAnchor = false;
 
         poolMetadata = Metadata({protocol: 1, pointer: "PoolMetadata"});
-        strategy = new QVSimpleStrategy(address(allo()), "QVSimpleStrategy");
-
-        _initialize();
+        strategy = address(new QVSimpleStrategy(address(allo()), "QVSimpleStrategy"));
     }
 
-    function _initialize() internal {
+    function _initialize() internal virtual {
         vm.prank(address(allo()));
-        strategy.initialize(
+        QVSimpleStrategy(strategy).initialize(
             poolId,
             abi.encode(
                 registryGating,
@@ -118,7 +121,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         _createPoolWithCustomStrategy();
     }
 
-    function _createPoolWithCustomStrategy() internal {
+    function _createPoolWithCustomStrategy() internal virtual {
         poolId = allo().createPoolWithCustomStrategy(
             poolIdentity_id(),
             address(strategy),
@@ -138,27 +141,27 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         );
     }
 
-    function test_deployment() public {
-        assertEq(address(strategy.getAllo()), address(allo()));
-        assertEq(strategy.getStrategyId(), keccak256(abi.encode("QVSimpleStrategy")));
+    function test_deployment() public virtual {
+        assertEq(address(QVSimpleStrategy(strategy).getAllo()), address(allo()));
+        assertEq(QVSimpleStrategy(strategy).getStrategyId(), keccak256(abi.encode("QVSimpleStrategy")));
     }
 
-    function test_initialize() public {
-        assertEq(strategy.getPoolId(), poolId);
-        assertEq(strategy.metadataRequired(), metadataRequired);
-        assertEq(strategy.maxVoiceCreditsPerAllocator(), maxVoiceCreditsPerAllocator);
-        assertEq(strategy.registrationStartTime(), registrationStartTime);
-        assertEq(strategy.registrationEndTime(), registrationEndTime);
-        assertEq(strategy.allocationStartTime(), allocationStartTime);
-        assertEq(strategy.allocationEndTime(), allocationEndTime);
+    function test_initialize() public virtual {
+        assertEq(QVSimpleStrategy(strategy).getPoolId(), poolId);
+        assertEq(QVSimpleStrategy(strategy).metadataRequired(), metadataRequired);
+        assertEq(QVSimpleStrategy(strategy).maxVoiceCreditsPerAllocator(), maxVoiceCreditsPerAllocator);
+        assertEq(QVSimpleStrategy(strategy).registrationStartTime(), registrationStartTime);
+        assertEq(QVSimpleStrategy(strategy).registrationEndTime(), registrationEndTime);
+        assertEq(QVSimpleStrategy(strategy).allocationStartTime(), allocationStartTime);
+        assertEq(QVSimpleStrategy(strategy).allocationEndTime(), allocationEndTime);
     }
 
     function test_initialize_BaseStrategy_UNAUTHORIZED() public {
         vm.prank(allo_owner());
-        strategy = new QVSimpleStrategy(address(allo()), "QVSimpleStrategy");
+        strategy = address(new QVSimpleStrategy(address(allo()), "QVSimpleStrategy"));
         vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
         vm.prank(randomAddress());
-        strategy.initialize(
+        QVSimpleStrategy(strategy).initialize(
             poolId,
             abi.encode(
                 registryGating,
@@ -172,11 +175,11 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         );
     }
 
-    function testRevert_initialize_BaseStrategy_ALREADY_INITIALIZED() public {
+    function testRevert_initialize_BaseStrategy_ALREADY_INITIALIZED() public virtual {
         vm.expectRevert(IStrategy.BaseStrategy_ALREADY_INITIALIZED.selector);
 
         vm.prank(address(allo()));
-        strategy.initialize(
+        QVSimpleStrategy(strategy).initialize(
             poolId,
             abi.encode(
                 registryGating,
@@ -191,12 +194,12 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
     }
 
     function testRevert_initialize_INVALID() public {
-        strategy = new QVSimpleStrategy(address(allo()), "QVSimpleStrategy");
+        strategy = address(new QVSimpleStrategy(address(allo()), "QVSimpleStrategy"));
 
         // when registrationStartTime is in the past
         vm.expectRevert(QVSimpleStrategy.INVALID.selector);
         vm.prank(address(allo()));
-        strategy.initialize(
+        QVSimpleStrategy(strategy).initialize(
             poolId,
             abi.encode(
                 registryGating,
@@ -212,7 +215,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         // when registrationStartTime > registrationEndTime
         vm.expectRevert(QVSimpleStrategy.INVALID.selector);
         vm.prank(address(allo()));
-        strategy.initialize(
+        QVSimpleStrategy(strategy).initialize(
             poolId,
             abi.encode(
                 registryGating,
@@ -228,7 +231,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         // when allocationStartTime > allocationEndTime
         vm.expectRevert(QVSimpleStrategy.INVALID.selector);
         vm.prank(address(allo()));
-        strategy.initialize(
+        QVSimpleStrategy(strategy).initialize(
             poolId,
             abi.encode(
                 registryGating,
@@ -244,7 +247,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         // when  registrationEndTime > allocationEndTime
         vm.expectRevert(QVSimpleStrategy.INVALID.selector);
         vm.prank(address(allo()));
-        strategy.initialize(
+        QVSimpleStrategy(strategy).initialize(
             poolId,
             abi.encode(
                 registryGating,
@@ -265,7 +268,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         vm.expectEmit(false, false, false, true);
         emit AllocatorAdded(allocator, pool_manager1());
 
-        strategy.addAllocator(allocator);
+        QVSimpleStrategy(strategy).addAllocator(allocator);
     }
 
     function testRevert_addAllocator_BaseStrategy_UNAUTHORIZED() public {
@@ -274,7 +277,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
 
         vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
 
-        strategy.addAllocator(allocator);
+        QVSimpleStrategy(strategy).addAllocator(allocator);
     }
 
     function test_removeAllocator() public {
@@ -284,7 +287,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         vm.expectEmit(false, false, false, true);
         emit AllocatorRemoved(allocator, pool_manager1());
 
-        strategy.removeAllocator(allocator);
+        QVSimpleStrategy(strategy).removeAllocator(allocator);
     }
 
     function testRevert_removeAllocator_BaseStrategy_UNAUTHORIZED() public {
@@ -293,27 +296,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
 
         vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
 
-        strategy.removeAllocator(allocator);
-    }
-
-    function test_addVoiceCredits() public {
-        vm.prank(pool_manager1());
-        vm.warp(allocationStartTime + 1);
-        address allocator = makeAddr("allocator");
-
-        vm.expectEmit(false, false, false, true);
-        emit VoiceCreditsUpdated(allocator, 100, pool_manager1());
-
-        strategy.addVoiceCredits(allocator, 100);
-    }
-
-    function testRevert_addVoiceCredits_ALLOCATION_NOT_ACTIVE() public {
-        vm.prank(pool_manager1());
-        vm.warp(allocationStartTime - 1);
-        address allocator = makeAddr("allocator");
-
-        vm.expectRevert(QVSimpleStrategy.ALLOCATION_NOT_ACTIVE.selector);
-        strategy.addVoiceCredits(allocator, 100);
+        QVSimpleStrategy(strategy).removeAllocator(allocator);
     }
 
     function test_registerRecipient_new() public {
@@ -325,9 +308,9 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         bytes memory data = abi.encode(recipientAddress, false, metadata);
 
         vm.prank(address(allo()));
-        address recipientId = strategy.registerRecipient(data, sender);
+        address recipientId = QVSimpleStrategy(strategy).registerRecipient(data, sender);
 
-        QVSimpleStrategy.Recipient memory receipt = strategy.getRecipient(recipientId);
+        QVSimpleStrategy.Recipient memory receipt = QVSimpleStrategy(strategy).getRecipient(recipientId);
 
         assertEq(receipt.useRegistryAnchor, useRegistryAnchor);
         assertEq(receipt.recipientAddress, recipientAddress);
@@ -337,9 +320,9 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
     }
 
     function test_registerRecipient_new_withRegistryAnchor() public {
-        strategy = new QVSimpleStrategy(address(allo()), "QVSimpleStrategy");
+        strategy = address(new QVSimpleStrategy(address(allo()), "QVSimpleStrategy"));
         vm.prank(address(allo()));
-        strategy.initialize(
+        QVSimpleStrategy(strategy).initialize(
             poolId,
             abi.encode(
                 true,
@@ -356,9 +339,9 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         bytes memory data = __generateRecipientWithId(poolIdentity_anchor());
 
         vm.prank(address(allo()));
-        address recipientId = strategy.registerRecipient(data, pool_admin());
+        address recipientId = QVSimpleStrategy(strategy).registerRecipient(data, pool_admin());
 
-        QVSimpleStrategy.Recipient memory receipt = strategy.getRecipient(recipientId);
+        QVSimpleStrategy.Recipient memory receipt = QVSimpleStrategy(strategy).getRecipient(recipientId);
         assertTrue(receipt.useRegistryAnchor);
     }
 
@@ -368,7 +351,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         // register
         vm.prank(address(allo()));
         address sender = makeAddr("recipient");
-        address recipientId = strategy.registerRecipient(__generateRecipientWithoutId(false), sender);
+        address recipientId = QVSimpleStrategy(strategy).registerRecipient(__generateRecipientWithoutId(false), sender);
 
         // reject
         address[] memory recipientIds = new address[](1);
@@ -378,10 +361,10 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         recipientStatuses[0] = QVSimpleStrategy.InternalRecipientStatus.Rejected;
 
         vm.prank(pool_manager1());
-        strategy.reviewRecipients(recipientIds, recipientStatuses);
+        QVSimpleStrategy(strategy).reviewRecipients(recipientIds, recipientStatuses);
 
         vm.prank(pool_manager2());
-        strategy.reviewRecipients(recipientIds, recipientStatuses);
+        QVSimpleStrategy(strategy).reviewRecipients(recipientIds, recipientStatuses);
 
         // appeal
         bytes memory data = __generateRecipientWithoutId(false);
@@ -389,10 +372,10 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         emit Appealed(recipientId, data, sender);
 
         vm.prank(address(allo()));
-        strategy.registerRecipient(data, sender);
+        QVSimpleStrategy(strategy).registerRecipient(data, sender);
 
         // test status mapping. Internal: Appealed -> Global: Pending
-        IStrategy.RecipientStatus newStatus = strategy.getRecipientStatus(recipientId);
+        IStrategy.RecipientStatus newStatus = QVSimpleStrategy(strategy).getRecipientStatus(recipientId);
         assertEq(uint8(IStrategy.RecipientStatus.Pending), uint8(newStatus));
     }
 
@@ -400,9 +383,10 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         vm.warp(registrationStartTime + 10);
         vm.prank(address(allo()));
         address sender = makeAddr("recipient");
-        address recipientId = strategy.registerRecipient(__generateRecipientWithoutId(false), sender);
+        address recipientId = QVSimpleStrategy(strategy).registerRecipient(__generateRecipientWithoutId(false), sender);
 
-        QVSimpleStrategy.InternalRecipientStatus recipientStatus = strategy.getInternalRecipientStatus(recipientId);
+        QVSimpleStrategy.InternalRecipientStatus recipientStatus =
+            QVSimpleStrategy(strategy).getInternalRecipientStatus(recipientId);
         assertEq(uint8(QVSimpleStrategy.InternalRecipientStatus.Pending), uint8(recipientStatus));
     }
 
@@ -410,7 +394,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
         vm.prank(randomAddress());
         bytes memory data = __generateRecipientWithoutId(false);
-        strategy.registerRecipient(data, msg.sender);
+        QVSimpleStrategy(strategy).registerRecipient(data, msg.sender);
     }
 
     function testRevert_registerRecipient_REGISTRATION_NOT_ACTIVE() public {
@@ -419,7 +403,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
 
         vm.prank(address(allo()));
         bytes memory data = __generateRecipientWithoutId(false);
-        strategy.registerRecipient(data, recipient1());
+        QVSimpleStrategy(strategy).registerRecipient(data, recipient1());
     }
 
     function testRevert_registerRecipient_isUsingRegistryAnchor_UNAUTHORIZED() public {
@@ -434,13 +418,13 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         bytes memory data = abi.encode(recipientAddress, true, metadata);
 
         vm.prank(address(allo()));
-        strategy.registerRecipient(data, sender);
+        QVSimpleStrategy(strategy).registerRecipient(data, sender);
     }
 
     function testRevert_registerRecipient_withAnchorGating_UNAUTHORIZED() public {
-        strategy = new QVSimpleStrategy(address(allo()), "QVSimpleStrategy");
+        strategy = address(new QVSimpleStrategy(address(allo()), "QVSimpleStrategy"));
         vm.prank(address(allo()));
-        strategy.initialize(
+        QVSimpleStrategy(strategy).initialize(
             poolId,
             abi.encode(
                 true,
@@ -460,7 +444,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         bytes memory data = __generateRecipientWithId(poolIdentity_anchor());
 
         vm.prank(address(allo()));
-        strategy.registerRecipient(data, sender);
+        QVSimpleStrategy(strategy).registerRecipient(data, sender);
     }
 
     function testRevert_registerRecipient_RECIPIENT_ERROR() public {
@@ -475,7 +459,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         bytes memory data = abi.encode(recipientAddress, false, metadata);
 
         vm.prank(address(allo()));
-        strategy.registerRecipient(data, sender);
+        QVSimpleStrategy(strategy).registerRecipient(data, sender);
     }
 
     function testRevert_registerRecipient_INVALID_METADATA() public {
@@ -491,7 +475,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         bytes memory data = abi.encode(recipientAddress, false, metadata);
 
         vm.prank(address(allo()));
-        strategy.registerRecipient(data, sender);
+        QVSimpleStrategy(strategy).registerRecipient(data, sender);
 
         // protocol is 0
         vm.expectRevert(QVSimpleStrategy.INVALID_METADATA.selector);
@@ -500,7 +484,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         data = abi.encode(recipientAddress, false, metadata);
 
         vm.prank(address(allo()));
-        strategy.registerRecipient(data, sender);
+        QVSimpleStrategy(strategy).registerRecipient(data, sender);
     }
 
     function test_getPayouts() public {
@@ -512,7 +496,8 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         recipientIds[0] = recipientId;
         recipientIds[1] = no_recipient();
 
-        QVSimpleStrategy.PayoutSummary[] memory payouts = strategy.getPayouts(recipientIds, "", address(0));
+        QVSimpleStrategy.PayoutSummary[] memory payouts =
+            QVSimpleStrategy(strategy).getPayouts(recipientIds, "", address(0));
 
         assertEq(payouts[0].recipientAddress, sender);
         assertEq(payouts[0].amount, 9.9e17);
@@ -530,9 +515,10 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         assertEq(token.balanceOf(address(strategy)), 9.9e17);
 
         vm.prank(address(allo()));
-        strategy.distribute(recipients, "", pool_admin());
+        QVSimpleStrategy(strategy).distribute(recipients, "", pool_admin());
 
-        QVSimpleStrategy.PayoutSummary[] memory payouts = strategy.getPayouts(recipients, "", address(0));
+        QVSimpleStrategy.PayoutSummary[] memory payouts =
+            QVSimpleStrategy(strategy).getPayouts(recipients, "", address(0));
 
         assertEq(payouts[0].recipientAddress, recipient1());
         assertEq(payouts[0].amount, 0); // already distributed
@@ -545,20 +531,20 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         );
 
         vm.prank(pool_admin());
-        strategy.updatePoolTimestamps(
+        QVSimpleStrategy(strategy).updatePoolTimestamps(
             registrationStartTime, registrationEndTime, allocationStartTime, allocationEndTime + 10
         );
 
-        assertEq(strategy.registrationStartTime(), registrationStartTime);
-        assertEq(strategy.registrationEndTime(), registrationEndTime);
-        assertEq(strategy.allocationStartTime(), allocationStartTime);
-        assertEq(strategy.allocationEndTime(), allocationEndTime + 10);
+        assertEq(QVSimpleStrategy(strategy).registrationStartTime(), registrationStartTime);
+        assertEq(QVSimpleStrategy(strategy).registrationEndTime(), registrationEndTime);
+        assertEq(QVSimpleStrategy(strategy).allocationStartTime(), allocationStartTime);
+        assertEq(QVSimpleStrategy(strategy).allocationEndTime(), allocationEndTime + 10);
     }
 
     function testRevert_updatePoolTimestamps_UNAUTHORIZED() public {
         vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
         vm.prank(randomAddress());
-        strategy.updatePoolTimestamps(
+        QVSimpleStrategy(strategy).updatePoolTimestamps(
             registrationStartTime, registrationEndTime, allocationStartTime, allocationEndTime + 10
         );
     }
@@ -566,26 +552,28 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
     function testRevert_updatePoolTimestamps_INVALID() public {
         vm.expectRevert(QVSimpleStrategy.INVALID.selector);
         vm.prank(pool_admin());
-        strategy.updatePoolTimestamps(block.timestamp - 1, registrationEndTime, allocationStartTime, allocationEndTime);
+        QVSimpleStrategy(strategy).updatePoolTimestamps(
+            block.timestamp - 1, registrationEndTime, allocationStartTime, allocationEndTime
+        );
     }
 
-    function test_isValidAllocator() public {
-        assertFalse(strategy.isValidAllocator(address(0)));
-        assertFalse(strategy.isValidAllocator(randomAddress()));
+    function test_isValidAllocator() public virtual {
+        assertFalse(QVSimpleStrategy(strategy).isValidAllocator(address(0)));
+        assertFalse(QVSimpleStrategy(strategy).isValidAllocator(randomAddress()));
     }
 
     function test_isPoolActive() public {
         vm.warp(registrationStartTime - 1);
-        assertFalse(strategy.isPoolActive());
+        assertFalse(QVSimpleStrategy(strategy).isPoolActive());
         vm.warp(registrationStartTime + 1);
-        assertTrue(strategy.isPoolActive());
+        assertTrue(QVSimpleStrategy(strategy).isPoolActive());
     }
 
     function test_reviewRecipients() public {
         vm.warp(registrationStartTime + 10);
         vm.prank(address(allo()));
         address sender = recipient1();
-        address recipientId = strategy.registerRecipient(__generateRecipientWithoutId(false), sender);
+        address recipientId = QVSimpleStrategy(strategy).registerRecipient(__generateRecipientWithoutId(false), sender);
 
         address[] memory recipientIds = new address[](1);
         recipientIds[0] = recipientId;
@@ -594,15 +582,15 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         recipientStatuses[0] = QVSimpleStrategy.InternalRecipientStatus.Rejected;
 
         vm.prank(pool_manager1());
-        strategy.reviewRecipients(recipientIds, recipientStatuses);
+        QVSimpleStrategy(strategy).reviewRecipients(recipientIds, recipientStatuses);
 
         vm.expectEmit(true, false, false, false);
         emit RecipientStatusUpdated(recipientId, QVSimpleStrategy.InternalRecipientStatus.Rejected, pool_admin());
 
         vm.prank(pool_manager2());
-        strategy.reviewRecipients(recipientIds, recipientStatuses);
+        QVSimpleStrategy(strategy).reviewRecipients(recipientIds, recipientStatuses);
 
-        QVSimpleStrategy.Recipient memory recipient = strategy.getRecipient(recipientId);
+        QVSimpleStrategy.Recipient memory recipient = QVSimpleStrategy(strategy).getRecipient(recipientId);
         assertEq(uint8(QVSimpleStrategy.InternalRecipientStatus.Rejected), uint8(recipient.recipientStatus));
     }
 
@@ -612,7 +600,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         // register
         vm.prank(address(allo()));
         address sender = makeAddr("recipient");
-        address recipientId = strategy.registerRecipient(__generateRecipientWithoutId(false), sender);
+        address recipientId = QVSimpleStrategy(strategy).registerRecipient(__generateRecipientWithoutId(false), sender);
 
         // reject
         address[] memory recipientIds = new address[](1);
@@ -625,32 +613,47 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         emit Reviewed(recipientId, QVSimpleStrategy.InternalRecipientStatus.Rejected, pool_manager1());
 
         vm.prank(pool_manager1());
-        strategy.reviewRecipients(recipientIds, recipientStatuses);
+        QVSimpleStrategy(strategy).reviewRecipients(recipientIds, recipientStatuses);
 
         // still pending
-        assertEq(uint8(strategy.getRecipientStatus(recipientId)), uint8(IStrategy.RecipientStatus.Pending));
-        assertEq(strategy.reviewsByStatus(recipientId, QVSimpleStrategy.InternalRecipientStatus.Rejected), 1);
+        assertEq(
+            uint8(QVSimpleStrategy(strategy).getRecipientStatus(recipientId)), uint8(IStrategy.RecipientStatus.Pending)
+        );
+        assertEq(
+            QVSimpleStrategy(strategy).reviewsByStatus(recipientId, QVSimpleStrategy.InternalRecipientStatus.Rejected),
+            1
+        );
 
         vm.expectEmit(true, true, false, false);
         emit RecipientStatusUpdated(recipientId, QVSimpleStrategy.InternalRecipientStatus.Rejected, pool_manager2());
         emit Reviewed(recipientId, QVSimpleStrategy.InternalRecipientStatus.Rejected, pool_manager2());
 
         vm.prank(pool_manager2());
-        strategy.reviewRecipients(recipientIds, recipientStatuses);
+        QVSimpleStrategy(strategy).reviewRecipients(recipientIds, recipientStatuses);
 
         // rejected
-        assertEq(uint8(strategy.getRecipientStatus(recipientId)), uint8(IStrategy.RecipientStatus.Rejected));
-        assertEq(strategy.reviewsByStatus(recipientId, QVSimpleStrategy.InternalRecipientStatus.Rejected), 2);
+        assertEq(
+            uint8(QVSimpleStrategy(strategy).getRecipientStatus(recipientId)), uint8(IStrategy.RecipientStatus.Rejected)
+        );
+        assertEq(
+            QVSimpleStrategy(strategy).reviewsByStatus(recipientId, QVSimpleStrategy.InternalRecipientStatus.Rejected),
+            2
+        );
 
         vm.expectEmit(true, false, false, false);
         emit Reviewed(recipientId, QVSimpleStrategy.InternalRecipientStatus.Rejected, pool_admin());
 
         vm.prank(pool_admin());
-        strategy.reviewRecipients(recipientIds, recipientStatuses);
+        QVSimpleStrategy(strategy).reviewRecipients(recipientIds, recipientStatuses);
 
         // still rejected
-        assertEq(uint8(strategy.getRecipientStatus(recipientId)), uint8(IStrategy.RecipientStatus.Rejected));
-        assertEq(strategy.reviewsByStatus(recipientId, QVSimpleStrategy.InternalRecipientStatus.Rejected), 3);
+        assertEq(
+            uint8(QVSimpleStrategy(strategy).getRecipientStatus(recipientId)), uint8(IStrategy.RecipientStatus.Rejected)
+        );
+        assertEq(
+            QVSimpleStrategy(strategy).reviewsByStatus(recipientId, QVSimpleStrategy.InternalRecipientStatus.Rejected),
+            3
+        );
     }
 
     function test_reviewRecipient_reviewTreshold_noStatusChange() public {
@@ -659,7 +662,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         // register
         vm.prank(address(allo()));
         address sender = makeAddr("recipient");
-        address recipientId = strategy.registerRecipient(__generateRecipientWithoutId(false), sender);
+        address recipientId = QVSimpleStrategy(strategy).registerRecipient(__generateRecipientWithoutId(false), sender);
 
         // reject
         address[] memory recipientIds = new address[](1);
@@ -669,42 +672,60 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         recipientStatuses[0] = QVSimpleStrategy.InternalRecipientStatus.Rejected;
 
         vm.prank(pool_manager1());
-        strategy.reviewRecipients(recipientIds, recipientStatuses);
+        QVSimpleStrategy(strategy).reviewRecipients(recipientIds, recipientStatuses);
 
         // still pending
-        assertEq(uint8(strategy.getRecipientStatus(recipientId)), uint8(IStrategy.RecipientStatus.Pending));
-        assertEq(strategy.reviewsByStatus(recipientId, QVSimpleStrategy.InternalRecipientStatus.Rejected), 1);
+        assertEq(
+            uint8(QVSimpleStrategy(strategy).getRecipientStatus(recipientId)), uint8(IStrategy.RecipientStatus.Pending)
+        );
+        assertEq(
+            QVSimpleStrategy(strategy).reviewsByStatus(recipientId, QVSimpleStrategy.InternalRecipientStatus.Rejected),
+            1
+        );
 
         vm.prank(pool_manager2());
-        strategy.reviewRecipients(recipientIds, recipientStatuses);
+        QVSimpleStrategy(strategy).reviewRecipients(recipientIds, recipientStatuses);
 
         // rejected
-        assertEq(uint8(strategy.getRecipientStatus(recipientId)), uint8(IStrategy.RecipientStatus.Rejected));
-        assertEq(strategy.reviewsByStatus(recipientId, QVSimpleStrategy.InternalRecipientStatus.Rejected), 2);
+        assertEq(
+            uint8(QVSimpleStrategy(strategy).getRecipientStatus(recipientId)), uint8(IStrategy.RecipientStatus.Rejected)
+        );
+        assertEq(
+            QVSimpleStrategy(strategy).reviewsByStatus(recipientId, QVSimpleStrategy.InternalRecipientStatus.Rejected),
+            2
+        );
 
         // one accept after two rejects
         recipientStatuses[0] = QVSimpleStrategy.InternalRecipientStatus.Accepted;
         vm.prank(pool_admin());
-        strategy.reviewRecipients(recipientIds, recipientStatuses);
+        QVSimpleStrategy(strategy).reviewRecipients(recipientIds, recipientStatuses);
 
         // still rejected
-        assertEq(uint8(strategy.getRecipientStatus(recipientId)), uint8(IStrategy.RecipientStatus.Rejected));
-        assertEq(strategy.reviewsByStatus(recipientId, QVSimpleStrategy.InternalRecipientStatus.Rejected), 2);
-        assertEq(strategy.reviewsByStatus(recipientId, QVSimpleStrategy.InternalRecipientStatus.Accepted), 1);
+        assertEq(
+            uint8(QVSimpleStrategy(strategy).getRecipientStatus(recipientId)), uint8(IStrategy.RecipientStatus.Rejected)
+        );
+        assertEq(
+            QVSimpleStrategy(strategy).reviewsByStatus(recipientId, QVSimpleStrategy.InternalRecipientStatus.Rejected),
+            2
+        );
+        assertEq(
+            QVSimpleStrategy(strategy).reviewsByStatus(recipientId, QVSimpleStrategy.InternalRecipientStatus.Accepted),
+            1
+        );
     }
 
     function testRevert_reviewRecipients_REGISTRATION_NOT_ACTIVE() public {
         vm.warp(allocationStartTime + 10);
         vm.expectRevert(QVSimpleStrategy.REGISTRATION_NOT_ACTIVE.selector);
         vm.prank(pool_manager1());
-        strategy.reviewRecipients(new address[](1), new QVSimpleStrategy.InternalRecipientStatus[](1));
+        QVSimpleStrategy(strategy).reviewRecipients(new address[](1), new QVSimpleStrategy.InternalRecipientStatus[](1));
     }
 
     function testRevert_reviewRecipients_INVALID() public {
         vm.warp(registrationStartTime + 10);
         vm.expectRevert(QVSimpleStrategy.INVALID.selector);
         vm.prank(pool_manager1());
-        strategy.reviewRecipients(new address[](1), new QVSimpleStrategy.InternalRecipientStatus[](0));
+        QVSimpleStrategy(strategy).reviewRecipients(new address[](1), new QVSimpleStrategy.InternalRecipientStatus[](0));
     }
 
     function testRevert_reviewRecipients_withNoneStatus_RECIPIENT_ERROR() public {
@@ -720,7 +741,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         vm.expectRevert(abi.encodeWithSelector(QVSimpleStrategy.RECIPIENT_ERROR.selector, recipients[0]));
         vm.prank(pool_manager1());
 
-        strategy.reviewRecipients(recipients, recipientStatuses);
+        QVSimpleStrategy(strategy).reviewRecipients(recipients, recipientStatuses);
     }
 
     function testRevert_ReviewRecipients_UNAUTHORIZED() public {
@@ -736,7 +757,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         recipientStatuses[1] = QVSimpleStrategy.InternalRecipientStatus.Rejected;
 
         vm.prank(pool_notAManager());
-        strategy.reviewRecipients(recipients, recipientStatuses);
+        QVSimpleStrategy(strategy).reviewRecipients(recipients, recipientStatuses);
     }
 
     function testRevert_reviewRecipients_withAppealedStatus_RECIPIENT_ERROR() public {
@@ -752,44 +773,43 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         vm.expectRevert(abi.encodeWithSelector(QVSimpleStrategy.RECIPIENT_ERROR.selector, recipients[0]));
         vm.prank(pool_manager1());
 
-        strategy.reviewRecipients(recipients, recipientStatuses);
+        QVSimpleStrategy(strategy).reviewRecipients(recipients, recipientStatuses);
     }
 
     function testRevert_reviewRecipients_UNAUTHORIZED() public {
         vm.warp(registrationStartTime + 10);
         vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
         vm.prank(randomAddress());
-        strategy.reviewRecipients(new address[](1), new QVSimpleStrategy.InternalRecipientStatus[](1));
+        QVSimpleStrategy(strategy).reviewRecipients(new address[](1), new QVSimpleStrategy.InternalRecipientStatus[](1));
     }
 
     function test_getRecipientStatus() public {
         vm.warp(registrationStartTime + 10);
         vm.prank(address(allo()));
         address sender = recipient1();
-        address recipientId = strategy.registerRecipient(__generateRecipientWithoutId(false), sender);
+        address recipientId = QVSimpleStrategy(strategy).registerRecipient(__generateRecipientWithoutId(false), sender);
 
-        BaseStrategy.RecipientStatus receiptStatus = strategy.getRecipientStatus(recipientId);
+        BaseStrategy.RecipientStatus receiptStatus = QVSimpleStrategy(strategy).getRecipientStatus(recipientId);
         assertEq(uint8(IStrategy.RecipientStatus.Pending), uint8(receiptStatus));
     }
 
-    function test_allocate() public {
+    function test_allocate() public virtual {
         address recipientId = __register_accept_recipient();
-        address allocator = makeAddr("allocator chad");
+        address allocator = randomAddress();
 
         vm.startPrank(pool_manager2());
         vm.warp(allocationStartTime + 10);
 
-        strategy.addAllocator(allocator);
-        strategy.addVoiceCredits(allocator, 10);
+        QVSimpleStrategy(strategy).addAllocator(allocator);
 
-        bytes memory allocateData = abi.encode(recipientId, 4);
+        bytes memory allocateData = __generateAllocation(recipientId, 4);
 
         vm.prank(address(allo()));
         vm.expectEmit(true, false, false, true);
 
         emit Allocated(recipientId, 2e9, allocator);
 
-        strategy.allocate(allocateData, allocator);
+        QVSimpleStrategy(strategy).allocate(allocateData, allocator);
     }
 
     function testRevert_allocate_ALLOCATION_NOT_ACTIVE() public {
@@ -798,53 +818,53 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         vm.expectRevert(QVSimpleStrategy.ALLOCATION_NOT_ACTIVE.selector);
 
         vm.prank(address(allo()));
-        bytes memory allocateData = abi.encode(recipientId, 4);
-        strategy.allocate(allocateData, msg.sender);
+        bytes memory allocateData = __generateAllocation(recipientId, 4);
+        QVSimpleStrategy(strategy).allocate(allocateData, msg.sender);
     }
 
     function testRevert_allocate_UNAUTHORIZED() public {
         address recipientId = __register_reject_recipient();
-        address allocator = makeAddr("allocator chad");
+        address allocator = makeAddr("allocator");
 
         vm.expectRevert(abi.encodeWithSelector(QVSimpleStrategy.UNAUTHORIZED.selector));
         vm.warp(allocationStartTime + 10);
 
-        bytes memory allocateData = abi.encode(recipientId, 4);
+        bytes memory allocateData = __generateAllocation(recipientId, 4);
 
         vm.prank(address(allo()));
-        strategy.allocate(allocateData, allocator);
+        QVSimpleStrategy(strategy).allocate(allocateData, allocator);
     }
 
     function testRevert_allocate_RECIPIENT_ERROR() public {
         address recipientId = __register_reject_recipient();
-        address allocator = makeAddr("allocator chad");
+        address allocator = randomAddress();
 
         vm.startPrank(pool_manager2());
-        strategy.addAllocator(allocator);
+        QVSimpleStrategy(strategy).addAllocator(allocator);
 
         vm.expectRevert(abi.encodeWithSelector(QVSimpleStrategy.RECIPIENT_ERROR.selector, recipientId));
         vm.warp(allocationStartTime + 10);
 
-        bytes memory allocateData = abi.encode(recipientId, 4);
+        bytes memory allocateData = __generateAllocation(recipientId, 4);
 
         vm.prank(address(allo()));
-        strategy.allocate(allocateData, allocator);
+        QVSimpleStrategy(strategy).allocate(allocateData, allocator);
     }
 
     function testRevert_allocate_INVALID_tooManyVoiceCredits() public {
         address recipientId = __register_accept_recipient();
-        address allocator = makeAddr("allocator chad");
+        address allocator = randomAddress();
 
         vm.startPrank(pool_manager2());
-        strategy.addAllocator(allocator);
+        QVSimpleStrategy(strategy).addAllocator(allocator);
 
         vm.expectRevert(abi.encodeWithSelector(QVSimpleStrategy.INVALID.selector));
         vm.warp(allocationStartTime + 10);
 
-        bytes memory allocateData = abi.encode(recipientId, 400);
+        bytes memory allocateData = __generateAllocation(recipientId, 400);
 
         vm.prank(address(allo()));
-        strategy.allocate(allocateData, allocator);
+        QVSimpleStrategy(strategy).allocate(allocateData, allocator);
     }
 
     function testRevert_allocate_INVALID_noVoiceTokens() public {
@@ -852,28 +872,27 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         vm.expectRevert(QVSimpleStrategy.INVALID.selector);
         vm.warp(allocationStartTime + 10);
 
-        address allocator = makeAddr("allocator");
-        bytes memory allocateData = abi.encode(recipientId, 0);
+        address allocator = randomAddress();
+        bytes memory allocateData = __generateAllocation(recipientId, 0);
 
         vm.prank(address(allo()));
-        strategy.allocate(allocateData, allocator);
+        QVSimpleStrategy(strategy).allocate(allocateData, allocator);
     }
 
     function testRevert_allocate_INVALID_voiceTokensMismatch() public {
         address recipientId = __register_accept_recipient();
-        address allocator = makeAddr("allocator chad");
+        address allocator = randomAddress();
 
         vm.startPrank(pool_manager2());
         vm.warp(allocationStartTime + 10);
 
-        strategy.addAllocator(allocator);
-        strategy.addVoiceCredits(allocator, 10);
+        QVSimpleStrategy(strategy).addAllocator(allocator);
 
         vm.expectRevert(QVSimpleStrategy.INVALID.selector);
 
-        bytes memory allocateData = abi.encode(recipientId, 0);
+        bytes memory allocateData = __generateAllocation(recipientId, 0);
         vm.prank(address(allo()));
-        strategy.allocate(allocateData, allocator);
+        QVSimpleStrategy(strategy).allocate(allocateData, allocator);
     }
 
     function test_distribute() public {
@@ -890,7 +909,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         // token.approve(pool_admin(), 100000000e18);
         emit Distributed(recipient1(), recipient1(), 9.9e17, pool_admin());
 
-        strategy.distribute(recipients, "", pool_admin());
+        QVSimpleStrategy(strategy).distribute(recipients, "", pool_admin());
 
         assertEq(token.balanceOf(recipient1()), 9.9e17);
     }
@@ -905,7 +924,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         vm.prank(address(allo()));
         vm.expectRevert(abi.encodeWithSelector(QVSimpleStrategy.RECIPIENT_ERROR.selector, recipient1()));
 
-        strategy.distribute(recipients, "", pool_admin());
+        QVSimpleStrategy(strategy).distribute(recipients, "", pool_admin());
     }
 
     function testRevert_distribute_RECIPIENT_ERROR_noRecipient() public {
@@ -918,7 +937,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         vm.prank(address(allo()));
         vm.expectRevert(abi.encodeWithSelector(QVSimpleStrategy.RECIPIENT_ERROR.selector, recipients[1]));
 
-        strategy.distribute(recipients, "", pool_admin());
+        QVSimpleStrategy(strategy).distribute(recipients, "", pool_admin());
     }
 
     function testRevert_distribute_RECIPIENT_ERROR_zeroAmount() public {
@@ -932,7 +951,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         vm.prank(address(allo()));
         vm.expectRevert(abi.encodeWithSelector(QVSimpleStrategy.RECIPIENT_ERROR.selector, recipients[0]));
 
-        strategy.distribute(recipients, "", pool_admin());
+        QVSimpleStrategy(strategy).distribute(recipients, "", pool_admin());
     }
 
     // Note: internal helper functions
@@ -955,7 +974,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         // register
         vm.prank(address(allo()));
         bytes memory data = __generateRecipientWithoutId(false);
-        address recipientId = strategy.registerRecipient(data, recipient1());
+        address recipientId = QVSimpleStrategy(strategy).registerRecipient(data, recipient1());
 
         // accept
         address[] memory recipientIds = new address[](1);
@@ -964,10 +983,10 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
             new QVSimpleStrategy.InternalRecipientStatus[](1);
         recipientStatuses[0] = QVSimpleStrategy.InternalRecipientStatus.Accepted;
         vm.prank(pool_admin());
-        strategy.reviewRecipients(recipientIds, recipientStatuses);
+        QVSimpleStrategy(strategy).reviewRecipients(recipientIds, recipientStatuses);
 
         vm.prank(pool_manager1());
-        strategy.reviewRecipients(recipientIds, recipientStatuses);
+        QVSimpleStrategy(strategy).reviewRecipients(recipientIds, recipientStatuses);
 
         return recipientId;
     }
@@ -978,7 +997,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         // register
         vm.prank(address(allo()));
         bytes memory data = __generateRecipientWithoutId(false);
-        address recipientId = strategy.registerRecipient(data, recipient1());
+        address recipientId = QVSimpleStrategy(strategy).registerRecipient(data, recipient1());
 
         // accept
         address[] memory recipientIds = new address[](1);
@@ -987,10 +1006,10 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
             new QVSimpleStrategy.InternalRecipientStatus[](1);
         recipientStatuses[0] = QVSimpleStrategy.InternalRecipientStatus.Rejected;
         vm.prank(pool_admin());
-        strategy.reviewRecipients(recipientIds, recipientStatuses);
+        QVSimpleStrategy(strategy).reviewRecipients(recipientIds, recipientStatuses);
 
         vm.prank(pool_manager1());
-        strategy.reviewRecipients(recipientIds, recipientStatuses);
+        QVSimpleStrategy(strategy).reviewRecipients(recipientIds, recipientStatuses);
 
         return recipientId;
     }
@@ -1015,15 +1034,19 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         allo().fundPool(poolId, 1e18);
 
         vm.prank(pool_manager1());
-        strategy.addAllocator(randomAddress());
+        QVSimpleStrategy(strategy).addAllocator(randomAddress());
 
         vm.warp(allocationStartTime + 10);
-        bytes memory allocation = abi.encode(recipientId, 1);
+        bytes memory allocation = __generateAllocation(recipientId, 4);
         vm.prank(address(allo()));
-        strategy.allocate(allocation, randomAddress());
+        QVSimpleStrategy(strategy).allocate(allocation, randomAddress());
 
         vm.warp(allocationEndTime + 10);
 
         return recipientId;
+    }
+
+    function __generateAllocation(address _recipient, uint256 _amount) internal view virtual returns (bytes memory) {
+        return abi.encode(_recipient, _amount);
     }
 }

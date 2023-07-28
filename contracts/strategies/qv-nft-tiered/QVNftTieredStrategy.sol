@@ -8,6 +8,11 @@ import {QVSimpleStrategy} from "../qv-simple/QVSimpleStrategy.sol";
 
 contract QVNftTieredStrategy is QVSimpleStrategy {
     /// ======================
+    /// ======= Events =======
+    /// ======================
+    event AllocatedWithNft(address indexed recipientId, uint256 votes, address nft, address allocator);
+
+    /// ======================
     /// ======= Storage ======
     /// ======================
 
@@ -86,7 +91,7 @@ contract QVNftTieredStrategy is QVSimpleStrategy {
 
         for (uint256 i = 0; i < nftsLength;) {
             ERC721 nft = _nfts[i];
-            nfts[i] = nft;
+            nfts.push(nft);
             maxVoiceCreditsPerNft[nft] = _maxVoiceCreditsPerNft[i];
             unchecked {
                 i++;
@@ -150,6 +155,10 @@ contract QVNftTieredStrategy is QVSimpleStrategy {
         Recipient storage recipient = recipients[recipientId];
         Allocator storage allocator = allocators[_sender];
 
+        if (recipient.recipientStatus != InternalRecipientStatus.Accepted) {
+            revert RECIPIENT_ERROR(recipientId);
+        }
+
         if (voiceCreditsToAllocate + voiceCreditsUsedPerNftId[nft][nftId] > maxVoiceCreditsPerNft[nft]) {
             revert INVALID();
         }
@@ -169,6 +178,6 @@ contract QVNftTieredStrategy is QVSimpleStrategy {
         // update credits used by nftId
         voiceCreditsUsedPerNftId[nft][nftId] += voiceCreditsToAllocate;
 
-        emit Allocated(recipientId, voteResult, address(nft), _sender);
+        emit AllocatedWithNft(recipientId, voteResult, address(nft), _sender);
     }
 }
