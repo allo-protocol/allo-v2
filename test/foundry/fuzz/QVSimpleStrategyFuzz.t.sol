@@ -11,11 +11,12 @@ import {QVSimpleStrategy} from "../../../contracts/strategies/qv-simple/QVSimple
 import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
 
 // Test Helpers
+import {Accounts} from "../shared/Accounts.sol";
 import {RegistrySetupFull} from "../shared/RegistrySetup.sol";
 import {StrategySetup} from "../shared/StrategySetup.sol";
 import {AlloSetup} from "../shared/AlloSetup.sol";
 
-contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup {
+contract QVSimpleStrategyTest is Accounts, StrategySetup, RegistrySetupFull, AlloSetup {
     error ALLOCATION_NOT_ACTIVE();
 
     struct Recipient {
@@ -119,7 +120,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup {
 
         vm.prank(pool_manager1());
         poolId = allo().createPoolWithCustomStrategy(
-            alloIdentity_id(),
+            poolIdentity_id(),
             address(strategy),
             abi.encode(
                 registryGating,
@@ -192,7 +193,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup {
 
     //     vm.startPrank(pool_manager1());
     //     poolId = allo().createPoolWithCustomStrategy(
-    //         alloIdentity_id(),
+    //         poolIdentity_id(),
     //         address(strategy),
     //         abi.encode(
     //             registryGating,

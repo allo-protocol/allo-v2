@@ -9,7 +9,7 @@ import {BaseStrategy} from "../BaseStrategy.sol";
 // Internal Libraries
 import {Metadata} from "../../core/libraries/Metadata.sol";
 
-contract QVSimpleStrategy is BaseStrategy { 
+contract QVSimpleStrategy is BaseStrategy {
     /// ======================
     /// ======= Errors ======
     /// ======================
@@ -40,6 +40,7 @@ contract QVSimpleStrategy is BaseStrategy {
     );
     event PayoutSet(bytes recipientIds);
     event Allocated(address indexed recipientId, uint256 votes, address allocator);
+    event Reviewed(address indexed recipientId, InternalRecipientStatus status, address sender);
 
     /// ======================
     /// ======= Storage ======
@@ -59,7 +60,6 @@ contract QVSimpleStrategy is BaseStrategy {
         Metadata metadata;
         InternalRecipientStatus recipientStatus;
         uint256 totalVotesReceived;
-        uint256 approvals; // This requires two approvals to be accepted
     }
 
     struct Allocator {
@@ -78,7 +78,6 @@ contract QVSimpleStrategy is BaseStrategy {
     uint256 public registrationEndTime;
     uint256 public allocationStartTime;
     uint256 public allocationEndTime;
-    uint256 public totalPayoutAmount;
 
     /// @notice token -> bool
     mapping(address => bool) public allowedTokens;
@@ -90,8 +89,8 @@ contract QVSimpleStrategy is BaseStrategy {
     mapping(address => bool) public allowedAllocators;
     /// @notice recipientId => paid out
     mapping(address => bool) public paidOut;
-    /// @notice recipientId -> PayoutSummary
-    mapping(address => PayoutSummary) public payoutSummaries;
+    // recipientId -> status -> count
+    mapping(address => mapping(InternalRecipientStatus => uint256)) public reviewsByStatus;
 
     /// ================================
     /// ========== Modifier ============
@@ -286,15 +285,16 @@ contract QVSimpleStrategy is BaseStrategy {
                 revert RECIPIENT_ERROR(recipientId);
             }
 
-            Recipient storage recipient = recipients[recipientId];
+            reviewsByStatus[recipientId][recipientStatus]++;
 
-            recipient.recipientStatus = recipientStatus;
+            if (reviewsByStatus[recipientId][recipientStatus] >= 2) {
+                Recipient storage recipient = recipients[recipientId];
+                recipient.recipientStatus = recipientStatus;
 
-            if (recipientStatus == InternalRecipientStatus.Accepted) {
-                recipient.approvals += 1;
+                emit RecipientStatusUpdated(recipientId, recipientStatus, address(0));
             }
 
-            emit RecipientStatusUpdated(recipientId, recipientStatus, msg.sender);
+            emit Reviewed(recipientId, recipientStatus, msg.sender);
 
             unchecked {
                 i++;
@@ -320,9 +320,12 @@ contract QVSimpleStrategy is BaseStrategy {
             Recipient memory recipient = recipients[recipientId];
 
             // Calculate the payout amount based on the percentage of total votes
-            uint256 amount =
-                paidOut[recipientId] ? 0 : (poolAmount * recipient.totalVotesReceived / totalRecipientVotes);
-
+            uint256 amount;
+            if (paidOut[recipientId] || totalRecipientVotes == 0) {
+                amount = 0;
+            } else {
+                amount = poolAmount * recipient.totalVotesReceived / totalRecipientVotes;
+            }
             payouts[i] = PayoutSummary(recipient.recipientAddress, amount);
 
             unchecked {
@@ -331,48 +334,6 @@ contract QVSimpleStrategy is BaseStrategy {
         }
 
         return payouts;
-    }
-
-    /// @notice Set the payouts for the recipients
-    /// @param _recipientIds The recipient ids
-    /// @param _amounts The amounts
-    function setPayout(address[] memory _recipientIds, uint256[] memory _amounts)
-        external
-        onlyPoolManager(msg.sender)
-        onlyAfterAllocation
-    {
-        uint256 recipientLength = _recipientIds.length;
-        if (recipientLength != _amounts.length) {
-            revert INVALID();
-        }
-
-        for (uint256 i = 0; i < recipientLength;) {
-            address recipientId = _recipientIds[i];
-            if (recipients[recipientId].recipientStatus != InternalRecipientStatus.Accepted) {
-                revert INVALID();
-            }
-
-            PayoutSummary storage payoutSummary = payoutSummaries[recipientId];
-            if (payoutSummary.amount != 0) {
-                revert RECIPIENT_ERROR(recipientId);
-            }
-
-            uint256 amount = _amounts[i];
-            totalPayoutAmount += amount;
-
-            if (totalPayoutAmount > allo.getPool(poolId).amount) {
-                revert INVALID();
-            }
-
-            payoutSummary.amount = amount;
-            payoutSummary.recipientAddress = recipients[recipientId].recipientAddress;
-
-            unchecked {
-                i++;
-            }
-        }
-
-        emit PayoutSet(abi.encode(_recipientIds));
     }
 
     /// @notice Set the start and end dates for the pool
@@ -526,15 +487,15 @@ contract QVSimpleStrategy is BaseStrategy {
         PayoutSummary[] memory payouts = getPayouts(_recipientIds, "", _sender);
 
         uint256 payoutLength = payouts.length;
-        for (uint256 i; i < payoutLength;) {
+        for (uint256 i = 0; i < payoutLength;) {
             address recipientId = _recipientIds[i];
             Recipient storage recipient = recipients[recipientId];
 
-            if (paidOut[recipientId] || recipient.recipientStatus != InternalRecipientStatus.Accepted) {
+            uint256 amount = payouts[i].amount;
+
+            if (paidOut[recipientId] || recipient.recipientStatus != InternalRecipientStatus.Accepted || amount == 0) {
                 revert RECIPIENT_ERROR(recipientId);
             }
-
-            uint256 amount = payouts[i].amount;
 
             IAllo.Pool memory pool = allo.getPool(poolId);
             _transferAmount(pool.token, recipient.recipientAddress, amount);

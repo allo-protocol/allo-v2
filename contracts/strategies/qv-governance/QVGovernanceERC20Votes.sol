@@ -15,15 +15,6 @@ contract QVGovernanceERC20Votes is QVSimpleStrategy {
     uint256 public timestamp;
     uint256 public reviewThreshold;
 
-    // recipientId -> status -> count
-    mapping(address => mapping(InternalRecipientStatus => uint256)) public reviewsByStatus;
-
-    /// ======================
-    /// ======= Events =======
-    /// ======================
-
-    event Reviewed(address indexed recipientId, InternalRecipientStatus status, address sender);
-
     /// ===============================
     /// ======== Constructor ==========
     /// ===============================
@@ -120,7 +111,6 @@ contract QVGovernanceERC20Votes is QVSimpleStrategy {
                 revert RECIPIENT_ERROR(recipientId);
             }
 
-            // Check if recipient has
             reviewsByStatus[recipientId][recipientStatus]++;
 
             if (reviewsByStatus[recipientId][recipientStatus] >= reviewThreshold) {
