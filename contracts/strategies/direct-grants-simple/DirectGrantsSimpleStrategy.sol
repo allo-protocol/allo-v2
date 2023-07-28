@@ -147,7 +147,8 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         payouts = new PayoutSummary[](recipientLength);
 
         for (uint256 i = 0; i < recipientLength;) {
-            payouts[i] = PayoutSummary(_recipientIds[i], _recipients[_recipientIds[i]].grantAmount);
+            Recipient memory recipient = _getRecipient(_recipientIds[i]);
+            payouts[i] = PayoutSummary(recipient.recipientAddress, recipient.grantAmount);
             unchecked {
                 i++;
             }

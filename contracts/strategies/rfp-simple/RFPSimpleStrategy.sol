@@ -44,15 +44,16 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     error MILESTONES_ALREADY_SET();
     error INVALID_METADATA();
     error AMOUNT_TOO_LOW();
+    error NOT_ENOUGH_FUNDS();
 
     /// ===============================
     /// ========== Events =============
     /// ===============================
 
-    event MAX_BID_INCREASED(uint256 maxBid);
-    event MILESTONE_SUBMITTED(uint256 milestoneId);
-    event MILESTONE_REJECTED(uint256 milestoneId);
-    event MILESTONES_SET();
+    event MaxBidIncreased(uint256 maxBid);
+    event MilstoneSubmitted(uint256 milestoneId);
+    event MilestoneRejected(uint256 milestoneId);
+    event MilestonesSet();
 
     /// ================================
     /// ========== Storage =============
@@ -114,7 +115,8 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Returns the payout summary for the accepted recipient
     function getPayouts(address[] memory, bytes memory, address) external view returns (PayoutSummary[] memory) {
         PayoutSummary[] memory payouts = new PayoutSummary[](1);
-        payouts[0] = PayoutSummary(acceptedRecipientId, _recipients[acceptedRecipientId].proposalBid);
+        Recipient memory recipient = _recipients[acceptedRecipientId];
+        payouts[0] = PayoutSummary(recipient.recipientAddress, recipient.proposalBid);
 
         return payouts;
     }
@@ -123,6 +125,12 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _allocator Address of the allocator
     function isValidAllocator(address _allocator) external view returns (bool) {
         return allo.isPoolManager(poolId, _allocator);
+    }
+
+    /// @notice Get the milestone
+    /// @param _milestoneId Id of the milestone
+    function getMilestone(uint256 _milestoneId) external view returns (Milestone memory) {
+        return milestones[_milestoneId];
     }
 
     /// @notice Get the status of the milestone
@@ -134,6 +142,10 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// ===============================
     /// ======= External/Custom =======
     /// ===============================
+
+    function setPoolActive(bool _active) external {
+        _setPoolActive(_active);
+    }
 
     /// @notice Set milestones for RFP pool
     /// @param _milestones The milestones to be set
@@ -158,17 +170,17 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
             revert INVALID_MILESTONE();
         }
 
-        emit MILESTONES_SET();
+        emit MilestonesSet();
     }
 
     /// @notice Submit milestone to RFP pool
     /// @param _metadata The proof of work
-    function submitMilestone(Metadata calldata _metadata) external {
+    function submitUpcomingMilestone(Metadata calldata _metadata) external {
         if (acceptedRecipientId != msg.sender && !_isIdentityMember(acceptedRecipientId, msg.sender)) {
             revert UNAUTHORIZED();
         }
 
-        if (upcomingMilestone > milestones.length) {
+        if (upcomingMilestone >= milestones.length) {
             revert INVALID_MILESTONE();
         }
 
@@ -176,7 +188,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         milestone.metadata = _metadata;
         milestone.milestoneStatus = RecipientStatus.Pending;
 
-        emit MILESTONE_SUBMITTED(upcomingMilestone);
+        emit MilstoneSubmitted(upcomingMilestone);
     }
 
     /// @notice Update max bid for RFP pool
@@ -193,12 +205,12 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         }
 
         milestones[_milestoneId].milestoneStatus = RecipientStatus.Rejected;
-        emit MILESTONE_REJECTED(_milestoneId);
+        emit MilestoneRejected(_milestoneId);
     }
 
     /// @notice Withdraw funds from RFP pool
     /// @param _amount The amount to be withdrawn
-    function withdraw(uint256 _amount) external onlyPoolManager(msg.sender) {
+    function withdraw(uint256 _amount) external onlyPoolManager(msg.sender) onlyInactivePool {
         poolAmount -= _amount;
         _transferAmount(allo.getPool(poolId).token, msg.sender, _amount);
     }
@@ -216,10 +228,6 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         onlyActivePool
         returns (address recipientId)
     {
-        if (acceptedRecipientId != address(0)) {
-            revert RECIPIENT_ALREADY_ACCEPTED();
-        }
-
         address recipientAddress;
         bool isUsingRegistryAnchor;
         uint256 proposalBid;
@@ -227,8 +235,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
         // decode data custom to this strategy
         if (useRegistryAnchor) {
-            (recipientId, recipientAddress, proposalBid, metadata) =
-                abi.decode(_data, (address, address, uint256, Metadata));
+            (recipientId, proposalBid, metadata) = abi.decode(_data, (address, uint256, Metadata));
 
             if (!_isIdentityMember(recipientId, _sender)) {
                 revert UNAUTHORIZED();
@@ -274,29 +281,24 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         virtual
         override
         nonReentrant
+        onlyActivePool
         onlyPoolManager(_sender)
     {
-        if (acceptedRecipientId != address(0)) {
-            revert RECIPIENT_ALREADY_ACCEPTED();
-        }
-
         acceptedRecipientId = abi.decode(_data, (address));
 
         // update status of acceptedRecipientId to accepted
-        if (acceptedRecipientId != address(0)) {
-            Recipient storage recipient = _recipients[acceptedRecipientId];
+        Recipient storage recipient = _recipients[acceptedRecipientId];
 
-            if (recipient.recipientStatus != RecipientStatus.Pending) {
-                revert INVALID_RECIPIENT();
-            }
-
-            recipient.recipientStatus = RecipientStatus.Accepted;
-            _setPoolActive(false);
-
-            IAllo.Pool memory pool = allo.getPool(poolId);
-
-            emit Allocated(acceptedRecipientId, recipient.proposalBid, pool.token, _sender);
+        if (acceptedRecipientId == address(0) || recipient.recipientStatus != RecipientStatus.Pending) {
+            revert INVALID_RECIPIENT();
         }
+
+        recipient.recipientStatus = RecipientStatus.Accepted;
+        _setPoolActive(false);
+
+        IAllo.Pool memory pool = allo.getPool(poolId);
+
+        emit Allocated(acceptedRecipientId, recipient.proposalBid, pool.token, _sender);
     }
 
     /// @notice Distribute the upcoming milestone
@@ -305,13 +307,10 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         internal
         virtual
         override
+        onlyInactivePool
         onlyPoolManager(_sender)
     {
-        if (acceptedRecipientId == address(0)) {
-            revert INVALID_RECIPIENT();
-        }
-
-        if (upcomingMilestone > milestones.length) {
+        if (upcomingMilestone >= milestones.length) {
             revert INVALID_MILESTONE();
         }
 
@@ -319,7 +318,11 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         Milestone storage milestone = milestones[upcomingMilestone];
         Recipient memory recipient = _recipients[acceptedRecipientId];
 
-        uint256 amount = recipient.proposalBid * milestone.amountPercentage / 1e18;
+        if (recipient.proposalBid > poolAmount) {
+            revert NOT_ENOUGH_FUNDS();
+        }
+
+        uint256 amount = (recipient.proposalBid * milestone.amountPercentage) / 1e18;
 
         poolAmount -= amount;
         _transferAmount(pool.token, recipient.recipientAddress, amount);
@@ -358,6 +361,8 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         }
         maxBid = _maxBid;
 
-        emit MAX_BID_INCREASED(maxBid);
+        emit MaxBidIncreased(maxBid);
     }
+
+    receive() external payable {}
 }
