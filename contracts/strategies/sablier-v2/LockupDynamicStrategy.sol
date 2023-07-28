@@ -173,7 +173,7 @@ contract LockupDynamicStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Set the internal status of the recipient to InReview
     /// @param _recipientIds Ids of the recipients
-    function setIntenalRecipientStatusToInReview(address[] calldata _recipientIds) external {
+    function setInternalRecipientStatusToInReview(address[] calldata _recipientIds) external {
         uint256 recipientLength = _recipientIds.length;
         for (uint256 i = 0; i < recipientLength;) {
             address recipientId = _recipientIds[i];

@@ -153,7 +153,7 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
         }
     }
 
-    /// @notice Checks if address is elgible allocator
+    /// @notice Checks if address is eligible allocator
     /// @param _allocator Address of the allocator
     function isValidAllocator(address _allocator) external view returns (bool) {
         return allo.isPoolManager(poolId, _allocator);
@@ -170,7 +170,7 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Set the internal status of the recipient to InReview
     /// @param _recipientIds Ids of the recipients
-    function setIntenalRecipientStatusToInReview(address[] calldata _recipientIds) external {
+    function setInternalRecipientStatusToInReview(address[] calldata _recipientIds) external {
         uint256 recipientLength = _recipientIds.length;
         for (uint256 i = 0; i < recipientLength;) {
             address recipientId = _recipientIds[i];
@@ -255,7 +255,7 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
         emit Registered(recipientId, _data, _sender);
     }
 
-    /// @notice Allocate amount to recipent for streaming grants
+    /// @notice Allocate amount to recipient for streaming grants
     /// @param _data The data to be decoded
     /// @param _sender The sender of the allocation
     function _allocate(bytes memory _data, address _sender)

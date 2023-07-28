@@ -22,7 +22,11 @@ contract LockupLinearStrategyTest is LockupBase_Test {
         LockupBase_Test.setUp();
 
         vm.startPrank(pool_manager1());
-        strategy = new LockupLinearStrategy(lockupLinear, address(allo),"LockupLinearStrategy");
+        strategy = new LockupLinearStrategy(
+            lockupLinear,
+            address(allo),
+            "LockupLinearStrategy"
+        );
         poolId = __StrategySetup(address(strategy), setUpData);
 
         vm.label(address(lockupLinear), "LockupLinear");
@@ -64,7 +68,7 @@ contract LockupLinearStrategyTest is LockupBase_Test {
 
         assertEq(recipientIds[0], pool_manager1());
 
-        strategy.setIntenalRecipientStatusToInReview(recipientIds);
+        strategy.setInternalRecipientStatusToInReview(recipientIds);
 
         LockupLinearStrategy.Recipient memory recipient = strategy.getRecipient(recipientIds[0]);
         assertEq(recipient.cancelable, params.cancelable, "recipient.cancelable");

@@ -77,7 +77,7 @@ contract LockupDynamicStrategyTest is LockupBase_Test {
         emit Registered(pool_manager1(), registerRecipientData, pool_manager1());
         recipientIds[0] = allo.registerRecipient(poolId, registerRecipientData);
 
-        strategy.setIntenalRecipientStatusToInReview(recipientIds);
+        strategy.setInternalRecipientStatusToInReview(recipientIds);
 
         LockupDynamicStrategy.Recipient memory recipient = strategy.getRecipient(recipientIds[0]);
         assertEq(recipient.cancelable, params.cancelable, "recipient.cancelable");
