@@ -129,8 +129,8 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
         }
     }
 
-    function getRecipientStreamIds(address _recipientId) external view returns (uint256[] memory) {
-        return _recipientStreamIds[_recipientId];
+    function getRecipientStreamId(address _recipientId, uint256 streamIdIndex) external view returns (uint256) {
+        return _recipientStreamIds[_recipientId][streamIdIndex];
     }
 
     /// @notice Returns the payout summary for the accepted recipient
