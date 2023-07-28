@@ -416,7 +416,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
         returns (address recipientId)
     {
         address recipientAddress;
-        bool _isUsingRegistryAnchor;
+        bool isUsingRegistryAnchor;
         Metadata memory metadata;
 
         // decode data custom to this strategy
@@ -427,9 +427,9 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
                 revert UNAUTHORIZED();
             }
         } else {
-            (recipientAddress, _isUsingRegistryAnchor, metadata) = abi.decode(_data, (address, bool, Metadata));
+            (recipientAddress, isUsingRegistryAnchor, metadata) = abi.decode(_data, (address, bool, Metadata));
             recipientId = _sender;
-            if (_isUsingRegistryAnchor && !_isIdentityMember(recipientId, _sender)) {
+            if (isUsingRegistryAnchor && !_isIdentityMember(recipientId, _sender)) {
                 revert UNAUTHORIZED();
             }
         }
@@ -445,7 +445,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
 
         // update the recipients data
         recipient.recipientAddress = recipientAddress;
-        recipient.useRegistryAnchor = _isUsingRegistryAnchor ? true : useRegistryAnchor;
+        recipient.useRegistryAnchor = isUsingRegistryAnchor ? true : useRegistryAnchor;
         recipient.metadata = metadata;
 
         if (recipient.recipientStatus == InternalRecipientStatus.Rejected) {

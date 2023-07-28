@@ -58,7 +58,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// ========== Storage =============
     /// ================================
 
-    bool public registryGating;
+    bool public useRegistryAnchor;
     bool public metadataRequired;
     uint256 public maxBid;
     uint256 public upcomingMilestone;
@@ -81,15 +81,15 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// ===============================
 
     function initialize(uint256 _poolId, bytes memory _data) public virtual override {
-        (uint256 _maxBid, bool _registryGating, bool _metadataRequired) = abi.decode(_data, (uint256, bool, bool));
-        __RFPSimpleStrategy_init(_poolId, _maxBid, _registryGating, _metadataRequired);
+        (uint256 _maxBid, bool _useRegistryAnchor, bool _metadataRequired) = abi.decode(_data, (uint256, bool, bool));
+        __RFPSimpleStrategy_init(_poolId, _maxBid, _useRegistryAnchor, _metadataRequired);
     }
 
-    function __RFPSimpleStrategy_init(uint256 _poolId, uint256 _maxBid, bool _registryGating, bool _metadataRequired)
+    function __RFPSimpleStrategy_init(uint256 _poolId, uint256 _maxBid, bool _useRegistryAnchor, bool _metadataRequired)
         internal
     {
         __BaseStrategy_init(_poolId);
-        registryGating = _registryGating;
+        useRegistryAnchor = _useRegistryAnchor;
         metadataRequired = _metadataRequired;
         _setPoolActive(true);
         _increaseMaxBid(_maxBid);
@@ -221,12 +221,12 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         }
 
         address recipientAddress;
-        bool useRegistryAnchor;
+        bool isUsingRegistryAnchor;
         uint256 proposalBid;
         Metadata memory metadata;
 
         // decode data custom to this strategy
-        if (registryGating) {
+        if (useRegistryAnchor) {
             (recipientId, recipientAddress, proposalBid, metadata) =
                 abi.decode(_data, (address, address, uint256, Metadata));
 
@@ -234,10 +234,10 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
                 revert UNAUTHORIZED();
             }
         } else {
-            (recipientAddress, useRegistryAnchor, proposalBid, metadata) =
+            (recipientAddress, isUsingRegistryAnchor, proposalBid, metadata) =
                 abi.decode(_data, (address, bool, uint256, Metadata));
             recipientId = _sender;
-            if (useRegistryAnchor && !_isIdentityMember(recipientId, _sender)) {
+            if (isUsingRegistryAnchor && !_isIdentityMember(recipientId, _sender)) {
                 revert UNAUTHORIZED();
             }
         }
@@ -255,7 +255,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
         Recipient memory recipient = Recipient({
             recipientAddress: recipientAddress,
-            useRegistryAnchor: registryGating ? true : useRegistryAnchor,
+            useRegistryAnchor: isUsingRegistryAnchor ? true : useRegistryAnchor,
             proposalBid: proposalBid,
             recipientStatus: RecipientStatus.Pending
         });
