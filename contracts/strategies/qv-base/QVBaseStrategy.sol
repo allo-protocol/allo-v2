@@ -422,13 +422,13 @@ abstract contract QVBaseStrategy is BaseStrategy {
     /// @param amount The amount to calculate votes for
     /// @return votes
     function _calculateVotes(uint256 amount) internal pure returns (uint256) {
-        return _sqrt(amount);
+        return sqrt(amount);
     }
 
     /// @notice Calculate the square root of a number (Babylonian method)
     /// @param x The number
     /// @return y The square root
-    function _sqrt(uint256 x) public pure returns (uint256 y) {
+    function sqrt(uint256 x) public pure returns (uint256 y) {
         uint256 z = (x + 1) / 2;
         y = x;
         while (z < y) {
