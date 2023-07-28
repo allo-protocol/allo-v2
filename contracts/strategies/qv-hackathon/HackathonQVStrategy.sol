@@ -12,20 +12,16 @@ import {
     RevocationRequestData
 } from "@ethereum-attestation-service/IEAS.sol";
 import {ISchemaRegistry, ISchemaResolver, SchemaRecord} from "@ethereum-attestation-service/ISchemaRegistry.sol";
-// Interfaces
-import {IAllo} from "../../core/IAllo.sol";
 // Core Contracts
 import {SchemaResolver} from "./SchemaResolver.sol";
-import {QVSimpleStrategy} from "../qv-simple/QVSimpleStrategy.sol";
-// Internal Libraries
-import {Metadata} from "../../core/libraries/Metadata.sol";
+import {QVBaseStrategy} from "../qv-base/QVBaseStrategy.sol";
 
 // Register the schema with the SchemaRegistry contract when required.
 // https://optimism-goerli.easscan.org/schema/create
 // https://docs.attest.sh/docs/tutorials/create-a-schema
 // https://github.com/ethereum-attestation-service/eas-contracts/blob/master/contracts/
 
-contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
+contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
     struct EASInfo {
         IEAS eas;
         ISchemaRegistry schemaRegistry;
@@ -60,6 +56,8 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
     EASInfo public easInfo;
     ERC721 public nft;
 
+    uint256 public maxVoiceCreditsPerAllocator;
+
     // recipientId -> uid
     mapping(address => bytes32) public recipientIdToUID;
     // nftId -> voiceCreditsUsed
@@ -84,7 +82,7 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
     /// ===== Constructor ====
     /// ======================
 
-    constructor(address _allo, string memory _name) QVSimpleStrategy(_allo, _name) {}
+    constructor(address _allo, string memory _name) QVBaseStrategy(_allo, _name) {}
 
     /// ======================
     /// ====== Initialize ====
@@ -106,24 +104,26 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
         internal
     {
         (
-            metadataRequired,
-            maxVoiceCreditsPerAllocator,
-            registrationStartTime,
-            registrationEndTime,
-            allocationStartTime,
-            allocationEndTime
+            bool _metadataRequired,
+            uint256 _maxVoiceCreditsPerAllocator,
+            uint256 _registrationStartTime,
+            uint256 _registrationEndTime,
+            uint256 _allocationStartTime,
+            uint256 _allocationEndTime
         ) = abi.decode(_data, (bool, uint256, uint256, uint256, uint256, uint256));
 
-        __QVSimpleStrategy_init(
+        __QVBaseStrategy_init(
             _poolId,
-            true, // useRegistryAnchor
-            metadataRequired,
-            maxVoiceCreditsPerAllocator,
-            registrationStartTime,
-            registrationEndTime,
-            allocationStartTime,
-            allocationEndTime
+            true, // _registryGating
+            _metadataRequired,
+            0, // reviewThreshold
+            _registrationStartTime,
+            _registrationEndTime,
+            _allocationStartTime,
+            _allocationEndTime
         );
+
+        maxVoiceCreditsPerAllocator = _maxVoiceCreditsPerAllocator;
 
         __SchemaResolver_init(_easInfo.eas);
 
@@ -182,7 +182,7 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
         }
     }
 
-    /// @notice Set the winner payoutPercentages
+    /// @notice Set the winner payoutPercentages per rank
     /// @param _payoutPercentages The payoutPercentages to set
     function setPayoutPercentages(uint256[] memory _payoutPercentages)
         external
@@ -211,6 +211,37 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
         }
     }
 
+    /// @notice Get the payouts for the recipients
+    /// @return The payouts as an array of PayoutSummary structs
+    function getPayouts(address[] memory, bytes memory, address)
+        public
+        view
+        virtual
+        override
+        returns (PayoutSummary[] memory)
+    {
+        uint256 recipientLength = payoutPercentages.length;
+
+        PayoutSummary[] memory payouts = new PayoutSummary[](recipientLength);
+        uint256 poolAmount = allo.getPool(poolId).amount;
+
+        for (uint256 i = 0; i < recipientLength;) {
+            address recipientId = indexToRecipientId[i];
+            Recipient memory recipient = recipients[recipientId];
+
+            // Calculate the payout amount based on the percentage of total votes
+            uint256 amount = poolAmount * payoutPercentages[i] / 1e18;
+
+            payouts[i] = PayoutSummary(recipient.recipientAddress, amount);
+
+            unchecked {
+                i++;
+            }
+        }
+
+        return payouts;
+    }
+
     /// =========================
     /// == Internal Functions ===
     /// =========================
@@ -224,37 +255,10 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
         onlyActiveRegistration
         returns (address recipientId)
     {
-        address recipientAddress;
-        Metadata memory metadata;
-
-        (recipientId, recipientAddress, metadata) = abi.decode(_data, (address, address, Metadata));
-
-        if (recipientIdToUID[recipientId] == 0 || !_isIdentityMember(recipientId, _sender)) {
+        if (recipientIdToUID[recipientId] == 0) {
             revert UNAUTHORIZED();
         }
-
-        if (metadataRequired && (bytes(metadata.pointer).length == 0 || metadata.protocol == 0)) {
-            revert INVALID_METADATA();
-        }
-
-        if (recipientAddress == address(0)) {
-            revert RECIPIENT_ERROR(recipientId);
-        }
-
-        Recipient storage recipient = recipients[recipientId];
-
-        // update the recipients data
-        recipient.recipientAddress = recipientAddress;
-        recipient.metadata = metadata;
-        recipient.useRegistryAnchor = true;
-
-        if (recipient.recipientStatus == InternalRecipientStatus.Rejected) {
-            recipient.recipientStatus = InternalRecipientStatus.Appealed;
-            emit Appealed(recipientId, _data, _sender);
-        } else {
-            recipient.recipientStatus = InternalRecipientStatus.Pending;
-            emit Registered(recipientId, _data, _sender);
-        }
+        super._registerRecipient(_data, _sender);
     }
 
     /// @notice Allocate votes to a recipient
@@ -270,15 +274,6 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
             revert UNAUTHORIZED();
         }
 
-        if (voiceCreditsToAllocate == 0) {
-            revert INVALID();
-        }
-
-        // check the time periods for allocation
-        if (block.timestamp < allocationStartTime || block.timestamp > allocationEndTime) {
-            revert ALLOCATION_NOT_ACTIVE();
-        }
-
         // spin up the structs in storage for updating
         Recipient storage recipient = recipients[recipientId];
         Allocator storage allocator = allocators[_sender];
@@ -287,17 +282,7 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
             revert INVALID();
         }
 
-        uint256 creditsCastToRecipient = allocator.voiceCreditsCastToRecipient[recipientId];
-        uint256 votesCastToRecipient = allocator.votesCastToRecipient[recipientId];
-
-        uint256 totalCredits = voiceCreditsToAllocate + creditsCastToRecipient;
-        uint256 voteResult = _calculateVotes(totalCredits * 1e18);
-        voteResult -= votesCastToRecipient;
-        totalRecipientVotes += voteResult;
-        recipient.totalVotesReceived += voteResult;
-
-        allocator.voiceCreditsCastToRecipient[recipientId] += totalCredits;
-        allocator.votesCastToRecipient[recipientId] += voteResult;
+        _qv_allocate(allocator, recipient, recipientId, voiceCreditsToAllocate, _sender);
 
         voiceCreditsUsedPerNftId[nftId] += voiceCreditsToAllocate;
 
@@ -355,40 +340,6 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
                 unchecked {
                     i++;
                 }
-            }
-        }
-
-        emit Allocated(_sender, voteResult, address(0), msg.sender);
-    }
-
-    /// @notice Distribute the tokens to the winners
-    /// @param _sender The sender of the transaction
-    function _distribute(address[] memory, bytes memory, address _sender)
-        internal
-        override
-        onlyPoolManager(_sender)
-        onlyAfterAllocation
-    {
-        uint256 payoutLength = payoutPercentages.length;
-        for (uint256 i; i < payoutLength;) {
-            address recipientId = indexToRecipientId[i];
-            Recipient memory recipient = recipients[recipientId];
-
-            if (paidOut[recipientId]) {
-                revert RECIPIENT_ERROR(recipientId);
-            }
-
-            IAllo.Pool memory pool = allo.getPool(poolId);
-
-            uint256 amount = pool.amount * payoutPercentages[i];
-
-            _transferAmount(pool.token, recipient.recipientAddress, amount);
-
-            paidOut[recipientId] = true;
-
-            emit Distributed(recipientId, recipient.recipientAddress, amount, _sender);
-            unchecked {
-                i++;
             }
         }
     }
@@ -463,5 +414,16 @@ contract HackathonQVStrategy is QVSimpleStrategy, SchemaResolver {
 
     function onRevoke(Attestation calldata, uint256) internal pure override returns (bool) {
         return true;
+    }
+
+    function _isAcceptedRecipient(address _recipientId) internal view override returns (bool) {
+        return recipients[_recipientId].recipientStatus == InternalRecipientStatus.Accepted;
+    }
+
+    /// @notice Checks if the allocator is valid
+    /// @param _allocator The allocator address
+    /// @return true if the allocator is valid
+    function isValidAllocator(address _allocator) external view virtual override returns (bool) {
+        return nft.balanceOf(_allocator) > 0;
     }
 }

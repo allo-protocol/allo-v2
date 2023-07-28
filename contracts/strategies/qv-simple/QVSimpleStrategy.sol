@@ -1,127 +1,18 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-// Interfaces
-import {IAllo} from "../../core/IAllo.sol";
-import {IRegistry} from "../../core/IRegistry.sol";
-// Core Contracts
-import {BaseStrategy} from "../BaseStrategy.sol";
-// Internal Libraries
-import {Metadata} from "../../core/libraries/Metadata.sol";
+import {QVBaseStrategy} from "../qv-base/QVBaseStrategy.sol";
 
-contract QVSimpleStrategy is BaseStrategy {
-    /// ======================
-    /// ======= Errors ======
-    /// ======================
-
-    error ALLOCATION_NOT_ACTIVE();
-    error ALLOCATION_NOT_ENDED();
-    error INVALID();
-    error INVALID_METADATA();
-    error RECIPIENT_ERROR(address recipientId);
-    error REGISTRATION_NOT_ACTIVE();
-    error UNAUTHORIZED();
-
-    /// ======================
-    /// ======= Events =======
-    /// ======================
-
-    event Appealed(address indexed recipientId, bytes data, address sender);
-    event RecipientStatusUpdated(address indexed recipientId, InternalRecipientStatus status, address sender);
+contract QVSimpleStrategy is QVBaseStrategy {
     event AllocatorAdded(address indexed allocator, address sender);
     event AllocatorRemoved(address indexed allocator, address sender);
-    event VoiceCreditsUpdated(address indexed allocator, uint256 voiceCredits, address sender);
-    event TimestampsUpdated(
-        uint256 registrationStartTime,
-        uint256 registrationEndTime,
-        uint256 allocationStartTime,
-        uint256 allocationEndTime,
-        address sender
-    );
-    event PayoutSet(bytes recipientIds);
-    event Allocated(address indexed recipientId, uint256 votes, address allocator);
-    event Reviewed(address indexed recipientId, InternalRecipientStatus status, address sender);
 
-    /// ======================
-    /// ======= Storage ======
-    /// ======================
-
-    enum InternalRecipientStatus {
-        None,
-        Pending,
-        Accepted,
-        Rejected,
-        Appealed
-    }
-
-    struct Recipient {
-        bool useRegistryAnchor;
-        address recipientAddress;
-        Metadata metadata;
-        InternalRecipientStatus recipientStatus;
-        uint256 totalVotesReceived;
-    }
-
-    struct Allocator {
-        uint256 voiceCredits;
-        mapping(address => uint256) voiceCreditsCastToRecipient;
-        mapping(address => uint256) votesCastToRecipient;
-    }
-
-    bool public registryGating;
-    bool public metadataRequired;
-
-    uint256 public totalRecipientVotes;
     uint256 public maxVoiceCreditsPerAllocator;
 
-    uint256 public registrationStartTime;
-    uint256 public registrationEndTime;
-    uint256 public allocationStartTime;
-    uint256 public allocationEndTime;
-
-    /// @notice token -> bool
-    mapping(address => bool) public allowedTokens;
-    /// @notice recipientId => Recipient
-    mapping(address => Recipient) public recipients;
-    /// @notice allocator address => Allocator
-    mapping(address => Allocator) public allocators;
     /// @notice allocator => bool
     mapping(address => bool) public allowedAllocators;
-    /// @notice recipientId => paid out
-    mapping(address => bool) public paidOut;
-    // recipientId -> status -> count
-    mapping(address => mapping(InternalRecipientStatus => uint256)) public reviewsByStatus;
 
-    /// ================================
-    /// ========== Modifier ============
-    /// ================================
-
-    modifier onlyActiveRegistration() {
-        if (registrationStartTime > block.timestamp || block.timestamp > registrationEndTime) {
-            revert REGISTRATION_NOT_ACTIVE();
-        }
-        _;
-    }
-
-    modifier onlyActiveAllocation() {
-        if (allocationStartTime > block.timestamp || block.timestamp > allocationEndTime) {
-            revert ALLOCATION_NOT_ACTIVE();
-        }
-        _;
-    }
-
-    modifier onlyAfterAllocation() {
-        if (block.timestamp < allocationEndTime) {
-            revert ALLOCATION_NOT_ENDED();
-        }
-        _;
-    }
-
-    /// ====================================
-    /// ========== Constructor =============
-    /// ====================================
-
-    constructor(address _allo, string memory _name) BaseStrategy(_allo, _name) {}
+    constructor(address _allo, string memory _name) QVBaseStrategy(_allo, _name) {}
 
     /// ===============================
     /// ========= Initialize ==========
@@ -134,99 +25,36 @@ contract QVSimpleStrategy is BaseStrategy {
         (
             bool _registryGating,
             bool _metadataRequired,
+            uint256 _reviewThreshold,
             uint256 _maxVoiceCreditsPerAllocator,
             uint256 _registrationStartTime,
             uint256 _registrationEndTime,
             uint256 _allocationStartTime,
             uint256 _allocationEndTime
-        ) = abi.decode(_data, (bool, bool, uint256, uint256, uint256, uint256, uint256));
-        __QVSimpleStrategy_init(
+        ) = abi.decode(_data, (bool, bool, uint256, uint256, uint256, uint256, uint256, uint256));
+        __QVBaseStrategy_init(
             _poolId,
             _registryGating,
             _metadataRequired,
-            _maxVoiceCreditsPerAllocator,
+            _reviewThreshold,
             _registrationStartTime,
             _registrationEndTime,
             _allocationStartTime,
             _allocationEndTime
         );
-    }
-
-    /// @dev Internal initialize function that sets the poolId in the base strategy
-    function __QVSimpleStrategy_init(
-        uint256 _poolId,
-        bool _registryGating,
-        bool _metadataRequired,
-        uint256 _maxVoiceCreditsPerAllocator,
-        uint256 _registrationStartTime,
-        uint256 _registrationEndTime,
-        uint256 _allocationStartTime,
-        uint256 _allocationEndTime
-    ) internal {
-        __BaseStrategy_init(_poolId);
-
-        registryGating = _registryGating;
-        metadataRequired = _metadataRequired;
-
-        if (
-            block.timestamp > _registrationStartTime || _registrationStartTime > _registrationEndTime
-                || _registrationStartTime > _allocationStartTime || _allocationStartTime > _allocationEndTime
-                || _registrationEndTime > _allocationEndTime
-        ) {
-            revert INVALID();
-        }
 
         maxVoiceCreditsPerAllocator = _maxVoiceCreditsPerAllocator;
-        registrationStartTime = _registrationStartTime;
-        registrationEndTime = _registrationEndTime;
-        allocationStartTime = _allocationStartTime;
-        allocationEndTime = _allocationEndTime;
-
-        emit TimestampsUpdated(
-            registrationStartTime, registrationEndTime, allocationStartTime, allocationEndTime, msg.sender
-        );
     }
 
     /// =========================
     /// ==== View Functions =====
     /// =========================
 
-    /// @notice Get the recipient
-    /// @param _recipientId Id of the recipient
-    function getRecipient(address _recipientId) external view returns (Recipient memory) {
-        return _getRecipient(_recipientId);
-    }
-
-    /// @notice Get Internal recipient status
-    /// @param _recipientId Id of the recipient
-    function getInternalRecipientStatus(address _recipientId) external view returns (InternalRecipientStatus) {
-        return _getRecipient(_recipientId).recipientStatus;
-    }
-
-    /// @notice Get recipient status
-    /// @param _recipientId Id of the recipient
-    function getRecipientStatus(address _recipientId) external view override returns (RecipientStatus) {
-        InternalRecipientStatus internalStatus = _getRecipient(_recipientId).recipientStatus;
-        if (internalStatus == InternalRecipientStatus.Appealed) {
-            return RecipientStatus.Pending;
-        } else {
-            return RecipientStatus(uint8(internalStatus));
-        }
-    }
-
     /// @notice Checks if the allocator is valid
     /// @param _allocator The allocator address
     /// @return true if the allocator is valid
-    function isValidAllocator(address _allocator) external view virtual returns (bool) {
+    function isValidAllocator(address _allocator) external view virtual override returns (bool) {
         return allowedAllocators[_allocator];
-    }
-
-    /// @notice Returns status of the pool
-    function _isPoolActive() internal view override returns (bool) {
-        if (registrationStartTime <= block.timestamp && block.timestamp <= registrationEndTime) {
-            return true;
-        }
-        return false;
     }
 
     /// ====================================
@@ -249,168 +77,6 @@ contract QVSimpleStrategy is BaseStrategy {
         emit AllocatorRemoved(_allocator, msg.sender);
     }
 
-    /// @notice Review recipient application
-    /// @param _recipientIds Ids of the recipients
-    /// @param _recipientStatuses Statuses of the recipients
-    function reviewRecipients(address[] calldata _recipientIds, InternalRecipientStatus[] calldata _recipientStatuses)
-        external
-        virtual
-        onlyPoolManager(msg.sender)
-        onlyActiveRegistration
-    {
-        uint256 recipientLength = _recipientIds.length;
-        if (recipientLength != _recipientStatuses.length) {
-            revert INVALID();
-        }
-
-        for (uint256 i = 0; i < recipientLength;) {
-            InternalRecipientStatus recipientStatus = _recipientStatuses[i];
-            address recipientId = _recipientIds[i];
-            if (recipientStatus == InternalRecipientStatus.None || recipientStatus == InternalRecipientStatus.Appealed)
-            {
-                revert RECIPIENT_ERROR(recipientId);
-            }
-
-            reviewsByStatus[recipientId][recipientStatus]++;
-
-            if (reviewsByStatus[recipientId][recipientStatus] >= 2) {
-                Recipient storage recipient = recipients[recipientId];
-                recipient.recipientStatus = recipientStatus;
-
-                emit RecipientStatusUpdated(recipientId, recipientStatus, address(0));
-            }
-
-            emit Reviewed(recipientId, recipientStatus, msg.sender);
-
-            unchecked {
-                i++;
-            }
-        }
-    }
-
-    /// @notice Get the payouts for the recipients
-    /// @param _recipientIds The recipient ids
-    /// @return The payouts as an array of PayoutSummary structs
-    function getPayouts(address[] memory _recipientIds, bytes memory, address)
-        public
-        view
-        override
-        returns (PayoutSummary[] memory)
-    {
-        PayoutSummary[] memory payouts = new PayoutSummary[](_recipientIds.length);
-        uint256 recipientLength = _recipientIds.length;
-        uint256 poolAmount = allo.getPool(poolId).amount;
-
-        for (uint256 i = 0; i < recipientLength;) {
-            address recipientId = _recipientIds[i];
-            Recipient memory recipient = recipients[recipientId];
-
-            // Calculate the payout amount based on the percentage of total votes
-            uint256 amount;
-            if (paidOut[recipientId] || totalRecipientVotes == 0) {
-                amount = 0;
-            } else {
-                amount = poolAmount * recipient.totalVotesReceived / totalRecipientVotes;
-            }
-            payouts[i] = PayoutSummary(recipient.recipientAddress, amount);
-
-            unchecked {
-                i++;
-            }
-        }
-
-        return payouts;
-    }
-
-    /// @notice Set the start and end dates for the pool
-    /// @param _registrationStartTime The start time for the registration
-    /// @param _registrationEndTime The end time for the registration
-    /// @param _allocationStartTime The start time for the allocation
-    /// @param _allocationEndTime The end time for the allocation
-    function updatePoolTimestamps(
-        uint256 _registrationStartTime,
-        uint256 _registrationEndTime,
-        uint256 _allocationStartTime,
-        uint256 _allocationEndTime
-    ) external onlyPoolManager(msg.sender) {
-        if (
-            block.timestamp > _registrationStartTime || _registrationStartTime > _registrationEndTime
-                || _registrationStartTime > _allocationStartTime || _allocationStartTime > _allocationEndTime
-                || _registrationEndTime > _allocationEndTime
-        ) {
-            revert INVALID();
-        }
-
-        registrationStartTime = _registrationStartTime;
-        registrationEndTime = _registrationEndTime;
-        allocationStartTime = _allocationStartTime;
-        allocationEndTime = _allocationEndTime;
-
-        emit TimestampsUpdated(
-            registrationStartTime, registrationEndTime, allocationStartTime, allocationEndTime, msg.sender
-        );
-    }
-
-    /// ====================================
-    /// ============ Internal ==============
-    /// ====================================
-
-    /// @notice Submit application to pool
-    /// @param _data The data to be decoded
-    /// @param _sender The sender of the transaction
-    function _registerRecipient(bytes memory _data, address _sender)
-        internal
-        virtual
-        override
-        onlyActiveRegistration
-        returns (address recipientId)
-    {
-        address recipientAddress;
-        bool useRegistryAnchor;
-        Metadata memory metadata;
-
-        // decode data custom to this strategy
-        if (registryGating) {
-            (recipientId, recipientAddress, metadata) = abi.decode(_data, (address, address, Metadata));
-
-            if (!_isIdentityMember(recipientId, _sender)) {
-                revert UNAUTHORIZED();
-            }
-        } else {
-            (recipientAddress, useRegistryAnchor, metadata) = abi.decode(_data, (address, bool, Metadata));
-            recipientId = _sender;
-            if (useRegistryAnchor && !_isIdentityMember(recipientId, _sender)) {
-                revert UNAUTHORIZED();
-            }
-        }
-
-        if (metadataRequired && (bytes(metadata.pointer).length == 0 || metadata.protocol == 0)) {
-            revert INVALID_METADATA();
-        }
-
-        if (recipientAddress == address(0)) {
-            revert RECIPIENT_ERROR(recipientId);
-        }
-
-        Recipient storage recipient = recipients[recipientId];
-
-        // update the recipients data
-        recipient.recipientAddress = recipientAddress;
-        recipient.metadata = metadata;
-        recipient.useRegistryAnchor = registryGating ? true : useRegistryAnchor;
-
-        // NOTE: do we need this? the status is not ever set to anything but None
-        // on creation? Shouldn't we be setting the status on review or setting it to
-        // Pending? Will it ever be Rejected when this is called? @thelostone-mc @KurtMerbeth
-        if (recipient.recipientStatus == InternalRecipientStatus.Rejected) {
-            recipient.recipientStatus = InternalRecipientStatus.Appealed;
-            emit Appealed(recipientId, _data, _sender);
-        } else {
-            recipient.recipientStatus = InternalRecipientStatus.Pending;
-            emit Registered(recipientId, _data, _sender);
-        }
-    }
-
     /// @notice Allocate votes to a recipient
     /// @param _data The data
     /// @param _sender The sender of the transaction
@@ -418,26 +84,16 @@ contract QVSimpleStrategy is BaseStrategy {
     function _allocate(bytes memory _data, address _sender) internal virtual override {
         (address recipientId, uint256 voiceCreditsToAllocate) = abi.decode(_data, (address, uint256));
 
-        // check the voiceCreditsToAllocate is > 0
-        if (voiceCreditsToAllocate == 0) {
-            revert INVALID();
-        }
-
-        // check the time periods for allocation
-        if (block.timestamp < allocationStartTime || block.timestamp > allocationEndTime) {
-            revert ALLOCATION_NOT_ACTIVE();
-        }
+        // spin up the structs in storage for updating
+        Recipient storage recipient = recipients[recipientId];
+        Allocator storage allocator = allocators[_sender];
 
         // check that the sender can allocate votes
         if (!allowedAllocators[_sender]) {
             revert UNAUTHORIZED();
         }
 
-        // spin up the structs in storage for updating
-        Recipient storage recipient = recipients[recipientId];
-        Allocator storage allocator = allocators[_sender];
-
-        if (recipient.recipientStatus != InternalRecipientStatus.Accepted) {
+        if (!_isAcceptedRecipient(recipientId)) {
             revert RECIPIENT_ERROR(recipientId);
         }
 
@@ -445,91 +101,10 @@ contract QVSimpleStrategy is BaseStrategy {
             revert INVALID();
         }
 
-        uint256 creditsCastToRecipient = allocator.voiceCreditsCastToRecipient[recipientId];
-        uint256 votesCastToRecipient = allocator.votesCastToRecipient[recipientId];
-
-        uint256 totalCredits = voiceCreditsToAllocate + creditsCastToRecipient;
-        uint256 voteResult = _calculateVotes(totalCredits * 1e18);
-        voteResult -= votesCastToRecipient;
-        totalRecipientVotes += voteResult;
-        recipient.totalVotesReceived += voteResult;
-
-        allocator.voiceCreditsCastToRecipient[recipientId] += totalCredits;
-        allocator.votesCastToRecipient[recipientId] += voteResult;
-
-        emit Allocated(recipientId, voteResult, _sender);
+        _qv_allocate(allocator, recipient, recipientId, voiceCreditsToAllocate, _sender);
     }
 
-    /// @notice Distribute the tokens to the recipients
-    /// @param _recipientIds The recipient ids
-    /// @param _sender The sender of the transaction
-    function _distribute(address[] memory _recipientIds, bytes memory, address _sender)
-        internal
-        virtual
-        override
-        onlyPoolManager(_sender)
-        onlyAfterAllocation
-    {
-        PayoutSummary[] memory payouts = getPayouts(_recipientIds, "", _sender);
-
-        uint256 payoutLength = payouts.length;
-        for (uint256 i = 0; i < payoutLength;) {
-            address recipientId = _recipientIds[i];
-            Recipient storage recipient = recipients[recipientId];
-
-            uint256 amount = payouts[i].amount;
-
-            if (paidOut[recipientId] || recipient.recipientStatus != InternalRecipientStatus.Accepted || amount == 0) {
-                revert RECIPIENT_ERROR(recipientId);
-            }
-
-            IAllo.Pool memory pool = allo.getPool(poolId);
-            _transferAmount(pool.token, recipient.recipientAddress, amount);
-
-            paidOut[recipientId] = true;
-
-            emit Distributed(recipientId, recipient.recipientAddress, amount, _sender);
-            unchecked {
-                i++;
-            }
-        }
-    }
-
-    /// @notice Check if sender is identity owner or member
-    /// @param _anchor Anchor of the identity
-    /// @param _sender The sender of the transaction
-    function _isIdentityMember(address _anchor, address _sender) internal view returns (bool) {
-        IRegistry registry = allo.getRegistry();
-        IRegistry.Identity memory identity = registry.getIdentityByAnchor(_anchor);
-        return registry.isOwnerOrMemberOfIdentity(identity.id, _sender);
-    }
-
-    /// @notice Get the recipient
-    /// @param _recipientId Id of the recipient
-    function _getRecipient(address _recipientId) internal view returns (Recipient memory) {
-        return recipients[_recipientId];
-    }
-
-    /// ====================================
-    /// ============ QV Helper ==============
-    /// ====================================
-
-    /// @notice Calculate the votes for a given amount
-    /// @param amount The amount to calculate votes for
-    /// @return votes
-    function _calculateVotes(uint256 amount) internal pure returns (uint256) {
-        return _sqrt(amount);
-    }
-
-    /// @notice Calculate the square root of a number (Babylonian method)
-    /// @param x The number
-    /// @return y The square root
-    function _sqrt(uint256 x) public pure returns (uint256 y) {
-        uint256 z = (x + 1) / 2;
-        y = x;
-        while (z < y) {
-            y = z;
-            z = (x / z + z) / 2;
-        }
+    function _isAcceptedRecipient(address _recipientId) internal view override returns (bool) {
+        return recipients[_recipientId].recipientStatus == InternalRecipientStatus.Accepted;
     }
 }

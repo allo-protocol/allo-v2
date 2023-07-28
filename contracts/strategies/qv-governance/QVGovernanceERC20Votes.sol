@@ -4,21 +4,20 @@ pragma solidity 0.8.19;
 // External Libraries
 import "@openzeppelin/governance/utils/IVotes.sol";
 // Core Contracts
-import {QVSimpleStrategy} from "../qv-simple/QVSimpleStrategy.sol";
+import {QVBaseStrategy} from "../qv-base/QVBaseStrategy.sol";
 
-contract QVGovernanceERC20Votes is QVSimpleStrategy {
+contract QVGovernanceERC20Votes is QVBaseStrategy {
     /// ======================
     /// ======= Storage ======
     /// ======================
 
     IVotes public govToken;
     uint256 public timestamp;
-    uint256 public reviewThreshold;
 
     /// ===============================
     /// ======== Constructor ==========
     /// ===============================
-    constructor(address _allo, string memory _name) QVSimpleStrategy(_allo, _name) {}
+    constructor(address _allo, string memory _name) QVBaseStrategy(_allo, _name) {}
 
     /// ===============================
     /// ========= Initialize ==========
@@ -65,11 +64,11 @@ contract QVGovernanceERC20Votes is QVSimpleStrategy {
         uint256 _allocationStartTime,
         uint256 _allocationEndTime
     ) internal {
-        __QVSimpleStrategy_init(
+        __QVBaseStrategy_init(
             _poolId,
             _registryGating,
             _metadataRequired,
-            0,
+            _reviewThreshold,
             _registrationStartTime,
             _registrationEndTime,
             _allocationStartTime,
@@ -77,9 +76,7 @@ contract QVGovernanceERC20Votes is QVSimpleStrategy {
         );
         govToken = IVotes(_govToken);
         timestamp = _timestamp;
-        reviewThreshold = _reviewThreshold;
 
-        // todo: test if it actually works
         // sanity check if token implements getPastVotes
         // should revert if function is not available
         govToken.getPastVotes(address(this), 0);
@@ -88,45 +85,6 @@ contract QVGovernanceERC20Votes is QVSimpleStrategy {
     /// ====================================
     /// ==== External/Public Functions =====
     /// ====================================
-
-    /// @notice Review recipient application
-    /// @param _recipientIds Ids of the recipients
-    /// @param _recipientStatuses Statuses of the recipients
-    function reviewRecipients(address[] calldata _recipientIds, InternalRecipientStatus[] calldata _recipientStatuses)
-        external
-        override
-        onlyPoolManager(msg.sender)
-        onlyActiveRegistration
-    {
-        uint256 recipientLength = _recipientIds.length;
-        if (recipientLength != _recipientStatuses.length) {
-            revert INVALID();
-        }
-
-        for (uint256 i = 0; i < recipientLength;) {
-            InternalRecipientStatus recipientStatus = _recipientStatuses[i];
-            address recipientId = _recipientIds[i];
-            if (recipientStatus == InternalRecipientStatus.None || recipientStatus == InternalRecipientStatus.Appealed)
-            {
-                revert RECIPIENT_ERROR(recipientId);
-            }
-
-            reviewsByStatus[recipientId][recipientStatus]++;
-
-            if (reviewsByStatus[recipientId][recipientStatus] >= reviewThreshold) {
-                Recipient storage recipient = recipients[recipientId];
-                recipient.recipientStatus = recipientStatus;
-
-                emit RecipientStatusUpdated(recipientId, recipientStatus, address(0));
-            }
-
-            emit Reviewed(recipientId, recipientStatus, msg.sender);
-
-            unchecked {
-                i++;
-            }
-        }
-    }
 
     /// @notice Checks if the allocator is valid
     /// @param _allocator The allocator address
@@ -146,38 +104,24 @@ contract QVGovernanceERC20Votes is QVSimpleStrategy {
     function _allocate(bytes memory _data, address _sender) internal virtual override {
         (address recipientId, uint256 voiceCreditsToAllocate) = abi.decode(_data, (address, uint256));
 
-        uint256 votePower = govToken.getPastVotes(_sender, timestamp);
-
-        // check the voiceCreditsToAllocate is > 0
-        if (voiceCreditsToAllocate == 0 || votePower == 0) {
-            revert INVALID();
-        }
-
-        // check the time periods for allocation
-        if (block.timestamp < allocationStartTime || block.timestamp > allocationEndTime) {
-            revert ALLOCATION_NOT_ACTIVE();
-        }
-
         // spin up the structs in storage for updating
         Recipient storage recipient = recipients[recipientId];
         Allocator storage allocator = allocators[_sender];
+
+        uint256 votePower = govToken.getPastVotes(_sender, timestamp);
 
         if (voiceCreditsToAllocate + allocator.voiceCredits > votePower) {
             revert INVALID();
         }
 
-        uint256 creditsCastToRecipient = allocator.voiceCreditsCastToRecipient[recipientId];
-        uint256 votesCastToRecipient = allocator.votesCastToRecipient[recipientId];
+        if (!_isAcceptedRecipient(recipientId)) {
+            revert RECIPIENT_ERROR(recipientId);
+        }
 
-        uint256 totalCredits = voiceCreditsToAllocate + creditsCastToRecipient;
-        uint256 voteResult = _calculateVotes(totalCredits * 1e18);
-        voteResult -= votesCastToRecipient;
-        totalRecipientVotes += voteResult;
-        recipient.totalVotesReceived += voteResult;
+        _qv_allocate(allocator, recipient, recipientId, voiceCreditsToAllocate, _sender);
+    }
 
-        allocator.voiceCreditsCastToRecipient[recipientId] += totalCredits;
-        allocator.votesCastToRecipient[recipientId] += voteResult;
-
-        emit Allocated(recipientId, voteResult, address(govToken), _sender);
+    function _isAcceptedRecipient(address _recipientId) internal view override returns (bool) {
+        return recipients[_recipientId].recipientStatus == InternalRecipientStatus.Accepted;
     }
 }

@@ -6,6 +6,7 @@ import {IStrategy} from "../../../contracts/strategies/IStrategy.sol";
 
 // Core/Strategies
 import {QVSimpleStrategy} from "../../../contracts/strategies/qv-simple/QVSimpleStrategy.sol";
+import {QVBaseStrategy} from "../../../contracts/strategies/qv-base/QVBaseStrategy.sol";
 
 // Internal Libraries
 import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
@@ -53,7 +54,7 @@ contract QVSimpleStrategyTest is Accounts, StrategySetup, RegistrySetupFull, All
     Metadata public poolMetadata;
 
     event Appealed(address indexed recipientId, bytes data, address sender);
-    event Reviewed(address indexed recipientId, QVSimpleStrategy.InternalRecipientStatus status, address sender);
+    event Reviewed(address indexed recipientId, QVBaseStrategy.InternalRecipientStatus status, address sender);
     event RoleGranted(address indexed recipientId, address indexed account, bytes32 indexed role);
     event RoleAdminChanged(
         bytes32 indexed newAdminRole, address indexed recipientId, address indexed previousAdminRole
@@ -66,7 +67,7 @@ contract QVSimpleStrategyTest is Accounts, StrategySetup, RegistrySetupFull, All
         uint256 allocationEndTime
     );
     event RecipientStatusUpdated(
-        address indexed recipientId, QVSimpleStrategy.InternalRecipientStatus status, address sender
+        address indexed recipientId, QVBaseStrategy.InternalRecipientStatus status, address sender
     );
     event PoolCreated(
         uint256 indexed poolId,
@@ -110,6 +111,7 @@ contract QVSimpleStrategyTest is Accounts, StrategySetup, RegistrySetupFull, All
             abi.encode(
                 registryGating,
                 metadataRequired,
+                1,
                 maxVoiceCreditsPerAllocator,
                 registrationStartTime,
                 registrationEndTime,
@@ -125,6 +127,7 @@ contract QVSimpleStrategyTest is Accounts, StrategySetup, RegistrySetupFull, All
             abi.encode(
                 registryGating,
                 metadataRequired,
+                1,
                 maxVoiceCreditsPerAllocator,
                 registrationStartTime,
                 registrationEndTime,
@@ -156,6 +159,7 @@ contract QVSimpleStrategyTest is Accounts, StrategySetup, RegistrySetupFull, All
             abi.encode(
                 registryGating,
                 metadataRequired,
+                1,
                 maxVoiceCreditsPerAllocator,
                 _registrationStartTime,
                 _registrationEndTime,
