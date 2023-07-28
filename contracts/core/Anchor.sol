@@ -7,39 +7,26 @@ contract Anchor {
     /// ==========================
     /// === Storage Variables ====
     /// ==========================
-    Registry immutable registry;
+    Registry public immutable registry;
     bytes32 public identityId;
 
     /// ==========================
     /// ======== Errors ==========
     /// ==========================
     error UNAUTHORIZED();
-    error ALREADY_INITIALIZED();
     error CALL_FAILED();
 
     /// ==========================
     /// ======= Constructor ======
     /// ==========================
-    constructor(address _registry) {
-        registry = Registry(_registry);
+    constructor(bytes32 _identityId) {
+        registry = Registry(msg.sender);
+        identityId = _identityId;
     }
 
     /// ==========================
     /// ======== External ========
     /// ==========================
-
-    /// @notice Initialize the Anchor
-    /// @param _identityId The identityId of the identity to anchor
-    function initialize(bytes32 _identityId) external {
-        if (msg.sender != address(registry)) {
-            revert UNAUTHORIZED();
-        }
-
-        if (identityId != "") {
-            revert ALREADY_INITIALIZED();
-        }
-        identityId = _identityId;
-    }
 
     /// @notice Execute a call to a target address
     /// @param _target The target address to call

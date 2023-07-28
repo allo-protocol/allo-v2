@@ -20,60 +20,21 @@ contract MockRegistry {
 contract AnchorTest is Test {
     Anchor public anchor;
     MockRegistry public mockRegistry;
+    bytes32 identityId;
 
     function setUp() public {
+        identityId = bytes32("test_identity");
         mockRegistry = new MockRegistry();
-        anchor = new Anchor(address(mockRegistry));
+        vm.prank(address(mockRegistry));
+        anchor = new Anchor(identityId);
     }
 
     function test_deploy() public {
-        anchor = new Anchor(address(mockRegistry));
-    }
-
-    function test_initialize() public {
-        bytes32 identityId = bytes32("test_identity");
-
-        // Only the registry contract should be able to initialize the anchor
-        assertTrue(anchor.identityId() == bytes32(0)); // Check if identityId is not initialized yet
-
-        mockRegistry.setOwnerOfIdentity(identityId, address(this)); // Set the caller as the owner of the identity
-
-        vm.prank(address(mockRegistry)); // Prank the registry contract to make it think it's the caller
-        anchor.initialize(identityId); // Initialize the anchor
-        assertTrue(anchor.identityId() == identityId); // Check if identityId is set after initialization
-    }
-
-    function testRevert_initialize_UNAUTHORIZED() public {
-        bytes32 identityId = bytes32("test_identity");
-
-        vm.expectRevert(Anchor.UNAUTHORIZED.selector); // Expect a revert with the UNAUTHORIZED error
-        anchor.initialize(identityId); // Try to initialize the anchor from an unauthorized address
-    }
-
-    function testRevert_initialize_ALREADY_INITIALIZED() public {
-        bytes32 identityId = bytes32("test_identity");
-
-        // Only the registry contract should be able to initialize the anchor
-        assertTrue(anchor.identityId() == bytes32(0)); // Check if identityId is not initialized yet
-        mockRegistry.setOwnerOfIdentity(identityId, address(this)); // Set the caller as the owner of the identity
-
-        vm.prank(address(mockRegistry)); // Prank the registry contract to make it think it's the caller
-        anchor.initialize(identityId); // Initialize the anchor
-        assertTrue(anchor.identityId() == identityId); // Check if identityId is set after initialization
-
-        vm.expectRevert(Anchor.ALREADY_INITIALIZED.selector); // Expect a revert with the ALREADY_INITIALIZED error
-
-        // Try to initialize the anchor again with a different identityId (should revert)
-        vm.prank(address(mockRegistry)); // Prank the registry contract to make it think it's the caller
-        bytes32 identityId2 = bytes32("test_identity_2");
-        anchor.initialize(identityId2);
+        assertEq(anchor.identityId(), bytes32("test_identity"));
+        assertEq(address(anchor.registry()), address(mockRegistry));
     }
 
     function test_execute() public {
-        vm.prank(address(mockRegistry)); // Prank the registry contract to make it think it's the caller
-        bytes32 identityId = bytes32("test_identity");
-        anchor.initialize(identityId);
-
         mockRegistry.setOwnerOfIdentity(identityId, address(this)); // Set the caller as the owner of the identity
 
         // Deploy a simple contract that increments a value and return it
@@ -101,10 +62,6 @@ contract AnchorTest is Test {
     }
 
     function test_execute_CALL_FAILED() public {
-        vm.prank(address(mockRegistry)); // Prank the registry contract to make it think it's the caller
-        bytes32 identityId = bytes32("test_identity");
-        anchor.initialize(identityId);
-
         mockRegistry.setOwnerOfIdentity(identityId, address(this)); // Set the caller as the owner of the identity
         // Deploy a contract without a fallback function (cannot receive ETH)
         NoFallbackContract noFallback = new NoFallbackContract();

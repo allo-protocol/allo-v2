@@ -257,15 +257,12 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
     /// @notice Generates and deploy the anchor for the given identityId and name
     /// @param _identityId Id of the identity
     /// @param _name The name of the identity
-    function _generateAnchor(bytes32 _identityId, string memory _name) internal returns (address) {
+    function _generateAnchor(bytes32 _identityId, string memory _name) internal returns (address anchor) {
         bytes32 salt = keccak256(abi.encodePacked(_identityId, _name));
 
-        bytes memory creationCode = abi.encodePacked(type(Anchor).creationCode, abi.encode(address(this)));
+        bytes memory creationCode = abi.encodePacked(type(Anchor).creationCode, abi.encode(_identityId));
 
-        address anchor = CREATE3.deploy(salt, creationCode, 0);
-        Anchor(anchor).initialize(_identityId);
-
-        return anchor;
+        anchor = CREATE3.deploy(salt, creationCode, 0);
     }
 
     /// @notice Generates the identityId based on msg.sender
