@@ -106,7 +106,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
     }
 
     function test_createPool() public {
-        allo().addToApprovedStrategies(strategy);
+        allo().addToCloneableStrategies(strategy);
 
         vm.expectEmit(true, true, false, false);
         emit PoolCreated(1, poolIdentity_id(), IStrategy(strategy), NATIVE, 0, metadata);
@@ -133,7 +133,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
     }
 
     function testRevert_createPoolWithCustomStrategy_IS_APPROVED_STRATEGY() public {
-        allo().addToApprovedStrategies(strategy);
+        allo().addToCloneableStrategies(strategy);
         vm.expectRevert(IAllo.IS_APPROVED_STRATEGY.selector);
         vm.prank(pool_admin());
         allo().createPoolWithCustomStrategy(poolIdentity_id(), strategy, "0x", NATIVE, 0, metadata, pool_managers());
@@ -328,38 +328,38 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
         allo().updateBaseFee(1e16);
     }
 
-    function test_addToApprovedStrategies() public {
+    function test_addToCloneableStrategies() public {
         address _strategy = makeAddr("strategy");
-        assertFalse(allo().isApprovedStrategy(_strategy));
-        allo().addToApprovedStrategies(_strategy);
-        assertTrue(allo().isApprovedStrategy(_strategy));
+        assertFalse(allo().isCloneableStrategy(_strategy));
+        allo().addToCloneableStrategies(_strategy);
+        assertTrue(allo().isCloneableStrategy(_strategy));
     }
 
-    function testRevert_addToApprovedStrategies_ZERO_ADDRESS() public {
+    function testRevert_addToCloneableStrategies_ZERO_ADDRESS() public {
         vm.expectRevert(IAllo.ZERO_ADDRESS.selector);
-        allo().addToApprovedStrategies(address(0));
+        allo().addToCloneableStrategies(address(0));
     }
 
-    function testRevert_addToApprovedStrategies_UNAUTHORIZED() public {
+    function testRevert_addToCloneableStrategies_UNAUTHORIZED() public {
         vm.expectRevert();
         vm.prank(makeAddr("anon"));
         address _strategy = makeAddr("strategy");
-        allo().addToApprovedStrategies(_strategy);
+        allo().addToCloneableStrategies(_strategy);
     }
 
-    function test_removeFromApprovedStrategies() public {
+    function test_removeFromCloneableStrategies() public {
         address _strategy = makeAddr("strategy");
-        allo().addToApprovedStrategies(_strategy);
-        assertTrue(allo().isApprovedStrategy(_strategy));
-        allo().removeFromApprovedStrategies(_strategy);
-        assertFalse(allo().isApprovedStrategy(_strategy));
+        allo().addToCloneableStrategies(_strategy);
+        assertTrue(allo().isCloneableStrategy(_strategy));
+        allo().removeFromCloneableStrategies(_strategy);
+        assertFalse(allo().isCloneableStrategy(_strategy));
     }
 
-    function testRevert_removeFromApprovedStrategies_UNAUTHORIZED() public {
+    function testRevert_removeFromCloneableStrategies_UNAUTHORIZED() public {
         address _strategy = makeAddr("strategy");
         vm.expectRevert();
         vm.prank(makeAddr("anon"));
-        allo().removeFromApprovedStrategies(_strategy);
+        allo().removeFromCloneableStrategies(_strategy);
     }
 
     function test_addPoolManager() public {

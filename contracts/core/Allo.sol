@@ -61,7 +61,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
     mapping(uint256 => Pool) private pools;
 
     /// @notice Strategy -> bool
-    mapping(address => bool) private approvedStrategies;
+    mapping(address => bool) private cloneableStrategies;
 
     /// ====================================
     /// =========== Intializer =============
@@ -127,14 +127,14 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
         if (_strategy == address(0)) {
             revert ZERO_ADDRESS();
         }
-        if (_isApprovedStrategy(_strategy)) {
+        if (_isCloneableStrategy(_strategy)) {
             revert IS_APPROVED_STRATEGY();
         }
 
         return _createPool(_identityId, IStrategy(_strategy), _initStrategyData, _token, _amount, _metadata, _managers);
     }
 
-    /// @notice Creates a new pool (by cloning an approved strategies)
+    /// @notice Creates a new pool (by cloning an cloneable strategies)
     /// @param _identityId The identityId of the pool
     /// @param _initStrategyData The data to initialize the strategy
     /// @param _token The address of the token
@@ -150,7 +150,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
         Metadata memory _metadata,
         address[] memory _managers
     ) external payable returns (uint256 poolId) {
-        if (!_isApprovedStrategy(_strategy)) {
+        if (!_isCloneableStrategy(_strategy)) {
             revert NOT_APPROVED_STRATEGY();
         }
 
@@ -207,19 +207,19 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
     /// @notice Add a strategy to the allowlist
     /// @param _strategy The address of the strategy
     /// @dev Only callable by the owner
-    function addToApprovedStrategies(address _strategy) external onlyOwner {
+    function addToCloneableStrategies(address _strategy) external onlyOwner {
         if (_strategy == address(0)) {
             revert ZERO_ADDRESS();
         }
-        approvedStrategies[_strategy] = true;
+        cloneableStrategies[_strategy] = true;
         emit StrategyApproved(_strategy);
     }
 
     /// @notice Remove a strategy from the allowlist
     /// @param _strategy The address of the strategy
     /// @dev Only callable by the owner
-    function removeFromApprovedStrategies(address _strategy) external onlyOwner {
-        approvedStrategies[_strategy] = false;
+    function removeFromCloneableStrategies(address _strategy) external onlyOwner {
+        cloneableStrategies[_strategy] = false;
         emit StrategyRemoved(_strategy);
     }
 
@@ -445,10 +445,10 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
         emit PoolFunded(_poolId, amountAfterFee, feeAmount);
     }
 
-    /// @notice Checks if the strategy is approved
+    /// @notice Checks if the strategy is cloneable
     /// @param _strategy The address of the strategy
-    function _isApprovedStrategy(address _strategy) internal view returns (bool) {
-        return approvedStrategies[_strategy];
+    function _isCloneableStrategy(address _strategy) internal view returns (bool) {
+        return cloneableStrategies[_strategy];
     }
 
     /// @notice Checks if the address is a pool admin
@@ -552,9 +552,9 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
         return registry;
     }
 
-    /// @notice return boolean if strategy is approved
-    function isApprovedStrategy(address _strategy) external view returns (bool) {
-        return _isApprovedStrategy(_strategy);
+    /// @notice return boolean if strategy is cloneable
+    function isCloneableStrategy(address _strategy) external view returns (bool) {
+        return _isCloneableStrategy(_strategy);
     }
 
     /// @notice return the pool
