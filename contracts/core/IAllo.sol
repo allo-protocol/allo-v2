@@ -68,8 +68,8 @@ interface IAllo {
     function updateTreasury(address payable _treasury) external;
     function updateFeePercentage(uint256 _feePercentage) external;
     function updateBaseFee(uint256 _baseFee) external;
-    function addToApprovedStrategies(address _strategy) external;
-    function removeFromApprovedStrategies(address _strategy) external;
+    function addToCloneableStrategies(address _strategy) external;
+    function removeFromCloneableStrategies(address _strategy) external;
     function addPoolManager(uint256 _poolId, address _manager) external;
     function removePoolManager(uint256 _poolId, address _manager) external;
     function recoverFunds(address _token, address _recipient) external;
@@ -88,7 +88,7 @@ interface IAllo {
 
     function isPoolAdmin(uint256 _poolId, address _address) external view returns (bool);
     function isPoolManager(uint256 _poolId, address _address) external view returns (bool);
-    function isApprovedStrategy(address) external view returns (bool);
+    function isCloneableStrategy(address) external view returns (bool);
 
     function getStrategy(uint256 _poolId) external view returns (address);
     function getFeePercentage() external view returns (uint256);
