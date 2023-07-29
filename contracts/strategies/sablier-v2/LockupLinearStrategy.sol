@@ -2,7 +2,9 @@
 pragma solidity 0.8.19;
 
 import {ReentrancyGuard} from "@openzeppelin/security/ReentrancyGuard.sol";
-import {IERC20} from "@sablier/v2-core/types/Tokens.sol";
+import {IERC20} from "@openzeppelin/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/token/ERC20/utils/SafeERC20.sol";
+import {IERC20 as SablierIERC20} from "@sablier/v2-core/types/Tokens.sol";
 import {ISablierV2LockupLinear} from "@sablier/v2-core/interfaces/ISablierV2LockupLinear.sol";
 import {Broker, LockupLinear} from "@sablier/v2-core/types/DataTypes.sol";
 
@@ -12,6 +14,8 @@ import {BaseStrategy} from "../BaseStrategy.sol";
 import {Metadata} from "../../core/libraries/Metadata.sol";
 
 contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
+    using SafeERC20 for IERC20;
+
     /// ===============================
     /// ========== Errors =============
     /// ===============================
@@ -324,7 +328,7 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
         uint128 amount = uint128(recipient.grantAmount);
 
         LockupLinear.CreateWithDurations memory params = LockupLinear.CreateWithDurations({
-            asset: IERC20(pool.token),
+            asset: SablierIERC20(pool.token),
             broker: broker,
             cancelable: recipient.cancelable,
             durations: recipient.durations,
@@ -334,7 +338,7 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
         });
 
         poolAmount -= amount;
-        IERC20(pool.token).approve(address(lockupLinear), amount);
+        IERC20(pool.token).forceApprove(address(lockupLinear), amount);
         uint256 streamId = lockupLinear.createWithDurations(params);
         _recipientStreamIds[_recipientId].push(streamId);
 
