@@ -1,8 +1,7 @@
 pragma solidity 0.8.19;
 
-import {IERC20} from "@sablier/v2-core/types/Tokens.sol";
 import {ISablierV2LockupDynamic} from "@sablier/v2-core/interfaces/ISablierV2LockupDynamic.sol";
-import {Broker, LockupDynamic} from "@sablier/v2-core/types/DataTypes.sol";
+import {LockupDynamic} from "@sablier/v2-core/types/DataTypes.sol";
 import {UD2x18} from "@sablier/v2-core/types/Math.sol";
 
 import {LockupDynamicStrategy} from "../../../../contracts/strategies/sablier-v2/LockupDynamicStrategy.sol";
@@ -94,7 +93,7 @@ contract LockupDynamicStrategyTest is LockupBase_Test {
         allo.distribute(poolId, recipientIds, "");
 
         uint256 recipientStreamId = strategy.getRecipientStreamId(recipientIds[0], 0);
-        assertEq(recipientStreamId, streamId, "recipientStreamIds");
+        assertEq(recipientStreamId, streamId, "recipientStreamId");
 
         uint256 afterDistributeNextStreamId = lockupDynamic.nextStreamId();
         assertEq(afterDistributeNextStreamId, streamId + 1, "afterDistributeNextStreamId");

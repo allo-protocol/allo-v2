@@ -1,11 +1,9 @@
 pragma solidity 0.8.19;
 
-import {ISablierV2Lockup} from "@sablier/v2-core/interfaces/ISablierV2Lockup.sol";
 import {IERC20} from "@sablier/v2-core/types/Tokens.sol";
 import {Test} from "forge-std/Test.sol";
 
 import {Accounts} from "../../shared/Accounts.sol";
-import {AlloSetup} from "../../shared/AlloSetup.sol";
 import {EventSetup} from "../../shared/EventSetup.sol";
 import {RegistrySetupFull} from "../../shared/RegistrySetup.sol";
 
@@ -21,7 +19,6 @@ contract LockupBase_Test is Test, Accounts, EventSetup, RegistrySetupFull {
     bool internal useRegistryAnchor = false;
 
     function setUp() public virtual {
-        // Fork Ethereum Mainnet at a specific block number.
         vm.createSelectFork({blockNumber: 17_787_058, urlOrAlias: "mainnet"});
 
         __RegistrySetupFull();

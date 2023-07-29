@@ -10,8 +10,8 @@ import {Broker, LockupLinear} from "@sablier/v2-core/types/DataTypes.sol";
 
 import {IAllo} from "../../core/IAllo.sol";
 import {IRegistry} from "../../core/IRegistry.sol";
-import {BaseStrategy} from "../BaseStrategy.sol";
 import {Metadata} from "../../core/libraries/Metadata.sol";
+import {BaseStrategy} from "../BaseStrategy.sol";
 
 contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
     using SafeERC20 for IERC20;
@@ -111,15 +111,42 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
     /// ============ Views ============
     /// ===============================
 
-    /// @notice Get the recipient
-    function getRecipient(address _recipientId) external view returns (Recipient memory) {
-        return _getRecipient(_recipientId);
+    /// @notice Get all of recipient's stream ids
+    /// @param _recipientId Id of the recipient
+    function getAllRecipientStreamIds(address _recipientId) external view returns (uint256[] memory) {
+        return _recipientStreamIds[_recipientId];
     }
 
     /// @notice Get Internal recipient status
     /// @param _recipientId Id of the recipient
     function getInternalRecipientStatus(address _recipientId) external view returns (InternalRecipientStatus) {
         return _getRecipient(_recipientId).recipientStatus;
+    }
+
+    /// @notice Returns the payout summary for the accepted recipient
+    function getPayouts(address[] memory _recipientIds, bytes memory, address)
+        external
+        view
+        override
+        returns (PayoutSummary[] memory payouts)
+    {
+        uint256 recipientLength = _recipientIds.length;
+
+        payouts = new PayoutSummary[](recipientLength);
+
+        address recipientId;
+        for (uint256 i = 0; i < recipientLength;) {
+            recipientId = _recipientIds[i];
+            payouts[i] = PayoutSummary(recipientId, _recipients[recipientId].grantAmount);
+            unchecked {
+                i++;
+            }
+        }
+    }
+
+    /// @notice Get the recipient
+    function getRecipient(address _recipientId) external view returns (Recipient memory) {
+        return _getRecipient(_recipientId);
     }
 
     /// @notice Get recipient status
@@ -140,35 +167,9 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
         return _recipientStreamIds[_recipientId][streamIdIndex];
     }
 
-    /// @notice Get the recipient's stream ids
-    /// @param _recipientId Id of the recipient
-    function getRecipientStreamIds(address _recipientId) external view returns (uint256[] memory) {
-        return _recipientStreamIds[_recipientId];
-    }
-
-    /// @notice Returns the payout summary for the accepted recipient
-    function getPayouts(address[] memory _recipientIds, bytes memory, address)
-        external
-        view
-        returns (PayoutSummary[] memory payouts)
-    {
-        uint256 recipientLength = _recipientIds.length;
-
-        payouts = new PayoutSummary[](recipientLength);
-
-        address recipientId;
-        for (uint256 i = 0; i < recipientLength;) {
-            recipientId = _recipientIds[i];
-            payouts[i] = PayoutSummary(recipientId, _recipients[recipientId].grantAmount);
-            unchecked {
-                i++;
-            }
-        }
-    }
-
     /// @notice Checks if address is eligible allocator
     /// @param _allocator Address of the allocator
-    function isValidAllocator(address _allocator) external view returns (bool) {
+    function isValidAllocator(address _allocator) external view override returns (bool) {
         return allo.isPoolManager(poolId, _allocator);
     }
 
@@ -176,9 +177,16 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
     /// ======= External/Custom =======
     /// ===============================
 
-    /// @notice Set the broker
-    /// @param _broker The new broker to be set
-    function setBroker(Broker memory _broker) external onlyPoolManager(msg.sender) {
+    /// @notice Cancel the stream and increase the pool amount by the refunded amount
+    /// @param _streamId The id of the stream
+    function cancelStream(uint256 _streamId) external onlyPoolManager(msg.sender) {
+        poolAmount += lockupLinear.refundableAmountOf(_streamId);
+        lockupLinear.cancel(_streamId);
+    }
+
+    /// @notice Set the Sablier broker
+    /// @param _broker The new Sablier broker to be set
+    function setBroker(Broker calldata _broker) external onlyPoolManager(msg.sender) {
         broker = _broker;
         emit BrokerSet(broker);
     }
@@ -199,13 +207,6 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
         }
     }
 
-    /// @notice Cancel the stream
-    /// @param _streamId The id of the stream
-    function cancelStream(uint256 _streamId) external onlyPoolManager(msg.sender) {
-        poolAmount += lockupLinear.refundableAmountOf(_streamId);
-        lockupLinear.cancel(_streamId);
-    }
-
     /// @notice Withdraw funds from pool
     /// @param _amount The amount to be withdrawn
     function withdraw(uint256 _amount) external onlyPoolManager(msg.sender) {
@@ -216,6 +217,102 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
     /// ====================================
     /// ============ Internal ==============
     /// ====================================
+
+    /// @notice Get the recipient
+    /// @param _recipientId Id of the recipient
+    function _getRecipient(address _recipientId) internal view returns (Recipient memory recipient) {
+        recipient = _recipients[_recipientId];
+    }
+
+    /// @notice Check if sender is identity owner or member
+    /// @param _anchor Anchor of the identity
+    /// @param _sender The sender of the transaction
+    function _isIdentityMember(address _anchor, address _sender) internal view returns (bool) {
+        IRegistry registry = allo.getRegistry();
+        IRegistry.Identity memory identity = registry.getIdentityByAnchor(_anchor);
+        return registry.isOwnerOrMemberOfIdentity(identity.id, _sender);
+    }
+
+    /// @notice Allocate amount to recipient for streaming grants
+    /// @param _data The data to be decoded
+    /// @param _sender The sender of the allocation
+    function _allocate(bytes memory _data, address _sender)
+        internal
+        virtual
+        override
+        nonReentrant
+        onlyPoolManager(_sender)
+    {
+        (address recipientId, InternalRecipientStatus recipientStatus, uint256 grantAmount) =
+            abi.decode(_data, (address, InternalRecipientStatus, uint256));
+
+        Recipient storage recipient = _recipients[recipientId];
+
+        if (
+            recipient.recipientStatus != InternalRecipientStatus.Accepted // no need to accept twice
+                && recipientStatus == InternalRecipientStatus.Accepted
+        ) {
+            IAllo.Pool memory pool = allo.getPool(poolId);
+            allocatedGrantAmount += grantAmount;
+
+            if (allocatedGrantAmount > pool.amount) {
+                revert ALLOCATION_EXCEEDS_POOL_AMOUNT();
+            }
+
+            recipient.grantAmount = grantAmount;
+            recipient.recipientStatus = InternalRecipientStatus.Accepted;
+
+            emit RecipientStatusChanged(recipientId, InternalRecipientStatus.Accepted);
+            emit Allocated(recipientId, recipient.grantAmount, pool.token, _sender);
+        } else if (
+            recipient.recipientStatus != InternalRecipientStatus.Rejected // no need to reject twice
+                && recipientStatus == InternalRecipientStatus.Rejected
+        ) {
+            recipient.recipientStatus = InternalRecipientStatus.Rejected;
+            emit RecipientStatusChanged(recipientId, InternalRecipientStatus.Rejected);
+        }
+    }
+
+    /// @notice Distribute the upcoming milestone
+    /// @param _sender The sender of the distribution
+    function _distribute(address[] memory _recipientIds, bytes memory, address _sender)
+        internal
+        virtual
+        override
+        onlyPoolManager(_sender)
+    {
+        uint256 recipientLength = _recipientIds.length;
+        for (uint256 i = 0; i < recipientLength;) {
+            _distributeToLockupLinear(_recipientIds[i], _sender);
+            unchecked {
+                i++;
+            }
+        }
+    }
+
+    function _distributeToLockupLinear(address _recipientId, address _sender) private {
+        Recipient memory recipient = _recipients[_recipientId];
+        IAllo.Pool memory pool = allo.getPool(poolId);
+
+        uint128 amount = uint128(recipient.grantAmount);
+
+        LockupLinear.CreateWithDurations memory params = LockupLinear.CreateWithDurations({
+            asset: SablierIERC20(pool.token),
+            broker: broker,
+            cancelable: recipient.cancelable,
+            durations: recipient.durations,
+            recipient: recipient.recipientAddress,
+            sender: address(this),
+            totalAmount: amount
+        });
+
+        poolAmount -= amount;
+        IERC20(pool.token).forceApprove(address(lockupLinear), amount);
+        uint256 streamId = lockupLinear.createWithDurations(params);
+        _recipientStreamIds[_recipientId].push(streamId);
+
+        emit Distributed(_recipientId, recipient.recipientAddress, amount, _sender);
+    }
 
     /// @notice Register to the pool
     /// @param _data The data to be decoded
@@ -275,101 +372,5 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
         _recipients[recipientId] = recipient;
 
         emit Registered(recipientId, _data, _sender);
-    }
-
-    /// @notice Allocate amount to recipient for streaming grants
-    /// @param _data The data to be decoded
-    /// @param _sender The sender of the allocation
-    function _allocate(bytes memory _data, address _sender)
-        internal
-        virtual
-        override
-        nonReentrant
-        onlyPoolManager(_sender)
-    {
-        (address recipientId, InternalRecipientStatus recipientStatus, uint256 grantAmount) =
-            abi.decode(_data, (address, InternalRecipientStatus, uint256));
-
-        Recipient storage recipient = _recipients[recipientId];
-
-        if (
-            recipient.recipientStatus != InternalRecipientStatus.Accepted // no need to accept twice
-                && recipientStatus == InternalRecipientStatus.Accepted
-        ) {
-            IAllo.Pool memory pool = allo.getPool(poolId);
-            allocatedGrantAmount += grantAmount;
-
-            if (allocatedGrantAmount > pool.amount) {
-                revert ALLOCATION_EXCEEDS_POOL_AMOUNT();
-            }
-
-            recipient.grantAmount = grantAmount;
-            recipient.recipientStatus = InternalRecipientStatus.Accepted;
-
-            emit RecipientStatusChanged(recipientId, InternalRecipientStatus.Accepted);
-            emit Allocated(recipientId, recipient.grantAmount, pool.token, _sender);
-        } else if (
-            recipient.recipientStatus != InternalRecipientStatus.Rejected // no need to reject twice
-                && recipientStatus == InternalRecipientStatus.Rejected
-        ) {
-            recipient.recipientStatus = InternalRecipientStatus.Rejected;
-            emit RecipientStatusChanged(recipientId, InternalRecipientStatus.Rejected);
-        }
-    }
-
-    /// @notice Distribute the upcoming milestone
-    /// @param _sender The sender of the distribution
-    function _distribute(address[] memory _recipientIds, bytes memory, address _sender)
-        internal
-        virtual
-        override
-        onlyPoolManager(_sender)
-    {
-        uint256 recipientLength = _recipientIds.length;
-        for (uint256 i = 0; i < recipientLength;) {
-            _distributeLockupLinear(_recipientIds[i], _sender);
-            unchecked {
-                i++;
-            }
-        }
-    }
-
-    function _distributeLockupLinear(address _recipientId, address _sender) private {
-        Recipient memory recipient = _recipients[_recipientId];
-        IAllo.Pool memory pool = allo.getPool(poolId);
-
-        uint128 amount = uint128(recipient.grantAmount);
-
-        LockupLinear.CreateWithDurations memory params = LockupLinear.CreateWithDurations({
-            asset: SablierIERC20(pool.token),
-            broker: broker,
-            cancelable: recipient.cancelable,
-            durations: recipient.durations,
-            recipient: recipient.recipientAddress,
-            sender: address(this),
-            totalAmount: amount
-        });
-
-        poolAmount -= amount;
-        IERC20(pool.token).forceApprove(address(lockupLinear), amount);
-        uint256 streamId = lockupLinear.createWithDurations(params);
-        _recipientStreamIds[_recipientId].push(streamId);
-
-        emit Distributed(_recipientId, recipient.recipientAddress, amount, _sender);
-    }
-
-    /// @notice Check if sender is identity owner or member
-    /// @param _anchor Anchor of the identity
-    /// @param _sender The sender of the transaction
-    function _isIdentityMember(address _anchor, address _sender) internal view returns (bool) {
-        IRegistry registry = allo.getRegistry();
-        IRegistry.Identity memory identity = registry.getIdentityByAnchor(_anchor);
-        return registry.isOwnerOrMemberOfIdentity(identity.id, _sender);
-    }
-
-    /// @notice Get the recipient
-    /// @param _recipientId Id of the recipient
-    function _getRecipient(address _recipientId) internal view returns (Recipient memory recipient) {
-        recipient = _recipients[_recipientId];
     }
 }
