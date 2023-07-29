@@ -32,20 +32,18 @@ contract LockupDynamicStrategyTest is LockupBase_Test {
 
     struct Params {
         bool cancelable;
-        uint40 startTime;
         UD2x18 segmentExponent;
         uint128 segmentAmount;
         address recipientAddress;
     }
 
     function testForkFuzz_RegisterRecipientAllocateDistribute(Params memory params) public {
-        params.startTime = uint40(_bound(params.startTime, block.timestamp - 1 days, block.timestamp + 1 weeks));
         params.segmentAmount = uint128(_bound(params.segmentAmount, 1, type(uint96).max / 2 - 1));
 
-        LockupDynamic.Segment[] memory segments = new LockupDynamic.Segment[](2);
+        LockupDynamic.SegmentWithDelta[] memory segments = new LockupDynamic.SegmentWithDelta[](2);
 
-        segments[0].milestone = params.startTime > block.timestamp ? params.startTime + 1 : uint40(block.timestamp + 1);
-        segments[1].milestone = segments[0].milestone + 12 weeks;
+        segments[0].delta = 1 days;
+        segments[1].delta = 12 weeks;
 
         segments[0].amount = params.segmentAmount;
         segments[1].amount = params.segmentAmount;
@@ -62,13 +60,7 @@ contract LockupDynamicStrategyTest is LockupBase_Test {
         allo.fundPool(poolId, grantAmount);
 
         bytes memory registerRecipientData = abi.encode(
-            params.recipientAddress,
-            useRegistryAnchor,
-            params.cancelable,
-            grantAmount,
-            params.startTime,
-            segments,
-            strategyMetadata
+            params.recipientAddress, useRegistryAnchor, params.cancelable, grantAmount, segments, strategyMetadata
         );
 
         address[] memory recipientIds = new address[](1);
@@ -107,9 +99,17 @@ contract LockupDynamicStrategyTest is LockupBase_Test {
         uint256 afterDistributeNextStreamId = lockupDynamic.nextStreamId();
         assertEq(afterDistributeNextStreamId, streamId + 1, "afterDistributeNextStreamId");
 
+        LockupDynamic.Segment[] memory expectedSegments = new LockupDynamic.Segment[](2);
+        expectedSegments[0].milestone = uint40(block.timestamp) + segments[0].delta;
+        expectedSegments[1].milestone = expectedSegments[0].milestone + segments[1].delta;
+        expectedSegments[0].amount = params.segmentAmount;
+        expectedSegments[1].amount = params.segmentAmount;
+        expectedSegments[0].exponent = params.segmentExponent;
+        expectedSegments[1].exponent = params.segmentExponent;
+
         LockupDynamic.Stream memory stream = lockupDynamic.getStream(streamId);
         assertEq(stream.sender, address(strategy), "stream.sender");
-        assertEq(stream.segments, segments, "stream.segments");
+        assertEq(stream.segments, expectedSegments, "stream.segments");
         assertEq(stream.isCancelable, params.cancelable, "stream.isCancelable");
         assertEq(address(stream.asset), address(GTC), "stream.asset");
         assertEq(stream.amounts.deposited, grantAmount, "stream.amounts.deposited");
@@ -123,6 +123,14 @@ contract LockupDynamicStrategyTest is LockupBase_Test {
     function assertEq(LockupDynamic.Segment[] memory a, LockupDynamic.Segment[] memory b, string memory message)
         internal
     {
+        assertEq(keccak256(abi.encode(a)), keccak256(abi.encode(b)), message);
+    }
+
+    function assertEq(
+        LockupDynamic.SegmentWithDelta[] memory a,
+        LockupDynamic.SegmentWithDelta[] memory b,
+        string memory message
+    ) internal {
         assertEq(keccak256(abi.encode(a)), keccak256(abi.encode(b)), message);
     }
 }

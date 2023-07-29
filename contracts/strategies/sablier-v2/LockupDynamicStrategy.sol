@@ -67,14 +67,13 @@ contract LockupDynamicStrategy is BaseStrategy, ReentrancyGuard {
         bool useRegistryAnchor;
         bool cancelable;
         InternalRecipientStatus recipientStatus;
-        uint40 startTime;
         address recipientAddress;
         // slot 1
         uint256 grantAmount;
         // slots [2..m]
         Metadata metadata;
         // slots [m..n]
-        LockupDynamic.Segment[] segments;
+        LockupDynamic.SegmentWithDelta[] segments;
     }
 
     /// ===============================
@@ -143,6 +142,12 @@ contract LockupDynamicStrategy is BaseStrategy, ReentrancyGuard {
         return _recipientStreamIds[_recipientId][streamIdIndex];
     }
 
+    /// @notice Get the recipient's stream ids
+    /// @param _recipientId Id of the recipient
+    function getRecipientStreamIds(address _recipientId) external view returns (uint256[] memory) {
+        return _recipientStreamIds[_recipientId];
+    }
+
     /// @notice Returns the payout summary for the accepted recipient
     function getPayouts(address[] memory _recipientIds, bytes memory, address)
         external
@@ -196,6 +201,12 @@ contract LockupDynamicStrategy is BaseStrategy, ReentrancyGuard {
         }
     }
 
+    /// @notice Cancel the stream
+    /// @param _streamId The id of the stream
+    function cancelStream(uint256 _streamId) external onlyPoolManager(msg.sender) {
+        lockupDynamic.cancel(_streamId);
+    }
+
     /// @notice Withdraw funds from pool
     /// @param _amount The amount to be withdrawn
     function withdraw(uint256 _amount) external onlyPoolManager(msg.sender) {
@@ -220,21 +231,20 @@ contract LockupDynamicStrategy is BaseStrategy, ReentrancyGuard {
         uint256 grantAmount;
         Metadata memory metadata;
         address recipientAddress;
-        uint40 startTime;
-        LockupDynamic.Segment[] memory segments;
+        LockupDynamic.SegmentWithDelta[] memory segments;
         bool useRegistryAnchor;
 
         // decode data custom to this strategy
         if (registryGating) {
-            (recipientId, recipientAddress, cancelable, grantAmount, startTime, segments, metadata) =
-                abi.decode(_data, (address, address, bool, uint256, uint40, LockupDynamic.Segment[], Metadata));
+            (recipientId, recipientAddress, cancelable, grantAmount, segments, metadata) =
+                abi.decode(_data, (address, address, bool, uint256, LockupDynamic.SegmentWithDelta[], Metadata));
 
             if (!_isIdentityMember(recipientId, _sender)) {
                 revert UNAUTHORIZED();
             }
         } else {
-            (recipientAddress, useRegistryAnchor, cancelable, grantAmount, startTime, segments, metadata) =
-                abi.decode(_data, (address, bool, bool, uint256, uint40, LockupDynamic.Segment[], Metadata));
+            (recipientAddress, useRegistryAnchor, cancelable, grantAmount, segments, metadata) =
+                abi.decode(_data, (address, bool, bool, uint256, LockupDynamic.SegmentWithDelta[], Metadata));
             recipientId = _sender;
             if (useRegistryAnchor && !_isIdentityMember(recipientId, _sender)) {
                 revert UNAUTHORIZED();
@@ -265,7 +275,6 @@ contract LockupDynamicStrategy is BaseStrategy, ReentrancyGuard {
         recipient.metadata = metadata;
         recipient.recipientAddress = recipientAddress;
         recipient.recipientStatus = InternalRecipientStatus.Pending;
-        recipient.startTime = startTime;
         recipient.useRegistryAnchor = registryGating ? true : useRegistryAnchor;
 
         emit Registered(recipientId, _data, _sender);
@@ -334,20 +343,19 @@ contract LockupDynamicStrategy is BaseStrategy, ReentrancyGuard {
 
         uint128 amount = uint128(recipient.grantAmount);
 
-        LockupDynamic.CreateWithMilestones memory params = LockupDynamic.CreateWithMilestones({
+        LockupDynamic.CreateWithDeltas memory params = LockupDynamic.CreateWithDeltas({
             asset: SablierIERC20(pool.token),
             broker: broker,
             cancelable: recipient.cancelable,
             recipient: recipient.recipientAddress,
             segments: recipient.segments,
             sender: address(this),
-            startTime: recipient.startTime,
             totalAmount: amount
         });
 
         poolAmount -= amount;
         IERC20(pool.token).forceApprove(address(lockupDynamic), amount);
-        uint256 streamId = lockupDynamic.createWithMilestones(params);
+        uint256 streamId = lockupDynamic.createWithDeltas(params);
         _recipientStreamIds[_recipientId].push(streamId);
 
         emit Distributed(_recipientId, recipient.recipientAddress, amount, _sender);

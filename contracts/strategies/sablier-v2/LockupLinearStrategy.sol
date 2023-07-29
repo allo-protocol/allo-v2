@@ -140,6 +140,12 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
         return _recipientStreamIds[_recipientId][streamIdIndex];
     }
 
+    /// @notice Get the recipient's stream ids
+    /// @param _recipientId Id of the recipient
+    function getRecipientStreamIds(address _recipientId) external view returns (uint256[] memory) {
+        return _recipientStreamIds[_recipientId];
+    }
+
     /// @notice Returns the payout summary for the accepted recipient
     function getPayouts(address[] memory _recipientIds, bytes memory, address)
         external
@@ -191,6 +197,12 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
                 i++;
             }
         }
+    }
+
+    /// @notice Cancel the stream
+    /// @param _streamId The id of the stream
+    function cancelStream(uint256 _streamId) external onlyPoolManager(msg.sender) {
+        lockupLinear.cancel(_streamId);
     }
 
     /// @notice Withdraw funds from pool
@@ -299,7 +311,7 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
             recipient.recipientStatus != InternalRecipientStatus.Rejected // no need to reject twice
                 && recipientStatus == InternalRecipientStatus.Rejected
         ) {
-            recipient.recipientStatus == InternalRecipientStatus.Rejected;
+            recipient.recipientStatus = InternalRecipientStatus.Rejected;
             emit RecipientStatusChanged(recipientId, InternalRecipientStatus.Rejected);
         }
     }
