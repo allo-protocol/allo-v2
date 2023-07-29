@@ -129,6 +129,9 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
         }
     }
 
+    /// @notice Get the recipient's stream id at the given index
+    /// @param _recipientId Id of the recipient
+    /// @param streamIdIndex Index of the stream id
     function getRecipientStreamId(address _recipientId, uint256 streamIdIndex) external view returns (uint256) {
         return _recipientStreamIds[_recipientId][streamIdIndex];
     }
@@ -163,6 +166,8 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
     /// ======= External/Custom =======
     /// ===============================
 
+    /// @notice Set the broker
+    /// @param _broker The new broker to be set
     function setBroker(Broker memory _broker) external onlyPoolManager(msg.sender) {
         broker = _broker;
         emit BrokerSet(broker);
