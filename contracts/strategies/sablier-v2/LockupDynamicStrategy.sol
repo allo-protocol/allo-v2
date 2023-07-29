@@ -204,6 +204,7 @@ contract LockupDynamicStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Cancel the stream
     /// @param _streamId The id of the stream
     function cancelStream(uint256 _streamId) external onlyPoolManager(msg.sender) {
+        poolAmount += lockupDynamic.refundableAmountOf(_streamId);
         lockupDynamic.cancel(_streamId);
     }
 

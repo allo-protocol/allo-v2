@@ -202,6 +202,7 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Cancel the stream
     /// @param _streamId The id of the stream
     function cancelStream(uint256 _streamId) external onlyPoolManager(msg.sender) {
+        poolAmount += lockupLinear.refundableAmountOf(_streamId);
         lockupLinear.cancel(_streamId);
     }
 
