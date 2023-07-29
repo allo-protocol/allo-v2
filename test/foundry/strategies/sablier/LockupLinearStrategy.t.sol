@@ -4,7 +4,7 @@ import {IERC20} from "@sablier/v2-core/types/Tokens.sol";
 import {ISablierV2LockupLinear} from "@sablier/v2-core/interfaces/ISablierV2LockupLinear.sol";
 import {Broker, LockupLinear} from "@sablier/v2-core/types/DataTypes.sol";
 
-import {LockupLinearStrategy} from "../../../../contracts/strategies/sablier/LockupLinearStrategy.sol";
+import {LockupLinearStrategy} from "../../../../contracts/strategies/sablier-v2/LockupLinearStrategy.sol";
 
 import {LockupBase_Test} from "./LockupBase.t.sol";
 

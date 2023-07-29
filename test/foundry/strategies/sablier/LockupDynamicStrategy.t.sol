@@ -5,7 +5,7 @@ import {ISablierV2LockupDynamic} from "@sablier/v2-core/interfaces/ISablierV2Loc
 import {Broker, LockupDynamic} from "@sablier/v2-core/types/DataTypes.sol";
 import {UD2x18} from "@sablier/v2-core/types/Math.sol";
 
-import {LockupDynamicStrategy} from "../../../../contracts/strategies/sablier/LockupDynamicStrategy.sol";
+import {LockupDynamicStrategy} from "../../../../contracts/strategies/sablier-v2/LockupDynamicStrategy.sol";
 
 import {LockupBase_Test} from "./LockupBase.t.sol";
 
