@@ -22,13 +22,21 @@ recipient
 /// @title Hats Protocol Allocator Strategy
 /// @author 0xZakk (zakk@gitcoin.co)
 /// @notice An allocation strategy that uses Hats Protocol to determine who can allocate a pool of funding
-contract HatsStrategy is BaseStrategy {
+contract HatsCommitteeStrategy is BaseStrategy {
+    /// @notice Status of recipient applications for funding
+    enum InternalRecipientStatus {
+        None,       // Default (No application)
+        Pending,    // Application submitted (pending review)
+        Accepted,   // Application accepted (approved, pending delay period)
+        Rejected,   // Application rejected (denied)
+        Distributed // Application distributed (funds transferred)
+    }
     /// @notice Recipient, a group or individual that applies to receive funding from the pool managed by this strategy
     struct Recipient {
         address recipientId;
         uint256 amount;
         Metadata metadata;
-        RecipientStatus status;
+        InternalRecipientStatus status;
     }
 
     /// ================================
@@ -68,23 +76,6 @@ contract HatsStrategy is BaseStrategy {
     /// @notice Invoked when the delay period has not passed
     error DELAY_NOT_MET();
 
-    /// ===============================
-    /// ========== Events =============
-    /// ===============================
-
-    /// @notice Emitted when someone registers to be a recipient
-    event Registered(address indexed recipientId, Metadata metadata, uint256 amount);
-
-    /// @notice Emitted when an allocation is approved to a recipient
-    event Allocated(address indexed recipientId, uint256 amount, ERC20 token, address sender);
-
-    /// @notice Emitted when a distribution is made
-    event Distributed(address indexed recipientId, uint256 amount, address sender);
-
-    /// ================================
-    /// ========== Modifier ============
-    /// ================================
-
     /// ===================================
     /// ========== Constructor ============
     /// ===================================
@@ -101,7 +92,7 @@ contract HatsStrategy is BaseStrategy {
     }
 
     /// ===============================
-    /// ========== Methods ============
+    /// ======== Allo Methods =========
     /// ===============================
 
     /// @notice Method for registering a recipient from the pool
@@ -121,7 +112,7 @@ contract HatsStrategy is BaseStrategy {
         if (!_isIdentityMember(recipientId, _sender)) revert UNAUTHORIZED();
 
         // Reject if already registered
-        if (recipients[recipientId].status != RecipientStatus.None) {
+        if (recipients[recipientId].status != InternalRecipientStatus.None) {
             revert RECIPIENT_ALREADY_REGISTERED();
         }
 
@@ -130,9 +121,9 @@ contract HatsStrategy is BaseStrategy {
         recipient.recipientId = recipientId;
         recipient.amount = amount;
         recipient.metadata = metadata;
-        recipient.status = RecipientStatus.Pending;
+        recipient.status = InternalRecipientStatus.Pending;
 
-        emit Registered(recipientId, metadata, amount);
+        emit Registered(recipientId, _data, _sender);
 
         return recipientId;
     }
@@ -149,19 +140,22 @@ contract HatsStrategy is BaseStrategy {
         Recipient storage recipient = recipients[recipientId];
 
         if (approval) {
-            if (recipient.status != RecipientStatus.Pending) revert UNAUTHORIZED();
+            if (recipient.status != InternalRecipientStatus.Pending) revert UNAUTHORIZED();
 
-            recipient.status = RecipientStatus.Accepted;
+            recipient.status = InternalRecipientStatus.Accepted;
             approvalTime[recipientId] = block.timestamp;
 
             IAllo.Pool memory pool = allo.getPool(poolId);
             emit Allocated(recipientId, recipient.amount, pool.token, _sender);
         } else {
-            if (recipient.status != RecipientStatus.Pending || recipient.status != RecipientStatus.Accepted) {
+            if (
+                recipient.status == InternalRecipientStatus.None ||     // Not registered
+                recipient.status == InternalRecipientStatus.Distributed // Already distributed
+            ) {
                 revert UNAUTHORIZED();
             }
 
-            recipient.status = RecipientStatus.Rejected;
+            recipient.status = InternalRecipientStatus.Rejected;
 
             emit Rejected(recipient.recipientId);
         }
@@ -179,7 +173,7 @@ contract HatsStrategy is BaseStrategy {
 
             Recipient storage recipient = recipients[recipientId];
 
-            if (recipient.status != RecipientStatus.Accepted) {
+            if (recipient.status != InternalRecipientStatus.Accepted) {
                 revert RECIPIENT_ERROR(recipientId);
             }
 
@@ -190,7 +184,7 @@ contract HatsStrategy is BaseStrategy {
             IAllo.Pool memory pool = allo.getPool(poolId);
             _transferAmount(pool.token, recipient.recipientId, recipient.amount);
 
-            emit Distributed(recipient.recipientId, recipient.amount, _sender);
+            emit Distributed(recipient.recipientId, recipient.recipientId, recipient.amount, _sender);
 
             unchecked {
                 i++;
@@ -219,8 +213,34 @@ contract HatsStrategy is BaseStrategy {
         return HATS.isWearerOfHat(_allocator, hatId);
     }
 
+    /// ====================================
+    /// ========= Helper Methods ===========
+    /// ====================================
+
+    function getRecipient(address _recipientId) external view returns (Recipient memory) {
+        return recipients[_recipientId];
+    }
+
+
+    /// @notice Map InternalRecipientStatus to standard RecipientStatus expected
+    //by Allo Core
+    /// @dev This strategy's concept of "Distributed" is what is generally thought
+    //of as "Accepted". We're adding this extra step to allow for the delay
+    //period, where an allocation has been approved, but not yet distributed.
     function getRecipientStatus(address _recipientId) external view override returns (RecipientStatus) {
-        return recipients[_recipientId].status;
+        Recipient memory recipient = recipients[_recipientId];
+
+        if (recipient.status == InternalRecipientStatus.None) {
+            return RecipientStatus.None;
+        } else if (recipient.status == InternalRecipientStatus.Pending) {
+            return RecipientStatus.Pending;
+        } else if (recipient.status == InternalRecipientStatus.Accepted) {
+            return RecipientStatus.Pending;
+        } else if (recipient.status == InternalRecipientStatus.Rejected) {
+            return RecipientStatus.Rejected;
+        } else if (recipient.status == InternalRecipientStatus.Distributed) {
+            return RecipientStatus.Accepted;
+        }
     }
 
     /// ====================================
