@@ -50,6 +50,7 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
     bool public metadataRequired;
     bool public grantAmountRequired;
     ISablierV2LockupLinear public lockupLinear;
+
     // slot 1
     uint256 public allocatedGrantAmount;
 
@@ -61,7 +62,7 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
     mapping(address recipientId => Recipient recipient) private _recipients;
     mapping(address recipientId => uint256[] streamIds) private _recipientStreamIds;
 
-    /// @notice Struct to hold details of an recipient
+    /// @notice Struct to hold details of a grant recipient
     struct Recipient {
         // slot 0
         bool useRegistryAnchor;
@@ -177,10 +178,13 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
     /// ======= External/Custom =======
     /// ===============================
 
-    /// @notice Cancel the stream and increase the pool amount by the refunded amount
+    /// @notice Cancel the stream and adjust the contract amounts.
     /// @param _streamId The id of the stream
-    function cancelStream(uint256 _streamId) external onlyPoolManager(msg.sender) {
-        poolAmount += lockupLinear.refundableAmountOf(_streamId);
+    function cancelStream(address _recipientId, uint256 _streamId) external onlyPoolManager(msg.sender) {
+        uint128 refundedAmount = lockupLinear.refundableAmountOf(_streamId);
+        _recipients[_recipientId].grantAmount -= refundedAmount;
+        allocatedGrantAmount -= refundedAmount;
+        poolAmount += refundedAmount;
         lockupLinear.cancel(_streamId);
     }
 

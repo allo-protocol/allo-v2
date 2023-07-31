@@ -50,6 +50,7 @@ contract LockupDynamicStrategy is BaseStrategy, ReentrancyGuard {
     bool public metadataRequired;
     bool public grantAmountRequired;
     ISablierV2LockupDynamic public lockupDynamic;
+
     // slot 1
     uint256 public allocatedGrantAmount;
 
@@ -61,7 +62,7 @@ contract LockupDynamicStrategy is BaseStrategy, ReentrancyGuard {
     mapping(address recipientId => Recipient recipient) private _recipients;
     mapping(address recipientId => uint256[] streamIds) private _recipientStreamIds;
 
-    /// @notice Struct to hold details of an recipient
+    /// @notice Struct to hold details of a grant recipient
     struct Recipient {
         // slot 0
         bool useRegistryAnchor;
@@ -179,6 +180,16 @@ contract LockupDynamicStrategy is BaseStrategy, ReentrancyGuard {
     /// ======= External/Custom =======
     /// ===============================
 
+    /// @notice Cancel the stream and adjust the contract amounts.
+    /// @param _streamId The id of the stream
+    function cancelStream(address _recipientId, uint256 _streamId) external onlyPoolManager(msg.sender) {
+        uint128 refundedAmount = lockupDynamic.refundableAmountOf(_streamId);
+        _recipients[_recipientId].grantAmount -= refundedAmount;
+        allocatedGrantAmount -= refundedAmount;
+        poolAmount += refundedAmount;
+        lockupDynamic.cancel(_streamId);
+    }
+
     /// @notice Set the Sablier broker
     /// @param _broker The new Sablier broker to be set
     function setBroker(Broker memory _broker) external onlyPoolManager(msg.sender) {
@@ -200,13 +211,6 @@ contract LockupDynamicStrategy is BaseStrategy, ReentrancyGuard {
                 i++;
             }
         }
-    }
-
-    /// @notice Cancel the stream
-    /// @param _streamId The id of the stream
-    function cancelStream(uint256 _streamId) external onlyPoolManager(msg.sender) {
-        poolAmount += lockupDynamic.refundableAmountOf(_streamId);
-        lockupDynamic.cancel(_streamId);
     }
 
     /// @notice Withdraw funds from pool
