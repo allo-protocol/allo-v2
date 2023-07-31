@@ -20,6 +20,7 @@ const chainIds = {
   // testnet
   goerli: 5,
   sepolia: 11155111,
+  "optimism-goerli": 420,
   "fantom-testnet": 4002,
   "pgn-sepolia": 58008,
 
@@ -126,6 +127,12 @@ const config: HardhatUserConfig = {
       "fantom-testnet",
       "https://rpc.testnet.fantom.network/"
     ),
+    "optimism-goerli": {
+      accounts: [deployPrivateKey],
+      chainId: chainIds["optimism-goerli"],
+      url: "https://optimism-goerli.publicnode.com",
+      gasPrice: 20000000000,
+    },
     "pgn-sepolia": {
       accounts: [deployPrivateKey],
       chainId: chainIds["pgn-sepolia"],
@@ -149,6 +156,8 @@ const config: HardhatUserConfig = {
       sepolia: process.env.ETHERSCAN_API_KEY,
       // @ts-ignore
       optimisticEthereum: process.env.OPTIMISTIC_ETHERSCAN_API_KEY,
+      // @ts-ignore
+      optimisticGoerli: process.env.OPTIMISTIC_ETHERSCAN_API_KEY,
       // @ts-ignore
       ftmTestnet: process.env.FTMSCAN_API_KEY,
       // @ts-ignore

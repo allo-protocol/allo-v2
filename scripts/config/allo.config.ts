@@ -60,10 +60,10 @@ export const alloConfig: DeployParams = {
 		feePercentage: 0,
 		baseFee: 0,
 	},
-	// Optimism Testnet
-	69: {
-		allo: "0x0",
-		proxyAddress: "0x0",
+	// Optimism Goerli
+	420: {
+		allo: "0x69b48AA632EEdb6764808295DDAe8F160A42b5ff",
+		proxyAddress: "0xb6078f194992b95c55700d791bd14e9e8560ba69",
 		treasury: "0x62BfD2d4aDfB40ee6aBe81E09DD1959Ce8c76b3F",
 		feePercentage: 0,
 		baseFee: 0,

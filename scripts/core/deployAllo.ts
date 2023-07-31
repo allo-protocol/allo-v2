@@ -46,7 +46,7 @@ export async function deployAllo(_registryAddress? : string) {
     alloParams.feePercentage,
     alloParams.baseFee,
   ]);
-
+  // await instance.waitForDeployment();
   // await instance.deploymentTransaction()?.wait(blocksToWait);
 
   console.log("Allo.sol deployed to:", instance.target);
