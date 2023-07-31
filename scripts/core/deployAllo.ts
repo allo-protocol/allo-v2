@@ -1,8 +1,8 @@
 import hre, { ethers, upgrades } from "hardhat";
-import { alloConfig } from "./config/allo.config";
-import { confirmContinue, prettyNum } from "./utils/script-utils";
+import { alloConfig } from "../config/allo.config";
+import { confirmContinue, prettyNum } from "../utils/script-utils";
 
-async function main() {
+async function deployAllo() {
   const network = await ethers.provider.getNetwork();
   const networkName = await hre.network.name;
   const chainId = Number(network.chainId);
@@ -44,7 +44,7 @@ async function main() {
   console.log("Allo deployed to:", instance.target);
 }
 
-main().catch((error) => {
+deployAllo().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });

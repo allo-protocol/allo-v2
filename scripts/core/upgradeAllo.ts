@@ -1,7 +1,7 @@
 import hre, { ethers, upgrades } from "hardhat";
-import { confirmContinue, prettyNum } from "./utils/script-utils";
+import { confirmContinue, prettyNum } from "../utils/script-utils";
 
-async function main() {
+async function upgradeAllo() {
     const network = await ethers.provider.getNetwork();
     const networkName = await hre.network.name;
     let account;
@@ -38,7 +38,7 @@ async function main() {
     console.log("Allo upgraded");
 }
 
-main().catch((error) => {
+upgradeAllo().catch((error) => {
     console.error(error);
     process.exitCode = 1;
 });

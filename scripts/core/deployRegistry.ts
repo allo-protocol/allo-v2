@@ -1,7 +1,7 @@
 import hre, { ethers } from "hardhat";
-import { confirmContinue, prettyNum } from "./utils/script-utils";
+import { confirmContinue, prettyNum } from "../utils/script-utils";
 
-async function main() {
+async function deployRegistry() {
     const network = await ethers.provider.getNetwork();
     const networkName = await hre.network.name;
     let account;
@@ -33,7 +33,7 @@ async function main() {
     console.log("Registry deployed to:", instance.target);
 }
 
-main().catch((error) => {
+deployRegistry().catch((error) => {
     console.error(error);
     process.exitCode = 1;
 });

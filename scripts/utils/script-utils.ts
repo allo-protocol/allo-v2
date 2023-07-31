@@ -1,27 +1,6 @@
 import "dotenv/config";
 import readline from "readline";
 
-// import {HDAccountsUserConfig, HttpNetworkUserConfig, NetworksUserConfig} from 'hardhat/types';
-
-export function getMnemonic(networkName?: string): string {
-  if (networkName) {
-    const mnemonic = process.env["MNEMONIC_" + networkName.toUpperCase()];
-    if (mnemonic && mnemonic !== "") {
-      return mnemonic;
-    }
-  }
-
-  const mnemonic = process.env.MNEMONIC;
-  if (!mnemonic || mnemonic === "") {
-    return "test test test test test test test test test test test junk";
-  }
-  return mnemonic;
-}
-
-export function accounts(networkName?: string): { mnemonic: string } {
-  return { mnemonic: getMnemonic(networkName) };
-}
-
 // --- User verification ---
 // Helper method for waiting on user input. Source: https://stackoverflow.com/a/50890409
 export async function waitForInput(query: string): Promise<unknown> {
