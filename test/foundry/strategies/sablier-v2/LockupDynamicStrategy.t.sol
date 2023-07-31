@@ -9,6 +9,8 @@ import {LockupDynamicStrategy} from "../../../../contracts/strategies/sablier-v2
 import {LockupBase_Test} from "./LockupBase.t.sol";
 
 contract LockupDynamicStrategyTest is LockupBase_Test {
+    event RecipientSegmentsChanged(address recipientId, LockupDynamic.SegmentWithDelta[] segments);
+
     ISablierV2LockupDynamic internal lockupDynamic = ISablierV2LockupDynamic(0x39EFdC3dbB57B2388CcC4bb40aC4CB1226Bc9E44);
     LockupDynamicStrategy internal strategy;
     uint256 internal poolId;
@@ -159,6 +161,43 @@ contract LockupDynamicStrategyTest is LockupBase_Test {
             vars.grantAmount - vars.refundedAmount,
             "recipient grant amount after cancel stream"
         );
+    }
+
+    function test_ChangeRecipientDurations() public {
+        address recipientAddress = makeAddr("recipientAddress");
+        bool cancelable = true;
+        uint256 grantAmount = 1000e18;
+        LockupDynamic.SegmentWithDelta[] memory registerSegments = new LockupDynamic.SegmentWithDelta[](2);
+        registerSegments[0].delta = 3 days;
+        registerSegments[1].delta = 4 days;
+        registerSegments[0].amount = 300e18;
+        registerSegments[1].amount = 700e18;
+        registerSegments[0].exponent = UD2x18.wrap(3.14e18);
+        registerSegments[1].exponent = UD2x18.wrap(2.71e18);
+
+        bytes memory registerRecipientData =
+            abi.encode(recipientAddress, useRegistryAnchor, cancelable, grantAmount, registerSegments, strategyMetadata);
+
+        address[] memory recipientIds = new address[](1);
+        recipientIds[0] = allo.registerRecipient(poolId, registerRecipientData);
+
+        LockupDynamicStrategy.Recipient memory recipient = strategy.getRecipient(recipientIds[0]);
+        assertEq(recipient.segments, registerSegments, "recipient.segments");
+
+        LockupDynamic.SegmentWithDelta[] memory newSegments = new LockupDynamic.SegmentWithDelta[](2);
+        newSegments[0].delta = 6 days;
+        newSegments[1].delta = 12 days;
+        newSegments[0].amount = 400e18;
+        newSegments[1].amount = 600e18;
+        newSegments[0].exponent = UD2x18.wrap(3.14e18);
+        newSegments[1].exponent = UD2x18.wrap(2.71e18);
+
+        vm.expectEmit({emitter: address(strategy)});
+        emit RecipientSegmentsChanged(recipientIds[0], newSegments);
+        strategy.changeRecipientSegments(recipientIds[0], newSegments);
+
+        recipient = strategy.getRecipient(recipientIds[0]);
+        assertEq(recipient.segments, newSegments, "recipient.segments");
     }
 
     function test_SetBroker() public {

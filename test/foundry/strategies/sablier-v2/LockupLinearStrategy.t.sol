@@ -8,6 +8,8 @@ import {LockupLinearStrategy} from "../../../../contracts/strategies/sablier-v2/
 import {LockupBase_Test} from "./LockupBase.t.sol";
 
 contract LockupLinearStrategyTest is LockupBase_Test {
+    event RecipientDurationsChanged(address recipientId, LockupLinear.Durations durations);
+
     ISablierV2LockupLinear internal lockupLinear = ISablierV2LockupLinear(0xB10daee1FCF62243aE27776D7a92D39dC8740f95);
     LockupLinearStrategy internal strategy;
     uint256 internal poolId;
@@ -126,6 +128,33 @@ contract LockupLinearStrategyTest is LockupBase_Test {
             params.grantAmount - refundedAmount,
             "recipient grant amount after cancel stream"
         );
+    }
+
+    function test_ChangeRecipientDurations() public {
+        address recipientAddress = makeAddr("recipientAddress");
+        bool cancelable = true;
+        uint256 grantAmount = 1000e18;
+        LockupLinear.Durations memory registerDurations = LockupLinear.Durations({cliff: 3 days, total: 4 days});
+
+        bytes memory registerRecipientData = abi.encode(
+            recipientAddress, useRegistryAnchor, cancelable, grantAmount, registerDurations, strategyMetadata
+        );
+
+        address[] memory recipientIds = new address[](1);
+        recipientIds[0] = allo.registerRecipient(poolId, registerRecipientData);
+
+        LockupLinearStrategy.Recipient memory recipient = strategy.getRecipient(recipientIds[0]);
+        assertEq(recipient.durations.cliff, registerDurations.cliff, "recipient.durations.cliff");
+        assertEq(recipient.durations.total, registerDurations.total, "recipient.durations.total");
+
+        LockupLinear.Durations memory newDurations = LockupLinear.Durations({cliff: 6 days, total: 12 days});
+        vm.expectEmit({emitter: address(strategy)});
+        emit RecipientDurationsChanged(recipientIds[0], newDurations);
+        strategy.changeRecipientDurations(recipientIds[0], newDurations);
+
+        recipient = strategy.getRecipient(recipientIds[0]);
+        assertEq(recipient.durations.cliff, newDurations.cliff, "recipient.durations.cliff");
+        assertEq(recipient.durations.total, newDurations.total, "recipient.durations.total");
     }
 
     function test_SetBroker() public {

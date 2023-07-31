@@ -212,7 +212,7 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
     {
         if (
             _recipients[_recipientId].recipientStatus != InternalRecipientStatus.Pending
-                || _recipients[_recipientId].recipientStatus != InternalRecipientStatus.InReview
+                && _recipients[_recipientId].recipientStatus != InternalRecipientStatus.InReview
         ) {
             revert STATUS_NOT_PENDING_OR_INREVIEW();
         }
