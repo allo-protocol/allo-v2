@@ -15,9 +15,9 @@ contract Deployer {
     }
 
     modifier onlyDeployer() {
-      if(!isDeployer[msg.sender]) {
-        revert UNAUTHORIZED();
-      }
+        if (!isDeployer[msg.sender]) {
+            revert UNAUTHORIZED();
+        }
         _;
     }
 
@@ -34,7 +34,7 @@ contract Deployer {
         if (usedSalts[salt]) {
             revert SALT_USED();
         }
-        
+
         usedSalts[salt] = true;
         return CREATE3.deploy(salt, creationCode, msg.value);
     }

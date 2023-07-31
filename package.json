@@ -20,8 +20,7 @@
     "deploy-core": "npx hardhat run scripts/core/_deployCore.ts --network",
     "deploy-allo": "npx hardhat run scripts/core/deployAllo.ts --network",
     "deploy-registry": "npx hardhat run scripts/core/deployRegistry.ts --network",
-    "upgrade-allo": "npx hardhat run scripts/core/deployAllo.ts --network",
-    "/////// deploy-strategies ///////": "echo 'deploy allo-v2 strategies'"
+    "upgrade-allo": "npx hardhat run scripts/core/deployAllo.ts --network"
   },
   "devDependencies": {
     "@ethereum-attestation-service/eas-contracts": "^0.28.1",
