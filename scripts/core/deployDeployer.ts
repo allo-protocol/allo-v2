@@ -36,10 +36,10 @@ export async function deployDeployer() {
   return instance.target;
 }
 
-deployDeployer().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+// deployDeployer().catch((error) => {
+//   console.error(error);
+//   process.exitCode = 1;
+// });
 
 // Note: Deploy script to run in terminal:
 // npx hardhat run scripts/deployDeployer.ts --network sepolia
