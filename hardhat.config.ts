@@ -120,7 +120,7 @@ const config: HardhatUserConfig = {
     ),
 
     // Test Networks
-    goerli: createTestnetConfig("goerli"),
+    goerli: createTestnetConfig("goerli", "https://ethereum-goerli.publicnode.com"),
     sepolia: createTestnetConfig("sepolia", "https://ethereum-sepolia.blockpi.network/v1/rpc/public"),
     "fantom-testnet": createTestnetConfig(
       "fantom-testnet",

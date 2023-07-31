@@ -22,8 +22,8 @@ export const alloConfig: DeployParams = {
 	},
 	// Goerli
 	5: {
-		allo: "0x0",
-		proxyAddress: "0x0",
+		allo: "0x96dDE4e7ca3fda7A99451F783554Ff4F193930Ec",
+		proxyAddress: "0x69b48aa632eedb6764808295ddae8f160a42b5ff",
 		treasury: "0x62BfD2d4aDfB40ee6aBe81E09DD1959Ce8c76b3F",
 		feePercentage: 0,
 		baseFee: 0,

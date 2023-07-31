@@ -16,7 +16,7 @@ export const registryConfig: DeployParams = {
   },
   // Goerli
   5: {
-    registry: "",
+    registry: "0x0e6c54D4cC786127F34B0fF1B569eC3Db89F8824",
     owner: "0x62BfD2d4aDfB40ee6aBe81E09DD1959Ce8c76b3F",
   },
   // Sepolia
