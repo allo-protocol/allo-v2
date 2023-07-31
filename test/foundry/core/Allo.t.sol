@@ -15,7 +15,7 @@ import {Native} from "../../../contracts/core/libraries/Native.sol";
 import {AlloSetup} from "../shared/AlloSetup.sol";
 import {RegistrySetupFull} from "../shared/RegistrySetup.sol";
 import {TestUtilities} from "../../utils/TestUtilities.sol";
-import {BadStrategy} from "../../utils/BadStrategy.sol";
+import {TestStrategy} from "../../utils/TestStrategy.sol";
 import {MockStrategy} from "../../utils/MockStrategy.sol";
 import {MockToken} from "../../utils/MockToken.sol";
 
@@ -95,7 +95,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
     }
 
     function testRevert_initialize_ALREADY_INITIALIZED() public {
-        vm.expectRevert(AlreadyInitialized.selector);
+        vm.expectRevert("Initializable: contract is already initialized");
 
         allo().initialize(
             address(registry()), // _registry
@@ -145,24 +145,24 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
     }
 
     function testRevert_createPool_poolId_MISMATCH() public {
-        BadStrategy badStrategy = new BadStrategy();
-        badStrategy.setPoolId(0);
+        TestStrategy testStrategy = new TestStrategy(makeAddr("allo"), "TestStrategy");
+        testStrategy.setPoolId(0);
 
         vm.expectRevert(IAllo.MISMATCH.selector);
         vm.prank(pool_admin());
         allo().createPoolWithCustomStrategy(
-            poolIdentity_id(), address(badStrategy), "0x", NATIVE, 0, metadata, pool_managers()
+            poolIdentity_id(), address(testStrategy), "0x", NATIVE, 0, metadata, pool_managers()
         );
     }
 
     function testRevert_createPool_allo_MISMATCH() public {
-        BadStrategy badStrategy = new BadStrategy();
-        badStrategy.setAllo(address(0));
+        TestStrategy testStrategy = new TestStrategy(makeAddr("allo"), "TestStrategy");
+        testStrategy.setAllo(address(0));
 
         vm.expectRevert(IAllo.MISMATCH.selector);
         vm.prank(pool_admin());
         allo().createPoolWithCustomStrategy(
-            poolIdentity_id(), address(badStrategy), "0x", NATIVE, 0, metadata, pool_managers()
+            poolIdentity_id(), address(testStrategy), "0x", NATIVE, 0, metadata, pool_managers()
         );
     }
 
