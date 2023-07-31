@@ -137,6 +137,7 @@ const config: HardhatUserConfig = {
       accounts: [deployPrivateKey],
       chainId: chainIds["pgn-sepolia"],
       url: "https://sepolia.publicgoods.network",
+      gasPrice: 20000000000,
     },
     localhost: createTestnetConfig("localhost", "http://localhost:8545"),
   },
