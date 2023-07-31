@@ -16,12 +16,12 @@ export const registryConfig: DeployParams = {
   },
   // Goerli
   5: {
-    registry: "0x0e6c54D4cC786127F34B0fF1B569eC3Db89F8824",
+    registry: "0xe571ec2C7b94dE72Bc01937a251E48780DEF882A",
     owner: "0x24aE808BAe513fA698d4C188b88538d9C909f83E",
   },
   // Sepolia
   11155111: {
-    registry: "0x0e6c54D4cC786127F34B0fF1B569eC3Db89F8824",
+    registry: "0xe571ec2C7b94dE72Bc01937a251E48780DEF882A",
     owner: "0x24aE808BAe513fA698d4C188b88538d9C909f83E",
   },
   // PGN
@@ -31,7 +31,7 @@ export const registryConfig: DeployParams = {
   },
   // PGN Sepolia
   58008: {
-    registry: "0x0e6c54D4cC786127F34B0fF1B569eC3Db89F8824",
+    registry: "0xe571ec2C7b94dE72Bc01937a251E48780DEF882A",
     owner: "0x24aE808BAe513fA698d4C188b88538d9C909f83E",
   },
   // Optimism
@@ -41,7 +41,7 @@ export const registryConfig: DeployParams = {
   },
   // Optimism Goerli
   420: {
-    registry: "0x0e6c54D4cC786127F34B0fF1B569eC3Db89F8824",
+    registry: "0xe571ec2C7b94dE72Bc01937a251E48780DEF882A",
     owner: "0x24aE808BAe513fA698d4C188b88538d9C909f83E",
   },
   // Fantom
