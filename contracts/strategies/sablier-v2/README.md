@@ -2,19 +2,19 @@
 
 ## Overview
 
-Sablier is a token streaming protocol. By _streaming_, we mean the capability to make payments by the second. This system allows direct grants with specific durations and it also enables the customization of distribution methods:
+Sablier is a token streaming protocol that enabled by-the-second payments. This integration allows Allo pool manager to create streams with specific durations and custom distribution methods:
 
-- `LockupLinearStrategy` for linear grant emissions
-- `LockupDynamicStrategy` for custom distribution emissions
+- `LockupLinearStrategy` for linear payment streaming
+- `LockupDynamicStrategy` for custom payment streaming curves
 
 Both strategies call the create functions which set the start time to `block.timestamp`:
 
-- [createWithDuration](https://docs.sablier.com/contracts/v2/reference/core/contract.SablierV2LockupLinear#createwithdurations)
-- [createWithDeltas](https://docs.sablier.com/contracts/v2/reference/core/contract.SablierV2LockupDynamic#createwithdeltas)
+- [`createWithDurations`](https://docs.sablier.com/contracts/v2/reference/core/contract.SablierV2LockupLinear#createwithdurations)
+- [`createWithDeltas`](https://docs.sablier.com/contracts/v2/reference/core/contract.SablierV2LockupDynamic#createwithdeltas)
 
-Visual images can provide a clearer understanding of the types of distribution curves you can create. For more details, please refer to Sablier's documentation, available at [sablier's docs](https://docs.sablier.com/apps/features#the-universal-streaming-engine).
+Visual images can provide a clearer understanding of the types of distribution curves you can create. For more details, please refer to Sablier's documentation, available at [docs.sablier.com](https://docs.sablier.com/apps/features#the-universal-streaming-engine).
 
-These strategies requires the calculation of allocation **off-chain**. Additionally, if a voting system exists, it must also be recorded **off-chain**. Once the grant is distributed, all calculations are managed **on-chain** by [Sablier contracts](https://github.com/sablier-labs/v2-core).
+These strategies assume that the voting systems and the allocation calculations are made **off-chain**. Then, once the grant is distributed, all calculations are managed **on-chain** by the [Sablier Protocol](https://github.com/sablier-labs/v2-core).
 
 ## Spec
 
@@ -36,9 +36,9 @@ In these strategies, prospective recipients only need to register for a grant. T
 In these strategies, pool managers are able to review, approve, and reject grants for specific amounts. Only pool managers should be considered eligible allocators that can call `allocate`.
 
 - `allocate` — function for pool managers (i.e. wallets marked as `eligible`) to either approve or reject a grant application
-  - If approving, the pool manager needs to set the amount of the pool that the recipient will receive as part of the grant. When approving, this also updates both global and local status to `Approved`
+  - If approving, the pool manager needs to set the amount of the pool that the recipient will be streamed as part of the grant. When approving, this also updates both global and local status to `Approved`
   - If rejecting, this should update both global and local status to `Rejected`
-- `setIntenalRecipientStatusToInReview` - function for pool managers to update the status of the recipient's application to signal that the application has been seen but no decision has been made. This action should keep the global status as `Pending` but set the local status to `In Review`
+- `setInternalRecipientStatusToInReview` - function for pool managers to update the status of the recipient's application to signal that the application has been seen but no decision has been made. This action should keep the global status as `Pending` but set the local status to `In Review`
 
 ### Payout calculation logic
 
@@ -55,14 +55,18 @@ These strategies will use a duration payout approach, where the recipient must w
   - `changeRecipientSegments` - function for the pool manager to change the recipient's funding segments
 
 - `distribute` - function for the pool manager to accept the recipient's payout, it will call the Sablier V2 contracts to create streams:
-
   - `SablierV2LockupLinear`
   - `SablierV2LockupDynamic`
+  - You can see a list of all Sablier V2 contracts [here](https://docs.sablier.com/contracts/v2/deployments)
 
-    All the stream ids will be stored in the strategy contract within the `_recipientStreamIds` mapping.
+All stream ids will be stored in the strategy contract within the reverse mapping `_recipientStreamIds`
 
 ### Cancel Stream
 
-When a stream is created and set to be cancelable(true), the pool manager has the option to invoke the `cancelStream` function. This can be useful in case any unexpected events occur during the streaming period. The unstreamed tokens will then be added back to the pool amount, and both i. the recipient grant amount and ii. the allocated grant amount will be adjusted accordingly.
+When a stream is created and set to be cancelable, the pool manager has the option to invoke the `cancelStream` function. This can be useful in case any unexpected event occurs during the streaming period. Subsequently:
+
+- The unstreamed tokens will be added back to the pool amount
+- The recipient grant amount will be decreased
+- The allocated grant amount will also be decreased
 
 Also, the `InternalRecipientStatus` will be updated to `Canceled` for the recipient.
