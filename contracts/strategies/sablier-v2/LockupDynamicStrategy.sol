@@ -34,6 +34,7 @@ contract LockupDynamicStrategy is BaseStrategy, ReentrancyGuard {
 
     event BrokerSet(Broker broker);
     event RecipientStatusChanged(address recipientId, InternalRecipientStatus status);
+    event RecipientSegmentsChanged(address recipientId, LockupDynamic.SegmentWithDelta[] segments);
 
     /// ================================
     /// ========== Storage =============
@@ -198,6 +199,30 @@ contract LockupDynamicStrategy is BaseStrategy, ReentrancyGuard {
         allocatedGrantAmount -= refundedAmount;
         poolAmount += refundedAmount;
         lockupDynamic.cancel(_streamId);
+    }
+
+    /// @notice Change the recipient's segments
+    /// @param _recipientId Id of the recipient
+    /// @param _segments The new segments
+    function changeRecipientSegments(address _recipientId, LockupDynamic.SegmentWithDelta[] calldata _segments)
+        external
+        onlyPoolManager(msg.sender)
+    {
+        if (
+            _recipients[_recipientId].recipientStatus != InternalRecipientStatus.Pending
+                || _recipients[_recipientId].recipientStatus != InternalRecipientStatus.InReview
+        ) {
+            revert STATUS_NOT_PENDING_OR_INREVIEW();
+        }
+
+        Recipient storage recipient = _recipients[_recipientId];
+
+        uint256 segmentCount = _segments.length;
+        for (uint256 i = 0; i < segmentCount; ++i) {
+            recipient.segments.push(_segments[i]);
+        }
+
+        emit RecipientSegmentsChanged(_recipientId, _segments);
     }
 
     /// @notice Set the Sablier broker

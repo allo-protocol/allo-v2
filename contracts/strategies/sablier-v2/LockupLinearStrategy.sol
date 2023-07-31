@@ -26,12 +26,14 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
     error ALLOCATION_EXCEEDS_POOL_AMOUNT();
     error INVALID_METADATA();
     error STATUS_NOT_ACCEPTED();
+    error STATUS_NOT_PENDING_OR_INREVIEW();
 
     /// ===============================
     /// ========== Events =============
     /// ===============================
 
     event BrokerSet(Broker broker);
+    event RecipientDurationsChanged(address recipientId, LockupLinear.Durations durations);
     event RecipientStatusChanged(address recipientId, InternalRecipientStatus status);
 
     /// ================================
@@ -194,6 +196,25 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
         allocatedGrantAmount -= refundedAmount;
         poolAmount += refundedAmount;
         lockupLinear.cancel(_streamId);
+    }
+
+    /// @notice Change the recipient's durations
+    /// @param _recipientId Id of the recipient
+    /// @param _durations The new durations
+    function changeRecipientDurations(address _recipientId, LockupLinear.Durations calldata _durations)
+        external
+        onlyPoolManager(msg.sender)
+    {
+        if (
+            _recipients[_recipientId].recipientStatus != InternalRecipientStatus.Pending
+                || _recipients[_recipientId].recipientStatus != InternalRecipientStatus.InReview
+        ) {
+            revert STATUS_NOT_PENDING_OR_INREVIEW();
+        }
+
+        _recipients[_recipientId].durations = _durations;
+
+        emit RecipientDurationsChanged(_recipientId, _durations);
     }
 
     /// @notice Set the Sablier broker
