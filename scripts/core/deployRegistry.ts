@@ -23,7 +23,7 @@ export async function deployRegistry() {
         contract: "Registry.sol",
         chainId: chainId,
         network: networkName,
-        deployed: deployerAddress,
+        deployerAddress: deployerAddress,
         registryOwner: registryConfig[chainId].owner,
         balance: prettyNum(balance.toString())
     });

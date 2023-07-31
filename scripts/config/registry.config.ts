@@ -9,8 +9,49 @@ type DeployParams = Record<number, RegistryConfig>;
 
 // NOTE: This will be the owner address for each registy on each network.
 export const registryConfig: DeployParams = {
+  // Mainnet
+  1: {
+    registry: "",
+    owner: "",
+  },
+  // Sepolia
   11155111: {
-    registry: "0xD8471D139e1DBceC97eD14BD69bDF8001d28F6Fa",
-    owner: "0x1fD06f088c720bA3b7a3634a8F021Fdd485DcA42",
+    registry: "",
+    owner: "0x62BfD2d4aDfB40ee6aBe81E09DD1959Ce8c76b3F",
+  },
+  // PGN
+  424: {
+    registry: "",
+    owner: "",
+  },
+  // PGN Sepolia
+  58008: {
+    registry: "",
+    owner: "0x62BfD2d4aDfB40ee6aBe81E09DD1959Ce8c76b3F",
+  },
+  // Optimism
+  10: {
+    registry: "",
+    owner: "",
+  },
+  // Optimism Testnet
+  69: {
+    registry: "",
+    owner: "0x62BfD2d4aDfB40ee6aBe81E09DD1959Ce8c76b3F",
+  },
+  // Goerli
+  5: {
+    registry: "",
+    owner: "0x62BfD2d4aDfB40ee6aBe81E09DD1959Ce8c76b3F",
+  },
+  // Fantom
+  250: {
+    registry: "",
+    owner: "",
+  },
+  // Fantom Testnet
+  4002: {
+    registry: "",
+    owner: "0x62BfD2d4aDfB40ee6aBe81E09DD1959Ce8c76b3F",
   },
 };
