@@ -15,7 +15,7 @@ import {Native} from "../../../contracts/core/libraries/Native.sol";
 // Test libraries
 import {AlloSetup} from "../shared/AlloSetup.sol";
 import {RegistrySetupFull} from "../shared/RegistrySetup.sol";
-import {MockStrategy} from "../utils/MockStrategy.sol";
+import {MockStrategy} from "../../utils/MockStrategy.sol";
 
 import {EventSetup} from "../shared/EventSetup.sol";
 

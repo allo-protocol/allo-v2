@@ -136,6 +136,14 @@ contract Accounts is StdCheats {
     // Recipient adresses
     // //////////////////////
 
+    function recipient1() public returns (address) {
+        return makeAddr("recipient1");
+    }
+
+    function recipient2() public returns (address) {
+        return makeAddr("recipient2");
+    }
+
     function recipient() public returns (address) {
         return makeAddr("recipient");
     }
@@ -149,10 +157,10 @@ contract Accounts is StdCheats {
     }
 
     // //////////////////////
-    // Random address
+    // Random adresses
     // //////////////////////
 
     function randomAddress() public returns (address) {
-        return makeAddr("randomAddress");
+        return makeAddr("random chad");
     }
 }
