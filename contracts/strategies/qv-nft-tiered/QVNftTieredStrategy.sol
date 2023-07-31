@@ -77,7 +77,7 @@ contract QVNftTieredStrategy is QVBaseStrategy {
             _poolId,
             _registryGating,
             _metadataRequired,
-            0, // reviewTreshold
+            0, // reviewThreshold
             _registrationStartTime,
             _registrationEndTime,
             _allocationStartTime,
