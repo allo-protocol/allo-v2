@@ -24,7 +24,7 @@ export const alloConfig: DeployParams = {
 	5: {
 		allo: "0x96dDE4e7ca3fda7A99451F783554Ff4F193930Ec",
 		proxyAddress: "0x69b48aa632eedb6764808295ddae8f160a42b5ff",
-		treasury: "0x62BfD2d4aDfB40ee6aBe81E09DD1959Ce8c76b3F",
+		treasury: "0x24aE808BAe513fA698d4C188b88538d9C909f83E",
 		feePercentage: 0,
 		baseFee: 0,
 	},
@@ -32,7 +32,7 @@ export const alloConfig: DeployParams = {
 	11155111: {
 		allo: "0x96dDE4e7ca3fda7A99451F783554Ff4F193930Ec",
 		proxyAddress: "0x69b48aa632eedb6764808295ddae8f160a42b5ff",
-		treasury: "0x62BfD2d4aDfB40ee6aBe81E09DD1959Ce8c76b3F",
+		treasury: "0x24aE808BAe513fA698d4C188b88538d9C909f83E",
 		feePercentage: 0,
 		baseFee: 0,
 	},
@@ -48,7 +48,7 @@ export const alloConfig: DeployParams = {
 	58008: {
 		allo: "0x96dDE4e7ca3fda7A99451F783554Ff4F193930Ec",
 		proxyAddress: "0x69b48aa632eedb6764808295ddae8f160a42b5ff",
-		treasury: "0x62BfD2d4aDfB40ee6aBe81E09DD1959Ce8c76b3F",
+		treasury: "0x24aE808BAe513fA698d4C188b88538d9C909f83E",
 		feePercentage: 0,
 		baseFee: 0,
 	},
@@ -64,7 +64,7 @@ export const alloConfig: DeployParams = {
 	420: {
 		allo: "0x69b48AA632EEdb6764808295DDAe8F160A42b5ff",
 		proxyAddress: "0xb6078f194992b95c55700d791bd14e9e8560ba69",
-		treasury: "0x62BfD2d4aDfB40ee6aBe81E09DD1959Ce8c76b3F",
+		treasury: "0x24aE808BAe513fA698d4C188b88538d9C909f83E",
 		feePercentage: 0,
 		baseFee: 0,
 	},
@@ -80,7 +80,7 @@ export const alloConfig: DeployParams = {
 	4002: {
 		allo: "0x0",
 		proxyAddress: "0x0",
-		treasury: "0x62BfD2d4aDfB40ee6aBe81E09DD1959Ce8c76b3F",
+		treasury: "0x24aE808BAe513fA698d4C188b88538d9C909f83E",
 		feePercentage: 0,
 		baseFee: 0,
 	},
