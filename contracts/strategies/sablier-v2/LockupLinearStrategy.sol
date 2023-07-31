@@ -122,6 +122,11 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
         return _recipientStreamIds[_recipientId];
     }
 
+    /// @notice Get the broker
+    function getBroker() external view returns (Broker memory) {
+        return broker;
+    }
+
     /// @notice Get Internal recipient status
     /// @param _recipientId Id of the recipient
     function getInternalRecipientStatus(address _recipientId) external view returns (InternalRecipientStatus) {
