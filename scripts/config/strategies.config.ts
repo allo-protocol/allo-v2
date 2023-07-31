@@ -14,7 +14,7 @@ type DeployerConfig = {
   [key: number]: { address: string };
 };
 
-export const deployerAddress: DeployerConfig = {
+export const deployerContractAddress: DeployerConfig = {
   // Mainnet
   1: {
     address: "",
