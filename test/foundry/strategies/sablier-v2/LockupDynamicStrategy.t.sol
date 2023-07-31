@@ -1,7 +1,7 @@
 pragma solidity 0.8.19;
 
 import {ISablierV2LockupDynamic} from "@sablier/v2-core/interfaces/ISablierV2LockupDynamic.sol";
-import {LockupDynamic} from "@sablier/v2-core/types/DataTypes.sol";
+import {Broker, LockupDynamic} from "@sablier/v2-core/types/DataTypes.sol";
 import {UD2x18} from "@sablier/v2-core/types/Math.sol";
 
 import {LockupDynamicStrategy} from "../../../../contracts/strategies/sablier-v2/LockupDynamicStrategy.sol";
@@ -30,89 +30,140 @@ contract LockupDynamicStrategyTest is LockupBase_Test {
     }
 
     struct Params {
-        bool cancelable;
         UD2x18 segmentExponent;
         uint128 segmentAmount;
         address recipientAddress;
     }
 
-    function testForkFuzz_RegisterRecipientAllocateDistribute(Params memory params) public {
+    /// Needed to prevent "Stack too deep" error
+    struct Vars {
+        LockupDynamic.SegmentWithDelta[] segments;
+        uint256 grantAmount;
+        bool cancelable;
+        bytes registerRecipientData;
+        address[] recipientIds;
+        LockupDynamicStrategy.Recipient recipient;
+        bytes allocateData;
+        LockupDynamic.Segment[] expectedSegments;
+        uint256 streamId;
+        uint256 recipientStreamId;
+        uint256 afterDistributeNextStreamId;
+        LockupDynamic.Stream stream;
+        uint256 poolAmountBeforeCancel;
+        uint256 allocatedGrantAmountBeforeCancel;
+        uint256 refundedAmount;
+    }
+
+    function testForkFuzz_RegisterRecipientAllocateDistributeCancelStream(Params memory params) public {
         params.segmentAmount = uint128(_bound(params.segmentAmount, 1, type(uint96).max / 2 - 1));
 
-        LockupDynamic.SegmentWithDelta[] memory segments = new LockupDynamic.SegmentWithDelta[](2);
+        Vars memory vars;
 
-        segments[0].delta = 1 days;
-        segments[1].delta = 12 weeks;
-
-        segments[0].amount = params.segmentAmount;
-        segments[1].amount = params.segmentAmount;
-
-        segments[0].exponent = params.segmentExponent;
-        segments[1].exponent = params.segmentExponent;
+        vars.segments = new LockupDynamic.SegmentWithDelta[](2);
+        vars.segments[0].delta = 1 days;
+        vars.segments[1].delta = 12 weeks;
+        vars.segments[0].amount = params.segmentAmount;
+        vars.segments[1].amount = params.segmentAmount;
+        vars.segments[0].exponent = params.segmentExponent;
+        vars.segments[1].exponent = params.segmentExponent;
 
         vm.assume(params.recipientAddress != address(0) && params.recipientAddress != pool_manager1());
 
-        uint256 grantAmount = params.segmentAmount * 2;
+        vars.grantAmount = params.segmentAmount * 2;
 
-        deal({token: address(GTC), to: pool_manager1(), give: grantAmount});
-        GTC.approve(address(allo), uint96(grantAmount));
-        allo.fundPool(poolId, grantAmount);
+        deal({token: address(GTC), to: pool_manager1(), give: vars.grantAmount});
+        GTC.approve(address(allo), uint96(vars.grantAmount));
+        allo.fundPool(poolId, vars.grantAmount);
 
-        bytes memory registerRecipientData = abi.encode(
-            params.recipientAddress, useRegistryAnchor, params.cancelable, grantAmount, segments, strategyMetadata
+        vars.cancelable = true;
+        vars.registerRecipientData = abi.encode(
+            params.recipientAddress,
+            useRegistryAnchor,
+            vars.cancelable,
+            vars.grantAmount,
+            vars.segments,
+            strategyMetadata
         );
 
-        address[] memory recipientIds = new address[](1);
+        vars.recipientIds = new address[](1);
 
         vm.expectEmit({emitter: address(strategy)});
-        emit Registered(pool_manager1(), registerRecipientData, pool_manager1());
-        recipientIds[0] = allo.registerRecipient(poolId, registerRecipientData);
+        emit Registered(pool_manager1(), vars.registerRecipientData, pool_manager1());
+        vars.recipientIds[0] = allo.registerRecipient(poolId, vars.registerRecipientData);
 
-        strategy.setInternalRecipientStatusToInReview(recipientIds);
+        strategy.setInternalRecipientStatusToInReview(vars.recipientIds);
 
-        LockupDynamicStrategy.Recipient memory recipient = strategy.getRecipient(recipientIds[0]);
-        assertEq(recipient.cancelable, params.cancelable, "recipient.cancelable");
-        assertEq(recipient.useRegistryAnchor, useRegistryAnchor, "recipient.useRegistryAnchor");
-        assertEq(uint8(recipient.recipientStatus), 4, "recipient.recipientStatus"); // InReview
-        assertEq(recipient.grantAmount, grantAmount, "recipient.grantAmount");
-        assertEq(recipient.segments, segments, "recipient.segments");
+        vars.recipient = strategy.getRecipient(vars.recipientIds[0]);
+        assertEq(vars.recipient.cancelable, vars.cancelable, "recipient.cancelable");
+        assertEq(vars.recipient.useRegistryAnchor, useRegistryAnchor, "recipient.useRegistryAnchor");
+        assertEq(uint8(vars.recipient.recipientStatus), 4, "recipient.recipientStatus"); // InReview
+        assertEq(vars.recipient.grantAmount, vars.grantAmount, "recipient.vars.grantAmount");
+        assertEq(vars.recipient.segments, vars.segments, "recipient.segments");
 
-        bytes memory allocateData =
-            abi.encode(recipientIds[0], LockupDynamicStrategy.InternalRecipientStatus.Accepted, grantAmount);
-
-        vm.expectEmit({emitter: address(strategy)});
-        emit Allocated(recipientIds[0], grantAmount, address(GTC), pool_manager1());
-        allo.allocate(poolId, allocateData);
-
-        assertEq(uint8(strategy.getInternalRecipientStatus(recipientIds[0])), 2, "after allocate internal status"); // Accepted
-
-        uint256 streamId = lockupDynamic.nextStreamId();
+        vars.allocateData =
+            abi.encode(vars.recipientIds[0], LockupDynamicStrategy.InternalRecipientStatus.Accepted, vars.grantAmount);
 
         vm.expectEmit({emitter: address(strategy)});
-        emit Distributed(recipientIds[0], params.recipientAddress, grantAmount, pool_manager1());
-        allo.distribute(poolId, recipientIds, "");
+        emit Allocated(vars.recipientIds[0], vars.grantAmount, address(GTC), pool_manager1());
+        allo.allocate(poolId, vars.allocateData);
 
-        uint256 recipientStreamId = strategy.getRecipientStreamId(recipientIds[0], 0);
-        assertEq(recipientStreamId, streamId, "recipientStreamId");
+        assertEq(uint8(strategy.getInternalRecipientStatus(vars.recipientIds[0])), 2, "after allocate internal status"); // Accepted
 
-        uint256 afterDistributeNextStreamId = lockupDynamic.nextStreamId();
-        assertEq(afterDistributeNextStreamId, streamId + 1, "afterDistributeNextStreamId");
+        vars.streamId = lockupDynamic.nextStreamId();
 
-        LockupDynamic.Segment[] memory expectedSegments = new LockupDynamic.Segment[](2);
-        expectedSegments[0].milestone = uint40(block.timestamp) + segments[0].delta;
-        expectedSegments[1].milestone = expectedSegments[0].milestone + segments[1].delta;
-        expectedSegments[0].amount = params.segmentAmount;
-        expectedSegments[1].amount = params.segmentAmount;
-        expectedSegments[0].exponent = params.segmentExponent;
-        expectedSegments[1].exponent = params.segmentExponent;
+        vm.expectEmit({emitter: address(strategy)});
+        emit Distributed(vars.recipientIds[0], params.recipientAddress, vars.grantAmount, pool_manager1());
+        allo.distribute(poolId, vars.recipientIds, "");
 
-        LockupDynamic.Stream memory stream = lockupDynamic.getStream(streamId);
-        assertEq(stream.sender, address(strategy), "stream.sender");
-        assertEq(stream.segments, expectedSegments, "stream.segments");
-        assertEq(stream.isCancelable, params.cancelable, "stream.isCancelable");
-        assertEq(address(stream.asset), address(GTC), "stream.asset");
-        assertEq(stream.amounts.deposited, grantAmount, "stream.amounts.deposited");
-        assertTrue(stream.isStream, "stream.isStream");
+        vars.recipientStreamId = strategy.getRecipientStreamId(vars.recipientIds[0], 0);
+        assertEq(vars.recipientStreamId, vars.streamId, "recipientStreamId");
+
+        vars.afterDistributeNextStreamId = lockupDynamic.nextStreamId();
+        assertEq(vars.afterDistributeNextStreamId, vars.streamId + 1, "afterDistributeNextStreamId");
+
+        vars.expectedSegments = new LockupDynamic.Segment[](2);
+        vars.expectedSegments[0].milestone = uint40(block.timestamp) + vars.segments[0].delta;
+        vars.expectedSegments[1].milestone = vars.expectedSegments[0].milestone + vars.segments[1].delta;
+        vars.expectedSegments[0].amount = params.segmentAmount;
+        vars.expectedSegments[1].amount = params.segmentAmount;
+        vars.expectedSegments[0].exponent = params.segmentExponent;
+        vars.expectedSegments[1].exponent = params.segmentExponent;
+
+        vars.stream = lockupDynamic.getStream(vars.streamId);
+        assertEq(vars.stream.sender, address(strategy), "stream.sender");
+        assertEq(vars.stream.segments, vars.expectedSegments, "stream.segments");
+        assertEq(vars.stream.isCancelable, vars.cancelable, "stream.isCancelable");
+        assertEq(address(vars.stream.asset), address(GTC), "stream.asset");
+        assertEq(vars.stream.amounts.deposited, vars.grantAmount, "stream.amounts.deposited");
+        assertTrue(vars.stream.isStream, "stream.isStream");
+
+        vm.warp(6 days);
+
+        vars.poolAmountBeforeCancel = strategy.getPoolAmount();
+        vars.allocatedGrantAmountBeforeCancel = strategy.getRecipient(vars.recipientIds[0]).grantAmount;
+        vars.refundedAmount = lockupDynamic.refundableAmountOf(vars.streamId);
+        strategy.cancelStream(vars.recipientIds[0], vars.streamId);
+        assertEq(uint8(strategy.getInternalRecipientStatus(vars.recipientIds[0])), 5, "after cancel internal status"); // Canceled
+        assertEq(
+            strategy.getPoolAmount(),
+            vars.poolAmountBeforeCancel + vars.refundedAmount,
+            "pool amount after cancel stream"
+        );
+        assertEq(
+            strategy.allocatedGrantAmount(),
+            vars.allocatedGrantAmountBeforeCancel - vars.refundedAmount,
+            "allocated grant amount after cancel stream"
+        );
+        assertEq(
+            strategy.getRecipient(vars.recipientIds[0]).grantAmount,
+            vars.grantAmount - vars.refundedAmount,
+            "recipient grant amount after cancel stream"
+        );
+    }
+
+    function test_SetBroker() public {
+        strategy.setBroker(broker);
+        assertEq(strategy.getBroker(), broker);
     }
 
     /// ===============================

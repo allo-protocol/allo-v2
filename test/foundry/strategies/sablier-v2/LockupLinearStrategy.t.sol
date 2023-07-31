@@ -1,7 +1,7 @@
 pragma solidity 0.8.19;
 
 import {ISablierV2LockupLinear} from "@sablier/v2-core/interfaces/ISablierV2LockupLinear.sol";
-import {LockupLinear} from "@sablier/v2-core/types/DataTypes.sol";
+import {Broker, LockupLinear} from "@sablier/v2-core/types/DataTypes.sol";
 
 import {LockupLinearStrategy} from "../../../../contracts/strategies/sablier-v2/LockupLinearStrategy.sol";
 
@@ -33,13 +33,12 @@ contract LockupLinearStrategyTest is LockupBase_Test {
     }
 
     struct Params {
-        bool cancelable;
         LockupLinear.Durations durations;
         uint256 grantAmount;
         address recipientAddress;
     }
 
-    function testForkFuzz_RegisterRecipientAllocateDistribute(Params memory params) public {
+    function testForkFuzz_RegisterRecipientAllocateDistributeCancelStream(Params memory params) public {
         params.durations.total = uint40(_bound(params.durations.total, 1 days, 52 weeks));
         vm.assume(params.durations.cliff < params.durations.total);
 
@@ -50,10 +49,11 @@ contract LockupLinearStrategyTest is LockupBase_Test {
         GTC.approve(address(allo), uint96(params.grantAmount));
         allo.fundPool(poolId, params.grantAmount);
 
+        bool cancelable = true;
         bytes memory registerRecipientData = abi.encode(
             params.recipientAddress,
             useRegistryAnchor,
-            params.cancelable,
+            cancelable,
             params.grantAmount,
             params.durations,
             strategyMetadata
@@ -70,7 +70,7 @@ contract LockupLinearStrategyTest is LockupBase_Test {
         strategy.setInternalRecipientStatusToInReview(recipientIds);
 
         LockupLinearStrategy.Recipient memory recipient = strategy.getRecipient(recipientIds[0]);
-        assertEq(recipient.cancelable, params.cancelable, "recipient.cancelable");
+        assertEq(recipient.cancelable, cancelable, "recipient.cancelable");
         assertEq(recipient.useRegistryAnchor, useRegistryAnchor, "recipient.useRegistryAnchor");
         assertEq(uint8(recipient.recipientStatus), 4, "recipient.recipientStatus"); // InReview
         assertEq(recipient.grantAmount, params.grantAmount, "recipient.grantAmount");
@@ -103,9 +103,33 @@ contract LockupLinearStrategyTest is LockupBase_Test {
         assertEq(stream.startTime, block.timestamp, "stream.startTime");
         assertEq(stream.cliffTime, block.timestamp + params.durations.cliff, "stream.cliffTime");
         assertEq(stream.endTime, block.timestamp + params.durations.total, "stream.endTime");
-        assertEq(stream.isCancelable, params.cancelable, "stream.isCancelable");
+        assertEq(stream.isCancelable, cancelable, "stream.isCancelable");
         assertEq(address(stream.asset), address(GTC), "stream.asset");
         assertEq(stream.amounts.deposited, params.grantAmount, "stream.amounts.deposited");
         assertTrue(stream.isStream, "stream.isStream");
+
+        vm.warp(lockupLinear.getEndTime(streamId) / 2);
+
+        uint256 poolAmountBeforeCancel = strategy.getPoolAmount();
+        uint256 allocatedGrantAmountBeforeCancel = strategy.allocatedGrantAmount();
+        uint128 refundedAmount = lockupLinear.refundableAmountOf(streamId);
+        strategy.cancelStream(recipientIds[0], streamId);
+        assertEq(uint8(strategy.getInternalRecipientStatus(recipientIds[0])), 5, "after cancel internal status"); // Canceled
+        assertEq(strategy.getPoolAmount(), poolAmountBeforeCancel + refundedAmount, "pool amount after cancel stream");
+        assertEq(
+            strategy.allocatedGrantAmount(),
+            allocatedGrantAmountBeforeCancel - refundedAmount,
+            "allocated grant amount after cancel stream"
+        );
+        assertEq(
+            strategy.getRecipient(recipientIds[0]).grantAmount,
+            params.grantAmount - refundedAmount,
+            "recipient grant amount after cancel stream"
+        );
+    }
+
+    function test_SetBroker() public {
+        strategy.setBroker(broker);
+        assertEq(strategy.getBroker(), broker);
     }
 }
