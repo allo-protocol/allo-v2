@@ -25,6 +25,7 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
     error INVALID_REGISTRATION();
     error ALLOCATION_EXCEEDS_POOL_AMOUNT();
     error INVALID_METADATA();
+    error STATUS_NOT_ACCEPTED();
 
     /// ===============================
     /// ========== Events =============
@@ -42,7 +43,8 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
         Pending,
         Accepted,
         Rejected,
-        InReview
+        InReview,
+        Canceled
     }
 
     // slot 0
@@ -179,8 +181,14 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
     /// ===============================
 
     /// @notice Cancel the stream and adjust the contract amounts.
+    /// @param _recipientId Id of the recipient
     /// @param _streamId The id of the stream
     function cancelStream(address _recipientId, uint256 _streamId) external onlyPoolManager(msg.sender) {
+        if (_recipients[_recipientId].recipientStatus == InternalRecipientStatus.Accepted) {
+            revert STATUS_NOT_ACCEPTED();
+        }
+        _recipients[_recipientId].recipientStatus = InternalRecipientStatus.Canceled;
+
         uint128 refundedAmount = lockupLinear.refundableAmountOf(_streamId);
         _recipients[_recipientId].grantAmount -= refundedAmount;
         allocatedGrantAmount -= refundedAmount;
