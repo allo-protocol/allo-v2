@@ -193,7 +193,7 @@ contract LockupDynamicStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _recipientId Id of the recipient
     /// @param _streamId The id of the stream
     function cancelStream(address _recipientId, uint256 _streamId) external onlyPoolManager(msg.sender) {
-        if (_recipients[_recipientId].recipientStatus == InternalRecipientStatus.Accepted) {
+        if (_recipients[_recipientId].recipientStatus != InternalRecipientStatus.Accepted) {
             revert STATUS_NOT_ACCEPTED();
         }
 
