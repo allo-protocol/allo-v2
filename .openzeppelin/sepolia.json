@@ -1,60 +1,25 @@
 {
   "manifestVersion": "3.2",
   "admin": {
-    "address": "0x1072304022203029a6237eb7B87F23f8c5E4679D",
-    "txHash": "0xc1664c359d2791ff011819859337996edc4145d1bdc815c1ae367de29f4abbaa"
+    "address": "0xdf25423c9ec15347197Aa5D3a41c2ebE27587D59",
+    "txHash": "0x2aa792e94142c39f4267aa91a7d943d869d79b50e2135aa3bb3253a88bd39dc5"
   },
   "proxies": [
     {
-      "address": "0x943AFE8A6f6B6f5172B70f5c4F0805e7063f8905",
-      "txHash": "0x4fc7c2cd7a011c800530de04d9a4ea19f03755e50c4f58c4c26f501db6b28132",
+      "address": "0xfF94fAfC740Be8D2010304108266E7b90ed232fc",
+      "txHash": "0x647e49736706a2f594f119c106f66d8b865c924c0bc5324afd8dce90850de1a0",
       "kind": "transparent"
     },
     {
-      "address": "0x1551D5Ff5586cCF45B6CD6349f0339c850481b34",
-      "txHash": "0x4e38b9e94d8b6647c2c26a0d72c5fff7490f72b7210a583bc7d90add83786665",
-      "kind": "transparent"
-    },
-    {
-      "address": "0x3b783dae9acF41FB67E0D883B0240676e56Aea85",
-      "txHash": "0x5d312e21fde6305ef6175abe1a4b12a1d2b4030fca979e7e981c39d2f7fabae6",
-      "kind": "transparent"
-    },
-    {
-      "address": "0x44665c718B57f3b780d1cddE30C32281C18Fa8ce",
-      "txHash": "0xe366c8932f81114bd85428cc3072443690ab972c692acd71a676e1825cd5db1e",
-      "kind": "transparent"
-    },
-    {
-      "address": "0x174b26eD4DF62A21189fF498834DE05077531EBD",
-      "txHash": "0xd177fe922a08bd97b9d75e3a7b3608a0a582e9021d992dc6153a8a63cfd96232",
-      "kind": "transparent"
-    },
-    {
-      "address": "0x5c073F643a8171F0eE3F0582bee5178c003c84fF",
-      "txHash": "0x98d5c2bfa115f02dee55f9664fb595d8d3aaa45abe3f571330dea0689a153f52",
-      "kind": "transparent"
-    },
-    {
-      "address": "0xaaA4bc2E24cFF92Da4a06808abef4aB9c5E20868",
-      "txHash": "0x34f110d91c5a41a6e550218109d835d5b4244cb290637838e85b0b1c283e2948",
-      "kind": "transparent"
-    },
-    {
-      "address": "0xF5A5B0Ad8fCB094cB9205A1c7C81E69a85C8d5E4",
-      "txHash": "0xdc4e508b4a12791f9716f072f2da40467d7889ad9ef561f3692fdac7922c8b0a",
-      "kind": "transparent"
-    },
-    {
-      "address": "0x7d626C9E93B9Fe5d17892BC41e1C73c46706F374",
-      "txHash": "0x8a8693cf45cf938ce74bb264939cf693dd329c83141f74a49eb4a69ab6aacce6",
+      "address": "0x3615d870d5B760cea43693ABED70Cd8A9b59b3d8",
+      "txHash": "0xfa0e16ea4e12cce350f11de8d3ec09ef56505399e4e3848291fc2d3883f2feb0",
       "kind": "transparent"
     }
   ],
   "impls": {
-    "a1344bbb8b10696d1da67f53c5315de2f41a88768334f16211235e067c7adb01": {
-      "address": "0xb38f7b412eA4cf921554b57A1bE5743eC0696E9b",
-      "txHash": "0x08d2fea3b5b6817f02d50e901400278a9ff10ecf055cac970281431564622943",
+    "ce2229996c830482327eebbedaae0806b9bdb966bae934f1b5e6e1a878d57fa8": {
+      "address": "0xB3Ee4800c93cBec7eD2a31050161240e4663Ff5E",
+      "txHash": "0xe377fbb07472594e8ef11da322b4b611000612a8b12fecdf2e829a0a0c8394c5",
       "layout": {
         "solcVersion": "0.8.19",
         "storage": [
@@ -79,7 +44,7 @@
             "label": "_roles",
             "offset": 0,
             "slot": "1",
-            "type": "t_mapping(t_bytes32,t_struct(RoleData)676_storage)",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)1124_storage)",
             "contract": "AccessControl",
             "src": "@openzeppelin/contracts/access/AccessControl.sol:56"
           },
@@ -119,7 +84,7 @@
             "label": "registry",
             "offset": 0,
             "slot": "6",
-            "type": "t_contract(IRegistry)4967",
+            "type": "t_contract(IRegistry)5401",
             "contract": "Allo",
             "src": "contracts/core/Allo.sol:55"
           },
@@ -135,25 +100,17 @@
             "label": "pools",
             "offset": 0,
             "slot": "8",
-            "type": "t_mapping(t_uint256,t_struct(Pool)4477_storage)",
+            "type": "t_mapping(t_uint256,t_struct(Pool)4946_storage)",
             "contract": "Allo",
             "src": "contracts/core/Allo.sol:61"
           },
           {
-            "label": "approvedStrategies",
+            "label": "cloneableStrategies",
             "offset": 0,
             "slot": "9",
             "type": "t_mapping(t_address,t_bool)",
             "contract": "Allo",
             "src": "contracts/core/Allo.sol:64"
-          },
-          {
-            "label": "feeSkirtingBountyPercentage",
-            "offset": 0,
-            "slot": "10",
-            "type": "t_uint256",
-            "contract": "Allo",
-            "src": "contracts/core/Allo.sol:67"
           }
         ],
         "types": {
@@ -173,11 +130,11 @@
             "label": "bytes32",
             "numberOfBytes": "32"
           },
-          "t_contract(IRegistry)4967": {
+          "t_contract(IRegistry)5401": {
             "label": "contract IRegistry",
             "numberOfBytes": "20"
           },
-          "t_contract(IStrategy)6414": {
+          "t_contract(IStrategy)6799": {
             "label": "contract IStrategy",
             "numberOfBytes": "20"
           },
@@ -189,11 +146,11 @@
             "label": "mapping(address => uint256)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_bytes32,t_struct(RoleData)676_storage)": {
+          "t_mapping(t_bytes32,t_struct(RoleData)1124_storage)": {
             "label": "mapping(bytes32 => struct AccessControl.RoleData)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint256,t_struct(Pool)4477_storage)": {
+          "t_mapping(t_uint256,t_struct(Pool)4946_storage)": {
             "label": "mapping(uint256 => struct IAllo.Pool)",
             "numberOfBytes": "32"
           },
@@ -201,7 +158,7 @@
             "label": "string",
             "numberOfBytes": "32"
           },
-          "t_struct(Metadata)5682_storage": {
+          "t_struct(Metadata)6143_storage": {
             "label": "struct Metadata",
             "members": [
               {
@@ -219,7 +176,7 @@
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(Pool)4477_storage": {
+          "t_struct(Pool)4946_storage": {
             "label": "struct IAllo.Pool",
             "members": [
               {
@@ -230,7 +187,7 @@
               },
               {
                 "label": "strategy",
-                "type": "t_contract(IStrategy)6414",
+                "type": "t_contract(IStrategy)6799",
                 "offset": 0,
                 "slot": "1"
               },
@@ -248,7 +205,7 @@
               },
               {
                 "label": "metadata",
-                "type": "t_struct(Metadata)5682_storage",
+                "type": "t_struct(Metadata)6143_storage",
                 "offset": 0,
                 "slot": "4"
               },
@@ -267,7 +224,7 @@
             ],
             "numberOfBytes": "256"
           },
-          "t_struct(RoleData)676_storage": {
+          "t_struct(RoleData)1124_storage": {
             "label": "struct AccessControl.RoleData",
             "members": [
               {

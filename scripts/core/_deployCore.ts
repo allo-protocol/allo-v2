@@ -1,12 +1,33 @@
-import hre, { ethers, upgrades } from "hardhat";
-import { alloConfig } from "../config/allo.config";
-import { confirmContinue, prettyNum } from "../utils/script-utils";
+import hre from "hardhat";
+import { deployRegistry } from "./deployRegistry";
+import { deployAllo } from "./deployAllo";
 
 async function deployCore() {
-  const network = await ethers.provider.getNetwork();
   const networkName = await hre.network.name;
 
-  console.log(`%cThis script deploys Allo V2 onto ${networkName}`, "color: white; background-color: #26bfa5;font-size: 20px");
+  console.log(`
+    ////////////////////////////////////////////////////
+    Deploy core Allo V2 contracts to ${networkName}
+    ======================================
+    - Registry
+    - Allo
+    ////////////////////////////////////////////////////`
+  );
+
+  deployRegistry().then(registryAddress => {
+
+    deployAllo(registryAddress!).then(alloAddress => {
+        console.log(`
+          ////////////////////////////////////////////////////
+          Core Allo V2 deployed to:
+          ======================================
+          Registry: ${registryAddress}
+          Allo: ${alloAddress}
+          ////////////////////////////////////////////////////`
+        );
+    });
+  })
+
 }
 
 deployCore().catch((error) => {

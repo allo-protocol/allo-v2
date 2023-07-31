@@ -17,10 +17,10 @@
     "coverage": "forge coverage",
     "coverage:html": "forge coverage && lcov --remove lcov.info -o lcov.info 'test/*' 'script/*' --ignore-errors unused,unused  && genhtml lcov.info --branch-coverage --output-dir coverage --ignore-error category",
     "/////// deploy-core ///////": "echo 'deploy allo-v2'",
-    "deploy-core": "pnpm hardhat run scripts/core/_deployCore.ts --network",
-    "deploy-allo": "pnpm hardhat run scripts/core/deployAllo.ts --network",
-    "deploy-registry": "pnpm hardhat run scripts/core/deployRegistry.ts --network",
-    "upgrade-allo": "pnpm hardhat run scripts/core/deployAllo.ts --network",
+    "deploy-core": "npx hardhat run scripts/core/_deployCore.ts --network",
+    "deploy-allo": "npx hardhat run scripts/core/deployAllo.ts --network",
+    "deploy-registry": "npx hardhat run scripts/core/deployRegistry.ts --network",
+    "upgrade-allo": "npx hardhat run scripts/core/deployAllo.ts --network",
     "/////// deploy-strategies ///////": "echo 'deploy allo-v2 strategies'"
   },
   "devDependencies": {

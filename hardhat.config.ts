@@ -8,7 +8,7 @@ import "@typechain/hardhat";
 import "hardhat-abi-exporter";
 import "hardhat-contract-sizer";
 import "hardhat-gas-reporter";
-import { HardhatUserConfig, task } from "hardhat/config";
+import { HardhatUserConfig } from "hardhat/config";
 import { NetworkUserConfig } from "hardhat/types";
 import "solidity-coverage";
 
@@ -33,11 +33,10 @@ const chainIds = {
 let deployPrivateKey = process.env.DEPLOYER_PRIVATE_KEY as string;
 if (!deployPrivateKey) {
   // default first account deterministically created by local nodes like `npx hardhat node` or `anvil`
-  deployPrivateKey =
-    "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
+  throw "No deployer private key set in .env";
 }
 
-const infuraIdKey = process.env.INFURA_ID as string;
+const infuraIdKey = process.env.INFURA_RPC_ID as string;
 
 /**
  * Generates hardhat network configuration the test networks.

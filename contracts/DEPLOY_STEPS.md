@@ -16,34 +16,44 @@ All the deploy scripts will expect network param to know which network the contr
 
 ### Setup && Install Dependencies
 
-1. Create an `.env` file
+1. Create an `.env` file and populate the .env file
 ```sh
-cp ../.env.example ../.env
+cp ../.env.sample ../.env
 ```
 
-2. Create an `.env` file and fill out
-    - `INFURA_ID`               : Infura ID for deploying contract ([Get one here](https://app.infura.io/dashboard))
-    - `DEPLOYER_PRIVATE_KEY`    : address which deploys the contract
-    - `ETHERSCAN_API_KEY`       : API key for etherscan verification ([Get one here](https://etherscan.io/myapikey))
-
-3. Install dependencies
+2. Install dependencies
 ```shell
 yarn install
 ```
 
-4. Install Foundry [Install Docs](https://book.getfoundry.sh/getting-started/installation)
+3. Install Foundry [Install Docs](https://book.getfoundry.sh/getting-started/installation)
 ```shell
 foundryup
 ```
 
-5. Building Contracts
+4. Compile Contracts
 ```shell
-forge build
+yarn compile
 ```
 
 6. Running Tests
 
-See [Testing](./TESTING.md) for more details
+The tests have been written in foundry.
+For detailed information on how the testing framework works, refer https://book.getfoundry.sh/forge/tests
+
+Run all tests witout verbosity
+```bash
+yarn test
+yarn test -vvvv # with verbosity
+yarn test --match-test <test_name> -vvvv # specific test
+```
+
+7. Coverage
+
+```bash
+yarn coverage # generate coverage on terminal
+yarn coverage:html # generage lcov coverage on html
+```
 
 
 ### Deploying Project Registry
@@ -52,7 +62,7 @@ The section here shows how to set up the project registry for the first time on 
 
 1. Deploy the `Registry` contract
 ```shell
- npx hardhat run scripts/deployRegistry.ts --network goerli  
+ npx hardhat run scripts/deployRegistry.ts --network goerli
 ```
 
 ### Deploying Allo
@@ -61,7 +71,7 @@ The section here shows how to deploy the Allo contract on a given network. In th
 
 1. Deploy the `Allo` contract
 ```shell
- npx hardhat run scripts/deployAllo.ts --network goerli  
+ npx hardhat run scripts/deployAllo.ts --network goerli
 ```
 
 ### Contract Verification
