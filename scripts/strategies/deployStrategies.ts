@@ -1,4 +1,4 @@
-import { AbiCoder, concat, hexlify, toUtf8Bytes } from "ethers";
+import { AbiCoder, concat, hexlify } from "ethers";
 import hre, { ethers } from "hardhat";
 import { alloConfig } from "../config/allo.config";
 import { deployerContractAddress } from "../config/strategies.config";
@@ -26,9 +26,9 @@ export async function deployStrategies(strategyName: string, version: string) {
     balance: prettyNum(balance.toString()),
   });
 
-  console.log(`Deploy ${strategyName}.sol`);
+  console.log(`Deploying ${strategyName}.sol`);
 
-  const DEPLOYER_CONTRACT_ADDRESS: string = deployerContractAddress[chainId].address; // replace with your contract address
+  const DEPLOYER_CONTRACT_ADDRESS: string = deployerContractAddress[chainId].address;
 
   console.log("Deployer contract address: ", DEPLOYER_CONTRACT_ADDRESS);
 
@@ -57,7 +57,7 @@ export async function deployStrategies(strategyName: string, version: string) {
     const types: Array<string> = ["address", "string"];
 
     // Get the creation code
-    const creationCodeBytes = hexlify(toUtf8Bytes(creationCode));
+    // const creationCodeBytes = hexlify(toUtf8Bytes(creationCode));
 
     // The data you're encoding
     const data: Array<any> = [allo, name];
@@ -66,7 +66,7 @@ export async function deployStrategies(strategyName: string, version: string) {
 
     // Combine the encoded parameters
     creationCodeWithConstructor = hexlify(
-      concat([creationCodeBytes, encodedParams]),
+      concat([creationCode, encodedParams]),
     );
   } catch (error) {
     console.log("Strategy name not found.", error);
