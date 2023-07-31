@@ -10,24 +10,44 @@ type StrategyConfig = {
 
 type DeployParams = Record<number, StrategyConfig>;
 
-export const deployerAddress = {
-    // Mainnet
-    1: "",
-    // Goerli
-    5: "0x339d087B3ab5DF79c6c3617B2487e5340F2DBE3f",
-    // Sepolia
-    11155111: "0x339d087B3ab5DF79c6c3617B2487e5340F2DBE3f",
-    // PGN
-    424: "",
-    // PGN Sepolia
-    58008: "0x339d087B3ab5DF79c6c3617B2487e5340F2DBE3f",
-    // Optimism
-    10: "",
-    // Optimism Goerli
-    420: "0x339d087B3ab5DF79c6c3617B2487e5340F2DBE3f",
-    // Fantom
-    250: "",
-}
+type DeployerConfig = {
+  [key: number]: { address: string };
+};
+
+export const deployerAddress: DeployerConfig = {
+  // Mainnet
+  1: {
+    address: "",
+  },
+  // Goerli
+  5: {
+    address: "0x339d087B3ab5DF79c6c3617B2487e5340F2DBE3f",
+  },
+  // Sepolia
+  11155111: {
+    address: "0x339d087B3ab5DF79c6c3617B2487e5340F2DBE3f",
+  },
+  // PGN
+  424: {
+    address: "",
+  },
+  // PGN Sepolia
+  58008: {
+    address: "0x339d087B3ab5DF79c6c3617B2487e5340F2DBE3f",
+  },
+  // Optimism
+  10: {
+    address: "",
+  },
+  // Optimism Goerli
+  420: {
+    address: "0x339d087B3ab5DF79c6c3617B2487e5340F2DBE3f",
+  },
+  // Fantom
+  250: {
+    address: "",
+  },
+};
 
 // NOTE: This will be the version address for each registy on each network.
 export const nameConfig: DeployParams = {

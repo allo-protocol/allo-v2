@@ -47,7 +47,7 @@ const infuraIdKey = process.env.INFURA_RPC_ID as string;
  */
 function createTestnetConfig(
   network: keyof typeof chainIds,
-  url?: string
+  url?: string,
 ): NetworkUserConfig {
   if (!url) {
     url = `https://${network}.infura.io/v3/${infuraIdKey}`;
@@ -57,6 +57,7 @@ function createTestnetConfig(
     chainId: chainIds[network],
     allowUnlimitedContractSize: true,
     url,
+    gasPrice: 20000000000,
   };
 }
 
@@ -68,7 +69,7 @@ function createTestnetConfig(
  */
 function createMainnetConfig(
   network: keyof typeof chainIds,
-  url?: string
+  url?: string,
 ): NetworkUserConfig {
   if (!url) {
     url = `https://${network}.infura.io/v3/${infuraIdKey}`;
@@ -117,15 +118,21 @@ const config: HardhatUserConfig = {
     },
     "fantom-mainnet": createMainnetConfig(
       "fantom-mainnet",
-      "https://rpc.ftm.tools"
+      "https://rpc.ftm.tools",
     ),
 
     // Test Networks
-    goerli: createTestnetConfig("goerli", "https://ethereum-goerli.publicnode.com"),
-    sepolia: createTestnetConfig("sepolia", "https://ethereum-sepolia.blockpi.network/v1/rpc/public"),
+    goerli: createTestnetConfig(
+      "goerli",
+      "https://ethereum-goerli.publicnode.com",
+    ),
+    sepolia: createTestnetConfig(
+      "sepolia",
+      "https://ethereum-sepolia.blockpi.network/v1/rpc/public",
+    ),
     "fantom-testnet": createTestnetConfig(
       "fantom-testnet",
-      "https://rpc.testnet.fantom.network/"
+      "https://rpc.testnet.fantom.network/",
     ),
     "optimism-goerli": {
       accounts: [deployPrivateKey],
