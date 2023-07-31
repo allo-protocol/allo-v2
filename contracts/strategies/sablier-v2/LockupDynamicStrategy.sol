@@ -259,19 +259,66 @@ contract LockupDynamicStrategy is BaseStrategy, ReentrancyGuard {
     /// ============ Internal ==============
     /// ====================================
 
-    /// @notice Get the recipient
-    /// @param _recipientId Id of the recipient
-    function _getRecipient(address _recipientId) internal view returns (Recipient memory recipient) {
-        recipient = _recipients[_recipientId];
-    }
-
-    /// @notice Check if sender is identity owner or member
-    /// @param _anchor Anchor of the identity
+    /// @notice Register to the pool
+    /// @param _data The data to be decoded
     /// @param _sender The sender of the transaction
-    function _isIdentityMember(address _anchor, address _sender) internal view returns (bool) {
-        IRegistry registry = allo.getRegistry();
-        IRegistry.Identity memory identity = registry.getIdentityByAnchor(_anchor);
-        return registry.isOwnerOrMemberOfIdentity(identity.id, _sender);
+    function _registerRecipient(bytes memory _data, address _sender)
+        internal
+        override
+        onlyActivePool
+        returns (address recipientId)
+    {
+        bool cancelable;
+        uint256 grantAmount;
+        Metadata memory metadata;
+        address recipientAddress;
+        LockupDynamic.SegmentWithDelta[] memory segments;
+        bool useRegistryAnchor;
+
+        // decode data custom to this strategy
+        if (registryGating) {
+            (recipientId, recipientAddress, cancelable, grantAmount, segments, metadata) =
+                abi.decode(_data, (address, address, bool, uint256, LockupDynamic.SegmentWithDelta[], Metadata));
+
+            if (!_isIdentityMember(recipientId, _sender)) {
+                revert UNAUTHORIZED();
+            }
+        } else {
+            (recipientAddress, useRegistryAnchor, cancelable, grantAmount, segments, metadata) =
+                abi.decode(_data, (address, bool, bool, uint256, LockupDynamic.SegmentWithDelta[], Metadata));
+            recipientId = _sender;
+            if (useRegistryAnchor && !_isIdentityMember(recipientId, _sender)) {
+                revert UNAUTHORIZED();
+            }
+        }
+
+        if (grantAmountRequired && grantAmount == 0) {
+            revert INVALID_REGISTRATION();
+        }
+
+        if (_recipients[recipientId].recipientStatus == InternalRecipientStatus.Accepted) {
+            revert RECIPIENT_ALREADY_ACCEPTED();
+        }
+
+        if (metadataRequired && (bytes(metadata.pointer).length == 0 || metadata.protocol == 0)) {
+            revert INVALID_METADATA();
+        }
+
+        Recipient storage recipient = _recipients[recipientId];
+
+        uint256 segmentCount = segments.length;
+        for (uint256 i = 0; i < segmentCount; ++i) {
+            recipient.segments.push(segments[i]);
+        }
+
+        recipient.cancelable = cancelable;
+        recipient.grantAmount = grantAmount;
+        recipient.metadata = metadata;
+        recipient.recipientAddress = recipientAddress;
+        recipient.recipientStatus = InternalRecipientStatus.Pending;
+        recipient.useRegistryAnchor = registryGating ? true : useRegistryAnchor;
+
+        emit Registered(recipientId, _data, _sender);
     }
 
     /// @notice Allocate amount to recipent for streaming grants
@@ -355,65 +402,18 @@ contract LockupDynamicStrategy is BaseStrategy, ReentrancyGuard {
         emit Distributed(_recipientId, recipient.recipientAddress, amount, _sender);
     }
 
-    /// @notice Register to the pool
-    /// @param _data The data to be decoded
+    /// @notice Get the recipient
+    /// @param _recipientId Id of the recipient
+    function _getRecipient(address _recipientId) internal view returns (Recipient memory recipient) {
+        recipient = _recipients[_recipientId];
+    }
+
+    /// @notice Check if sender is identity owner or member
+    /// @param _anchor Anchor of the identity
     /// @param _sender The sender of the transaction
-    function _registerRecipient(bytes memory _data, address _sender)
-        internal
-        override
-        onlyActivePool
-        returns (address recipientId)
-    {
-        bool cancelable;
-        uint256 grantAmount;
-        Metadata memory metadata;
-        address recipientAddress;
-        LockupDynamic.SegmentWithDelta[] memory segments;
-        bool useRegistryAnchor;
-
-        // decode data custom to this strategy
-        if (registryGating) {
-            (recipientId, recipientAddress, cancelable, grantAmount, segments, metadata) =
-                abi.decode(_data, (address, address, bool, uint256, LockupDynamic.SegmentWithDelta[], Metadata));
-
-            if (!_isIdentityMember(recipientId, _sender)) {
-                revert UNAUTHORIZED();
-            }
-        } else {
-            (recipientAddress, useRegistryAnchor, cancelable, grantAmount, segments, metadata) =
-                abi.decode(_data, (address, bool, bool, uint256, LockupDynamic.SegmentWithDelta[], Metadata));
-            recipientId = _sender;
-            if (useRegistryAnchor && !_isIdentityMember(recipientId, _sender)) {
-                revert UNAUTHORIZED();
-            }
-        }
-
-        if (grantAmountRequired && grantAmount == 0) {
-            revert INVALID_REGISTRATION();
-        }
-
-        if (_recipients[recipientId].recipientStatus == InternalRecipientStatus.Accepted) {
-            revert RECIPIENT_ALREADY_ACCEPTED();
-        }
-
-        if (metadataRequired && (bytes(metadata.pointer).length == 0 || metadata.protocol == 0)) {
-            revert INVALID_METADATA();
-        }
-
-        Recipient storage recipient = _recipients[recipientId];
-
-        uint256 segmentCount = segments.length;
-        for (uint256 i = 0; i < segmentCount; ++i) {
-            recipient.segments.push(segments[i]);
-        }
-
-        recipient.cancelable = cancelable;
-        recipient.grantAmount = grantAmount;
-        recipient.metadata = metadata;
-        recipient.recipientAddress = recipientAddress;
-        recipient.recipientStatus = InternalRecipientStatus.Pending;
-        recipient.useRegistryAnchor = registryGating ? true : useRegistryAnchor;
-
-        emit Registered(recipientId, _data, _sender);
+    function _isIdentityMember(address _anchor, address _sender) internal view returns (bool) {
+        IRegistry registry = allo.getRegistry();
+        IRegistry.Identity memory identity = registry.getIdentityByAnchor(_anchor);
+        return registry.isOwnerOrMemberOfIdentity(identity.id, _sender);
     }
 }
