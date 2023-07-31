@@ -221,6 +221,7 @@ contract LockupDynamicStrategy is BaseStrategy, ReentrancyGuard {
         }
 
         Recipient storage recipient = _recipients[_recipientId];
+        delete recipient.segments;
 
         uint256 segmentCount = _segments.length;
         for (uint256 i = 0; i < segmentCount; ++i) {
