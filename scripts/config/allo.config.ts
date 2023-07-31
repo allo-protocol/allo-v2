@@ -2,6 +2,7 @@
 
 type AlloConfig = {
 	allo: string;
+	proxyAddress: string,
 	treasury: string;
 	feePercentage: number;
 	baseFee: number;
@@ -14,13 +15,23 @@ export const alloConfig: DeployParams = {
 	// Mainnet
 	1: {
 		allo: "0x0",
+		proxyAddress: "0x0",
 		treasury: "0x0",
+		feePercentage: 0,
+		baseFee: 0,
+	},
+	// Goerli
+	5: {
+		allo: "0x0",
+		proxyAddress: "0x0",
+		treasury: "0x62BfD2d4aDfB40ee6aBe81E09DD1959Ce8c76b3F",
 		feePercentage: 0,
 		baseFee: 0,
 	},
 	// Sepolia
 	11155111: {
-		allo: "",
+		allo: "0x96dDE4e7ca3fda7A99451F783554Ff4F193930Ec",
+		proxyAddress: "0x69b48aa632eedb6764808295ddae8f160a42b5ff",
 		treasury: "0x62BfD2d4aDfB40ee6aBe81E09DD1959Ce8c76b3F",
 		feePercentage: 0,
 		baseFee: 0,
@@ -28,6 +39,7 @@ export const alloConfig: DeployParams = {
 	// PGN
 	424: {
 		allo: "0x0",
+		proxyAddress: "0x0",
 		treasury: "0x0",
 		feePercentage: 0,
 		baseFee: 0,
@@ -35,6 +47,7 @@ export const alloConfig: DeployParams = {
 	// PGN Sepolia
 	58008: {
 		allo: "0x0",
+		proxyAddress: "0x0",
 		treasury: "0x62BfD2d4aDfB40ee6aBe81E09DD1959Ce8c76b3F",
 		feePercentage: 0,
 		baseFee: 0,
@@ -42,6 +55,7 @@ export const alloConfig: DeployParams = {
 	// Optimism
 	10: {
 		allo: "0x0",
+		proxyAddress: "0x0",
 		treasury: "0x0",
 		feePercentage: 0,
 		baseFee: 0,
@@ -49,13 +63,7 @@ export const alloConfig: DeployParams = {
 	// Optimism Testnet
 	69: {
 		allo: "0x0",
-		treasury: "0x62BfD2d4aDfB40ee6aBe81E09DD1959Ce8c76b3F",
-		feePercentage: 0,
-		baseFee: 0,
-	},
-	// Goerli
-	5: {
-		allo: "0x0",
+		proxyAddress: "0x0",
 		treasury: "0x62BfD2d4aDfB40ee6aBe81E09DD1959Ce8c76b3F",
 		feePercentage: 0,
 		baseFee: 0,
@@ -63,6 +71,7 @@ export const alloConfig: DeployParams = {
 	// Fantom
 	250: {
 		allo: "0x0",
+		proxyAddress: "0x0",
 		treasury: "0x0",
 		feePercentage: 0,
 		baseFee: 0,
@@ -70,6 +79,7 @@ export const alloConfig: DeployParams = {
 	// Fantom Testnet
 	4002: {
 		allo: "0x0",
+		proxyAddress: "0x0",
 		treasury: "0x62BfD2d4aDfB40ee6aBe81E09DD1959Ce8c76b3F",
 		feePercentage: 0,
 		baseFee: 0,

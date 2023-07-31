@@ -50,6 +50,7 @@ export async function deployAllo(_registryAddress? : string) {
   // await instance.deploymentTransaction()?.wait(blocksToWait);
 
   console.log("Allo.sol deployed to:", instance.target);
+  console.log("Allo.sol instance: ", instance);
 
   return instance.target;
 }
