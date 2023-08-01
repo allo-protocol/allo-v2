@@ -25,10 +25,10 @@ Explain the logic for determining how recipients are added to the strategy's poo
     - What criteria determine the eligibility of a recipient to register in this strategy? Are there any specific requirements or conditions?
     - Are there any additional custom functions or conditions for verifying recipient eligibility?
 - **Recipient information**
-    - How does a recipient identify themselves? Is it through an address like msg.sender, do they need an identity registered at the `Registry` contract, or another mechanism? 
+    - How does a recipient identify themselves? Is it through an address like msg.sender, do they need an profile registered at the `Registry` contract, or another mechanism? 
         - If through the Registry, can the pool creator set a custom registry?
         - Which address is returned by `registerRecipient` and represents the `recipientId`?
-        - Can the address that receives the funds be different from the recipient's identity?
+        - Can the address that receives the funds be different from the recipient's profile?
     - What additional data is needed and passed during the registration process, apart from the recipient's address?
 - **Registering recipients**
     - Is the `registerRecipient` function accessible to anyone, or is it restricted to specific roles or addresses?

@@ -22,7 +22,7 @@ import {MockToken} from "../../utils/MockToken.sol";
 contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
     event PoolCreated(
         uint256 indexed poolId,
-        bytes32 indexed identityId,
+        bytes32 indexed profileId,
         IStrategy strategy,
         address token,
         uint256 amount,
@@ -116,7 +116,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
 
         IAllo.Pool memory pool = allo().getPool(poolId);
 
-        assertEq(pool.identityId, poolIdentity_id());
+        assertEq(pool.profileId, poolIdentity_id());
         assertNotEq(address(pool.strategy), address(strategy));
     }
 
@@ -206,7 +206,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
 
         IAllo.Pool memory pool = allo().getPool(poolId);
 
-        assertEq(pool.identityId, poolIdentity_id());
+        assertEq(pool.profileId, poolIdentity_id());
         assertEq(address(pool.strategy), strategy);
     }
 

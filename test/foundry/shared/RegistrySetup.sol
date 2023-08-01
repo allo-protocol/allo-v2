@@ -38,19 +38,19 @@ contract RegistrySetupFull is RegistrySetup {
 
         vm.prank(pool_admin());
         _poolIdentityId_ = _registry_.createIdentity(
-            0, "Pool Identity 1", Metadata({protocol: 1, pointer: "PoolIdentity1"}), pool_admin(), pool_managers()
+            0, "Pool Profile 1", Metadata({protocol: 1, pointer: "PoolIdentity1"}), pool_admin(), pool_managers()
         );
         _poolIdentityAnchor_ = _registry_.getIdentityById(_poolIdentityId_).anchor;
 
         vm.prank(identity1_owner());
         _identity1Id_ = _registry_.createIdentity(
-            0, "Identity 1", Metadata({protocol: 1, pointer: "Identity1"}), identity1_owner(), identity1_members()
+            0, "Profile 1", Metadata({protocol: 1, pointer: "Identity1"}), identity1_owner(), identity1_members()
         );
         _identity1Anchor_ = _registry_.getIdentityById(_identity1Id_).anchor;
 
         vm.prank(identity2_owner());
         _identity2Id_ = _registry_.createIdentity(
-            0, "Identity 2", Metadata({protocol: 1, pointer: "Identity2"}), identity2_owner(), identity2_members()
+            0, "Profile 2", Metadata({protocol: 1, pointer: "Identity2"}), identity2_owner(), identity2_members()
         );
         _identity2Anchor_ = _registry_.getIdentityById(_identity2Id_).anchor;
     }

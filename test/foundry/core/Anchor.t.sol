@@ -8,34 +8,34 @@ import {Anchor} from "../../../contracts/core/Anchor.sol";
 contract MockRegistry {
     mapping(bytes32 => address) public owners;
 
-    function isOwnerOfIdentity(bytes32 identityId, address owner) external view returns (bool) {
-        return owners[identityId] == owner;
+    function isOwnerOfIdentity(bytes32 profileId, address owner) external view returns (bool) {
+        return owners[profileId] == owner;
     }
 
-    function setOwnerOfIdentity(bytes32 identityId, address owner) external {
-        owners[identityId] = owner;
+    function setOwnerOfIdentity(bytes32 profileId, address owner) external {
+        owners[profileId] = owner;
     }
 }
 
 contract AnchorTest is Test {
     Anchor public anchor;
     MockRegistry public mockRegistry;
-    bytes32 identityId;
+    bytes32 profileId;
 
     function setUp() public {
-        identityId = bytes32("test_identity");
+        profileId = bytes32("test_identity");
         mockRegistry = new MockRegistry();
         vm.prank(address(mockRegistry));
-        anchor = new Anchor(identityId);
+        anchor = new Anchor(profileId);
     }
 
     function test_deploy() public {
-        assertEq(anchor.identityId(), bytes32("test_identity"));
+        assertEq(anchor.profileId(), bytes32("test_identity"));
         assertEq(address(anchor.registry()), address(mockRegistry));
     }
 
     function test_execute() public {
-        mockRegistry.setOwnerOfIdentity(identityId, address(this)); // Set the caller as the owner of the identity
+        mockRegistry.setOwnerOfIdentity(profileId, address(this)); // Set the caller as the owner of the profile
 
         // Deploy a simple contract that increments a value and return it
         Incrementer incrementer = new Incrementer();
@@ -62,7 +62,7 @@ contract AnchorTest is Test {
     }
 
     function test_execute_CALL_FAILED() public {
-        mockRegistry.setOwnerOfIdentity(identityId, address(this)); // Set the caller as the owner of the identity
+        mockRegistry.setOwnerOfIdentity(profileId, address(this)); // Set the caller as the owner of the profile
         // Deploy a contract without a fallback function (cannot receive ETH)
         NoFallbackContract noFallback = new NoFallbackContract();
 

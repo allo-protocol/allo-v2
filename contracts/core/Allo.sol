@@ -108,7 +108,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
     /// ====================================
 
     /// @notice Creates a new pool (with custom strategy)
-    /// @param _identityId The identityId of the pool
+    /// @param _profileId The profileId of the pool
     /// @param _strategy The address of strategy
     /// @param _initStrategyData The data to initialize the strategy
     /// @param _token The address of the token
@@ -116,7 +116,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
     /// @param _metadata The metadata of the pool
     /// @param _managers The managers of the pool
     function createPoolWithCustomStrategy(
-        bytes32 _identityId,
+        bytes32 _profileId,
         address _strategy,
         bytes memory _initStrategyData,
         address _token,
@@ -131,18 +131,18 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
             revert IS_APPROVED_STRATEGY();
         }
 
-        return _createPool(_identityId, IStrategy(_strategy), _initStrategyData, _token, _amount, _metadata, _managers);
+        return _createPool(_profileId, IStrategy(_strategy), _initStrategyData, _token, _amount, _metadata, _managers);
     }
 
-    /// @notice Creates a new pool (by cloning an cloneable strategies)
-    /// @param _identityId The identityId of the pool
+    /// @notice Creates a new pool (by cloning an approved strategies)
+    /// @param _profileId The profileId of the pool
     /// @param _initStrategyData The data to initialize the strategy
     /// @param _token The address of the token
     /// @param _amount The amount of the token
     /// @param _metadata The metadata of the pool
     /// @param _managers The managers of the pool
     function createPool(
-        bytes32 _identityId,
+        bytes32 _profileId,
         address _strategy,
         bytes memory _initStrategyData,
         address _token,
@@ -155,7 +155,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
         }
 
         return _createPool(
-            _identityId,
+            _profileId,
             IStrategy(Clone.createClone(_strategy, _nonces[msg.sender]++)),
             _initStrategyData,
             _token,
@@ -331,7 +331,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
     /// ====================================
 
     /// @notice Creates a new pool
-    /// @param _identityId The identityId of the pool creator in the registry
+    /// @param _profileId The profileId of the pool creator in the registry
     /// @param _strategy The address of strategy
     /// @param _initStrategyData The data to initialize the strategy
     /// @param _token The address of the token that the pool is denominated in
@@ -339,7 +339,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
     /// @param _metadata The metadata of the pool
     /// @param _managers The managers of the pool
     function _createPool(
-        bytes32 _identityId,
+        bytes32 _profileId,
         IStrategy _strategy,
         bytes memory _initStrategyData,
         address _token,
@@ -347,7 +347,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
         Metadata memory _metadata,
         address[] memory _managers
     ) internal returns (uint256 poolId) {
-        if (!registry.isOwnerOrMemberOfIdentity(_identityId, msg.sender)) {
+        if (!registry.isOwnerOrMemberOfIdentity(_profileId, msg.sender)) {
             revert UNAUTHORIZED();
         }
 
@@ -358,7 +358,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
         bytes32 POOL_ADMIN_ROLE = keccak256(abi.encodePacked(poolId, "admin"));
 
         Pool memory pool = Pool({
-            identityId: _identityId,
+            profileId: _profileId,
             strategy: _strategy,
             metadata: _metadata,
             token: _token,
@@ -410,7 +410,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
             _fundPool(_amount, poolId, _strategy);
         }
 
-        emit PoolCreated(poolId, _identityId, _strategy, _token, _amount, _metadata);
+        emit PoolCreated(poolId, _profileId, _strategy, _token, _amount, _metadata);
     }
 
     /// @notice passes _data & msg.sender through to the strategy for that pool

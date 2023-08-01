@@ -3,21 +3,21 @@ pragma solidity 0.8.19;
 
 // External Libraries
 library TestUtilities {
-    /// @notice Generates the anchor for the given identityId and name
-    /// @param _identityId Id of the identity
-    /// @param _name The name of the identity
-    function _testUtilGenerateAnchor(bytes32 _identityId, string memory _name, address _registry)
+    /// @notice Generates the anchor for the given profileId and name
+    /// @param _profileId Id of the profile
+    /// @param _name The name of the profile
+    function _testUtilGenerateAnchor(bytes32 _profileId, string memory _name, address _registry)
         internal
         pure
         returns (address)
     {
-        bytes32 salt = keccak256(abi.encodePacked(_identityId, _name));
+        bytes32 salt = keccak256(abi.encodePacked(_profileId, _name));
 
         return getDeployed(salt, _registry);
     }
 
-    /// @notice Generates the identityId based on msg.sender
-    /// @param _nonce Nonce used to generate identityId
+    /// @notice Generates the profileId based on msg.sender
+    /// @param _nonce Nonce used to generate profileId
     function _testUtilGenerateIdentityId(uint256 _nonce, address sender) internal pure returns (bytes32) {
         return keccak256(abi.encodePacked(_nonce, sender));
     }
