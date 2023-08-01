@@ -23,19 +23,19 @@ contract AnchorTest is Test {
     bytes32 profileId;
 
     function setUp() public {
-        profileId = bytes32("test_identity");
+        profileId = bytes32("test_profile");
         mockRegistry = new MockRegistry();
         vm.prank(address(mockRegistry));
         anchor = new Anchor(profileId);
     }
 
     function test_deploy() public {
-        assertEq(anchor.profileId(), bytes32("test_identity"));
+        assertEq(anchor.profileId(), bytes32("test_profile"));
         assertEq(address(anchor.registry()), address(mockRegistry));
     }
 
     function test_execute() public {
-        mockRegistry.setOwnerOfProfile(profileId, address(this)); // Set the caller as the owner of the identity
+        mockRegistry.setOwnerOfProfile(profileId, address(this)); // Set the caller as the owner of the profile
 
         // Deploy a simple contract that increments a value and return it
         Incrementer incrementer = new Incrementer();
@@ -62,7 +62,7 @@ contract AnchorTest is Test {
     }
 
     function test_execute_CALL_FAILED() public {
-        mockRegistry.setOwnerOfProfile(profileId, address(this)); // Set the caller as the owner of the identity
+        mockRegistry.setOwnerOfProfile(profileId, address(this)); // Set the caller as the owner of the profile
         // Deploy a contract without a fallback function (cannot receive ETH)
         NoFallbackContract noFallback = new NoFallbackContract();
 

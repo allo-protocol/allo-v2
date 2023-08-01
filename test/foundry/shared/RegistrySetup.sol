@@ -27,11 +27,11 @@ contract RegistrySetupFull is RegistrySetup {
     bytes32 internal _poolProfileId_;
     address internal _poolProfileAnchor_;
 
-    bytes32 internal _identity1Id_;
-    address internal _identity1Anchor_;
+    bytes32 internal _profile1Id_;
+    address internal _profile1Anchor_;
 
-    bytes32 internal _identity2Id_;
-    address internal _identity2Anchor_;
+    bytes32 internal _profile2Id_;
+    address internal _profile2Anchor_;
 
     function __RegistrySetupFull() internal {
         __RegistrySetup();
@@ -42,17 +42,17 @@ contract RegistrySetupFull is RegistrySetup {
         );
         _poolProfileAnchor_ = _registry_.getProfileById(_poolProfileId_).anchor;
 
-        vm.prank(identity1_owner());
-        _identity1Id_ = _registry_.createProfile(
-            0, "Profile 1", Metadata({protocol: 1, pointer: "Profile1"}), identity1_owner(), identity1_members()
+        vm.prank(profile1_owner());
+        _profile1Id_ = _registry_.createProfile(
+            0, "Profile 1", Metadata({protocol: 1, pointer: "Profile1"}), profile1_owner(), profile1_members()
         );
-        _identity1Anchor_ = _registry_.getProfileById(_identity1Id_).anchor;
+        _profile1Anchor_ = _registry_.getProfileById(_profile1Id_).anchor;
 
-        vm.prank(identity2_owner());
-        _identity2Id_ = _registry_.createProfile(
-            0, "Profile 2", Metadata({protocol: 1, pointer: "Profile2"}), identity2_owner(), identity2_members()
+        vm.prank(profile2_owner());
+        _profile2Id_ = _registry_.createProfile(
+            0, "Profile 2", Metadata({protocol: 1, pointer: "Profile2"}), profile2_owner(), profile2_members()
         );
-        _identity2Anchor_ = _registry_.getProfileById(_identity2Id_).anchor;
+        _profile2Anchor_ = _registry_.getProfileById(_profile2Id_).anchor;
     }
 
     function poolProfile_id() public view returns (bytes32) {
@@ -63,19 +63,19 @@ contract RegistrySetupFull is RegistrySetup {
         return _poolProfileAnchor_;
     }
 
-    function identity1_id() public view returns (bytes32) {
-        return _identity1Id_;
+    function profile1_id() public view returns (bytes32) {
+        return _profile1Id_;
     }
 
-    function identity1_anchor() public view returns (address) {
-        return _identity1Anchor_;
+    function profile1_anchor() public view returns (address) {
+        return _profile1Anchor_;
     }
 
-    function identity2_id() public view returns (bytes32) {
-        return _identity2Id_;
+    function profile2_id() public view returns (bytes32) {
+        return _profile2Id_;
     }
 
-    function identity2_anchor() public view returns (address) {
-        return _identity2Anchor_;
+    function profile2_anchor() public view returns (address) {
+        return _profile2Anchor_;
     }
 }

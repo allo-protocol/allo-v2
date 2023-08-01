@@ -29,7 +29,7 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
     mapping(bytes32 => Profile) public identitiesById;
 
     /// @notice Profile.id -> pending owner
-    mapping(bytes32 => address) public identityIdToPendingOwner;
+    mapping(bytes32 => address) public profileIdToPendingOwner;
 
     /// @notice Allo Owner Role for fund recovery
     bytes32 public constant ALLO_OWNER = keccak256("ALLO_OWNER");
@@ -119,9 +119,7 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
             }
         }
 
-        emit ProfileCreated(
-            profileId, profile.nonce, profile.name, profile.metadata, profile.owner, profile.anchor
-        );
+        emit ProfileCreated(profileId, profile.nonce, profile.name, profile.metadata, profile.owner, profile.anchor);
 
         return profileId;
     }
@@ -194,7 +192,7 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
         external
         onlyProfileOwner(_profileId)
     {
-        identityIdToPendingOwner[_profileId] = _pendingOwner;
+        profileIdToPendingOwner[_profileId] = _pendingOwner;
 
         emit ProfilePendingOwnerUpdated(_profileId, _pendingOwner);
     }
@@ -204,14 +202,14 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
     /// @dev Only pending owner can claim ownership.
     function acceptProfileOwnership(bytes32 _profileId) external {
         Profile storage profile = identitiesById[_profileId];
-        address newOwner = identityIdToPendingOwner[_profileId];
+        address newOwner = profileIdToPendingOwner[_profileId];
 
         if (msg.sender != newOwner) {
             revert NOT_PENDING_OWNER();
         }
 
         profile.owner = newOwner;
-        delete identityIdToPendingOwner[_profileId];
+        delete profileIdToPendingOwner[_profileId];
 
         emit ProfileOwnerUpdated(_profileId, profile.owner);
     }
