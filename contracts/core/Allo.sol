@@ -347,7 +347,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
         Metadata memory _metadata,
         address[] memory _managers
     ) internal returns (uint256 poolId) {
-        if (!registry.isOwnerOrMemberOfIdentity(_profileId, msg.sender)) {
+        if (!registry.isOwnerOrMemberOfProfile(_profileId, msg.sender)) {
             revert UNAUTHORIZED();
         }
 

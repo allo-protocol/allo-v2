@@ -33,7 +33,7 @@ contract Anchor {
     /// @param _value The amount of native token to send
     /// @param _data The data to send to the target address
     function execute(address _target, uint256 _value, bytes memory _data) external returns (bytes memory) {
-        if (!registry.isOwnerOfIdentity(profileId, msg.sender)) {
+        if (!registry.isOwnerOfProfile(profileId, msg.sender)) {
             revert UNAUTHORIZED();
         }
 

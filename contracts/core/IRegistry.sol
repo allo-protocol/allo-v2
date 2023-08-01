@@ -30,39 +30,39 @@ interface IRegistry {
     /// ======= Events =======
     /// ======================
 
-    event IdentityCreated(
+    event ProfileCreated(
         bytes32 indexed profileId, uint256 nonce, string name, Metadata metadata, address owner, address anchor
     );
-    event IdentityNameUpdated(bytes32 indexed profileId, string name, address anchor);
-    event IdentityMetadataUpdated(bytes32 indexed profileId, Metadata metadata);
-    event IdentityOwnerUpdated(bytes32 indexed profileId, address owner);
-    event IdentityPendingOwnerUpdated(bytes32 indexed profileId, address pendingOwner);
+    event ProfileNameUpdated(bytes32 indexed profileId, string name, address anchor);
+    event ProfileMetadataUpdated(bytes32 indexed profileId, Metadata metadata);
+    event ProfileOwnerUpdated(bytes32 indexed profileId, address owner);
+    event ProfilePendingOwnerUpdated(bytes32 indexed profileId, address pendingOwner);
 
     /// =========================
     /// ==== View Functions =====
     /// =========================
 
-    function getIdentityById(bytes32 profileId) external view returns (Profile memory);
-    function getIdentityByAnchor(address _anchor) external view returns (Profile memory);
-    function isOwnerOrMemberOfIdentity(bytes32 _profileId, address _account) external view returns (bool);
-    function isOwnerOfIdentity(bytes32 _profileId, address _owner) external view returns (bool);
-    function isMemberOfIdentity(bytes32 _profileId, address _member) external view returns (bool);
+    function getProfileById(bytes32 profileId) external view returns (Profile memory);
+    function getProfileByAnchor(address _anchor) external view returns (Profile memory);
+    function isOwnerOrMemberOfProfile(bytes32 _profileId, address _account) external view returns (bool);
+    function isOwnerOfProfile(bytes32 _profileId, address _owner) external view returns (bool);
+    function isMemberOfProfile(bytes32 _profileId, address _member) external view returns (bool);
 
     /// ====================================
     /// ==== External/Public Functions =====
     /// ====================================
 
-    function createIdentity(
+    function createProfile(
         uint256 _nonce,
         string memory _name,
         Metadata memory _metadata,
         address _owner,
         address[] memory _members
     ) external returns (bytes32);
-    function updateIdentityName(bytes32 _profileId, string memory _name) external returns (address);
-    function updateIdentityMetadata(bytes32 _profileId, Metadata memory _metadata) external;
-    function updateIdentityPendingOwner(bytes32 _profileId, address _pendingOwner) external;
-    function acceptIdentityOwnership(bytes32 _profileId) external;
+    function updateProfileName(bytes32 _profileId, string memory _name) external returns (address);
+    function updateProfileMetadata(bytes32 _profileId, Metadata memory _metadata) external;
+    function updateProfilePendingOwner(bytes32 _profileId, address _pendingOwner) external;
+    function acceptProfileOwnership(bytes32 _profileId) external;
     function addMembers(bytes32 _profileId, address[] memory _members) external;
     function removeMembers(bytes32 _profileId, address[] memory _members) external;
     function recoverFunds(address _token, address _recipient) external;

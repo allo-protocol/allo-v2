@@ -28,23 +28,23 @@ contract Accounts is StdCheats {
     // Null Profile adresses
     // //////////////////////
 
-    function nullIdentity_owner() public pure returns (address) {
+    function nullProfile_owner() public pure returns (address) {
         return 0x0000000000000000000000000000000000000000;
     }
 
-    function nullIdentity_notAMember() public pure returns (address) {
+    function nullProfile_notAMember() public pure returns (address) {
         return 0x0000000000000000000000000000000000000000;
     }
 
-    function nullIdentity_member1() public pure returns (address) {
+    function nullProfile_member1() public pure returns (address) {
         return 0x0000000000000000000000000000000000000000;
     }
 
-    function nullIdentity_member2() public pure returns (address) {
+    function nullProfile_member2() public pure returns (address) {
         return 0x0000000000000000000000000000000000000000;
     }
 
-    function nullIdentity_members() public pure returns (address[] memory) {
+    function nullProfile_members() public pure returns (address[] memory) {
         return new address[](2);
     }
 

@@ -23,7 +23,7 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
     /// ==========================
 
     /// @notice anchor -> Profile.id
-    mapping(address => bytes32) public anchorToIdentityId;
+    mapping(address => bytes32) public anchorToProfileId;
 
     /// @notice Profile.id -> Profile
     mapping(bytes32 => Profile) public identitiesById;
@@ -39,8 +39,8 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
     /// ====================================
 
     /// @notice Modifier to check if the caller is the owner of the profile
-    modifier onlyIdentityOwner(bytes32 _profileId) {
-        if (!isOwnerOfIdentity(_profileId, msg.sender)) {
+    modifier onlyProfileOwner(bytes32 _profileId) {
+        if (!isOwnerOfProfile(_profileId, msg.sender)) {
             revert UNAUTHORIZED();
         }
         _;
@@ -59,14 +59,14 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
 
     /// @notice Retrieve profile by profileId
     /// @param profileId The profileId of the profile
-    function getIdentityById(bytes32 profileId) public view returns (Profile memory) {
+    function getProfileById(bytes32 profileId) public view returns (Profile memory) {
         return identitiesById[profileId];
     }
 
     /// @notice Retrieve profile by anchor
     /// @param _anchor The anchor of the profile
-    function getIdentityByAnchor(address _anchor) public view returns (Profile memory) {
-        bytes32 profileId = anchorToIdentityId[_anchor];
+    function getProfileByAnchor(address _anchor) public view returns (Profile memory) {
+        bytes32 profileId = anchorToProfileId[_anchor];
         return identitiesById[profileId];
     }
 
@@ -77,14 +77,14 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
     /// @param _metadata The metadata of the profile
     /// @param _members The members of the profile
     /// @param _owner The owner of the profile
-    function createIdentity(
+    function createProfile(
         uint256 _nonce,
         string memory _name,
         Metadata memory _metadata,
         address _owner,
         address[] memory _members
     ) external returns (bytes32) {
-        bytes32 profileId = _generateIdentityId(_nonce);
+        bytes32 profileId = _generateProfileId(_nonce);
 
         if (identitiesById[profileId].anchor != address(0)) {
             revert NONCE_NOT_AVAILABLE();
@@ -104,7 +104,7 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
         });
 
         identitiesById[profileId] = profile;
-        anchorToIdentityId[profile.anchor] = profileId;
+        anchorToProfileId[profile.anchor] = profileId;
 
         // assign roles
         uint256 memberLength = _members.length;
@@ -119,7 +119,7 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
             }
         }
 
-        emit IdentityCreated(
+        emit ProfileCreated(
             profileId, profile.nonce, profile.name, profile.metadata, profile.owner, profile.anchor
         );
 
@@ -130,9 +130,9 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
     /// @param _profileId The profileId of the profile
     /// @param _name The new name of the profile
     /// @dev Only owner can update the name.
-    function updateIdentityName(bytes32 _profileId, string memory _name)
+    function updateProfileName(bytes32 _profileId, string memory _name)
         external
-        onlyIdentityOwner(_profileId)
+        onlyProfileOwner(_profileId)
         returns (address)
     {
         address anchor = _generateAnchor(_profileId, _name);
@@ -141,13 +141,13 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
         profile.name = _name;
 
         // remove old anchor
-        anchorToIdentityId[profile.anchor] = bytes32(0);
+        anchorToProfileId[profile.anchor] = bytes32(0);
 
         // set new anchor
         profile.anchor = anchor;
-        anchorToIdentityId[anchor] = _profileId;
+        anchorToProfileId[anchor] = _profileId;
 
-        emit IdentityNameUpdated(_profileId, _name, anchor);
+        emit ProfileNameUpdated(_profileId, _name, anchor);
 
         // TODO: should we return profile
         return anchor;
@@ -157,52 +157,52 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
     /// @param _profileId The profileId of the profile
     /// @param _metadata The new metadata of the profile
     /// @dev Only owner can update metadata
-    function updateIdentityMetadata(bytes32 _profileId, Metadata memory _metadata)
+    function updateProfileMetadata(bytes32 _profileId, Metadata memory _metadata)
         external
-        onlyIdentityOwner(_profileId)
+        onlyProfileOwner(_profileId)
     {
         identitiesById[_profileId].metadata = _metadata;
 
-        emit IdentityMetadataUpdated(_profileId, _metadata);
+        emit ProfileMetadataUpdated(_profileId, _metadata);
     }
 
     /// @notice Returns if the given address is an owner or member of the profile
     /// @param _profileId The profileId of the profile
     /// @param _account The address to check
-    function isOwnerOrMemberOfIdentity(bytes32 _profileId, address _account) public view returns (bool) {
-        return isOwnerOfIdentity(_profileId, _account) || isMemberOfIdentity(_profileId, _account);
+    function isOwnerOrMemberOfProfile(bytes32 _profileId, address _account) public view returns (bool) {
+        return isOwnerOfProfile(_profileId, _account) || isMemberOfProfile(_profileId, _account);
     }
 
     /// @notice Returns if the given address is an owner of the profile
     /// @param _profileId The profileId of the profile
     /// @param _owner The address to check
-    function isOwnerOfIdentity(bytes32 _profileId, address _owner) public view returns (bool) {
+    function isOwnerOfProfile(bytes32 _profileId, address _owner) public view returns (bool) {
         return identitiesById[_profileId].owner == _owner;
     }
 
     /// @notice Returns if the given address is an member of the profile
     /// @param _profileId The profileId of the profile
     /// @param _member The address to check
-    function isMemberOfIdentity(bytes32 _profileId, address _member) public view returns (bool) {
+    function isMemberOfProfile(bytes32 _profileId, address _member) public view returns (bool) {
         return hasRole(_profileId, _member);
     }
 
     /// @notice Updates the pending owner of the profile
     /// @param _profileId The profileId of the profile
     /// @param _pendingOwner New pending owner
-    function updateIdentityPendingOwner(bytes32 _profileId, address _pendingOwner)
+    function updateProfilePendingOwner(bytes32 _profileId, address _pendingOwner)
         external
-        onlyIdentityOwner(_profileId)
+        onlyProfileOwner(_profileId)
     {
         identityIdToPendingOwner[_profileId] = _pendingOwner;
 
-        emit IdentityPendingOwnerUpdated(_profileId, _pendingOwner);
+        emit ProfilePendingOwnerUpdated(_profileId, _pendingOwner);
     }
 
     /// @notice Transfers the ownership of the profile to the pending owner
     /// @param _profileId The profileId of the profile
     /// @dev Only pending owner can claim ownership.
-    function acceptIdentityOwnership(bytes32 _profileId) external {
+    function acceptProfileOwnership(bytes32 _profileId) external {
         Profile storage profile = identitiesById[_profileId];
         address newOwner = identityIdToPendingOwner[_profileId];
 
@@ -213,14 +213,14 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
         profile.owner = newOwner;
         delete identityIdToPendingOwner[_profileId];
 
-        emit IdentityOwnerUpdated(_profileId, profile.owner);
+        emit ProfileOwnerUpdated(_profileId, profile.owner);
     }
 
     /// @notice Adds members to the profile
     /// @param _profileId The profileId of the profile
     /// @param _members The members to add
     /// @dev Only owner can add members
-    function addMembers(bytes32 _profileId, address[] memory _members) external onlyIdentityOwner(_profileId) {
+    function addMembers(bytes32 _profileId, address[] memory _members) external onlyProfileOwner(_profileId) {
         uint256 memberLength = _members.length;
 
         for (uint256 i = 0; i < memberLength;) {
@@ -239,7 +239,7 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
     /// @param _profileId The profileId of the profile
     /// @param _members The members to remove
     /// @dev Only owner can remove members
-    function removeMembers(bytes32 _profileId, address[] memory _members) external onlyIdentityOwner(_profileId) {
+    function removeMembers(bytes32 _profileId, address[] memory _members) external onlyProfileOwner(_profileId) {
         uint256 memberLength = _members.length;
 
         for (uint256 i = 0; i < memberLength;) {
@@ -267,7 +267,7 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
 
     /// @notice Generates the profileId based on msg.sender
     /// @param _nonce Nonce used to generate profileId
-    function _generateIdentityId(uint256 _nonce) internal view returns (bytes32) {
+    function _generateProfileId(uint256 _nonce) internal view returns (bytes32) {
         return keccak256(abi.encodePacked(_nonce, msg.sender));
     }
 

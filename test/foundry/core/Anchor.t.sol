@@ -8,11 +8,11 @@ import {Anchor} from "../../../contracts/core/Anchor.sol";
 contract MockRegistry {
     mapping(bytes32 => address) public owners;
 
-    function isOwnerOfIdentity(bytes32 profileId, address owner) external view returns (bool) {
+    function isOwnerOfProfile(bytes32 profileId, address owner) external view returns (bool) {
         return owners[profileId] == owner;
     }
 
-    function setOwnerOfIdentity(bytes32 profileId, address owner) external {
+    function setOwnerOfProfile(bytes32 profileId, address owner) external {
         owners[profileId] = owner;
     }
 }
@@ -35,7 +35,7 @@ contract AnchorTest is Test {
     }
 
     function test_execute() public {
-        mockRegistry.setOwnerOfIdentity(profileId, address(this)); // Set the caller as the owner of the identity
+        mockRegistry.setOwnerOfProfile(profileId, address(this)); // Set the caller as the owner of the identity
 
         // Deploy a simple contract that increments a value and return it
         Incrementer incrementer = new Incrementer();
@@ -62,7 +62,7 @@ contract AnchorTest is Test {
     }
 
     function test_execute_CALL_FAILED() public {
-        mockRegistry.setOwnerOfIdentity(profileId, address(this)); // Set the caller as the owner of the identity
+        mockRegistry.setOwnerOfProfile(profileId, address(this)); // Set the caller as the owner of the identity
         // Deploy a contract without a fallback function (cannot receive ETH)
         NoFallbackContract noFallback = new NoFallbackContract();
 

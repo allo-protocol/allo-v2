@@ -68,7 +68,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
 
         vm.prank(pool_admin());
         poolId = allo().createPoolWithCustomStrategy(
-            poolIdentity_id(),
+            poolProfile_id(),
             address(strategy),
             abi.encode(
                 useRegistryAnchor,
@@ -624,10 +624,10 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         );
 
         vm.warp(registrationStartTime + 1);
-        bytes memory data = __generateRecipientWithId(poolIdentity_anchor());
+        bytes memory data = __generateRecipientWithId(poolProfile_anchor());
 
         vm.expectEmit(true, false, false, true);
-        emit Registered(poolIdentity_anchor(), data, address(pool_admin()));
+        emit Registered(poolProfile_anchor(), data, address(pool_admin()));
 
         vm.prank(address(allo()));
         address recipientId = strategy.registerRecipient(data, pool_admin());
