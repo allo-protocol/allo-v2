@@ -3,10 +3,12 @@ pragma solidity 0.8.19;
 
 // External Libraries
 import {AccessControl} from "@openzeppelin/access/AccessControl.sol";
+import {CREATE3} from "@solady/utils/CREATE3.sol";
 import {ERC20} from "@solady/tokens/ERC20.sol";
 // Interfaces
 import "./IRegistry.sol";
 // Internal Libraries
+import {Anchor} from "./Anchor.sol";
 import {Metadata} from "./libraries/Metadata.sol";
 import "./libraries/Native.sol";
 import "./libraries/Transfer.sol";
@@ -138,7 +140,7 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
         Identity storage identity = identitiesById[_identityId];
         identity.name = _name;
 
-        // clear old anchor
+        // remove old anchor
         anchorToIdentityId[identity.anchor] = bytes32(0);
 
         // set new anchor
@@ -252,12 +254,15 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
     /// ======== Internal Functions ========
     /// ====================================
 
-    /// @notice Generates the anchor for the given identityId and name
+    /// @notice Generates and deploy the anchor for the given identityId and name
     /// @param _identityId Id of the identity
     /// @param _name The name of the identity
-    function _generateAnchor(bytes32 _identityId, string memory _name) internal pure returns (address) {
-        bytes32 attestationHash = keccak256(abi.encodePacked(_identityId, _name));
-        return address(uint160(uint256(attestationHash)));
+    function _generateAnchor(bytes32 _identityId, string memory _name) internal returns (address anchor) {
+        bytes32 salt = keccak256(abi.encodePacked(_identityId, _name));
+
+        bytes memory creationCode = abi.encodePacked(type(Anchor).creationCode, abi.encode(_identityId));
+
+        anchor = CREATE3.deploy(salt, creationCode, 0);
     }
 
     /// @notice Generates the identityId based on msg.sender

@@ -8,12 +8,16 @@ contract Accounts is StdCheats {
     // Protocol adresses
     // //////////////////////
 
+    function local() public pure returns (address) {
+        return 0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496;
+    }
+
     function registry_owner() public returns (address) {
         return makeAddr("registry_owner");
     }
 
-    function allo_owner() public pure returns (address) {
-        return 0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496;
+    function allo_owner() public returns (address) {
+        return makeAddr("allo_owner");
     }
 
     function allo_treasury() public returns (address payable) {
@@ -126,5 +130,29 @@ contract Accounts is StdCheats {
         _members[1] = identity2_member2();
 
         return _members;
+    }
+
+    // //////////////////////
+    // Recipient adresses
+    // //////////////////////
+
+    function recipient() public returns (address) {
+        return makeAddr("recipient");
+    }
+
+    function recipientAddress() public returns (address) {
+        return makeAddr("recipientAddress");
+    }
+
+    function no_recipient() public returns (address) {
+        return makeAddr("no_recipient");
+    }
+
+    // //////////////////////
+    // Random address
+    // //////////////////////
+
+    function randomAddress() public returns (address) {
+        return makeAddr("randomAddress");
     }
 }

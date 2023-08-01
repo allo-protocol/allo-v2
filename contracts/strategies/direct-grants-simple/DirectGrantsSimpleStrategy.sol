@@ -45,7 +45,6 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// ===============================
 
     error RECIPIENT_ALREADY_ACCEPTED();
-    error INVALID_RECIPIENT();
     error UNAUTHORIZED();
     error INVALID_MILESTONE();
     error MILESTONE_ALREADY_ACCEPTED();
@@ -106,7 +105,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     ) internal {
         __BaseStrategy_init(_poolId);
         registryGating = _registryGating;
-        _metadataRequired = _metadataRequired;
+        metadataRequired = _metadataRequired;
         grantAmountRequired = _grantAmountRequired;
         _setPoolActive(true);
     }
@@ -260,7 +259,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Withdraw funds from pool
     /// @param _amount The amount to be withdrawn
     function withdraw(uint256 _amount) external onlyPoolManager(msg.sender) {
-        allo.decreasePoolTotalFunding(poolId, _amount);
+        poolAmount -= _amount;
         _transferAmount(allo.getPool(poolId).token, msg.sender, _amount);
     }
 
@@ -402,7 +401,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
         IAllo.Pool memory pool = allo.getPool(poolId);
 
-        allo.decreasePoolTotalFunding(poolId, amount);
+        poolAmount -= amount;
         _transferAmount(pool.token, recipient.recipientAddress, amount);
 
         milestone.milestoneStatus = RecipientStatus.Accepted;
