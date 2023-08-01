@@ -325,11 +325,11 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
 
         // optionally using anchor
-        address anchor = identity1_anchor();
-        bytes memory data = abi.encode(identity1_member1(), anchor, 1e18, metadata);
+        address anchor = profile1_anchor();
+        bytes memory data = abi.encode(profile1_member1(), anchor, 1e18, metadata);
 
         vm.prank(address(allo()));
-        strategy.registerRecipient(data, identity1_member1());
+        strategy.registerRecipient(data, profile1_member1());
 
         RFPSimpleStrategy.Recipient memory _recipient = strategy.getRecipient(anchor);
         assertEq(_recipient.useRegistryAnchor, true);
@@ -353,7 +353,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
 
         vm.expectRevert(RFPSimpleStrategy.UNAUTHORIZED.selector);
         vm.prank(address(allo()));
-        testStrategy.registerRecipient(data, identity1_notAMember());
+        testStrategy.registerRecipient(data, profile1_notAMember());
     }
 
     function testRevert_registerRecipient_withOptionallyUsingRegistryAnchor_UNAUTHORIZED() public {
