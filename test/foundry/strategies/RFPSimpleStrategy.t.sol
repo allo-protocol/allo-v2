@@ -7,6 +7,8 @@ import {IAllo} from "../../../contracts/core/Allo.sol";
 import {IStrategy} from "../../../contracts/strategies/IStrategy.sol";
 // Core contracts
 import {BaseStrategy} from "../../../contracts/strategies/BaseStrategy.sol";
+import {IStrategy} from "../../../contracts/strategies/IStrategy.sol";
+
 import {RFPSimpleStrategy} from "../../../contracts/strategies/rfp-simple/RFPSimpleStrategy.sol";
 // Internal libraries
 import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
@@ -64,15 +66,34 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
     }
 
     function test_deployment() public {
-        assertEq(address(strategy.getAllo()), address(allo()));
-        assertEq(strategy.getStrategyId(), keccak256(abi.encode("RFPSimpleStrategy")));
+        RFPSimpleStrategy testStrategy = new RFPSimpleStrategy(address(allo()), "RFPSimpleStrategy");
+        assertEq(address(testStrategy.getAllo()), address(allo()));
+        assertEq(testStrategy.getStrategyId(), keccak256(abi.encode("RFPSimpleStrategy")));
     }
 
     function test_initialize() public {
-        assertEq(strategy.getPoolId(), poolId);
-        assertEq(strategy.useRegistryAnchor(), useRegistryAnchor);
-        assertEq(strategy.metadataRequired(), metadataRequired);
-        assertEq(strategy.maxBid(), maxBid);
+        RFPSimpleStrategy testStrategy = new RFPSimpleStrategy(address(allo()), "RFPSimpleStrategy");
+        vm.prank(address(allo()));
+        testStrategy.initialize(1337, abi.encode(maxBid, useRegistryAnchor, metadataRequired));
+        assertEq(testStrategy.getPoolId(), 1337);
+        assertEq(testStrategy.useRegistryAnchor(), useRegistryAnchor);
+        assertEq(testStrategy.metadataRequired(), metadataRequired);
+        assertEq(testStrategy.maxBid(), maxBid);
+    }
+
+    function testRevert_initialize_ALREADY_INITIALIZED() public {
+        RFPSimpleStrategy testStrategy = new RFPSimpleStrategy(address(allo()), "RFPSimpleStrategy");
+        vm.startPrank(address(allo()));
+        testStrategy.initialize(1337, abi.encode(maxBid, useRegistryAnchor, metadataRequired));
+
+        vm.expectRevert(IStrategy.BaseStrategy_ALREADY_INITIALIZED.selector);
+        testStrategy.initialize(1337, abi.encode(maxBid, useRegistryAnchor, metadataRequired));
+    }
+
+    function testRevert_initialize_UNAUTHORIZED() public {
+        RFPSimpleStrategy testStrategy = new RFPSimpleStrategy(address(allo()), "RFPSimpleStrategy");
+        vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
+        testStrategy.initialize(1337, abi.encode(maxBid, useRegistryAnchor, metadataRequired));
     }
 
     function test_getRecipient() public {
@@ -81,6 +102,35 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         assertEq(_recipient.useRegistryAnchor, useRegistryAnchor);
         assertEq(uint8(_recipient.recipientStatus), uint8(IStrategy.RecipientStatus.Pending));
         assertEq(_recipient.proposalBid, 1e18);
+    }
+
+    function test_getRecipient_Rejected() public {
+        address rejectedAddress = randomAddress();
+        Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
+
+        bytes memory data = abi.encode(recipientAddress(), false, 1e18, metadata);
+        vm.prank(address(allo()));
+        strategy.registerRecipient(data, rejectedAddress);
+
+        // accepted recipient
+        address recipientId = __register_recipient();
+        vm.prank(address(allo()));
+        strategy.allocate(abi.encode(recipientId), address(pool_admin()));
+
+        RFPSimpleStrategy.Recipient memory rejectedRecipient = strategy.getRecipient(rejectedAddress);
+        assertEq(uint8(rejectedRecipient.recipientStatus), uint8(IStrategy.RecipientStatus.Rejected));
+        assertEq(rejectedRecipient.proposalBid, 1e18);
+    }
+
+    function test_getRecipient_None() public {
+        // set accepted recipient
+        address recipientId = __register_recipient();
+        vm.prank(address(allo()));
+        strategy.allocate(abi.encode(recipientId), address(pool_admin()));
+
+        RFPSimpleStrategy.Recipient memory noRecipient = strategy.getRecipient(randomAddress());
+        assertEq(uint8(noRecipient.recipientStatus), uint8(IStrategy.RecipientStatus.None));
+        assertEq(noRecipient.proposalBid, 0);
     }
 
     function test_getRecipientStatus() public {
@@ -250,6 +300,41 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         assertEq(uint8(_recipient.recipientStatus), uint8(IStrategy.RecipientStatus.Pending));
     }
 
+    function test_registerRecipient_zero_proposalBid() public {
+        address sender = recipient();
+        Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
+
+        bytes memory data = abi.encode(recipientAddress(), false, 0, metadata);
+
+        vm.expectEmit(true, false, false, true);
+        emit Registered(sender, data, sender);
+
+        vm.prank(address(allo()));
+        address recipientId = strategy.registerRecipient(data, sender);
+
+        RFPSimpleStrategy.Recipient memory _recipient = strategy.getRecipient(recipientId);
+        assertEq(_recipient.proposalBid, maxBid);
+    }
+
+    function test_registerRecipient_withOptionallyUsingRegistryAnchor() public {
+        RFPSimpleStrategy testStrategy = new RFPSimpleStrategy(address(allo()), "RFPSimpleStrategy");
+        vm.prank(address(allo()));
+        // no registryAnchor required
+        testStrategy.initialize(1337, abi.encode(maxBid, false, metadataRequired));
+
+        Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
+
+        // optionally using anchor
+        address anchor = identity1_anchor();
+        bytes memory data = abi.encode(anchor, true, 1e18, metadata);
+
+        vm.prank(address(allo()));
+        strategy.registerRecipient(data, identity1_member1());
+
+        RFPSimpleStrategy.Recipient memory _recipient = strategy.getRecipient(anchor);
+        assertEq(_recipient.useRegistryAnchor, true);
+    }
+
     function testRevert_registerRecipient_BaseStrategy_POOL_INACTIVE() public {
         __register_setMilestones_allocate();
         vm.expectRevert(IStrategy.BaseStrategy_POOL_INACTIVE.selector);
@@ -257,11 +342,29 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
     }
 
     function testRevert_registerRecipient_withUseRegistryAnchor_UNAUTHORIZED() public {
-        // TODO
+        RFPSimpleStrategy testStrategy = new RFPSimpleStrategy(address(allo()), "RFPSimpleStrategy");
+        vm.prank(address(allo()));
+        testStrategy.initialize(1337, abi.encode(maxBid, true, metadataRequired));
+
+        address anchor = poolIdentity_anchor();
+        Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
+
+        bytes memory data = abi.encode(anchor, 1e18, metadata);
+
+        vm.expectRevert(RFPSimpleStrategy.UNAUTHORIZED.selector);
+        vm.prank(address(allo()));
+        testStrategy.registerRecipient(data, identity1_notAMember());
     }
 
-    function testRevert_registerRecipient_withoutUseRegistryAnchor_UNAUTHORIZED() public {
-        // TODO
+    function testRevert_registerRecipient_withOptionallyUsingRegistryAnchor_UNAUTHORIZED() public {
+        address sender = randomAddress();
+        Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
+
+        bytes memory data = abi.encode(sender, true, 1e18, metadata);
+
+        vm.expectRevert(RFPSimpleStrategy.UNAUTHORIZED.selector);
+        vm.prank(address(allo()));
+        strategy.registerRecipient(data, sender);
     }
 
     function testRevert_registerRecipient_INVALID_METADATA() public {
@@ -306,7 +409,9 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
     }
 
     function testRevert_allocate_INVALID_RECIPIENT() public {
-        // TODO
+        vm.prank(address(allo()));
+        vm.expectRevert(RFPSimpleStrategy.INVALID_RECIPIENT.selector);
+        strategy.allocate(abi.encode(randomAddress()), address(pool_admin()));
     }
 
     function test_distribute() public {
