@@ -28,7 +28,8 @@ export async function deployStrategies(strategyName: string, version: string) {
 
   console.log(`Deploying ${strategyName}.sol`);
 
-  const DEPLOYER_CONTRACT_ADDRESS: string = deployerContractAddress[chainId].address;
+  const DEPLOYER_CONTRACT_ADDRESS: string =
+    deployerContractAddress[chainId].address;
 
   console.log("Deployer contract address: ", DEPLOYER_CONTRACT_ADDRESS);
 
@@ -39,7 +40,9 @@ export async function deployStrategies(strategyName: string, version: string) {
   // Get contract instance
   const DeployerContract = await hre.ethers.getContractFactory("Deployer");
   // Attach the deployed Deployer contract
-  const deployerContract: any = DeployerContract.attach(deployerContractAddress[chainId].address);
+  const deployerContract: any = DeployerContract.attach(
+    deployerContractAddress[chainId].address,
+  );
 
   let creationCode;
   let creationCodeWithConstructor;
@@ -56,13 +59,9 @@ export async function deployStrategies(strategyName: string, version: string) {
     // Define the types of the data
     const types: Array<string> = ["address", "string"];
 
-    // Get the creation code
-    // const creationCodeBytes = hexlify(toUtf8Bytes(creationCode));
-
     // The data you're encoding
     const data: Array<any> = [allo, name];
     const encodedParams = new AbiCoder().encode(types, data);
-
 
     // Combine the encoded parameters
     creationCodeWithConstructor = hexlify(
@@ -81,14 +80,27 @@ export async function deployStrategies(strategyName: string, version: string) {
 
   // Call the contract function
   try {
-    const strategyAddress = await deployerContract["deploy(string,string,bytes)"](strategyName, version, creationCodeWithConstructor);
+    // get the strategy address
+    const strategyAddress = await deployerContract.deploy.staticCall(
+      strategyName,
+      version,
+      creationCodeWithConstructor,
+    );
+
+    // Deploy the contract and get the transaction response
+    const txResponse = await deployerContract.deploy(
+      strategyName,
+      version,
+      creationCodeWithConstructor,
+    );
+
+    // Wait for the transaction to be mined
+    await txResponse.wait();
 
     console.log("Strategy deployed at address: ", strategyAddress);
   } catch (error) {
-    console.log("Error calling deploy() function.", error);
+    console.log("Error calling deploy() function. \n", error);
   }
-
-  console.log(`Called function deploy on Deployer at address: ${DEPLOYER_CONTRACT_ADDRESS}`);
 }
 
 // Note: Deploy script to run in terminal:

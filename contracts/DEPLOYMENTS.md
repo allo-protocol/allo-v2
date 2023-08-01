@@ -1,52 +1,21 @@
 # Contract Deployment Information
 
+## Core Contracts
 
-<table>
-<thead>
-  <tr>
-    <th>Chain</th>
-    <th>Goerli</th>
-    <th>Optimism Goerli</th>
-    <th>Sepolia</th>
-    <th>PGN Sepolia</th>
-  </tr>
-</thead>
-<tbody>
-  <tr>
-    <td>Registry</td>
-    <td colspan="4">0xe571ec2C7b94dE72Bc01937a251E48780DEF882A</td>
-  </tr>
-  <tr>
-    <td>Allo</td>
-    <td colspan="4">0x45F5506b0014cbdc9652854B65eed90E56aB7dA9</td>
-  </tr>
-  <tr>
-    <td>Allo Proxy</td>
-    <td colspan="4">0x97122901b6346a625294d446f5d0b7bc00a3b0f2</td>
-  </tr>
-</tbody>
-</table>
+| Contract                       | Address                                      | Goerli | Optimism Goerli | Sepolia | PGN Sepolia |
+|--------------------------------|----------------------------------------------|:------:|:---------------:|:-------:|:-----------:|
+| Registry | `0xe571ec2C7b94dE72Bc01937a251E48780DEF882A` | [🔗](https://goerli.etherscan.io/address/0xe571ec2C7b94dE72Bc01937a251E48780DEF882A) |      [🔗](https://goerli-optimism.etherscan.io/address/0xe571ec2C7b94dE72Bc01937a251E48780DEF882A)     | [🔗](https://sepolia.etherscan.io/address/0xe571ec2C7b94dE72Bc01937a251E48780DEF882A)  |   [🔗](https://explorer.sepolia.publicgoods.network/address/0xe571ec2C7b94dE72Bc01937a251E48780DEF882A)    |
+| Allo | `0x45F5506b0014cbdc9652854B65eed90E56aB7dA9` | [🔗](https://goerli.etherscan.io/address/0x45F5506b0014cbdc9652854B65eed90E56aB7dA9) |      [🔗](https://goerli-optimism.etherscan.io/address/0x45F5506b0014cbdc9652854B65eed90E56aB7dA9)     | [🔗](https://sepolia.etherscan.io/address/0x45F5506b0014cbdc9652854B65eed90E56aB7dA9)  |   [🔗](https://explorer.sepolia.publicgoods.network/address/0x45F5506b0014cbdc9652854B65eed90E56aB7dA9)    |
+| Allo Proxy | `0x97122901b6346a625294d446f5d0b7bc00a3b0f2` | [🔗](https://goerli.etherscan.io/address/0x97122901b6346a625294d446f5d0b7bc00a3b0f2) |      [🔗](https://goerli-optimism.etherscan.io/address/0x97122901b6346a625294d446f5d0b7bc00a3b0f2)     | [🔗](https://sepolia.etherscan.io/address/0x97122901b6346a625294d446f5d0b7bc00a3b0f2)  |   [🔗](https://explorer.sepolia.publicgoods.network/address/0x97122901b6346a625294d446f5d0b7bc00a3b0f2)    |
 
+## Strategies
 
-# Strategy
+| Contract                       | Address                                      | Goerli | Optimism Goerli | Sepolia | PGN Sepolia |
+|--------------------------------|----------------------------------------------|:------:|:---------------:|:-------:|:-----------:|
+| Donation Voting v1 | `0x4AB4eF1aa0c2f63FFE77b245E679fb7B38681470` | [🔗](https://goerli.etherscan.io/address/0x4AB4eF1aa0c2f63FFE77b245E679fb7B38681470) |      [🔗](https://goerli-optimism.etherscan.io/address/0x4AB4eF1aa0c2f63FFE77b245E679fb7B38681470)     | [🔗](https://sepolia.etherscan.io/address/0x4AB4eF1aa0c2f63FFE77b245E679fb7B38681470)  |   [🔗](https://explorer.sepolia.publicgoods.network/address/0x4AB4eF1aa0c2f63FFE77b245E679fb7B38681470)    |
 
-# Contract Deployment Information
+## Developer Contracts
 
-
-<table>
-<thead>
-  <tr>
-    <th>Chain</th>
-    <th>Goerli</th>
-    <th>Optimism Goerli</th>
-    <th>Sepolia</th>
-    <th>PGN Sepolia</th>
-  </tr>
-</thead>
-<tbody>
-  <tr>
-    <td>Deployer</td>
-    <td colspan="4">0x339d087B3ab5DF79c6c3617B2487e5340F2DBE3f</td>
-  </tr>
-</tbody>
-</table>
+| Contract                       | Address                                      | Goerli | Optimism Goerli | Sepolia | PGN Sepolia |
+|--------------------------------|----------------------------------------------|:------:|:---------------:|:-------:|:-----------:|
+| Deployer | `0x339d087B3ab5DF79c6c3617B2487e5340F2DBE3f` | [🔗](https://goerli.etherscan.io/address/0x339d087B3ab5DF79c6c3617B2487e5340F2DBE3f) |      [🔗](https://goerli-optimism.etherscan.io/address/0x339d087B3ab5DF79c6c3617B2487e5340F2DBE3f)     | [🔗](https://sepolia.etherscan.io/address/0x339d087B3ab5DF79c6c3617B2487e5340F2DBE3f)  |   [🔗](https://explorer.sepolia.publicgoods.network/address/0x339d087B3ab5DF79c6c3617B2487e5340F2DBE3f)    |

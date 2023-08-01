@@ -53,7 +53,7 @@ export const deployerContractAddress: DeployerConfig = {
 export const nameConfig: DeployParams = {
   // Mainnet
   1: {
-    "direct-grants": {
+    "donation-voting": {
       name: "",
       version: "",
       address: "",
@@ -61,23 +61,23 @@ export const nameConfig: DeployParams = {
   },
   // Goerli
   5: {
-    "direct-grants": {
-      name: "",
-      version: "",
-      address: "",
+    "donation-voting": {
+      name: "DonationVotingStrategy",
+      version: "v1",
+      address: "0x4AB4eF1aa0c2f63FFE77b245E679fb7B38681470",
     },
   },
   // Sepolia
   11155111: {
-    "direct-grants": {
-      name: "",
-      version: "",
-      address: "",
+    "donation-voting": {
+      name: "DonationVotingStrategy",
+      version: "v1",
+      address: "0x4AB4eF1aa0c2f63FFE77b245E679fb7B38681470",
     },
   },
   // PGN
   424: {
-    "direct-grants": {
+    "donation-voting": {
       name: "",
       version: "",
       address: "",
@@ -85,15 +85,15 @@ export const nameConfig: DeployParams = {
   },
   // PGN Sepolia
   58008: {
-    "direct-grants": {
-      name: "",
-      version: "",
-      address: "",
+    "donation-voting": {
+      name: "DonationVotingStrategy",
+      version: "v1",
+      address: "0x4AB4eF1aa0c2f63FFE77b245E679fb7B38681470",
     },
   },
   // Optimism
   10: {
-    "direct-grants": {
+    "donation-voting": {
       name: "",
       version: "",
       address: "",
@@ -101,15 +101,15 @@ export const nameConfig: DeployParams = {
   },
   // Optimism Goerli
   420: {
-    "direct-grants": {
-      name: "",
-      version: "",
-      address: "",
+    "donation-voting": {
+      name: "DonationVotingStrategy",
+      version: "v1",
+      address: "0x4AB4eF1aa0c2f63FFE77b245E679fb7B38681470",
     },
   },
   // Fantom
   250: {
-    "direct-grants": {
+    "donation-voting": {
       name: "",
       version: "",
       address: "",
