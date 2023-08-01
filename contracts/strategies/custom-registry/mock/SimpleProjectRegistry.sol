@@ -95,10 +95,10 @@ contract SimpleProjectRegistry is Ownable {
     /// @notice Internal method that adds projects to the registry
     /// @param _project The address of the project to add
     function _addProject(address _project) internal {
-        if (projects[_projects]) {
+        if (projects[_project]) {
             revert ProjectAlreadyInRegistry();
         }
-        projects[_projects[i]] = true;
+        projects[_project] = true;
     }
 
     /// @notice Internal method that removes a project from the registry
