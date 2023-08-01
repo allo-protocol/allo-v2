@@ -70,7 +70,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
     );
     event PoolCreated(
         uint256 indexed poolId,
-        bytes32 indexed identityId,
+        bytes32 indexed profileId,
         IStrategy strategy,
         MockToken token,
         uint256 amount,

@@ -8,7 +8,7 @@ contract Anchor {
     /// === Storage Variables ====
     /// ==========================
     Registry public immutable registry;
-    bytes32 public identityId;
+    bytes32 public profileId;
 
     /// ==========================
     /// ======== Errors ==========
@@ -19,9 +19,9 @@ contract Anchor {
     /// ==========================
     /// ======= Constructor ======
     /// ==========================
-    constructor(bytes32 _identityId) {
+    constructor(bytes32 _profileId) {
         registry = Registry(msg.sender);
-        identityId = _identityId;
+        profileId = _profileId;
     }
 
     /// ==========================
@@ -33,7 +33,7 @@ contract Anchor {
     /// @param _value The amount of native token to send
     /// @param _data The data to send to the target address
     function execute(address _target, uint256 _value, bytes memory _data) external returns (bytes memory) {
-        if (!registry.isOwnerOfIdentity(identityId, msg.sender)) {
+        if (!registry.isOwnerOfIdentity(profileId, msg.sender)) {
             revert UNAUTHORIZED();
         }
 

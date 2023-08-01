@@ -25,7 +25,7 @@ contract Accounts is StdCheats {
     }
 
     // //////////////////////
-    // Null Identity adresses
+    // Null Profile adresses
     // //////////////////////
 
     function nullIdentity_owner() public pure returns (address) {
@@ -77,7 +77,7 @@ contract Accounts is StdCheats {
     }
 
     // //////////////////////
-    // Identity 1 adresses
+    // Profile 1 adresses
     // //////////////////////
 
     function identity1_owner() public returns (address) {
@@ -105,7 +105,7 @@ contract Accounts is StdCheats {
     }
 
     // //////////////////////
-    // Identity 2 adresses
+    // Profile 2 adresses
     // //////////////////////
 
     function identity2_owner() public returns (address) {

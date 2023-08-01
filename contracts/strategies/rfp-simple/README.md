@@ -8,13 +8,13 @@ Many organizations accomplish tasks by outsourcing the work to expert teams. In 
 ### Recipient logic
 In this strategy, prospective recipients only need to apply for a grant. There isn't an approval step before voting. 
 - **Recipient eligibility**
-    - Pool manager can require recipients to have Allo registry identity in order to apply
+    - Pool manager can require recipients to have Allo registry profile in order to apply
     - Pool manager can require recipients to submit application information
         - If this is configured, all application content and formatting is stored off-chain with a pointer to that data saved to the contract
         - Pool manager can also save metadata about the pool off-chain
 - **Recipient information**
     - prospective recipients must provide a recipientID and an address where they can receive funds
-        - if an Allo registry identity is required, then that identity is used as the recipientID
+        - if an Allo registry profile is required, then that profile is used as the recipientID
 - **Registering recipients**
     - `registerRecipient` - function for recipient to submit application
         - as long as the recipient submits an application that meets all requirements, then the recipient status is set to `Pending` (global and local)

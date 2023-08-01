@@ -17,13 +17,13 @@ import {MockToken} from "../../utils/MockToken.sol";
 
 contract RegistryTest is Test, RegistrySetup, Native {
     event IdentityCreated(
-        bytes32 indexed identityId, uint256 nonce, string name, Metadata metadata, address owner, address anchor
+        bytes32 indexed profileId, uint256 nonce, string name, Metadata metadata, address owner, address anchor
     );
 
-    event IdentityNameUpdated(bytes32 indexed identityId, string name, address anchor);
-    event IdentityMetadataUpdated(bytes32 indexed identityId, Metadata metadata);
-    event IdentityOwnerUpdated(bytes32 indexed identityId, address owner);
-    event IdentityPendingOwnerUpdated(bytes32 indexed identityId, address pendingOwner);
+    event IdentityNameUpdated(bytes32 indexed profileId, string name, address anchor);
+    event IdentityMetadataUpdated(bytes32 indexed profileId, Metadata metadata);
+    event IdentityOwnerUpdated(bytes32 indexed profileId, address owner);
+    event IdentityPendingOwnerUpdated(bytes32 indexed profileId, address pendingOwner);
 
     Metadata public metadata;
     string public name;
@@ -34,7 +34,7 @@ contract RegistryTest is Test, RegistrySetup, Native {
     function setUp() public {
         __RegistrySetup();
         metadata = Metadata({protocol: 1, pointer: "test metadata"});
-        name = "New Identity";
+        name = "New Profile";
         nonce = 2;
 
         token = new MockToken();
@@ -48,28 +48,28 @@ contract RegistryTest is Test, RegistrySetup, Native {
 
         emit IdentityCreated(testIdentityId, nonce, name, metadata, identity1_owner(), testAnchor);
 
-        // create identity
+        // create profile
         bytes32 newIdentityId = registry().createIdentity(nonce, name, metadata, identity1_owner(), identity1_members());
 
-        // Check if the new identity was created
-        Registry.Identity memory identity = registry().getIdentityById(newIdentityId);
+        // Check if the new profile was created
+        Registry.Profile memory profile = registry().getIdentityById(newIdentityId);
 
-        assertEq(testIdentityId, newIdentityId, "identityId");
+        assertEq(testIdentityId, newIdentityId, "profileId");
 
-        assertEq(identity.id, newIdentityId, "newIdentityId");
-        assertEq(identity.name, name, "name");
-        assertEq(identity.metadata.protocol, metadata.protocol, "metadata.protocol");
-        assertEq(identity.metadata.pointer, metadata.pointer, "metadata.pointer");
-        assertEq(registry().anchorToIdentityId(identity.anchor), newIdentityId, "anchorToIdentityId");
+        assertEq(profile.id, newIdentityId, "newIdentityId");
+        assertEq(profile.name, name, "name");
+        assertEq(profile.metadata.protocol, metadata.protocol, "metadata.protocol");
+        assertEq(profile.metadata.pointer, metadata.pointer, "metadata.pointer");
+        assertEq(registry().anchorToIdentityId(profile.anchor), newIdentityId, "anchorToIdentityId");
 
-        Registry.Identity memory identityByAnchor = registry().getIdentityByAnchor(identity.anchor);
+        Registry.Profile memory identityByAnchor = registry().getIdentityByAnchor(profile.anchor);
         assertEq(identityByAnchor.name, name, "getIdentityByAnchor: name");
     }
 
     function testRevert_createIdentity_owner_ZERO_ADDRESS() public {
         vm.expectRevert(IRegistry.ZERO_ADDRESS.selector);
 
-        // create identity
+        // create profile
         registry().createIdentity(nonce, name, metadata, address(0), identity1_members());
     }
 
@@ -77,17 +77,17 @@ contract RegistryTest is Test, RegistrySetup, Native {
         vm.expectRevert(IRegistry.ZERO_ADDRESS.selector);
         address[] memory _members = new address[](1);
         _members[0] = address(0);
-        // create identity
+        // create profile
         registry().createIdentity(nonce, name, metadata, identity1_owner(), _members);
     }
 
     function testRevert_createIdentity_NONCE_NOT_AVAILABLE() public {
-        // create identity
+        // create profile
         registry().createIdentity(nonce, name, metadata, identity1_owner(), identity1_members());
 
         vm.expectRevert(IRegistry.NONCE_NOT_AVAILABLE.selector);
 
-        // create identity with same index and name
+        // create profile with same index and name
         registry().createIdentity(nonce, name, metadata, identity1_owner(), identity1_members());
     }
 
@@ -98,14 +98,14 @@ contract RegistryTest is Test, RegistrySetup, Native {
         address testAnchor = TestUtilities._testUtilGenerateAnchor(newIdentityId, newName, address(registry()));
         vm.expectEmit(true, false, false, true);
         emit IdentityNameUpdated(newIdentityId, newName, testAnchor);
-        Registry.Identity memory identity = registry().getIdentityById(newIdentityId);
+        Registry.Profile memory profile = registry().getIdentityById(newIdentityId);
 
         vm.prank(identity1_owner());
         address newAnchor = registry().updateIdentityName(newIdentityId, newName);
 
         assertEq(registry().getIdentityById(newIdentityId).name, newName, "name");
-        // old and new anchor should be mapped to identityId
-        assertEq(registry().anchorToIdentityId(identity.anchor), bytes32(0), "old anchor");
+        // old and new anchor should be mapped to profileId
+        assertEq(registry().anchorToIdentityId(profile.anchor), bytes32(0), "old anchor");
         assertEq(registry().anchorToIdentityId(newAnchor), newIdentityId, "new anchor");
     }
 
@@ -152,9 +152,9 @@ contract RegistryTest is Test, RegistrySetup, Native {
         vm.prank(identity1_owner());
         registry().updateIdentityMetadata(newIdentityId, newMetadata);
 
-        Registry.Identity memory identity = registry().getIdentityById(newIdentityId);
-        assertEq(identity.metadata.protocol, newMetadata.protocol, "metadata.protocol");
-        assertEq(identity.metadata.pointer, newMetadata.pointer, "metadata.pointer");
+        Registry.Profile memory profile = registry().getIdentityById(newIdentityId);
+        assertEq(profile.metadata.protocol, newMetadata.protocol, "metadata.protocol");
+        assertEq(profile.metadata.pointer, newMetadata.pointer, "metadata.pointer");
     }
 
     function test_updateIdentityMetadataForInvalidId() public {

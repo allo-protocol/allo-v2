@@ -20,7 +20,7 @@ In this strategy, recipients must submit an application and be approved by pool 
         - if the Allo registry is not required, the recipient has the option of using their `anchorId` or `msg.sender`
 - **Recipient eligibility**
     - Pool manager has the option to enable two separate eligibility requirements on this contract:
-        - Requiring recipients to have an Allo registry identity in order to apply
+        - Requiring recipients to have an Allo registry profile in order to apply
         - Requiring recipients to submit answers to questions, stored in metadata
             - This metadata may include information for the front end on required / optional questions, but the contract only needs to check for whether metadata has been submitted
             - The pool manager should have a function that enables them to edit the pool metadata, which is callable at any point

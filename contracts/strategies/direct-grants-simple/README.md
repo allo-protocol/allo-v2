@@ -10,8 +10,8 @@ In this strategy, prospective recipients only need to register for a grant. Ther
 - `registerRecipient` - function for recipient to submit application
     - if a recipient submits an application that meets all requirements, then the recipient status is set to `Pending`
     - **Customizable Settings**
-        - pool manager can require recipients to have Allo registry identity in order to apply
-            - if pool manager doesn't require Allo identity and the recipient doesn't have one, then `msg.sender` is used as recipient id
+        - pool manager can require recipients to have Allo registry profile in order to apply
+            - if pool manager doesn't require Allo profile and the recipient doesn't have one, then `msg.sender` is used as recipient id
         - pool manager can include optional and required questions in an application, stored in metadata
             - recipient must answer questions as specified by pool manager
         - pool manager can require that the recipient include a requested grant amount

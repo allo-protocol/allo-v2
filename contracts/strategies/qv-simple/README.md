@@ -8,7 +8,7 @@ Quadratic Voting is a popular method for democratic decision-making. This strate
 ### Recipient logic
 In this strategy, prospective recipients need to apply and be approved by at least two admins. The pool managers can set a time window in which applications must be received.
 - **Recipient Eligibility**
-    - pool manager has the option to require recipients to have an Allo registry identity in order to apply
+    - pool manager has the option to require recipients to have an Allo registry profile in order to apply
     - pool manager has the option to require application metadata submitted with the application
         - This metadata may include information for the front end on required / optional questions, but the contract only needs to check for whether metadata has been submitted
         - Pool manager needs to have a way to upload the application form metadata
