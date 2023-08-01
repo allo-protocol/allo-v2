@@ -30,6 +30,7 @@ interface IStrategy {
     error BaseStrategy_NOT_INITIALIZED();
     error BaseStrategy_INVALID_ADDRESS();
     error BaseStrategy_POOL_INACTIVE();
+    error BaseStrategy_POOL_ACTIVE();
 
     /// ======================
     /// ======= Events =======

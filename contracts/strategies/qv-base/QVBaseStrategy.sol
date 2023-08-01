@@ -319,7 +319,9 @@ abstract contract QVBaseStrategy is BaseStrategy {
         returns (address recipientId)
     {
         address recipientAddress;
-        bool useRegistryAnchor;
+        address registryAnchor;
+        bool isUsingRegistryAnchor;
+
         Metadata memory metadata;
 
         // decode data custom to this strategy
@@ -330,9 +332,10 @@ abstract contract QVBaseStrategy is BaseStrategy {
                 revert UNAUTHORIZED();
             }
         } else {
-            (recipientAddress, useRegistryAnchor, metadata) = abi.decode(_data, (address, bool, Metadata));
-            recipientId = _sender;
-            if (useRegistryAnchor && !_isProfileMember(recipientId, _sender)) {
+            (recipientAddress, registryAnchor, metadata) = abi.decode(_data, (address, address, Metadata));
+            isUsingRegistryAnchor = registryAnchor != address(0);
+            recipientId = isUsingRegistryAnchor ? registryAnchor : _sender;
+            if (isUsingRegistryAnchor && !_isProfileMember(recipientId, _sender)) {
                 revert UNAUTHORIZED();
             }
         }
@@ -350,7 +353,7 @@ abstract contract QVBaseStrategy is BaseStrategy {
         // update the recipients data
         recipient.recipientAddress = recipientAddress;
         recipient.metadata = metadata;
-        recipient.useRegistryAnchor = registryGating ? true : useRegistryAnchor;
+        recipient.useRegistryAnchor = registryGating ? true : isUsingRegistryAnchor;
 
         // NOTE: do we need this? the status is not ever set to anything but None
         // on creation? Shouldn't we be setting the status on review or setting it to

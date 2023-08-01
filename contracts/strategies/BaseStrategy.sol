@@ -56,6 +56,13 @@ abstract contract BaseStrategy is IStrategy, Transfer {
         _;
     }
 
+    modifier onlyInactivePool() {
+        if (poolActive) {
+            revert BaseStrategy_POOL_ACTIVE();
+        }
+        _;
+    }
+
     modifier onlyInitialized() {
         if (poolId == 0) {
             revert BaseStrategy_NOT_INITIALIZED();

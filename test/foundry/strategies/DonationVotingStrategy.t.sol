@@ -27,7 +27,6 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         address indexed recipientId, DonationVotingStrategy.InternalRecipientStatus recipientStatus, address sender
     );
     event Claimed(address indexed recipientId, address recipientAddress, uint256 amount, address token);
-    event Allocated(address indexed recipientId, uint256 amount, address token, address sender);
 
     bool public useRegistryAnchor;
     bool public metadataRequired;
@@ -592,10 +591,8 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
     function test_registerRecipient_new() public {
         vm.warp(registrationStartTime + 1);
         address sender = recipient();
-        address recipientAddress = recipientAddress();
         Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
-
-        bytes memory data = abi.encode(recipientAddress, false, metadata);
+        bytes memory data = abi.encode(recipientAddress(), false, metadata);
 
         vm.expectEmit(true, false, false, true);
         emit Registered(sender, data, sender);
@@ -603,8 +600,8 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         vm.prank(address(allo()));
         address recipientId = strategy.registerRecipient(data, sender);
 
-        DonationVotingStrategy.Recipient memory recipient = strategy.getRecipient(recipientId);
-        assertEq(uint8(recipient.recipientStatus), uint8(DonationVotingStrategy.InternalRecipientStatus.Pending));
+        DonationVotingStrategy.Recipient memory _recipient = strategy.getRecipient(recipientId);
+        assertEq(uint8(_recipient.recipientStatus), uint8(DonationVotingStrategy.InternalRecipientStatus.Pending));
     }
 
     function test_registerRecipient_new_withRegistryAnchor() public {

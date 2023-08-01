@@ -134,7 +134,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
         return _createPool(_profileId, IStrategy(_strategy), _initStrategyData, _token, _amount, _metadata, _managers);
     }
 
-    /// @notice Creates a new pool (by cloning an cloneable strategies)
+    /// @notice Creates a new pool (by cloning a cloneable strategies)
     /// @param _profileId The profileId of the pool
     /// @param _initStrategyData The data to initialize the strategy
     /// @param _token The address of the token

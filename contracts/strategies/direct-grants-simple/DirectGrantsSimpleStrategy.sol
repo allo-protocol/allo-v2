@@ -147,7 +147,8 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         payouts = new PayoutSummary[](recipientLength);
 
         for (uint256 i = 0; i < recipientLength;) {
-            payouts[i] = PayoutSummary(_recipientIds[i], _recipients[_recipientIds[i]].grantAmount);
+            Recipient memory recipient = _getRecipient(_recipientIds[i]);
+            payouts[i] = PayoutSummary(recipient.recipientAddress, recipient.grantAmount);
             unchecked {
                 i++;
             }
@@ -277,7 +278,8 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         returns (address recipientId)
     {
         address recipientAddress;
-        bool useRegistryAnchor;
+        address registryAnchor;
+        bool isUsingRegistryAnchor;
         uint256 grantAmount;
         Metadata memory metadata;
 
@@ -290,10 +292,12 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
                 revert UNAUTHORIZED();
             }
         } else {
-            (recipientAddress, useRegistryAnchor, grantAmount, metadata) =
-                abi.decode(_data, (address, bool, uint256, Metadata));
-            recipientId = _sender;
-            if (useRegistryAnchor && !_isProfileMember(recipientId, _sender)) {
+            (recipientAddress, registryAnchor, grantAmount, metadata) =
+                abi.decode(_data, (address, address, uint256, Metadata));
+            isUsingRegistryAnchor = registryAnchor != address(0);
+
+            recipientId = isUsingRegistryAnchor ? registryAnchor : _sender;
+            if (isUsingRegistryAnchor && !_isProfileMember(recipientId, _sender)) {
                 revert UNAUTHORIZED();
             }
         }
@@ -311,7 +315,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
         Recipient memory recipient = Recipient({
             recipientAddress: recipientAddress,
-            useRegistryAnchor: registryGating ? true : useRegistryAnchor,
+            useRegistryAnchor: registryGating ? true : isUsingRegistryAnchor,
             grantAmount: grantAmount,
             metadata: metadata,
             recipientStatus: InternalRecipientStatus.Pending

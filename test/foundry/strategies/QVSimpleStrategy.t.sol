@@ -315,7 +315,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         address recipientAddress = makeAddr("recipientAddress");
         Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
 
-        bytes memory data = abi.encode(recipientAddress, false, metadata);
+        bytes memory data = abi.encode(recipientAddress, address(0), metadata);
 
         vm.prank(address(allo()));
         address recipientId = QVSimpleStrategy(strategy).registerRecipient(data, sender);
