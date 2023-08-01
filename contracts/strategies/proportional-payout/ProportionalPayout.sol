@@ -2,13 +2,16 @@
 pragma solidity 0.8.19;
 
 import {ERC20} from "@solady/tokens/ERC20.sol";
-import {Allo} from "../core/Allo.sol";
-import {BaseStrategy} from "./BaseStrategy.sol";
-import {Transfer} from "../core/libraries/Transfer.sol";
+import {Allo} from "../../core/Allo.sol";
+import {IAllo} from "../../core/IAllo.sol";
+import {BaseStrategy} from "./../BaseStrategy.sol";
+import {Transfer} from "../../core/libraries/Transfer.sol";
 
 contract ProportionalPayout is BaseStrategy {
+    error RECIPIENT_MAX_REACHED();
+
     /// @notice The maximum number of recipients allowed
-    /// @dev This is both to keep the number of choices low and to avoid gas issues 
+    /// @dev This is both to keep the number of choices low and to avoid gas issues
     uint256 constant MAX_RECIPIENTS = 3;
 
     /// ================================
@@ -74,7 +77,12 @@ contract ProportionalPayout is BaseStrategy {
     /// ===============================
 
     function initialize(uint256 _poolId, bytes memory _data) public override {
-        super.initialize(_poolId, _data);
+        __ProportionalPayout_init(_poolId, _data);
+    }
+
+    function __ProportionalPayout_init(uint256 _poolId, bytes memory _data) internal {
+        __BaseStrategy_init(_poolId);
+
         (token, startTime, endTime) = abi.decode(_data, (ERC20, uint256, uint256));
 
         if (startTime >= endTime || endTime < block.timestamp) {
@@ -82,14 +90,13 @@ contract ProportionalPayout is BaseStrategy {
         }
     }
 
-    function registerRecipients(
-        bytes memory _data,
-        address _sender
-    ) external
-      payable 
-      onlyDuringAllocationPeriod 
-      onlyAllo 
-      returns (address) {
+    function _registerRecipient(bytes memory _data, address _sender)
+        internal
+        override
+        onlyDuringAllocationPeriod
+        onlyAllo
+        returns (address)
+    {
         if (recipients.length == MAX_RECIPIENTS) {
             revert RECIPIENT_MAX_REACHED();
         }
@@ -109,8 +116,7 @@ contract ProportionalPayout is BaseStrategy {
         }
     }
 
-    function getRecipientStatus(address _recipientId) public view returns
-    (RecipientStatus) {
+    function getRecipientStatus(address _recipientId) public view returns (RecipientStatus) {
         if (isRecipient[_recipientId]) {
             return RecipientStatus.Accepted;
         } else {
@@ -119,14 +125,10 @@ contract ProportionalPayout is BaseStrategy {
     }
 
     function isValidAllocator(address _allocator) public view returns (bool) {
-        return token.balanceOf[_allocator] > 0;
+        return token.balanceOf(_allocator) > 0;
     }
 
-    function allocate(
-        bytes memory _data,
-        address _sender
-    ) external payable
-    onlyDuringAllocationPeriod onlyAllo {
+    function _allocate(bytes memory _data, address _sender) internal override onlyDuringAllocationPeriod onlyAllo {
         if (hasVoted[_sender]) {
             revert AlreadyAllocated();
         }
@@ -142,52 +144,50 @@ contract ProportionalPayout is BaseStrategy {
         totalVotes += _amount;
     }
 
-    function getPayouts(
-        address[] memory _recipientIds,
-        bytes memory _data,
-        address _sender
-    ) external view returns (uint256[] memory) {
+    function getPayouts(address[] memory _recipientIds, bytes memory _data, address _sender)
+        public
+        view
+        returns (PayoutSummary[] memory)
+    {
         if (block.timestamp < endTime) {
             revert AllocationHasntEnded();
         }
 
-        uint256[] memory payouts = new uint[](_recipientIds.length);
+        uint256[] memory _payouts = new uint[](_recipientIds.length);
+        PayoutSummary[] memory payoutSummary = new PayoutSummary[](_recipientIds.length);
 
         // Get pool size
-        (,,, uint256 _poolSize,,,) = allo.pools(poolId)
+        // (,,, uint256 _poolSize,,,) = pools(poolId);
 
-        // loop through recipients
-        for (uint256 i; i < _recipientIds.length; i++) {
-            if (isRecipient[_recipientIds[i]]) {
-                // get votes for recipient as percentage of total votes
-                payouts[i] = votes[_recipientIds[i]] * _poolSize / totalVotes;
-            }
-        }
+        // // loop through recipients
+        // for (uint256 i; i < _recipientIds.length; i++) {
+        //     if (isRecipient[_recipientIds[i]]) {
+        //         // get votes for recipient as percentage of total votes
+        //         _payouts[i] = votes[_recipientIds[i]] * _poolSize / totalVotes;
+        //         payoutSummary[i] = PayoutSummary(_recipientIds[i], _payouts[i]);
+        //     }
+        // }
 
-        return payouts;
+        return payoutSummary;
     }
 
-    function distribute(
-        address[] memory _recipientIds,
-        bytes memory _data,
-        address _sender
-    ) external onlyAllo {
+    function _distribute(address[] memory _recipientIds, bytes memory _data, address _sender)
+        internal
+        override
+        onlyAllo
+    {
         // Check that round has ended
         if (block.timestamp < endTime) {
             revert AllocationHasntEnded();
         }
 
         // Get distribution
-        (,, address tokenToDistribute, uint256 amountToDistribute,,,) = allo.pools(poolId);
-        uint256[] memory _payouts = getPayouts(_recipientIds, _data, _sender);
+        // (,, address tokenToDistribute, uint256 amountToDistribute,,,) = allo.pools(poolId);
+        // PayoutSummary[] memory _payouts = getPayouts(_recipientIds, _data, _sender);
 
-        // Transfer pool to recipients
-        for (uint256 i; i < _recipientIds.length; i++) {
-            _transferAmount(
-                tokenToDistribute,
-                _recipientIds[i],
-                _payouts[i]
-            )
-        }
+        // // Transfer pool to recipients
+        // for (uint256 i; i < _recipientIds.length; i++) {
+        //     _transferAmount(tokenToDistribute, _recipientIds[i], _payouts[i].amount);
+        // }
     }
 }

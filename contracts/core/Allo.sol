@@ -58,6 +58,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
     mapping(address => uint256) private _nonces;
 
     /// @notice Pool.id -> Pool
+    // Note: the ProportionalPayout strategy needs this public?
     mapping(uint256 => Pool) private pools;
 
     /// @notice Strategy -> bool
