@@ -22,7 +22,6 @@ contract TestStrategy is IStrategy {
         strategyId = keccak256(abi.encode(_name));
     }
 
-
     // ======================
     // ======= Views ========
     // ======================

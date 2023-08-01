@@ -71,7 +71,7 @@ contract QVSimpleStrategyTest is Accounts, StrategySetup, RegistrySetupFull, All
     );
     event PoolCreated(
         uint256 indexed poolId,
-        bytes32 indexed identityId,
+        bytes32 indexed profileId,
         IStrategy strategy,
         address token,
         uint256 amount,
@@ -122,7 +122,7 @@ contract QVSimpleStrategyTest is Accounts, StrategySetup, RegistrySetupFull, All
 
         vm.prank(pool_manager1());
         poolId = allo().createPoolWithCustomStrategy(
-            poolIdentity_id(),
+            poolProfile_id(),
             address(strategy),
             abi.encode(
                 registryGating,
@@ -197,7 +197,7 @@ contract QVSimpleStrategyTest is Accounts, StrategySetup, RegistrySetupFull, All
 
     //     vm.startPrank(pool_manager1());
     //     poolId = allo().createPoolWithCustomStrategy(
-    //         poolIdentity_id(),
+    //         poolProfile_id(),
     //         address(strategy),
     //         abi.encode(
     //             registryGating,

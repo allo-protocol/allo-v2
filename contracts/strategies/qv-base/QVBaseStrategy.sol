@@ -326,13 +326,13 @@ abstract contract QVBaseStrategy is BaseStrategy {
         if (registryGating) {
             (recipientId, recipientAddress, metadata) = abi.decode(_data, (address, address, Metadata));
 
-            if (!_isIdentityMember(recipientId, _sender)) {
+            if (!_isProfileMember(recipientId, _sender)) {
                 revert UNAUTHORIZED();
             }
         } else {
             (recipientAddress, useRegistryAnchor, metadata) = abi.decode(_data, (address, bool, Metadata));
             recipientId = _sender;
-            if (useRegistryAnchor && !_isIdentityMember(recipientId, _sender)) {
+            if (useRegistryAnchor && !_isProfileMember(recipientId, _sender)) {
                 revert UNAUTHORIZED();
             }
         }
@@ -399,13 +399,13 @@ abstract contract QVBaseStrategy is BaseStrategy {
         }
     }
 
-    /// @notice Check if sender is identity owner or member
-    /// @param _anchor Anchor of the identity
+    /// @notice Check if sender is profile owner or member
+    /// @param _anchor Anchor of the profile
     /// @param _sender The sender of the transaction
-    function _isIdentityMember(address _anchor, address _sender) internal view returns (bool) {
+    function _isProfileMember(address _anchor, address _sender) internal view returns (bool) {
         IRegistry registry = allo.getRegistry();
-        IRegistry.Identity memory identity = registry.getIdentityByAnchor(_anchor);
-        return registry.isOwnerOrMemberOfIdentity(identity.id, _sender);
+        IRegistry.Profile memory profile = registry.getProfileByAnchor(_anchor);
+        return registry.isOwnerOrMemberOfProfile(profile.id, _sender);
     }
 
     /// @notice Get the recipient

@@ -164,7 +164,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Submit milestone to RFP pool
     /// @param _metadata The proof of work
     function submitMilestone(Metadata calldata _metadata) external {
-        if (acceptedRecipientId != msg.sender && !_isIdentityMember(acceptedRecipientId, msg.sender)) {
+        if (acceptedRecipientId != msg.sender && !_isProfileMember(acceptedRecipientId, msg.sender)) {
             revert UNAUTHORIZED();
         }
 
@@ -230,14 +230,14 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
             (recipientId, recipientAddress, proposalBid, metadata) =
                 abi.decode(_data, (address, address, uint256, Metadata));
 
-            if (!_isIdentityMember(recipientId, _sender)) {
+            if (!_isProfileMember(recipientId, _sender)) {
                 revert UNAUTHORIZED();
             }
         } else {
             (recipientAddress, useRegistryAnchor, proposalBid, metadata) =
                 abi.decode(_data, (address, bool, uint256, Metadata));
             recipientId = _sender;
-            if (useRegistryAnchor && !_isIdentityMember(recipientId, _sender)) {
+            if (useRegistryAnchor && !_isProfileMember(recipientId, _sender)) {
                 revert UNAUTHORIZED();
             }
         }
@@ -330,13 +330,13 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         emit Distributed(acceptedRecipientId, recipient.recipientAddress, amount, _sender);
     }
 
-    /// @notice Check if sender is identity owner or member
-    /// @param _anchor Anchor of the identity
+    /// @notice Check if sender is profile owner or member
+    /// @param _anchor Anchor of the profile
     /// @param _sender The sender of the transaction
-    function _isIdentityMember(address _anchor, address _sender) internal view returns (bool) {
+    function _isProfileMember(address _anchor, address _sender) internal view returns (bool) {
         IRegistry registry = allo.getRegistry();
-        IRegistry.Identity memory identity = registry.getIdentityByAnchor(_anchor);
-        return registry.isOwnerOrMemberOfIdentity(identity.id, _sender);
+        IRegistry.Profile memory profile = registry.getProfileByAnchor(_anchor);
+        return registry.isOwnerOrMemberOfProfile(profile.id, _sender);
     }
 
     /// @notice Get the recipient

@@ -9,9 +9,9 @@ contract MockNFT is ERC721 {
     constructor() {}
 
     function mint(address _to, uint256 _amount) public {
-      for(uint256 i = 0; i < _amount; i++) {
-        _mint(_to, lastTokenId++);
-      }
+        for (uint256 i = 0; i < _amount; i++) {
+            _mint(_to, lastTokenId++);
+        }
     }
 
     function name() public pure override returns (string memory) {

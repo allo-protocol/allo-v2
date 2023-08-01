@@ -25,26 +25,26 @@ contract Accounts is StdCheats {
     }
 
     // //////////////////////
-    // Null Identity adresses
+    // Null Profile adresses
     // //////////////////////
 
-    function nullIdentity_owner() public pure returns (address) {
+    function nullProfile_owner() public pure returns (address) {
         return 0x0000000000000000000000000000000000000000;
     }
 
-    function nullIdentity_notAMember() public pure returns (address) {
+    function nullProfile_notAMember() public pure returns (address) {
         return 0x0000000000000000000000000000000000000000;
     }
 
-    function nullIdentity_member1() public pure returns (address) {
+    function nullProfile_member1() public pure returns (address) {
         return 0x0000000000000000000000000000000000000000;
     }
 
-    function nullIdentity_member2() public pure returns (address) {
+    function nullProfile_member2() public pure returns (address) {
         return 0x0000000000000000000000000000000000000000;
     }
 
-    function nullIdentity_members() public pure returns (address[] memory) {
+    function nullProfile_members() public pure returns (address[] memory) {
         return new address[](2);
     }
 
@@ -77,57 +77,57 @@ contract Accounts is StdCheats {
     }
 
     // //////////////////////
-    // Identity 1 adresses
+    // Profile 1 adresses
     // //////////////////////
 
-    function identity1_owner() public returns (address) {
-        return makeAddr("identity1_owner");
+    function profile1_owner() public returns (address) {
+        return makeAddr("profile1_owner");
     }
 
-    function identity1_notAMember() public returns (address) {
-        return makeAddr("identity1_notAMember");
+    function profile1_notAMember() public returns (address) {
+        return makeAddr("profile1_notAMember");
     }
 
-    function identity1_member1() public returns (address) {
-        return makeAddr("identity1_member1");
+    function profile1_member1() public returns (address) {
+        return makeAddr("profile1_member1");
     }
 
-    function identity1_member2() public returns (address) {
-        return makeAddr("identity1_member2");
+    function profile1_member2() public returns (address) {
+        return makeAddr("profile1_member2");
     }
 
-    function identity1_members() public returns (address[] memory) {
+    function profile1_members() public returns (address[] memory) {
         address[] memory _members = new address[](2);
-        _members[0] = identity1_member1();
-        _members[1] = identity1_member2();
+        _members[0] = profile1_member1();
+        _members[1] = profile1_member2();
 
         return _members;
     }
 
     // //////////////////////
-    // Identity 2 adresses
+    // Profile 2 adresses
     // //////////////////////
 
-    function identity2_owner() public returns (address) {
-        return makeAddr("identity2_owner");
+    function profile2_owner() public returns (address) {
+        return makeAddr("profile2_owner");
     }
 
-    function identity2_notAMember() public returns (address) {
-        return makeAddr("identity2_notAMember");
+    function profile2_notAMember() public returns (address) {
+        return makeAddr("profile2_notAMember");
     }
 
-    function identity2_member1() public returns (address) {
-        return makeAddr("identity2_member1");
+    function profile2_member1() public returns (address) {
+        return makeAddr("profile2_member1");
     }
 
-    function identity2_member2() public returns (address) {
-        return makeAddr("identity2_member2");
+    function profile2_member2() public returns (address) {
+        return makeAddr("profile2_member2");
     }
 
-    function identity2_members() public returns (address[] memory) {
+    function profile2_members() public returns (address[] memory) {
         address[] memory _members = new address[](2);
-        _members[0] = identity2_member1();
-        _members[1] = identity2_member2();
+        _members[0] = profile2_member1();
+        _members[1] = profile2_member2();
 
         return _members;
     }
