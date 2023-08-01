@@ -326,7 +326,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
 
         // optionally using anchor
         address anchor = identity1_anchor();
-        bytes memory data = abi.encode(anchor, true, 1e18, metadata);
+        bytes memory data = abi.encode(identity1_member1(), anchor, 1e18, metadata);
 
         vm.prank(address(allo()));
         strategy.registerRecipient(data, identity1_member1());

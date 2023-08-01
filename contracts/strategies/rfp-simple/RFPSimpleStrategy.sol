@@ -229,6 +229,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         returns (address recipientId)
     {
         address recipientAddress;
+        address registryAnchor;
         bool isUsingRegistryAnchor;
         uint256 proposalBid;
         Metadata memory metadata;
@@ -241,9 +242,10 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
                 revert UNAUTHORIZED();
             }
         } else {
-            (recipientAddress, isUsingRegistryAnchor, proposalBid, metadata) =
-                abi.decode(_data, (address, bool, uint256, Metadata));
-            recipientId = _sender;
+            (recipientAddress, registryAnchor, proposalBid, metadata) =
+                abi.decode(_data, (address, address, uint256, Metadata));
+            isUsingRegistryAnchor = registryAnchor != address(0);
+            recipientId = isUsingRegistryAnchor ? registryAnchor : _sender;
             if (isUsingRegistryAnchor && !_isIdentityMember(recipientId, _sender)) {
                 revert UNAUTHORIZED();
             }
@@ -262,7 +264,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
         Recipient memory recipient = Recipient({
             recipientAddress: recipientAddress,
-            useRegistryAnchor: isUsingRegistryAnchor ? true : useRegistryAnchor,
+            useRegistryAnchor: useRegistryAnchor ? true : isUsingRegistryAnchor,
             proposalBid: proposalBid,
             recipientStatus: RecipientStatus.Pending
         });

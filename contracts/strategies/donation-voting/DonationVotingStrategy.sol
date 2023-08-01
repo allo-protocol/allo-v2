@@ -416,6 +416,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
         returns (address recipientId)
     {
         address recipientAddress;
+        address registryAnchor;
         bool isUsingRegistryAnchor;
         Metadata memory metadata;
 
@@ -427,26 +428,28 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
                 revert UNAUTHORIZED();
             }
         } else {
-            (recipientAddress, isUsingRegistryAnchor, metadata) = abi.decode(_data, (address, bool, Metadata));
-            recipientId = _sender;
+            (recipientAddress, registryAnchor, metadata) = abi.decode(_data, (address, address, Metadata));
+            isUsingRegistryAnchor = registryAnchor != address(0);
+            recipientId = isUsingRegistryAnchor ? registryAnchor : _sender;
             if (isUsingRegistryAnchor && !_isIdentityMember(recipientId, _sender)) {
                 revert UNAUTHORIZED();
             }
         }
 
-        if (recipientAddress == address(0)) {
-            revert RECIPIENT_ERROR(recipientId);
-        }
         if (metadataRequired && (bytes(metadata.pointer).length == 0 || metadata.protocol == 0)) {
             revert INVALID_METADATA();
+        }
+
+        if (recipientAddress == address(0)) {
+            revert RECIPIENT_ERROR(recipientId);
         }
 
         Recipient storage recipient = _recipients[recipientId];
 
         // update the recipients data
         recipient.recipientAddress = recipientAddress;
-        recipient.useRegistryAnchor = isUsingRegistryAnchor ? true : useRegistryAnchor;
         recipient.metadata = metadata;
+        recipient.useRegistryAnchor = useRegistryAnchor ? true : isUsingRegistryAnchor;
 
         if (recipient.recipientStatus == InternalRecipientStatus.Rejected) {
             recipient.recipientStatus = InternalRecipientStatus.Appealed;
