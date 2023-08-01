@@ -2,7 +2,7 @@
 pragma solidity 0.8.19;
 
 // External Libraries
-import {ReentrancyGuard} from "@openzeppelin/security/ReentrancyGuard.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 // Intefaces
 import {IAllo} from "../../core/IAllo.sol";
 import {IRegistry} from "../../core/IRegistry.sol";

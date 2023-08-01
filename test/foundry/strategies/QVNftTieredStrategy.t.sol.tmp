@@ -3,7 +3,7 @@ pragma solidity 0.8.19;
 
 import {IStrategy} from "../../../contracts/strategies/IStrategy.sol";
 
-import {ERC721} from "@solady/tokens/ERC721.sol";
+import {ERC721} from "solady/src/tokens/ERC721.sol";
 
 import {QVNftTieredStrategy} from "../../../contracts/strategies/qv-nft-tiered/QVNftTieredStrategy.sol";
 import {QVSimpleStrategyTest} from "./QVSimpleStrategy.t.sol";

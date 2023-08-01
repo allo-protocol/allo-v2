@@ -2,10 +2,10 @@
 pragma solidity 0.8.19;
 
 // External Libraries
-import "@solady/auth/Ownable.sol";
-import "@openzeppelin-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import "@openzeppelin/access/AccessControl.sol";
+import "solady/src/auth/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
 // Interfaces
 import "./IAllo.sol";
 // Internal Libraries

@@ -7,7 +7,13 @@ typechain
 typechain-types
 lcov.info
 
+# Hardhat files
+artifacts
+cache
+abis
+
 # Foundry files
 out
 broadcast
 cache_forge/*.json
+cache_forge/*

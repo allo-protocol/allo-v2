@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import {IAllo} from "../../contracts/core/IAllo.sol";
 import {IStrategy} from "../../contracts/strategies/IStrategy.sol";
 
-contract BadStrategy is IStrategy {
+contract TestStrategy is IStrategy {
     // ======================
     // ======= Storage ======
     // ======================
@@ -16,6 +16,12 @@ contract BadStrategy is IStrategy {
     bool private poolActive;
     uint256 private poolAmount;
     mapping(address => RecipientStatus) private recipientStatus;
+
+    constructor(address _allo, string memory _name) {
+        allo = IAllo(_allo);
+        strategyId = keccak256(abi.encode(_name));
+    }
+
 
     // ======================
     // ======= Views ========

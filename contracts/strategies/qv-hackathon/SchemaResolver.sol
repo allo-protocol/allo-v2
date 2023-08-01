@@ -9,9 +9,9 @@ pragma solidity 0.8.19;
 //  - replaced constructor  __SchemaResolver_init()
 // Reason for change:
 //  - wanted it to set when HackathonQVStrategy.initialize() is invoked
-import {IEAS, Attestation} from "@ethereum-attestation-service/IEAS.sol";
-import {InvalidEAS, uncheckedInc} from "@ethereum-attestation-service/Common.sol";
-import {ISchemaResolver} from "@ethereum-attestation-service/resolver/ISchemaResolver.sol";
+import {IEAS, Attestation} from "@ethereum-attestation-service/eas-contracts/contracts/IEAS.sol";
+import {InvalidEAS, uncheckedInc} from "@ethereum-attestation-service/eas-contracts/contracts/Common.sol";
+import {ISchemaResolver} from "@ethereum-attestation-service/eas-contracts/contracts/resolver/ISchemaResolver.sol";
 
 /**
  * @title A base resolver contract
