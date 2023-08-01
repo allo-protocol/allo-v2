@@ -23,14 +23,14 @@ contract AnchorTest is Test {
     bytes32 profileId;
 
     function setUp() public {
-        profileId = bytes32("test_identity");
+        profileId = bytes32("test_profile");
         mockRegistry = new MockRegistry();
         vm.prank(address(mockRegistry));
         anchor = new Anchor(profileId);
     }
 
     function test_deploy() public {
-        assertEq(anchor.profileId(), bytes32("test_identity"));
+        assertEq(anchor.profileId(), bytes32("test_profile"));
         assertEq(address(anchor.registry()), address(mockRegistry));
     }
 
