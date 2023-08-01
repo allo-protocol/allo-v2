@@ -126,7 +126,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
 
     function _createPoolWithCustomStrategy() internal virtual {
         poolId = allo().createPoolWithCustomStrategy(
-            poolIdentity_id(),
+            poolProfile_id(),
             address(strategy),
             abi.encode(
                 registryGating,
@@ -347,7 +347,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         );
 
         vm.warp(registrationStartTime + 10);
-        bytes memory data = __generateRecipientWithId(poolIdentity_anchor());
+        bytes memory data = __generateRecipientWithId(poolProfile_anchor());
 
         vm.prank(address(allo()));
         address recipientId = QVSimpleStrategy(strategy).registerRecipient(data, pool_admin());
@@ -453,7 +453,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         vm.expectRevert(QVBaseStrategy.UNAUTHORIZED.selector);
 
         address sender = recipient1();
-        bytes memory data = __generateRecipientWithId(poolIdentity_anchor());
+        bytes memory data = __generateRecipientWithId(poolProfile_anchor());
 
         vm.prank(address(allo()));
         QVSimpleStrategy(strategy).registerRecipient(data, sender);

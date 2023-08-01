@@ -24,8 +24,8 @@ contract RegistrySetup is Test, Accounts {
 /// @title RegistrySetupFull
 /// @notice This contract is used to setup a Registry contract with two identities for testing purposes.
 contract RegistrySetupFull is RegistrySetup {
-    bytes32 internal _poolIdentityId_;
-    address internal _poolIdentityAnchor_;
+    bytes32 internal _poolProfileId_;
+    address internal _poolProfileAnchor_;
 
     bytes32 internal _identity1Id_;
     address internal _identity1Anchor_;
@@ -37,30 +37,30 @@ contract RegistrySetupFull is RegistrySetup {
         __RegistrySetup();
 
         vm.prank(pool_admin());
-        _poolIdentityId_ = _registry_.createIdentity(
-            0, "Pool Profile 1", Metadata({protocol: 1, pointer: "PoolIdentity1"}), pool_admin(), pool_managers()
+        _poolProfileId_ = _registry_.createProfile(
+            0, "Pool Profile 1", Metadata({protocol: 1, pointer: "PoolProfile1"}), pool_admin(), pool_managers()
         );
-        _poolIdentityAnchor_ = _registry_.getIdentityById(_poolIdentityId_).anchor;
+        _poolProfileAnchor_ = _registry_.getProfileById(_poolProfileId_).anchor;
 
         vm.prank(identity1_owner());
-        _identity1Id_ = _registry_.createIdentity(
-            0, "Profile 1", Metadata({protocol: 1, pointer: "Identity1"}), identity1_owner(), identity1_members()
+        _identity1Id_ = _registry_.createProfile(
+            0, "Profile 1", Metadata({protocol: 1, pointer: "Profile1"}), identity1_owner(), identity1_members()
         );
-        _identity1Anchor_ = _registry_.getIdentityById(_identity1Id_).anchor;
+        _identity1Anchor_ = _registry_.getProfileById(_identity1Id_).anchor;
 
         vm.prank(identity2_owner());
-        _identity2Id_ = _registry_.createIdentity(
-            0, "Profile 2", Metadata({protocol: 1, pointer: "Identity2"}), identity2_owner(), identity2_members()
+        _identity2Id_ = _registry_.createProfile(
+            0, "Profile 2", Metadata({protocol: 1, pointer: "Profile2"}), identity2_owner(), identity2_members()
         );
-        _identity2Anchor_ = _registry_.getIdentityById(_identity2Id_).anchor;
+        _identity2Anchor_ = _registry_.getProfileById(_identity2Id_).anchor;
     }
 
-    function poolIdentity_id() public view returns (bytes32) {
-        return _poolIdentityId_;
+    function poolProfile_id() public view returns (bytes32) {
+        return _poolProfileId_;
     }
 
-    function poolIdentity_anchor() public view returns (address) {
-        return _poolIdentityAnchor_;
+    function poolProfile_anchor() public view returns (address) {
+        return _poolProfileAnchor_;
     }
 
     function identity1_id() public view returns (bytes32) {

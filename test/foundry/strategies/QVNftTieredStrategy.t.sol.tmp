@@ -53,7 +53,7 @@ contract QVNftTieredStrategyTest is QVSimpleStrategyTest {
 
     function _createPoolWithCustomStrategy() internal override {
         poolId = allo().createPoolWithCustomStrategy(
-            poolIdentity_id(),
+            poolProfile_id(),
             address(strategy),
             abi.encode(
                 registryGating,

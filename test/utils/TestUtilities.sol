@@ -18,7 +18,7 @@ library TestUtilities {
 
     /// @notice Generates the profileId based on msg.sender
     /// @param _nonce Nonce used to generate profileId
-    function _testUtilGenerateIdentityId(uint256 _nonce, address sender) internal pure returns (bytes32) {
+    function _testUtilGenerateProfileId(uint256 _nonce, address sender) internal pure returns (bytes32) {
         return keccak256(abi.encodePacked(_nonce, sender));
     }
 

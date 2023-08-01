@@ -55,7 +55,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
 
         vm.prank(pool_admin());
         poolId = allo().createPoolWithCustomStrategy(
-            poolIdentity_id(),
+            poolProfile_id(),
             address(strategy),
             abi.encode(maxBid, useRegistryAnchor, metadataRequired),
             NATIVE,
@@ -346,7 +346,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         vm.prank(address(allo()));
         testStrategy.initialize(1337, abi.encode(maxBid, true, metadataRequired));
 
-        address anchor = poolIdentity_anchor();
+        address anchor = poolProfile_anchor();
         Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
 
         bytes memory data = abi.encode(anchor, 1e18, metadata);
