@@ -83,12 +83,6 @@ contract NFTVoteWinnerTakeAll is BaseStrategy {
         return RecipientStatus.None;
     }
 
-    function getPayouts(address[] memory, bytes memory, address) external view returns (PayoutSummary[] memory) {
-        PayoutSummary[] memory payouts = new PayoutSummary[](1);
-        payouts[0] = PayoutSummary(currentWinner, allo.getPool(poolId).amount);
-        return payouts;
-    }
-
     function isValidAllocator(address _allocator) public view returns (bool) {
         return nft.balanceOf(_allocator) > 0;
     }
@@ -158,5 +152,10 @@ contract NFTVoteWinnerTakeAll is BaseStrategy {
         _setPoolActive(false);
 
         emit Distributed(currentWinner, currentWinner, poolAmount, _sender);
+    }
+
+    function _getPayout(address _recipientId, bytes memory) internal view override returns (PayoutSummary memory) {
+        if (_recipientId != currentWinner) PayoutSummary(_recipientId, 0);
+        return PayoutSummary(currentWinner, poolAmount);
     }
 }

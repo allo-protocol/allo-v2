@@ -113,10 +113,9 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     }
 
     /// @notice Returns the payout summary for the accepted recipient
-    function getPayouts(address[] memory, bytes memory, address) external view returns (PayoutSummary[] memory) {
+    function getPayouts(address[] memory, bytes[] memory) external view override returns (PayoutSummary[] memory) {
         PayoutSummary[] memory payouts = new PayoutSummary[](1);
-        Recipient memory recipient = _recipients[acceptedRecipientId];
-        payouts[0] = PayoutSummary(recipient.recipientAddress, recipient.proposalBid);
+        payouts[0] = _getPayout(acceptedRecipientId, "");
 
         return payouts;
     }
@@ -364,6 +363,11 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         maxBid = _maxBid;
 
         emit MaxBidIncreased(maxBid);
+    }
+
+    function _getPayout(address _recipientId, bytes memory) internal view override returns (PayoutSummary memory) {
+        Recipient memory recipient = _recipients[_recipientId];
+        return PayoutSummary(recipient.recipientAddress, recipient.proposalBid);
     }
 
     receive() external payable {}

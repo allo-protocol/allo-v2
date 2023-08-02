@@ -141,7 +141,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
 
     function test_getPayouts() public {
         _register_allocate_submit_distribute();
-        IStrategy.PayoutSummary[] memory payouts = strategy.getPayouts(new address[](0), "", pool_admin());
+        IStrategy.PayoutSummary[] memory payouts = strategy.getPayouts(new address[](0), new bytes[](0));
         assertEq(payouts[0].amount, 1e18);
         assertEq(payouts[0].recipientAddress, recipientAddress());
     }

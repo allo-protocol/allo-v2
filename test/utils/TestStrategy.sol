@@ -54,7 +54,7 @@ contract TestStrategy is IStrategy {
         return recipientStatus[_recipientId];
     }
 
-    function getPayouts(address[] memory _recipientIds, bytes memory, address)
+    function getPayouts(address[] memory _recipientIds, bytes[] memory)
         external
         pure
         override
@@ -96,4 +96,5 @@ contract TestStrategy is IStrategy {
     function setPoolId(uint256 _poolId_) external {
         poolId = _poolId_;
     }
+
 }

@@ -136,25 +136,6 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         }
     }
 
-    /// @notice Returns the payout summary for the accepted recipient
-    function getPayouts(address[] memory _recipientIds, bytes memory, address)
-        external
-        view
-        returns (PayoutSummary[] memory payouts)
-    {
-        uint256 recipientLength = _recipientIds.length;
-
-        payouts = new PayoutSummary[](recipientLength);
-
-        for (uint256 i = 0; i < recipientLength;) {
-            Recipient memory recipient = _getRecipient(_recipientIds[i]);
-            payouts[i] = PayoutSummary(recipient.recipientAddress, recipient.grantAmount);
-            unchecked {
-                i++;
-            }
-        }
-    }
-
     /// @notice Checks if address is elgible allocator
     /// @param _allocator Address of the allocator
     function isValidAllocator(address _allocator) external view returns (bool) {
@@ -352,7 +333,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
             IAllo.Pool memory pool = allo.getPool(poolId);
             allocatedGrantAmount += grantAmount;
 
-            if (allocatedGrantAmount > pool.amount) {
+            if (allocatedGrantAmount > poolAmount) {
                 revert ALLOCATION_EXCEEDS_POOL_AMOUNT();
             }
 
@@ -429,5 +410,11 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _recipientId Id of the recipient
     function _getRecipient(address _recipientId) internal view returns (Recipient memory recipient) {
         recipient = _recipients[_recipientId];
+    }
+
+    /// @notice Returns the payout summary for the accepted recipient
+    function _getPayout(address _recipientId, bytes memory) internal view override returns (PayoutSummary memory) {
+        Recipient memory recipient = _getRecipient(_recipientId);
+        return PayoutSummary(recipient.recipientAddress, recipient.grantAmount);
     }
 }

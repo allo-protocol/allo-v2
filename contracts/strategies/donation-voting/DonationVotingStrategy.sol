@@ -44,13 +44,11 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     /// ===============================
 
     error UNAUTHORIZED();
-    error RECIPIENT_ALREADY_ACCEPTED();
     error REGISTRATION_NOT_ACTIVE();
     error ALLOCATION_NOT_ACTIVE();
     error ALLOCATION_NOT_ENDED();
     error RECIPIENT_ERROR(address recipientId);
     error INVALID();
-    error DISTRIBUTION_STARTED();
     error NOT_ALLOWED();
     error INVALID_METADATA();
 
@@ -212,24 +210,6 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
         }
     }
 
-    /// @notice Returns the payout summary for the accepted recipient
-    function getPayouts(address[] memory _recipientIds, bytes memory, address)
-        external
-        view
-        returns (PayoutSummary[] memory payouts)
-    {
-        uint256 recipientLength = _recipientIds.length;
-
-        payouts = new PayoutSummary[](recipientLength);
-
-        for (uint256 i = 0; i < recipientLength;) {
-            payouts[i] = payoutSummaries[_recipientIds[i]];
-            unchecked {
-                i++;
-            }
-        }
-    }
-
     /// @notice Checks if address is elgible allocator
     function isValidAllocator(address) external pure returns (bool) {
         return true;
@@ -299,7 +279,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
             uint256 amount = _amounts[i];
             totalPayoutAmount += amount;
 
-            if (totalPayoutAmount > allo.getPool(poolId).amount) {
+            if (totalPayoutAmount > poolAmount) {
                 revert INVALID();
             }
 
@@ -371,7 +351,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
         }
 
         IAllo.Pool memory pool = allo.getPool(poolId);
-        if (pool.amount - totalPayoutAmount < _amount) {
+        if (poolAmount - totalPayoutAmount < _amount) {
             revert NOT_ALLOWED();
         }
 
@@ -537,6 +517,11 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _recipientId Id of the recipient
     function _getRecipient(address _recipientId) internal view returns (Recipient memory) {
         return _recipients[_recipientId];
+    }
+
+    /// @notice Returns the payout summary for the accepted recipient
+    function _getPayout(address _recipientId, bytes memory) internal view override returns (PayoutSummary memory) {
+        return payoutSummaries[_recipientId];
     }
 
     receive() external payable {}
