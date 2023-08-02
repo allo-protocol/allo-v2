@@ -13,7 +13,7 @@ import {Native} from "../../core/libraries/Native.sol";
 import {NFT} from "./NFT.sol";
 import {NFTFactory} from "./NFTFactory.sol";
 
-contract WrappedVotingStrategy is Native, BaseStrategy, Initializable, ReentrancyGuard {
+contract WrappedVotingNftMintStrategy is Native, BaseStrategy, Initializable, ReentrancyGuard {
     enum InternalRecipientStatus {
         Pending,
         Accepted,
