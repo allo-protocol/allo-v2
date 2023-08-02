@@ -25,7 +25,7 @@ contract NFT is ERC721, Ownable {
         MINT_PRICE = _price;
     }
 
-    function safeMint(address to) public payable onlyOwner {
+    function mintTo(address to) public payable onlyOwner {
         if (msg.value != MINT_PRICE) {
             revert MintPriceNotPaid();
         }
