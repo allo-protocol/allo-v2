@@ -1,13 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-// External Libraries
-import {ERC20} from "@openzeppelin/token/ERC20/ERC20.sol";
-import {IERC20} from "@openzeppelin/token/ERC20/IERC20.sol";
-// Interfaces
-import {IAllo} from "../core/IAllo.sol";
-import {IStrategy} from "./IStrategy.sol";
-// Internal Libraries
+import "./IStrategy.sol";
+
+import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {Transfer} from "../core/libraries/Transfer.sol";
 
 abstract contract BaseStrategy is IStrategy, Transfer {
@@ -59,6 +55,13 @@ abstract contract BaseStrategy is IStrategy, Transfer {
         _;
     }
 
+    modifier onlyInactivePool() {
+        if (poolActive) {
+            revert BaseStrategy_POOL_ACTIVE();
+        }
+        _;
+    }
+
     modifier onlyInitialized() {
         if (poolId == 0) {
             revert BaseStrategy_NOT_INITIALIZED();
@@ -86,7 +89,7 @@ abstract contract BaseStrategy is IStrategy, Transfer {
         return poolAmount;
     }
 
-    function isPoolActive() external override returns (bool) {
+    function isPoolActive() external view override returns (bool) {
         return _isPoolActive();
     }
 
@@ -130,6 +133,24 @@ abstract contract BaseStrategy is IStrategy, Transfer {
         return _distribute(_recipientIds, _data, _sender);
     }
 
+    function getPayouts(address[] memory _recipientIds, bytes[] memory _data)
+        external
+        view
+        virtual
+        override
+        returns (PayoutSummary[] memory)
+    {
+        uint256 length = _recipientIds.length;
+        PayoutSummary[] memory payouts = new PayoutSummary[](length);
+        for (uint256 i = 0; i < length;) {
+            payouts[i] = _getPayout(_recipientIds[i], _data[i]);
+            unchecked {
+                i++;
+            }
+        }
+        return payouts;
+    }
+
     /// ====================================
     /// ============ Internal ==============
     /// ====================================
@@ -141,7 +162,7 @@ abstract contract BaseStrategy is IStrategy, Transfer {
     }
 
     // this will hold logic to determine if a pool is active or not
-    function _isPoolActive() internal virtual returns (bool) {
+    function _isPoolActive() internal view virtual returns (bool) {
         return poolActive;
     }
 
@@ -159,4 +180,11 @@ abstract contract BaseStrategy is IStrategy, Transfer {
     // most strategies will track a TOTAL amount per recipient, and a PAID amount, and pay the difference
     // this contract will need to track the amount paid already, so that it doesn't double pay
     function _distribute(address[] memory _recipientIds, bytes memory _data, address _sender) internal virtual;
+
+    // this will return the amount to pay a recipient
+    function _getPayout(address _recipientId, bytes memory _data)
+        internal
+        view
+        virtual
+        returns (PayoutSummary memory);
 }

@@ -2,11 +2,16 @@
 pragma solidity 0.8.19;
 
 // External Libraries
-import {ERC721} from "@solady/tokens/ERC721.sol";
+import {ERC721} from "solady/src/tokens/ERC721.sol";
 // Core Contracts
-import {QVSimpleStrategy} from "../qv-simple/QVSimpleStrategy.sol";
+import {QVBaseStrategy} from "../qv-base/QVBaseStrategy.sol";
 
-contract QVNftTieredStrategy is QVSimpleStrategy {
+contract QVNftTieredStrategy is QVBaseStrategy {
+    /// ======================
+    /// ======= Events =======
+    /// ======================
+    event AllocatedWithNft(address indexed recipientId, uint256 votes, address nft, address allocator);
+
     /// ======================
     /// ======= Storage ======
     /// ======================
@@ -23,7 +28,7 @@ contract QVNftTieredStrategy is QVSimpleStrategy {
     /// ======== Constructor ==========
     /// ===============================
 
-    constructor(address _allo, string memory _name) QVSimpleStrategy(_allo, _name) {}
+    constructor(address _allo, string memory _name) QVBaseStrategy(_allo, _name) {}
 
     /// ===============================
     /// ========= Initialize ==========
@@ -68,11 +73,11 @@ contract QVNftTieredStrategy is QVSimpleStrategy {
         uint256 _allocationStartTime,
         uint256 _allocationEndTime
     ) internal {
-        __QVSimpleStrategy_init(
+        __QVBaseStrategy_init(
             _poolId,
             _registryGating,
             _metadataRequired,
-            0,
+            0, // reviewThreshold
             _registrationStartTime,
             _registrationEndTime,
             _allocationStartTime,
@@ -86,7 +91,7 @@ contract QVNftTieredStrategy is QVSimpleStrategy {
 
         for (uint256 i = 0; i < nftsLength;) {
             ERC721 nft = _nfts[i];
-            nfts[i] = nft;
+            nfts.push(nft);
             maxVoiceCreditsPerNft[nft] = _maxVoiceCreditsPerNft[i];
             unchecked {
                 i++;
@@ -132,43 +137,32 @@ contract QVNftTieredStrategy is QVSimpleStrategy {
         (address recipientId, ERC721 nft, uint256 nftId, uint256 voiceCreditsToAllocate) =
             abi.decode(_data, (address, ERC721, uint256, uint256));
 
-        if (voiceCreditsToAllocate == 0) {
-            revert INVALID();
-        }
-
-        // check the time periods for allocation
-        if (block.timestamp < allocationStartTime || block.timestamp > allocationEndTime) {
-            revert ALLOCATION_NOT_ACTIVE();
-        }
+        // spin up the structs in storage for updating
+        Recipient storage recipient = recipients[recipientId];
+        Allocator storage allocator = allocators[_sender];
 
         // check that the sender can allocate votes
         if (nft.ownerOf(nftId) != _sender) {
             revert UNAUTHORIZED();
         }
 
-        // spin up the structs in storage for updating
-        Recipient storage recipient = recipients[recipientId];
-        Allocator storage allocator = allocators[_sender];
+        if (!_isAcceptedRecipient(recipientId)) {
+            revert RECIPIENT_ERROR(recipientId);
+        }
 
         if (voiceCreditsToAllocate + voiceCreditsUsedPerNftId[nft][nftId] > maxVoiceCreditsPerNft[nft]) {
             revert INVALID();
         }
 
-        uint256 creditsCastToRecipient = allocator.voiceCreditsCastToRecipient[recipientId];
-        uint256 votesCastToRecipient = allocator.votesCastToRecipient[recipientId];
-
-        uint256 totalCredits = voiceCreditsToAllocate + creditsCastToRecipient;
-        uint256 voteResult = _calculateVotes(totalCredits * 1e18);
-        voteResult -= votesCastToRecipient;
-        totalRecipientVotes += voteResult;
-        recipient.totalVotes += voteResult;
-
-        allocator.voiceCreditsCastToRecipient[recipientId] += totalCredits;
-        allocator.votesCastToRecipient[recipientId] += voteResult;
+        _qv_allocate(allocator, recipient, recipientId, voiceCreditsToAllocate, _sender);
 
         // update credits used by nftId
         voiceCreditsUsedPerNftId[nft][nftId] += voiceCreditsToAllocate;
 
-        emit Allocated(recipientId, voteResult, address(nft), _sender);
+        emit AllocatedWithNft(recipientId, voiceCreditsToAllocate, address(nft), _sender);
+    }
+
+    function _isAcceptedRecipient(address _recipientId) internal view override returns (bool) {
+        return recipients[_recipientId].recipientStatus == InternalRecipientStatus.Accepted;
     }
 }

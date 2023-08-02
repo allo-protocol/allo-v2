@@ -24,59 +24,58 @@ contract RegistrySetup is Test, Accounts {
 /// @title RegistrySetupFull
 /// @notice This contract is used to setup a Registry contract with two identities for testing purposes.
 contract RegistrySetupFull is RegistrySetup {
-    bytes32 internal _poolIdentityId_;
-    address internal _poolItyAnchor_;
+    bytes32 internal _poolProfileId_;
+    address internal _poolProfileAnchor_;
 
-    bytes32 internal _identity1Id_;
-    address internal _identity1Anchor_;
+    bytes32 internal _profile1Id_;
+    address internal _profile1Anchor_;
 
-    bytes32 internal _identity2Id_;
-    address internal _identity2Anchor_;
+    bytes32 internal _profile2Id_;
+    address internal _profile2Anchor_;
 
     function __RegistrySetupFull() internal {
         __RegistrySetup();
 
         vm.prank(pool_admin());
-        _poolIdentityId_ = _registry_.createIdentity(
-            0, "Pool Identity 1", Metadata({protocol: 1, pointer: "PoolIdentity1"}), pool_admin(), pool_managers()
+        _poolProfileId_ = _registry_.createProfile(
+            0, "Pool Profile 1", Metadata({protocol: 1, pointer: "PoolProfile1"}), pool_admin(), pool_managers()
         );
+        _poolProfileAnchor_ = _registry_.getProfileById(_poolProfileId_).anchor;
 
-        _poolItyAnchor_ = _registry_.getIdentityById(_poolIdentityId_).anchor;
-
-        vm.prank(identity1_owner());
-        _identity1Id_ = _registry_.createIdentity(
-            0, "Identity 1", Metadata({protocol: 1, pointer: "Identity1"}), identity1_owner(), identity1_members()
+        vm.prank(profile1_owner());
+        _profile1Id_ = _registry_.createProfile(
+            0, "Profile 1", Metadata({protocol: 1, pointer: "Profile1"}), profile1_owner(), profile1_members()
         );
-        _identity1Anchor_ = _registry_.getIdentityById(_identity1Id_).anchor;
+        _profile1Anchor_ = _registry_.getProfileById(_profile1Id_).anchor;
 
-        vm.prank(identity2_owner());
-        _identity2Id_ = _registry_.createIdentity(
-            0, "Identity 2", Metadata({protocol: 1, pointer: "Identity2"}), identity2_owner(), identity2_members()
+        vm.prank(profile2_owner());
+        _profile2Id_ = _registry_.createProfile(
+            0, "Profile 2", Metadata({protocol: 1, pointer: "Profile2"}), profile2_owner(), profile2_members()
         );
-        _identity2Anchor_ = _registry_.getIdentityById(_identity2Id_).anchor;
+        _profile2Anchor_ = _registry_.getProfileById(_profile2Id_).anchor;
     }
 
-    function poolIdentity_id() public view returns (bytes32) {
-        return _poolIdentityId_;
+    function poolProfile_id() public view returns (bytes32) {
+        return _poolProfileId_;
     }
 
-    function poolIdentity_anchor() public view returns (address) {
-        return _poolItyAnchor_;
+    function poolProfile_anchor() public view returns (address) {
+        return _poolProfileAnchor_;
     }
 
-    function identity1_id() public view returns (bytes32) {
-        return _identity1Id_;
+    function profile1_id() public view returns (bytes32) {
+        return _profile1Id_;
     }
 
-    function identity1_anchor() public view returns (address) {
-        return _identity1Anchor_;
+    function profile1_anchor() public view returns (address) {
+        return _profile1Anchor_;
     }
 
-    function identity2_id() public view returns (bytes32) {
-        return _identity2Id_;
+    function profile2_id() public view returns (bytes32) {
+        return _profile2Id_;
     }
 
-    function identity2_anchor() public view returns (address) {
-        return _identity2Anchor_;
+    function profile2_anchor() public view returns (address) {
+        return _profile2Anchor_;
     }
 }

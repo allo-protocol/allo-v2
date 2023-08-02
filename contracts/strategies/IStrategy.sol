@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-// Interfaces
 import {IAllo} from "../core/IAllo.sol";
 
 interface IStrategy {
@@ -31,12 +30,13 @@ interface IStrategy {
     error BaseStrategy_NOT_INITIALIZED();
     error BaseStrategy_INVALID_ADDRESS();
     error BaseStrategy_POOL_INACTIVE();
+    error BaseStrategy_POOL_ACTIVE();
 
     /// ======================
     /// ======= Events =======
     /// ======================
 
-    event Initialized(address allo, bytes32 identityId, uint256 poolId, bytes data);
+    event Initialized(address allo, bytes32 profileId, uint256 poolId, bytes data);
     event Registered(address indexed recipientId, bytes data, address sender);
     event Allocated(address indexed recipientId, uint256 amount, address token, address sender);
     event Distributed(address indexed recipientId, address recipientAddress, uint256 amount, address sender);
@@ -75,7 +75,7 @@ interface IStrategy {
     function getRecipientStatus(address _recipientId) external view returns (RecipientStatus);
 
     /// @return Input the values you would send to distribute(), get the amounts each recipient in the array would receive
-    function getPayouts(address[] memory _recipientIds, bytes memory _data, address _sender)
+    function getPayouts(address[] memory _recipientIds, bytes[] memory _data)
         external
         view
         returns (PayoutSummary[] memory);

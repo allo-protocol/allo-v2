@@ -14,15 +14,15 @@ import {Native} from "../../../contracts/core/libraries/Native.sol";
 // Test libraries
 import {AlloSetup} from "../shared/AlloSetup.sol";
 import {RegistrySetupFull} from "../shared/RegistrySetup.sol";
-import {TestUtilities} from "../utils/TestUtilities.sol";
-import {BadStrategy} from "../utils/BadStrategy.sol";
-import {MockStrategy} from "../utils/MockStrategy.sol";
-import {MockToken} from "../utils/MockToken.sol";
+import {TestUtilities} from "../../utils/TestUtilities.sol";
+import {TestStrategy} from "../../utils/TestStrategy.sol";
+import {MockStrategy} from "../../utils/MockStrategy.sol";
+import {MockToken} from "../../utils/MockToken.sol";
 
 contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
     event PoolCreated(
         uint256 indexed poolId,
-        bytes32 indexed identityId,
+        bytes32 indexed profileId,
         IStrategy strategy,
         address token,
         uint256 amount,
@@ -68,7 +68,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
     function _utilCreatePool(uint256 _amount) internal returns (uint256) {
         vm.prank(pool_admin());
         return allo().createPoolWithCustomStrategy(
-            poolIdentity_id(), strategy, "0x", address(token), _amount, metadata, pool_managers()
+            poolProfile_id(), strategy, "0x", address(token), _amount, metadata, pool_managers()
         );
     }
 
@@ -95,7 +95,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
     }
 
     function testRevert_initialize_ALREADY_INITIALIZED() public {
-        vm.expectRevert(AlreadyInitialized.selector);
+        vm.expectRevert("Initializable: contract is already initialized");
 
         allo().initialize(
             address(registry()), // _registry
@@ -109,60 +109,60 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
         allo().addToCloneableStrategies(strategy);
 
         vm.expectEmit(true, true, false, false);
-        emit PoolCreated(1, poolIdentity_id(), IStrategy(strategy), NATIVE, 0, metadata);
+        emit PoolCreated(1, poolProfile_id(), IStrategy(strategy), NATIVE, 0, metadata);
 
         vm.prank(pool_admin());
-        uint256 poolId = allo().createPool(poolIdentity_id(), strategy, "0x", NATIVE, 0, metadata, pool_managers());
+        uint256 poolId = allo().createPool(poolProfile_id(), strategy, "0x", NATIVE, 0, metadata, pool_managers());
 
         IAllo.Pool memory pool = allo().getPool(poolId);
 
-        assertEq(pool.identityId, poolIdentity_id());
+        assertEq(pool.profileId, poolProfile_id());
         assertNotEq(address(pool.strategy), address(strategy));
     }
 
     function testRevert_createPool_NOT_APPROVED_STRATEGY() public {
         vm.expectRevert(IAllo.NOT_APPROVED_STRATEGY.selector);
         vm.prank(pool_admin());
-        allo().createPool(poolIdentity_id(), strategy, "0x", NATIVE, 0, metadata, pool_managers());
+        allo().createPool(poolProfile_id(), strategy, "0x", NATIVE, 0, metadata, pool_managers());
     }
 
     function testRevert_createPoolWithCustomStrategy_ZERO_ADDRESS() public {
         vm.expectRevert(IAllo.ZERO_ADDRESS.selector);
         vm.prank(pool_admin());
-        allo().createPoolWithCustomStrategy(poolIdentity_id(), address(0), "0x", NATIVE, 0, metadata, pool_managers());
+        allo().createPoolWithCustomStrategy(poolProfile_id(), address(0), "0x", NATIVE, 0, metadata, pool_managers());
     }
 
     function testRevert_createPoolWithCustomStrategy_IS_APPROVED_STRATEGY() public {
         allo().addToCloneableStrategies(strategy);
         vm.expectRevert(IAllo.IS_APPROVED_STRATEGY.selector);
         vm.prank(pool_admin());
-        allo().createPoolWithCustomStrategy(poolIdentity_id(), strategy, "0x", NATIVE, 0, metadata, pool_managers());
+        allo().createPoolWithCustomStrategy(poolProfile_id(), strategy, "0x", NATIVE, 0, metadata, pool_managers());
     }
 
     function testRevert_createPool_UNAUTHORIZED() public {
         vm.expectRevert(IAllo.UNAUTHORIZED.selector);
-        allo().createPoolWithCustomStrategy(poolIdentity_id(), strategy, "0x", NATIVE, 0, metadata, pool_managers());
+        allo().createPoolWithCustomStrategy(poolProfile_id(), strategy, "0x", NATIVE, 0, metadata, pool_managers());
     }
 
     function testRevert_createPool_poolId_MISMATCH() public {
-        BadStrategy badStrategy = new BadStrategy();
-        badStrategy.setPoolId(0);
+        TestStrategy testStrategy = new TestStrategy(makeAddr("allo"), "TestStrategy");
+        testStrategy.setPoolId(0);
 
         vm.expectRevert(IAllo.MISMATCH.selector);
         vm.prank(pool_admin());
         allo().createPoolWithCustomStrategy(
-            poolIdentity_id(), address(badStrategy), "0x", NATIVE, 0, metadata, pool_managers()
+            poolProfile_id(), address(testStrategy), "0x", NATIVE, 0, metadata, pool_managers()
         );
     }
 
     function testRevert_createPool_allo_MISMATCH() public {
-        BadStrategy badStrategy = new BadStrategy();
-        badStrategy.setAllo(address(0));
+        TestStrategy testStrategy = new TestStrategy(makeAddr("allo"), "TestStrategy");
+        testStrategy.setAllo(address(0));
 
         vm.expectRevert(IAllo.MISMATCH.selector);
         vm.prank(pool_admin());
         allo().createPoolWithCustomStrategy(
-            poolIdentity_id(), address(badStrategy), "0x", NATIVE, 0, metadata, pool_managers()
+            poolProfile_id(), address(testStrategy), "0x", NATIVE, 0, metadata, pool_managers()
         );
     }
 
@@ -171,7 +171,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
         poolManagers[0] = address(0);
         vm.expectRevert(IAllo.ZERO_ADDRESS.selector);
         vm.prank(pool_admin());
-        allo().createPoolWithCustomStrategy(poolIdentity_id(), strategy, "0x", NATIVE, 0, metadata, poolManagers);
+        allo().createPoolWithCustomStrategy(poolProfile_id(), strategy, "0x", NATIVE, 0, metadata, poolManagers);
     }
 
     function test_createPoolWithBaseFee() public {
@@ -186,7 +186,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
 
         vm.prank(pool_admin());
         allo().createPoolWithCustomStrategy{value: 1e18}(
-            poolIdentity_id(), strategy, "0x", NATIVE, 0, metadata, pool_managers()
+            poolProfile_id(), strategy, "0x", NATIVE, 0, metadata, pool_managers()
         );
     }
 
@@ -200,13 +200,13 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
 
     function test_createPool_WithAmount() public {
         vm.expectEmit(true, false, false, true);
-        emit PoolCreated(1, poolIdentity_id(), IStrategy(strategy), address(token), 10 * 10 ** 18, metadata);
+        emit PoolCreated(1, poolProfile_id(), IStrategy(strategy), address(token), 10 * 10 ** 18, metadata);
 
         uint256 poolId = _utilCreatePool(10 * 10 ** 18);
 
         IAllo.Pool memory pool = allo().getPool(poolId);
 
-        assertEq(pool.identityId, poolIdentity_id());
+        assertEq(pool.profileId, poolProfile_id());
         assertEq(address(pool.strategy), strategy);
     }
 
@@ -447,7 +447,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
         address mockStrategy = address(new MockStrategy(address(allo())));
         vm.prank(pool_admin());
         poolIds[1] = allo().createPoolWithCustomStrategy(
-            poolIdentity_id(), mockStrategy, "0x", address(token), 0, metadata, pool_managers()
+            poolProfile_id(), mockStrategy, "0x", address(token), 0, metadata, pool_managers()
         );
 
         bytes[] memory datas = new bytes[](2);
@@ -465,7 +465,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
         address mockStrategy = address(new MockStrategy(address(allo())));
         vm.prank(pool_admin());
         poolIds[1] = allo().createPoolWithCustomStrategy(
-            poolIdentity_id(), mockStrategy, "0x", address(token), 0, metadata, pool_managers()
+            poolProfile_id(), mockStrategy, "0x", address(token), 0, metadata, pool_managers()
         );
 
         bytes[] memory datas = new bytes[](1);
@@ -508,7 +508,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
         address mockStrategy = address(new MockStrategy(address(allo())));
         vm.prank(pool_admin());
         poolIds[1] = allo().createPoolWithCustomStrategy(
-            poolIdentity_id(), mockStrategy, "0x", address(token), 0, metadata, pool_managers()
+            poolProfile_id(), mockStrategy, "0x", address(token), 0, metadata, pool_managers()
         );
 
         bytes[] memory datas = new bytes[](2);
@@ -526,7 +526,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
         address mockStrategy = address(new MockStrategy(address(allo())));
         vm.prank(pool_admin());
         poolIds[1] = allo().createPoolWithCustomStrategy(
-            poolIdentity_id(), mockStrategy, "0x", address(token), 0, metadata, pool_managers()
+            poolProfile_id(), mockStrategy, "0x", address(token), 0, metadata, pool_managers()
         );
 
         bytes[] memory datas = new bytes[](1);

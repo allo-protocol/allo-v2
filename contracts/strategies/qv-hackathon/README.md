@@ -6,7 +6,7 @@ Quadratic allocation is a popular method for democratic decision-making. This st
 
 ## Spec
 ### Recipient logic
-In this strategy, recipients do not need to apply — they are automatically added to the pool if they are eligible. The pool manager uses an Allo identity and an EAS attestation to indicate eligible recipients. Any Allo identities that have the manager-designated attestation are eligible recipients. 
+In this strategy, recipients do not need to apply — they are automatically added to the pool if they are eligible. The pool manager uses an Allo profile and an EAS attestation to indicate eligible recipients. Any Allo identities that have the manager-designated attestation are eligible recipients. 
 - **Recipient Eligibility**
     - Pool managers will manually add recipients to the pool. 
 - **Register recipients**

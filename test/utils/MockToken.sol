@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import "@openzeppelin/token/ERC20/ERC20.sol";
-import "@openzeppelin/token/ERC20/extensions/ERC20Permit.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
 
 contract MockToken is ERC20, ERC20Permit {
     constructor() ERC20("Mock Token", "MTK") ERC20Permit("Mock Token") {}

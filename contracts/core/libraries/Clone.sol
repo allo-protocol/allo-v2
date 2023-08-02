@@ -2,7 +2,7 @@
 pragma solidity 0.8.19;
 
 // External Libraries
-import "@openzeppelin-upgradeable/proxy/ClonesUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/ClonesUpgradeable.sol";
 
 /// @title Clone library
 /// @notice A library to create clones of the strategy contracts when a pool is created

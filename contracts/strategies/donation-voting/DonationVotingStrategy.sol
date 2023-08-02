@@ -2,7 +2,7 @@
 pragma solidity 0.8.19;
 
 // External Libraries
-import {ReentrancyGuard} from "@openzeppelin/security/ReentrancyGuard.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 // Interfaces
 import {IAllo} from "../../core/IAllo.sol";
 import {IRegistry} from "../../core/IRegistry.sol";
@@ -44,13 +44,11 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     /// ===============================
 
     error UNAUTHORIZED();
-    error RECIPIENT_ALREADY_ACCEPTED();
     error REGISTRATION_NOT_ACTIVE();
     error ALLOCATION_NOT_ACTIVE();
     error ALLOCATION_NOT_ENDED();
     error RECIPIENT_ERROR(address recipientId);
     error INVALID();
-    error DISTRIBUTION_STARTED();
     error NOT_ALLOWED();
     error INVALID_METADATA();
 
@@ -212,24 +210,6 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
         }
     }
 
-    /// @notice Returns the payout summary for the accepted recipient
-    function getPayouts(address[] memory _recipientIds, bytes memory, address)
-        external
-        view
-        returns (PayoutSummary[] memory payouts)
-    {
-        uint256 recipientLength = _recipientIds.length;
-
-        payouts = new PayoutSummary[](recipientLength);
-
-        for (uint256 i = 0; i < recipientLength;) {
-            payouts[i] = payoutSummaries[_recipientIds[i]];
-            unchecked {
-                i++;
-            }
-        }
-    }
-
     /// @notice Checks if address is elgible allocator
     function isValidAllocator(address) external pure returns (bool) {
         return true;
@@ -299,7 +279,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
             uint256 amount = _amounts[i];
             totalPayoutAmount += amount;
 
-            if (totalPayoutAmount > allo.getPool(poolId).amount) {
+            if (totalPayoutAmount > poolAmount) {
                 revert INVALID();
             }
 
@@ -371,7 +351,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
         }
 
         IAllo.Pool memory pool = allo.getPool(poolId);
-        if (pool.amount - totalPayoutAmount < _amount) {
+        if (poolAmount - totalPayoutAmount < _amount) {
             revert NOT_ALLOWED();
         }
 
@@ -416,37 +396,40 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
         returns (address recipientId)
     {
         address recipientAddress;
-        bool _isUsingRegistryAnchor;
+        address registryAnchor;
+        bool isUsingRegistryAnchor;
         Metadata memory metadata;
 
         // decode data custom to this strategy
         if (useRegistryAnchor) {
             (recipientId, recipientAddress, metadata) = abi.decode(_data, (address, address, Metadata));
 
-            if (!_isIdentityMember(recipientId, _sender)) {
+            if (!_isProfileMember(recipientId, _sender)) {
                 revert UNAUTHORIZED();
             }
         } else {
-            (recipientAddress, _isUsingRegistryAnchor, metadata) = abi.decode(_data, (address, bool, Metadata));
-            recipientId = _sender;
-            if (_isUsingRegistryAnchor && !_isIdentityMember(recipientId, _sender)) {
+            (recipientAddress, registryAnchor, metadata) = abi.decode(_data, (address, address, Metadata));
+            isUsingRegistryAnchor = registryAnchor != address(0);
+            recipientId = isUsingRegistryAnchor ? registryAnchor : _sender;
+            if (isUsingRegistryAnchor && !_isProfileMember(recipientId, _sender)) {
                 revert UNAUTHORIZED();
             }
         }
 
-        if (recipientAddress == address(0)) {
-            revert RECIPIENT_ERROR(recipientId);
-        }
         if (metadataRequired && (bytes(metadata.pointer).length == 0 || metadata.protocol == 0)) {
             revert INVALID_METADATA();
+        }
+
+        if (recipientAddress == address(0)) {
+            revert RECIPIENT_ERROR(recipientId);
         }
 
         Recipient storage recipient = _recipients[recipientId];
 
         // update the recipients data
         recipient.recipientAddress = recipientAddress;
-        recipient.useRegistryAnchor = _isUsingRegistryAnchor ? true : useRegistryAnchor;
         recipient.metadata = metadata;
+        recipient.useRegistryAnchor = useRegistryAnchor ? true : isUsingRegistryAnchor;
 
         if (recipient.recipientStatus == InternalRecipientStatus.Rejected) {
             recipient.recipientStatus = InternalRecipientStatus.Appealed;
@@ -521,19 +504,24 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
         }
     }
 
-    /// @notice Check if sender is identity owner or member
-    /// @param _anchor Anchor of the identity
+    /// @notice Check if sender is profile owner or member
+    /// @param _anchor Anchor of the profile
     /// @param _sender The sender of the transaction
-    function _isIdentityMember(address _anchor, address _sender) internal view returns (bool) {
+    function _isProfileMember(address _anchor, address _sender) internal view returns (bool) {
         IRegistry registry = allo.getRegistry();
-        IRegistry.Identity memory identity = registry.getIdentityByAnchor(_anchor);
-        return registry.isOwnerOrMemberOfIdentity(identity.id, _sender);
+        IRegistry.Profile memory profile = registry.getProfileByAnchor(_anchor);
+        return registry.isOwnerOrMemberOfProfile(profile.id, _sender);
     }
 
     /// @notice Get the recipient
     /// @param _recipientId Id of the recipient
     function _getRecipient(address _recipientId) internal view returns (Recipient memory) {
         return _recipients[_recipientId];
+    }
+
+    /// @notice Returns the payout summary for the accepted recipient
+    function _getPayout(address _recipientId, bytes memory) internal view override returns (PayoutSummary memory) {
+        return payoutSummaries[_recipientId];
     }
 
     receive() external payable {}

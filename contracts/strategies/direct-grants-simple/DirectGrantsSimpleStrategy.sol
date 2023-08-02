@@ -2,7 +2,7 @@
 pragma solidity 0.8.19;
 
 // External Libraries
-import {ReentrancyGuard} from "@openzeppelin/security/ReentrancyGuard.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 // Intefaces
 import {IAllo} from "../../core/IAllo.sol";
 import {IRegistry} from "../../core/IRegistry.sol";
@@ -136,24 +136,6 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         }
     }
 
-    /// @notice Returns the payout summary for the accepted recipient
-    function getPayouts(address[] memory _recipientIds, bytes memory, address)
-        external
-        view
-        returns (PayoutSummary[] memory payouts)
-    {
-        uint256 recipientLength = _recipientIds.length;
-
-        payouts = new PayoutSummary[](recipientLength);
-
-        for (uint256 i = 0; i < recipientLength;) {
-            payouts[i] = PayoutSummary(_recipientIds[i], _recipients[_recipientIds[i]].grantAmount);
-            unchecked {
-                i++;
-            }
-        }
-    }
-
     /// @notice Checks if address is elgible allocator
     /// @param _allocator Address of the allocator
     function isValidAllocator(address _allocator) external view returns (bool) {
@@ -202,7 +184,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _recipientId Id of the recipient
     /// @param _metadata The proof of work
     function submitMilestone(address _recipientId, uint256 _milestoneId, Metadata calldata _metadata) external {
-        if (_recipientId != msg.sender && !_isIdentityMember(_recipientId, msg.sender)) {
+        if (_recipientId != msg.sender && !_isProfileMember(_recipientId, msg.sender)) {
             revert UNAUTHORIZED();
         }
 
@@ -277,7 +259,8 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         returns (address recipientId)
     {
         address recipientAddress;
-        bool useRegistryAnchor;
+        address registryAnchor;
+        bool isUsingRegistryAnchor;
         uint256 grantAmount;
         Metadata memory metadata;
 
@@ -286,14 +269,16 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
             (recipientId, recipientAddress, grantAmount, metadata) =
                 abi.decode(_data, (address, address, uint256, Metadata));
 
-            if (!_isIdentityMember(recipientId, _sender)) {
+            if (!_isProfileMember(recipientId, _sender)) {
                 revert UNAUTHORIZED();
             }
         } else {
-            (recipientAddress, useRegistryAnchor, grantAmount, metadata) =
-                abi.decode(_data, (address, bool, uint256, Metadata));
-            recipientId = _sender;
-            if (useRegistryAnchor && !_isIdentityMember(recipientId, _sender)) {
+            (recipientAddress, registryAnchor, grantAmount, metadata) =
+                abi.decode(_data, (address, address, uint256, Metadata));
+            isUsingRegistryAnchor = registryAnchor != address(0);
+
+            recipientId = isUsingRegistryAnchor ? registryAnchor : _sender;
+            if (isUsingRegistryAnchor && !_isProfileMember(recipientId, _sender)) {
                 revert UNAUTHORIZED();
             }
         }
@@ -311,7 +296,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
         Recipient memory recipient = Recipient({
             recipientAddress: recipientAddress,
-            useRegistryAnchor: registryGating ? true : useRegistryAnchor,
+            useRegistryAnchor: registryGating ? true : isUsingRegistryAnchor,
             grantAmount: grantAmount,
             metadata: metadata,
             recipientStatus: InternalRecipientStatus.Pending
@@ -348,7 +333,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
             IAllo.Pool memory pool = allo.getPool(poolId);
             allocatedGrantAmount += grantAmount;
 
-            if (allocatedGrantAmount > pool.amount) {
+            if (allocatedGrantAmount > poolAmount) {
                 revert ALLOCATION_EXCEEDS_POOL_AMOUNT();
             }
 
@@ -412,18 +397,24 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         emit Distributed(_recipientId, recipient.recipientAddress, amount, _sender);
     }
 
-    /// @notice Check if sender is identity owner or member
-    /// @param _anchor Anchor of the identity
+    /// @notice Check if sender is profile owner or member
+    /// @param _anchor Anchor of the profile
     /// @param _sender The sender of the transaction
-    function _isIdentityMember(address _anchor, address _sender) internal view returns (bool) {
+    function _isProfileMember(address _anchor, address _sender) internal view returns (bool) {
         IRegistry registry = allo.getRegistry();
-        IRegistry.Identity memory identity = registry.getIdentityByAnchor(_anchor);
-        return registry.isOwnerOrMemberOfIdentity(identity.id, _sender);
+        IRegistry.Profile memory profile = registry.getProfileByAnchor(_anchor);
+        return registry.isOwnerOrMemberOfProfile(profile.id, _sender);
     }
 
     /// @notice Get the recipient
     /// @param _recipientId Id of the recipient
     function _getRecipient(address _recipientId) internal view returns (Recipient memory recipient) {
         recipient = _recipients[_recipientId];
+    }
+
+    /// @notice Returns the payout summary for the accepted recipient
+    function _getPayout(address _recipientId, bytes memory) internal view override returns (PayoutSummary memory) {
+        Recipient memory recipient = _getRecipient(_recipientId);
+        return PayoutSummary(recipient.recipientAddress, recipient.grantAmount);
     }
 }

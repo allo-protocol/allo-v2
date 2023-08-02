@@ -2,7 +2,7 @@
 pragma solidity 0.8.19;
 
 // External Libraries
-import {SafeTransferLib} from "@solady/utils/SafeTransferLib.sol";
+import {SafeTransferLib} from "solady/src/utils/SafeTransferLib.sol";
 // Internal Libraries
 import "./Native.sol";
 

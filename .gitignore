@@ -6,8 +6,16 @@ coverage.json
 typechain
 typechain-types
 lcov.info
+lcov.info.pruned
+# Hardhat files
+artifacts
+cache
+abis
 
 # Foundry files
 out
 broadcast
 cache_forge/*.json
+cache/validations.json
+.gitignore
+cache/solidity-files-cache.json

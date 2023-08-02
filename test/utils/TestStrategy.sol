@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {IAllo} from "../../../contracts/core/IAllo.sol";
-import {IStrategy} from "../../../contracts/strategies/IStrategy.sol";
+import {IAllo} from "../../contracts/core/IAllo.sol";
+import {IStrategy} from "../../contracts/strategies/IStrategy.sol";
 
-contract BadStrategy is IStrategy {
+contract TestStrategy is IStrategy {
     // ======================
     // ======= Storage ======
     // ======================
@@ -16,6 +16,11 @@ contract BadStrategy is IStrategy {
     bool private poolActive;
     uint256 private poolAmount;
     mapping(address => RecipientStatus) private recipientStatus;
+
+    constructor(address _allo, string memory _name) {
+        allo = IAllo(_allo);
+        strategyId = keccak256(abi.encode(_name));
+    }
 
     // ======================
     // ======= Views ========
@@ -49,7 +54,7 @@ contract BadStrategy is IStrategy {
         return recipientStatus[_recipientId];
     }
 
-    function getPayouts(address[] memory _recipientIds, bytes memory, address)
+    function getPayouts(address[] memory _recipientIds, bytes[] memory)
         external
         pure
         override
@@ -91,4 +96,5 @@ contract BadStrategy is IStrategy {
     function setPoolId(uint256 _poolId_) external {
         poolId = _poolId_;
     }
+
 }

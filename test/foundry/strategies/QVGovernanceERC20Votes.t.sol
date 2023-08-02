@@ -6,7 +6,7 @@ import {IAllo} from "../../../contracts/core/Allo.sol";
 import {Allo} from "../../../contracts/core/Allo.sol";
 import {BaseStrategy} from "../../../contracts/strategies/BaseStrategy.sol";
 import {QVGovernanceERC20Votes} from "../../../contracts/strategies/qv-governance/QVGovernanceERC20Votes.sol";
-import {MockToken} from "../utils/MockToken.sol";
+import {MockToken} from "../../utils/MockToken.sol";
 
 contract QVGovernanceERC20VotesTest is Test {
     struct InitializationData {

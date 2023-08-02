@@ -13,10 +13,9 @@ interface IAllo {
     /// ======================
 
     struct Pool {
-        bytes32 identityId;
+        bytes32 profileId;
         IStrategy strategy;
         address token;
-        uint256 amount;
         Metadata metadata;
         bytes32 managerRole;
         bytes32 adminRole;
@@ -40,7 +39,7 @@ interface IAllo {
 
     event PoolCreated(
         uint256 indexed poolId,
-        bytes32 indexed identityId,
+        bytes32 indexed profileId,
         IStrategy strategy,
         address token,
         uint256 amount,
