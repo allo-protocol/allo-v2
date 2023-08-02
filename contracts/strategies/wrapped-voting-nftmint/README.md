@@ -1,4 +1,4 @@
-Spec: Wrapped Voting
+Spec: Wrapped Voting with NFT Mint
 ---------------------------------
 
 ## Overview 
