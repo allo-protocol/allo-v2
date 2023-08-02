@@ -217,7 +217,7 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
 
     /// @notice Get the payouts for the recipients
     /// @return The payouts as an array of PayoutSummary structs
-    function getPayouts(address[] memory, bytes memory, address)
+    function getPayouts(address[] memory, bytes[] memory)
         public
         view
         virtual
@@ -227,16 +227,10 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
         uint256 recipientLength = payoutPercentages.length;
 
         PayoutSummary[] memory payouts = new PayoutSummary[](recipientLength);
-        uint256 poolAmount = allo.getPool(poolId).amount;
 
         for (uint256 i = 0; i < recipientLength;) {
             address recipientId = indexToRecipientId[i];
-            Recipient memory recipient = recipients[recipientId];
-
-            // Calculate the payout amount based on the percentage of total votes
-            uint256 amount = poolAmount * payoutPercentages[i] / 1e18;
-
-            payouts[i] = PayoutSummary(recipient.recipientAddress, amount);
+            payouts[i] = _getPayout(recipientId, "");
 
             unchecked {
                 i++;
@@ -244,6 +238,13 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
         }
 
         return payouts;
+    }
+
+    function _getPayout(address _recipientId, bytes memory) internal view override returns (PayoutSummary memory) {
+        uint256 payoutPercentage = payoutPercentages[recipientIdToIndex[_recipientId]];
+        uint256 amount = poolAmount * payoutPercentage / 1e18;
+
+        return PayoutSummary(recipients[_recipientId].recipientAddress, amount);
     }
 
     /// =========================

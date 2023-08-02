@@ -296,7 +296,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         address[] memory recipients = new address[](1);
         recipients[0] = recipientId;
 
-        IStrategy.PayoutSummary[] memory payouts = strategy.getPayouts(recipients, "", address(0));
+        IStrategy.PayoutSummary[] memory payouts = strategy.getPayouts(recipients, new bytes[](1));
         assertEq(payouts[0].amount, 9.9e17);
         assertEq(payouts[0].recipientAddress, makeAddr(string(abi.encodePacked("recipientAddress"))));
     }

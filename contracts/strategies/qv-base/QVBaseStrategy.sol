@@ -240,41 +240,6 @@ abstract contract QVBaseStrategy is BaseStrategy {
         }
     }
 
-    /// @notice Get the payouts for the recipients
-    /// @param _recipientIds The recipient ids
-    /// @return The payouts as an array of PayoutSummary structs
-    function getPayouts(address[] memory _recipientIds, bytes memory, address)
-        public
-        view
-        virtual
-        override
-        returns (PayoutSummary[] memory)
-    {
-        PayoutSummary[] memory payouts = new PayoutSummary[](_recipientIds.length);
-        uint256 recipientLength = _recipientIds.length;
-        uint256 poolAmount = allo.getPool(poolId).amount;
-
-        for (uint256 i = 0; i < recipientLength;) {
-            address recipientId = _recipientIds[i];
-            Recipient memory recipient = recipients[recipientId];
-
-            // Calculate the payout amount based on the percentage of total votes
-            uint256 amount;
-            if (paidOut[recipientId] || totalRecipientVotes == 0) {
-                amount = 0;
-            } else {
-                amount = poolAmount * recipient.totalVotesReceived / totalRecipientVotes;
-            }
-            payouts[i] = PayoutSummary(recipient.recipientAddress, amount);
-
-            unchecked {
-                i++;
-            }
-        }
-
-        return payouts;
-    }
-
     /// @notice Set the start and end dates for the pool
     /// @param _registrationStartTime The start time for the registration
     /// @param _registrationEndTime The end time for the registration
@@ -377,14 +342,13 @@ abstract contract QVBaseStrategy is BaseStrategy {
         onlyPoolManager(_sender)
         onlyAfterAllocation
     {
-        PayoutSummary[] memory payouts = getPayouts(_recipientIds, "", _sender);
-
-        uint256 payoutLength = payouts.length;
+        uint256 payoutLength = _recipientIds.length;
         for (uint256 i = 0; i < payoutLength;) {
             address recipientId = _recipientIds[i];
             Recipient storage recipient = recipients[recipientId];
 
-            uint256 amount = payouts[i].amount;
+            PayoutSummary memory payout = _getPayout(recipientId, "");
+            uint256 amount = payout.amount;
 
             if (paidOut[recipientId] || !_isAcceptedRecipient(recipientId) || amount == 0) {
                 revert RECIPIENT_ERROR(recipientId);
@@ -471,4 +435,26 @@ abstract contract QVBaseStrategy is BaseStrategy {
     /// @param _recipientId The recipient id
     /// @return true if the recipient is accepted
     function _isAcceptedRecipient(address _recipientId) internal view virtual returns (bool);
+
+    /// @notice Get the payout for a single recipient
+    /// @param _recipientId The recipient id
+    /// @return The payout as a PayoutSummary struct
+    function _getPayout(address _recipientId, bytes memory)
+        internal
+        view
+        virtual
+        override
+        returns (PayoutSummary memory)
+    {
+        Recipient memory recipient = recipients[_recipientId];
+
+        // Calculate the payout amount based on the percentage of total votes
+        uint256 amount;
+        if (paidOut[_recipientId] || totalRecipientVotes == 0) {
+            amount = 0;
+        } else {
+            amount = poolAmount * recipient.totalVotesReceived / totalRecipientVotes;
+        }
+        return PayoutSummary(recipient.recipientAddress, amount);
+    }
 }

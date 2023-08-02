@@ -74,7 +74,7 @@ interface IStrategy {
     function getRecipientStatus(address _recipientId) external view returns (RecipientStatus);
 
     /// @return Input the values you would send to distribute(), get the amounts each recipient in the array would receive
-    function getPayouts(address[] memory _recipientIds, bytes memory _data, address _sender)
+    function getPayouts(address[] memory _recipientIds, bytes[] memory _data)
         external
         view
         returns (PayoutSummary[] memory);

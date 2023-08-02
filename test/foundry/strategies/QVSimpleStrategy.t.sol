@@ -509,7 +509,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         recipientIds[1] = no_recipient();
 
         QVBaseStrategy.PayoutSummary[] memory payouts =
-            QVSimpleStrategy(strategy).getPayouts(recipientIds, "", address(0));
+            QVSimpleStrategy(strategy).getPayouts(recipientIds, new bytes[](2));
 
         assertEq(payouts[0].recipientAddress, sender);
         assertEq(payouts[0].amount, 9.9e17);
@@ -530,7 +530,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         QVSimpleStrategy(strategy).distribute(recipients, "", pool_admin());
 
         QVBaseStrategy.PayoutSummary[] memory payouts =
-            QVSimpleStrategy(strategy).getPayouts(recipients, "", address(0));
+            QVSimpleStrategy(strategy).getPayouts(recipients, new bytes[](1));
 
         assertEq(payouts[0].recipientAddress, recipient1());
         assertEq(payouts[0].amount, 0); // already distributed
@@ -808,7 +808,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         QVSimpleStrategy(strategy).addAllocator(allocator);
 
         bytes memory allocateData = __generateAllocation(recipientId, 4);
-
+        vm.stopPrank();
         vm.prank(address(allo()));
         vm.expectEmit(true, false, false, true);
 
@@ -853,7 +853,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         vm.warp(allocationStartTime + 10);
 
         bytes memory allocateData = __generateAllocation(recipientId, 4);
-
+        vm.stopPrank();
         vm.prank(address(allo()));
         QVSimpleStrategy(strategy).allocate(allocateData, allocator);
     }
@@ -869,6 +869,8 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         vm.warp(allocationStartTime + 10);
 
         bytes memory allocateData = __generateAllocation(recipientId, 400);
+
+        vm.stopPrank();
 
         vm.prank(address(allo()));
         QVSimpleStrategy(strategy).allocate(allocateData, allocator);
@@ -899,6 +901,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
 
         vm.expectRevert(QVBaseStrategy.INVALID.selector);
 
+        vm.stopPrank();
         bytes memory allocateData = __generateAllocation(recipientId, 0);
         vm.prank(address(allo()));
         QVSimpleStrategy(strategy).allocate(allocateData, allocator);

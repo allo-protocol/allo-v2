@@ -57,18 +57,27 @@ contract MockStrategy is BaseStrategy {
     }
 
     /// @return Input the values you would send to distribute(), get the amounts each recipient in the array would receive
-    function getPayouts(address[] memory _recipientIds, bytes memory _data, address _sender)
+    function getPayouts(address[] memory _recipientIds, bytes[] memory _data)
         external
         view
+        override
         returns (PayoutSummary[] memory)
     {
         surpressStateMutabilityWarning;
-        (PayoutSummary[] memory payouts) = abi.decode(_data, (PayoutSummary[]));
 
-        _recipientIds;
-        _sender;
+        PayoutSummary[] memory payouts = new PayoutSummary[](_recipientIds.length);
+
+        for(uint256 i = 0; i < _recipientIds.length; i++) {
+            payouts[i] = abi.decode(_data[i], (PayoutSummary));
+        }
 
         return payouts;
+    }
+
+    function _getPayout(address _recipientId, bytes memory _data) internal view override returns (PayoutSummary memory) {
+        surpressStateMutabilityWarning;
+        _data;
+        return PayoutSummary(_recipientId, 0);
     }
 
     function setPoolActive(bool _active) external {

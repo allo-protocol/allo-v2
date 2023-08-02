@@ -362,7 +362,6 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
             strategy: _strategy,
             metadata: _metadata,
             token: _token,
-            amount: 0, // this value is updated in _fundPool
             managerRole: POOL_MANAGER_ROLE,
             adminRole: POOL_ADMIN_ROLE
         });
@@ -439,7 +438,6 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
         }
 
         _transferAmountFrom(_token, TransferData({from: msg.sender, to: address(_strategy), amount: amountAfterFee}));
-        pool.amount += amountAfterFee;
         _strategy.increasePoolAmount(amountAfterFee);
 
         emit PoolFunded(_poolId, amountAfterFee, feeAmount);
