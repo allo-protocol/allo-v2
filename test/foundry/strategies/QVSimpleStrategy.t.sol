@@ -808,7 +808,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         QVSimpleStrategy(strategy).addAllocator(allocator);
 
         bytes memory allocateData = __generateAllocation(recipientId, 4);
-
+        vm.stopPrank();
         vm.prank(address(allo()));
         vm.expectEmit(true, false, false, true);
 
@@ -853,7 +853,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         vm.warp(allocationStartTime + 10);
 
         bytes memory allocateData = __generateAllocation(recipientId, 4);
-
+        vm.stopPrank();
         vm.prank(address(allo()));
         QVSimpleStrategy(strategy).allocate(allocateData, allocator);
     }
@@ -869,6 +869,8 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         vm.warp(allocationStartTime + 10);
 
         bytes memory allocateData = __generateAllocation(recipientId, 400);
+
+        vm.stopPrank();
 
         vm.prank(address(allo()));
         QVSimpleStrategy(strategy).allocate(allocateData, allocator);
@@ -899,6 +901,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
 
         vm.expectRevert(QVBaseStrategy.INVALID.selector);
 
+        vm.stopPrank();
         bytes memory allocateData = __generateAllocation(recipientId, 0);
         vm.prank(address(allo()));
         QVSimpleStrategy(strategy).allocate(allocateData, allocator);
