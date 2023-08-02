@@ -10,6 +10,7 @@ import {MockToken} from "../utils/MockToken.sol";
 import {HatsCommitteeStrategy} from
 "../../../contracts/strategies/hats-voter-eligibility/HatsCommitteeStrategy.sol";
 import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
+import {IAllo} from "../../../contracts/core/IAllo.sol";
 import {IHats} from "@hats-protocol/Interfaces/IHats.sol";
 import {ERC20} from "@solady/tokens/ERC20.sol";
 
@@ -443,12 +444,33 @@ contract HatsVotingTest is IHatsVotingTest, Test, Accounts, RegistrySetupFull, A
         emit Rejected(testRecipient.recipientId);
         _doAllocation(poolId, testRecipient.recipientId, false);
 
+        actualRecipient = strategy.getRecipient(testRecipient.recipientId);
 
         // Status should be rejected now
         assertEq(uint256(actualRecipient.status), 3);
     }
 
     /// - Cannot reject an application after funds have been distributed
+    /// @notice Once an application has been paid out, it cannot be rejected
+    // function testHatsStrategy__CannotRejectAfterDistributed() public {
+    //     Recipient memory testRecipient = _registerRecipient();
+    //     _doAllocation(poolId, testRecipient.recipientId, true);
+    //
+    //     HatsCommitteeStrategy.Recipient memory actualRecipient
+    //     = strategy.getRecipient(testRecipient.recipientId);
+    //
+    //     // Status should be approved
+    //     assertEq(uint256(actualRecipient.status), 2);
+    //
+    //     vm.warp(block.timestamp + 3 days)
+    //
+    //     // Distribute funds
+    //     _doDistribution(poolId, testRecipient.recipientId);
+    //
+    //     // Reject allocation (false)
+    //     vm.expectRevert(UNAUTHORIZED.selector);
+    //     _doAllocation(poolId, testRecipient.recipientId, false);
+    // }
 
     /// @notice If a Hat wearer tries to allocate to a non-registered recipient, it will revert with an UNAUTHORIZED error
     function testHatsStrategy__CannotAllocateToNonRegisteredRecipient() public {
@@ -472,9 +494,67 @@ contract HatsVotingTest is IHatsVotingTest, Test, Accounts, RegistrySetupFull, A
     // Test: Distributing Tokens
     // -----------------------
 
-    // - Rejects distribution if delay hasn't passed
-    // - Rejects distribution if not approved
+    /// @notice Calling distribute fails if the delay hasn't passed
+    function testHatsStrategy__CannotDistributeBeforeDelay() public {
+        Recipient memory testRecipient = _registerRecipient();
+        _doAllocation(poolId, testRecipient.recipientId, true);
+
+        address[] memory recipientIds = new address[](1);
+        recipientIds[0] = testRecipient.recipientId;
+
+        bytes memory data;
+
+        // Try to distribute
+        vm.expectRevert(DELAY_NOT_MET.selector);
+        allo().distribute(poolId, recipientIds, data);
+    }
+
+    /// @notice Calling distribute for a project that hasn't been approved
+    //should revert with an RECIPIENT_ERROR error
+    function testHatsStrategy__CannotDistributeIfNotApproved() public {
+        Recipient memory testRecipient = _registerRecipient();
+
+        address[] memory recipientIds = new address[](1);
+        recipientIds[0] = testRecipient.recipientId;
+
+        bytes memory data;
+
+        // Try to distribute
+        vm.expectRevert();
+        allo().distribute(poolId, recipientIds, data);
+    }
+
     // - Transfers tokens from pool to recipient (pool balance decreases, recipient balance increases)
+    /// @notice distribute transfers tokens from pool to recipient
+    function testHatsStrategy__DistributeTransfersTokens() public {
+        Recipient memory testRecipient = _registerRecipient();
+        _doAllocation(poolId, testRecipient.recipientId, true);
+
+        // Initial balalnce
+        uint256 initialRecipientBalance = token.balanceOf(testRecipient.recipientId);
+        assertEq(initialRecipientBalance, 0);
+
+        vm.warp(block.timestamp + 3 days);
+
+        vm.expectEmit();
+        emit Distributed(testRecipient.recipientId, testRecipient.recipientId,
+                         1000, address(this));
+
+        // Distribute funds
+        address[] memory recipientIds = new address[](1);
+        recipientIds[0] = testRecipient.recipientId;
+        bytes memory data;
+        allo().distribute(poolId, recipientIds, data);
+
+        // Check balances
+        uint256 actualRecipientBalance = token.balanceOf(testRecipient.recipientId);
+        assertEq(actualRecipientBalance, 1000);
+
+        // NOTE: How to track pool balance?
+        // IAllo.Pool memory pool = allo().getPool(poolId);
+        // assertEq(actualPoolBalance, poolSize - 1000);
+    }
+
     // - Transfers tokens from pool to recipient (emits Distributed event)
     // - Can transfer to multiple recipients at once
     // - distribute creates payoutSummary
