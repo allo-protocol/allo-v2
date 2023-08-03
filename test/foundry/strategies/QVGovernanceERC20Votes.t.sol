@@ -6,7 +6,7 @@ import {IAllo} from "../../../contracts/core/Allo.sol";
 import {Allo} from "../../../contracts/core/Allo.sol";
 import {BaseStrategy} from "../../../contracts/strategies/BaseStrategy.sol";
 import {QVGovernanceERC20Votes} from "../../../contracts/strategies/qv-governance/QVGovernanceERC20Votes.sol";
-import {MockToken} from "../../utils/MockToken.sol";
+import {MockERC20} from "../../utils/MockERC20.sol";
 
 contract QVGovernanceERC20VotesTest is Test {
     struct InitializationData {
@@ -23,13 +23,13 @@ contract QVGovernanceERC20VotesTest is Test {
 
     Allo public allo;
     QVGovernanceERC20Votes public strategy;
-    MockToken public token;
+    MockERC20 public token;
 
     function setUp() public {
         allo = new Allo();
         // InitializationData memory data = InitializationData(address(allo), 0, 0, false, false, 0, 0, 0, 0);
 
-        token = new MockToken();
+        token = new MockERC20();
         // strategy = new QVGovernanceERC20Votes(address(0), "QVGovernanceERC20Votes");
         // strategy.initialize(0, abi.encode(data));
     }

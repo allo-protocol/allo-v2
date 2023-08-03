@@ -2,8 +2,8 @@
 pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
+import "solady/src/auth/Ownable.sol";
 
 contract NFT is ERC721, Ownable {
     using Strings for uint256;
@@ -23,6 +23,7 @@ contract NFT is ERC721, Ownable {
         uint256 _price //price in wei
     ) ERC721(_name, _symbol) {
         MINT_PRICE = _price;
+        _initializeOwner(msg.sender);
     }
 
     function mintTo(address to) public payable onlyOwner {

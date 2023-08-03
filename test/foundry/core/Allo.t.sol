@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
 import "forge-std/Test.sol";
@@ -17,7 +18,7 @@ import {RegistrySetupFull} from "../shared/RegistrySetup.sol";
 import {TestUtilities} from "../../utils/TestUtilities.sol";
 import {TestStrategy} from "../../utils/TestStrategy.sol";
 import {MockStrategy} from "../../utils/MockStrategy.sol";
-import {MockToken} from "../../utils/MockToken.sol";
+import {MockERC20} from "../../utils/MockERC20.sol";
 
 contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
     event PoolCreated(
@@ -41,7 +42,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
     error AlreadyInitialized();
 
     address public strategy;
-    MockToken public token;
+    MockERC20 public token;
 
     uint256 mintAmount = 1000000 * 10 ** 18;
 
@@ -53,7 +54,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
         __RegistrySetupFull();
         __AlloSetup(address(registry()));
 
-        token = new MockToken();
+        token = new MockERC20();
         token.mint(local(), mintAmount);
         token.mint(allo_owner(), mintAmount);
         token.mint(pool_admin(), mintAmount);
