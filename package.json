@@ -8,7 +8,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "compile": "forge build",
+    "build": "forge build",
     "test": "forge test",
     "fmt": "forge fmt contracts/**/*.sol && forge fmt test/**/*.sol",
     "fork": "anvil --fork-url",

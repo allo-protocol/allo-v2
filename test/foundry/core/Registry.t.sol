@@ -13,7 +13,7 @@ import {Native} from "../../../contracts/core/libraries/Native.sol";
 import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
 // Test libraries
 import {TestUtilities} from "../../utils/TestUtilities.sol";
-import {MockToken} from "../../utils/MockToken.sol";
+import {MockERC20} from "../../utils/MockERC20.sol";
 
 contract RegistryTest is Test, RegistrySetup, Native {
     event ProfileCreated(
@@ -29,7 +29,7 @@ contract RegistryTest is Test, RegistrySetup, Native {
     string public name;
     uint256 public nonce;
 
-    MockToken public token;
+    MockERC20 public token;
 
     function setUp() public {
         __RegistrySetup();
@@ -37,7 +37,7 @@ contract RegistryTest is Test, RegistrySetup, Native {
         name = "New Profile";
         nonce = 2;
 
-        token = new MockToken();
+        token = new MockERC20();
     }
 
     function test_createProfile() public {

@@ -21,7 +21,7 @@ import {AlloSetup} from "../shared/AlloSetup.sol";
 import {EventSetup} from "../shared/EventSetup.sol";
 
 // Mocks
-import {MockToken} from "../../utils/MockToken.sol";
+import {MockERC20} from "../../utils/MockERC20.sol";
 
 contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, EventSetup, Native {
     error ALLOCATION_NOT_ACTIVE();
@@ -57,7 +57,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
     uint256 public allocationEndTime;
 
     address public strategy;
-    MockToken public token;
+    MockERC20 public token;
     Metadata public poolMetadata;
 
     address[] public allowedTokens;
@@ -72,7 +72,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         uint256 indexed poolId,
         bytes32 indexed profileId,
         IStrategy strategy,
-        MockToken token,
+        MockERC20 token,
         uint256 amount,
         Metadata metadata
     );
@@ -87,7 +87,7 @@ contract QVSimpleStrategyTest is StrategySetup, RegistrySetupFull, AlloSetup, Ev
         __RegistrySetupFull();
         __AlloSetup(address(registry()));
 
-        token = new MockToken();
+        token = new MockERC20();
         token.mint(address(this), 100e18);
 
         registrationStartTime = today();
