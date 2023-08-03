@@ -507,7 +507,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Check if sender is profile owner or member
     /// @param _anchor Anchor of the profile
     /// @param _sender The sender of the transaction
-    function _isProfileMember(address _anchor, address _sender) internal view returns (bool) {
+    function _isProfileMember(address _anchor, address _sender) internal view virtual returns (bool) {
         IRegistry registry = allo.getRegistry();
         IRegistry.Profile memory profile = registry.getProfileByAnchor(_anchor);
         return registry.isOwnerOrMemberOfProfile(profile.id, _sender);
