@@ -6,7 +6,7 @@ import {IAllo} from "../../core/IAllo.sol";
 import {BaseStrategy} from "./../BaseStrategy.sol";
 import {Metadata} from "../../core/libraries/Metadata.sol";
 
-contract ProportionalPayout is BaseStrategy {
+contract ProportionalPayoutStrategy is BaseStrategy {
     /// =====================
     /// ======= Events ======
     /// =====================
