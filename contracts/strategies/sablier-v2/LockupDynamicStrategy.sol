@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import {ReentrancyGuard} from "@openzeppelin/security/ReentrancyGuard.sol";
-import {IERC20} from "@openzeppelin/token/ERC20/IERC20.sol";
-import {SafeERC20} from "@openzeppelin/token/ERC20/utils/SafeERC20.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {ISablierV2LockupDynamic} from "@sablier/v2-core/interfaces/ISablierV2LockupDynamic.sol";
 import {Broker, LockupDynamic} from "@sablier/v2-core/types/DataTypes.sol";
 import {IERC20 as SablierIERC20} from "@sablier/v2-core/types/Tokens.sol";
@@ -136,20 +136,19 @@ contract LockupDynamicStrategy is BaseStrategy, ReentrancyGuard {
     }
 
     /// @notice Returns the payout summary for the accepted recipient
-    function getPayouts(address[] memory _recipientIds, bytes memory, address)
+    function getPayouts(address[] memory _recipientIds, bytes memory)
         external
         view
-        override
         returns (PayoutSummary[] memory payouts)
     {
         uint256 recipientLength = _recipientIds.length;
-
         payouts = new PayoutSummary[](recipientLength);
-
         address recipientId;
+
         for (uint256 i = 0; i < recipientLength;) {
             recipientId = _recipientIds[i];
-            payouts[i] = PayoutSummary(recipientId, _recipients[recipientId].grantAmount);
+            payouts[i] = _getPayout(recipientId, "");
+
             unchecked {
                 i++;
             }
@@ -286,14 +285,14 @@ contract LockupDynamicStrategy is BaseStrategy, ReentrancyGuard {
             (recipientId, recipientAddress, cancelable, grantAmount, segments, metadata) =
                 abi.decode(_data, (address, address, bool, uint256, LockupDynamic.SegmentWithDelta[], Metadata));
 
-            if (!_isIdentityMember(recipientId, _sender)) {
+            if (!_isProfileMember(recipientId, _sender)) {
                 revert UNAUTHORIZED();
             }
         } else {
             (recipientAddress, useRegistryAnchor, cancelable, grantAmount, segments, metadata) =
                 abi.decode(_data, (address, bool, bool, uint256, LockupDynamic.SegmentWithDelta[], Metadata));
             recipientId = _sender;
-            if (useRegistryAnchor && !_isIdentityMember(recipientId, _sender)) {
+            if (useRegistryAnchor && !_isProfileMember(recipientId, _sender)) {
                 revert UNAUTHORIZED();
             }
         }
@@ -349,7 +348,7 @@ contract LockupDynamicStrategy is BaseStrategy, ReentrancyGuard {
             IAllo.Pool memory pool = allo.getPool(poolId);
             allocatedGrantAmount += grantAmount;
 
-            if (allocatedGrantAmount > pool.amount) {
+            if (allocatedGrantAmount > poolAmount) {
                 revert ALLOCATION_EXCEEDS_POOL_AMOUNT();
             }
 
@@ -414,12 +413,24 @@ contract LockupDynamicStrategy is BaseStrategy, ReentrancyGuard {
         recipient = _recipients[_recipientId];
     }
 
-    /// @notice Check if sender is identity owner or member
-    /// @param _anchor Anchor of the identity
+    function _getPayout(address _recipientId, bytes memory)
+        internal
+        view
+        virtual
+        override
+        returns (PayoutSummary memory)
+    {
+        Recipient memory recipient = _recipients[_recipientId];
+
+        return PayoutSummary(recipient.recipientAddress, recipient.grantAmount);
+    }
+
+    /// @notice Check if sender is profile owner or member
+    /// @param _anchor Anchor of the profile
     /// @param _sender The sender of the transaction
-    function _isIdentityMember(address _anchor, address _sender) internal view returns (bool) {
+    function _isProfileMember(address _anchor, address _sender) internal view returns (bool) {
         IRegistry registry = allo.getRegistry();
-        IRegistry.Identity memory identity = registry.getIdentityByAnchor(_anchor);
-        return registry.isOwnerOrMemberOfIdentity(identity.id, _sender);
+        IRegistry.Profile memory profile = registry.getProfileByAnchor(_anchor);
+        return registry.isOwnerOrMemberOfProfile(profile.id, _sender);
     }
 }
