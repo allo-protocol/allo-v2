@@ -34,7 +34,7 @@ contract LockupBase_Test is Test, Accounts, EventSetup, RegistrySetupFull {
 
     function __StrategySetup(address strategy, bytes memory data) internal returns (uint256 poolId) {
         poolId = allo.createPoolWithCustomStrategy(
-            poolIdentity_id(), strategy, data, address(GTC), 0, poolMetadata, pool_managers()
+            poolProfile_id(), strategy, data, address(GTC), 0, poolMetadata, pool_managers()
         );
     }
 
