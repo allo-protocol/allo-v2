@@ -346,7 +346,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
             recipient.recipientStatus != InternalRecipientStatus.Rejected // no need to reject twice
                 && recipientStatus == InternalRecipientStatus.Rejected
         ) {
-            recipient.recipientStatus == InternalRecipientStatus.Rejected;
+            recipient.recipientStatus = InternalRecipientStatus.Rejected;
             emit RecipientStatusChanged(recipientId, InternalRecipientStatus.Rejected);
         }
     }
