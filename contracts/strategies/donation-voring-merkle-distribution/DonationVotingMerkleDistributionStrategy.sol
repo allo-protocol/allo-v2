@@ -103,8 +103,6 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
     mapping(address => bool) public allowedTokens;
     /// @notice recipientId -> Recipient
     mapping(address => Recipient) private _recipients;
-    /// @notice recipientId -> PayoutSummary
-    mapping(address => PayoutSummary) public payoutSummaries;
     /// @notice recipientId -> token -> amount
     mapping(address => mapping(address => uint256)) public claims;
 
