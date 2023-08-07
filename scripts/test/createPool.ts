@@ -1,6 +1,6 @@
 import hre, { ethers } from "hardhat";
 import { alloConfig } from "../config/allo.config";
-import { confirmContinue, prettyNum } from "../utils/script-utils";
+import { confirmContinue, prettyNum } from "../utils/scripts";
 
 export async function createPool() {
 

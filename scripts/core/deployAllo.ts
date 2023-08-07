@@ -1,7 +1,7 @@
 import hre, { ethers, upgrades } from "hardhat";
 import { alloConfig } from "../config/allo.config";
 import { registryConfig } from "../config/registry.config";
-import { confirmContinue, prettyNum } from "../utils/script-utils";
+import { confirmContinue, prettyNum, verifyContract } from "../utils/scripts";
 
 export async function deployAllo(_registryAddress? : string) {
   const network = await ethers.provider.getNetwork();
@@ -48,6 +48,8 @@ export async function deployAllo(_registryAddress? : string) {
   ]);
   // await instance.waitForDeployment();
   // await instance.deploymentTransaction()?.wait(blocksToWait);
+
+  // await verifyContract(instance.target.toString());
 
   console.log("Allo.sol deployed to:", instance.target);
 

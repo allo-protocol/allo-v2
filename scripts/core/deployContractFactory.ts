@@ -1,5 +1,5 @@
 import hre, { ethers } from "hardhat";
-import { confirmContinue, prettyNum } from "../utils/script-utils";
+import { confirmContinue, prettyNum, verifyContract } from "../utils/scripts";
 
 export async function deployContractFactory() {
   const network = await ethers.provider.getNetwork();
@@ -30,6 +30,8 @@ export async function deployContractFactory() {
   const instance = await ContractFactory.deploy();
 
   console.log("ContractFactory deployed to:", instance.target);
+
+  // await verifyContract(instance.target.toString());
 
   return instance.target;
 }
