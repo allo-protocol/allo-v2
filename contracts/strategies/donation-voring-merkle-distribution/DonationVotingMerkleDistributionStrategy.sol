@@ -84,6 +84,7 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
 
     bool public useRegistryAnchor;
     bool public metadataRequired;
+    bool public distributionStarted;
     uint256 public registrationStartTime;
     uint256 public registrationEndTime;
     uint256 public allocationStartTime;
@@ -97,7 +98,7 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
     mapping(uint256 => uint256) private distributedBitMap;
 
     /// MetaPtr containing the distribution
-    Metadata public distributionMetaPtr;
+    Metadata public distributionMetadata;
 
     /// @notice token -> bool
     mapping(address => bool) public allowedTokens;
@@ -302,12 +303,7 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
             revert NOT_ALLOWED();
         }
 
-        // TODO: discuss if we want to allow withdrawing ONLY "poolAmount - totalPayoutAmount" from the pool
         IAllo.Pool memory pool = allo.getPool(poolId);
-        if (poolAmount - totalPayoutAmount < _amount) {
-            revert NOT_ALLOWED();
-        }
-
         poolAmount -= _amount;
         _transferAmount(pool.token, msg.sender, _amount);
     }
@@ -349,17 +345,18 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         onlyAfterAllocation
         onlyPoolManager(msg.sender)
     {
-        if (merkleRoot != "") {
+
+        if(distributionStarted) {
             revert INVALID();
         }
 
-        (bytes32 _merkleRoot, Metadata memory _distributionMetaPtr) =
+        (bytes32 _merkleRoot, Metadata memory _distributionMetadata) =
             abi.decode(encodedDistribution, (bytes32, Metadata));
 
         merkleRoot = _merkleRoot;
-        distributionMetaPtr = _distributionMetaPtr;
+        distributionMetadata = _distributionMetadata;
 
-        emit DistributionUpdated(merkleRoot, distributionMetaPtr);
+        emit DistributionUpdated(merkleRoot, distributionMetadata);
     }
 
     /// @notice function to check if distribution is set
@@ -492,6 +489,9 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
     {
         if (merkleRoot == "") {
             revert INVALID();
+        }
+        if(!distributionStarted) {
+            distributionStarted = true;
         }
 
         Distribution[] memory distributions = abi.decode(_data, (Distribution[]));
