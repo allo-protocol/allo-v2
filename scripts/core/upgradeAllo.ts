@@ -1,5 +1,6 @@
 import hre, { ethers, upgrades } from "hardhat";
-import { confirmContinue, prettyNum } from "../utils/script-utils";
+import { confirmContinue, prettyNum } from "../utils/scripts";
+import { alloConfig } from "../config/allo.config";
 
 async function upgradeAllo() {
     const network = await ethers.provider.getNetwork();
@@ -7,6 +8,9 @@ async function upgradeAllo() {
     let account;
     let accountAddress;
     const blocksToWait = hre.network.name === "localhost" ? 0 : 10;
+    const chainId = Number(network.chainId);
+
+    const alloParams = alloConfig[chainId];
 
     account = (await ethers.getSigners())[0];
     accountAddress = await account.getAddress();
@@ -14,27 +18,24 @@ async function upgradeAllo() {
 
     console.log(`This script upgrades the Allo contract on ${networkName}`);
 
-    const PROXY_ADDRESS = "0x174b26eD4DF62A21189fF498834DE05077531EBD";
-
     await confirmContinue({
         contract: "Upgrading Allo",
         chainId: network.chainId,
         network: network.name,
         account: accountAddress,
         balance: prettyNum(balance.toString()),
-        proxyAddress: PROXY_ADDRESS,
+        proxyAddress: alloParams.alloProxy,
       });
 
     console.log("Upgrading Allo...");
 
     const AlloV2 = await ethers.getContractFactory("Allo", account);
-    const instance = await upgrades.upgradeProxy(PROXY_ADDRESS, AlloV2);
+    const instance = await upgrades.upgradeProxy(alloParams.alloProxy, AlloV2);
     // console.log("tx hash", instance.deployTransaction);
     // await instance.deployed(blocksToWait);
 
     // const gas = await instance.deployTransaction.estimateGas();
     // console.log(`gas used: ${gas}`)
-
     console.log("Allo upgraded");
 }
 

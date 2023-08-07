@@ -1,4 +1,5 @@
 import "dotenv/config";
+import { run } from "hardhat";
 import readline from "readline";
 
 // --- User verification ---
@@ -39,3 +40,17 @@ export const prettyNum = (_n: number | string) => {
 
   return s;
 }
+
+export const verifyContract = async (contract: string, verifyArgs: string[]) => {
+  console.log("Verifying contract...");
+  try {
+    await run("verify:verify", {
+      address: contract,
+      constructorArguments: verifyArgs,
+    });
+
+    console.log("Contract verified!");
+  } catch (err) {
+    console.log(err);
+  }
+};
