@@ -15,20 +15,23 @@ import "solidity-coverage";
 dotenv.config();
 
 const chainIds = {
-  // local
+  // local network
   localhost: 31337,
+
   // testnet
-  goerli: 5,
-  sepolia: 11155111,
+  "goerli": 5,
+  "sepolia": 11155111,
   "optimism-goerli": 420,
   "fantom-testnet": 4002,
   "pgn-sepolia": 58008,
+  "celo-testnet": 44787,
 
   // mainnet
-  mainnet: 1,
+  "mainnet": 1,
   "optimism-mainnet": 10,
   "pgn-mainnet": 424,
   "fantom-mainnet": 250,
+  "celo-mainnet": 42220,
 };
 
 let deployPrivateKey = process.env.DEPLOYER_PRIVATE_KEY as string;
@@ -110,16 +113,22 @@ const config: HardhatUserConfig = {
     // Main Networks
     mainnet: createMainnetConfig("mainnet"),
     "optimism-mainnet": createMainnetConfig("optimism-mainnet"),
+    "fantom-mainnet": createMainnetConfig(
+      "fantom-mainnet",
+      "https://rpc.ftm.tools",
+    ),
     "pgn-mainnet": {
       accounts: [deployPrivateKey],
       chainId: chainIds["pgn-mainnet"],
       url: "https://rpc.publicgoods.network",
       gasPrice: 20000000000,
     },
-    "fantom-mainnet": createMainnetConfig(
-      "fantom-mainnet",
-      "https://rpc.ftm.tools",
-    ),
+    "celo-mainnet": {
+      accounts: [deployPrivateKey],
+      chainId: chainIds["celo-mainnet"],
+      url: "https://forno.celo.org",
+      gasPrice: 20000000000,
+    },
 
     // Test Networks
     goerli: createTestnetConfig("goerli"),
@@ -140,6 +149,14 @@ const config: HardhatUserConfig = {
       url: "https://sepolia.publicgoods.network",
       gasPrice: 20000000000,
     },
+    "celo-testnet": {
+      accounts: [deployPrivateKey],
+      chainId: chainIds["celo-testnet"],
+      url: "https://alfajores-forno.celo-testnet.org",
+      gasPrice: 20000000000,
+    },
+
+    // Local Networks
     localhost: createTestnetConfig("localhost", "http://localhost:8545"),
   },
   gasReporter: {
