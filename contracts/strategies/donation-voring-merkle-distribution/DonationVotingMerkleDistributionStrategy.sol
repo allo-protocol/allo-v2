@@ -345,8 +345,7 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         onlyAfterAllocation
         onlyPoolManager(msg.sender)
     {
-
-        if(distributionStarted) {
+        if (distributionStarted) {
             revert INVALID();
         }
 
@@ -490,7 +489,7 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         if (merkleRoot == "") {
             revert INVALID();
         }
-        if(!distributionStarted) {
+        if (!distributionStarted) {
             distributionStarted = true;
         }
 
