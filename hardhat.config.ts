@@ -188,6 +188,10 @@ const config: HardhatUserConfig = {
       "pgn-mainnet": process.env.PGNSCAN_API_KEY,
       // @ts-ignore
       "pgn-sepolia": process.env.PGNSCAN_API_KEY,
+      // @ts-ignore
+      "celo-mainnet": process.env.CELOSCAN_API_KEY,
+      // @ts-ignore
+      "celo-testnet": process.env.CELOSCAN_API_KEY,
     },
     customChains: [
       {
@@ -204,6 +208,22 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://explorer.sepolia.publicgoods.network/api",
           browserURL: "https://explorer.sepolia.publicgoods.network",
+        },
+      },
+      {
+        network: "celo-mainnet",
+        chainId: chainIds["celo-mainnet"],
+        urls: {
+          apiURL: "https://celoscan.io/api",
+          browserURL: "https://celoscan.io",
+        },
+      },
+      {
+        network: "celo-testnet",
+        chainId: chainIds["celo-testnet"],
+        urls: {
+          apiURL: "https://api-alfajores.celoscan.io/api",
+          browserURL: "https://alfajores.celoscan.io",
         },
       },
     ],
