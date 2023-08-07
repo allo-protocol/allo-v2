@@ -4,14 +4,18 @@ pragma solidity 0.8.19;
 import {ERC721} from "solady/src/tokens/ERC721.sol";
 
 contract MockNFT is ERC721 {
-    uint256 lastTokenId;
+    uint256 private _lastTokenId;
 
     constructor() {}
 
-    function mint(address _to, uint256 _amount) public {
+    function mintMultiple(address _to, uint256 _amount) public {
         for (uint256 i = 0; i < _amount; i++) {
-            _mint(_to, ++lastTokenId);
+            _safeMint(_to, _lastTokenId++);
         }
+    }
+
+    function mint(address _to) public {
+        _safeMint(_to, _lastTokenId++);
     }
 
     function name() public pure override returns (string memory) {

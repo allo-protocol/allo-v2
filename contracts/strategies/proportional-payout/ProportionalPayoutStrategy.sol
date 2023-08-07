@@ -6,6 +6,9 @@ import {IAllo} from "../../core/IAllo.sol";
 import {BaseStrategy} from "./../BaseStrategy.sol";
 import {Metadata} from "../../core/libraries/Metadata.sol";
 
+/// @title Proportional Payout Strategy
+/// @notice This strategy allows the allocator to allocate votes to recipients
+/// @author allo-team
 contract ProportionalPayoutStrategy is BaseStrategy {
     /// =====================
     /// ======= Events ======
@@ -45,6 +48,7 @@ contract ProportionalPayoutStrategy is BaseStrategy {
     /// ======================
     /// ======= Storage ======
     /// ======================
+
     struct Recipient {
         address recipientAddress;
         Metadata metadata;
@@ -73,6 +77,38 @@ contract ProportionalPayoutStrategy is BaseStrategy {
 
     constructor(address _allo, string memory _name) BaseStrategy(_allo, _name) {}
 
+    /// ===============================
+    /// ========= Initialize ==========
+    /// ===============================
+
+    function initialize(uint256 _poolId, bytes memory _data) external override onlyAllo {
+        (address _nft, uint256 _maxRecipientsAllowed, uint256 _allocationStartTime, uint256 _allocationEndTime) =
+            abi.decode(_data, (address, uint256, uint256, uint256));
+
+        __ProtportionalPayoutStrategy_init(
+            _poolId, ERC721(_nft), _allocationStartTime, _allocationEndTime, _maxRecipientsAllowed
+        );
+    }
+
+    function __ProtportionalPayoutStrategy_init(
+        uint256 _poolId,
+        ERC721 _nft,
+        uint256 _startTime,
+        uint256 _endTime,
+        uint256 _maxRecipients
+    ) internal {
+        if (_startTime >= _endTime || _endTime < block.timestamp) {
+            revert INVALID();
+        }
+        __BaseStrategy_init(_poolId);
+
+        nft = ERC721(_nft);
+        maxRecipientsAllowed = _maxRecipients;
+
+        _setAllocationTime(_startTime, _endTime);
+        _setPoolActive(true);
+    }
+
     /// ==================
     /// ==== Views =======
     /// ==================
@@ -92,17 +128,6 @@ contract ProportionalPayoutStrategy is BaseStrategy {
     // ==================
     // ==== External ====
     // ==================
-
-    function initialize(uint256 _poolId, bytes memory _data) external override onlyAllo {
-        (address _nft, uint256 _maxRecipientsAllowed, uint256 _allocationStartTime, uint256 _allocationEndTime) =
-            abi.decode(_data, (address, uint256, uint256, uint256));
-        __BaseStrategy_init(_poolId);
-
-        nft = ERC721(_nft);
-        maxRecipientsAllowed = _maxRecipientsAllowed;
-
-        _setAllocationTime(_allocationStartTime, _allocationEndTime);
-    }
 
     /// @notice Checks if the allocator is valid
     /// @param _allocator The allocator address
