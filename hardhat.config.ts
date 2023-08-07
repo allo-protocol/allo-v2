@@ -17,12 +17,14 @@ dotenv.config();
 const chainIds = {
   // local
   localhost: 31337,
+  "localhost-celo": 7545,
   // testnet
   goerli: 5,
   sepolia: 11155111,
   "optimism-goerli": 420,
   "fantom-testnet": 4002,
   "pgn-sepolia": 58008,
+  alfajores: 44787,
 
   // mainnet
   mainnet: 1,
@@ -120,6 +122,14 @@ const config: HardhatUserConfig = {
       "fantom-mainnet",
       "https://rpc.ftm.tools",
     ),
+    celo: {
+      url: "https://forno.celo.org",
+      accounts: {
+        mnemonic: process.env.MNEMONIC,
+        path: "m/44'/52752'/0'/0"
+      },
+      chainId: 42220
+    },
 
     // Test Networks
     goerli: createTestnetConfig("goerli"),
@@ -140,7 +150,17 @@ const config: HardhatUserConfig = {
       url: "https://sepolia.publicgoods.network",
       gasPrice: 20000000000,
     },
+    // https://docs.celo.org/developer/deploy/hardhat
+    alfajores: {
+      chainId: chainIds.alfajores,
+      url: "https://alfajores-forno.celo-testnet.org",
+      accounts: {
+        mnemonic: process.env.MNEMONIC,
+        path: "m/44'/52752'/0'/0"
+      }
+    },
     localhost: createTestnetConfig("localhost", "http://localhost:8545"),
+    "localhost-celo": createTestnetConfig("localhost-celo", "http://127.0.0.1:7545"),
   },
   gasReporter: {
     coinmarketcap: process.env.COINMARKETCAP_API_KEY,
