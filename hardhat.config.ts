@@ -132,7 +132,10 @@ const config: HardhatUserConfig = {
 
     // Test Networks
     goerli: createTestnetConfig("goerli"),
-    sepolia: createTestnetConfig("sepolia", "https://rpc.sepolia.dev"),
+    sepolia: createTestnetConfig(
+      "sepolia",
+      "https://eth-sepolia.public.blastapi.io"
+    ),
     "fantom-testnet": createTestnetConfig(
       "fantom-testnet",
       "https://rpc.testnet.fantom.network/",

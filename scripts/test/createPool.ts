@@ -14,7 +14,7 @@ export async function createPool() {
 
     const balance = await ethers.provider.getBalance(deployerAddress);
 
-    const allo = alloConfig[chainId].allo;
+    const allo = alloConfig[chainId].alloProxy;
 
     await confirmContinue({
         contract: "allo: create pool",
