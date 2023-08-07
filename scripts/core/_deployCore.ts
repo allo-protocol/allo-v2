@@ -10,27 +10,26 @@ async function deployCore() {
     ////////////////////////////////////////////////////
     Deploy core Allo V2 contracts to ${networkName}
     ======================================
+    - Deployer (used for strategy deployments)
     - Registry
     - Allo
-    - Deployer (used for strategy deployments)
     ////////////////////////////////////////////////////`
   );
 
-  // Registry
-  deployRegistry().then(registryAddress => {
-    // Allo
-    deployAllo(registryAddress.toString()).then(alloAddress => {
-        // Deployer
-        deployDeployer().then(deployerAddress => {
-
+  // Deployer
+  deployDeployer().then(deployerAddress => {
+    // Registry
+    deployRegistry().then(registryAddress => {
+      // Allo
+      deployAllo(registryAddress.toString()).then(alloAddress => {
           // Log deployed addresses
           console.log(`
             ////////////////////////////////////////////////////
             Core Allo V2 deployed to:
             ======================================
+            Deployer: ${deployerAddress}
             Registry: ${registryAddress}
             Allo: ${alloAddress}
-            Deployer: ${deployerAddress}
             ////////////////////////////////////////////////////`
           );
         });
