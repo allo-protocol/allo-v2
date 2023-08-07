@@ -69,7 +69,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     Milestone[] public milestones;
 
     /// @notice recipientId -> Recipient
-    mapping(address => Recipient) private _recipients;
+    mapping(address => Recipient) internal _recipients;
 
     /// ===============================
     /// ======== Constructor ==========
