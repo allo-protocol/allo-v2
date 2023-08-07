@@ -7,20 +7,24 @@ import {IStrategy} from "../../../contracts/strategies/IStrategy.sol";
 
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
-import {Accounts} from "../shared/Accounts.sol";
-import {RegistrySetupFull} from "../shared/RegistrySetup.sol";
-import {AlloSetup} from "../shared/AlloSetup.sol";
-
 import {ProportionalPayoutStrategy} from
     "../../../contracts/strategies/proportional-payout/ProportionalPayoutStrategy.sol";
 import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
 
-contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, AlloSetup {
+// Test Libraries
+import {Accounts} from "../shared/Accounts.sol";
+import {RegistrySetupFull} from "../shared/RegistrySetup.sol";
+import {AlloSetup} from "../shared/AlloSetup.sol";
+import {EventSetup} from "../shared/EventSetup.sol";
+
+contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, AlloSetup, EventSetup {
     error RECIPIENT_ERROR(address recipientId);
     error MAX_REACHED();
     error ALLOCATION_NOT_ACTIVE();
     error ALLOCATION_NOT_ENDED();
     error INVALID();
+
+    event AllocationTimeSet(uint256 startTime, uint256 endTime);
 
     /// @notice The maximum number of recipients allowed
     /// @dev This is both to keep the number of choices low and to avoid gas issues
@@ -92,6 +96,13 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
 
     function testRevert_initialize_STRATEGY_ALREADY_INITIALIZED() public {}
 
+    function test_getRecipient() public {
+        address recipientId = __register_recipient();
+        ProportionalPayoutStrategy.Recipient memory recipient = strategy.getRecipient(recipientId);
+
+        assertEq(recipient.recipientAddress, recipient1());
+    }
+
     function test_getRecipientStatus() public {}
 
     function test_isValidAllocator() public {
@@ -106,9 +117,42 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
         // assertTrue(strategy.isValidAllocator(recipientId));
     }
 
-    function test_setRecipientStatus() public {}
+    function test_registerRecipient() public {
+        address recipientAddress = recipient();
+        vm.deal(recipientAddress, 1000000000000000000);
+        Metadata memory metadata = Metadata({protocol: 1, pointer: "I am Chad"});
+        bytes memory data = abi.encode(recipientAddress, recipientAddress, IStrategy.RecipientStatus.Accepted, metadata);
 
-    function test_setRecipientStatus_revert_UNAUTHORIZED() public {}
+        vm.prank(pool_manager1());
+        allo().registerRecipient(poolId, data);
+
+        IStrategy.RecipientStatus status = strategy.getRecipientStatus(recipientAddress);
+        assertEq(uint8(status), uint8(IStrategy.RecipientStatus.Accepted));
+    }
+
+    function testRevert_registerRecipient_RECIPIENT_ERROR() public {
+        address recipientAddress = nullProfile_member1();
+        vm.deal(recipientAddress, 1000000000000000000);
+        Metadata memory metadata = Metadata({protocol: 1, pointer: "I am Chad"});
+        bytes memory data = abi.encode(recipientAddress, recipientAddress, IStrategy.RecipientStatus.Accepted, metadata);
+
+        vm.expectRevert(abi.encodeWithSelector(ProportionalPayoutStrategy.RECIPIENT_ERROR.selector, recipientAddress));
+
+        vm.prank(pool_manager1());
+        allo().registerRecipient(poolId, data);
+    }
+
+    function testRevert_registerRecipient_UNAUTHORIZED() public {
+        address recipientAddress = nullProfile_member1();
+        vm.deal(recipientAddress, 1000000000000000000);
+        Metadata memory metadata = Metadata({protocol: 1, pointer: "I am Chad"});
+        bytes memory data = abi.encode(recipientAddress, recipientAddress, IStrategy.RecipientStatus.Accepted, metadata);
+
+        vm.expectRevert(abi.encodeWithSelector(IStrategy.BaseStrategy_UNAUTHORIZED.selector));
+
+        vm.prank(pool_notAManager());
+        allo().registerRecipient(poolId, data);
+    }
 
     function test_getPayouts() public {}
 
@@ -136,7 +180,38 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
         // allo().allocate(poolId, data);
     }
 
-    function test_setAllocationTimes() public {}
+    function test_setAllocationTimes() public {
+        uint256 _startTime = block.timestamp + 100;
+        uint256 _endTime = block.timestamp + 600;
 
-    function testRevert_setAllocationTimes_UNAUTHORIZED() public {}
+        vm.expectEmit(true, false, false, true);
+        emit AllocationTimeSet(_startTime, _endTime);
+
+        vm.prank(pool_manager1());
+        strategy.setAllocationTime(_startTime, _endTime);
+
+        assertEq(strategy.allocationStartTime(), _startTime);
+        assertEq(strategy.allocationEndTime(), _endTime);
+    }
+
+    function testRevert_setAllocationTimes_UNAUTHORIZED() public {
+        uint256 _startTime = block.timestamp + 100;
+        uint256 _endTime = block.timestamp + 600;
+
+        vm.expectRevert(abi.encodeWithSelector(IStrategy.BaseStrategy_UNAUTHORIZED.selector));
+        emit AllocationTimeSet(_startTime, _endTime);
+
+        vm.prank(pool_notAManager());
+        strategy.setAllocationTime(_startTime, _endTime);
+    }
+
+    function __register_recipient() internal returns (address recipientId) {
+        address recipientAddress = recipient1();
+        vm.deal(recipientAddress, 1000000000000000000);
+        Metadata memory metadata = Metadata({protocol: 1, pointer: "I am Chad"});
+        bytes memory data = abi.encode(recipientAddress, recipientAddress, IStrategy.RecipientStatus.Accepted, metadata);
+
+        vm.prank(pool_manager1());
+        recipientId = allo().registerRecipient(poolId, data);
+    }
 }

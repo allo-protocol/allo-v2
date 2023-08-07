@@ -73,6 +73,22 @@ contract ProportionalPayoutStrategy is BaseStrategy {
 
     constructor(address _allo, string memory _name) BaseStrategy(_allo, _name) {}
 
+    /// ==================
+    /// ==== Views =======
+    /// ==================
+
+    /// @notice Get the recipient
+    /// @param _recipientId Id of the recipient
+    function getRecipient(address _recipientId) external view returns (Recipient memory) {
+        return _getRecipient(_recipientId);
+    }
+
+    /// @notice Checks if msg.sender is eligible for RFP allocation
+    /// @param _recipientId Id of the recipient
+    function getRecipientStatus(address _recipientId) external view override returns (RecipientStatus) {
+        return _getRecipient(_recipientId).recipientStatus;
+    }
+
     // ==================
     // ==== External ====
     // ==================
@@ -86,12 +102,6 @@ contract ProportionalPayoutStrategy is BaseStrategy {
         maxRecipientsAllowed = _maxRecipientsAllowed;
 
         _setAllocationTime(_allocationStartTime, _allocationEndTime);
-    }
-
-    /// @notice Get recipient status
-    /// @param _recipientId Id of the recipient
-    function getRecipientStatus(address _recipientId) external view returns (RecipientStatus) {
-        return recipients[_recipientId].recipientStatus;
     }
 
     /// @notice Checks if the allocator is valid
@@ -236,5 +246,11 @@ contract ProportionalPayoutStrategy is BaseStrategy {
         allocationEndTime = _allocationEndTime;
 
         emit AllocationTimeSet(_allocationStartTime, _allocationEndTime);
+    }
+
+    /// @notice Get the recipient
+    /// @param _recipientId Id of the recipient
+    function _getRecipient(address _recipientId) internal view returns (Recipient memory recipient) {
+        recipient = recipients[_recipientId];
     }
 }
