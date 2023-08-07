@@ -2,28 +2,28 @@ pragma solidity 0.8.19;
 
 import "forge-std/Test.sol";
 
-import {Deployer} from "../../../contracts/deployer/Deployer.sol";
+import {ContractFactory} from "../../../contracts/deployer/ContractFactory.sol";
 import {TestStrategy} from "../../utils/TestStrategy.sol";
 
-contract DeployerTest is Test {
-    Deployer deployerInstance;
+contract ContractFactoryTest is Test {
+    ContractFactory factoryInstance;
     address public deployerAddress;
 
     function setUp() public {
         deployerAddress = makeAddr("deployerAddress");
-        deployerInstance = new Deployer();
-        deployerInstance.setDeployer(deployerAddress, true);
+        factoryInstance = new ContractFactory();
+        factoryInstance.setDeployer(deployerAddress, true);
     }
 
     function test_constructor() public {
-        assertTrue(deployerInstance.isDeployer(address(this)));
-        assertTrue(deployerInstance.isDeployer(deployerAddress));
+        assertTrue(factoryInstance.isDeployer(address(this)));
+        assertTrue(factoryInstance.isDeployer(deployerAddress));
     }
 
     function test_deploy_shit() public {
         // Deploy a contract and check that it was deployed successfully
         bytes memory creationCode = type(TestStrategy).creationCode;
-        address deployedAddress = deployerInstance.deploy(
+        address deployedAddress = factoryInstance.deploy(
             "TestStrategy", "v1", abi.encodePacked(creationCode, abi.encode(makeAddr("allo"), "TestStrategy"))
         );
 
@@ -32,40 +32,40 @@ contract DeployerTest is Test {
     }
 
     function testRevert_deploy_UNAUTHORIZED() public {
-        vm.expectRevert(Deployer.UNAUTHORIZED.selector);
+        vm.expectRevert(ContractFactory.UNAUTHORIZED.selector);
 
         bytes memory creationCode = type(TestStrategy).creationCode;
         vm.prank(makeAddr("alice"));
-        deployerInstance.deploy(
+        factoryInstance.deploy(
             "TestStrategy", "v1", abi.encodePacked(creationCode, abi.encode(makeAddr("allo"), "TestStrategy"))
         );
     }
 
     function testRevert_deploy_SALT_USED() public {
         bytes memory creationCode = type(TestStrategy).creationCode;
-        deployerInstance.deploy(
+        factoryInstance.deploy(
             "TestStrategy", "v1", abi.encodePacked(creationCode, abi.encode(makeAddr("allo"), "TestStrategy"))
         );
 
-        vm.expectRevert(Deployer.SALT_USED.selector);
-        deployerInstance.deploy(
+        vm.expectRevert(ContractFactory.SALT_USED.selector);
+        factoryInstance.deploy(
             "TestStrategy", "v1", abi.encodePacked(creationCode, abi.encode(makeAddr("allo"), "TestStrategy"))
         );
     }
 
     function test_setDeployer() public {
-        address newDeployerAddress = makeAddr("bob");
+        address newContractFactoryAddress = makeAddr("bob");
 
-        assertFalse(deployerInstance.isDeployer(newDeployerAddress));
-        deployerInstance.setDeployer(newDeployerAddress, true);
-        assertTrue(deployerInstance.isDeployer(newDeployerAddress));
+        assertFalse(factoryInstance.isDeployer(newContractFactoryAddress));
+        factoryInstance.setDeployer(newContractFactoryAddress, true);
+        assertTrue(factoryInstance.isDeployer(newContractFactoryAddress));
     }
 
     function testRevert_setDeployer_UNAUTHORIZED() public {
-        address newDeployerAddress = makeAddr("bob");
+        address newContractFactoryAddress = makeAddr("bob");
 
-        vm.expectRevert(Deployer.UNAUTHORIZED.selector);
+        vm.expectRevert(ContractFactory.UNAUTHORIZED.selector);
         vm.prank(makeAddr("alice"));
-        deployerInstance.setDeployer(newDeployerAddress, true);
+        factoryInstance.setDeployer(newContractFactoryAddress, true);
     }
 }
