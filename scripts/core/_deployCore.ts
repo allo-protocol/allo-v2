@@ -10,13 +10,13 @@ async function deployCore() {
     ////////////////////////////////////////////////////
     Deploy core Allo V2 contracts to ${networkName}
     ======================================
-    - Deployer (used for strategy deployments)
+    - ContractFactory (used for strategy deployments)
     - Registry
     - Allo
     ////////////////////////////////////////////////////`
   );
 
-  // Deployer
+  // ContractFactory
   deployContractFactory().then(deployedContract => {
     // Registry
     deployRegistry().then(registryAddress => {
@@ -27,7 +27,7 @@ async function deployCore() {
             ////////////////////////////////////////////////////
             Core Allo V2 deployed to:
             ======================================
-            Deployer: ${deployedContract}
+            ContractFactory: ${deployedContract}
             Registry: ${registryAddress}
             Allo: ${alloAddress}
             ////////////////////////////////////////////////////`

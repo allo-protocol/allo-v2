@@ -47,6 +47,18 @@ export const deployerContractAddress: DeployerConfig = {
   250: {
     address: "",
   },
+  // Fantom Testnet
+  4002: {
+    address: "",
+  },
+  // Celo Mainnet
+  42220: {
+    address: "",
+  },
+  // Celo Alfajores
+  44787: {
+    address: "",
+  },
 };
 
 // NOTE: This will be the version address for each registy on each network.
@@ -112,6 +124,30 @@ export const nameConfig: DeployParams = {
     "donation-voting": {
       name: "",
       version: "",
+      address: "",
+    },
+  },
+  // Fantom Testnet
+  4002: {
+    "donation-voting": {
+      name: "",
+      version: "",
+      address: "",
+    },
+  },
+  // Celo Mainnet
+  42220: {
+    "donation-voting": {
+      name: "",
+      version: "",
+      address: "",
+    },
+  },
+  // Celo Alfajores
+  44787: {
+    "donation-voting": {
+      name: "DonationVotingStrategy",
+      version: "v1",
       address: "",
     },
   },

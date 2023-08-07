@@ -24,7 +24,7 @@ export const alloConfig: DeployParams = {
 	5: {
 		allo: "0x45F5506b0014cbdc9652854B65eed90E56aB7dA9",
 		proxyAddress: "0x97122901b6346a625294d446f5d0b7bc00a3b0f2",
-		treasury: "0x24aE808BAe513fA698d4C188b88538d9C909f83E",
+		treasury: "0xBa0BBfB320486119f97Ea9C4671dE5e45441B2b7",
 		feePercentage: 0,
 		baseFee: 0,
 	},
@@ -32,7 +32,7 @@ export const alloConfig: DeployParams = {
 	11155111: {
 		allo: "0x45F5506b0014cbdc9652854B65eed90E56aB7dA9",
 		proxyAddress: "0x97122901b6346a625294d446f5d0b7bc00a3b0f2",
-		treasury: "0x24aE808BAe513fA698d4C188b88538d9C909f83E",
+		treasury: "0xBa0BBfB320486119f97Ea9C4671dE5e45441B2b7",
 		feePercentage: 0,
 		baseFee: 0,
 	},
@@ -48,7 +48,7 @@ export const alloConfig: DeployParams = {
 	58008: {
 		allo: "0x45F5506b0014cbdc9652854B65eed90E56aB7dA9",
 		proxyAddress: "0x97122901b6346a625294d446f5d0b7bc00a3b0f2",
-		treasury: "0x24aE808BAe513fA698d4C188b88538d9C909f83E",
+		treasury: "0xBa0BBfB320486119f97Ea9C4671dE5e45441B2b7",
 		feePercentage: 0,
 		baseFee: 0,
 	},
@@ -64,7 +64,7 @@ export const alloConfig: DeployParams = {
 	420: {
 		allo: "0x45F5506b0014cbdc9652854B65eed90E56aB7dA9",
 		proxyAddress: "0x97122901b6346a625294d446f5d0b7bc00a3b0f2",
-		treasury: "0x24aE808BAe513fA698d4C188b88538d9C909f83E",
+		treasury: "0xBa0BBfB320486119f97Ea9C4671dE5e45441B2b7",
 		feePercentage: 0,
 		baseFee: 0,
 	},
@@ -76,4 +76,28 @@ export const alloConfig: DeployParams = {
 		feePercentage: 0,
 		baseFee: 0,
 	},
+	// Fantom Testnet
+	4002: {
+		allo: "0x0",
+		proxyAddress: "0x0",
+		treasury: "0xBa0BBfB320486119f97Ea9C4671dE5e45441B2b7",
+		feePercentage: 0,
+		baseFee: 0,
+	},
+	// Celo Mainnet
+	42220: {
+		allo: "0x0",
+		proxyAddress: "0x0",
+		treasury: "0X0",
+		feePercentage: 0,
+		baseFee: 0,
+	},
+	// Celo Testnet Alfajores
+	44787: {
+		allo: "0x0",
+		proxyAddress: "0x0",
+		treasury: "0xBa0BBfB320486119f97Ea9C4671dE5e45441B2b7",
+		feePercentage: 0,
+		baseFee: 0,
+	}
 };

@@ -17,12 +17,12 @@ export const registryConfig: DeployParams = {
   // Goerli
   5: {
     registry: "0xe571ec2C7b94dE72Bc01937a251E48780DEF882A",
-    owner: "0x24aE808BAe513fA698d4C188b88538d9C909f83E",
+    owner: "0xBa0BBfB320486119f97Ea9C4671dE5e45441B2b7",
   },
   // Sepolia
   11155111: {
     registry: "0xe571ec2C7b94dE72Bc01937a251E48780DEF882A",
-    owner: "0x24aE808BAe513fA698d4C188b88538d9C909f83E",
+    owner: "0xBa0BBfB320486119f97Ea9C4671dE5e45441B2b7",
   },
   // PGN
   424: {
@@ -32,7 +32,7 @@ export const registryConfig: DeployParams = {
   // PGN Sepolia
   58008: {
     registry: "0xe571ec2C7b94dE72Bc01937a251E48780DEF882A",
-    owner: "0x24aE808BAe513fA698d4C188b88538d9C909f83E",
+    owner: "0xBa0BBfB320486119f97Ea9C4671dE5e45441B2b7",
   },
   // Optimism
   10: {
@@ -42,7 +42,7 @@ export const registryConfig: DeployParams = {
   // Optimism Goerli
   420: {
     registry: "0xe571ec2C7b94dE72Bc01937a251E48780DEF882A",
-    owner: "0x24aE808BAe513fA698d4C188b88538d9C909f83E",
+    owner: "0xBa0BBfB320486119f97Ea9C4671dE5e45441B2b7",
   },
   // Fantom
   250: {
@@ -52,6 +52,16 @@ export const registryConfig: DeployParams = {
   // Fantom Testnet
   4002: {
     registry: "",
-    owner: "0x24aE808BAe513fA698d4C188b88538d9C909f83E",
+    owner: "0xBa0BBfB320486119f97Ea9C4671dE5e45441B2b7",
+  },
+  // Celo Mainnet
+  42220: {
+    registry: "",
+    owner: "",
+  },
+  // Celo Testnet Alfajores
+  44787: {
+    registry: "",
+    owner: "0xBa0BBfB320486119f97Ea9C4671dE5e45441B2b7",
   },
 };
