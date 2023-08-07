@@ -52,7 +52,7 @@ export async function deployStrategies(strategyName: string, version: string) {
     //get bytecode of strategy
     creationCode = Strategy.bytecode;
 
-    const allo = alloConfig[chainId].allo;
+    const allo = alloConfig[chainId].alloProxy;
     const name = strategyName + version;
 
     //abi.encodePacked(creationCode, abi.encode(address(allo), "TestStrategy"))

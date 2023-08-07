@@ -1,7 +1,7 @@
 import hre, { ethers } from "hardhat";
 import { confirmContinue, prettyNum } from "../utils/script-utils";
 
-export async function deployDeployer() {
+export async function deployContractFactory() {
   const network = await ethers.provider.getNetwork();
   const networkName = await hre.network.name;
   const chainId = Number(network.chainId);
@@ -12,34 +12,32 @@ export async function deployDeployer() {
 
   console.log(`
     ////////////////////////////////////////////////////
-            Deploys Deployer.sol on ${networkName}
+        Deploys ContractFactory.sol on ${networkName}
     ////////////////////////////////////////////////////`
   );
 
   await confirmContinue({
-    contract: "Deploy Deployer.sol",
+    contract: "Deploy ContractFactory.sol",
     chainId: chainId,
     network: networkName,
     deployerAddress: deployerAddress,
     balance: prettyNum(balance.toString()),
   });
 
-  console.log("Deploying Deployer.sol...");
+  console.log("Deploying ContractFactory.sol...");
 
-  const Deployer = await ethers.getContractFactory("Deployer");
-  const instance = await Deployer.deploy();
+  const ContractFactory = await ethers.getContractFactory("ContractFactory");
+  const instance = await ContractFactory.deploy();
 
-  // await instance.deploymentTransaction()?.wait(blocksToWait);
-
-  console.log("Deployer deployed to:", instance.target);
+  console.log("ContractFactory deployed to:", instance.target);
 
   return instance.target;
 }
 
-// deployDeployer().catch((error) => {
+// deployContractFactory().catch((error) => {
 //   console.error(error);
 //   process.exitCode = 1;
 // });
 
 // Note: Deploy script to run in terminal:
-// npx hardhat run scripts/deployDeployer.ts --network sepolia
+// npx hardhat run scripts/deployContractFactory.ts --network sepolia

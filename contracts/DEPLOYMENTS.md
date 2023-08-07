@@ -2,20 +2,101 @@
 
 ## Core Contracts
 
-| Contract                       | Address                                      | Goerli | Optimism Goerli | Sepolia | PGN Sepolia |
-|--------------------------------|----------------------------------------------|:------:|:---------------:|:-------:|:-----------:|
-| Registry | `0xe571ec2C7b94dE72Bc01937a251E48780DEF882A` | [🔗](https://goerli.etherscan.io/address/0xe571ec2C7b94dE72Bc01937a251E48780DEF882A) |      [🔗](https://goerli-optimism.etherscan.io/address/0xe571ec2C7b94dE72Bc01937a251E48780DEF882A)     | [🔗](https://sepolia.etherscan.io/address/0xe571ec2C7b94dE72Bc01937a251E48780DEF882A)  |   [🔗](https://explorer.sepolia.publicgoods.network/address/0xe571ec2C7b94dE72Bc01937a251E48780DEF882A)    |
-| Allo Proxy | `0x45F5506b0014cbdc9652854B65eed90E56aB7dA9` | [🔗](https://goerli.etherscan.io/address/0x45F5506b0014cbdc9652854B65eed90E56aB7dA9) |      [🔗](https://goerli-optimism.etherscan.io/address/0x45F5506b0014cbdc9652854B65eed90E56aB7dA9)     | [🔗](https://sepolia.etherscan.io/address/0x45F5506b0014cbdc9652854B65eed90E56aB7dA9)  |   [🔗](https://explorer.sepolia.publicgoods.network/address/0x45F5506b0014cbdc9652854B65eed90E56aB7dA9)    |
-| Allo | `0x97122901b6346a625294d446f5d0b7bc00a3b0f2` | [🔗](https://goerli.etherscan.io/address/0x97122901b6346a625294d446f5d0b7bc00a3b0f2) |      [🔗](https://goerli-optimism.etherscan.io/address/0x97122901b6346a625294d446f5d0b7bc00a3b0f2)     | [🔗](https://sepolia.etherscan.io/address/0x97122901b6346a625294d446f5d0b7bc00a3b0f2)  |   [🔗](https://explorer.sepolia.publicgoods.network/address/0x97122901b6346a625294d446f5d0b7bc00a3b0f2)    |
+
+<table>
+<thead>
+  <tr>
+    <th>Contract</th>
+    <th>Address</th>
+    <th>Goerli</th>
+    <th>Optimism Goerli</th>
+    <th>Sepolia</th>
+    <th>PGN Sepolia</th>
+    <th>Celo Alfajores</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td>Registry</td>
+    <td>0xAEc621EC8D9dE4B524f4864791171045d6BBBe27</td>
+    <td><a href="https://goerli.etherscan.io/address/0xAEc621EC8D9dE4B524f4864791171045d6BBBe27">&#x1F517;</a></td>
+    <td><a href="https://goerli-optimism.etherscan.io/address/0xAEc621EC8D9dE4B524f4864791171045d6BBBe27">&#x1F517;</a></td>
+    <td><a href="https://sepolia.etherscan.io/address/0xAEc621EC8D9dE4B524f4864791171045d6BBBe27">&#x1F517;</a></td>
+    <td><a href="https://explorer.sepolia.publicgoods.network/address/0xAEc621EC8D9dE4B524f4864791171045d6BBBe27">&#x1F517;</a></td>
+    <td><a href="https://explorer.celo.org/alfajores/address/0xAEc621EC8D9dE4B524f4864791171045d6BBBe27">&#x1F517;</a></td>
+  </tr>
+  <tr>
+    <td>Allo Proxy</td>
+    <td>0x79536CC062EE8FAFA7A19a5fa07783BD7F792206</td>
+    <td><a href="https://goerli.etherscan.io/address/0x79536CC062EE8FAFA7A19a5fa07783BD7F792206">&#x1F517;</a></td>
+    <td><a href="https://goerli-optimism.etherscan.io/address/0x79536CC062EE8FAFA7A19a5fa07783BD7F792206">&#x1F517;</a></td>
+    <td><a href="https://sepolia.etherscan.io/address/0x79536CC062EE8FAFA7A19a5fa07783BD7F792206">&#x1F517;</a></td>
+    <td><a href="https://explorer.sepolia.publicgoods.network/address/0x79536CC062EE8FAFA7A19a5fa07783BD7F792206">&#x1F517;</a></td>
+    <td><a href="https://explorer.celo.org/alfajores/address/0x79536CC062EE8FAFA7A19a5fa07783BD7F792206">&#x1F517;</a></td>
+  </tr>
+  <tr>
+    <td>Allo Implementation</td>
+    <td>0x8dde1922d5f772890f169714faceef9551791caf</td>
+    <td><a href="https://goerli.etherscan.io/address/0x8dde1922d5f772890f169714faceef9551791caf">&#x1F517;</a></td>
+    <td><a href="https://goerli-optimism.etherscan.io/address/0x8dde1922d5f772890f169714faceef9551791caf">&#x1F517;</a></td>
+    <td><a href="https://sepolia.etherscan.io/address/0x8dde1922d5f772890f169714faceef9551791caf">&#x1F517;</a></td>
+    <td><a href="https://explorer.sepolia.publicgoods.network/address/0x8dde1922d5f772890f169714faceef9551791caf">&#x1F517;</a></td>
+    <td><a href="https://explorer.celo.org/alfajores/address/0x8dde1922d5f772890f169714faceef9551791caf">&#x1F517;</a></td>
+  </tr>
+</tbody>
+</table>
+
 
 ## Strategies
 
-| Contract                       | Address                                      | Goerli | Optimism Goerli | Sepolia | PGN Sepolia |
-|--------------------------------|----------------------------------------------|:------:|:---------------:|:-------:|:-----------:|
-| Donation Voting v1 | `0x4AB4eF1aa0c2f63FFE77b245E679fb7B38681470` | [🔗](https://goerli.etherscan.io/address/0x4AB4eF1aa0c2f63FFE77b245E679fb7B38681470) |      [🔗](https://goerli-optimism.etherscan.io/address/0x4AB4eF1aa0c2f63FFE77b245E679fb7B38681470)     | [🔗](https://sepolia.etherscan.io/address/0x4AB4eF1aa0c2f63FFE77b245E679fb7B38681470)  |   [🔗](https://explorer.sepolia.publicgoods.network/address/0x4AB4eF1aa0c2f63FFE77b245E679fb7B38681470)    |
+<table>
+<thead>
+  <tr>
+    <th>Contract</th>
+    <th>Address</th>
+    <th>Goerli</th>
+    <th>Optimism Goerli</th>
+    <th>Sepolia</th>
+    <th>PGN Sepolia</th>
+    <th>Celo Alfajores</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td>Donation Voting V1</td>
+    <td></td>
+    <td><a href="https://goerli.etherscan.io/address/">&#x1F517;</a></td>
+    <td><a href="https://goerli-optimism.etherscan.io/address/">&#x1F517;</a></td>
+    <td><a href="https://sepolia.etherscan.io/address/">&#x1F517;</a></td>
+    <td><a href="https://explorer.sepolia.publicgoods.network/address/">&#x1F517;</a></td>
+    <td><a href="https://explorer.celo.org/alfajores/address/">&#x1F517;</a></td>
+  </tr>
+</tbody>
+</table>
 
 ## Developer Contracts
 
-| Contract                       | Address                                      | Goerli | Optimism Goerli | Sepolia | PGN Sepolia |
-|--------------------------------|----------------------------------------------|:------:|:---------------:|:-------:|:-----------:|
-| Deployer | `0x339d087B3ab5DF79c6c3617B2487e5340F2DBE3f` | [🔗](https://goerli.etherscan.io/address/0x339d087B3ab5DF79c6c3617B2487e5340F2DBE3f) |      [🔗](https://goerli-optimism.etherscan.io/address/0x339d087B3ab5DF79c6c3617B2487e5340F2DBE3f)     | [🔗](https://sepolia.etherscan.io/address/0x339d087B3ab5DF79c6c3617B2487e5340F2DBE3f)  |   [🔗](https://explorer.sepolia.publicgoods.network/address/0x339d087B3ab5DF79c6c3617B2487e5340F2DBE3f)    |
+<table>
+<thead>
+  <tr>
+    <th>Contract</th>
+    <th>Address</th>
+    <th>Goerli</th>
+    <th>Optimism Goerli</th>
+    <th>Sepolia</th>
+    <th>PGN Sepolia</th>
+    <th>Celo Alfajores</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td>ContractFactory</td>
+    <td>0x737b811828B34838e2188c59cfF72BD1019A1070</td>
+    <td><a href="https://goerli.etherscan.io/address/0x737b811828B34838e2188c59cfF72BD1019A1070">&#x1F517;</a></td>
+    <td><a href="https://goerli-optimism.etherscan.io/address/0x737b811828B34838e2188c59cfF72BD1019A1070">&#x1F517;</a></td>
+    <td><a href="https://sepolia.etherscan.io/address/0x737b811828B34838e2188c59cfF72BD1019A1070">&#x1F517;</a></td>
+    <td><a href="https://explorer.sepolia.publicgoods.network/address/0x737b811828B34838e2188c59cfF72BD1019A1070">&#x1F517;</a></td>
+    <td><a href="https://explorer.celo.org/alfajores/address/0x737b811828B34838e2188c59cfF72BD1019A1070">&#x1F517;</a></td>
+  </tr>
+</tbody>
+</table>

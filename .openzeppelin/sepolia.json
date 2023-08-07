@@ -1,20 +1,20 @@
 {
   "manifestVersion": "3.2",
   "admin": {
-    "address": "0x2608Afc3CCDA3dEa4965A516Aa14Cb085e465dE1",
-    "txHash": "0xd892a39425311a91ef5da3429355dfe06c2cef0a4012b7a2b9579e49927ceb92"
+    "address": "0x3486c2Ea339c02fe966B2FAD9374fA259d47AFD8",
+    "txHash": "0x9eea639d75f8b3f1c908f2abcd07b3919b88ac0155c7b152e69465e7fb9531e1"
   },
   "proxies": [
     {
-      "address": "0x45F5506b0014cbdc9652854B65eed90E56aB7dA9",
-      "txHash": "0x2fd8f858d49ec9758af15eac5b1f2529aa3315910535453c85363494cc4c4021",
+      "address": "0x79536CC062EE8FAFA7A19a5fa07783BD7F792206",
+      "txHash": "0xa84b8642b4bc96b3f6f1b3f09bba264cb71715445afcc7131a34d47550364a4f",
       "kind": "transparent"
     }
   ],
   "impls": {
-    "ce2229996c830482327eebbedaae0806b9bdb966bae934f1b5e6e1a878d57fa8": {
-      "address": "0x97122901B6346a625294D446F5d0b7bc00A3b0f2",
-      "txHash": "0x0bc1cb6feda3789f64a8a75ab848ba837cebff4c8ec8fd43c52df75a22dca10e",
+    "f9984da39bc01b4a3b8ac2ddbc72201dff7ec729ff3cfe2cc57ac1da147edb32": {
+      "address": "0x8dDe1922d5f772890f169714FACeEF9551791CaF",
+      "txHash": "0xf52f301fc4ab5c4c3edc1f9ce0012a71ccf513f1d0587a1454b8c18eca16bb1f",
       "layout": {
         "solcVersion": "0.8.19",
         "storage": [
@@ -79,7 +79,7 @@
             "label": "registry",
             "offset": 0,
             "slot": "6",
-            "type": "t_contract(IRegistry)4041",
+            "type": "t_contract(IRegistry)4032",
             "contract": "Allo",
             "src": "contracts/core/Allo.sol:55"
           },
@@ -95,7 +95,7 @@
             "label": "pools",
             "offset": 0,
             "slot": "8",
-            "type": "t_mapping(t_uint256,t_struct(Pool)3586_storage)",
+            "type": "t_mapping(t_uint256,t_struct(Pool)3577_storage)",
             "contract": "Allo",
             "src": "contracts/core/Allo.sol:61"
           },
@@ -125,11 +125,11 @@
             "label": "bytes32",
             "numberOfBytes": "32"
           },
-          "t_contract(IRegistry)4041": {
+          "t_contract(IRegistry)4032": {
             "label": "contract IRegistry",
             "numberOfBytes": "20"
           },
-          "t_contract(IStrategy)4471": {
+          "t_contract(IStrategy)4463": {
             "label": "contract IStrategy",
             "numberOfBytes": "20"
           },
@@ -145,7 +145,7 @@
             "label": "mapping(bytes32 => struct AccessControl.RoleData)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_uint256,t_struct(Pool)3586_storage)": {
+          "t_mapping(t_uint256,t_struct(Pool)3577_storage)": {
             "label": "mapping(uint256 => struct IAllo.Pool)",
             "numberOfBytes": "32"
           },
@@ -153,7 +153,7 @@
             "label": "string",
             "numberOfBytes": "32"
           },
-          "t_struct(Metadata)4112_storage": {
+          "t_struct(Metadata)4103_storage": {
             "label": "struct Metadata",
             "members": [
               {
@@ -171,18 +171,18 @@
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(Pool)3586_storage": {
+          "t_struct(Pool)3577_storage": {
             "label": "struct IAllo.Pool",
             "members": [
               {
-                "label": "identityId",
+                "label": "profileId",
                 "type": "t_bytes32",
                 "offset": 0,
                 "slot": "0"
               },
               {
                 "label": "strategy",
-                "type": "t_contract(IStrategy)4471",
+                "type": "t_contract(IStrategy)4463",
                 "offset": 0,
                 "slot": "1"
               },
@@ -193,31 +193,25 @@
                 "slot": "2"
               },
               {
-                "label": "amount",
-                "type": "t_uint256",
+                "label": "metadata",
+                "type": "t_struct(Metadata)4103_storage",
                 "offset": 0,
                 "slot": "3"
-              },
-              {
-                "label": "metadata",
-                "type": "t_struct(Metadata)4112_storage",
-                "offset": 0,
-                "slot": "4"
               },
               {
                 "label": "managerRole",
                 "type": "t_bytes32",
                 "offset": 0,
-                "slot": "6"
+                "slot": "5"
               },
               {
                 "label": "adminRole",
                 "type": "t_bytes32",
                 "offset": 0,
-                "slot": "7"
+                "slot": "6"
               }
             ],
-            "numberOfBytes": "256"
+            "numberOfBytes": "224"
           },
           "t_struct(RoleData)676_storage": {
             "label": "struct AccessControl.RoleData",
