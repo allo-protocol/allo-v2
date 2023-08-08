@@ -20,4 +20,7 @@ contract EventSetup {
         address sender
     );
     event PayoutSet(bytes recipientIds);
+    event Claimed(address indexed recipientId, address recipientAddress, uint256 amount, address token);
+    event TimestampsUpdated(uint256 allocationStartTime, uint256 allocationEndTime, address sender);
+    event NFTContractCreated(address nftContractAddress);
 }

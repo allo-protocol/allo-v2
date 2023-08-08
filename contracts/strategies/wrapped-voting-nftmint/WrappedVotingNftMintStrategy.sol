@@ -78,7 +78,7 @@ contract WrappedVotingNftMintStrategy is Native, BaseStrategy, Initializable, Re
     /// @notice Initializes the WrappedVotingStrategy contract
     /// @param _poolId The ID of the pool
     /// @param _data The data containing the NFTFactory address, allocation start time, and allocation end time
-    function initialize(uint256 _poolId, bytes memory _data) external initializer {
+    function initialize(uint256 _poolId, bytes memory _data) external override {
         (address nftFactoryAddress, uint256 _allocationStartTime, uint256 _allocationEndTime) =
             abi.decode(_data, (address, uint256, uint256));
         __WrappedVotingStrategy_init(_poolId, nftFactoryAddress, _allocationStartTime, _allocationEndTime);
@@ -127,28 +127,34 @@ contract WrappedVotingNftMintStrategy is Native, BaseStrategy, Initializable, Re
     /// @param _data The data containing NFT information
     /// @param _sender The sender of the transaction
     function _allocate(bytes memory _data, address _sender) internal override {
-        NFT nft = abi.decode(_data, (NFT));
+        // decode the data to get the NFT contract
+        (NFT nft, address recipientAddress) = abi.decode(_data, (NFT, address));
         uint256 mintPrice = nft.MINT_PRICE();
         if (msg.value == 0 || msg.value < mintPrice) {
             revert INVALID();
         }
 
+        // divide the amount sent by the mint price to get the amount of NFTs to mint
         uint256 amount = msg.value / mintPrice;
 
+        // mint the NFT's to the sender
         for (uint256 i = 0; i < amount;) {
-            nft.mintTo{value: mintPrice}(_sender);
+            nft.mintTo{value: mintPrice}(recipientAddress);
             unchecked {
                 i++;
             }
         }
 
+        // add the amount to the sender's allocation
         allocations[_sender] += amount;
 
+        // if the sender's allocation is greater than the current winner's allocation, set the current winner to the sender
         if (allocations[_sender] > allocations[currentWinner]) {
             currentWinner = _sender;
         }
 
-        emit Allocated(address(nft), amount, NATIVE, _sender);
+        // emit the event
+        emit Allocated(address(nft), amount, NATIVE, recipientAddress);
     }
 
     /// @notice Internal function to distribute the tokens to the winner

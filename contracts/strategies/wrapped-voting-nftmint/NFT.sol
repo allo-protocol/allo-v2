@@ -20,10 +20,11 @@ contract NFT is ERC721, Ownable {
     constructor(
         string memory _name,
         string memory _symbol,
-        uint256 _price //price in wei
+        uint256 _price, //price in wei
+        address _owner
     ) ERC721(_name, _symbol) {
         MINT_PRICE = _price;
-        _initializeOwner(msg.sender);
+        _initializeOwner(_owner);
     }
 
     function mintTo(address to) public payable onlyOwner {
