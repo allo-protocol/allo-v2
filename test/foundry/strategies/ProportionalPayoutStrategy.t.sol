@@ -148,7 +148,7 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
         assertEq(recipient.recipientAddress, recipient1());
     }
 
-    function test_isValidAllocator_shit() public {
+    function test_isValidAllocator() public {
         address recipientAddress = recipient1();
         assertFalse(strategy.isValidAllocator(recipientAddress));
 

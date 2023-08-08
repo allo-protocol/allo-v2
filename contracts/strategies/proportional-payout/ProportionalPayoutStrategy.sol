@@ -129,13 +129,6 @@ contract ProportionalPayoutStrategy is BaseStrategy {
     // ==== External ====
     // ==================
 
-    /// @notice Checks if the allocator is valid
-    /// @param _allocator The allocator address
-    /// @return true if the allocator is valid
-    function isValidAllocator(address _allocator) external view virtual override returns (bool) {
-        return nft.balanceOf(_allocator) > 0;
-    }
-
     /// @notice Set the allocation start and end timestamps
     /// @param _allocationStartTime The allocation start timestamp
     /// @param _allocationEndTime The allocation end timestamp
@@ -149,11 +142,18 @@ contract ProportionalPayoutStrategy is BaseStrategy {
     // ==================
     // ==== Internal ====
     // ==================
+
+    /// @notice Checks if the allocator is valid
+    /// @param _allocator The allocator address
+    /// @return true if the allocator is valid
+    function _isValidAllocator(address _allocator) internal view override returns (bool) {
+        return nft.balanceOf(_allocator) > 0;
+    }
+
     /// @notice Allocate votes to a recipient
     /// @param _data The data
     /// @param _sender The sender of the transaction
     /// @dev Only the NFT holder can call this function
-
     function _allocate(bytes memory _data, address _sender) internal override onlyActiveAllocation {
         (address recipientId, uint256 nftId) = abi.decode(_data, (address, uint256));
 
