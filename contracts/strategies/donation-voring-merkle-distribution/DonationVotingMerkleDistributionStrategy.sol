@@ -4,6 +4,7 @@ pragma solidity 0.8.19;
 // External Libraries
 import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import {Multicall} from "@openzeppelin/contracts/utils/Multicall.sol";
 // Interfaces
 import {IAllo} from "../../core/IAllo.sol";
 import {IRegistry} from "../../core/IRegistry.sol";
@@ -13,7 +14,7 @@ import {BaseStrategy} from "../BaseStrategy.sol";
 import {Metadata} from "../../core/libraries/Metadata.sol";
 import {Native} from "../../core/libraries/Native.sol";
 
-contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGuard {
+contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGuard, Multicall {
     /// ================================
     /// ========== Struct ==============
     /// ================================
@@ -26,12 +27,16 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         Appealed
     }
 
+    struct ApplicationStatus {
+        uint256 index;
+        uint256 statusRow;
+    }
+
     /// @notice Struct to hold details of the recipients
     struct Recipient {
         bool useRegistryAnchor;
         address recipientAddress;
         Metadata metadata;
-        InternalRecipientStatus recipientStatus;
     }
 
     /// @notice Struct to hold details of the allocations to claim
@@ -65,7 +70,7 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
     /// ===============================
 
     event Appealed(address indexed recipientId, bytes data, address sender);
-    event RecipientStatusUpdated(address indexed recipientId, InternalRecipientStatus recipientStatus, address sender);
+    event RecipientStatusUpdated(uint256 indexed rowIndex, uint256 fullRow, address sender);
     event Claimed(address indexed recipientId, address recipientAddress, uint256 amount, address token);
     event TimestampsUpdated(
         uint256 registrationStartTime,
@@ -82,6 +87,10 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
     /// ========== Storage =============
     /// ================================
 
+
+    /// Metadata containing the distribution
+    Metadata public distributionMetadata;
+
     bool public useRegistryAnchor;
     bool public metadataRequired;
     bool public distributionStarted;
@@ -90,15 +99,31 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
     uint256 public allocationStartTime;
     uint256 public allocationEndTime;
     uint256 public totalPayoutAmount;
+    uint256 public recipientsCounter;
 
     /// @notice merkle root generated from distribution
     bytes32 public merkleRoot;
 
+    // This is a packed array of booleans.
+    // statuses[0] is the first row of the bitmap and allows to store 256 bits to describe
+    // the status of 256 projects.
+    // statuses[1] is the second row, and so on.
+    // Instead of using 1 bit for each recipient status, we use 4 bits to allow 5 statuses:
+    // 0: none
+    // 1: pending
+    // 2: accepted
+    // 3: rejected
+    // 4: appealed
+    // Since it's a mapping the storage it's pre-allocated with zero values,
+    // so if we check the status of an existing recipient, the value is by default 0 (pending).
+    // If we want to check the status of an recipient, we take its index from the `recipients` array
+    // and convert it to the 2-bits position in the bitmap.
+    mapping(uint256 => uint256) public statusesBitMap;
+    // recipientId => statusIndex
+    mapping(address => uint256) public recipientToStatusIndexes;
+
     /// @notice packed array of booleans to keep track of claims
     mapping(uint256 => uint256) private distributedBitMap;
-
-    /// MetaPtr containing the distribution
-    Metadata public distributionMetadata;
 
     /// @notice token -> bool
     mapping(address => bool) public allowedTokens;
@@ -217,13 +242,13 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
     /// @notice Get Internal recipient status
     /// @param _recipientId Id of the recipient
     function getInternalRecipientStatus(address _recipientId) external view returns (InternalRecipientStatus) {
-        return _getRecipient(_recipientId).recipientStatus;
+        return InternalRecipientStatus(_getRecipientStatus(_recipientId));
     }
 
     /// @notice Get recipient status
     /// @param _recipientId Id of the recipient
     function getRecipientStatus(address _recipientId) external view override returns (RecipientStatus) {
-        InternalRecipientStatus internalStatus = _getRecipient(_recipientId).recipientStatus;
+        InternalRecipientStatus internalStatus = InternalRecipientStatus(_getRecipientStatus(_recipientId));
         if (internalStatus == InternalRecipientStatus.Appealed) {
             return RecipientStatus.Pending;
         } else {
@@ -240,32 +265,26 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
     /// ======= External/Custom =======
     /// ===============================
 
-    /// @notice Review recipient application
-    /// @param _recipientIds Ids of the recipients
-    /// @param _recipientStatuses Statuses of the recipients
-    function reviewRecipients(address[] calldata _recipientIds, InternalRecipientStatus[] calldata _recipientStatuses)
+    // Statuses:
+    // * 0 - none
+    // * 1 - pending
+    // * 2 - approved
+    // * 3 - rejected
+    // * 4 - appealed
+    /// Set recipient statuses
+    /// @param statuses new statuses
+    function reviewRecipients(ApplicationStatus[] memory statuses)
         external
-        onlyPoolManager(msg.sender)
         onlyActiveRegistration
+        onlyPoolManager(msg.sender)
     {
-        uint256 recipientLength = _recipientIds.length;
-        if (recipientLength != _recipientStatuses.length) {
-            revert INVALID();
-        }
+        for (uint256 i = 0; i < statuses.length;) {
+            uint256 rowIndex = statuses[i].index;
+            uint256 fullRow = statuses[i].statusRow;
 
-        for (uint256 i = 0; i < recipientLength;) {
-            InternalRecipientStatus recipientStatus = _recipientStatuses[i];
-            address recipientId = _recipientIds[i];
-            if (recipientStatus == InternalRecipientStatus.None || recipientStatus == InternalRecipientStatus.Appealed)
-            {
-                revert RECIPIENT_ERROR(recipientId);
-            }
+            statusesBitMap[rowIndex] = fullRow;
 
-            Recipient storage recipient = _recipients[recipientId];
-
-            recipient.recipientStatus = recipientStatus;
-
-            emit RecipientStatusUpdated(recipientId, recipientStatus, msg.sender);
+            emit RecipientStatusUpdated(rowIndex, fullRow, msg.sender);
 
             unchecked {
                 i++;
@@ -338,7 +357,7 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
     /// ============ Merkle ==============
     /// ==================================
 
-    /// @notice Invoked by round operator to update the merkle root and distribution MetaPtr
+    /// @notice Invoked by round operator to update the merkle root and distribution Metadata
     /// @param encodedDistribution encoded distribution
     function updateDistribution(bytes calldata encodedDistribution)
         external
@@ -396,7 +415,7 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         return false;
     }
 
-    /// @notice Submit application to pool
+    /// @notice Submit recipient to pool
     /// @param _data The data to be decoded
     /// @param _sender The sender of the transaction
     function _registerRecipient(bytes memory _data, address _sender)
@@ -441,12 +460,19 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         recipient.metadata = metadata;
         recipient.useRegistryAnchor = useRegistryAnchor ? true : isUsingRegistryAnchor;
 
-        if (recipient.recipientStatus == InternalRecipientStatus.Rejected) {
-            recipient.recipientStatus = InternalRecipientStatus.Appealed;
+        uint8 currentStatus = _getRecipientStatus(recipientId);
+
+        if (currentStatus == uint8(InternalRecipientStatus.Rejected)) {
+            _setRecipientStatus(recipientId, uint8(InternalRecipientStatus.Appealed));
             emit Appealed(recipientId, _data, _sender);
         } else {
-            recipient.recipientStatus = InternalRecipientStatus.Pending;
-            emit Registered(recipientId, _data, _sender);
+            recipientToStatusIndexes[recipientId] = recipientsCounter;
+            _setRecipientStatus(recipientId, uint8(InternalRecipientStatus.Pending));
+
+            bytes memory extendedData = abi.encode(_data, recipientsCounter);
+            emit Registered(recipientId, extendedData, _sender);
+
+            recipientsCounter++;
         }
     }
 
@@ -459,9 +485,7 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
     {
         (address recipientId, uint256 amount, address token) = abi.decode(_data, (address, uint256, address));
 
-        Recipient storage recipient = _recipients[recipientId];
-
-        if (recipient.recipientStatus != InternalRecipientStatus.Accepted) {
+        if (InternalRecipientStatus(_getRecipientStatus(recipientId)) != InternalRecipientStatus.Accepted) {
             revert RECIPIENT_ERROR(recipientId);
         }
 
@@ -486,9 +510,6 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         override
         onlyPoolManager(_sender)
     {
-        if (merkleRoot == "") {
-            revert INVALID();
-        }
         if (!distributionStarted) {
             distributionStarted = true;
         }
@@ -595,6 +616,41 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         } else {
             revert RECIPIENT_ERROR(recipientId);
         }
+    }
+
+    /// @notice set recipient status
+    /// @param _recipientId Id of the recipient
+    /// @param _status Status of the recipient
+    function _setRecipientStatus(address _recipientId, uint256 _status) internal {
+        (uint256 rowIndex, uint256 colIndex, uint256 currentRow) = _getStatusRowColumn(_recipientId);
+
+        uint256 newRow = currentRow & ~(15 << colIndex);
+        statusesBitMap[rowIndex] = newRow | (_status << colIndex);
+    }
+
+    /// @notice get recipient status rowIndex, colIndex and currentRow
+    /// @param _recipientId Id of the recipient
+    /// @return rowIndex, colIndex, currentRow
+    function _getStatusRowColumn(address _recipientId) internal view returns (uint256, uint256, uint256) {
+        uint256 recipientIndex = recipientToStatusIndexes[_recipientId];
+
+        if (recipientIndex >= recipientsCounter) {
+            revert INVALID();
+        }
+
+        uint256 rowIndex = recipientIndex / 64; // 256 / 4
+        uint256 colIndex = (recipientIndex % 64) * 4;
+
+        return (rowIndex, colIndex, statusesBitMap[rowIndex]);
+    }
+
+    /// @notice Get recipient status
+    /// @param _recipientId index of the recipient
+    /// @return status status of the recipient
+    function _getRecipientStatus(address _recipientId) internal view returns (uint8) {
+        (, uint256 colIndex, uint256 currentRow) = _getStatusRowColumn(_recipientId);
+        uint8 status = uint8((currentRow >> colIndex) & 15);
+        return status;
     }
 
     receive() external payable {}
