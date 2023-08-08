@@ -16,7 +16,7 @@ import {RegistrySetupFull} from "../shared/RegistrySetup.sol";
 import {AlloSetup} from "../shared/AlloSetup.sol";
 import {EventSetup} from "../shared/EventSetup.sol";
 // Mocks
-import {MockNFT} from "../../utils/MockNFT.sol";
+import {MockERC721} from "../../utils/MockERC721.sol";
 
 contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, AlloSetup, EventSetup {
     error RECIPIENT_ERROR(address recipientId);
@@ -42,7 +42,7 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
     uint256 public endTime;
 
     /// @notice The nft required for voting
-    MockNFT public nft;
+    MockERC721 public nft;
 
     /// @notice List of recipients who will receive payout at the end
     address[] public recipients;
@@ -79,13 +79,13 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
         strategy = new ProportionalPayoutStrategy(address(allo()), "ProportionalPayoutStrategy");
         initialized = false;
 
-        nft = MockNFT(makeAddr("nft"));
+        nft = new MockERC721();
 
         vm.prank(pool_admin());
         poolId = allo().createPoolWithCustomStrategy(
             poolProfile_id(),
             address(strategy),
-            abi.encode(address(nft), 20, startTime, endTime),
+            abi.encode(address(nft), 2, startTime, endTime),
             address(0),
             0,
             poolMetadata,
@@ -104,11 +104,11 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
         ProportionalPayoutStrategy testStrategy =
             new ProportionalPayoutStrategy(address(allo()), "ProportionalPayoutStrategy");
         vm.prank(address(allo()));
-        testStrategy.initialize(poolId, abi.encode(address(nft), 20, startTime, endTime));
+        testStrategy.initialize(poolId, abi.encode(address(nft), 2, startTime, endTime));
 
         assertEq(testStrategy.allocationStartTime(), startTime);
         assertEq(testStrategy.allocationEndTime(), endTime);
-        assertEq(testStrategy.maxRecipientsAllowed(), 20);
+        assertEq(testStrategy.maxRecipientsAllowed(), 2);
         assertTrue(testStrategy.isPoolActive());
         assertEq(address(testStrategy.nft()), address(nft));
     }
@@ -117,10 +117,10 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
         ProportionalPayoutStrategy testStrategy =
             new ProportionalPayoutStrategy(address(allo()), "ProportionalPayoutStrategy");
         vm.startPrank(address(allo()));
-        testStrategy.initialize(1337, abi.encode(address(nft), 20, startTime, endTime));
+        testStrategy.initialize(1337, abi.encode(address(nft), 2, startTime, endTime));
 
         vm.expectRevert(IStrategy.BaseStrategy_ALREADY_INITIALIZED.selector);
-        testStrategy.initialize(1337, abi.encode(address(nft), 20, startTime, endTime));
+        testStrategy.initialize(1337, abi.encode(address(nft), 2, startTime, endTime));
     }
 
     function testRevert_initialize_UNAUTHORIZED() public {
@@ -128,7 +128,7 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
             new ProportionalPayoutStrategy(address(allo()), "ProportionalPayoutStrategy");
         vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
 
-        testStrategy.initialize(1337, abi.encode(address(nft), 20, startTime, endTime));
+        testStrategy.initialize(1337, abi.encode(address(nft), 2, startTime, endTime));
     }
 
     function testRevert_initialize_INVALID() public {
@@ -138,7 +138,7 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
         vm.expectRevert(abi.encodeWithSelector(ProportionalPayoutStrategy.INVALID.selector));
 
         vm.prank(address(allo()));
-        testStrategy.initialize(1337, abi.encode(address(nft), 20, endTime, startTime));
+        testStrategy.initialize(1337, abi.encode(address(nft), 2, endTime, startTime));
     }
 
     function test_getRecipient() public {
@@ -148,81 +148,13 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
         assertEq(recipient.recipientAddress, recipient1());
     }
 
-    function test_isValidAllocator() public {
-        // address recipientAddress = recipient1();
-        // todo: this keeps failing on mint...
-        // nft.mint(recipientAddress);
-
-        // emit log_named_uint("balance", nft.balanceOf(recipientAddress));
-
-        // assertTrue(strategy.isValidAllocator(recipientAddress));
-    }
-
-    function test_registerRecipient() public {
+    function test_isValidAllocator_shit() public {
         address recipientAddress = recipient1();
-        vm.deal(recipientAddress, 1000000000000000000);
-        Metadata memory metadata = Metadata({protocol: 1, pointer: "I am Chad"});
-        bytes memory data = abi.encode(recipientAddress, recipientAddress, IStrategy.RecipientStatus.Accepted, metadata);
+        assertFalse(strategy.isValidAllocator(recipientAddress));
 
-        vm.prank(pool_manager1());
-        allo().registerRecipient(poolId, data);
+        nft.mint(recipientAddress, 1);
 
-        IStrategy.RecipientStatus status = strategy.getRecipientStatus(recipientAddress);
-        assertEq(uint8(status), uint8(IStrategy.RecipientStatus.Accepted));
-    }
-
-    function testRevert_registerRecipient_RECIPIENT_ERROR() public {
-        address recipientAddress = nullProfile_member1();
-        vm.deal(recipientAddress, 1000000000000000000);
-        Metadata memory metadata = Metadata({protocol: 1, pointer: "I am Chad"});
-        bytes memory data = abi.encode(recipientAddress, recipientAddress, IStrategy.RecipientStatus.Accepted, metadata);
-
-        vm.expectRevert(abi.encodeWithSelector(ProportionalPayoutStrategy.RECIPIENT_ERROR.selector, recipientAddress));
-
-        vm.prank(pool_manager1());
-        allo().registerRecipient(poolId, data);
-    }
-
-    function testRevert_registerRecipient_UNAUTHORIZED() public {
-        address recipientAddress = nullProfile_member1();
-        vm.deal(recipientAddress, 1000000000000000000);
-        Metadata memory metadata = Metadata({protocol: 1, pointer: "I am Chad"});
-        bytes memory data = abi.encode(recipientAddress, recipientAddress, IStrategy.RecipientStatus.Accepted, metadata);
-
-        vm.expectRevert(abi.encodeWithSelector(IStrategy.BaseStrategy_UNAUTHORIZED.selector));
-
-        vm.prank(pool_notAManager());
-        allo().registerRecipient(poolId, data);
-    }
-
-    function test_getPayouts() public {
-        _register_allocate_submit_distribute();
-        IStrategy.PayoutSummary[] memory payouts = strategy.getPayouts(recipients, new bytes[](0));
-        assertEq(payouts.length, 1);
-        assertEq(payouts[0].amount, 1e18);
-        assertEq(payouts[0].recipientAddress, recipient1());
-    }
-
-    function test_allocate() public {}
-
-    function testRevert_allocate_UNAUTHORIZED() public {
-        // address recipientId = makeAddr("recipient");
-        // bytes memory data = abi.encode(recipientId, 1);
-
-        // vm.expectRevert(abi.encodeWithSelector(ProportionalPayoutStrategy.UNAUTHORIZED.selector));
-
-        // // TODO:
-        // vm.prank(address(allo()));
-        // allo().allocate(poolId, data);
-    }
-
-    // TODO:
-    function testRevert_allocate_RECIPIENT_ERROR() public {
-        // vm.expectRevert(NotElligibleVoter.selector);
-        // address recipientId = makeAddr("recipient");
-        // bytes memory data = abi.encode(recipientId, amount);
-
-        // allo().allocate(poolId, data);
+        assertTrue(strategy.isValidAllocator(recipientAddress));
     }
 
     function test_setAllocationTimes() public {
@@ -250,27 +182,225 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
         strategy.setAllocationTime(_startTime, _endTime);
     }
 
+    function testRevert_setAllocationTimes_INVALID() public {
+        uint256 _startTime = block.timestamp - 1;
+        uint256 _endTime = block.timestamp + 600;
+
+        vm.expectRevert(ProportionalPayoutStrategy.INVALID.selector);
+        vm.prank(pool_manager1());
+        strategy.setAllocationTime(_startTime, _endTime);
+
+        vm.expectRevert(ProportionalPayoutStrategy.INVALID.selector);
+        vm.prank(pool_manager1());
+        strategy.setAllocationTime(_endTime + 10, _endTime);
+    }
+
+    function test_registerRecipient_acceptApplication() public {
+        Metadata memory metadata = Metadata({protocol: 1, pointer: "Test Metadata"});
+        bytes memory data = abi.encode(recipient1(), recipient1(), IStrategy.RecipientStatus.Accepted, metadata);
+
+        vm.prank(pool_manager1());
+        allo().registerRecipient(poolId, data);
+
+        IStrategy.RecipientStatus status = strategy.getRecipientStatus(recipient1());
+        assertEq(uint8(status), uint8(IStrategy.RecipientStatus.Accepted));
+    }
+
+    function test_registerRecipient_rejectApprovedApplication() public {
+        Metadata memory metadata = Metadata({protocol: 1, pointer: "Test Metadata"});
+        bytes memory data = abi.encode(recipient1(), recipient1(), IStrategy.RecipientStatus.Accepted, metadata);
+
+        vm.prank(pool_manager1());
+        allo().registerRecipient(poolId, data);
+
+        IStrategy.RecipientStatus status = strategy.getRecipientStatus(recipient1());
+        assertEq(uint8(status), uint8(IStrategy.RecipientStatus.Accepted));
+        assertEq(strategy.recipientsCounter(), 1);
+
+        data = abi.encode(recipient1(), recipient1(), IStrategy.RecipientStatus.Rejected, metadata);
+
+        vm.prank(pool_manager1());
+        allo().registerRecipient(poolId, data);
+
+        status = strategy.getRecipientStatus(recipient1());
+        assertEq(uint8(status), uint8(IStrategy.RecipientStatus.Rejected));
+        assertEq(strategy.recipientsCounter(), 0);
+    }
+
+    function testRevert_registerRecipient_RECIPIENT_ERROR_zeroRecipientId() public {
+        Metadata memory metadata = Metadata({protocol: 1, pointer: "Test Metadata"});
+        bytes memory data = abi.encode(address(0), recipient1(), IStrategy.RecipientStatus.Accepted, metadata);
+
+        vm.expectRevert(abi.encodeWithSelector(ProportionalPayoutStrategy.RECIPIENT_ERROR.selector, address(0)));
+
+        vm.prank(pool_manager1());
+        allo().registerRecipient(poolId, data);
+    }
+
+    function testRevert_registerRecipient_RECIPIENT_ERROR_zeroRecipientAddress() public {
+        Metadata memory metadata = Metadata({protocol: 1, pointer: "Test Metadata"});
+        bytes memory data = abi.encode(recipient1(), address(0), IStrategy.RecipientStatus.Accepted, metadata);
+
+        vm.expectRevert(abi.encodeWithSelector(ProportionalPayoutStrategy.RECIPIENT_ERROR.selector, recipient1()));
+
+        vm.prank(pool_manager1());
+        allo().registerRecipient(poolId, data);
+    }
+
+    function testRevert_registerRecipient_RECIPIENT_ERROR_invalidStatus() public {
+        Metadata memory metadata = Metadata({protocol: 1, pointer: "Test Metadata"});
+        bytes memory data = abi.encode(recipient1(), recipient1(), IStrategy.RecipientStatus.Pending, metadata);
+
+        vm.expectRevert(abi.encodeWithSelector(ProportionalPayoutStrategy.RECIPIENT_ERROR.selector, recipient1()));
+
+        vm.prank(pool_manager1());
+        allo().registerRecipient(poolId, data);
+    }
+
+    function testRevert_registerRecipient_MAX_REACHED() public {
+        Metadata memory metadata = Metadata({protocol: 1, pointer: "Test Metadata"});
+        bytes memory data =
+            abi.encode(makeAddr("recipient1"), makeAddr("recipient1"), IStrategy.RecipientStatus.Accepted, metadata);
+
+        vm.prank(pool_manager1());
+        allo().registerRecipient(poolId, data);
+
+        data = abi.encode(makeAddr("recipient2"), makeAddr("recipient2"), IStrategy.RecipientStatus.Accepted, metadata);
+        vm.prank(pool_manager1());
+        allo().registerRecipient(poolId, data);
+
+        vm.expectRevert(ProportionalPayoutStrategy.MAX_REACHED.selector);
+        data = abi.encode(makeAddr("recipient3"), makeAddr("recipient3"), IStrategy.RecipientStatus.Accepted, metadata);
+        vm.prank(pool_manager1());
+
+        allo().registerRecipient(poolId, data);
+    }
+
+    function testRevert_registerRecipient_UNAUTHORIZED() public {
+        Metadata memory metadata = Metadata({protocol: 1, pointer: "Test Metadata"});
+        bytes memory data = abi.encode(recipient1(), recipient1(), IStrategy.RecipientStatus.Accepted, metadata);
+
+        vm.expectRevert(abi.encodeWithSelector(IStrategy.BaseStrategy_UNAUTHORIZED.selector));
+
+        vm.prank(pool_notAManager());
+        allo().registerRecipient(poolId, data);
+    }
+
+    function test_getPayouts() public {
+        address recipientId = _register_allocate_submit_distribute();
+        address[] memory recipientIds = new address[](1);
+        recipientIds[0] = recipientId;
+
+        IStrategy.PayoutSummary[] memory payouts = strategy.getPayouts(recipientIds, new bytes[](0));
+        assertEq(payouts.length, 1);
+        assertEq(payouts[0].amount, 9.9e18);
+        assertEq(payouts[0].recipientAddress, recipient1());
+    }
+
+    function test_allocate() public {
+        address recipientId = __register_recipient();
+
+        ProportionalPayoutStrategy.Recipient memory recipient = strategy.getRecipient(recipientId);
+        assertEq(strategy.totalAllocations(), 0);
+        assertFalse(strategy.hasAllocated(1));
+        assertEq(recipient.totalVotesReceived, 0);
+
+        nft.mint(makeAddr("nftOwner"), 1);
+
+        vm.warp(startTime + 10);
+        vm.prank(makeAddr("nftOwner"));
+        vm.expectEmit(true, false, false, true);
+        emit Allocated(recipientId, 1, address(0), makeAddr("nftOwner"));
+
+        allo().allocate(poolId, abi.encode(recipientId, 1));
+
+        recipient = strategy.getRecipient(recipientId);
+
+        assertEq(strategy.totalAllocations(), 1);
+        assertTrue(strategy.hasAllocated(1));
+        assertEq(recipient.totalVotesReceived, 1);
+    }
+
+    function testRevert_allocate_ALLOCATION_NOT_ACTIVE() public {
+        address recipientId = makeAddr("recipient");
+        bytes memory data = abi.encode(recipientId, 1);
+
+        vm.expectRevert(ProportionalPayoutStrategy.ALLOCATION_NOT_ACTIVE.selector);
+
+        vm.prank(address(allo()));
+        allo().allocate(poolId, data);
+    }
+
+    function testRevert_allocate_UNAUTHORIZED() public {
+        address recipientId = makeAddr("recipient");
+        bytes memory data = abi.encode(recipientId, 1);
+
+        nft.mint(recipient1(), 1);
+
+        vm.warp(startTime + 1);
+        vm.expectRevert(ProportionalPayoutStrategy.UNAUTHORIZED.selector);
+
+        vm.prank(address(allo()));
+        allo().allocate(poolId, data);
+    }
+
+    function testRevert_allocate_RECIPIENT_ERROR_shit() public {
+        Metadata memory metadata = Metadata({protocol: 1, pointer: "Test Metadata"});
+        bytes memory data = abi.encode(recipient1(), recipient1(), IStrategy.RecipientStatus.Accepted, metadata);
+
+        vm.prank(pool_manager1());
+        address recipientId = allo().registerRecipient(poolId, data);
+
+        vm.prank(pool_manager1());
+        data = abi.encode(recipient1(), recipient1(), IStrategy.RecipientStatus.Rejected, metadata);
+        allo().registerRecipient(poolId, data);
+
+        nft.mint(makeAddr("nftOwner"), 1);
+        vm.warp(startTime + 1);
+
+        vm.expectRevert(abi.encodeWithSelector(ProportionalPayoutStrategy.RECIPIENT_ERROR.selector, recipientId));
+        vm.prank(makeAddr("nftOwner"));
+        allo().allocate(poolId, abi.encode(recipientId, 1));
+    }
+
     function __register_recipient() internal returns (address recipientId) {
-        address recipientAddress = recipient1();
-        vm.deal(recipientAddress, 1000000000000000000);
-        Metadata memory metadata = Metadata({protocol: 1, pointer: "I am Chad"});
-        bytes memory data = abi.encode(recipientAddress, recipientAddress, IStrategy.RecipientStatus.Accepted, metadata);
+        Metadata memory metadata = Metadata({protocol: 1, pointer: "Test Metadata"});
+        bytes memory data = abi.encode(recipient1(), recipient1(), IStrategy.RecipientStatus.Accepted, metadata);
 
         vm.prank(pool_manager1());
         recipientId = allo().registerRecipient(poolId, data);
     }
 
-    function _register_allocate_submit_distribute() internal returns (address recipientId) {
+    function __register_allocate() internal returns (address recipientId) {
         recipientId = __register_recipient();
+
+        nft.mint(makeAddr("nftOwner"), 1);
+
+        vm.warp(startTime + 1);
+
+        vm.prank(makeAddr("nftOwner"));
+        vm.expectEmit(true, false, false, true);
+        emit Allocated(recipientId, 1, address(0), makeAddr("nftOwner"));
+
+        allo().allocate(poolId, abi.encode(recipientId, 1));
+    }
+
+    function _register_allocate_submit_distribute() internal returns (address recipientId) {
+        recipientId = __register_allocate();
         vm.deal(pool_admin(), 1e19);
 
         vm.prank(pool_admin());
         allo().fundPool{value: 1e19}(poolId, 1e19);
 
         vm.expectEmit(true, false, false, true);
-        emit Distributed(recipientId, recipientAddress(), 7e17, pool_admin());
+        emit Distributed(recipientId, recipient1(), 9.9e18, pool_admin());
+
+        vm.warp(endTime + 1);
+
+        address[] memory recipientIds = new address[](1);
+        recipientIds[0] = recipientId;
 
         vm.prank(address(allo()));
-        strategy.distribute(new address[](0), "", pool_admin());
+        strategy.distribute(recipientIds, "", pool_admin());
     }
 }

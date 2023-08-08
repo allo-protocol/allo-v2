@@ -231,6 +231,7 @@ contract ProportionalPayoutStrategy is BaseStrategy {
         (address recipientId, address recipientAddress, RecipientStatus status, Metadata memory metadata) =
             abi.decode(_data, (address, address, RecipientStatus, Metadata));
 
+        // validate decoded id and address
         if (recipientId == address(0) || recipientAddress == address(0)) {
             revert RECIPIENT_ERROR(recipientId);
         }
@@ -238,8 +239,10 @@ contract ProportionalPayoutStrategy is BaseStrategy {
         Recipient storage recipient = recipients[recipientId];
 
         if (recipient.recipientStatus != RecipientStatus.Accepted && status == RecipientStatus.Accepted) {
+            // when a recipient is accepted, increment the counter
             recipientsCounter++;
         } else if (recipient.recipientStatus == RecipientStatus.Accepted && status == RecipientStatus.Rejected) {
+            // when a recipient is rejected, increment the counter
             recipientsCounter--;
         } else {
             revert RECIPIENT_ERROR(recipientId);
