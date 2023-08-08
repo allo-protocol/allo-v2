@@ -291,10 +291,34 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
         address[] memory recipientIds = new address[](1);
         recipientIds[0] = recipientId;
 
-        IStrategy.PayoutSummary[] memory payouts = strategy.getPayouts(recipientIds, new bytes[](0));
+        ProportionalPayoutStrategy.PayoutSummary[] memory payouts = strategy.getPayouts(recipientIds, new bytes[](1));
         assertEq(payouts.length, 1);
         assertEq(payouts[0].amount, 9.9e18);
         assertEq(payouts[0].recipientAddress, recipient1());
+    }
+
+    function test_distribute() public {
+        address recipientId = _register_allocate_submit_distribute();
+        assertTrue(strategy.paidOut(recipientId));
+    }
+
+    function testRevert_distribute_RECIPIENT_ERROR() public {
+        address recipientId = _register_allocate_submit_distribute();
+        address[] memory recipientIds = new address[](1);
+        recipientIds[0] = recipientId;
+
+        vm.expectRevert(abi.encodeWithSelector(ProportionalPayoutStrategy.RECIPIENT_ERROR.selector, recipientId));
+
+        vm.prank(address(allo()));
+        strategy.distribute(recipientIds, "", pool_admin());
+    }
+
+    function testRevert_distribute_RECIPIENT_ERROR_notAcceptedStatus() public {
+        //  TODO
+    }
+
+    function testRevert_distribute_RECIPIENT_ERROR_amountZero() public {
+        // TODO
     }
 
     function test_allocate() public {
