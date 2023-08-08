@@ -87,7 +87,6 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
     /// ========== Storage =============
     /// ================================
 
-
     /// Metadata containing the distribution
     Metadata public distributionMetadata;
 
