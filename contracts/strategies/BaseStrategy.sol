@@ -150,6 +150,10 @@ abstract contract BaseStrategy is IStrategy, Transfer {
         return payouts;
     }
 
+    function isValidAllocator(address _allocator) external view virtual override returns (bool) {
+        return _isValidAllocator(_allocator);
+    }
+
     /// ====================================
     /// ============ Internal ==============
     /// ====================================
@@ -164,6 +168,11 @@ abstract contract BaseStrategy is IStrategy, Transfer {
     function _isPoolActive() internal view virtual returns (bool) {
         return poolActive;
     }
+
+    /// @notice Checks if the allocator is valid
+    /// @param _allocator The allocator address
+    /// @return true if the allocator is valid
+    function _isValidAllocator(address _allocator) internal view virtual returns (bool);
 
     // this is called via allo.sol to register recipients
     // it can change their status all the way to Accepted, or to Pending if there are more steps

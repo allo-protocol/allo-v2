@@ -120,12 +120,6 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         return payouts;
     }
 
-    /// @notice Checks if address is elgible allocator
-    /// @param _allocator Address of the allocator
-    function isValidAllocator(address _allocator) external view returns (bool) {
-        return allo.isPoolManager(poolId, _allocator);
-    }
-
     /// @notice Get the milestone
     /// @param _milestoneId Id of the milestone
     function getMilestone(uint256 _milestoneId) external view returns (Milestone memory) {
@@ -368,6 +362,12 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     function _getPayout(address _recipientId, bytes memory) internal view override returns (PayoutSummary memory) {
         Recipient memory recipient = _recipients[_recipientId];
         return PayoutSummary(recipient.recipientAddress, recipient.proposalBid);
+    }
+
+    /// @notice Checks if address is elgible allocator
+    /// @param _allocator Address of the allocator
+    function _isValidAllocator(address _allocator) internal view override returns (bool) {
+        return allo.isPoolManager(poolId, _allocator);
     }
 
     receive() external payable {}

@@ -3,18 +3,16 @@ pragma solidity 0.8.19;
 import "forge-std/Test.sol";
 
 // Interfaces
-import {IAllo} from "../../../contracts/core/Allo.sol";
 import {IStrategy} from "../../../contracts/strategies/IStrategy.sol";
 // Core contracts
 import {BaseStrategy} from "../../../contracts/strategies/BaseStrategy.sol";
 import {QVBaseStrategy} from "../../../contracts/strategies/qv-base/QVBaseStrategy.sol";
 // Internal libraries
 import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
-import {Native} from "../../../contracts/core/libraries/Native.sol";
 
 // Test libraries
 import {AlloSetup} from "../shared/AlloSetup.sol";
-import {BaseStrategyTestMock} from "../../utils/BaseStrategyTestMock.sol";
+import {QVBaseStrategyTestMock} from "../../utils/QVBaseStrategyTestMock.sol";
 import {MockERC20} from "../../utils/MockERC20.sol";
 import {RegistrySetupFull} from "../shared/RegistrySetup.sol";
 
@@ -71,7 +69,7 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
     );
     event Allocated(address indexed recipientId, uint256 votes, address allocator);
 
-    function setUp() public {
+    function setUp() public virtual {
         __RegistrySetupFull();
         __AlloSetup(address(registry()));
 
@@ -89,8 +87,12 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
 
         poolMetadata = Metadata({protocol: 1, pointer: "PoolMetadata"});
 
-        _strategy = address(new BaseStrategyTestMock(address(allo()), "MockStrategy"));
+        _strategy = _createStrategy();
         _initialize();
+    }
+
+    function _createStrategy() internal virtual returns (address) {
+        return address(new QVBaseStrategyTestMock(address(allo()), "MockStrategy"));
     }
 
     function _initialize() internal virtual {
@@ -146,12 +148,12 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
         assertEq(qvStrategy().allocationEndTime(), allocationEndTime);
     }
 
-    function test_initialize_UNAUTHORIZED() public {
+    function test_initialize_UNAUTHORIZED() public virtual {
         vm.prank(allo_owner());
-        address strategy = address(new BaseStrategyTestMock(address(allo()), "MockStrategy"));
+        address strategy = address(new QVBaseStrategyTestMock(address(allo()), "MockStrategy"));
         vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
         vm.prank(randomAddress());
-        BaseStrategyTestMock(strategy).initialize(
+        QVBaseStrategyTestMock(strategy).initialize(
             poolId,
             abi.encode(
                 registryGating,
@@ -183,8 +185,8 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
         );
     }
 
-    function testRevert_initialize_INVALID() public {
-        BaseStrategyTestMock strategy = new BaseStrategyTestMock(address(allo()), "MockStrategy");
+    function testRevert_initialize_INVALID() public virtual {
+        QVBaseStrategyTestMock strategy = new QVBaseStrategyTestMock(address(allo()), "MockStrategy");
 
         // when registrationStartTime is in the past
         vm.expectRevert(QVBaseStrategy.INVALID.selector);
@@ -271,9 +273,9 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
     }
 
     function test_registerRecipient_new_withRegistryAnchor() public {
-        BaseStrategyTestMock strategy = new BaseStrategyTestMock(address(allo()), "MockStrategy");
+        QVBaseStrategyTestMock strategy = new QVBaseStrategyTestMock(address(allo()), "MockStrategy");
         vm.prank(address(allo()));
-        BaseStrategyTestMock(strategy).initialize(
+        QVBaseStrategyTestMock(strategy).initialize(
             poolId,
             abi.encode(
                 true,
@@ -292,8 +294,39 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
         vm.prank(address(allo()));
         address recipientId = strategy.registerRecipient(data, profile1_member1());
 
-        QVBaseStrategy.Recipient memory receipt = BaseStrategyTestMock(strategy).getRecipient(recipientId);
+        QVBaseStrategy.Recipient memory receipt = QVBaseStrategyTestMock(strategy).getRecipient(recipientId);
         assertTrue(receipt.useRegistryAnchor);
+    }
+
+    function testRevert_registerRecipient_new_withRegistryAnchor_UNAUTHORIZED() public {
+        QVBaseStrategyTestMock strategy = new QVBaseStrategyTestMock(address(allo()), "MockStrategy");
+        vm.prank(address(allo()));
+        QVBaseStrategyTestMock(strategy).initialize(
+            poolId,
+            abi.encode(
+                true,
+                metadataRequired,
+                2,
+                registrationStartTime,
+                registrationEndTime,
+                allocationStartTime,
+                allocationEndTime
+            )
+        );
+
+        vm.warp(registrationStartTime + 10);
+        bytes memory data = __generateRecipientWithId(profile1_anchor());
+
+        vm.prank(address(allo()));
+        vm.expectRevert(QVBaseStrategy.UNAUTHORIZED.selector);
+        strategy.registerRecipient(data, profile2_member1());
+    }
+
+    function testRevert_registerRecipient_UNAUTHORIZED() public {
+        vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
+        vm.prank(randomAddress());
+        bytes memory data = __generateRecipientWithoutId(false);
+        qvStrategy().registerRecipient(data, msg.sender);
     }
 
     function test_registerRecipient_appeal() public {
@@ -365,9 +398,9 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
     }
 
     function testRevert_registerRecipient_withAnchorGating_UNAUTHORIZED() public {
-        BaseStrategyTestMock strategy = new BaseStrategyTestMock(address(allo()), "MockStrategy");
+        QVBaseStrategyTestMock strategy = new QVBaseStrategyTestMock(address(allo()), "MockStrategy");
         vm.prank(address(allo()));
-        BaseStrategyTestMock(strategy).initialize(
+        QVBaseStrategyTestMock(strategy).initialize(
             poolId,
             abi.encode(
                 true,
@@ -799,8 +832,8 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
         assertEq(votes, 4);
     }
 
-    function test_mock_isValidAllocator() public {
-      assertTrue(qvStrategy().isValidAllocator(address(123)));
+    function test_isValidAllocator() public virtual {
+        assertTrue(qvStrategy().isValidAllocator(address(123)));
     }
 
     // Note: internal helper functions
@@ -896,7 +929,7 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
         return abi.encode(_recipient, _amount);
     }
 
-    function qvStrategy() internal view virtual returns (QVBaseStrategy) {
+    function qvStrategy() internal view returns (QVBaseStrategy) {
         return (QVBaseStrategy(_strategy));
     }
 }

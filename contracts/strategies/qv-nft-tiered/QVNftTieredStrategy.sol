@@ -43,17 +43,19 @@ contract QVNftTieredStrategy is QVBaseStrategy {
             bool _metadataRequired,
             ERC721[] memory _nfts,
             uint256[] memory _maxVoiceCreditsPerNft,
+            uint256 _reviewTreshold,
             uint256 _registrationStartTime,
             uint256 _registrationEndTime,
             uint256 _allocationStartTime,
             uint256 _allocationEndTime
-        ) = abi.decode(_data, (bool, bool, ERC721[], uint256[], uint256, uint256, uint256, uint256));
+        ) = abi.decode(_data, (bool, bool, ERC721[], uint256[], uint256, uint256, uint256, uint256, uint256));
         __QV_NFT_TieredStrategy_init(
             _poolId,
             _registryGating,
             _metadataRequired,
             _nfts,
             _maxVoiceCreditsPerNft,
+            _reviewTreshold,
             _registrationStartTime,
             _registrationEndTime,
             _allocationStartTime,
@@ -68,6 +70,7 @@ contract QVNftTieredStrategy is QVBaseStrategy {
         bool _metadataRequired,
         ERC721[] memory _nfts,
         uint256[] memory _maxVoiceCreditsPerNft,
+        uint256 _reviewThreshold,
         uint256 _registrationStartTime,
         uint256 _registrationEndTime,
         uint256 _allocationStartTime,
@@ -77,7 +80,7 @@ contract QVNftTieredStrategy is QVBaseStrategy {
             _poolId,
             _registryGating,
             _metadataRequired,
-            0, // reviewThreshold
+            _reviewThreshold,
             _registrationStartTime,
             _registrationEndTime,
             _allocationStartTime,
@@ -103,18 +106,7 @@ contract QVNftTieredStrategy is QVBaseStrategy {
     /// ==== View Functions =====
     /// =========================
 
-    /// @notice Checks if the allocator is valid
-    /// @param _allocator The allocator address
-    /// @return true if the allocator is valid
-    function isValidAllocator(address _allocator) external view override returns (bool) {
-        return _isValidAllocator(_allocator);
-    }
-
-    /// =============================
-    /// ==== Internal Functions =====
-    /// =============================
-
-    function _isValidAllocator(address _allocator) internal view returns (bool) {
+    function _isValidAllocator(address _allocator) internal view override returns (bool) {
         uint256 nftsLength = nfts.length;
         for (uint256 i = 0; i < nftsLength;) {
             if (nfts[i].balanceOf(_allocator) > 0) {
@@ -150,7 +142,11 @@ contract QVNftTieredStrategy is QVBaseStrategy {
             revert RECIPIENT_ERROR(recipientId);
         }
 
-        if (voiceCreditsToAllocate + voiceCreditsUsedPerNftId[nft][nftId] > maxVoiceCreditsPerNft[nft]) {
+        if (
+            !_hasVoiceCreditsLeft(
+                voiceCreditsToAllocate + voiceCreditsUsedPerNftId[nft][nftId], maxVoiceCreditsPerNft[nft]
+            )
+        ) {
             revert INVALID();
         }
 
@@ -164,5 +160,14 @@ contract QVNftTieredStrategy is QVBaseStrategy {
 
     function _isAcceptedRecipient(address _recipientId) internal view override returns (bool) {
         return recipients[_recipientId].recipientStatus == InternalRecipientStatus.Accepted;
+    }
+
+    function _hasVoiceCreditsLeft(uint256 _maxVoiceCredits, uint256 _maxVoiceCreditsPerNft)
+        internal
+        pure
+        override
+        returns (bool)
+    {
+        return _maxVoiceCredits <= _maxVoiceCreditsPerNft;
     }
 }

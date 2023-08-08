@@ -89,7 +89,7 @@ contract QVGovernanceERC20Votes is QVBaseStrategy {
     /// @notice Checks if the allocator is valid
     /// @param _allocator The allocator address
     /// @return true if the allocator is valid
-    function isValidAllocator(address _allocator) external view override returns (bool) {
+    function _isValidAllocator(address _allocator) internal view override returns (bool) {
         return govToken.getPastVotes(_allocator, timestamp) > 0;
     }
 
@@ -110,7 +110,7 @@ contract QVGovernanceERC20Votes is QVBaseStrategy {
 
         uint256 votePower = govToken.getPastVotes(_sender, timestamp);
 
-        if (voiceCreditsToAllocate + allocator.voiceCredits > votePower) {
+        if (!_hasVoiceCreditsLeft(voiceCreditsToAllocate + allocator.voiceCredits, votePower)) {
             revert INVALID();
         }
 
@@ -123,5 +123,14 @@ contract QVGovernanceERC20Votes is QVBaseStrategy {
 
     function _isAcceptedRecipient(address _recipientId) internal view override returns (bool) {
         return recipients[_recipientId].recipientStatus == InternalRecipientStatus.Accepted;
+    }
+
+    function _hasVoiceCreditsLeft(uint256 _voiceCreditsToAllocate, uint256 _votePower)
+        internal
+        pure
+        override
+        returns (bool)
+    {
+        return (_voiceCreditsToAllocate <= _votePower);
     }
 }
