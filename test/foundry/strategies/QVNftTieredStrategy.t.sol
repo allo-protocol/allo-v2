@@ -85,10 +85,33 @@ contract QVNftTieredStrategyTest is QVBaseStrategyTest {
     }
 
     function test_initialize_nftTiered() public {
-        assertEq(address(qvNftStrategy().nfts(0)), address(nfts[0]));
-        assertEq(address(qvNftStrategy().nfts(1)), address(nfts[1]));
-        assertEq(qvNftStrategy().maxVoiceCreditsPerNft(nfts[0]), maxVoiceCreditsPerNft[0]);
-        assertEq(qvNftStrategy().maxVoiceCreditsPerNft(nfts[1]), maxVoiceCreditsPerNft[1]);
+        vm.startPrank(allo_owner());
+        QVNftTieredStrategy strategy = new QVNftTieredStrategy(address(allo()), "MockStrategy");
+
+        assertEq(strategy.maxVoiceCreditsPerNft(nfts[0]), 0);
+        assertEq(strategy.maxVoiceCreditsPerNft(nfts[1]), 0);
+
+        vm.stopPrank();
+        vm.startPrank(address(allo()));
+        strategy.initialize(
+            poolId,
+            abi.encode(
+                registryGating,
+                metadataRequired,
+                nfts,
+                maxVoiceCreditsPerNft,
+                2,
+                registrationStartTime,
+                registrationEndTime,
+                allocationStartTime,
+                allocationEndTime
+            )
+        );
+
+        assertEq(address(strategy.nfts(0)), address(nfts[0]));
+        assertEq(address(strategy.nfts(1)), address(nfts[1]));
+        assertEq(strategy.maxVoiceCreditsPerNft(nfts[0]), maxVoiceCreditsPerNft[0]);
+        assertEq(strategy.maxVoiceCreditsPerNft(nfts[1]), maxVoiceCreditsPerNft[1]);
     }
 
     function test_initialize_UNAUTHORIZED() public override {
