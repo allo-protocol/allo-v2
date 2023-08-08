@@ -24,7 +24,7 @@ contract LockupDynamicStrategyTest is LockupBase_Test {
         LockupBase_Test.setUp();
 
         vm.startPrank(pool_manager1());
-        strategy = new LockupDynamicStrategy(lockupDynamic, address(allo),"LockupDynamicStrategy");
+        strategy = new LockupDynamicStrategy(lockupDynamic, address(allo()),"LockupDynamicStrategy");
         poolId = __StrategySetup(address(strategy), setUpData);
 
         vm.label(address(lockupDynamic), "LockupDynamic");
@@ -56,6 +56,14 @@ contract LockupDynamicStrategyTest is LockupBase_Test {
         uint256 refundedAmount;
     }
 
+    function test_initialize() public {}
+
+    function test_initialize_BaseStrategy_UNAUTHORIZED() public {}
+
+    function testRevert_initialize_BaseStrategy_ALREADY_INITIALIZED() public {}
+
+    function testRevert_initialize_INVALID() public {}
+
     function testForkFuzz_RegisterRecipientAllocateDistributeCancelStream(Params memory params) public {
         params.segmentAmount = uint128(_bound(params.segmentAmount, 1, type(uint96).max / 2 - 1));
 
@@ -74,8 +82,8 @@ contract LockupDynamicStrategyTest is LockupBase_Test {
         vars.grantAmount = params.segmentAmount * 2;
 
         deal({token: address(GTC), to: pool_manager1(), give: vars.grantAmount});
-        GTC.approve(address(allo), uint96(vars.grantAmount));
-        allo.fundPool(poolId, vars.grantAmount);
+        GTC.approve(address(allo()), uint96(vars.grantAmount));
+        allo().fundPool(poolId, vars.grantAmount);
 
         vars.cancelable = true;
         vars.registerRecipientData = abi.encode(
@@ -91,7 +99,7 @@ contract LockupDynamicStrategyTest is LockupBase_Test {
 
         vm.expectEmit({emitter: address(strategy)});
         emit Registered(pool_manager1(), vars.registerRecipientData, pool_manager1());
-        vars.recipientIds[0] = allo.registerRecipient(poolId, vars.registerRecipientData);
+        vars.recipientIds[0] = allo().registerRecipient(poolId, vars.registerRecipientData);
 
         strategy.setInternalRecipientStatusToInReview(vars.recipientIds);
 
@@ -107,7 +115,8 @@ contract LockupDynamicStrategyTest is LockupBase_Test {
 
         vm.expectEmit({emitter: address(strategy)});
         emit Allocated(vars.recipientIds[0], vars.grantAmount, address(GTC), pool_manager1());
-        allo.allocate(poolId, vars.allocateData);
+        // FIXME: This is failing because the fee has not been paid out of this amount.
+        allo().allocate(poolId, vars.allocateData);
 
         assertEq(uint8(strategy.getInternalRecipientStatus(vars.recipientIds[0])), 2, "after allocate internal status"); // Accepted
 
@@ -115,7 +124,7 @@ contract LockupDynamicStrategyTest is LockupBase_Test {
 
         vm.expectEmit({emitter: address(strategy)});
         emit Distributed(vars.recipientIds[0], params.recipientAddress, vars.grantAmount, pool_manager1());
-        allo.distribute(poolId, vars.recipientIds, "");
+        allo().distribute(poolId, vars.recipientIds, "");
 
         vars.recipientStreamId = strategy.getRecipientStreamId(vars.recipientIds[0], 0);
         assertEq(vars.recipientStreamId, vars.streamId, "recipientStreamId");
@@ -179,7 +188,7 @@ contract LockupDynamicStrategyTest is LockupBase_Test {
             abi.encode(recipientAddress, useRegistryAnchor, cancelable, grantAmount, registerSegments, strategyMetadata);
 
         address[] memory recipientIds = new address[](1);
-        recipientIds[0] = allo.registerRecipient(poolId, registerRecipientData);
+        recipientIds[0] = allo().registerRecipient(poolId, registerRecipientData);
 
         LockupDynamicStrategy.Recipient memory recipient = strategy.getRecipient(recipientIds[0]);
         assertEq(recipient.segments, registerSegments, "recipient.segments");
