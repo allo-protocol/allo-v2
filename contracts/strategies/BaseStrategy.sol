@@ -140,6 +140,9 @@ abstract contract BaseStrategy is IStrategy, Transfer {
         returns (PayoutSummary[] memory)
     {
         uint256 length = _recipientIds.length;
+        if (length != _data.length) {
+            revert BaseStrategy_ARRAY_MISMATCH();
+        }
         PayoutSummary[] memory payouts = new PayoutSummary[](length);
         for (uint256 i = 0; i < length;) {
             payouts[i] = _getPayout(_recipientIds[i], _data[i]);

@@ -11,7 +11,7 @@ import {ERC721} from "solady/src/tokens/ERC721.sol";
 // Test libraries
 import {QVBaseStrategyTest} from "./QVBaseStrategy.t.sol";
 import {MockERC20Vote} from "../../utils/MockERC20Vote.sol";
-import {MockNFT} from "../../utils/MockNFT.sol";
+import {MockERC721} from "../../utils/MockERC721.sol";
 
 // Core contracts
 import {QVNftTieredStrategy} from "../../../contracts/strategies/qv-nft-tiered/QVNftTieredStrategy.sol";
@@ -21,8 +21,8 @@ contract QVNftTieredStrategyTest is QVBaseStrategyTest {
     uint256[] public maxVoiceCreditsPerNft = new uint256[](2);
 
     function setUp() public override {
-        nfts[0] = (ERC721(address(new MockNFT())));
-        nfts[1] = (ERC721(address(new MockNFT())));
+        nfts[0] = (ERC721(address(new MockERC721())));
+        nfts[1] = (ERC721(address(new MockERC721())));
 
         maxVoiceCreditsPerNft[0] = (1000);
         maxVoiceCreditsPerNft[1] = (100);
@@ -58,8 +58,8 @@ contract QVNftTieredStrategyTest is QVBaseStrategyTest {
         vm.startPrank(pool_admin());
         _createPoolWithCustomStrategy();
 
-        MockNFT(address(nfts[0])).mint(randomAddress(), 1);
-        MockNFT(address(nfts[1])).mint(randomAddress(), 1);
+        MockERC721(address(nfts[0])).mint(randomAddress(), 1);
+        MockERC721(address(nfts[1])).mint(randomAddress(), 1);
     }
 
     function _createPoolWithCustomStrategy() internal override {
@@ -167,9 +167,9 @@ contract QVNftTieredStrategyTest is QVBaseStrategyTest {
         vm.startPrank(allo_owner());
         strategy = new QVNftTieredStrategy(address(allo()), "MockStrategy");
         ERC721[] memory wrongNftsLength = new ERC721[](3);
-        wrongNftsLength[0] = (ERC721(address(new MockNFT())));
-        wrongNftsLength[1] = (ERC721(address(new MockNFT())));
-        wrongNftsLength[2] = (ERC721(address(new MockNFT())));
+        wrongNftsLength[0] = (ERC721(address(new MockERC721())));
+        wrongNftsLength[1] = (ERC721(address(new MockERC721())));
+        wrongNftsLength[2] = (ERC721(address(new MockERC721())));
 
         vm.expectRevert(QVBaseStrategy.INVALID.selector);
 
