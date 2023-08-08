@@ -324,11 +324,30 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
     }
 
     function testRevert_distribute_RECIPIENT_ERROR_notAcceptedStatus() public {
-        //  TODO
+        address recipientId = makeAddr("notAcceptedStatus");
+        address[] memory recipientIds = new address[](1);
+        recipientIds[0] = recipientId;
+
+        vm.warp(endTime + 10);
+
+        vm.expectRevert(abi.encodeWithSelector(ProportionalPayoutStrategy.RECIPIENT_ERROR.selector, recipientId));
+
+        vm.prank(address(allo()));
+        strategy.distribute(recipientIds, "", pool_admin());
     }
 
     function testRevert_distribute_RECIPIENT_ERROR_amountZero() public {
-        // TODO
+        address recipientId = __register_recipient();
+        // accepted, byt no allocations
+        address[] memory recipientIds = new address[](1);
+        recipientIds[0] = recipientId;
+
+        vm.warp(endTime + 10);
+
+        vm.expectRevert(abi.encodeWithSelector(ProportionalPayoutStrategy.RECIPIENT_ERROR.selector, recipientId));
+
+        vm.prank(address(allo()));
+        strategy.distribute(recipientIds, "", pool_admin());
     }
 
     function test_allocate() public {
