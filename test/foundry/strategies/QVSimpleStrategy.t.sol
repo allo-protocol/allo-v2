@@ -27,7 +27,7 @@ contract QVSimpleStrategyTest is QVBaseStrategyTest {
     }
 
     function _initialize() internal override {
-        vm.prank(address(allo()));
+        vm.startPrank(address(allo()));
         qvSimpleStrategy().initialize(
             poolId,
             abi.encode(
@@ -75,10 +75,11 @@ contract QVSimpleStrategyTest is QVBaseStrategyTest {
     }
 
     function test_initialize_UNAUTHORIZED() public override {
-        vm.prank(allo_owner());
+        vm.startPrank(allo_owner());
         QVSimpleStrategy strategy = new QVSimpleStrategy(address(allo()), "MockStrategy");
         vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
-        vm.prank(randomAddress());
+        vm.stopPrank();
+        vm.startPrank(randomAddress());
         strategy.initialize(
             poolId,
             abi.encode(
@@ -97,7 +98,7 @@ contract QVSimpleStrategyTest is QVBaseStrategyTest {
     function testRevert_initialize_ALREADY_INITIALIZED() public override {
         vm.expectRevert(IStrategy.BaseStrategy_ALREADY_INITIALIZED.selector);
 
-        vm.prank(address(allo()));
+        vm.startPrank(address(allo()));
         QVSimpleStrategy(_strategy).initialize(
             poolId,
             abi.encode(
@@ -118,7 +119,7 @@ contract QVSimpleStrategyTest is QVBaseStrategyTest {
 
         // when registrationStartTime is in the past
         vm.expectRevert(QVBaseStrategy.INVALID.selector);
-        vm.prank(address(allo()));
+        vm.startPrank(address(allo()));
         strategy.initialize(
             poolId,
             abi.encode(
@@ -135,7 +136,7 @@ contract QVSimpleStrategyTest is QVBaseStrategyTest {
 
         // when registrationStartTime > registrationEndTime
         vm.expectRevert(QVBaseStrategy.INVALID.selector);
-        vm.prank(address(allo()));
+        vm.startPrank(address(allo()));
         strategy.initialize(
             poolId,
             abi.encode(
@@ -152,7 +153,7 @@ contract QVSimpleStrategyTest is QVBaseStrategyTest {
 
         // when allocationStartTime > allocationEndTime
         vm.expectRevert(QVBaseStrategy.INVALID.selector);
-        vm.prank(address(allo()));
+        vm.startPrank(address(allo()));
         strategy.initialize(
             poolId,
             abi.encode(
@@ -169,7 +170,7 @@ contract QVSimpleStrategyTest is QVBaseStrategyTest {
 
         // when  registrationEndTime > allocationEndTime
         vm.expectRevert(QVBaseStrategy.INVALID.selector);
-        vm.prank(address(allo()));
+        vm.startPrank(address(allo()));
         strategy.initialize(
             poolId,
             abi.encode(
@@ -186,7 +187,7 @@ contract QVSimpleStrategyTest is QVBaseStrategyTest {
     }
 
     function test_addAllocator() public {
-        vm.prank(pool_manager1());
+        vm.startPrank(pool_manager1());
         address allocator = makeAddr("allocator");
 
         vm.expectEmit(false, false, false, true);
@@ -196,7 +197,7 @@ contract QVSimpleStrategyTest is QVBaseStrategyTest {
     }
 
     function testRevert_addAllocator_BaseStrategy_UNAUTHORIZED() public {
-        vm.prank(randomAddress());
+        vm.startPrank(randomAddress());
         address allocator = makeAddr("allocator");
 
         vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
@@ -205,7 +206,7 @@ contract QVSimpleStrategyTest is QVBaseStrategyTest {
     }
 
     function test_removeAllocator() public {
-        vm.prank(pool_manager1());
+        vm.startPrank(pool_manager1());
         address allocator = makeAddr("allocator");
 
         vm.expectEmit(false, false, false, true);
@@ -215,7 +216,7 @@ contract QVSimpleStrategyTest is QVBaseStrategyTest {
     }
 
     function testRevert_removeAllocator_BaseStrategy_UNAUTHORIZED() public {
-        vm.prank(randomAddress());
+        vm.startPrank(randomAddress());
         address allocator = makeAddr("allocator");
 
         vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
@@ -238,7 +239,7 @@ contract QVSimpleStrategyTest is QVBaseStrategyTest {
 
         bytes memory allocateData = __generateAllocation(recipientId, 4);
 
-        vm.prank(address(allo()));
+        vm.startPrank(address(allo()));
         qvSimpleStrategy().allocate(allocateData, allocator);
     }
 
@@ -254,7 +255,7 @@ contract QVSimpleStrategyTest is QVBaseStrategyTest {
 
         bytes memory allocateData = __generateAllocation(recipientId, 4);
         vm.stopPrank();
-        vm.prank(address(allo()));
+        vm.startPrank(address(allo()));
         qvSimpleStrategy().allocate(allocateData, allocator);
     }
 
@@ -272,7 +273,7 @@ contract QVSimpleStrategyTest is QVBaseStrategyTest {
 
         vm.stopPrank();
 
-        vm.prank(address(allo()));
+        vm.startPrank(address(allo()));
         qvSimpleStrategy().allocate(allocateData, allocator);
     }
 
@@ -281,12 +282,12 @@ contract QVSimpleStrategyTest is QVBaseStrategyTest {
         vm.warp(allocationStartTime + 10);
 
         address allocator = randomAddress();
-        vm.prank(pool_manager1());
+        vm.startPrank(pool_manager1());
         qvSimpleStrategy().addAllocator(allocator);
         bytes memory allocateData = __generateAllocation(recipientId, 0);
 
         vm.expectRevert(QVBaseStrategy.INVALID.selector);
-        vm.prank(address(allo()));
+        vm.startPrank(address(allo()));
         qvSimpleStrategy().allocate(allocateData, allocator);
     }
 
@@ -303,7 +304,7 @@ contract QVSimpleStrategyTest is QVBaseStrategyTest {
 
         vm.stopPrank();
         bytes memory allocateData = __generateAllocation(recipientId, 0);
-        vm.prank(address(allo()));
+        vm.startPrank(address(allo()));
         qvSimpleStrategy().allocate(allocateData, allocator);
     }
 

@@ -39,7 +39,7 @@ contract QVNftTieredStrategyTest is QVBaseStrategyTest {
     }
 
     function _initialize() internal override {
-        vm.prank(address(allo()));
+        vm.startPrank(address(allo()));
         qvNftStrategy().initialize(
             poolId,
             abi.encode(
@@ -92,10 +92,11 @@ contract QVNftTieredStrategyTest is QVBaseStrategyTest {
     }
 
     function test_initialize_UNAUTHORIZED() public override {
-        vm.prank(allo_owner());
+        vm.startPrank(allo_owner());
         QVNftTieredStrategy strategy = new QVNftTieredStrategy(address(allo()), "MockStrategy");
         vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
-        vm.prank(randomAddress());
+        vm.stopPrank();
+        vm.startPrank(randomAddress());
         strategy.initialize(
             poolId,
             abi.encode(
@@ -113,7 +114,7 @@ contract QVNftTieredStrategyTest is QVBaseStrategyTest {
     }
 
     function testRevert_initialize_arrayLengthMismatch_INVALID() public {
-        vm.prank(allo_owner());
+        vm.startPrank(allo_owner());
         QVNftTieredStrategy strategy = new QVNftTieredStrategy(address(allo()), "MockStrategy");
 
         uint256[] memory wrongMaxVoiceCreditsPerNftLength = new uint256[](3);
@@ -123,7 +124,8 @@ contract QVNftTieredStrategyTest is QVBaseStrategyTest {
 
         vm.expectRevert(QVBaseStrategy.INVALID.selector);
 
-        vm.prank(address(allo()));
+        vm.stopPrank();
+        vm.startPrank(address(allo()));
         strategy.initialize(
             poolId,
             abi.encode(
@@ -139,7 +141,7 @@ contract QVNftTieredStrategyTest is QVBaseStrategyTest {
             )
         );
 
-        vm.prank(allo_owner());
+        vm.startPrank(allo_owner());
         strategy = new QVNftTieredStrategy(address(allo()), "MockStrategy");
         ERC721[] memory wrongNftsLength = new ERC721[](3);
         wrongNftsLength[0] = (ERC721(address(new MockNFT())));
@@ -148,7 +150,8 @@ contract QVNftTieredStrategyTest is QVBaseStrategyTest {
 
         vm.expectRevert(QVBaseStrategy.INVALID.selector);
 
-        vm.prank(address(allo()));
+        vm.stopPrank();
+        vm.startPrank(address(allo()));
         strategy.initialize(
             poolId,
             abi.encode(
@@ -168,7 +171,7 @@ contract QVNftTieredStrategyTest is QVBaseStrategyTest {
     function testRevert_initialize_ALREADY_INITIALIZED() public override {
         vm.expectRevert(IStrategy.BaseStrategy_ALREADY_INITIALIZED.selector);
 
-        vm.prank(address(allo()));
+        vm.startPrank(address(allo()));
         QVNftTieredStrategy(_strategy).initialize(
             poolId,
             abi.encode(
@@ -190,7 +193,7 @@ contract QVNftTieredStrategyTest is QVBaseStrategyTest {
 
         // when registrationStartTime is in the past
         vm.expectRevert(QVBaseStrategy.INVALID.selector);
-        vm.prank(address(allo()));
+        vm.startPrank(address(allo()));
         strategy.initialize(
             poolId,
             abi.encode(
@@ -208,7 +211,7 @@ contract QVNftTieredStrategyTest is QVBaseStrategyTest {
 
         // when registrationStartTime > registrationEndTime
         vm.expectRevert(QVBaseStrategy.INVALID.selector);
-        vm.prank(address(allo()));
+        vm.startPrank(address(allo()));
         strategy.initialize(
             poolId,
             abi.encode(
@@ -226,7 +229,7 @@ contract QVNftTieredStrategyTest is QVBaseStrategyTest {
 
         // when allocationStartTime > allocationEndTime
         vm.expectRevert(QVBaseStrategy.INVALID.selector);
-        vm.prank(address(allo()));
+        vm.startPrank(address(allo()));
         strategy.initialize(
             poolId,
             abi.encode(
@@ -244,7 +247,7 @@ contract QVNftTieredStrategyTest is QVBaseStrategyTest {
 
         // when  registrationEndTime > allocationEndTime
         vm.expectRevert(QVBaseStrategy.INVALID.selector);
-        vm.prank(address(allo()));
+        vm.startPrank(address(allo()));
         strategy.initialize(
             poolId,
             abi.encode(
@@ -270,7 +273,7 @@ contract QVNftTieredStrategyTest is QVBaseStrategyTest {
 
         bytes memory allocateData = __generateAllocation(recipientId, 4);
 
-        vm.prank(address(allo()));
+        vm.startPrank(address(allo()));
         qvNftStrategy().allocate(allocateData, allocator);
     }
 
@@ -282,7 +285,7 @@ contract QVNftTieredStrategyTest is QVBaseStrategyTest {
         vm.warp(allocationStartTime + 10);
 
         bytes memory allocateData = __generateAllocation(recipientId, 4);
-        vm.prank(address(allo()));
+        vm.startPrank(address(allo()));
         qvNftStrategy().allocate(allocateData, allocator);
     }
 
@@ -295,7 +298,7 @@ contract QVNftTieredStrategyTest is QVBaseStrategyTest {
 
         bytes memory allocateData = __generateAllocation(recipientId, 4000);
 
-        vm.prank(address(allo()));
+        vm.startPrank(address(allo()));
         qvNftStrategy().allocate(allocateData, allocator);
     }
 
@@ -307,7 +310,7 @@ contract QVNftTieredStrategyTest is QVBaseStrategyTest {
         bytes memory allocateData = __generateAllocation(recipientId, 0);
 
         vm.expectRevert(QVBaseStrategy.INVALID.selector);
-        vm.prank(address(allo()));
+        vm.startPrank(address(allo()));
         qvNftStrategy().allocate(allocateData, allocator);
     }
 
