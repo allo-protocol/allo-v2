@@ -5,36 +5,49 @@ pragma solidity 0.8.19;
 import {IStrategy} from "../../../contracts/strategies/IStrategy.sol";
 import {QVBaseStrategy} from "../../../contracts/strategies/qv-base/QVBaseStrategy.sol";
 
+// External Libraries
+import {ERC721} from "solady/src/tokens/ERC721.sol";
+
 // Test libraries
 import {QVBaseStrategyTest} from "./QVBaseStrategy.t.sol";
+import {MockERC20Vote} from "../../utils/MockERC20Vote.sol";
+import {MockNFT} from "../../utils/MockNFT.sol";
+
 // Core contracts
-import {QVSimpleStrategy} from "../../../contracts/strategies/qv-simple/QVSimpleStrategy.sol";
+import {QVNftTieredStrategy} from "../../../contracts/strategies/qv-nft-tiered/QVNftTieredStrategy.sol";
 
-contract QVSimpleStrategyTest is QVBaseStrategyTest {
-    event AllocatorAdded(address indexed allocator, address sender);
-    event AllocatorRemoved(address indexed allocator, address sender);
-    event VoiceCreditsUpdated(address indexed allocator, uint256 voiceCredits, address sender);
-
-    uint256 public maxVoiceCreditsPerAllocator;
+contract QVNftTieredStrategyTest is QVBaseStrategyTest {
+    ERC721[] public nfts = new ERC721[](2);
+    uint256[] public maxVoiceCreditsPerNft = new uint256[](2);
 
     function setUp() public override {
-        maxVoiceCreditsPerAllocator = 100;
+        nfts[0] = (ERC721(address(new MockNFT())));
+        nfts[1] = (ERC721(address(new MockNFT())));
+
+        maxVoiceCreditsPerNft[0] = (1000);
+        maxVoiceCreditsPerNft[1] = (100);
+
         super.setUp();
     }
 
     function _createStrategy() internal override returns (address) {
-        return address(new QVSimpleStrategy(address(allo()), "MockStrategy"));
+        return address(new QVNftTieredStrategy(address(allo()), "MockStrategy"));
+    }
+
+    function qvNftStrategy() internal view returns (QVNftTieredStrategy) {
+        return (QVNftTieredStrategy(_strategy));
     }
 
     function _initialize() internal override {
         vm.startPrank(address(allo()));
-        qvSimpleStrategy().initialize(
+        qvNftStrategy().initialize(
             poolId,
             abi.encode(
                 registryGating,
                 metadataRequired,
+                nfts,
+                maxVoiceCreditsPerNft,
                 2,
-                maxVoiceCreditsPerAllocator,
                 registrationStartTime,
                 registrationEndTime,
                 allocationStartTime,
@@ -44,7 +57,9 @@ contract QVSimpleStrategyTest is QVBaseStrategyTest {
 
         vm.startPrank(pool_admin());
         _createPoolWithCustomStrategy();
-        qvSimpleStrategy().addAllocator(randomAddress());
+
+        MockNFT(address(nfts[0])).mint(randomAddress(), 1);
+        MockNFT(address(nfts[1])).mint(randomAddress(), 1);
     }
 
     function _createPoolWithCustomStrategy() internal override {
@@ -54,8 +69,9 @@ contract QVSimpleStrategyTest is QVBaseStrategyTest {
             abi.encode(
                 registryGating,
                 metadataRequired,
+                nfts,
+                maxVoiceCreditsPerNft,
                 2,
-                maxVoiceCreditsPerAllocator,
                 registrationStartTime,
                 registrationEndTime,
                 allocationStartTime,
@@ -66,17 +82,41 @@ contract QVSimpleStrategyTest is QVBaseStrategyTest {
             poolMetadata,
             pool_managers()
         );
-
-        qvSimpleStrategy().addAllocator(randomAddress());
     }
 
-    function test_initialize_maxVoiceCreditsPerAllocator() public virtual {
-        assertEq(qvSimpleStrategy().maxVoiceCreditsPerAllocator(), maxVoiceCreditsPerAllocator);
+    function test_initialize_nftTiered() public {
+        vm.startPrank(allo_owner());
+        QVNftTieredStrategy strategy = new QVNftTieredStrategy(address(allo()), "MockStrategy");
+
+        assertEq(strategy.maxVoiceCreditsPerNft(nfts[0]), 0);
+        assertEq(strategy.maxVoiceCreditsPerNft(nfts[1]), 0);
+
+        vm.stopPrank();
+        vm.startPrank(address(allo()));
+        strategy.initialize(
+            poolId,
+            abi.encode(
+                registryGating,
+                metadataRequired,
+                nfts,
+                maxVoiceCreditsPerNft,
+                2,
+                registrationStartTime,
+                registrationEndTime,
+                allocationStartTime,
+                allocationEndTime
+            )
+        );
+
+        assertEq(address(strategy.nfts(0)), address(nfts[0]));
+        assertEq(address(strategy.nfts(1)), address(nfts[1]));
+        assertEq(strategy.maxVoiceCreditsPerNft(nfts[0]), maxVoiceCreditsPerNft[0]);
+        assertEq(strategy.maxVoiceCreditsPerNft(nfts[1]), maxVoiceCreditsPerNft[1]);
     }
 
     function test_initialize_UNAUTHORIZED() public override {
         vm.startPrank(allo_owner());
-        QVSimpleStrategy strategy = new QVSimpleStrategy(address(allo()), "MockStrategy");
+        QVNftTieredStrategy strategy = new QVNftTieredStrategy(address(allo()), "MockStrategy");
         vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
         vm.stopPrank();
         vm.startPrank(randomAddress());
@@ -85,8 +125,64 @@ contract QVSimpleStrategyTest is QVBaseStrategyTest {
             abi.encode(
                 registryGating,
                 metadataRequired,
+                nfts,
+                maxVoiceCreditsPerNft,
                 2,
-                maxVoiceCreditsPerAllocator,
+                registrationStartTime,
+                registrationEndTime,
+                allocationStartTime,
+                allocationEndTime
+            )
+        );
+    }
+
+    function testRevert_initialize_arrayLengthMismatch_INVALID() public {
+        vm.startPrank(allo_owner());
+        QVNftTieredStrategy strategy = new QVNftTieredStrategy(address(allo()), "MockStrategy");
+
+        uint256[] memory wrongMaxVoiceCreditsPerNftLength = new uint256[](3);
+        wrongMaxVoiceCreditsPerNftLength[0] = (1337);
+        wrongMaxVoiceCreditsPerNftLength[1] = (420);
+        wrongMaxVoiceCreditsPerNftLength[2] = (69);
+
+        vm.expectRevert(QVBaseStrategy.INVALID.selector);
+
+        vm.stopPrank();
+        vm.startPrank(address(allo()));
+        strategy.initialize(
+            poolId,
+            abi.encode(
+                registryGating,
+                metadataRequired,
+                nfts,
+                wrongMaxVoiceCreditsPerNftLength,
+                2,
+                registrationStartTime,
+                registrationEndTime,
+                allocationStartTime,
+                allocationEndTime
+            )
+        );
+
+        vm.startPrank(allo_owner());
+        strategy = new QVNftTieredStrategy(address(allo()), "MockStrategy");
+        ERC721[] memory wrongNftsLength = new ERC721[](3);
+        wrongNftsLength[0] = (ERC721(address(new MockNFT())));
+        wrongNftsLength[1] = (ERC721(address(new MockNFT())));
+        wrongNftsLength[2] = (ERC721(address(new MockNFT())));
+
+        vm.expectRevert(QVBaseStrategy.INVALID.selector);
+
+        vm.stopPrank();
+        vm.startPrank(address(allo()));
+        strategy.initialize(
+            poolId,
+            abi.encode(
+                registryGating,
+                metadataRequired,
+                wrongNftsLength,
+                maxVoiceCreditsPerNft,
+                2,
                 registrationStartTime,
                 registrationEndTime,
                 allocationStartTime,
@@ -99,13 +195,14 @@ contract QVSimpleStrategyTest is QVBaseStrategyTest {
         vm.expectRevert(IStrategy.BaseStrategy_ALREADY_INITIALIZED.selector);
 
         vm.startPrank(address(allo()));
-        QVSimpleStrategy(_strategy).initialize(
+        QVNftTieredStrategy(_strategy).initialize(
             poolId,
             abi.encode(
                 registryGating,
                 metadataRequired,
+                nfts,
+                maxVoiceCreditsPerNft,
                 2,
-                maxVoiceCreditsPerAllocator,
                 registrationStartTime,
                 registrationEndTime,
                 allocationStartTime,
@@ -115,7 +212,7 @@ contract QVSimpleStrategyTest is QVBaseStrategyTest {
     }
 
     function testRevert_initialize_INVALID() public override {
-        QVSimpleStrategy strategy = new QVSimpleStrategy(address(allo()), "MockStrategy");
+        QVNftTieredStrategy strategy = new QVNftTieredStrategy(address(allo()), "MockStrategy");
 
         // when registrationStartTime is in the past
         vm.expectRevert(QVBaseStrategy.INVALID.selector);
@@ -125,8 +222,9 @@ contract QVSimpleStrategyTest is QVBaseStrategyTest {
             abi.encode(
                 registryGating,
                 metadataRequired,
+                nfts,
+                maxVoiceCreditsPerNft,
                 2,
-                maxVoiceCreditsPerAllocator,
                 today() - 1,
                 registrationEndTime,
                 allocationStartTime,
@@ -142,8 +240,9 @@ contract QVSimpleStrategyTest is QVBaseStrategyTest {
             abi.encode(
                 registryGating,
                 metadataRequired,
+                nfts,
+                maxVoiceCreditsPerNft,
                 2,
-                maxVoiceCreditsPerAllocator,
                 weekAfterNext(),
                 registrationEndTime,
                 allocationStartTime,
@@ -159,8 +258,9 @@ contract QVSimpleStrategyTest is QVBaseStrategyTest {
             abi.encode(
                 registryGating,
                 metadataRequired,
+                nfts,
+                maxVoiceCreditsPerNft,
                 2,
-                maxVoiceCreditsPerAllocator,
                 registrationStartTime,
                 registrationEndTime,
                 oneMonthFromNow() + today(),
@@ -176,58 +276,15 @@ contract QVSimpleStrategyTest is QVBaseStrategyTest {
             abi.encode(
                 registryGating,
                 metadataRequired,
+                nfts,
+                maxVoiceCreditsPerNft,
                 2,
-                maxVoiceCreditsPerAllocator,
                 registrationStartTime,
                 oneMonthFromNow() + today(),
                 allocationStartTime,
                 allocationEndTime
             )
         );
-    }
-
-    function test_addAllocator() public {
-        vm.startPrank(pool_manager1());
-        address allocator = makeAddr("allocator");
-
-        vm.expectEmit(false, false, false, true);
-        emit AllocatorAdded(allocator, pool_manager1());
-
-        qvSimpleStrategy().addAllocator(allocator);
-    }
-
-    function testRevert_addAllocator_BaseStrategy_UNAUTHORIZED() public {
-        vm.startPrank(randomAddress());
-        address allocator = makeAddr("allocator");
-
-        vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
-
-        qvSimpleStrategy().addAllocator(allocator);
-    }
-
-    function test_removeAllocator() public {
-        vm.startPrank(pool_manager1());
-        address allocator = makeAddr("allocator");
-
-        vm.expectEmit(false, false, false, true);
-        emit AllocatorRemoved(allocator, pool_manager1());
-
-        qvSimpleStrategy().removeAllocator(allocator);
-    }
-
-    function testRevert_removeAllocator_BaseStrategy_UNAUTHORIZED() public {
-        vm.startPrank(randomAddress());
-        address allocator = makeAddr("allocator");
-
-        vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
-
-        qvSimpleStrategy().removeAllocator(allocator);
-    }
-
-    function test_isValidAllocator() public override {
-        assertFalse(qvSimpleStrategy().isValidAllocator(address(0)));
-        assertFalse(qvSimpleStrategy().isValidAllocator(address(123)));
-        assertTrue(qvSimpleStrategy().isValidAllocator(randomAddress()));
     }
 
     function testRevert_allocate_UNAUTHORIZED() public {
@@ -240,41 +297,32 @@ contract QVSimpleStrategyTest is QVBaseStrategyTest {
         bytes memory allocateData = __generateAllocation(recipientId, 4);
 
         vm.startPrank(address(allo()));
-        qvSimpleStrategy().allocate(allocateData, allocator);
+        qvNftStrategy().allocate(allocateData, allocator);
     }
 
     function testRevert_allocate_RECIPIENT_ERROR() public {
         address recipientId = __register_reject_recipient();
         address allocator = randomAddress();
 
-        vm.startPrank(pool_manager2());
-        qvSimpleStrategy().addAllocator(allocator);
-
         vm.expectRevert(abi.encodeWithSelector(QVBaseStrategy.RECIPIENT_ERROR.selector, recipientId));
         vm.warp(allocationStartTime + 10);
 
         bytes memory allocateData = __generateAllocation(recipientId, 4);
-        vm.stopPrank();
         vm.startPrank(address(allo()));
-        qvSimpleStrategy().allocate(allocateData, allocator);
+        qvNftStrategy().allocate(allocateData, allocator);
     }
 
     function testRevert_allocate_INVALID_tooManyVoiceCredits() public {
         address recipientId = __register_accept_recipient();
         address allocator = randomAddress();
 
-        vm.startPrank(pool_manager2());
-        qvSimpleStrategy().addAllocator(allocator);
-
         vm.expectRevert(abi.encodeWithSelector(QVBaseStrategy.INVALID.selector));
         vm.warp(allocationStartTime + 10);
 
-        bytes memory allocateData = __generateAllocation(recipientId, 400);
-
-        vm.stopPrank();
+        bytes memory allocateData = __generateAllocation(recipientId, 4000);
 
         vm.startPrank(address(allo()));
-        qvSimpleStrategy().allocate(allocateData, allocator);
+        qvNftStrategy().allocate(allocateData, allocator);
     }
 
     function testRevert_allocate_INVALID_noVoiceTokens() public {
@@ -282,33 +330,19 @@ contract QVSimpleStrategyTest is QVBaseStrategyTest {
         vm.warp(allocationStartTime + 10);
 
         address allocator = randomAddress();
-        vm.startPrank(pool_manager1());
-        qvSimpleStrategy().addAllocator(allocator);
         bytes memory allocateData = __generateAllocation(recipientId, 0);
 
         vm.expectRevert(QVBaseStrategy.INVALID.selector);
         vm.startPrank(address(allo()));
-        qvSimpleStrategy().allocate(allocateData, allocator);
+        qvNftStrategy().allocate(allocateData, allocator);
     }
 
-    function testRevert_allocate_INVALID_voiceTokensMismatch() public {
-        address recipientId = __register_accept_recipient();
-        address allocator = randomAddress();
-
-        vm.startPrank(pool_manager2());
-        vm.warp(allocationStartTime + 10);
-
-        qvSimpleStrategy().addAllocator(allocator);
-
-        vm.expectRevert(QVBaseStrategy.INVALID.selector);
-
-        vm.stopPrank();
-        bytes memory allocateData = __generateAllocation(recipientId, 0);
-        vm.startPrank(address(allo()));
-        qvSimpleStrategy().allocate(allocateData, allocator);
+    function __generateAllocation(address _recipient, uint256 _amount) internal view override returns (bytes memory) {
+        return abi.encode(_recipient, nfts[0], 1, _amount);
     }
 
-    function qvSimpleStrategy() internal view returns (QVSimpleStrategy) {
-        return (QVSimpleStrategy(_strategy));
+    function test_isValidAllocator() public override {
+        assertFalse(qvNftStrategy().isValidAllocator(address(123)));
+        assertTrue(qvNftStrategy().isValidAllocator(randomAddress()));
     }
 }

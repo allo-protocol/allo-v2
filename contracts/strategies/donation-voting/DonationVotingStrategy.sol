@@ -211,7 +211,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     }
 
     /// @notice Checks if address is elgible allocator
-    function isValidAllocator(address) external pure returns (bool) {
+    function _isValidAllocator(address) internal pure override returns (bool) {
         return true;
     }
 

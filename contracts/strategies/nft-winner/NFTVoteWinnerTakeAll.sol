@@ -83,7 +83,7 @@ contract NFTVoteWinnerTakeAll is BaseStrategy {
         return RecipientStatus.None;
     }
 
-    function isValidAllocator(address _allocator) public view returns (bool) {
+    function _isValidAllocator(address _allocator) internal view override returns (bool) {
         return nft.balanceOf(_allocator) > 0;
     }
 

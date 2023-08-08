@@ -283,7 +283,7 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
         Recipient storage recipient = recipients[recipientId];
         Allocator storage allocator = allocators[_sender];
 
-        if (voiceCreditsToAllocate + voiceCreditsUsedPerNftId[nftId] > maxVoiceCreditsPerAllocator) {
+        if (!_hasVoiceCreditsLeft(voiceCreditsToAllocate, voiceCreditsUsedPerNftId[nftId])) {
             revert INVALID();
         }
 
@@ -428,7 +428,16 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
     /// @notice Checks if the allocator is valid
     /// @param _allocator The allocator address
     /// @return true if the allocator is valid
-    function isValidAllocator(address _allocator) external view virtual override returns (bool) {
+    function _isValidAllocator(address _allocator) internal view virtual override returns (bool) {
         return nft.balanceOf(_allocator) > 0;
+    }
+
+    function _hasVoiceCreditsLeft(uint256 _voiceCreditsToAllocate, uint256 _voiceCreditsUsed)
+        internal
+        view
+        override
+        returns (bool)
+    {
+        return (_voiceCreditsToAllocate + _voiceCreditsUsed) <= maxVoiceCreditsPerAllocator;
     }
 }

@@ -111,11 +111,6 @@ contract WrappedVotingNftMintStrategy is Native, BaseStrategy, Initializable, Re
         emit TimestampsUpdated(allocationStartTime, allocationEndTime, msg.sender);
     }
 
-    /// @notice Returns true for any allocator address (always returns true)
-    function isValidAllocator(address) external pure returns (bool) {
-        return true;
-    }
-
     /// @notice Returns the status of the recipient based on whether it is an NFT contract created by the factory
     /// @param _recipientId The address of the recipient
     /// @return The RecipientStatus of the recipient
@@ -197,5 +192,10 @@ contract WrappedVotingNftMintStrategy is Native, BaseStrategy, Initializable, Re
     function _getPayout(address _recipientId, bytes memory) internal view override returns (PayoutSummary memory) {
         if (_recipientId != currentWinner) PayoutSummary(_recipientId, 0);
         return PayoutSummary(currentWinner, poolAmount);
+    }
+
+    /// @notice Returns true for any allocator address (always returns true)
+    function _isValidAllocator(address) internal pure override returns (bool) {
+        return true;
     }
 }

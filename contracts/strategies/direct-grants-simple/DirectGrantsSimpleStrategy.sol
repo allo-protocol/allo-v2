@@ -138,7 +138,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Checks if address is elgible allocator
     /// @param _allocator Address of the allocator
-    function isValidAllocator(address _allocator) external view returns (bool) {
+    function _isValidAllocator(address _allocator) internal view override returns (bool) {
         return allo.isPoolManager(poolId, _allocator);
     }
 
