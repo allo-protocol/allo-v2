@@ -5,6 +5,7 @@ import "forge-std/Test.sol";
 
 // Interfaces
 import {IStrategy} from "../../../contracts/strategies/IStrategy.sol";
+import {IRegistry} from "../../../contracts/core/IRegistry.sol";
 // Core contracts
 import {BaseStrategy} from "../../../contracts/strategies/BaseStrategy.sol";
 
@@ -48,6 +49,7 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
 
     uint256 public poolId;
 
+    // Setup the tests
     function setUp() public virtual {
         __RegistrySetupFull();
         __AlloSetup(address(registry()));
@@ -88,11 +90,13 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
         );
     }
 
+    // Tests the deployment of the strategy
     function test_deployment() public {
         assertEq(address(strategy.getAllo()), address(allo()));
         assertEq(strategy.getStrategyId(), keccak256(abi.encode("DonationVotingMerkleDistributionStrategy")));
     }
 
+    // Tests that the strategy is initialized correctly
     function test_initialize() public {
         assertEq(strategy.getPoolId(), poolId);
         assertEq(strategy.useRegistryAnchor(), useRegistryAnchor);
@@ -104,10 +108,10 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
         assertTrue(strategy.allowedTokens(address(0)));
     }
 
+    // Tests that the strategy can be initialized with no allowed tokens, otherwise reverts
     function testRevert_initialize_withNoAllowedToken() public {
         strategy =
             new DonationVotingMerkleDistributionStrategy(address(allo()), "DonationVotingMerkleDistributionStrategy");
-        // when _registrationStartTime is in past
         vm.prank(address(allo()));
         strategy.initialize(
             poolId,
@@ -124,6 +128,29 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
         assertTrue(strategy.allowedTokens(address(0)));
     }
 
+    // Tests that the strategy reverts when non-allowed tokens are used
+    function testRevert_initialize_withNotAllowedToken() public {
+        DonationVotingMerkleDistributionStrategy testSrategy =
+            new DonationVotingMerkleDistributionStrategy(address(allo()), "DonationVotingMerkleDistributionStrategy");
+        address[] memory tokensAllowed = new address[](1);
+        tokensAllowed[0] = makeAddr("token");
+        vm.prank(address(allo()));
+        testSrategy.initialize(
+            poolId,
+            abi.encode(
+                useRegistryAnchor,
+                metadataRequired,
+                registrationStartTime,
+                registrationEndTime,
+                allocationStartTime,
+                allocationEndTime,
+                tokensAllowed
+            )
+        );
+        assertFalse(testSrategy.allowedTokens(makeAddr("not-allowed-token")));
+    }
+
+    // Tests that only the pool admin can initialize the strategy
     function test_initialize_BaseStrategy_UNAUTHORIZED() public {
         vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
 
@@ -142,6 +169,7 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
         );
     }
 
+    // Tests that the strategy can only be initialized once
     function testRevert_initialize_BaseStrategy_ALREADY_INITIALIZED() public {
         vm.expectRevert(IStrategy.BaseStrategy_ALREADY_INITIALIZED.selector);
 
@@ -160,6 +188,7 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
         );
     }
 
+    // Tests when initializing the strategy with invalid timestamps for 5 scenarios
     function testRevert_initialize_INVALID() public {
         strategy =
             new DonationVotingMerkleDistributionStrategy(address(allo()), "DonationVotingMerkleDistributionStrategy");
@@ -244,34 +273,44 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
         );
     }
 
+    // Tests that the correct recipient is returned
     function test_getRecipient() public {
-        // TODO
+        // __create_profile();
+        // __register_recipient();
+        // strategy.getRecipient(recipient1());
     }
 
+    // Tests that the correct internal recipient status is returned
     function test_getInternalRecipientStatus() public {
         // TODO
     }
 
+    // Tests that the correct recipient status is returned
     function test_getRecipientStatus() public {
         // TODO
     }
 
+    //  Tests that the correct recipient status is returned for an appeal
     function test_getRecipientStatus_appeal() public {
         // TODO
     }
 
+    // Tests that the pool manager can update the recipient status
     function test_reviewRecients() public {
         // TODO
     }
 
+    // Tests that you can only review recipients when registration is active
     function testRevert_reviewRecipients_REGISTRATION_NOT_ACTIVE() public {
         // TODO
     }
 
+    // Tests that only the pool admin can review recipients
     function testRevert_reviewRecipients_UNAUTHORIZED() public {
         // TODO
     }
 
+    // Tests that the strategy timestamps can be updated and updated correctly
     function test_updatePoolTimestamps() public {
         vm.expectEmit(false, false, false, true);
         emit TimestampsUpdated(
@@ -289,6 +328,7 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
         assertEq(strategy.allocationEndTime(), allocationEndTime + 10);
     }
 
+    // Tests that only the pool admin can update the timestamps
     function testRevert_updatePoolTimestamps_UNAUTHORIZED() public {
         vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
         vm.prank(randomAddress());
@@ -297,12 +337,14 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
         );
     }
 
+    // Tests that the timestamps are valid otherwise reverts
     function testRevert_updatePoolTimestamps_INVALID() public {
         vm.expectRevert(DonationVotingMerkleDistributionStrategy.INVALID.selector);
         vm.prank(pool_admin());
         strategy.updatePoolTimestamps(block.timestamp - 1, registrationEndTime, allocationStartTime, allocationEndTime);
     }
 
+    // Tests for when the allocation has not ended, should revert
     function testRevert_withdraw_NOT_ALLOWED_30days() public {
         vm.warp(allocationEndTime + 1 days);
 
@@ -311,22 +353,26 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
         strategy.withdraw(1e18);
     }
 
+    // Tests for when the withdraw amount is greater than the balance of the pool
     function testRevert_withdraw_NOT_ALLOWED_exceed_amount() public {
         vm.warp(block.timestamp + 31 days);
 
-        vm.expectRevert(DonationVotingMerkleDistributionStrategy.NOT_ALLOWED.selector);
+        vm.expectRevert(DonationVotingMerkleDistributionStrategy.INVALID.selector);
         vm.prank(pool_admin());
         strategy.withdraw(1e18);
     }
 
+    // Tests that only the pool manager can withdraw funds
     function testRevert_withdraw_UNAUTHORIZED() public {
         vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
         vm.prank(randomAddress());
         strategy.withdraw(1e18);
     }
 
+    // Tests the claim function
     function test_claim() public {
-        // TODO
+        // warp past allocation end time
+        vm.warp(allocationEndTime + 1 days);
     }
 
     function testRevert_claim_ALLOCATION_NOT_ENDED() public {
@@ -357,11 +403,13 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
         // TODO
     }
 
+    // Tests that an address is a valid allocator
     function test_isValidAllocator() public {
         assertTrue(strategy.isValidAllocator(address(0)));
         assertTrue(strategy.isValidAllocator(makeAddr("random")));
     }
 
+    // Tests if the pool is active after the registration time begins
     function test_isPoolActive() public {
         assertFalse(strategy.isPoolActive());
         vm.warp(registrationStartTime + 1);
@@ -369,7 +417,7 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
     }
 
     function test_registerRecipient_new() public {
-        // TODO
+        // __register_recipient();
     }
 
     function test_registerRecipient_new_withRegistryAnchor() public {
@@ -435,5 +483,31 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
     function testRevert_distribute_RECIPIENT_ERROR() public {
         // TODO
     }
+
+    /// ====================
+    /// ===== Helpers ======
+    /// ====================
+
+    // Helper function to register a recipient
+    function __register_recipient() internal {
+        Metadata memory metadata = Metadata({protocol: 1, pointer: "RecipientMetadata"});
+        IRegistry.Profile memory profile = allo().getRegistry().getProfileById(poolProfile_id());
+        bytes memory data = abi.encode(recipient1(), profile.anchor, metadata);
+
+        // warp to registration start time
+        vm.warp(registrationStartTime + 1);
+        vm.prank(pool_manager1());
+        allo().registerRecipient(poolId, data);
+    }
+
+    function __create_profile() internal returns (bytes32 profileId) {
+        Metadata memory metadata = Metadata({protocol: 1, pointer: "ProfileMetadata"});
+        address[] memory poolMembers = new address[](2);
+        poolMembers[0] = pool_manager1();
+        poolMembers[1] = recipient1();
+
+        profileId = allo().getRegistry().createProfile(1, "Chad", metadata, pool_manager1(), poolMembers);
+    }
+
     // TODO: ADD OTHER MERKLE CHECKS
 }

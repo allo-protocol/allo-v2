@@ -317,6 +317,9 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         }
 
         IAllo.Pool memory pool = allo.getPool(poolId);
+        if (_amount > poolAmount) {
+            revert INVALID();
+        }
         poolAmount -= _amount;
         _transferAmount(pool.token, msg.sender, _amount);
     }
