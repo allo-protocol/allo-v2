@@ -180,7 +180,7 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Checks if address is eligible allocator
     /// @param _allocator Address of the allocator
     function isValidAllocator(address _allocator) external view override returns (bool) {
-        return allo.isPoolManager(poolId, _allocator);
+        return _isValidAllocator(_allocator);
     }
 
     /// ===============================
@@ -255,6 +255,12 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
     /// ====================================
     /// ============ Internal ==============
     /// ====================================
+
+    /// @notice Check if address is valid allocator
+    /// @param _allocator Address of the allocator
+    function _isValidAllocator(address _allocator) internal view returns (bool) {
+        return allo.isPoolManager(poolId, _allocator);
+    }
 
     /// @notice Register to the pool
     /// @param _data The data to be decoded
