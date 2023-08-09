@@ -33,14 +33,15 @@ contract LockupDynamicStrategyTest is LockupBase_Test {
 
     struct Params {
         UD2x18 segmentExponent;
-        uint128 segmentAmount;
+        uint128 fundPoolAmount;
         address recipientAddress;
     }
 
     /// Needed to prevent "Stack too deep" error
     struct Vars {
+        uint128 segmentAmount;
         LockupDynamic.SegmentWithDelta[] segments;
-        uint256 grantAmount;
+        uint128 grantAmount;
         bool cancelable;
         bytes registerRecipientData;
         address[] recipientIds;
@@ -65,25 +66,29 @@ contract LockupDynamicStrategyTest is LockupBase_Test {
     function testRevert_initialize_INVALID() public {}
 
     function testForkFuzz_RegisterRecipientAllocateDistributeCancelStream(Params memory params) public {
-        params.segmentAmount = uint128(_bound(params.segmentAmount, 1, type(uint96).max / 2 - 1));
+        vm.assume(params.recipientAddress != address(0) && params.recipientAddress != pool_manager1());
+
+        params.fundPoolAmount = uint128(_bound(params.fundPoolAmount, 1, type(uint96).max - 1));
 
         Vars memory vars;
+
+        uint256 feeAmount = (params.fundPoolAmount * allo().getFeePercentage()) / allo().FEE_DENOMINATOR();
+        vars.grantAmount = params.fundPoolAmount - uint128(feeAmount);
 
         vars.segments = new LockupDynamic.SegmentWithDelta[](2);
         vars.segments[0].delta = 1 days;
         vars.segments[1].delta = 12 weeks;
-        vars.segments[0].amount = params.segmentAmount;
-        vars.segments[1].amount = params.segmentAmount;
+        vars.segments[0].amount = vars.grantAmount / 2;
+        vars.segments[1].amount = vars.grantAmount - vars.segments[0].amount;
         vars.segments[0].exponent = params.segmentExponent;
         vars.segments[1].exponent = params.segmentExponent;
 
-        vm.assume(params.recipientAddress != address(0) && params.recipientAddress != pool_manager1());
+        deal({token: address(GTC), to: pool_manager1(), give: params.fundPoolAmount});
+        GTC.approve(address(allo()), uint96(params.fundPoolAmount));
 
-        vars.grantAmount = params.segmentAmount * 2;
-
-        deal({token: address(GTC), to: pool_manager1(), give: vars.grantAmount});
-        GTC.approve(address(allo()), uint96(vars.grantAmount));
-        allo().fundPool(poolId, vars.grantAmount);
+        vm.expectEmit({emitter: address(allo())});
+        emit PoolFunded(poolId, vars.grantAmount, feeAmount);
+        allo().fundPool(poolId, params.fundPoolAmount);
 
         vars.cancelable = true;
         vars.registerRecipientData = abi.encode(
@@ -115,7 +120,6 @@ contract LockupDynamicStrategyTest is LockupBase_Test {
 
         vm.expectEmit({emitter: address(strategy)});
         emit Allocated(vars.recipientIds[0], vars.grantAmount, address(GTC), pool_manager1());
-        // FIXME: This is failing because the fee has not been paid out of this amount.
         allo().allocate(poolId, vars.allocateData);
 
         assertEq(uint8(strategy.getInternalRecipientStatus(vars.recipientIds[0])), 2, "after allocate internal status"); // Accepted
@@ -135,8 +139,8 @@ contract LockupDynamicStrategyTest is LockupBase_Test {
         vars.expectedSegments = new LockupDynamic.Segment[](2);
         vars.expectedSegments[0].milestone = uint40(block.timestamp) + vars.segments[0].delta;
         vars.expectedSegments[1].milestone = vars.expectedSegments[0].milestone + vars.segments[1].delta;
-        vars.expectedSegments[0].amount = params.segmentAmount;
-        vars.expectedSegments[1].amount = params.segmentAmount;
+        vars.expectedSegments[0].amount = vars.segments[0].amount;
+        vars.expectedSegments[1].amount = vars.segments[1].amount;
         vars.expectedSegments[0].exponent = params.segmentExponent;
         vars.expectedSegments[1].exponent = params.segmentExponent;
 
