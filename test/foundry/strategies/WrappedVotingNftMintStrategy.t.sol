@@ -15,6 +15,8 @@ import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
 import {Native} from "../../../contracts/core/libraries/Native.sol";
 import {NFT} from "../../../contracts/strategies/wrapped-voting-nftmint/NFT.sol";
 import {NFTFactory} from "../../../contracts/strategies/wrapped-voting-nftmint/NFTFactory.sol";
+// External Libraries
+import {ERC20} from "solady/src/tokens/ERC20.sol";
 // Test libraries
 import {AlloSetup} from "../shared/AlloSetup.sol";
 import {RegistrySetupFull} from "../shared/RegistrySetup.sol";
@@ -83,11 +85,9 @@ contract WrappedVotingNftMintStrategyTest is Test, AlloSetup, RegistrySetupFull,
 
         // create an NFT
         nftFactory = new NFTFactory();
-        nft = NFT(nftFactory.createNFTContract("NFT", "NFT", 1e16, address(strategy)));
 
-        // // Fund pool
-        // vm.deal(address(strategy), 1e20);
-        // allo().fundPool{value: 1e20}(poolId, 1e20);
+        // create the NFT with mint price of 1e16 or 0.01 ETH
+        nft = NFT(nftFactory.createNFTContract("NFT", "NFT", 1e16, address(strategy)));
     }
 
     // Test that strategy contract is deployed and initialized correctly
@@ -192,6 +192,20 @@ contract WrappedVotingNftMintStrategyTest is Test, AlloSetup, RegistrySetupFull,
         // );
     }
 
+    // Fuzz test the timestamps with some assumtions to avoid reversion
+    function testFuzz_setAllocationTimestamps(uint256 _startTime, uint256 _endTime) public {
+        vm.assume(_startTime < _endTime);
+        vm.assume(_startTime > block.timestamp);
+        vm.assume(_startTime > 0);
+
+        vm.prank(pool_manager1());
+        strategy.setAllocationTimes(_startTime, _endTime);
+
+        assertEq(strategy.allocationStartTime(), _startTime);
+        assertEq(strategy.allocationEndTime(), _endTime);
+    }
+
+    // Tests that ths allocation timestamps are updated correctly
     function test_setAllocationTimestamps() public {
         uint256 newAllocationStartTime = block.timestamp + 1 weeks;
         uint256 newAllocationEndTime = block.timestamp + 2 weeks;
@@ -229,6 +243,8 @@ contract WrappedVotingNftMintStrategyTest is Test, AlloSetup, RegistrySetupFull,
     // Tests allocation
     function test_allocate() public {
         __allocate();
+
+        assertEq(address(strategy).balance, 1e20);
     }
 
     // Tests that allocated reverts whent he minter is not the owner
@@ -358,6 +374,74 @@ contract WrappedVotingNftMintStrategyTest is Test, AlloSetup, RegistrySetupFull,
         strategy.distribute(recipients, payoutData, address(this));
     }
 
+    /// TODO: NFT Contract test coverage - move?
+    function test_mintTo() public {}
+
+    // Tests that when the mint price is not paid it reverts
+    function testRevert_mintTo_MintPriceNotPaid() public {
+        vm.expectRevert(NFT.MintPriceNotPaid.selector);
+
+        // Sending value as zero which is also under the mint price
+        vm.prank(address(strategy));
+        nft.mintTo{value: 0}(recipient1());
+    }
+
+    // Tests that when max supply is reached the mintTo reverts
+    function testRevert_mintTo_MaxSupply() public {
+        bytes memory data = abi.encode(nft, recipient1());
+        vm.expectRevert();
+
+        // Sending value to buy all 10_000 plus 1
+        vm.deal(address(strategy), 1_001e18);
+        vm.prank(address(strategy));
+
+        allo().allocate{value: 1_001e18}(poolId, data);
+    }
+
+    // Tests that the NFT contract returns the correct tokenURI
+    function test_tokenURI() public {
+        assertEq(nft.tokenURI(1), "1");
+    }
+
+    // Tests that the withdrawPayments function works correctly
+    function test_withdrawPayments() public {
+        __allocate();
+        __fund_pool();
+
+        vm.warp(allocationEndTime + 1);
+        vm.prank(address(strategy));
+        nft.withdrawPayments(payable(recipient1()));
+
+        uint256 balance = address(recipient1()).balance;
+
+        assertEq(balance, 1e18);
+    }
+
+    // Tests that the withdrawPayments reverts if the caller is not the owner
+    function testRevert_withdrawPayments_UNAUTHORIZED() public {
+        __allocate();
+        __fund_pool();
+
+        vm.expectRevert();
+
+        vm.warp(allocationEndTime + 1);
+        vm.prank(randomAddress());
+        nft.withdrawPayments(payable(recipient1()));
+    }
+
+    // Tests that the withdrawPayments reverts if the transfer fails WithdrawTransfer()
+    // NOTE: not sure how to do this one yet
+    function testRevert_withdrawPayments_WithdrawTransfer() public {
+        // __allocate();
+        // __fund_pool();
+
+        // vm.expectRevert();
+
+        // vm.warp(allocationEndTime + 1);
+        // vm.prank(randomAddress());
+        // nft.withdrawPayments(payable(recipient1()));
+    }
+
     /// ====================
     /// ===== Helpers ======
     /// ====================
@@ -386,5 +470,7 @@ contract WrappedVotingNftMintStrategyTest is Test, AlloSetup, RegistrySetupFull,
     function __fund_pool() internal {
         vm.deal(address(strategy), 1e20);
         allo().fundPool{value: 1e20}(poolId, 1e20);
+
+        assertEq(address(strategy).balance, 1e20);
     }
 }

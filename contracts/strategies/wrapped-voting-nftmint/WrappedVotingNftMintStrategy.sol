@@ -149,6 +149,7 @@ contract WrappedVotingNftMintStrategy is Native, BaseStrategy, Initializable, Re
     /// @notice Returns the status of the recipient based on whether it is an NFT contract created by the factory
     /// @param _recipientId The address of the recipient
     /// @return The RecipientStatus of the recipient
+    // NOTE: why are we using the recipientId as the address of the NFT contract?
     function getRecipientStatus(address _recipientId) external view override returns (RecipientStatus) {
         return nftFactory.isNFTContract(_recipientId) ? RecipientStatus.Accepted : RecipientStatus.None;
     }
@@ -169,6 +170,7 @@ contract WrappedVotingNftMintStrategy is Native, BaseStrategy, Initializable, Re
         }
 
         // divide the amount sent by the mint price to get the amount of NFTs to mint
+        // NOTE: what do we do with the leftover wei?
         uint256 amount = msg.value / mintPrice;
 
         // mint the NFT's to the sender
