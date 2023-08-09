@@ -1,35 +1,35 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
+// Test contracts
 import "forge-std/Test.sol";
+import {CREATE3} from "solady/src/utils/CREATE3.sol";
 
 // Interfaces
 import {IStrategy} from "../../../contracts/strategies/IStrategy.sol";
 import {IRegistry} from "../../../contracts/core/IRegistry.sol";
 // Core contracts
 import {BaseStrategy} from "../../../contracts/strategies/BaseStrategy.sol";
-
+// Strategy Contracts
 import {DonationVotingMerkleDistributionStrategy} from
     "../../../contracts/strategies/donation-voting-merkle-distribution/DonationVotingMerkleDistributionStrategy.sol";
-// Internal libraries
+// Core libraries
 import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
 import {Native} from "../../../contracts/core/libraries/Native.sol";
-
+import {Anchor} from "../../../contracts/core/Anchor.sol";
 // Test libraries
 import {AlloSetup} from "../shared/AlloSetup.sol";
 import {RegistrySetupFull} from "../shared/RegistrySetup.sol";
-
 import {EventSetup} from "../shared/EventSetup.sol";
 
 contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, RegistrySetupFull, EventSetup, Native {
-    /// ===============================
-    /// ========== Events =============
-    /// ===============================
-
     event RecipientStatusUpdated(uint256 indexed rowIndex, uint256 fullRow, address sender);
     event DistributionUpdated(bytes32 merkleRoot, Metadata metadata);
     event FundsDistributed(uint256 amount, address grantee, address indexed token, address indexed recipientId);
     event BatchPayoutSuccessful(address indexed sender);
+    event ProfileCreated(
+        bytes32 profileId, uint256 nonce, string name, Metadata metadata, address indexed owner, address indexed anchor
+    );
 
     bool public useRegistryAnchor;
     bool public metadataRequired;
@@ -38,16 +38,13 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
     uint256 public registrationEndTime;
     uint256 public allocationStartTime;
     uint256 public allocationEndTime;
+    uint256 public poolId;
 
     address[] public allowedTokens;
-
-    DonationVotingMerkleDistributionStrategy public strategy;
-
     address public token;
 
+    DonationVotingMerkleDistributionStrategy public strategy;
     Metadata public poolMetadata;
-
-    uint256 public poolId;
 
     // Setup the tests
     function setUp() public virtual {
@@ -59,7 +56,7 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
         allocationStartTime = block.timestamp + 301;
         allocationEndTime = block.timestamp + 600;
 
-        useRegistryAnchor = false;
+        useRegistryAnchor = true;
         metadataRequired = true;
 
         poolMetadata = Metadata({protocol: 1, pointer: "PoolMetadata"});
@@ -275,7 +272,6 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
 
     // Tests that the correct recipient is returned
     function test_getRecipient() public {
-        // __create_profile();
         // __register_recipient();
         // strategy.getRecipient(recipient1());
     }
@@ -417,7 +413,7 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
     }
 
     function test_registerRecipient_new() public {
-        // __register_recipient();
+        // __create_profile_register_recipient();
     }
 
     function test_registerRecipient_new_withRegistryAnchor() public {
@@ -489,24 +485,49 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
     /// ====================
 
     // Helper function to register a recipient
-    function __register_recipient() internal {
-        Metadata memory metadata = Metadata({protocol: 1, pointer: "RecipientMetadata"});
-        IRegistry.Profile memory profile = allo().getRegistry().getProfileById(poolProfile_id());
-        bytes memory data = abi.encode(recipient1(), profile.anchor, metadata);
+    // function __register_recipient() internal {
+    //     Metadata memory metadata = __get_metadata(1, "Profile2");
+    //     IRegistry.Profile memory profile = allo().getRegistry().getProfileById(0xce6ccaa269c65528ca658852ba7db8f27381e06b52e4b77db17c9a1475b22bc4);
+    //     bytes memory data = abi.encode(recipient1(), 0xE4C662c4b8018EEA89294209Cd34Efb150EF4297, metadata);
 
-        // warp to registration start time
-        vm.warp(registrationStartTime + 1);
-        vm.prank(pool_manager1());
-        allo().registerRecipient(poolId, data);
+    //     // warp to registration start time
+    //     vm.warp(registrationStartTime + 1);
+    //     vm.prank(pool_admin());
+    //     allo().registerRecipient(poolId, data);
+    // }
+
+    // Helper function to create a profile
+    // function __create_profile() internal returns (bytes32 profileId) {
+    //     Metadata memory metadata = __get_metadata(1, "ProfileMetadata");
+    //     address[] memory poolMembers = new address[](2);
+    //     poolMembers[0] = pool_manager1();
+    //     poolMembers[1] = recipient1();
+
+    //     // NOTE: how to know the anchor it will emit without creating profile?
+    //     // How to get the profile id without creating profile yet?
+    //     // 0xd35eb5538c1856e9010643a255dde8e41acf0a3349042b857f6f1a4cd5b05097
+    //     address anchor = __generateAnchor(0xd35eb5538c1856e9010643a255dde8e41acf0a3349042b857f6f1a4cd5b05097, "Chad");
+    //     vm.expectEmit(true, false, false, true);
+    //     emit ProfileCreated(profileId, 1, "Chad", metadata, pool_manager1(), anchor);
+
+    //     profileId = allo().getRegistry().createProfile(1, "Chad", metadata, pool_manager1(), poolMembers);
+    //     emit log_bytes32(profileId);
+    // }
+
+    function __generateAnchor(bytes32 _profileId, string memory _name) internal returns (address anchor) {
+        bytes32 salt = keccak256(abi.encodePacked(_profileId, _name));
+
+        bytes memory creationCode = abi.encodePacked(type(Anchor).creationCode, abi.encode(_profileId));
+
+        anchor = CREATE3.deploy(salt, creationCode, 0);
     }
 
-    function __create_profile() internal returns (bytes32 profileId) {
-        Metadata memory metadata = Metadata({protocol: 1, pointer: "ProfileMetadata"});
-        address[] memory poolMembers = new address[](2);
-        poolMembers[0] = pool_manager1();
-        poolMembers[1] = recipient1();
-
-        profileId = allo().getRegistry().createProfile(1, "Chad", metadata, pool_manager1(), poolMembers);
+    function __get_metadata(uint256 _protocol, string memory _pointer)
+        internal
+        pure
+        returns (Metadata memory metadata)
+    {
+        metadata = Metadata({protocol: _protocol, pointer: _pointer});
     }
 
     // TODO: ADD OTHER MERKLE CHECKS
