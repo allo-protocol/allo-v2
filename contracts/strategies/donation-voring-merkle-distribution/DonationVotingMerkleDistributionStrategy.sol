@@ -255,11 +255,6 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         }
     }
 
-    /// @notice Checks if address is elgible allocator
-    function isValidAllocator(address) external pure returns (bool) {
-        return true;
-    }
-
     /// ===============================
     /// ======= External/Custom =======
     /// ===============================
@@ -390,6 +385,11 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
     /// ====================================
     /// ============ Internal ==============
     /// ====================================
+
+    /// @notice Checks if address is elgible allocator
+    function _isValidAllocator(address) internal pure override returns (bool) {
+        return true;
+    }
 
     function _isPoolTimestampValid(
         uint256 _registrationStartTime,
