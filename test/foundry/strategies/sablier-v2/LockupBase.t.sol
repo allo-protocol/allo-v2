@@ -14,6 +14,8 @@ import {Allo} from "../../../../contracts/core/Allo.sol";
 import {Metadata} from "../../../../contracts/core/libraries/Metadata.sol";
 
 contract LockupBase_Test is Test, Accounts, EventSetup, RegistrySetupFull, AlloSetup {
+    event PoolFunded(uint256 indexed poolId, uint256 amount, uint256 fee);
+
     IERC20 internal GTC = IERC20(0xDe30da39c46104798bB5aA3fe8B9e0e1F348163F);
 
     Broker internal broker = Broker({account: pool_manager1(), fee: UD60x18.wrap(0.01e18)});
