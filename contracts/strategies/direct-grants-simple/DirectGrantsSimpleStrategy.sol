@@ -52,13 +52,14 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     error INVALID_REGISTRATION();
     error ALLOCATION_EXCEEDS_POOL_AMOUNT();
     error INVALID_METADATA();
+    error RECIPIENT_NOT_ACCEPTED();
 
     /// ===============================
     /// ========== Events =============
     /// ===============================
 
     event RecipientStatusChanged(address recipientId, InternalRecipientStatus status);
-    event MilestonesSubmitted(address recipientId, uint256 milestoneId, Metadata metadata);
+    event MilestoneSubmitted(address recipientId, uint256 milestoneId, Metadata metadata);
     event MilestoneStatusChanged(address recipientId, uint256 milestoneId, RecipientStatus status);
     event MilestonesSet(address recipientId);
 
@@ -149,6 +150,12 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         return milestones[_recipientId][_milestoneId].milestoneStatus;
     }
 
+    /// @notice Get the milestones
+    /// @param _recipientId Id of the recipient
+    function getMilestones(address _recipientId) external view returns (Milestone[] memory) {
+        return milestones[_recipientId];
+    }
+
     /// ===============================
     /// ======= External/Custom =======
     /// ===============================
@@ -161,12 +168,22 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
             revert MILESTONES_ALREADY_SET();
         }
 
+        Recipient memory recipient = _getRecipient(_recipientId);
+
+        if (recipient.recipientStatus != InternalRecipientStatus.Accepted) {
+            revert RECIPIENT_NOT_ACCEPTED();
+        }
+
         uint256 totalAmountPercentage;
 
         uint256 milestonesLength = _milestones.length;
         for (uint256 i = 0; i < milestonesLength;) {
-            totalAmountPercentage += _milestones[i].amountPercentage;
-            milestones[_recipientId].push(_milestones[i]);
+            Milestone memory milestone = _milestones[i];
+            if (milestone.milestoneStatus != RecipientStatus.None) {
+                revert INVALID_MILESTONE();
+            }
+            totalAmountPercentage += milestone.amountPercentage;
+            milestones[_recipientId].push(milestone);
 
             unchecked {
                 i++;
@@ -203,7 +220,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         milestone.metadata = _metadata;
         milestone.milestoneStatus = RecipientStatus.Pending;
 
-        emit MilestonesSubmitted(_recipientId, _milestoneId, _metadata);
+        emit MilestoneSubmitted(_recipientId, _milestoneId, _metadata);
     }
 
     /// @notice Reject pending milestone of the recipient
@@ -417,4 +434,6 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         Recipient memory recipient = _getRecipient(_recipientId);
         return PayoutSummary(recipient.recipientAddress, recipient.grantAmount);
     }
+
+    receive() external payable {}
 }
