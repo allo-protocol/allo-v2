@@ -8,8 +8,7 @@ import {
     AttestationRequest,
     AttestationRequestData,
     IEAS,
-    RevocationRequest,
-    RevocationRequestData
+    RevocationRequest
 } from "@ethereum-attestation-service/eas-contracts/contracts/IEAS.sol";
 import {
     ISchemaRegistry,
@@ -54,7 +53,6 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
     /// ======================
 
     bytes32 constant _NO_RELATED_ATTESTATION_UID = 0;
-    ISchemaRegistry public schemaRegistry;
     uint256[] public payoutPercentages;
     uint256[] public votesByRank;
     EASInfo public easInfo;
@@ -145,10 +143,10 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
         if (bytes(_easInfo.schema).length > 0) {
             // if the schema is present, then register schema and update uid
             easInfo.schemaUID =
-                schemaRegistry.register(_easInfo.schema, ISchemaResolver(address(this)), _easInfo.revocable);
+                easInfo.schemaRegistry.register(_easInfo.schema, ISchemaResolver(address(this)), _easInfo.revocable);
         } else {
             // compare SchemaRecord to data passed in
-            SchemaRecord memory record = schemaRegistry.getSchema(_easInfo.schemaUID);
+            SchemaRecord memory record = easInfo.schemaRegistry.getSchema(_easInfo.schemaUID);
             if (
                 record.uid != _easInfo.schemaUID || record.revocable != _easInfo.revocable
                     || keccak256(abi.encode(record.schema)) != keccak256(abi.encode(_easInfo.schema))
@@ -395,7 +393,7 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
     /// @dev Gets a schema from the SchemaRegistry contract using the UID
     /// @param uid The UID of the schema to get.
     function getSchema(bytes32 uid) external view returns (SchemaRecord memory) {
-        return schemaRegistry.getSchema(uid);
+        return easInfo.schemaRegistry.getSchema(uid);
     }
 
     /// @notice Returns if the attestation is payable or not
