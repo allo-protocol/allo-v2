@@ -64,6 +64,10 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
         token.approve(address(allo()), mintAmount);
 
         strategy = address(new MockStrategy(address(allo())));
+
+        vm.startPrank(allo_owner());
+        allo().transferOwnership(local());
+        vm.stopPrank();
     }
 
     function _utilCreatePool(uint256 _amount) internal returns (uint256) {
