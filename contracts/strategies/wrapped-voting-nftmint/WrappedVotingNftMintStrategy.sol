@@ -63,17 +63,28 @@ contract WrappedVotingNftMintStrategy is Native, BaseStrategy, Initializable, Re
     /// ================================
 
     NFTFactory public nftFactory;
+
     uint256 public allocationStartTime;
     uint256 public allocationEndTime;
+
+    // The current winner of the pool balance
     address public currentWinner;
 
     // recipientId => amount
     mapping(address => uint256) private allocations;
 
+    /// ================================
+    /// ========== Constructor =========
+    /// ================================
+
     /// @notice Constructor for initializing the WrappedVotingStrategy contract
     /// @param _allo The address of the ALLO contract
     /// @param _name The name of the strategy
     constructor(address _allo, string memory _name) BaseStrategy(_allo, _name) {}
+
+    /// ================================
+    /// ========== Initializer =========
+    /// ================================
 
     /// @notice Initializes the WrappedVotingStrategy contract
     /// @param _poolId The ID of the pool
@@ -82,6 +93,30 @@ contract WrappedVotingNftMintStrategy is Native, BaseStrategy, Initializable, Re
         (address nftFactoryAddress, uint256 _allocationStartTime, uint256 _allocationEndTime) =
             abi.decode(_data, (address, uint256, uint256));
         __WrappedVotingStrategy_init(_poolId, nftFactoryAddress, _allocationStartTime, _allocationEndTime);
+    }
+
+    /// ====================
+    /// ===== External =====
+    /// ====================
+
+    function setAllocationTimes(uint256 _allocationStartTime, uint256 _allocationEndTime)
+        external
+        onlyPoolManager(msg.sender)
+    {
+        _setAllocationTimes(_allocationStartTime, _allocationEndTime);
+    }
+
+    /// ====================
+    /// ===== Internal =====
+    /// ====================
+
+    function _setAllocationTimes(uint256 _allocationStartTime, uint256 _allocationEndTime) internal {
+        _isPoolTimestampValid(_allocationStartTime, _allocationEndTime);
+
+        allocationStartTime = _allocationStartTime;
+        allocationEndTime = _allocationEndTime;
+
+        emit TimestampsUpdated(allocationStartTime, allocationEndTime, msg.sender);
     }
 
     /// @notice Internal function to initialize the WrappedVotingStrategy
@@ -125,8 +160,7 @@ contract WrappedVotingNftMintStrategy is Native, BaseStrategy, Initializable, Re
 
     /// @notice Internal function to allocate based on the given data.
     /// @param _data The data containing NFT information
-    /// @param _sender The sender of the transaction
-    function _allocate(bytes memory _data, address _sender) internal override {
+    function _allocate(bytes memory _data, address) internal override {
         // decode the data to get the NFT contract
         (NFT nft, address recipientAddress) = abi.decode(_data, (NFT, address));
         uint256 mintPrice = nft.MINT_PRICE();
@@ -146,11 +180,11 @@ contract WrappedVotingNftMintStrategy is Native, BaseStrategy, Initializable, Re
         }
 
         // add the amount to the sender's allocation
-        allocations[_sender] += amount;
+        allocations[recipientAddress] += amount;
 
         // if the sender's allocation is greater than the current winner's allocation, set the current winner to the sender
-        if (allocations[_sender] > allocations[currentWinner]) {
-            currentWinner = _sender;
+        if (allocations[recipientAddress] > allocations[currentWinner]) {
+            currentWinner = recipientAddress;
         }
 
         // emit the event
@@ -172,10 +206,6 @@ contract WrappedVotingNftMintStrategy is Native, BaseStrategy, Initializable, Re
 
         emit Distributed(currentWinner, currentWinner, poolAmount, _sender);
     }
-
-    /// ====================================
-    /// ============ Internal ==============
-    /// ====================================
 
     /// @notice Internal function to check if the pool timestamp is valid
     /// @param _allocationStartTime The start time of the allocation period
@@ -201,6 +231,7 @@ contract WrappedVotingNftMintStrategy is Native, BaseStrategy, Initializable, Re
     }
 
     /// @notice Returns true for any allocator address (always returns true)
+    /// @return A boolean indicating whether the allocator is valid, always true in this case
     function _isValidAllocator(address) internal pure override returns (bool) {
         return true;
     }
