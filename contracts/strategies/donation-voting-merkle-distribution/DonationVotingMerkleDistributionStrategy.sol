@@ -311,7 +311,7 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
 
     /// @notice Withdraw funds from pool
     /// @param _amount The amount to be withdrawn
-    function withdraw(uint256 _amount) external onlyPoolManager(msg.sender) onlyAfterAllocation {
+    function withdraw(uint256 _amount) external onlyPoolManager(msg.sender) {
         if (block.timestamp <= allocationEndTime + 30 days) {
             revert NOT_ALLOWED();
         }

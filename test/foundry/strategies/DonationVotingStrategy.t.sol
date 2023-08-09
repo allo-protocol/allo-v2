@@ -551,12 +551,6 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         strategy.withdraw(9.9e17); // 1e18 - 1e17 fee = 9.9e17
     }
 
-    function testRevert_withdraw_ALLOCATION_NOT_ENDED() public {
-        vm.expectRevert(DonationVotingStrategy.ALLOCATION_NOT_ENDED.selector);
-        vm.prank(pool_admin());
-        strategy.withdraw(1e18);
-    }
-
     function testRevert_withdraw_NOT_ALLOWED_30days() public {
         vm.warp(allocationEndTime + 1 days);
 
@@ -846,7 +840,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         assertEq(address(recipientAddress()).balance, 9.9e17);
     }
 
-    function test_distribute_twice_to_same_recipient() public {
+    function testRevert_distribute_twice_to_same_recipient() public {
         __register_accept_setPayout_recipient();
 
         address[] memory recipients = new address[](2);
