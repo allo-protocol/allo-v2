@@ -94,18 +94,17 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
     }
 
     function test_deployment() public {
-        ProportionalPayoutStrategy testStrategy =
-            new ProportionalPayoutStrategy(address(allo()), "ProportionalPayoutStrategy");
-        assertEq(address(allo()), address(allo()));
+        ProportionalPayoutStrategy testStrategy = __createTestStrategy();
+        assertEq(address(testStrategy.getAllo()), address(allo()));
         assertEq(testStrategy.getStrategyId(), keccak256(abi.encode("ProportionalPayoutStrategy")));
     }
 
     function test_initialize() public {
-        ProportionalPayoutStrategy testStrategy =
-            new ProportionalPayoutStrategy(address(allo()), "ProportionalPayoutStrategy");
+        ProportionalPayoutStrategy testStrategy = __createTestStrategy();
         vm.prank(address(allo()));
         testStrategy.initialize(poolId, abi.encode(address(nft), 2, startTime, endTime));
 
+        assertEq(testStrategy.getPoolId(), poolId);
         assertEq(testStrategy.allocationStartTime(), startTime);
         assertEq(testStrategy.allocationEndTime(), endTime);
         assertEq(testStrategy.maxRecipientsAllowed(), 2);
@@ -114,8 +113,7 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
     }
 
     function testRevert_initialize_ALREADY_INITIALIZED() public {
-        ProportionalPayoutStrategy testStrategy =
-            new ProportionalPayoutStrategy(address(allo()), "ProportionalPayoutStrategy");
+        ProportionalPayoutStrategy testStrategy = __createTestStrategy();
         vm.startPrank(address(allo()));
         testStrategy.initialize(1337, abi.encode(address(nft), 2, startTime, endTime));
 
@@ -124,16 +122,14 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
     }
 
     function testRevert_initialize_UNAUTHORIZED() public {
-        ProportionalPayoutStrategy testStrategy =
-            new ProportionalPayoutStrategy(address(allo()), "ProportionalPayoutStrategy");
+        ProportionalPayoutStrategy testStrategy = __createTestStrategy();
         vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
 
         testStrategy.initialize(1337, abi.encode(address(nft), 2, startTime, endTime));
     }
 
     function testRevert_initialize_INVALID() public {
-        ProportionalPayoutStrategy testStrategy =
-            new ProportionalPayoutStrategy(address(allo()), "ProportionalPayoutStrategy");
+        ProportionalPayoutStrategy testStrategy = __createTestStrategy();
 
         vm.expectRevert(abi.encodeWithSelector(ProportionalPayoutStrategy.INVALID.selector));
 
@@ -416,6 +412,10 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
         allo().allocate(poolId, abi.encode(recipientId, 1));
     }
 
+    /// ====================
+    /// ===== Helpers ======
+    /// ====================
+
     function __register_recipient() internal returns (address recipientId) {
         Metadata memory metadata = Metadata({protocol: 1, pointer: "Test Metadata"});
         bytes memory data = abi.encode(recipient1(), recipient1(), IStrategy.RecipientStatus.Accepted, metadata);
@@ -455,5 +455,12 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
 
         vm.prank(address(allo()));
         strategy.distribute(recipientIds, "", pool_admin());
+    }
+
+    function __createTestStrategy() internal returns (ProportionalPayoutStrategy testStrategy) {
+        testStrategy = new ProportionalPayoutStrategy(
+            address(allo()),
+            "ProportionalPayoutStrategy"
+        );
     }
 }

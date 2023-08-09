@@ -25,7 +25,6 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
     event RecipientStatusUpdated(
         address indexed recipientId, DonationVotingStrategy.InternalRecipientStatus recipientStatus, address sender
     );
-    event Claimed(address indexed recipientId, address recipientAddress, uint256 amount, address token);
 
     bool public useRegistryAnchor;
     bool public metadataRequired;
