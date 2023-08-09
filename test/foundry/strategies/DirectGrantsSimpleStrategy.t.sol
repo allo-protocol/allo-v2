@@ -204,6 +204,22 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
         vm.stopPrank();
     }
 
+    function test_getPayouts() public {
+        address recipientId = _register_recipient_allocate_accept();
+        address[] memory recipients = new address[](2);
+        recipients[0] = recipientId;
+        recipients[1] = randomAddress();
+
+        bytes[] memory data = new bytes[](2);
+
+        IStrategy.PayoutSummary[] memory payouts = strategy.getPayouts(recipients, data);
+        assertTrue(payouts[0].amount == 1e18);
+        assertTrue(payouts[0].recipientAddress == recipient1());
+
+        assertTrue(payouts[1].amount == 0);
+        assertTrue(payouts[1].recipientAddress == address(0));
+    }
+
     function test_setIntenalRecipientStatusToInReview() public {
         address recipientId = _register_recipient();
 
@@ -238,13 +254,9 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
     function test_allocate_reject() public {
         address recipientId = _register_recipient_allocate_reject();
 
-        DirectGrantsSimpleStrategy.Recipient memory recipient = strategy.getRecipient(recipientId);
+        DirectGrantsSimpleStrategy.RecipientStatus recipientStatus = strategy.getRecipientStatus(recipientId);
 
-        // TODO: why is this failing?
-        // Event is emitted correclty, but recipientStatus is not updated
-        // emit RecipientStatusChanged(recipientId: Anchor: [0xad5FDFa74961f0b6F1745eF0A1Fa0e115caa9641], status: 3)
-        // InternalRecipientStatus is still 1 (Pending)
-        // assertEq(uint8(recipient.recipientStatus), uint8(DirectGrantsSimpleStrategy.InternalRecipientStatus.Rejected));
+        assertEq(uint8(recipientStatus), uint8(IStrategy.RecipientStatus.Rejected));
     }
 
     function testRevert_allocate_ALLOCATION_EXCEEDS_POOL_AMOUNT() public {
@@ -263,7 +275,19 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
     }
 
     function testRevert_allocate_MILESTONES_ALREADY_SET() public {
-        // todo
+        address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones_distribute();
+
+        DirectGrantsSimpleStrategy.InternalRecipientStatus recipientStatus =
+            DirectGrantsSimpleStrategy.InternalRecipientStatus.Accepted;
+        uint256 grantAmount = 1e18; // 1 eth
+
+        bytes memory data = abi.encode(recipientId, recipientStatus, grantAmount);
+
+        vm.expectRevert(DirectGrantsSimpleStrategy.MILESTONES_ALREADY_SET.selector);
+
+        vm.startPrank(address(allo()));
+        strategy.allocate(data, pool_manager1());
+        vm.stopPrank();
     }
 
     function test_setMilestones() public {
@@ -277,29 +301,27 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
     }
 
     function testRevert_setMilestones_MILESTONES_ALREADY_SET() public {
-        // address recipientId = _register_recipient_allocate_accept_set_milestones();
+        address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones_distribute();
 
-        // todo: distribute first
+        DirectGrantsSimpleStrategy.Milestone[] memory milestones = new DirectGrantsSimpleStrategy.Milestone[](2);
 
-        // DirectGrantsSimpleStrategy.Milestone[] memory milestones = new DirectGrantsSimpleStrategy.Milestone[](2);
+        milestones[0] = DirectGrantsSimpleStrategy.Milestone({
+            amountPercentage: 0.3e18,
+            metadata: Metadata(1, "milestone-1"),
+            milestoneStatus: IStrategy.RecipientStatus.None
+        });
 
-        // milestones[0] = DirectGrantsSimpleStrategy.Milestone({
-        //     amountPercentage: 0.3e18,
-        //     metadata: Metadata(1, "milestone-1"),
-        //     milestoneStatus: IStrategy.RecipientStatus.None
-        // });
+        milestones[1] = DirectGrantsSimpleStrategy.Milestone({
+            amountPercentage: 0.7e18,
+            metadata: Metadata(1, "milestone-2"),
+            milestoneStatus: IStrategy.RecipientStatus.None
+        });
 
-        // milestones[1] = DirectGrantsSimpleStrategy.Milestone({
-        //     amountPercentage: 0.7e18,
-        //     metadata: Metadata(1, "milestone-2"),
-        //     milestoneStatus: IStrategy.RecipientStatus.None
-        // });
+        vm.expectRevert(DirectGrantsSimpleStrategy.MILESTONES_ALREADY_SET.selector);
 
-        // vm.expectRevert(DirectGrantsSimpleStrategy.MILESTONES_ALREADY_SET.selector);
-
-        // vm.startPrank(pool_manager1());
-        // strategy.setMilestones(recipientId, milestones);
-        // vm.stopPrank();
+        vm.startPrank(pool_manager1());
+        strategy.setMilestones(recipientId, milestones);
+        vm.stopPrank();
     }
 
     function testRevert_setMilestones_RECIPIENT_NOT_ACCEPTED() public {
@@ -377,6 +399,102 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
 
         assertEq(uint8(milestones[0].milestoneStatus), uint8(IStrategy.RecipientStatus.Pending));
         assertEq(uint8(milestones[1].milestoneStatus), uint8(IStrategy.RecipientStatus.Pending));
+    }
+
+    function testRevert_submitMilestone_UNAUTHORIZED() public {
+        address recipientId = _register_recipient_allocate_accept_set_milestones();
+
+        Metadata memory metadata = Metadata(1, "milestone-1");
+
+        vm.expectRevert(DirectGrantsSimpleStrategy.UNAUTHORIZED.selector);
+
+        vm.startPrank(randomAddress());
+        strategy.submitMilestone(recipientId, 0, metadata);
+        vm.stopPrank();
+    }
+
+    function testRevert_submitMilestone_INVALID_MILESTONE() public {
+        address recipientId = _register_recipient_allocate_accept_set_milestones();
+
+        Metadata memory metadata = Metadata(3, "milestone-3");
+
+        vm.expectRevert(DirectGrantsSimpleStrategy.INVALID_MILESTONE.selector);
+
+        vm.startPrank(profile1_member1());
+        strategy.submitMilestone(recipientId, 3, metadata);
+        vm.stopPrank();
+    }
+
+    function testRevert_submitMilestone_MILESTONE_ALREADY_ACCEPTED() public {
+        address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones_distribute();
+
+        Metadata memory metadata = Metadata(1, "milestone-1");
+
+        vm.expectRevert(DirectGrantsSimpleStrategy.MILESTONE_ALREADY_ACCEPTED.selector);
+
+        vm.startPrank(profile1_member1());
+        strategy.submitMilestone(recipientId, 0, metadata);
+        vm.stopPrank();
+    }
+
+    function test_rejectMilestone() public {
+        address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones();
+
+        vm.startPrank(pool_manager1());
+        strategy.rejectMilestone(recipientId, 0);
+        vm.stopPrank();
+
+        DirectGrantsSimpleStrategy.Milestone[] memory milestones = strategy.getMilestones(recipientId);
+
+        assertEq(uint8(milestones[0].milestoneStatus), uint8(IStrategy.RecipientStatus.Rejected));
+        assertEq(uint8(milestones[1].milestoneStatus), uint8(IStrategy.RecipientStatus.Pending));
+    }
+
+    function testRevert_rejectMilestone_MILESTONE_ALREADY_ACCEPTED() public {
+        address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones_distribute();
+
+        vm.expectRevert(DirectGrantsSimpleStrategy.MILESTONE_ALREADY_ACCEPTED.selector);
+
+        vm.startPrank(pool_manager1());
+        strategy.rejectMilestone(recipientId, 0);
+        vm.stopPrank();
+    }
+
+    function test_distribute() public {
+        address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones_distribute();
+
+        DirectGrantsSimpleStrategy.Milestone[] memory milestones = strategy.getMilestones(recipientId);
+
+        assertEq(uint8(milestones[0].milestoneStatus), uint8(IStrategy.RecipientStatus.Accepted));
+        assertEq(uint8(milestones[1].milestoneStatus), uint8(IStrategy.RecipientStatus.Accepted));
+
+        assertEq(recipient1().balance, 1e18);
+        assertEq(address(strategy).balance, 0);
+    }
+
+    function testRevert_distribute_INVALID_MILESTONE() public {
+        address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones();
+
+        vm.startPrank(pool_manager1());
+        strategy.rejectMilestone(recipientId, 0);
+
+        address[] memory recipients = new address[](2);
+
+        recipients[0] = recipientId;
+        recipients[1] = recipientId;
+
+        vm.expectRevert(DirectGrantsSimpleStrategy.INVALID_MILESTONE.selector);
+
+        allo().distribute(poolId, recipients, "");
+        vm.stopPrank();
+    }
+
+    function test_withdraw() public {
+        vm.startPrank(pool_manager1());
+        strategy.withdraw(1e18);
+        vm.stopPrank();
+
+        assertEq(address(strategy).balance, 0);
     }
 
     // =================== Helper ===================
@@ -497,6 +615,28 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
         vm.startPrank(profile1_member1());
         strategy.submitMilestone(recipientId, 0, metadata1);
         strategy.submitMilestone(recipientId, 1, metadata2);
+        vm.stopPrank();
+    }
+
+    function _register_recipient_allocate_accept_set_and_submit_milestones_distribute()
+        internal
+        returns (address recipientId)
+    {
+        recipientId = _register_recipient_allocate_accept_set_and_submit_milestones();
+
+        address[] memory recipients = new address[](2);
+
+        recipients[0] = recipientId;
+        recipients[1] = recipientId;
+
+        vm.expectEmit(false, false, true, true);
+
+        emit MilestoneStatusChanged(recipientId, 1, IStrategy.RecipientStatus.Accepted);
+        emit Distributed(recipientId, recipient1(), 0.7e18, pool_manager1());
+
+        vm.startPrank(pool_manager1());
+        allo().distribute(poolId, recipients, "");
+
         vm.stopPrank();
     }
 }
