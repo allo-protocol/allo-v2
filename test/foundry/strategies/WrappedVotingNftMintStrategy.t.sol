@@ -4,9 +4,6 @@ import "forge-std/Test.sol";
 
 // Interfaces
 import {IStrategy} from "../../../contracts/strategies/IStrategy.sol";
-// Core contracts
-import {BaseStrategy} from "../../../contracts/strategies/BaseStrategy.sol";
-import {DonationVotingStrategy} from "../../../contracts/strategies/donation-voting/DonationVotingStrategy.sol";
 // Strategy contracts
 import {WrappedVotingNftMintStrategy} from
     "../../../contracts/strategies/wrapped-voting-nftmint/WrappedVotingNftMintStrategy.sol";
@@ -15,13 +12,12 @@ import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
 import {Native} from "../../../contracts/core/libraries/Native.sol";
 import {NFT} from "../../../contracts/strategies/wrapped-voting-nftmint/NFT.sol";
 import {NFTFactory} from "../../../contracts/strategies/wrapped-voting-nftmint/NFTFactory.sol";
-// External Libraries
-import {ERC20} from "solady/src/tokens/ERC20.sol";
 // Test libraries
 import {AlloSetup} from "../shared/AlloSetup.sol";
 import {RegistrySetupFull} from "../shared/RegistrySetup.sol";
 
 import {EventSetup} from "../shared/EventSetup.sol";
+import {MockRevertingReceiver} from "../../utils/MockRevertingReceiver.sol";
 
 contract WrappedVotingNftMintStrategyTest is Test, AlloSetup, RegistrySetupFull, EventSetup, Native {
     error UNAUTHORIZED();
@@ -56,12 +52,16 @@ contract WrappedVotingNftMintStrategyTest is Test, AlloSetup, RegistrySetupFull,
     mapping(address => uint256) private allocations;
 
     // Test values
-    address internal nftFactoryAddress = makeAddr("nft-factory");
+    address internal nftFactoryAddress;
 
     // Setup the test
     function setUp() public virtual {
         __RegistrySetupFull();
         __AlloSetup(address(registry()));
+
+        // create the nft factory
+        nftFactory = new NFTFactory();
+        nftFactoryAddress = address(nftFactory);
 
         allocationStartTime = block.timestamp;
         allocationEndTime = block.timestamp + 1 weeks;
@@ -82,9 +82,6 @@ contract WrappedVotingNftMintStrategyTest is Test, AlloSetup, RegistrySetupFull,
             metadata,
             pool_managers()
         );
-
-        // create an NFT
-        nftFactory = new NFTFactory();
 
         // create the NFT with mint price of 1e16 or 0.01 ETH
         nft = NFT(nftFactory.createNFTContract("NFT", "NFT", 1e16, address(strategy)));
@@ -169,27 +166,13 @@ contract WrappedVotingNftMintStrategyTest is Test, AlloSetup, RegistrySetupFull,
         strategy.registerRecipient(abi.encode(0, 0, 0, 0, 0, 0), address(0));
     }
 
-    // FIXME: this test will expect an emit and the emit can't happen until it is deployed...
-    function test_nftContractCreated() public {
-        // vm.expectEmit(true, false, false, true);
-        // emit NFTContractCreated(address(strategy));
-
-        // NFT testNft = NFT(nftFactory.createNFTContract("NFT", "NFT", 1e16, address(strategy)));
-    }
-
-    // FIXME: Tests that the recipient status is updated correctly and returns the correct status
     function test_getRecipientStatus() public {
-        NFT testNft = NFT(nftFactory.createNFTContract("NFT", "NFT", 1e16, address(strategy)));
-        bytes memory data = abi.encode(testNft, recipient1());
-        vm.deal(address(strategy), 1e20);
-        vm.prank(address(strategy));
-        allo().allocate{value: 1e18}(poolId, data);
+        address testNft = nftFactory.createNFTContract("NFT", "NFT", 1e16, randomAddress());
 
-        //  FIXME: this test is reverting...
-        // assertEq(
-        //     uint8(strategy.getRecipientStatus(recipient1())),
-        //     uint8(WrappedVotingNftMintStrategy.InternalRecipientStatus.Accepted)
-        // );
+        assertEq(uint8(strategy.getRecipientStatus(testNft)), uint8(IStrategy.RecipientStatus.Accepted));
+
+        address noNft = makeAddr("no-nft");
+        assertEq(uint8(strategy.getRecipientStatus(noNft)), uint8(IStrategy.RecipientStatus.None));
     }
 
     // Fuzz test the timestamps with some assumtions to avoid reversion
@@ -242,19 +225,11 @@ contract WrappedVotingNftMintStrategyTest is Test, AlloSetup, RegistrySetupFull,
 
     // Tests allocation
     function test_allocate() public {
-        __allocate();
+        address recipientNft = __allocate();
 
-        assertEq(address(strategy).balance, 1e20);
-    }
-
-    // Tests that allocated reverts whent he minter is not the owner
-    function testRevert_allocate_NOT_AUTHORIZED() public {
-        NFT testNft = NFT(nftFactory.createNFTContract("NFT", "NFT", 1e16, no_recipient()));
-        bytes memory data = abi.encode(testNft, recipient1());
-        vm.expectRevert(0x82b42900);
-        vm.deal(recipient1(), 1e20);
-        vm.prank(recipient1());
-        allo().allocate{value: 1e18}(poolId, data);
+        assertEq(strategy.allocations(recipientNft), 1);
+        assertEq(strategy.currentWinner(), recipientNft);
+        assertEq(NFT(recipientNft).balanceOf(makeAddr("allocator")), 1);
     }
 
     // Tests allocation reverts if amount is less than the mint price or 0
@@ -269,11 +244,11 @@ contract WrappedVotingNftMintStrategyTest is Test, AlloSetup, RegistrySetupFull,
 
     // Tests that the payout amount and recipient address are correct
     function test_getPayouts() public {
-        __allocate();
+        address recipientNft = __allocate();
         __fund_pool();
 
         address[] memory recipients = new address[](2);
-        recipients[0] = recipient1();
+        recipients[0] = recipientNft;
         recipients[1] = recipient2();
 
         bytes[] memory payoutData = new bytes[](2);
@@ -284,7 +259,10 @@ contract WrappedVotingNftMintStrategyTest is Test, AlloSetup, RegistrySetupFull,
 
         // NOTE: this will be after 1% fee is taken
         assertEq(payouts[0].amount, 9.9e19);
-        assertEq(payouts[0].recipientAddress, recipient1());
+        assertEq(payouts[0].recipientAddress, recipientNft);
+
+        assertEq(payouts[1].amount, 0);
+        assertEq(payouts[1].recipientAddress, recipient2());
     }
 
     // Tests if the two arrays are not the same length it will revert
@@ -319,8 +297,6 @@ contract WrappedVotingNftMintStrategyTest is Test, AlloSetup, RegistrySetupFull,
         vm.warp(allocationEndTime + 1);
         vm.prank(address(allo()));
         strategy.distribute(recipients, payoutData, address(this));
-
-        // TODO: Check the recipients balance
     }
 
     // Tests that only Allo can call this function, otherwise reverts
@@ -374,8 +350,35 @@ contract WrappedVotingNftMintStrategyTest is Test, AlloSetup, RegistrySetupFull,
         strategy.distribute(recipients, payoutData, address(this));
     }
 
-    /// TODO: NFT Contract test coverage - move?
-    function test_mintTo() public {}
+    function testRevert_mintTo_MaxSupply() public {
+        NFT tmpNft = new NFT("Hello", "World", 1, randomAddress());
+
+        address minter = makeAddr("minter");
+        vm.deal(minter, 1e18);
+        vm.startPrank(minter);
+        for (uint256 i = 0; i < tmpNft.TOTAL_SUPPLY(); i++) {
+            tmpNft.mintTo{value: 1}(minter);
+        }
+
+        vm.expectRevert(NFT.MaxSupply.selector);
+        tmpNft.mintTo{value: 1}(minter);
+    }
+
+    function testRevert_nft_RevertingReceiver() public {
+        address revertingReceiver = address(new MockRevertingReceiver());
+        NFT tmpNft = new NFT("Hello", "World", 1, randomAddress());
+
+        address minter = makeAddr("minter");
+        vm.deal(minter, 1e18);
+        vm.startPrank(minter);
+
+        tmpNft.mintTo{value: 1}(minter);
+
+        vm.stopPrank();
+        vm.startPrank(randomAddress());
+        vm.expectRevert(NFT.WithdrawTransfer.selector);
+        tmpNft.withdrawPayments(payable(revertingReceiver));
+    }
 
     // Tests that when the mint price is not paid it reverts
     function testRevert_mintTo_MintPriceNotPaid() public {
@@ -386,18 +389,6 @@ contract WrappedVotingNftMintStrategyTest is Test, AlloSetup, RegistrySetupFull,
         nft.mintTo{value: 0}(recipient1());
     }
 
-    // Tests that when max supply is reached the mintTo reverts
-    function testRevert_mintTo_MaxSupply() public {
-        bytes memory data = abi.encode(nft, recipient1());
-        vm.expectRevert();
-
-        // Sending value to buy all 10_000 plus 1
-        vm.deal(address(strategy), 1_001e18);
-        vm.prank(address(strategy));
-
-        allo().allocate{value: 1_001e18}(poolId, data);
-    }
-
     // Tests that the NFT contract returns the correct tokenURI
     function test_tokenURI() public {
         assertEq(nft.tokenURI(1), "1");
@@ -405,12 +396,10 @@ contract WrappedVotingNftMintStrategyTest is Test, AlloSetup, RegistrySetupFull,
 
     // Tests that the withdrawPayments function works correctly
     function test_withdrawPayments() public {
-        __allocate();
-        __fund_pool();
+        address nftAddress = __allocate();
 
-        vm.warp(allocationEndTime + 1);
-        vm.prank(address(strategy));
-        nft.withdrawPayments(payable(recipient1()));
+        vm.prank(randomAddress()); //owner
+        NFT(nftAddress).withdrawPayments(payable(recipient1()));
 
         uint256 balance = address(recipient1()).balance;
 
@@ -455,15 +444,18 @@ contract WrappedVotingNftMintStrategyTest is Test, AlloSetup, RegistrySetupFull,
     }
 
     // Allocates to a recipient
-    function __allocate() internal {
-        bytes memory data = abi.encode(nft, recipient1());
+    function __allocate() internal returns (address recipientNFT) {
+        recipientNFT = nftFactory.createNFTContract("test", "test", 1e18, randomAddress());
+        bytes memory data = abi.encode(recipientNFT);
 
-        vm.deal(address(strategy), 1e20);
-        vm.prank(address(strategy));
+        address allocator = makeAddr("allocator");
+        vm.deal(address(allo()), 1e18);
         vm.expectEmit(true, false, false, true);
-        emit Allocated(address(nft), (1e18 / nft.MINT_PRICE()), NATIVE, recipient1());
+        emit Allocated(recipientNFT, 1, NATIVE, allocator);
 
-        allo().allocate{value: 1e18}(poolId, data);
+        vm.startPrank(address(allo()));
+        strategy.allocate{value: 1e18}(data, allocator);
+        vm.stopPrank();
     }
 
     // Funds the pool with 10 ETH

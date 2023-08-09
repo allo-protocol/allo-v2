@@ -24,7 +24,6 @@ contract WrappedVotingNftMintStrategy is Native, BaseStrategy, Initializable, Re
     /// ========== Errors =============
     /// ===============================
 
-    error UNAUTHORIZED();
     error REGISTRATION_NOT_ACTIVE();
     error ALLOCATION_NOT_ACTIVE();
     error ALLOCATION_NOT_ENDED();
@@ -71,7 +70,7 @@ contract WrappedVotingNftMintStrategy is Native, BaseStrategy, Initializable, Re
     address public currentWinner;
 
     // recipientId => amount
-    mapping(address => uint256) private allocations;
+    mapping(address => uint256) public allocations;
 
     /// ================================
     /// ========== Constructor =========
@@ -149,7 +148,6 @@ contract WrappedVotingNftMintStrategy is Native, BaseStrategy, Initializable, Re
     /// @notice Returns the status of the recipient based on whether it is an NFT contract created by the factory
     /// @param _recipientId The address of the recipient
     /// @return The RecipientStatus of the recipient
-    // NOTE: why are we using the recipientId as the address of the NFT contract?
     function getRecipientStatus(address _recipientId) external view override returns (RecipientStatus) {
         return nftFactory.isNFTContract(_recipientId) ? RecipientStatus.Accepted : RecipientStatus.None;
     }
@@ -161,10 +159,10 @@ contract WrappedVotingNftMintStrategy is Native, BaseStrategy, Initializable, Re
 
     /// @notice Internal function to allocate based on the given data.
     /// @param _data The data containing NFT information
-    function _allocate(bytes memory _data, address) internal override {
+    function _allocate(bytes memory _data, address _sender) internal override {
         // decode the data to get the NFT contract
-        (NFT nft, address recipientAddress) = abi.decode(_data, (NFT, address));
-        uint256 mintPrice = nft.MINT_PRICE();
+        (address nft) = abi.decode(_data, (address));
+        uint256 mintPrice = NFT(nft).MINT_PRICE();
         if (msg.value == 0 || msg.value < mintPrice) {
             revert INVALID();
         }
@@ -175,22 +173,22 @@ contract WrappedVotingNftMintStrategy is Native, BaseStrategy, Initializable, Re
 
         // mint the NFT's to the sender
         for (uint256 i = 0; i < amount;) {
-            nft.mintTo{value: mintPrice}(recipientAddress);
+            NFT(nft).mintTo{value: mintPrice}(_sender);
             unchecked {
                 i++;
             }
         }
 
         // add the amount to the sender's allocation
-        allocations[recipientAddress] += amount;
+        allocations[nft] += amount;
 
         // if the sender's allocation is greater than the current winner's allocation, set the current winner to the sender
-        if (allocations[recipientAddress] > allocations[currentWinner]) {
-            currentWinner = recipientAddress;
+        if (allocations[nft] > allocations[currentWinner]) {
+            currentWinner = nft;
         }
 
         // emit the event
-        emit Allocated(address(nft), amount, NATIVE, recipientAddress);
+        emit Allocated(address(nft), amount, NATIVE, _sender);
     }
 
     /// @notice Internal function to distribute the tokens to the winner
@@ -228,7 +226,7 @@ contract WrappedVotingNftMintStrategy is Native, BaseStrategy, Initializable, Re
     /// @param _recipientId The address of the recipient
     /// @return The PayoutSummary for the recipient
     function _getPayout(address _recipientId, bytes memory) internal view override returns (PayoutSummary memory) {
-        if (_recipientId != currentWinner) PayoutSummary(_recipientId, 0);
+        if (_recipientId != currentWinner) return PayoutSummary(_recipientId, 0);
         return PayoutSummary(currentWinner, poolAmount);
     }
 

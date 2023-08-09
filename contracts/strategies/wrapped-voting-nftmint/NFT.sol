@@ -15,7 +15,7 @@ contract NFT is ERC721, Ownable {
 
     uint256 public currentTokenId;
     uint256 public MINT_PRICE;
-    uint256 public constant TOTAL_SUPPLY = 10_000;
+    uint256 public constant TOTAL_SUPPLY = 5;
 
     constructor(
         string memory _name,
@@ -27,7 +27,7 @@ contract NFT is ERC721, Ownable {
         _initializeOwner(_owner);
     }
 
-    function mintTo(address to) public payable onlyOwner {
+    function mintTo(address to) public payable {
         if (msg.value != MINT_PRICE) {
             revert MintPriceNotPaid();
         }
