@@ -178,12 +178,6 @@ contract LockupDynamicStrategy is BaseStrategy, ReentrancyGuard {
         return _recipientStreamIds[_recipientId][streamIdIndex];
     }
 
-    /// @notice Checks if address is eligible allocator
-    /// @param _allocator Address of the allocator
-    function isValidAllocator(address _allocator) external view override returns (bool) {
-        return _isValidAllocator(_allocator);
-    }
-
     /// ===============================
     /// ======= External/Custom =======
     /// ===============================
@@ -266,7 +260,7 @@ contract LockupDynamicStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Check if address is valid allocator
     /// @param _allocator Address of the allocator
-    function _isValidAllocator(address _allocator) internal view returns (bool) {
+    function _isValidAllocator(address _allocator) internal view override returns (bool) {
         return allo.isPoolManager(poolId, _allocator);
     }
 
