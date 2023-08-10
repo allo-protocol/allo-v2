@@ -357,8 +357,9 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
     /// ==================================
 
     /// @notice Invoked by round operator to update the merkle root and distribution Metadata
-    /// @param encodedDistribution encoded distribution
-    function updateDistribution(bytes calldata encodedDistribution)
+    /// @param _merkleRoot The merkle root of the distribution
+    /// @param _distributionMetadata The metadata of the distribution
+    function updateDistribution(bytes32 _merkleRoot, Metadata memory _distributionMetadata)
         external
         onlyAfterAllocation
         onlyPoolManager(msg.sender)
@@ -366,9 +367,6 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         if (distributionStarted) {
             revert INVALID();
         }
-
-        (bytes32 _merkleRoot, Metadata memory _distributionMetadata) =
-            abi.decode(encodedDistribution, (bytes32, Metadata));
 
         merkleRoot = _merkleRoot;
         distributionMetadata = _distributionMetadata;
@@ -610,7 +608,7 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
 
         address recipientAddress = _recipients[recipientId].recipientAddress;
 
-        if (_validateDistribution(index, recipientId, amount, recipientAddress, merkleProof)) {
+        if (_validateDistribution(index, recipientId, recipientAddress, amount, merkleProof)) {
             IAllo.Pool memory pool = allo.getPool(poolId);
 
             _setDistributed(index);

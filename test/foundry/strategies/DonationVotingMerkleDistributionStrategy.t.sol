@@ -461,7 +461,7 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
         emit DistributionUpdated(merkleRoot, metadata);
 
         vm.prank(pool_admin());
-        strategy.updateDistribution(abi.encode(merkleRoot, metadata));
+        strategy.updateDistribution(merkleRoot, metadata);
     }
 
     function testRevert_updateDistribution_INVALID() public {
@@ -473,7 +473,7 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
         vm.expectRevert(DonationVotingMerkleDistributionStrategy.ALLOCATION_NOT_ENDED.selector);
 
         vm.prank(pool_admin());
-        strategy.updateDistribution(abi.encode(""));
+        strategy.updateDistribution("", Metadata({protocol: 1, pointer: "metadata"}));
     }
 
     function testRevert_updateDistribution_UNAUTHORIZED() public {
@@ -481,7 +481,7 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
         vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
 
         vm.prank(randomAddress());
-        strategy.updateDistribution(abi.encode(""));
+        strategy.updateDistribution("", Metadata({protocol: 1, pointer: "metadata"}));
     }
 
     function test_isDistributionSet_True() public {
@@ -491,7 +491,7 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
         Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
 
         vm.prank(pool_admin());
-        strategy.updateDistribution(abi.encode(merkleRoot, metadata));
+        strategy.updateDistribution(merkleRoot, metadata);
 
         assertTrue(strategy.isDistributionSet());
     }
@@ -667,15 +667,78 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
     }
 
     function test_distribute() public {
-        // TODO
+        (bytes32 merkleRoot, DonationVotingMerkleDistributionStrategy.Distribution[] memory distributions) =
+            __getMerkleRootAndDistributions();
+
+        __register_accept_recipient();
+        __register_recipient2();
+
+        vm.warp(allocationEndTime + 1);
+
+        vm.prank(pool_admin());
+        strategy.updateDistribution(merkleRoot, Metadata(1, "metadata"));
+
+        allo().fundPool{value: 3e18}(poolId, 3e18);
+
+        vm.prank(address(allo()));
+        vm.expectEmit(false, false, false, true);
+        emit FundsDistributed(
+            1e18, 0x7b6d3eB9bb22D0B13a2FAd6D6bDBDc34Ad2c5849, NATIVE, 0xad5FDFa74961f0b6F1745eF0A1Fa0e115caa9641
+        );
+
+        vm.expectEmit(false, false, false, true);
+        emit FundsDistributed(
+            2e18, 0x0c73C6E53042522CDd21Bd8F1C63e14e66869E99, NATIVE, 0x4E0aB029b2128e740fA408a26aC5f314e769469f
+        );
+
+        vm.expectEmit(false, false, false, true);
+        emit BatchPayoutSuccessful(pool_admin());
+
+        strategy.distribute(new address[](0), abi.encode(distributions), pool_admin());
     }
 
     function testRevert_distribute_twice_to_same_recipient() public {
-        // TODO
+        (bytes32 merkleRoot, DonationVotingMerkleDistributionStrategy.Distribution[] memory distributions) =
+            __getMerkleRootAndDistributions();
+
+        __register_accept_recipient();
+        __register_recipient2();
+
+        vm.warp(allocationEndTime + 1);
+
+        vm.prank(pool_admin());
+        strategy.updateDistribution(merkleRoot, Metadata(1, "metadata"));
+
+        allo().fundPool{value: 3e18}(poolId, 3e18);
+
+        vm.prank(address(allo()));
+        strategy.distribute(new address[](0), abi.encode(distributions), pool_admin());
+
+        vm.expectRevert(
+            abi.encodeWithSelector(DonationVotingMerkleDistributionStrategy.RECIPIENT_ERROR.selector, profile1_anchor())
+        );
+        vm.prank(address(allo()));
+        strategy.distribute(new address[](0), abi.encode(distributions), pool_admin());
     }
 
     function testRevert_distribute_RECIPIENT_ERROR() public {
-        // TODO
+        (bytes32 merkleRoot, DonationVotingMerkleDistributionStrategy.Distribution[] memory distributions) =
+            __getMerkleRootAndDistributions();
+
+        __register_accept_recipient();
+
+        vm.warp(allocationEndTime + 1);
+
+        vm.prank(pool_admin());
+        strategy.updateDistribution(merkleRoot, Metadata(1, "metadata"));
+
+        allo().fundPool{value: 3e18}(poolId, 3e18);
+
+        vm.prank(address(allo()));
+        vm.expectRevert(
+            abi.encodeWithSelector(DonationVotingMerkleDistributionStrategy.RECIPIENT_ERROR.selector, profile2_anchor())
+        );
+        strategy.distribute(new address[](0), abi.encode(distributions), pool_admin());
     }
 
     /// ====================
@@ -698,6 +761,15 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
         vm.prank(address(allo()));
         bytes memory data = __generateRecipientWithId(profile1_anchor());
         recipientId = strategy.registerRecipient(data, profile1_member1());
+    }
+
+    function __register_recipient2() internal returns (address recipientId) {
+        vm.warp(registrationStartTime + 10);
+        Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
+
+        vm.prank(address(allo()));
+        bytes memory data = abi.encode(profile2_anchor(), randomAddress(), metadata);
+        recipientId = strategy.registerRecipient(data, profile2_member1());
     }
 
     function __register_accept_recipient() internal returns (address recipientId) {
@@ -733,38 +805,38 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
         strategy.reviewRecipients(statuses);
     }
 
-    function __register_accept_updateDistribution_recipient() internal returns (address) {
-        address recipientId = __register_accept_recipient();
-        vm.warp(registrationEndTime + 10);
+    // function __register_accept_updateDistribution_recipient() internal returns (address) {
+    //     address recipientId = __register_accept_recipient();
+    //     vm.warp(registrationEndTime + 10);
 
-        address[] memory recipientIds = new address[](1);
-        recipientIds[0] = recipientId;
+    //     address[] memory recipientIds = new address[](1);
+    //     recipientIds[0] = recipientId;
 
-        uint256[] memory amounts = new uint256[](1);
-        amounts[0] = 9.9e17; // fund amount: 1e18 - fee: 1e17 = 9.9e17
+    //     uint256[] memory amounts = new uint256[](1);
+    //     amounts[0] = 9.9e17; // fund amount: 1e18 - fee: 1e17 = 9.9e17
 
-        // fund pool
-        allo().fundPool{value: 1e18}(poolId, 1e18);
+    //     // fund pool
+    //     allo().fundPool{value: 1e18}(poolId, 1e18);
 
-        vm.warp(allocationEndTime + 10);
+    //     vm.warp(allocationEndTime + 10);
 
-        Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
+    //     Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
 
-        bytes32[] memory merkleProof = new bytes32[](1);
-        merkleProof[0] = bytes32("merkleProol");
-        DonationVotingMerkleDistributionStrategy.Distribution memory distribution =
-        DonationVotingMerkleDistributionStrategy.Distribution({
-            index: 0,
-            recipientId: profile1_anchor(),
-            amount: 1e18,
-            merkleProof: merkleProof
-        });
+    //     bytes32[] memory merkleProof = new bytes32[](1);
+    //     merkleProof[0] = bytes32("merkleProol");
+    //     DonationVotingMerkleDistributionStrategy.Distribution memory distribution =
+    //     DonationVotingMerkleDistributionStrategy.Distribution({
+    //         index: 0,
+    //         recipientId: profile1_anchor(),
+    //         amount: 1e18,
+    //         merkleProof: merkleProof
+    //     });
 
-        vm.prank(pool_admin());
-        strategy.updateDistribution(abi.encode(distribution, metadata));
+    //     vm.prank(pool_admin());
+    //     strategy.updateDistribution(bytes32("merkleRoot"), metadata);
 
-        return recipientId;
-    }
+    //     return recipientId;
+    // }
 
     function __register_accept_recipient_allocate() internal returns (address) {
         address recipientId = __register_accept_recipient();
@@ -803,6 +875,64 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
 
         applicationStatus =
             DonationVotingMerkleDistributionStrategy.ApplicationStatus({index: _recipientIndex, statusRow: statusRow});
+    }
+
+    function __getMerkleRootAndDistributions()
+        internal
+        pure
+        returns (bytes32, DonationVotingMerkleDistributionStrategy.Distribution[] memory)
+    {
+        DonationVotingMerkleDistributionStrategy.Distribution[] memory distributions =
+            new DonationVotingMerkleDistributionStrategy.Distribution[](2);
+
+        DonationVotingMerkleDistributionStrategy.Distribution memory distribution0 =
+        DonationVotingMerkleDistributionStrategy.Distribution({
+            index: 0,
+            recipientId: 0xad5FDFa74961f0b6F1745eF0A1Fa0e115caa9641,
+            // recipientAddress: '0x7b6d3eB9bb22D0B13a2FAd6D6bDBDc34Ad2c5849',
+            amount: 1e18,
+            merkleProof: new bytes32[](1)
+        });
+        distribution0.merkleProof[0] = 0x84de05a8497b125afa0c428b43e98c4378eb0f8eadae82538ee2b53e44bea806;
+
+        DonationVotingMerkleDistributionStrategy.Distribution memory distribution1 =
+        DonationVotingMerkleDistributionStrategy.Distribution({
+            index: 1,
+            recipientId: 0x4E0aB029b2128e740fA408a26aC5f314e769469f,
+            // recipientAddress: '0x0c73C6E53042522CDd21Bd8F1C63e14e66869E99',
+            amount: 2e18,
+            merkleProof: new bytes32[](1)
+        });
+        distribution1.merkleProof[0] = 0x4a3e9be6ab6503dfc6dd903fddcbabf55baef0c6aaca9f2cce2dc6d6350303f5;
+
+        distributions[0] = distribution0;
+        distributions[1] = distribution1;
+
+        bytes32 merkleRoot = 0xbd6f4408f5de99e3401b90770fc87cc4e23b76c093f812d61df2bce4b881d88c;
+
+        return (merkleRoot, distributions);
+
+        //        distributions [
+        //   [
+        //     0,
+        //     '0xad5FDFa74961f0b6F1745eF0A1Fa0e115caa9641',
+        //     '0x7b6d3eB9bb22D0B13a2FAd6D6bDBDc34Ad2c5849',
+        //     BigNumber { value: "1000000000000000000" }
+        //   ],
+        //   [
+        //     1,
+        //     '0x4E0aB029b2128e740fA408a26aC5f314e769469f',
+        //     '0x0c73C6E53042522CDd21Bd8F1C63e14e66869E99',
+        //     BigNumber { value: "2000000000000000000" }
+        //   ]
+        // ]
+        // tree.root 0xbd6f4408f5de99e3401b90770fc87cc4e23b76c093f812d61df2bce4b881d88c
+        // proof0.root [
+        //   '0x84de05a8497b125afa0c428b43e98c4378eb0f8eadae82538ee2b53e44bea806'
+        // ]
+        // proof1.root [
+        //   '0x4a3e9be6ab6503dfc6dd903fddcbabf55baef0c6aaca9f2cce2dc6d6350303f5'
+        // ]
     }
 
     // TODO: ADD OTHER MERKLE CHECKS
