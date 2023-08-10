@@ -65,7 +65,7 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
             new DonationVotingMerkleDistributionStrategy(address(allo()), "DonationVotingMerkleDistributionStrategy");
 
         allowedTokens = new address[](1);
-        allowedTokens[0] = address(0);
+        allowedTokens[0] = NATIVE;
 
         vm.prank(pool_admin());
         poolId = allo().createPoolWithCustomStrategy(
@@ -100,7 +100,7 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
         assertEq(strategy.registrationEndTime(), registrationEndTime);
         assertEq(strategy.allocationStartTime(), allocationStartTime);
         assertEq(strategy.allocationEndTime(), allocationEndTime);
-        assertTrue(strategy.allowedTokens(address(0)));
+        assertTrue(strategy.allowedTokens(NATIVE));
     }
 
     function testRevert_initialize_withNoAllowedToken() public {
@@ -351,7 +351,7 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
     function testRevert_withdraw_NOT_ALLOWED_exceed_amount() public {
         vm.warp(block.timestamp + 31 days);
 
-        vm.expectRevert(DonationVotingMerkleDistributionStrategy.INVALID.selector);
+        vm.expectRevert(DonationVotingMerkleDistributionStrategy.NOT_ALLOWED.selector);
         vm.prank(pool_admin());
         strategy.withdraw(1e18);
     }
@@ -477,21 +477,24 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
     }
 
     function testRevert_allocate_INVALID_invalidToken() public virtual {
+        address recipientId = __register_accept_recipient();
+
         vm.expectRevert(DonationVotingMerkleDistributionStrategy.INVALID.selector);
 
         vm.warp(allocationStartTime + 1);
         vm.deal(pool_admin(), 1e20);
         vm.prank(pool_admin());
-        allo().allocate{value: 1e18}(poolId, abi.encode(address(0), 1e18, address(0)));
+        allo().allocate(poolId, abi.encode(recipientId, 1e18, address(123)));
     }
 
     function testRevert_allocate_INVALID_amountMismatch() public {
+        address recipientId = __register_accept_recipient();
         vm.expectRevert(DonationVotingMerkleDistributionStrategy.INVALID.selector);
 
         vm.warp(allocationStartTime + 1);
         vm.deal(pool_admin(), 1e20);
         vm.prank(pool_admin());
-        allo().allocate{value: 1e17}(poolId, abi.encode(address(0), 1e18, address(0)));
+        allo().allocate{value: 1e17}(poolId, abi.encode(recipientId, 1e18, NATIVE));
     }
 
     function test_distribute() public {
@@ -524,8 +527,8 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
         vm.warp(registrationStartTime + 10);
 
         vm.prank(address(allo()));
-        bytes memory data = __generateRecipientWithoutId();
-        recipientId = strategy.registerRecipient(data, recipient());
+        bytes memory data = __generateRecipientWithId(profile1_anchor());
+        recipientId = strategy.registerRecipient(data, profile1_member1());
     }
 
     function __register_accept_recipient() internal returns (address recipientId) {
@@ -580,7 +583,7 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
         DonationVotingMerkleDistributionStrategy.Distribution memory distribution =
         DonationVotingMerkleDistributionStrategy.Distribution({
             index: 0,
-            recipientId: recipient1(),
+            recipientId: profile1_anchor(),
             amount: 1e18,
             merkleProof: merkleProof
         });

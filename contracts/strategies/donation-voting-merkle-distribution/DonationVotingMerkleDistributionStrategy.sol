@@ -497,7 +497,7 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
             revert INVALID();
         }
 
-        if (token == NATIVE && msg.value != amount) {
+        if (msg.value > 0 && token != NATIVE || token == NATIVE && msg.value != amount) {
             revert INVALID();
         }
 
@@ -647,7 +647,7 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
     function _getStatusRowColumn(address _recipientId) internal view returns (uint256, uint256, uint256) {
         uint256 recipientIndex = recipientToStatusIndexes[_recipientId];
 
-        if (recipientIndex >= recipientsCounter) {
+        if (recipientIndex > recipientsCounter) {
             revert INVALID();
         }
 
