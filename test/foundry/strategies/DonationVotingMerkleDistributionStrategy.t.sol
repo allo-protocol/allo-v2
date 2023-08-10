@@ -265,8 +265,10 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
 
     // Tests that the correct recipient is returned
     function test_getRecipient() public {
-        // __register_recipient();
-        // strategy.getRecipient(recipient1());
+        // address recipientId = __register_recipient();
+        // DonationVotingMerkleDistributionStrategy.Recipient memory recipient =  strategy.getRecipient(recipientId);
+        // assertFalse(recipient.useRegistryAnchor);
+        // TODO: test other fields
     }
 
     // Tests that the correct internal recipient status is returned
