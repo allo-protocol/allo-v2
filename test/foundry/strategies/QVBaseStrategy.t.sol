@@ -12,13 +12,16 @@ import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
 
 // Test libraries
 import {AlloSetup} from "../shared/AlloSetup.sol";
-import {QVBaseStrategyTestMock} from "../../utils/QVBaseStrategyTestMock.sol";
-import {MockERC20} from "../../utils/MockERC20.sol";
 import {RegistrySetupFull} from "../shared/RegistrySetup.sol";
-
 import {StrategySetup} from "../shared/StrategySetup.sol";
 import {EventSetup} from "../shared/EventSetup.sol";
+// Mocks
+import {QVBaseStrategyTestMock} from "../../utils/QVBaseStrategyTestMock.sol";
+import {MockERC20} from "../../utils/MockERC20.sol";
 
+/// @title QVBaseStrategyTest
+/// @notice Test suite for QVBaseStrategy
+/// @author allo-team
 contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup, EventSetup {
     error ALLOCATION_NOT_ACTIVE();
 
@@ -110,7 +113,6 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
             )
         );
 
-        vm.stopPrank();
         vm.startPrank(pool_admin());
         _createPoolWithCustomStrategy();
         vm.stopPrank();
@@ -318,14 +320,14 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
         strategy.registerRecipient(data, profile2_member1());
     }
 
-    function testRevert_registerRecipient_UNAUTHORIZED() public {
+    function testRevert_registerRecipient_UNAUTHORIZED() public virtual {
         vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
         vm.startPrank(randomAddress());
         bytes memory data = __generateRecipientWithoutId(false);
         qvStrategy().registerRecipient(data, msg.sender);
     }
 
-    function test_registerRecipient_appeal() public {
+    function test_registerRecipient_appeal() public virtual {
         vm.warp(registrationStartTime + 10);
 
         address recipientId = __register_reject_recipient();
@@ -837,13 +839,11 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
         QVBaseStrategy.InternalRecipientStatus[] memory recipientStatuses =
             new QVBaseStrategy.InternalRecipientStatus[](1);
         recipientStatuses[0] = QVBaseStrategy.InternalRecipientStatus.Rejected;
-        vm.startPrank(pool_admin());
+        vm.prank(pool_admin());
         qvStrategy().reviewRecipients(recipientIds, recipientStatuses);
 
-        vm.stopPrank();
-        vm.startPrank(pool_manager1());
+        vm.prank(pool_manager1());
         qvStrategy().reviewRecipients(recipientIds, recipientStatuses);
-        vm.stopPrank();
         return recipientId;
     }
 
@@ -859,19 +859,16 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
 
         token.mint(pool_manager1(), 100e18);
         // set the allowance for the transfer
-        vm.startPrank(pool_manager1());
+        vm.prank(pool_manager1());
         token.approve(address(allo()), 999999999e18);
 
-        vm.stopPrank();
         // fund pool
-        vm.startPrank(pool_manager1());
+        vm.prank(pool_manager1());
         allo().fundPool(poolId, 1e18);
-        vm.stopPrank();
         vm.warp(allocationStartTime + 10);
         bytes memory allocation = __generateAllocation(recipientId, 4);
-        vm.startPrank(address(allo()));
+        vm.prank(address(allo()));
         qvStrategy().allocate(allocation, randomAddress());
-        vm.stopPrank();
         vm.warp(allocationEndTime + 10);
 
         return recipientId;

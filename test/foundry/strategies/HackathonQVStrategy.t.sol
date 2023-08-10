@@ -26,9 +26,12 @@ import {
     ISchemaResolver,
     SchemaRecord
 } from "@ethereum-attestation-service/eas-contracts/contracts/ISchemaRegistry.sol";
-
+// Mocks
 import {MockEAS, MockSchemaRegistry} from "../../utils/MockEAS.sol";
 
+/// @title HackathonQVStrategyTest
+/// @notice This contract tests the HackathonQVStrategy contract
+/// @author allo-team
 contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
     ISchemaRegistry public schemaRegistry;
     HackathonQVStrategy.EASInfo public easInfo;
@@ -37,6 +40,7 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
 
     uint256 public maxVoiceCreditsPerAllocator;
 
+    // Set up the tests
     function setUp() public override {
         eas = IEAS(address(new MockEAS()));
         schemaRegistry = ISchemaRegistry(address(new MockSchemaRegistry()));
@@ -181,6 +185,9 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
         );
     }
 
+    // NOTE: overriding so it does not run the underyling test
+    function test_registerRecipient_appeal() public override {}
+
     function testRevert_registerRecipient_INVALID_METADATA() public override {
         vm.warp(registrationStartTime + 1);
 
@@ -205,6 +212,22 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
         qvStrategy().registerRecipient(data, sender);
     }
 
+    /// @notice Tests that a recipient can only be registered by pool manager
+    function testRevert_registerRecipient_UNAUTHORIZED() public override {
+        vm.warp(registrationStartTime + 1);
+
+        address sender = recipient1();
+        Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
+
+        bytes memory data = abi.encode(profile1_anchor(), recipient1(), metadata);
+
+        vm.expectRevert();
+
+        vm.prank(randomAddress());
+        qvStrategy().registerRecipient(data, sender);
+    }
+
+    /// @notice Tests that this reverts when the recipient is not valid
     function testRevert_registerRecipient_RECIPIENT_ERROR() public override {
         vm.warp(registrationStartTime + 1);
 
@@ -220,6 +243,7 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
         qvStrategy().registerRecipient(data, sender);
     }
 
+    /// @notice Tests distribute
     function test_distribute() public override {
         __register_accept_allocate_recipient();
 
@@ -237,6 +261,7 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
         hQvStrategy().distribute(recipients, "", pool_admin());
     }
 
+    /// @notice Tests getPayouts
     function test_getPayouts() public override {
         __register_accept_allocate_recipient();
 
@@ -246,6 +271,7 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
         assertEq(payouts[0].amount, 0.594 ether);
     }
 
+    /// @notice Tests if an address is a valid allocator
     function test_isValidAllocator() public override {
         assertTrue(qvStrategy().isValidAllocator(randomAddress()));
         assertFalse(qvStrategy().isValidAllocator(address(123)));
@@ -332,16 +358,62 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
         assertEq(keccak256(abi.encode(mockAttestation)), keccak256(abi.encode(attestation)));
     }
 
+    /// @notice Tests the payout percentages can be set - no event is emitted on this call
+    function test_setPayoutPercentages() public {
+        uint256[] memory amounts = new uint256[](2);
+        amounts[0] = 6e17;
+        amounts[1] = 4e17;
+
+        vm.prank(pool_admin());
+        hQvStrategy().setPayoutPercentages(amounts);
+    }
+
+    /// @notice Tests the payout percentages will revert if allocation has started
+    function testRevert_setPayoutPercentages_ALLOCATION_STARTED() public {
+        uint256[] memory amounts = new uint256[](2);
+        amounts[0] = 6e17;
+        amounts[1] = 4e17;
+
+        vm.expectRevert(HackathonQVStrategy.ALLOCATION_STARTED.selector);
+        vm.warp(allocationStartTime + 10);
+        vm.prank(pool_admin());
+        hQvStrategy().setPayoutPercentages(amounts);
+    }
+
+    /// @notice Tests the payout percentages will revert if list is out of order
+    function testRevert_setPayoutPercentages_INVALID_OUT_OF_ORDER() public {
+        uint256[] memory amounts = new uint256[](2);
+        amounts[0] = 4e17;
+        amounts[1] = 6e17;
+
+        vm.expectRevert();
+
+        vm.prank(pool_admin());
+        hQvStrategy().setPayoutPercentages(amounts);
+    }
+
+    /// @notice Tests the payout percentages will revert if amounts don't add up to 1e18
+    function testRevert_setPayoutPercentages_INVALID_AMOUNT() public {
+        uint256[] memory amounts = new uint256[](2);
+        amounts[0] = 6e17;
+        amounts[1] = 3e17;
+
+        vm.expectRevert(QVBaseStrategy.INVALID.selector);
+
+        vm.prank(pool_admin());
+        hQvStrategy().setPayoutPercentages(amounts);
+    }
+
     // ==========================================================================
 
     function __setAllowedRecipientId() internal {
-        bytes memory aesData = abi.encode("attestation data");
+        bytes memory easData = abi.encode("attestation data");
 
         address[] memory recipients = new address[](1);
         recipients[0] = profile1_anchor();
 
         vm.startPrank(pool_admin());
-        hQvStrategy().setAllowedRecipientIds(recipients, uint64(allocationEndTime + 30 days), aesData);
+        hQvStrategy().setAllowedRecipientIds(recipients, uint64(allocationEndTime + 30 days), easData);
         vm.stopPrank();
     }
 

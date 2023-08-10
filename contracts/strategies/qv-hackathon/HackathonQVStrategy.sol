@@ -176,10 +176,8 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
     /// @notice Set the winner payoutPercentages per rank
     /// @param _payoutPercentages The payoutPercentages to set
     function setPayoutPercentages(uint256[] memory _payoutPercentages) external onlyPoolManager(msg.sender) {
-        if (block.timestamp > allocationStartTime) {
-            if (payoutPercentages.length != 0) {
-                revert ALLOCATION_STARTED();
-            }
+        if (block.timestamp > allocationStartTime || payoutPercentages.length != 0) {
+            revert ALLOCATION_STARTED();
         }
 
         uint256 percentageLength = _payoutPercentages.length;
