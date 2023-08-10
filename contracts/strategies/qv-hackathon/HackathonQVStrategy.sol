@@ -262,6 +262,11 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
             revert UNAUTHORIZED();
         }
         super._registerRecipient(_data, _sender);
+        
+        Recipient storage recipient = recipients[recipientId];
+        if (recipient.recipientStatus == InternalRecipientStatus.Pending) {
+            recipient.recipientStatus = InternalRecipientStatus.Accepted;
+        }
     }
 
     /// @notice Allocate votes to a recipient
