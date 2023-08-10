@@ -557,7 +557,7 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
 
         address recipientAddress = _getRecipient(recipientId).recipientAddress;
 
-        if (_validateDistribution(index, recipientAddress, amount, recipientId, merkleProof)) {
+        if (_validateDistribution(index, recipientId, recipientAddress, amount, merkleProof)) {
             return PayoutSummary(recipientAddress, amount);
         }
         return PayoutSummary(recipientAddress, 0);
@@ -566,15 +566,15 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
     function _validateDistribution(
         uint256 _index,
         address _recipientId,
-        uint256 _amount,
         address _recipientAddress,
+        uint256 _amount,
         bytes32[] memory _merkleProof
     ) internal view returns (bool) {
         if (_hasBeenDistributed(_index)) {
             return false;
         }
 
-        bytes32 node = keccak256(bytes.concat(keccak256(abi.encode(_index, _recipientAddress, _amount, _recipientId))));
+        bytes32 node = keccak256(bytes.concat(keccak256(abi.encode(_index, _recipientId, _recipientAddress, _amount))));
 
         if (!MerkleProof.verify(_merkleProof, merkleRoot, node)) {
             return false;
