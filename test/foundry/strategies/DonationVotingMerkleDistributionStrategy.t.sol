@@ -295,9 +295,16 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
     }
 
     //  Tests that the correct recipient status is returned for an appeal
-    function test_getRecipientStatus_appeal() public {
+    function test_register_getRecipientStatus_appeal() public {
         address recipientId = __register_reject_recipient();
-        __register_recipient();
+        bytes memory data = __generateRecipientWithId(profile1_anchor());
+
+        vm.expectEmit(false, false, false, true);
+        emit Appealed(profile1_anchor(), data, profile1_member1());
+
+        vm.prank(address(allo()));
+        strategy.registerRecipient(data, profile1_member1());
+
         DonationVotingMerkleDistributionStrategy.InternalRecipientStatus recipientStatusInternal =
             strategy.getInternalRecipientStatus(recipientId);
         assertEq(
@@ -445,7 +452,21 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
     }
 
     function test_updateDistribution() public {
-        // TODO
+        vm.warp(allocationEndTime + 1);
+
+        bytes32 merkleRoot = keccak256(abi.encode("merkleRoot"));
+        Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
+
+        vm.expectEmit(false, false, false, true);
+        emit DistributionUpdated(merkleRoot, metadata);
+
+        vm.prank(pool_admin());
+        strategy.updateDistribution(abi.encode(merkleRoot, metadata));
+    }
+
+    function testRevert_updateDistribution_INVALID() public {
+        // todo set distribution and distribute
+        // try to updateDistribution afterwards
     }
 
     function testRevert_updateDistribution_ALLOCATION_NOT_ENDED() public {
@@ -464,7 +485,15 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
     }
 
     function test_isDistributionSet_True() public {
-        // TODO
+        vm.warp(allocationEndTime + 1);
+
+        bytes32 merkleRoot = keccak256(abi.encode("merkleRoot"));
+        Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
+
+        vm.prank(pool_admin());
+        strategy.updateDistribution(abi.encode(merkleRoot, metadata));
+
+        assertTrue(strategy.isDistributionSet());
     }
 
     function test_isDistributionSet_False() public {
@@ -490,38 +519,106 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
         assertTrue(strategy.isPoolActive());
     }
 
-    function test_registerRecipient_new() public {
-        // __create_profile_register_recipient();
-    }
-
     function test_registerRecipient_new_withRegistryAnchor() public {
-        // TODO
+        DonationVotingMerkleDistributionStrategy _strategy =
+            new DonationVotingMerkleDistributionStrategy(address(allo()), "DonationVotingStrategy");
+        vm.prank(address(allo()));
+        _strategy.initialize(
+            poolId,
+            abi.encode(
+                false,
+                metadataRequired,
+                registrationStartTime,
+                registrationEndTime,
+                allocationStartTime,
+                allocationEndTime,
+                allowedTokens
+            )
+        );
+
+        vm.warp(registrationStartTime + 1);
+
+        bytes memory data = abi.encode(recipientAddress(), profile1_anchor(), Metadata(1, "metadata"));
+
+        vm.expectEmit(false, false, false, true);
+        emit Registered(profile1_anchor(), abi.encode(data, 0), address(profile1_member1()));
+
+        vm.prank(address(allo()));
+        address recipientId = _strategy.registerRecipient(data, profile1_member1());
+
+        DonationVotingMerkleDistributionStrategy.InternalRecipientStatus status =
+            _strategy.getInternalRecipientStatus(recipientId);
+        assertEq(uint8(DonationVotingMerkleDistributionStrategy.InternalRecipientStatus.Pending), uint8(status));
     }
 
-    function test_registerRecipient_appeal() public {
-        // TODO
+    function testRevert_registerRecipient_new_withRegistryAnchor_UNAUTHORIZED() public {
+        DonationVotingMerkleDistributionStrategy _strategy =
+            new DonationVotingMerkleDistributionStrategy(address(allo()), "DonationVotingStrategy");
+        vm.prank(address(allo()));
+        _strategy.initialize(
+            poolId,
+            abi.encode(
+                false,
+                metadataRequired,
+                registrationStartTime,
+                registrationEndTime,
+                allocationStartTime,
+                allocationEndTime,
+                allowedTokens
+            )
+        );
+
+        vm.warp(registrationStartTime + 1);
+
+        bytes memory data = abi.encode(recipientAddress(), profile1_anchor(), Metadata(1, "metadata"));
+
+        vm.expectRevert(DonationVotingMerkleDistributionStrategy.UNAUTHORIZED.selector);
+        vm.prank(address(allo()));
+        _strategy.registerRecipient(data, profile2_member1());
     }
 
-    function testRevert_registerRecipient_UNAUTHORIZED() public {}
+    function testRevert_registerRecipient_UNAUTHORIZED() public {
+        vm.warp(registrationStartTime + 10);
+
+        vm.expectRevert(DonationVotingMerkleDistributionStrategy.UNAUTHORIZED.selector);
+
+        vm.prank(address(allo()));
+        bytes memory data = __generateRecipientWithId(profile1_anchor());
+        strategy.registerRecipient(data, profile2_member1());
+    }
 
     function testRevert_registerRecipient_REGISTRATION_NOT_ACTIVE() public {
-        // TODO
-    }
+        vm.expectRevert(DonationVotingMerkleDistributionStrategy.REGISTRATION_NOT_ACTIVE.selector);
 
-    function testRevert_registerRecipient_isUsingRegistryAnchor_UNAUTHORIZED() public {
-        // TODO
-    }
-
-    function testRevert_registerRecipient_withAnchorGating_UNAUTHORIZED() public {
-        // TODO
+        vm.prank(address(allo()));
+        bytes memory data = __generateRecipientWithId(profile1_anchor());
+        strategy.registerRecipient(data, profile1_member1());
     }
 
     function testRevert_registerRecipient_RECIPIENT_ERROR() public {
-        // TODO
+        Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
+        vm.warp(registrationStartTime + 10);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(DonationVotingMerkleDistributionStrategy.RECIPIENT_ERROR.selector, profile1_anchor())
+        );
+
+        vm.prank(address(allo()));
+
+        bytes memory data = abi.encode(profile1_anchor(), address(0), metadata);
+        strategy.registerRecipient(data, profile1_member1());
     }
 
     function testRevert_registerRecipient_INVALID_METADATA() public {
-        // TODO
+        Metadata memory metadata = Metadata({protocol: 0, pointer: "metadata"});
+        vm.warp(registrationStartTime + 10);
+
+        vm.expectRevert(DonationVotingMerkleDistributionStrategy.INVALID_METADATA.selector);
+
+        vm.prank(address(allo()));
+
+        bytes memory data = abi.encode(profile1_anchor(), recipientAddress(), metadata);
+        strategy.registerRecipient(data, profile1_member1());
     }
 
     function test_allocate() public {
