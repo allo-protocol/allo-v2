@@ -311,12 +311,17 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
 
     /// @notice Withdraw funds from pool
     /// @param _amount The amount to be withdrawn
-    function withdraw(uint256 _amount) external onlyPoolManager(msg.sender) onlyAfterAllocation {
+    function withdraw(uint256 _amount) external onlyPoolManager(msg.sender) {
         if (block.timestamp <= allocationEndTime + 30 days) {
             revert NOT_ALLOWED();
         }
 
         IAllo.Pool memory pool = allo.getPool(poolId);
+
+        if (_amount > poolAmount) {
+            revert NOT_ALLOWED();
+        }
+
         poolAmount -= _amount;
         _transferAmount(pool.token, msg.sender, _amount);
     }
@@ -352,8 +357,9 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
     /// ==================================
 
     /// @notice Invoked by round operator to update the merkle root and distribution Metadata
-    /// @param encodedDistribution encoded distribution
-    function updateDistribution(bytes calldata encodedDistribution)
+    /// @param _merkleRoot The merkle root of the distribution
+    /// @param _distributionMetadata The metadata of the distribution
+    function updateDistribution(bytes32 _merkleRoot, Metadata memory _distributionMetadata)
         external
         onlyAfterAllocation
         onlyPoolManager(msg.sender)
@@ -361,9 +367,6 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         if (distributionStarted) {
             revert INVALID();
         }
-
-        (bytes32 _merkleRoot, Metadata memory _distributionMetadata) =
-            abi.decode(encodedDistribution, (bytes32, Metadata));
 
         merkleRoot = _merkleRoot;
         distributionMetadata = _distributionMetadata;
@@ -492,7 +495,7 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
             revert INVALID();
         }
 
-        if (token == NATIVE && msg.value != amount) {
+        if (msg.value > 0 && token != NATIVE || token == NATIVE && msg.value != amount) {
             revert INVALID();
         }
 
@@ -552,7 +555,7 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
 
         address recipientAddress = _getRecipient(recipientId).recipientAddress;
 
-        if (_validateDistribution(index, recipientAddress, amount, recipientId, merkleProof)) {
+        if (_validateDistribution(index, recipientId, recipientAddress, amount, merkleProof)) {
             return PayoutSummary(recipientAddress, amount);
         }
         return PayoutSummary(recipientAddress, 0);
@@ -561,15 +564,15 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
     function _validateDistribution(
         uint256 _index,
         address _recipientId,
-        uint256 _amount,
         address _recipientAddress,
+        uint256 _amount,
         bytes32[] memory _merkleProof
     ) internal view returns (bool) {
         if (_hasBeenDistributed(_index)) {
             return false;
         }
 
-        bytes32 node = keccak256(bytes.concat(keccak256(abi.encode(_index, _recipientAddress, _amount, _recipientId))));
+        bytes32 node = keccak256(bytes.concat(keccak256(abi.encode(_index, _recipientId, _recipientAddress, _amount))));
 
         if (!MerkleProof.verify(_merkleProof, merkleRoot, node)) {
             return false;
@@ -605,10 +608,11 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
 
         address recipientAddress = _recipients[recipientId].recipientAddress;
 
-        if (_validateDistribution(index, recipientId, amount, recipientAddress, merkleProof)) {
+        if (_validateDistribution(index, recipientId, recipientAddress, amount, merkleProof)) {
             IAllo.Pool memory pool = allo.getPool(poolId);
 
             _setDistributed(index);
+            poolAmount -= amount;
             _transferAmount(pool.token, payable(recipientAddress), amount);
 
             emit FundsDistributed(amount, recipientAddress, pool.token, recipientId);
@@ -627,22 +631,6 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         statusesBitMap[rowIndex] = newRow | (_status << colIndex);
     }
 
-    /// @notice get recipient status rowIndex, colIndex and currentRow
-    /// @param _recipientId Id of the recipient
-    /// @return rowIndex, colIndex, currentRow
-    function _getStatusRowColumn(address _recipientId) internal view returns (uint256, uint256, uint256) {
-        uint256 recipientIndex = recipientToStatusIndexes[_recipientId];
-
-        if (recipientIndex >= recipientsCounter) {
-            revert INVALID();
-        }
-
-        uint256 rowIndex = recipientIndex / 64; // 256 / 4
-        uint256 colIndex = (recipientIndex % 64) * 4;
-
-        return (rowIndex, colIndex, statusesBitMap[rowIndex]);
-    }
-
     /// @notice Get recipient status
     /// @param _recipientId index of the recipient
     /// @return status status of the recipient
@@ -650,6 +638,18 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         (, uint256 colIndex, uint256 currentRow) = _getStatusRowColumn(_recipientId);
         uint8 status = uint8((currentRow >> colIndex) & 15);
         return status;
+    }
+
+    /// @notice get recipient status rowIndex, colIndex and currentRow
+    /// @param _recipientId Id of the recipient
+    /// @return rowIndex, colIndex, currentRow
+    function _getStatusRowColumn(address _recipientId) internal view returns (uint256, uint256, uint256) {
+        uint256 recipientIndex = recipientToStatusIndexes[_recipientId];
+
+        uint256 rowIndex = recipientIndex / 64; // 256 / 4
+        uint256 colIndex = (recipientIndex % 64) * 4;
+
+        return (rowIndex, colIndex, statusesBitMap[rowIndex]);
     }
 
     receive() external payable {}
