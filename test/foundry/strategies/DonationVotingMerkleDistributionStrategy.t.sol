@@ -347,6 +347,40 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
         strategy.reviewRecipients(statuses);
     }
 
+    function test_getPayouts() public {
+        (bytes32 merkleRoot, DonationVotingMerkleDistributionStrategy.Distribution[] memory distributions) =
+            __getMerkleRootAndDistributions();
+
+        __register_accept_recipient();
+        __register_recipient2();
+
+        vm.warp(allocationEndTime + 1);
+
+        vm.prank(pool_admin());
+        strategy.updateDistribution(merkleRoot, Metadata(1, "metadata"));
+
+        address[] memory recipientsIds = new address[](2);
+        recipientsIds[0] = profile1_anchor();
+        recipientsIds[1] = makeAddr("noRecipient");
+
+        bytes[] memory data = new bytes[](2);
+
+        data[0] = abi.encode(distributions[0]);
+        data[1] = abi.encode(
+            DonationVotingMerkleDistributionStrategy.Distribution({
+                index: 1,
+                recipientId: makeAddr("noRecipient"),
+                amount: 1e18,
+                merkleProof: new bytes32[](0)
+            })
+        );
+
+        IStrategy.PayoutSummary[] memory summary = strategy.getPayouts(recipientsIds, data);
+
+        assertEq(summary[0].amount, 1e18);
+        assertEq(summary[1].amount, 0);
+    }
+
     // Tests that the strategy timestamps can be updated and updated correctly
     function test_updatePoolTimestamps() public {
         vm.expectEmit(false, false, false, true);
@@ -465,8 +499,13 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
     }
 
     function testRevert_updateDistribution_INVALID() public {
-        // todo set distribution and distribute
-        // try to updateDistribution afterwards
+        test_distribute();
+        bytes32 merkleRoot = keccak256(abi.encode("merkleRoot"));
+        Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
+
+        vm.expectRevert(DonationVotingMerkleDistributionStrategy.INVALID.selector);
+        vm.prank(pool_admin());
+        strategy.updateDistribution(merkleRoot, metadata);
     }
 
     function testRevert_updateDistribution_ALLOCATION_NOT_ENDED() public {
@@ -501,7 +540,8 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
     }
 
     function test_hasBeenDistributed_True() public {
-        // TODO
+        test_distribute();
+        assertTrue(strategy.hasBeenDistributed(0));
     }
 
     function test_hasBeenDistributed_False() public {
@@ -721,6 +761,29 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
         strategy.distribute(new address[](0), abi.encode(distributions), pool_admin());
     }
 
+    function testRevert_distribute_wrongProof() public {
+        (bytes32 merkleRoot, DonationVotingMerkleDistributionStrategy.Distribution[] memory distributions) =
+            __getMerkleRootAndDistributions();
+
+        __register_accept_recipient();
+        __register_recipient2();
+
+        vm.warp(allocationEndTime + 1);
+
+        vm.prank(pool_admin());
+        strategy.updateDistribution(merkleRoot, Metadata(1, "metadata"));
+
+        allo().fundPool{value: 3e18}(poolId, 3e18);
+
+        distributions[0].merkleProof[0] = bytes32(0);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(DonationVotingMerkleDistributionStrategy.RECIPIENT_ERROR.selector, profile1_anchor())
+        );
+        vm.prank(address(allo()));
+        strategy.distribute(new address[](0), abi.encode(distributions), pool_admin());
+    }
+
     function testRevert_distribute_RECIPIENT_ERROR() public {
         (bytes32 merkleRoot, DonationVotingMerkleDistributionStrategy.Distribution[] memory distributions) =
             __getMerkleRootAndDistributions();
@@ -804,39 +867,6 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
         vm.prank(pool_admin());
         strategy.reviewRecipients(statuses);
     }
-
-    // function __register_accept_updateDistribution_recipient() internal returns (address) {
-    //     address recipientId = __register_accept_recipient();
-    //     vm.warp(registrationEndTime + 10);
-
-    //     address[] memory recipientIds = new address[](1);
-    //     recipientIds[0] = recipientId;
-
-    //     uint256[] memory amounts = new uint256[](1);
-    //     amounts[0] = 9.9e17; // fund amount: 1e18 - fee: 1e17 = 9.9e17
-
-    //     // fund pool
-    //     allo().fundPool{value: 1e18}(poolId, 1e18);
-
-    //     vm.warp(allocationEndTime + 10);
-
-    //     Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
-
-    //     bytes32[] memory merkleProof = new bytes32[](1);
-    //     merkleProof[0] = bytes32("merkleProol");
-    //     DonationVotingMerkleDistributionStrategy.Distribution memory distribution =
-    //     DonationVotingMerkleDistributionStrategy.Distribution({
-    //         index: 0,
-    //         recipientId: profile1_anchor(),
-    //         amount: 1e18,
-    //         merkleProof: merkleProof
-    //     });
-
-    //     vm.prank(pool_admin());
-    //     strategy.updateDistribution(bytes32("merkleRoot"), metadata);
-
-    //     return recipientId;
-    // }
 
     function __register_accept_recipient_allocate() internal returns (address) {
         address recipientId = __register_accept_recipient();
@@ -934,6 +964,4 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
         //   '0x4a3e9be6ab6503dfc6dd903fddcbabf55baef0c6aaca9f2cce2dc6d6350303f5'
         // ]
     }
-
-    // TODO: ADD OTHER MERKLE CHECKS
 }
