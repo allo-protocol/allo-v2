@@ -111,7 +111,7 @@ contract DonationVotingCustomRegistryStrategyTest is Test, DonationVotingStrateg
         strategy.allocate(allocateData, allocator);
     }
 
-    function _getEncodedData(address _recipientAddress, uint256 _protocol, string memory _pointer)
+    function __getEncodedData(address _recipientAddress, uint256 _protocol, string memory _pointer)
         internal
         override
         returns (bytes memory data)

@@ -244,7 +244,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         address sender = recipient();
         address recipientAddress = recipientAddress();
 
-        bytes memory data = _getEncodedData(recipientAddress, 1, "metadata");
+        bytes memory data = __getEncodedData(recipientAddress, 1, "metadata");
 
         address recipientId = strategy.registerRecipient(data, sender);
 
@@ -582,7 +582,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
     function test_registerRecipient_new() public {
         vm.warp(registrationStartTime + 1);
         address sender = recipient();
-        bytes memory data = _getEncodedData(sender, 1, "metadata");
+        bytes memory data = __getEncodedData(sender, 1, "metadata");
 
         vm.expectEmit(true, false, false, true);
         emit Registered(sender, data, sender);
@@ -715,7 +715,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
 
         vm.expectRevert(abi.encodeWithSelector(DonationVotingStrategy.RECIPIENT_ERROR.selector, sender));
 
-        bytes memory data = _getEncodedData(recipientAddress, 1, "metadata");
+        bytes memory data = __getEncodedData(recipientAddress, 1, "metadata");
 
         vm.prank(address(allo()));
         strategy.registerRecipient(data, sender);
@@ -729,14 +729,14 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         // pointer is empty
         vm.expectRevert(DonationVotingStrategy.INVALID_METADATA.selector);
         address recipientAddress = recipientAddress();
-        bytes memory data = _getEncodedData(recipientAddress, 1, "");
+        bytes memory data = __getEncodedData(recipientAddress, 1, "");
 
         vm.prank(address(allo()));
         strategy.registerRecipient(data, sender);
 
         // protocol is 0
         vm.expectRevert(DonationVotingStrategy.INVALID_METADATA.selector);
-        data = _getEncodedData(recipientAddress, 0, "metadata");
+        data = __getEncodedData(recipientAddress, 0, "metadata");
 
         vm.prank(address(allo()));
         strategy.registerRecipient(data, sender);
@@ -867,7 +867,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
     }
 
     function __generateRecipientWithoutId() internal returns (bytes memory) {
-        return _getEncodedData(recipientAddress(), 1, "metadata");
+        return __getEncodedData(recipientAddress(), 1, "metadata");
     }
 
     function __generateRecipientWithId(address _recipientId) internal returns (bytes memory) {
@@ -937,7 +937,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         return recipientId;
     }
 
-    function _getEncodedData(address _recipientAddress, uint256 _protocol, string memory _pointer)
+    function __getEncodedData(address _recipientAddress, uint256 _protocol, string memory _pointer)
         internal
         virtual
         returns (bytes memory data)

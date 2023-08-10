@@ -317,9 +317,11 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         }
 
         IAllo.Pool memory pool = allo.getPool(poolId);
+        // TODO: check if pool manager can withdraw from vault
         if (_amount > poolAmount) {
-            revert INVALID();
+            revert NOT_ALLOWED();
         }
+
         poolAmount -= _amount;
         _transferAmount(pool.token, msg.sender, _amount);
     }
@@ -630,6 +632,15 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         statusesBitMap[rowIndex] = newRow | (_status << colIndex);
     }
 
+    /// @notice Get recipient status
+    /// @param _recipientId index of the recipient
+    /// @return status status of the recipient
+    function _getRecipientStatus(address _recipientId) internal view returns (uint8) {
+        (, uint256 colIndex, uint256 currentRow) = _getStatusRowColumn(_recipientId);
+        uint8 status = uint8((currentRow >> colIndex) & 15);
+        return status;
+    }
+
     /// @notice get recipient status rowIndex, colIndex and currentRow
     /// @param _recipientId Id of the recipient
     /// @return rowIndex, colIndex, currentRow
@@ -644,15 +655,6 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         uint256 colIndex = (recipientIndex % 64) * 4;
 
         return (rowIndex, colIndex, statusesBitMap[rowIndex]);
-    }
-
-    /// @notice Get recipient status
-    /// @param _recipientId index of the recipient
-    /// @return status status of the recipient
-    function _getRecipientStatus(address _recipientId) internal view returns (uint8) {
-        (, uint256 colIndex, uint256 currentRow) = _getStatusRowColumn(_recipientId);
-        uint8 status = uint8((currentRow >> colIndex) & 15);
-        return status;
     }
 
     receive() external payable {}
