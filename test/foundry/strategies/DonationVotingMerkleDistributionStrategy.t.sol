@@ -67,8 +67,12 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
         allowedTokens = new address[](1);
         allowedTokens[0] = NATIVE;
 
+        vm.prank(allo_owner());
+        allo().updateFeePercentage(0);
+
+        vm.deal(pool_admin(), 1e18);
         vm.prank(pool_admin());
-        poolId = allo().createPoolWithCustomStrategy(
+        poolId = allo().createPoolWithCustomStrategy{value: 1e18}(
             poolProfile_id(),
             address(strategy),
             abi.encode(
@@ -81,7 +85,7 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
                 allowedTokens
             ),
             NATIVE,
-            0,
+            1e18,
             poolMetadata,
             pool_managers()
         );
@@ -265,30 +269,50 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
 
     // Tests that the correct recipient is returned
     function test_getRecipient() public {
-        // address recipientId = __register_recipient();
-        // DonationVotingMerkleDistributionStrategy.Recipient memory recipient =  strategy.getRecipient(recipientId);
-        // assertFalse(recipient.useRegistryAnchor);
-        // TODO: test other fields
+        address recipientId = __register_recipient();
+        DonationVotingMerkleDistributionStrategy.Recipient memory recipient = strategy.getRecipient(recipientId);
+        assertTrue(recipient.useRegistryAnchor);
+        assertEq(recipient.recipientAddress, recipientAddress());
+        assertEq(recipient.metadata.protocol, 1);
+        assertEq(keccak256(abi.encode(recipient.metadata.pointer)), keccak256(abi.encode("metadata")));
     }
 
     // Tests that the correct internal recipient status is returned
     function test_getInternalRecipientStatus() public {
-        // TODO
+        address recipientId = __register_recipient();
+        DonationVotingMerkleDistributionStrategy.InternalRecipientStatus recipientStatus =
+            strategy.getInternalRecipientStatus(recipientId);
+        assertEq(
+            uint8(recipientStatus), uint8(DonationVotingMerkleDistributionStrategy.InternalRecipientStatus.Pending)
+        );
     }
 
     // Tests that the correct recipient status is returned
     function test_getRecipientStatus() public {
-        // TODO
+        address recipientId = __register_recipient();
+        IStrategy.RecipientStatus recipientStatus = strategy.getRecipientStatus(recipientId);
+        assertEq(uint8(recipientStatus), uint8(IStrategy.RecipientStatus.Pending));
     }
 
     //  Tests that the correct recipient status is returned for an appeal
     function test_getRecipientStatus_appeal() public {
-        // TODO
+        address recipientId = __register_reject_recipient();
+        __register_recipient();
+        DonationVotingMerkleDistributionStrategy.InternalRecipientStatus recipientStatusInternal =
+            strategy.getInternalRecipientStatus(recipientId);
+        assertEq(
+            uint8(recipientStatusInternal),
+            uint8(DonationVotingMerkleDistributionStrategy.InternalRecipientStatus.Appealed)
+        );
+
+        IStrategy.RecipientStatus recipientStatus = strategy.getRecipientStatus(recipientId);
+        assertEq(uint8(recipientStatus), uint8(IStrategy.RecipientStatus.Pending));
     }
 
     // Tests that the pool manager can update the recipient status
-    function test_reviewRecients() public {
-        // TODO
+    function test_reviewRecipients() public {
+        __register_accept_recipient();
+        assertEq(strategy.statusesBitMap(0), 2);
     }
 
     // Tests that you can only review recipients when registration is active
@@ -305,7 +329,15 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
 
     // Tests that only the pool admin can review recipients
     function testRevert_reviewRecipients_UNAUTHORIZED() public {
-        // TODO
+        __register_recipient();
+        vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
+        vm.warp(registrationStartTime + 1);
+
+        DonationVotingMerkleDistributionStrategy.ApplicationStatus[] memory statuses =
+            new DonationVotingMerkleDistributionStrategy.ApplicationStatus[](1);
+        statuses[0] = DonationVotingMerkleDistributionStrategy.ApplicationStatus({index: 0, statusRow: 1});
+
+        strategy.reviewRecipients(statuses);
     }
 
     // Tests that the strategy timestamps can be updated and updated correctly
@@ -353,7 +385,7 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
 
         vm.expectRevert(DonationVotingMerkleDistributionStrategy.NOT_ALLOWED.selector);
         vm.prank(pool_admin());
-        strategy.withdraw(1e18);
+        strategy.withdraw(2e18);
     }
 
     function testRevert_withdraw_UNAUTHORIZED() public {
@@ -362,23 +394,54 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
         strategy.withdraw(1e18);
     }
 
+    function test_withdraw() public {
+        vm.warp(block.timestamp + 31 days);
+
+        uint256 balanceBefore = pool_admin().balance;
+
+        vm.prank(pool_admin());
+        strategy.withdraw(1e18);
+
+        assertEq(pool_admin().balance, balanceBefore + 1e18);
+    }
+
     function test_claim() public {
-        // warp past allocation end time
+        __register_accept_recipient_allocate();
         vm.warp(allocationEndTime + 1 days);
+
+        DonationVotingMerkleDistributionStrategy.Claim[] memory claim =
+            new DonationVotingMerkleDistributionStrategy.Claim[](1);
+        claim[0] = DonationVotingMerkleDistributionStrategy.Claim({recipientId: profile1_anchor(), token: NATIVE});
+
+        vm.expectEmit(true, false, false, true);
+        emit Claimed(profile1_anchor(), recipientAddress(), 1e18, NATIVE);
+
+        strategy.claim(claim);
     }
 
     function testRevert_claim_ALLOCATION_NOT_ENDED() public {
-        // TODO
+        __register_accept_recipient_allocate();
+
+        DonationVotingMerkleDistributionStrategy.Claim[] memory claim =
+            new DonationVotingMerkleDistributionStrategy.Claim[](1);
+        claim[0] = DonationVotingMerkleDistributionStrategy.Claim({recipientId: profile1_anchor(), token: NATIVE});
+
+        vm.expectRevert(DonationVotingMerkleDistributionStrategy.ALLOCATION_NOT_ENDED.selector);
+
+        strategy.claim(claim);
     }
 
     function testRevert_claim_INVALID_amountIsZero() public {
-        // DonationVotingMerkleDistributionStrategy.Claim[] memory claims = __create_claims_data();
+        __register_accept_recipient_allocate();
+        vm.warp(allocationEndTime + 1 days);
 
-        // vm.expectRevert(DonationVotingMerkleDistributionStrategy.INVALID.selector);
-        // // warp past allocation end time
-        // vm.warp(allocationEndTime + 1);
-        // vm.prank(pool_admin());
-        // strategy.claim(claims);
+        DonationVotingMerkleDistributionStrategy.Claim[] memory claim =
+            new DonationVotingMerkleDistributionStrategy.Claim[](1);
+        claim[0] = DonationVotingMerkleDistributionStrategy.Claim({recipientId: profile1_anchor(), token: address(123)});
+
+        vm.expectRevert(DonationVotingMerkleDistributionStrategy.INVALID.selector);
+
+        strategy.claim(claim);
     }
 
     function test_updateDistribution() public {
@@ -462,7 +525,9 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
     }
 
     function test_allocate() public {
-        // TODO
+        address recipientId = __register_accept_recipient_allocate();
+
+        assertEq(strategy.claims(recipientId, NATIVE), 1e18);
     }
 
     function testRevert_allocate_ALLOCATION_NOT_ACTIVE() public {
@@ -473,7 +538,14 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
     }
 
     function testRevert_allocate_RECIPIENT_ERROR() public {
-        // TODO
+        vm.expectRevert(
+            abi.encodeWithSelector(DonationVotingMerkleDistributionStrategy.RECIPIENT_ERROR.selector, randomAddress())
+        );
+
+        vm.warp(allocationStartTime + 1);
+        vm.deal(pool_admin(), 1e20);
+        vm.prank(pool_admin());
+        allo().allocate(poolId, abi.encode(randomAddress(), 1e18, address(123)));
     }
 
     function testRevert_allocate_INVALID_invalidToken() public virtual {
@@ -557,6 +629,9 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
         statuses[0] =
             __buildStatusRow(0, uint8(DonationVotingMerkleDistributionStrategy.InternalRecipientStatus.Rejected));
 
+        vm.expectEmit(false, false, false, true);
+        emit RecipientStatusUpdated(0, statuses[0].statusRow, pool_admin());
+
         vm.prank(pool_admin());
         strategy.reviewRecipients(statuses);
     }
@@ -590,6 +665,21 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
 
         vm.prank(pool_admin());
         strategy.updateDistribution(abi.encode(distribution, metadata));
+
+        return recipientId;
+    }
+
+    function __register_accept_recipient_allocate() internal returns (address) {
+        address recipientId = __register_accept_recipient();
+
+        vm.warp(allocationStartTime + 1);
+        vm.deal(randomAddress(), 1e18);
+        vm.prank(randomAddress());
+
+        vm.expectEmit(false, false, false, true);
+        emit Allocated(recipientId, 1e18, NATIVE, randomAddress());
+
+        allo().allocate{value: 1e18}(poolId, abi.encode(recipientId, 1e18, NATIVE));
 
         return recipientId;
     }

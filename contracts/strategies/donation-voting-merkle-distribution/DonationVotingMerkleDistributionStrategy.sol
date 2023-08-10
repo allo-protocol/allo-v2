@@ -317,7 +317,7 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         }
 
         IAllo.Pool memory pool = allo.getPool(poolId);
-        // TODO: check if pool manager can withdraw from vault
+
         if (_amount > poolAmount) {
             revert NOT_ALLOWED();
         }
@@ -614,6 +614,7 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
             IAllo.Pool memory pool = allo.getPool(poolId);
 
             _setDistributed(index);
+            poolAmount -= amount;
             _transferAmount(pool.token, payable(recipientAddress), amount);
 
             emit FundsDistributed(amount, recipientAddress, pool.token, recipientId);
