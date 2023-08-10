@@ -70,17 +70,6 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
     mapping(uint256 => address) public indexToRecipientId;
 
     /// ======================
-    /// ===== Modifiers ======
-    /// ======================
-
-    modifier onlyBeforeAllocation() {
-        if (block.timestamp > allocationStartTime) {
-            revert ALLOCATION_STARTED();
-        }
-        _;
-    }
-
-    /// ======================
     /// ===== Constructor ====
     /// ======================
 
@@ -186,11 +175,13 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
 
     /// @notice Set the winner payoutPercentages per rank
     /// @param _payoutPercentages The payoutPercentages to set
-    function setPayoutPercentages(uint256[] memory _payoutPercentages)
-        external
-        onlyPoolManager(msg.sender)
-        onlyBeforeAllocation
-    {
+    function setPayoutPercentages(uint256[] memory _payoutPercentages) external onlyPoolManager(msg.sender) {
+        if (block.timestamp > allocationStartTime) {
+            if (payoutPercentages.length != 0) {
+                revert ALLOCATION_STARTED();
+            }
+        }
+
         uint256 percentageLength = _payoutPercentages.length;
         uint256 totalPayoutPercentages = 0;
 
@@ -201,7 +192,8 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
 
         for (uint256 i = 0; i < percentageLength;) {
             uint256 payoutPercentage = _payoutPercentages[i];
-            payoutPercentages[i] = payoutPercentage;
+            payoutPercentages.push(payoutPercentage);
+            votesByRank.push(0);
             totalPayoutPercentages += payoutPercentage;
             unchecked {
                 i++;
@@ -240,7 +232,7 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
 
     function _getPayout(address _recipientId, bytes memory) internal view override returns (PayoutSummary memory) {
         uint256 payoutPercentage = payoutPercentages[recipientIdToIndex[_recipientId]];
-        uint256 amount = poolAmount * payoutPercentage / 1e18;
+        uint256 amount = (paidOut[_recipientId]) ? 0 : poolAmount * payoutPercentage / 1e18;
 
         return PayoutSummary(recipients[_recipientId].recipientAddress, amount);
     }
@@ -258,11 +250,12 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
         onlyActiveRegistration
         returns (address recipientId)
     {
+        recipientId = super._registerRecipient(_data, _sender);
+
         if (recipientIdToUID[recipientId] == 0) {
             revert UNAUTHORIZED();
         }
-        super._registerRecipient(_data, _sender);
-        
+
         Recipient storage recipient = recipients[recipientId];
         if (recipient.recipientStatus == InternalRecipientStatus.Pending) {
             recipient.recipientStatus = InternalRecipientStatus.Accepted;
@@ -297,6 +290,10 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
         TmpRecipient memory tmp = TmpRecipient({recipientId: address(0), voteRank: 0, foundRecipientAtIndex: 0});
 
         uint256 totalWinners = payoutPercentages.length;
+
+        if (totalWinners == 0) {
+            revert INVALID();
+        }
 
         if (recipient.totalVotesReceived > votesByRank[totalWinners - 1]) {
             for (uint256 i = 0; i < totalWinners;) {
@@ -401,10 +398,10 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
         return easInfo.schemaRegistry.getSchema(uid);
     }
 
-    /// @notice Returns if the attestation is payable or not
+    /// @notice Returns if the this contract is payable or not
     /// @return True if the attestation is payable, false otherwise
     function isPayable() public pure override returns (bool) {
-        return false;
+        return true;
     }
 
     /// @notice Returns if the attestation is expired or not

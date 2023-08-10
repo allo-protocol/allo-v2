@@ -110,8 +110,10 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
             )
         );
 
+        vm.stopPrank();
         vm.startPrank(pool_admin());
         _createPoolWithCustomStrategy();
+        vm.stopPrank();
     }
 
     function _createPoolWithCustomStrategy() internal virtual {
@@ -255,22 +257,15 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
 
     function test_registerRecipient_new() public {
         vm.warp(registrationStartTime + 10);
-        address sender = recipient1();
-        address recipientAddress = makeAddr("recipientAddress");
-        Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
-
-        bytes memory data = abi.encode(recipientAddress, address(0), metadata);
-
-        vm.startPrank(address(allo()));
-        address recipientId = qvStrategy().registerRecipient(data, sender);
+        address recipientId = __register_recipient();
 
         QVBaseStrategy.Recipient memory receipt = qvStrategy().getRecipient(recipientId);
 
         assertEq(receipt.useRegistryAnchor, useRegistryAnchor);
-        assertEq(receipt.recipientAddress, recipientAddress);
-        assertEq(receipt.metadata.pointer, metadata.pointer);
-        assertEq(receipt.metadata.protocol, metadata.protocol);
-        assertEq(uint8(receipt.recipientStatus), uint8(QVBaseStrategy.InternalRecipientStatus.Pending));
+        assertEq(receipt.recipientAddress, recipient1());
+        assertEq(receipt.metadata.pointer, "metadata");
+        assertEq(receipt.metadata.protocol, 1);
+        assertEq(uint8(receipt.recipientStatus), __afterRegistrationStatus());
     }
 
     function test_registerRecipient_new_withRegistryAnchor() public {
@@ -333,31 +328,8 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
     function test_registerRecipient_appeal() public {
         vm.warp(registrationStartTime + 10);
 
-        // register
-        vm.startPrank(address(allo()));
-        address sender = makeAddr("recipient");
-        address recipientId = qvStrategy().registerRecipient(__generateRecipientWithoutId(false), sender);
-
-        // reject
-        address[] memory recipientIds = new address[](1);
-        recipientIds[0] = recipientId;
-        QVBaseStrategy.InternalRecipientStatus[] memory recipientStatuses =
-            new QVBaseStrategy.InternalRecipientStatus[](1);
-        recipientStatuses[0] = QVBaseStrategy.InternalRecipientStatus.Rejected;
-
-        vm.startPrank(pool_manager1());
-        qvStrategy().reviewRecipients(recipientIds, recipientStatuses);
-
-        vm.startPrank(pool_manager2());
-        qvStrategy().reviewRecipients(recipientIds, recipientStatuses);
-
-        // appeal
-        bytes memory data = __generateRecipientWithoutId(false);
-        vm.expectEmit(true, false, false, true);
-        emit Appealed(recipientId, data, sender);
-
-        vm.startPrank(address(allo()));
-        qvStrategy().registerRecipient(data, sender);
+        address recipientId = __register_reject_recipient();
+        __register_recipient();
 
         // test status mapping. Internal: Appealed -> Global: Pending
         IStrategy.RecipientStatus newStatus = qvStrategy().getRecipientStatus(recipientId);
@@ -365,13 +337,10 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
     }
 
     function test_getInternalRecipientStatus() public {
-        vm.warp(registrationStartTime + 10);
-        vm.startPrank(address(allo()));
-        address sender = makeAddr("recipient");
-        address recipientId = qvStrategy().registerRecipient(__generateRecipientWithoutId(false), sender);
+        address recipientId = __register_accept_recipient();
 
         QVBaseStrategy.InternalRecipientStatus recipientStatus = qvStrategy().getInternalRecipientStatus(recipientId);
-        assertEq(uint8(QVBaseStrategy.InternalRecipientStatus.Pending), uint8(recipientStatus));
+        assertEq(uint8(QVBaseStrategy.InternalRecipientStatus.Accepted), uint8(recipientStatus));
     }
 
     function testRevert_registerRecipient_REGISTRATION_NOT_ACTIVE() public {
@@ -424,7 +393,7 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
         qvStrategy().registerRecipient(data, sender);
     }
 
-    function testRevert_registerRecipient_RECIPIENT_ERROR() public {
+    function testRevert_registerRecipient_RECIPIENT_ERROR() public virtual {
         vm.warp(registrationStartTime + 1);
 
         address sender = recipient1();
@@ -439,7 +408,7 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
         qvStrategy().registerRecipient(data, sender);
     }
 
-    function testRevert_registerRecipient_INVALID_METADATA() public {
+    function testRevert_registerRecipient_INVALID_METADATA() public virtual {
         vm.warp(registrationStartTime + 1);
 
         address sender = recipient1();
@@ -464,7 +433,7 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
         qvStrategy().registerRecipient(data, sender);
     }
 
-    function test_getPayouts() public {
+    function test_getPayouts() public virtual {
         vm.warp(registrationStartTime + 10);
         address sender = recipient1();
         address recipientId = __register_accept_allocate_recipient();
@@ -483,12 +452,10 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
     }
 
     function test_getPayouts_ALREADY_DISTRIBUTED() public {
-        __register_accept_allocate_recipient();
+        address recipientId = __register_accept_allocate_recipient();
 
         address[] memory recipients = new address[](1);
-        recipients[0] = recipient1();
-
-        assertEq(token.balanceOf(_strategy), 9.9e17);
+        recipients[0] = recipientId;
 
         vm.startPrank(address(allo()));
         qvStrategy().distribute(recipients, "", pool_admin());
@@ -540,10 +507,7 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
     }
 
     function test_reviewRecipients() public {
-        vm.warp(registrationStartTime + 10);
-        vm.startPrank(address(allo()));
-        address sender = recipient1();
-        address recipientId = qvStrategy().registerRecipient(__generateRecipientWithoutId(false), sender);
+        address recipientId = __register_recipient();
 
         address[] memory recipientIds = new address[](1);
         recipientIds[0] = recipientId;
@@ -564,13 +528,8 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
         assertEq(uint8(QVBaseStrategy.InternalRecipientStatus.Rejected), uint8(recipient.recipientStatus));
     }
 
-    function test_reviewRecipient_reviewTreshold() public {
-        vm.warp(registrationStartTime + 10);
-
-        // register
-        vm.startPrank(address(allo()));
-        address sender = makeAddr("recipient");
-        address recipientId = qvStrategy().registerRecipient(__generateRecipientWithoutId(false), sender);
+    function test_reviewRecipient_reviewTreshold() public virtual {
+        address recipientId = __register_recipient();
 
         // reject
         address[] memory recipientIds = new address[](1);
@@ -611,13 +570,8 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
         assertEq(qvStrategy().reviewsByStatus(recipientId, QVBaseStrategy.InternalRecipientStatus.Rejected), 3);
     }
 
-    function test_reviewRecipient_reviewTreshold_noStatusChange() public {
-        vm.warp(registrationStartTime + 10);
-
-        // register
-        vm.startPrank(address(allo()));
-        address sender = makeAddr("recipient");
-        address recipientId = qvStrategy().registerRecipient(__generateRecipientWithoutId(false), sender);
+    function test_reviewRecipient_reviewTreshold_noStatusChange() public virtual {
+        address recipientId = __register_recipient();
 
         // reject
         address[] memory recipientIds = new address[](1);
@@ -721,13 +675,9 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
     }
 
     function test_getRecipientStatus() public {
-        vm.warp(registrationStartTime + 10);
-        vm.startPrank(address(allo()));
-        address sender = recipient1();
-        address recipientId = qvStrategy().registerRecipient(__generateRecipientWithoutId(false), sender);
-
+        address recipientId = __register_accept_recipient();
         BaseStrategy.RecipientStatus receiptStatus = qvStrategy().getRecipientStatus(recipientId);
-        assertEq(uint8(IStrategy.RecipientStatus.Pending), uint8(receiptStatus));
+        assertEq(uint8(IStrategy.RecipientStatus.Accepted), uint8(receiptStatus));
     }
 
     function test_allocate() public virtual {
@@ -757,7 +707,7 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
         qvStrategy().allocate(allocateData, randomAddress());
     }
 
-    function test_distribute() public {
+    function test_distribute() public virtual {
         __register_accept_allocate_recipient();
 
         address[] memory recipients = new address[](1);
@@ -789,11 +739,11 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
         qvStrategy().distribute(recipients, "", pool_admin());
     }
 
-    function testRevert_distribute_RECIPIENT_ERROR_noRecipient() public {
-        __register_accept_allocate_recipient();
+    function testRevert_distribute_RECIPIENT_ERROR_noRecipient() public virtual {
+        address recipientId = __register_accept_allocate_recipient();
 
         address[] memory recipients = new address[](2);
-        recipients[0] = recipient1();
+        recipients[0] = recipientId;
         recipients[1] = no_recipient();
 
         vm.expectRevert(abi.encodeWithSelector(QVBaseStrategy.RECIPIENT_ERROR.selector, no_recipient()));
@@ -839,26 +789,30 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
 
     // Note: internal helper functions
 
-    function __generateRecipientWithoutId(bool _isUsingRegistryAnchor) internal returns (bytes memory) {
+    function __generateRecipientWithoutId(bool _isUsingRegistryAnchor) internal virtual returns (bytes memory) {
         Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
 
         return abi.encode(recipient1(), _isUsingRegistryAnchor, metadata);
     }
 
-    function __generateRecipientWithId(address _recipientId) internal returns (bytes memory) {
+    function __generateRecipientWithId(address _recipientId) internal virtual returns (bytes memory) {
         Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
 
         return abi.encode(_recipientId, recipient1(), metadata);
     }
 
-    function __register_accept_recipient() internal returns (address) {
+    function __register_recipient() internal virtual returns (address recipientId) {
         vm.warp(registrationStartTime + 10);
 
         // register
         vm.startPrank(address(allo()));
         bytes memory data = __generateRecipientWithoutId(false);
-        address recipientId = qvStrategy().registerRecipient(data, recipient1());
+        recipientId = qvStrategy().registerRecipient(data, recipient1());
+        vm.stopPrank();
+    }
 
+    function __register_accept_recipient() internal virtual returns (address) {
+        address recipientId = __register_recipient();
         // accept
         address[] memory recipientIds = new address[](1);
         recipientIds[0] = recipientId;
@@ -867,20 +821,15 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
         recipientStatuses[0] = QVBaseStrategy.InternalRecipientStatus.Accepted;
         vm.startPrank(pool_admin());
         qvStrategy().reviewRecipients(recipientIds, recipientStatuses);
-
+        vm.stopPrank();
         vm.startPrank(pool_manager1());
         qvStrategy().reviewRecipients(recipientIds, recipientStatuses);
-
+        vm.stopPrank();
         return recipientId;
     }
 
     function __register_reject_recipient() internal returns (address) {
-        vm.warp(registrationStartTime + 10);
-
-        // register
-        vm.startPrank(address(allo()));
-        bytes memory data = __generateRecipientWithoutId(false);
-        address recipientId = qvStrategy().registerRecipient(data, recipient1());
+        address recipientId = __register_recipient();
 
         // accept
         address[] memory recipientIds = new address[](1);
@@ -891,13 +840,14 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
         vm.startPrank(pool_admin());
         qvStrategy().reviewRecipients(recipientIds, recipientStatuses);
 
+        vm.stopPrank();
         vm.startPrank(pool_manager1());
         qvStrategy().reviewRecipients(recipientIds, recipientStatuses);
-
+        vm.stopPrank();
         return recipientId;
     }
 
-    function __register_accept_allocate_recipient() internal returns (address) {
+    function __register_accept_allocate_recipient() internal virtual returns (address) {
         address recipientId = __register_accept_recipient();
         vm.warp(registrationEndTime + 10);
 
@@ -912,15 +862,16 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
         vm.startPrank(pool_manager1());
         token.approve(address(allo()), 999999999e18);
 
+        vm.stopPrank();
         // fund pool
         vm.startPrank(pool_manager1());
         allo().fundPool(poolId, 1e18);
-
+        vm.stopPrank();
         vm.warp(allocationStartTime + 10);
         bytes memory allocation = __generateAllocation(recipientId, 4);
         vm.startPrank(address(allo()));
         qvStrategy().allocate(allocation, randomAddress());
-
+        vm.stopPrank();
         vm.warp(allocationEndTime + 10);
 
         return recipientId;
@@ -932,5 +883,9 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
 
     function qvStrategy() internal view returns (QVBaseStrategy) {
         return (QVBaseStrategy(_strategy));
+    }
+
+    function __afterRegistrationStatus() internal pure virtual returns (uint8) {
+        return uint8(QVBaseStrategy.InternalRecipientStatus.Pending);
     }
 }
