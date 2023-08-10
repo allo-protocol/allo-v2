@@ -5,6 +5,9 @@ pragma solidity 0.8.19;
 import {DonationVotingStrategy} from "../donation-voting/DonationVotingStrategy.sol";
 import {SimpleProjectRegistry} from "./SimpleProjectRegistry.sol";
 
+/// @title Donation Voting Custom Registry Strategy
+/// @author allo-team
+/// @notice This contract is a strategy that allows for donation voting with a custom registry.
 contract DonationVotingCustomRegistryStrategy is DonationVotingStrategy {
     SimpleProjectRegistry public registry;
 
