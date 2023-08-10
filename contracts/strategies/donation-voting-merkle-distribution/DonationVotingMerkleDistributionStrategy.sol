@@ -646,10 +646,6 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
     function _getStatusRowColumn(address _recipientId) internal view returns (uint256, uint256, uint256) {
         uint256 recipientIndex = recipientToStatusIndexes[_recipientId];
 
-        if (recipientIndex > recipientsCounter) {
-            revert INVALID();
-        }
-
         uint256 rowIndex = recipientIndex / 64; // 256 / 4
         uint256 colIndex = (recipientIndex % 64) * 4;
 
