@@ -221,9 +221,23 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
 
         bytes memory data = abi.encode(profile1_anchor(), recipient1(), metadata);
 
-        vm.expectRevert();
+        vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
 
         vm.prank(randomAddress());
+        qvStrategy().registerRecipient(data, sender);
+    }
+
+    function testRevert_registerRecipient_UNAUTHORIZED_recipientIdToUIDIsZero() public {
+        vm.warp(registrationStartTime + 1);
+
+        address sender = recipient1();
+        Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
+
+        bytes memory data = abi.encode(randomAddress(), recipient1(), metadata);
+
+        vm.expectRevert(QVBaseStrategy.UNAUTHORIZED.selector);
+
+        vm.prank(address(allo()));
         qvStrategy().registerRecipient(data, sender);
     }
 
