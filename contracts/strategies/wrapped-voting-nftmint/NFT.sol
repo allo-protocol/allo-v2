@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import {ERC721} from "solady/src/tokens/ERC721.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "solady/src/auth/Ownable.sol";
 
@@ -17,14 +17,27 @@ contract NFT is ERC721, Ownable {
     uint256 public MINT_PRICE;
     uint256 public constant TOTAL_SUPPLY = 5;
 
+    string internal __name;
+    string internal __symbol;
+
     constructor(
         string memory _name,
         string memory _symbol,
         uint256 _price, //price in wei
         address _owner
-    ) ERC721(_name, _symbol) {
+    ) {
+        __name = _name;
+        __symbol = _symbol;
         MINT_PRICE = _price;
         _initializeOwner(_owner);
+    }
+
+    function name() public view virtual override returns (string memory) {
+        return __name;
+    }
+
+    function symbol() public view virtual override returns (string memory) {
+        return __symbol;
     }
 
     function mintTo(address to) public payable {

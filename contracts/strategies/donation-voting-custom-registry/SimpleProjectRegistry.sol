@@ -15,7 +15,7 @@ pragma solidity 0.8.19;
  * registry.
  */
 
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "solady/src/auth/Ownable.sol";
 
 /// @title Simple Project Registry
 /// @author @0xZakk <zakk@gitcoin.co>
@@ -56,7 +56,7 @@ contract SimpleProjectRegistry is Ownable {
     //===========================
 
     constructor(address _initialOwner) {
-        _transferOwnership(_initialOwner);
+        _initializeOwner(_initialOwner);
     }
 
     //===========================
