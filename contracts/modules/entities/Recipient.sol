@@ -20,7 +20,7 @@ Examples include:
 contract Recipient {
     constructor() {}
 
-    // NOTE: 
+    // NOTE:
     /// @notice Adds a recipient
     /// @param _recipient The address of the recipient to add
     function addRecipient(address _recipient) external {}

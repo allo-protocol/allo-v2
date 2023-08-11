@@ -13,7 +13,6 @@ Examples:
 
 */
 
-
 contract Milestone {
     constructor() {}
 }
