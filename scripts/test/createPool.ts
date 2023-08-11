@@ -46,10 +46,10 @@ export async function createPool() {
     return instance.target;
 }
 
-// createPool().catch((error) => {
-//     console.error(error);
-//     process.exitCode = 1;
-// });
+createPool().catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+});
 
 // Note: Deploy script to run in terminal:
 // npx hardhat run scripts/createPool.ts --network sepolia

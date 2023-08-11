@@ -28,26 +28,26 @@ export async function createProfile() {
     console.log("Creating profile...");
     const instance = await ethers.getContractAt('Registry', registry);
 
-    await instance.createProfile({
-        nonce: 1,
-        name: "test",
-        metadata: {
+    await instance.createProfile(
+        1, // none
+        "Shitzu", // name
+        {
             protocol: 1,
             pointer: "bafybeia4khbew3r2mkflyn7nzlvfzcb3qpfeftz5ivpzfwn77ollj47gqi"
-        },
-        owner: "0x24aE808BAe513fA698d4C188b88538d9C909f83E",
-        members: []
-    });
+        }, // metadata
+        "0xB8cEF765721A6da910f14Be93e7684e9a3714123", // owner
+        ["0x5cdb35fADB8262A3f88863254c870c2e6A848CcA"] // members
+    );
 
     console.log("profile created at:", instance.target);
   
     return instance.target;
 }
 
-// createProfile().catch((error) => {
-//     console.error(error);
-//     process.exitCode = 1;
-// });
+createProfile().catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+});
 
 // Note: Deploy script to run in terminal:
 // npx hardhat run scripts/createProfile.ts --network sepolia
