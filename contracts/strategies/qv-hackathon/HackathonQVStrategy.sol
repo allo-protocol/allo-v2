@@ -319,11 +319,15 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
                     // update the temp values to the next index values
                     tmp.voteRank = _tmpVoteRank;
                     tmp.recipientId = _tmpRecipient;
+
+                    if (i == totalWinners - 1) {
+                        recipientIdToIndex[tmp.recipientId] = 0;
+                    }
                 }
 
                 // if recipient is in winner list add him and store the temp values to push the rest of the list by 1 in the next loop
                 if (tmp.foundRecipientAtIndex == 0 && recipient.totalVotesReceived > votesByRank[i]) {
-                    tmp.foundRecipientAtIndex = i;
+                    tmp.foundRecipientAtIndex = 1;
                     // store the previous winner at index i in tmp variables
                     tmp.voteRank = votesByRank[i];
                     tmp.recipientId = indexToRecipientId[i];

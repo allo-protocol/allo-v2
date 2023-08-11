@@ -833,7 +833,7 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
     function __register_reject_recipient() internal returns (address) {
         address recipientId = __register_recipient();
 
-        // accept
+        // reject
         address[] memory recipientIds = new address[](1);
         recipientIds[0] = recipientId;
         QVBaseStrategy.InternalRecipientStatus[] memory recipientStatuses =

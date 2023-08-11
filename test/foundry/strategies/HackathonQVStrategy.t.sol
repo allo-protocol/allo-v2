@@ -55,9 +55,7 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
         });
 
         nft = new MockERC721();
-        for (uint256 i = 1; i <= 10; i++) {
-            nft.mint(randomAddress(), i);
-        }
+        nft.mint(randomAddress(), 1);
 
         /**
          */
@@ -123,7 +121,7 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
                 )
             ),
             NATIVE,
-            0 ether, // TODO: setup tests for failed transfers when a value is passed here.
+            0 ether,
             poolMetadata,
             pool_managers()
         );
@@ -159,9 +157,15 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
             )
         );
 
-        assertEq(newStrategy.maxVoiceCreditsPerAllocator(), maxVoiceCreditsPerAllocator);
+        (IEAS eas_, ISchemaRegistry schemaReg_, bytes32 schemaUid_, string memory schema_, bool revocable_) =
+            newStrategy.easInfo();
 
-        // TODO
+        assertEq(newStrategy.maxVoiceCreditsPerAllocator(), maxVoiceCreditsPerAllocator);
+        assertEq(address(eas_), address(eas));
+        assertEq(address(schemaReg_), address(schemaRegistry));
+        assertEq(schemaUid_, bytes32("123"));
+        assertEq(schema_, easInfo.schema);
+        assertEq(revocable_, easInfo.revocable);
     }
 
     function testRevert_initialize_ALREADY_INITIALIZED() public override {
@@ -185,8 +189,89 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
         );
     }
 
-    // NOTE: overriding so it does not run the underyling test
-    function test_registerRecipient_appeal() public override {}
+    function testRevert_initialize_INVALID_SCHEMA() public {
+        HackathonQVStrategy hStrategy = HackathonQVStrategy(payable(_createStrategy()));
+
+        HackathonQVStrategy.EASInfo memory easInfoFalse = HackathonQVStrategy.EASInfo({
+            eas: eas,
+            schemaRegistry: schemaRegistry,
+            schemaUID: bytes32("123"),
+            schema: "", // length == 0
+            revocable: false // false != true
+        });
+
+        vm.expectRevert(HackathonQVStrategy.INVALID_SCHEMA.selector);
+
+        vm.startPrank(address(allo()));
+        hStrategy.initialize(
+            poolId,
+            abi.encode(
+                easInfoFalse,
+                address(nft),
+                abi.encode(
+                    metadataRequired,
+                    maxVoiceCreditsPerAllocator,
+                    registrationStartTime,
+                    registrationEndTime,
+                    allocationStartTime,
+                    allocationEndTime
+                )
+            )
+        );
+
+        easInfoFalse.revocable = true;
+
+        vm.expectRevert(HackathonQVStrategy.INVALID_SCHEMA.selector);
+
+        hStrategy.initialize(
+            poolId,
+            abi.encode(
+                easInfoFalse,
+                address(nft),
+                abi.encode(
+                    metadataRequired,
+                    maxVoiceCreditsPerAllocator,
+                    registrationStartTime,
+                    registrationEndTime,
+                    allocationStartTime,
+                    allocationEndTime
+                )
+            )
+        );
+    }
+
+    function test_register() public {
+        address recipientId = __register_recipient();
+        HackathonQVStrategy.Recipient memory recipient = hQvStrategy().getRecipient(recipientId);
+
+        assertEq(uint8(recipient.recipientStatus), uint8(QVBaseStrategy.InternalRecipientStatus.Accepted));
+    }
+
+    function test_registerRecipient_appeal() public override {
+        vm.warp(registrationStartTime + 10);
+
+        // register
+        vm.prank(address(allo()));
+        bytes memory data = __generateRecipientWithId(profile1_anchor());
+        address recipientId = hQvStrategy().registerRecipient(data, recipient1());
+
+        // reject
+        address[] memory recipientIds = new address[](1);
+        recipientIds[0] = recipientId;
+        QVBaseStrategy.InternalRecipientStatus[] memory recipientStatuses =
+            new QVBaseStrategy.InternalRecipientStatus[](1);
+        recipientStatuses[0] = QVBaseStrategy.InternalRecipientStatus.Rejected;
+        vm.prank(pool_admin());
+        qvStrategy().reviewRecipients(recipientIds, recipientStatuses);
+
+        // appeal
+        vm.prank(address(allo()));
+        hQvStrategy().registerRecipient(data, recipient1());
+
+        HackathonQVStrategy.Recipient memory recipient = hQvStrategy().getRecipient(recipientId);
+
+        assertEq(uint8(recipient.recipientStatus), uint8(QVBaseStrategy.InternalRecipientStatus.Appealed));
+    }
 
     function testRevert_registerRecipient_INVALID_METADATA() public override {
         vm.warp(registrationStartTime + 1);
@@ -216,15 +301,15 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
     function testRevert_registerRecipient_UNAUTHORIZED() public override {
         vm.warp(registrationStartTime + 1);
 
-        address sender = recipient1();
+        address sender = profile2_member1();
         Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
 
-        bytes memory data = abi.encode(profile1_anchor(), recipient1(), metadata);
+        bytes memory data = abi.encode(profile2_anchor(), sender, metadata);
 
-        vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
+        vm.expectRevert(QVBaseStrategy.UNAUTHORIZED.selector);
 
-        vm.prank(randomAddress());
-        qvStrategy().registerRecipient(data, sender);
+        vm.prank(address(allo()));
+        hQvStrategy().registerRecipient(data, sender);
     }
 
     function testRevert_registerRecipient_UNAUTHORIZED_recipientIdToUIDIsZero() public {
@@ -238,7 +323,7 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
         vm.expectRevert(QVBaseStrategy.UNAUTHORIZED.selector);
 
         vm.prank(address(allo()));
-        qvStrategy().registerRecipient(data, sender);
+        hQvStrategy().registerRecipient(data, sender);
     }
 
     /// @notice Tests that this reverts when the recipient is not valid
@@ -266,6 +351,33 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
         bytes memory allocation = __generateAllocation(recipientId, 1);
         vm.startPrank(address(allo()));
         qvStrategy().allocate(allocation, makeAddr("bob"));
+    }
+
+    function testRevert_allocate_INVALID_noVoiceCreditsLeft() public {
+        address recipientId = __register_accept_recipient();
+
+        vm.warp(allocationStartTime + 10);
+        bytes memory allocation = __generateAllocation(recipientId, 5);
+        vm.startPrank(address(allo()));
+        qvStrategy().allocate(allocation, randomAddress());
+
+        vm.expectRevert(QVBaseStrategy.INVALID.selector);
+
+        qvStrategy().allocate(allocation, randomAddress());
+        vm.stopPrank();
+    }
+
+    function testRevert_allocate_INVALID_noPayoutPercentages() public {
+        address recipientId = __register_recipient_noPayoutPercentages();
+
+        vm.warp(allocationStartTime + 10);
+        bytes memory allocation = __generateAllocation(recipientId, 5);
+        vm.startPrank(address(allo()));
+
+        vm.expectRevert(QVBaseStrategy.INVALID.selector);
+
+        qvStrategy().allocate(allocation, randomAddress());
+        vm.stopPrank();
     }
 
     /// @notice Tests distribute
@@ -383,10 +495,6 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
         assertEq(keccak256(abi.encode(mockAttestation)), keccak256(abi.encode(attestation)));
     }
 
-    function test_isAttestationExpired() public {
-        assertFalse(hQvStrategy().isAttestationExpired(address(123)));
-    }
-
     /// @notice Tests the payout percentages can be set - no event is emitted on this call
     function test_setPayoutPercentages() public {
         uint256[] memory amounts = new uint256[](2);
@@ -433,6 +541,257 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
         hQvStrategy().setPayoutPercentages(amounts);
     }
 
+    function test_isAttestationExpired() public {
+        assertFalse(hQvStrategy().isAttestationExpired(profile1_anchor()));
+
+        vm.warp(allocationEndTime + 10);
+        assertTrue(hQvStrategy().isAttestationExpired(profile1_anchor()));
+    }
+
+    function test_winnerlist() public {
+        // create some hackers
+        address[] memory hacker = new address[](10);
+        address[] memory hackerAnchors = new address[](10);
+
+        for (uint256 i = 0; i < 10; i++) {
+            string memory hackerName = string(abi.encode("Hacker ", i));
+            hacker[i] = makeAddr(hackerName);
+
+            vm.prank(hacker[i]);
+            bytes32 profileId =
+                registry().createProfile(0, hackerName, Metadata(1, hackerName), hacker[i], new address[](0));
+
+            hackerAnchors[i] = registry().getProfileById(profileId).anchor;
+        }
+
+        // create some allocators
+        address[] memory allocators = new address[](10);
+        for (uint256 i = 0; i < 10; i++) {
+            allocators[i] = makeAddr(string(abi.encode("Allocator ", i)));
+            nft.mint(allocators[i], i + 2);
+        }
+
+        // setAllowedRecipientIds
+
+        vm.startPrank(pool_admin());
+        hQvStrategy().setAllowedRecipientIds(
+            hackerAnchors, uint64(allocationEndTime + 30 days), abi.encode("attestation data")
+        );
+
+        // setPayoutPercentages for 4 winner
+
+        uint256[] memory amounts = new uint256[](4);
+        amounts[0] = 4e17;
+        amounts[1] = 3e17;
+        amounts[2] = 2e17;
+        amounts[3] = 1e17;
+
+        hQvStrategy().setPayoutPercentages(amounts);
+
+        vm.stopPrank();
+
+        // register recipients
+
+        vm.warp(registrationStartTime + 10);
+
+        vm.startPrank(address(allo()));
+
+        bytes memory data_;
+
+        for (uint256 i = 0; i < 10; i++) {
+            data_ = abi.encode(hackerAnchors[i], hacker[i], Metadata(1, string(abi.encode("Hacker ", i))));
+            hQvStrategy().registerRecipient(data_, hacker[i]);
+        }
+
+        // allocate
+
+        vm.warp(allocationStartTime + 10);
+
+        for (uint256 i = 0; i < 10; i++) {
+            data_ = abi.encode(
+                hackerAnchors[i],
+                i + 2, // nft id to vote with
+                1 // vote credits to allocate
+            );
+
+            hQvStrategy().allocate(data_, allocators[i]);
+
+            assertEq(hQvStrategy().voiceCreditsUsedPerNftId(i + 2), 1);
+
+            if (i < 4) {
+                assertTrue(hQvStrategy().recipientIdToIndex(hackerAnchors[i]) == i);
+                assertTrue(hQvStrategy().indexToRecipientId(i) == hackerAnchors[i]);
+            } else {
+                assertTrue(hQvStrategy().recipientIdToIndex(hackerAnchors[i]) == 0);
+                assertTrue(hQvStrategy().indexToRecipientId(i) == address(0));
+            }
+        }
+
+        // current winner list:
+        // 0: hacker 0, allocated votes: 1
+        // 1: hacker 1, allocated votes: 1
+        // 2: hacker 2, allocated votes: 1
+        // 3: hacker 3, allocated votes: 1
+
+        // not in list:
+        // hacker 4
+        // hacker 5
+        // hacker 6
+        // hacker 7
+        // hacker 8
+        // hacker 9
+
+        // allocate vote for hacker 5
+
+        data_ = abi.encode(
+            hackerAnchors[4],
+            2, // nft id to vote with
+            1 // vote credits to allocate
+        );
+
+        hQvStrategy().allocate(data_, allocators[0]);
+
+        // expect hacker 5 at index 0
+        // hacker 0 at index 1
+        // hacker 1 at index 2
+        // hacker 2 at index 3
+        // hacker 3 not in list
+
+        assertTrue(hQvStrategy().recipientIdToIndex(hackerAnchors[4]) == 0);
+        assertTrue(hQvStrategy().indexToRecipientId(0) == hackerAnchors[4]);
+
+        assertTrue(hQvStrategy().recipientIdToIndex(hackerAnchors[0]) == 1);
+        assertTrue(hQvStrategy().indexToRecipientId(1) == hackerAnchors[0]);
+
+        assertTrue(hQvStrategy().recipientIdToIndex(hackerAnchors[1]) == 2);
+        assertTrue(hQvStrategy().indexToRecipientId(2) == hackerAnchors[1]);
+
+        assertTrue(hQvStrategy().recipientIdToIndex(hackerAnchors[2]) == 3);
+        assertTrue(hQvStrategy().indexToRecipientId(3) == hackerAnchors[2]);
+
+        assertTrue(hQvStrategy().recipientIdToIndex(hackerAnchors[3]) == 0);
+        assertTrue(hQvStrategy().indexToRecipientId(4) == address(0));
+
+        // current winner list:
+        // 0: hacker 4, allocated votes: 2
+        // 1: hacker 0, allocated votes: 1
+        // 2: hacker 1, allocated votes: 1
+        // 3: hacker 2, allocated votes: 1
+
+        // not in list:
+        // hacker 3
+        // hacker 4
+        // hacker 6
+        // hacker 7
+        // hacker 8
+        // hacker 9
+
+        // allocate vote for hacker 6
+
+        data_ = abi.encode(
+            hackerAnchors[5],
+            2, // nft id to vote with
+            2 // vote credits to allocate
+        );
+
+        hQvStrategy().allocate(data_, allocators[0]);
+
+        // expect
+        // hacker 5 at index 0
+        // hacker 4 at index 1
+        // hacker 0 at index 2
+        // hacker 1 at index 3
+        // hacker 2 not in list
+
+        assertTrue(hQvStrategy().recipientIdToIndex(hackerAnchors[5]) == 0);
+        assertTrue(hQvStrategy().indexToRecipientId(0) == hackerAnchors[5]);
+
+        assertTrue(hQvStrategy().recipientIdToIndex(hackerAnchors[4]) == 1);
+        assertTrue(hQvStrategy().indexToRecipientId(1) == hackerAnchors[4]);
+
+        assertTrue(hQvStrategy().recipientIdToIndex(hackerAnchors[0]) == 2);
+        assertTrue(hQvStrategy().indexToRecipientId(2) == hackerAnchors[0]);
+
+        assertTrue(hQvStrategy().recipientIdToIndex(hackerAnchors[1]) == 3);
+        assertTrue(hQvStrategy().indexToRecipientId(3) == hackerAnchors[1]);
+
+        assertTrue(hQvStrategy().recipientIdToIndex(hackerAnchors[2]) == 0);
+        assertTrue(hQvStrategy().indexToRecipientId(4) == address(0));
+
+        // current winner list:
+        // 0: hacker 5, allocated votes: 3
+        // 1: hacker 4, allocated votes: 2
+        // 2: hacker 0, allocated votes: 1
+        // 3: hacker 1, allocated votes: 1
+
+        // not in list:
+        // hacker 2
+        // hacker 3
+        // hacker 4
+        // ...
+
+        // allocate 2 vote for hacker 0
+
+        data_ = abi.encode(
+            hackerAnchors[0],
+            3, // nft id to vote with
+            2 // vote credits to allocate
+        );
+
+        hQvStrategy().allocate(data_, allocators[1]);
+
+        // expect hacker 0 at index 1
+
+        assertTrue(hQvStrategy().recipientIdToIndex(hackerAnchors[5]) == 0);
+        assertTrue(hQvStrategy().indexToRecipientId(0) == hackerAnchors[5]);
+
+        assertTrue(hQvStrategy().recipientIdToIndex(hackerAnchors[0]) == 1);
+        assertTrue(hQvStrategy().indexToRecipientId(1) == hackerAnchors[0]);
+
+        assertTrue(hQvStrategy().recipientIdToIndex(hackerAnchors[4]) == 2);
+        assertTrue(hQvStrategy().indexToRecipientId(2) == hackerAnchors[4]);
+
+        assertTrue(hQvStrategy().recipientIdToIndex(hackerAnchors[1]) == 3);
+        assertTrue(hQvStrategy().indexToRecipientId(3) == hackerAnchors[1]);
+
+        assertTrue(hQvStrategy().recipientIdToIndex(hackerAnchors[2]) == 0);
+        assertTrue(hQvStrategy().indexToRecipientId(4) == address(0));
+
+        // current winner list:
+        // 0: hacker 5, allocated votes: 3
+        // 1: hacker 0, allocated votes: 3
+        // 2: hacker 4, allocated votes: 2
+        // 3: hacker 1, allocated votes: 1
+
+        // not in list:
+        // hacker 2
+        // hacker 3
+        // hacker 6
+        // ...
+
+        vm.stopPrank();
+
+        // getPayouts
+
+        uint256 balance = address(hQvStrategy()).balance;
+
+        IStrategy.PayoutSummary[] memory payoutSummary = hQvStrategy().getPayouts(hackerAnchors, new bytes[](10));
+
+        assertTrue(payoutSummary.length == 4);
+
+        assertTrue(payoutSummary[0].recipientAddress == hacker[5]);
+        assertTrue(payoutSummary[0].amount == balance * amounts[0] / 1e18);
+
+        assertTrue(payoutSummary[1].recipientAddress == hacker[0]);
+        assertTrue(payoutSummary[1].amount == balance * amounts[1] / 1e18);
+
+        assertTrue(payoutSummary[2].recipientAddress == hacker[4]);
+        assertTrue(payoutSummary[2].amount == balance * amounts[2] / 1e18);
+
+        assertTrue(payoutSummary[3].recipientAddress == hacker[1]);
+        assertTrue(payoutSummary[3].amount == balance * amounts[3] / 1e18);
+    }
+
     // ==========================================================================
 
     function __setAllowedRecipientId() internal {
@@ -446,19 +805,22 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
         vm.stopPrank();
     }
 
-    function __register_recipient() internal override returns (address recipientId) {
+    function __register_recipient_noPayoutPercentages() internal returns (address recipientId) {
         vm.warp(registrationStartTime + 10);
 
         // register
         vm.startPrank(address(allo()));
         bytes memory data = __generateRecipientWithId(profile1_anchor());
         recipientId = hQvStrategy().registerRecipient(data, recipient1());
+        vm.stopPrank();
+    }
+
+    function __register_recipient() internal override returns (address recipientId) {
+        recipientId = __register_recipient_noPayoutPercentages();
 
         uint256[] memory amounts = new uint256[](2);
         amounts[0] = 6e17;
         amounts[1] = 4e17;
-
-        vm.stopPrank();
 
         vm.prank(pool_admin());
         hQvStrategy().setPayoutPercentages(amounts);
