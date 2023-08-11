@@ -9,6 +9,8 @@ import {LockupLinearStrategy} from "../../../../contracts/strategies/sablier-v2/
 
 import {LockupBase_Test} from "./LockupBase.t.sol";
 
+import {Metadata} from "../../../../contracts/core/libraries/Metadata.sol";
+
 import {console2} from "forge-std/console2.sol";
 
 contract LockupLinearStrategyTest is LockupBase_Test {
@@ -41,6 +43,9 @@ contract LockupLinearStrategyTest is LockupBase_Test {
     function test_initialize() public {
         strategy.setBroker(broker);
         assertEq(strategy.getBroker(), broker);
+        assertEq(registryGating, strategy.registryGating());
+        assertEq(metadataRequired, strategy.metadataRequired());
+        assertEq(grantAmountRequired, strategy.grantAmountRequired());
     }
 
     function test_initialize_BaseStrategy_UNAUTHORIZED() public {}
@@ -178,6 +183,102 @@ contract LockupLinearStrategyTest is LockupBase_Test {
         );
     }
 
+    function test_registerRecipient() public {
+        Vars memory vars;
+
+        LockupLinear.Durations memory durations = LockupLinear.Durations({cliff: 3 days, total: 4 days});
+
+        vars.cancelable = true;
+        vars.registerRecipientData = abi.encode(
+            pool_manager1(), useRegistryAnchor, vars.cancelable, vars.grantAmount, durations, strategyMetadata
+        );
+
+        vars.recipientIds = new address[](1);
+
+        vm.expectEmit({emitter: address(strategy)});
+        emit Registered(pool_manager1(), vars.registerRecipientData, pool_manager1());
+        vars.recipientIds[0] = allo().registerRecipient(poolId, vars.registerRecipientData);
+
+        assertEq(vars.recipientIds[0], pool_manager1());
+    }
+
+    function testRevert_registerRecipient_UNAUTHORIZED_NOT_PROFILE_MEMBER() public {
+        Vars memory vars;
+
+        LockupLinear.Durations memory durations = LockupLinear.Durations({cliff: 3 days, total: 4 days});
+
+        vars.cancelable = true;
+        vars.registerRecipientData = abi.encode(
+            randomAddress(), useRegistryAnchor, vars.cancelable, vars.grantAmount, durations, strategyMetadata
+        );
+        vars.recipientIds = new address[](1);
+
+        // FIXME:
+        // vm.expectRevert(LockupLinearStrategy.UNAUTHORIZED.selector);
+        // vm.startPrank(randomAddress());
+        // vars.recipientIds[0] = allo().registerRecipient(poolId, vars.registerRecipientData);
+        // vm.stopPrank();
+    }
+
+    // FIXME: grantAmountRequired needs to be set to true
+    function testRevert_registerRecipient_INVALID_REGISTRATION() public {
+        Vars memory vars;
+
+        LockupLinear.Durations memory durations = LockupLinear.Durations({cliff: 3 days, total: 4 days});
+
+        vars.cancelable = true;
+        vars.registerRecipientData =
+            abi.encode(pool_manager1(), useRegistryAnchor, vars.cancelable, 0, durations, strategyMetadata);
+        vars.recipientIds = new address[](1);
+        grantAmountRequired = true;
+
+        vm.expectRevert(LockupLinearStrategy.UNAUTHORIZED.selector);
+        vars.recipientIds[0] = allo().registerRecipient(poolId, vars.registerRecipientData);
+    }
+
+    function testRevert_registerRecipient_RECIPIENT_ALREADY_ACCEPTED() public {
+        Vars memory vars;
+
+        LockupLinear.Durations memory durations = LockupLinear.Durations({cliff: 3 days, total: 4 days});
+
+        vars.cancelable = true;
+        vars.registerRecipientData = abi.encode(
+            pool_manager1(), useRegistryAnchor, vars.cancelable, vars.grantAmount, durations, strategyMetadata
+        );
+        vars.recipientIds = new address[](1);
+        grantAmountRequired = true;
+
+        vars.recipientIds[0] = allo().registerRecipient(poolId, vars.registerRecipientData);
+        vars.allocateData =
+            abi.encode(vars.recipientIds[0], LockupLinearStrategy.InternalRecipientStatus.Accepted, vars.grantAmount);
+
+        allo().allocate(poolId, vars.allocateData);
+
+        vm.expectRevert(LockupLinearStrategy.RECIPIENT_ALREADY_ACCEPTED.selector);
+        vars.recipientIds[0] = allo().registerRecipient(poolId, vars.registerRecipientData);
+    }
+
+    function testRevert_registerRecipient_INVALID_METADATA() public {
+        Vars memory vars;
+
+        LockupLinear.Durations memory durations = LockupLinear.Durations({cliff: 3 days, total: 4 days});
+
+        vars.cancelable = true;
+        vars.registerRecipientData = abi.encode(
+            pool_manager1(),
+            useRegistryAnchor,
+            vars.cancelable,
+            vars.grantAmount,
+            durations,
+            Metadata({protocol: 0, pointer: ""})
+        );
+        vars.recipientIds = new address[](1);
+
+        // FIXME: need to make metadata required to test this
+        // vm.expectRevert(LockupLinearStrategy.INVALID_METADATA.selector);
+        vars.recipientIds[0] = allo().registerRecipient(poolId, vars.registerRecipientData);
+    }
+
     function test_ChangeRecipientDurations() public {
         address recipientAddress = makeAddr("recipientAddress");
         bool cancelable = true;
@@ -208,5 +309,59 @@ contract LockupLinearStrategyTest is LockupBase_Test {
     function test_SetBroker() public {
         strategy.setBroker(broker);
         assertEq(strategy.getBroker(), broker);
+    }
+
+    function testRevert_cancelStream_STATUS_NOT_ACCEPTED() public {}
+
+    function test_getAllRecipientStreamIds() public {
+        uint256[] memory streamIds = strategy.getAllRecipientStreamIds(recipient());
+
+        assertEq(streamIds.length, 0);
+
+        // TODO: add a recipient stream id or two
+    }
+
+    function test_GetPayouts() public {
+        address[] memory recipientIds = new address[](1);
+        recipientIds[0] = recipient();
+
+        strategy.getPayouts(recipientIds, "");
+
+        assertEq(strategy.getPayouts(recipientIds, "").length, 1);
+
+        // TODO: add some data for payouts to not be 0
+    }
+
+    function test_getRecipientStatus() public {
+        Vars memory vars;
+
+        // get the status - should be None | 0
+        assertEq(uint8(strategy.getRecipientStatus(recipient())), 0);
+
+        // Register a new recipient
+        LockupLinear.Durations memory durations = LockupLinear.Durations({cliff: 3 days, total: 4 days});
+
+        vars.cancelable = true;
+        vars.grantAmount = 1e19;
+        vars.registerRecipientData = abi.encode(
+            pool_manager1(), useRegistryAnchor, vars.cancelable, vars.grantAmount, durations, strategyMetadata
+        );
+        vars.recipientIds = new address[](1);
+
+        vm.expectEmit({emitter: address(strategy)});
+        emit Registered(pool_manager1(), vars.registerRecipientData, pool_manager1());
+        vars.recipientIds[0] = allo().registerRecipient(poolId, vars.registerRecipientData);
+
+        assertEq(vars.recipientIds[0], pool_manager1());
+
+        // Set the recipient status to InReview | 4
+        strategy.setInternalRecipientStatusToInReview(vars.recipientIds);
+
+        assertEq(uint8(strategy.getInternalRecipientStatus(vars.recipientIds[0])), 4); // InReview
+    }
+
+    function test_isValidAllocator() public {
+        assertEq(strategy.isValidAllocator(pool_manager1()), true);
+        assertEq(strategy.isValidAllocator(randomAddress()), false);
     }
 }
