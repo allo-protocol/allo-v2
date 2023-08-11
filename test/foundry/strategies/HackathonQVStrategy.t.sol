@@ -44,7 +44,7 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
     function setUp() public override {
         eas = IEAS(address(new MockEAS()));
         schemaRegistry = ISchemaRegistry(address(new MockSchemaRegistry()));
-        maxVoiceCreditsPerAllocator = 10;
+        maxVoiceCreditsPerAllocator = 5;
 
         easInfo = HackathonQVStrategy.EASInfo({
             eas: eas,
@@ -257,6 +257,17 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
         qvStrategy().registerRecipient(data, sender);
     }
 
+    function testRevert_allocate_UNAUTHORIZED() public {
+        address recipientId = __register_accept_recipient();
+
+        vm.expectRevert(QVBaseStrategy.UNAUTHORIZED.selector);
+
+        vm.warp(allocationStartTime + 10);
+        bytes memory allocation = __generateAllocation(recipientId, 1);
+        vm.startPrank(address(allo()));
+        qvStrategy().allocate(allocation, makeAddr("bob"));
+    }
+
     /// @notice Tests distribute
     function test_distribute() public override {
         __register_accept_allocate_recipient();
@@ -370,6 +381,10 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
 
         Attestation memory attestation = hQvStrategy().getAttestation(bytes32("1"));
         assertEq(keccak256(abi.encode(mockAttestation)), keccak256(abi.encode(attestation)));
+    }
+
+    function test_isAttestationExpired() public {
+        assertFalse(hQvStrategy().isAttestationExpired(address(123)));
     }
 
     /// @notice Tests the payout percentages can be set - no event is emitted on this call
