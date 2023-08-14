@@ -1,8 +1,8 @@
 pragma solidity 0.8.19;
 
-import {Broker} from "@sablier/v2-core/types/DataTypes.sol";
-import {UD60x18} from "@sablier/v2-core/types/Math.sol";
-import {IERC20} from "@sablier/v2-core/types/Tokens.sol";
+import {Broker} from "@sablier/v2-core/src/types/DataTypes.sol";
+import {UD60x18} from "@sablier/v2-core/src/types/Math.sol";
+import {IERC20} from "@sablier/v2-core/src/types/Tokens.sol";
 import {Test} from "forge-std/Test.sol";
 
 import {Accounts} from "../../shared/Accounts.sol";
