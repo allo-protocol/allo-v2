@@ -2,8 +2,8 @@ pragma solidity 0.8.19;
 
 // Interfaces
 import {IStrategy} from "../../../../contracts/strategies/IStrategy.sol";
-import {ISablierV2LockupLinear} from "@sablier/v2-core/interfaces/ISablierV2LockupLinear.sol";
-import {Broker, LockupLinear} from "@sablier/v2-core/types/DataTypes.sol";
+import {ISablierV2LockupLinear} from "@sablier/v2-core/src/interfaces/ISablierV2LockupLinear.sol";
+import {Broker, LockupLinear} from "@sablier/v2-core/src/types/DataTypes.sol";
 
 import {LockupLinearStrategy} from "../../../../contracts/strategies/sablier-v2/LockupLinearStrategy.sol";
 
