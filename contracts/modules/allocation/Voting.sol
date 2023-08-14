@@ -14,9 +14,11 @@ Examples:
 
 */
 
+import {Voter} from "../entities/Voter.sol";
+
 /// @title Voting
 /// @notice Voting is a module that handles the casting and calculation of votes
 /// @author allo-team
-contract Voting {
+contract Voting is Voter {
     constructor() {}
 }

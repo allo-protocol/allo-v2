@@ -23,10 +23,10 @@ contract Recipient {
     // NOTE:
     /// @notice Adds a recipient
     /// @param _recipient The address of the recipient to add
-    function addRecipient(address _recipient) external {}
+    function _addRecipient(address _recipient) internal {}
 
     // NOTE:
     /// @notice Removes a recipient
     /// @param _recipient The address of the recipient to remove
-    function removeRecipient(address _recipient) external {}
+    function _removeRecipient(address _recipient) internal {}
 }
