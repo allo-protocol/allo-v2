@@ -1,53 +1,21 @@
-<!-- abstract Base contract
- - all getter, all base variables
 
-- internal functions for every getter (and setter)
+- [Module Library](#module-library)
+  - [0. Interface and Base Contract](#0-interface-and-base-contract)
+  - [1. Registration](#1-registration)
+  - [2. Recipient Status Management](#2-recipient-status-management)
+  - [3. Allocation](#3-allocation)
+  - [4. Payout](#4-payout)
+  - [5. Other](#5-other)
+- [Module Development](#module-development)
+  - [0. Branching](#0-branching)
+  - [1. Base Contract for Shared State](#1-base-contract-for-shared-state)
+  - [2. Unified Access through Internal Getters and Setters](#2-unified-access-through-internal-getters-and-setters)
+  - [3. Replacing Structs with Mappings](#3-replacing-structs-with-mappings)
+  - [4. Implementing Category-Specific Modules](#4-implementing-category-specific-modules)
+  - [5. Compiling Constraints](#5-compiling-constraints)
+  - [6. Test Cases](#6-test-cases)
 
-// go through direct grants
-// where isPoolActive live?
-
-<!-- # Recipient Management / Accept Recipient -->
-
-<!-- ## Register 
-  - registry gated
-  - not registry gated
-  - metadata 
-  - no metadata -->
-<!-- 
-flavors: 
-  - review process
-  - auto acceptance (apply, set metadata, recipientAddress, etc..)
-  - only added by pool owner
-  - whitelist and afterward (register apply, set metadata, recipientAddress, etc..)
-
-  - custom registry
-
- ## no registration required
-  - token gated
-  - nft gated
-  - ....
-  - -> also auto acceptance (apply, set metadata, recipientAddress, etc..)
-
-## Payout
- - set payouts for every recipient
- - set merkle tree and stuff
- - qv calculations
- - winner list
- - milestone based -> allocation depends // wtf we're doing
-
-## Allocation
-  - token vault with claim
-  - multiple NFT token
-  - NFT votes with voiceCredits
-  - governance token voting stuff
-  - other voiceCredit stuff
-
-
-## Time gated registration
-
-## Time gated allocation --> 
-
-<!-- ## Withdrawal  -->
+---
 
 # Module Library
 
@@ -60,24 +28,56 @@ flavors:
 Provides a foundation for other modules to build upon.
 
 ## 1. Registration
-  - Registry gated
-    - Extension: Custom Registry
-  - Not Registry Gated
-  - No Registration required
-  - Restricted by Poolmanager
+
+- Registry gated
+  - Extension: Custom Registry
+- Not Registry Gated
+- No Registration required
 
 Extensions:
-  - Recipient Metadata
+
+- Recipient Metadata
+- NFT / Token Gating
+- Only Poolmanager restriction
+- Time-gated recipient registration
 
 ## 2. Recipient Status Management
-  - Manual Review
-    - Extension: Threshold
-  - Auto Acceptance
-  - NFT Gated
 
+- Manual Review
+  - Extension: Threshold
+- Auto Acceptance
+  - Extensions: NFT or whatever Token balance
+
+## 3. Allocation
+
+- Token Allocations with vault
+- Voice Credits
+  - Extensions: based on token balance, (multiple) NFT's, address whitelist, gov token balance
+- Milestone based
+
+Extensions:
+
+- QV calculations
+- Winner list (Hackathon)
+- Only Poolmanager restriction
+- Only NFT Holder
+- Time-gated allocation periods
+
+## 4. Payout
+
+- Set fixed payouts for each recipient
+- Merkle tree-based distribution
+- Proportional to total allocation
+
+## 5. Other
+
+- Withdrawal
+
+---
 
 # Module Development
 
+Note: We should begin by focusing on a single module category initially and ensure that our approach aligns with our expectations.
 ## 0. Branching
 
 - Create a separate branch from the main branch to serve as the primary module development branch.
@@ -118,7 +118,7 @@ We will need a abstract base contract containing:
 
 **For example:**
 
-To be able to access the information across the different modules the base contract needs to implement  functions like  
+To be able to access the information across the different modules the base contract needs to implement functions like
 
 ```solidity
 function _setRecipientStatus(Status/uint8 ..) internal;
@@ -126,13 +126,13 @@ function _setRecipientStatus(Status/uint8 ..) internal;
 function _getRecipientStatus(Status/uint8 ..) internal returns (Status/uint8);
 ```
 
- which will be implemented by an module of the right category, in this case in a Recipient management module.
+which will be implemented by an module of the right category, in this case in a Recipient management module.
 
 ## 3. Replacing Structs with Mappings
 
 Instead of using structs, modules should use mappings to store strategy-specific information.
 
-**For Example:** 
+**For Example:**
 
 Instead of a `Recipient` struct with a `status` property, a module should implement a `address => Status` mapping with the corresponding `getter` and `setter` (defined in the base contract).
 
@@ -153,7 +153,6 @@ function _setRecipientStatus(..) internal virtual {
   /* managing status change */
 }
 ```
-
 
 - Review Threshold Extension:
 
