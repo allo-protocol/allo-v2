@@ -9,7 +9,7 @@
 - [Module Development](#module-development)
   - [0. Branching](#0-branching)
   - [1. Base Contract for Shared State](#1-base-contract-for-shared-state)
-  - [2. Unified Access through Internal Getters and Setters](#2-unified-access-through-internal-getters-and-setters)
+  - [2. Unified Access through Internal Hooks, Getters and Setters](#2-unified-access-through-internal-hooks-getters-and-setters)
   - [3. Replacing Structs with Mappings](#3-replacing-structs-with-mappings)
   - [4. Implementing Category-Specific Modules](#4-implementing-category-specific-modules)
   - [5. Compiling Constraints](#5-compiling-constraints)
@@ -111,8 +111,9 @@ We will need a abstract base contract containing:
 
 **Note:** we already have a contract like this which needs to be extended during the module development.
 
-## 2. Unified Access through Internal Getters and Setters
+## 2. Unified Access through Internal Hooks, Getters and Setters
 
+- Implement `beforeAllocation`, `afterAllocation`, `beforeRegistration`, `afterRegistration` hooks to enable a better cross module communication.
 - Enable cross-module data access via internal getter and setter functions defined in the base contract.
 - These functions must be uniquely implemented by each module category for consistent data manipulation.
 
