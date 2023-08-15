@@ -80,7 +80,7 @@
     <td><a href="https://explorer.sepolia.publicgoods.network/address/0xf243619f931c81617EE00bAAA5c5d97aCcC5af10">&#x1F517;</a></td>
     <td><a href="https://explorer.celo.org/alfajores/address/0xf243619f931c81617EE00bAAA5c5d97aCcC5af10">&#x1F517;</a></td>
   </tr>
-      <tr>
+  <tr>
     <td>Donation Voting Merkle Distribution V1</td>
     <td>0xC88612a4541A28c221F3d03b6Cf326dCFC557C4E</td>
     <td><a href="https://goerli.etherscan.io/address/0xC88612a4541A28c221F3d03b6Cf326dCFC557C4E">&#x1F517;</a></td>
