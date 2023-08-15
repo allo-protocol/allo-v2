@@ -71,6 +71,15 @@
     <td><a href="https://explorer.sepolia.publicgoods.network/address/">&#x1F517;</a></td>
     <td><a href="https://explorer.celo.org/alfajores/address/">&#x1F517;</a></td>
   </tr>
+    <tr>
+    <td>Direct Grants Simple V1</td>
+    <td>0xf243619f931c81617EE00bAAA5c5d97aCcC5af10</td>
+    <td><a href="https://goerli.etherscan.io/address/0xf243619f931c81617EE00bAAA5c5d97aCcC5af10">&#x1F517;</a></td>
+    <td><a href="https://goerli-optimism.etherscan.io/address/0xf243619f931c81617EE00bAAA5c5d97aCcC5af10">&#x1F517;</a></td>
+    <td><a href="https://sepolia.etherscan.io/address/0xf243619f931c81617EE00bAAA5c5d97aCcC5af10">&#x1F517;</a></td>
+    <td><a href="https://explorer.sepolia.publicgoods.network/address/0xf243619f931c81617EE00bAAA5c5d97aCcC5af10">&#x1F517;</a></td>
+    <td><a href="https://explorer.celo.org/alfajores/address/0xf243619f931c81617EE00bAAA5c5d97aCcC5af10">&#x1F517;</a></td>
+  </tr>
 </tbody>
 </table>
 

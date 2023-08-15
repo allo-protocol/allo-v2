@@ -38,7 +38,7 @@ export async function deployStrategies(strategyName: string, version: string) {
   console.log("Calling contract with the account:", deployer.address);
 
   // Get contract instance
-  const DeployerContract = await hre.ethers.getContractFactory("Deployer");
+  const DeployerContract = await hre.ethers.getContractFactory("ContractFactory");
   // Attach the deployed Deployer contract
   const deployerContract: any = DeployerContract.attach(
     deployerContractAddress[chainId].address,
