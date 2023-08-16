@@ -3,13 +3,9 @@ pragma solidity 0.8.19;
 
 // Test contracts
 import "forge-std/Test.sol";
-import {CREATE3} from "solady/src/utils/CREATE3.sol";
 
 // Interfaces
 import {IStrategy} from "../../../contracts/strategies/IStrategy.sol";
-import {IRegistry} from "../../../contracts/core/IRegistry.sol";
-// Core contracts
-import {BaseStrategy} from "../../../contracts/strategies/BaseStrategy.sol";
 // Strategy Contracts
 import {DonationVotingMerkleDistributionStrategy} from
     "../../../contracts/strategies/donation-voting-merkle-distribution/DonationVotingMerkleDistributionStrategy.sol";

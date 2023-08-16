@@ -2,22 +2,10 @@ pragma solidity 0.8.19;
 
 import "forge-std/Test.sol";
 
-// Interfaces
-import {IAllo} from "../../../contracts/core/Allo.sol";
-import {IStrategy} from "../../../contracts/strategies/IStrategy.sol";
-// Core contracts
-import {BaseStrategy} from "../../../contracts/strategies/BaseStrategy.sol";
-import {DonationVotingStrategy} from "../../../contracts/strategies/donation-voting/DonationVotingStrategy.sol";
-// Internal libraries
-import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
-import {Native} from "../../../contracts/core/libraries/Native.sol";
-
 // Test libraries
 import {AlloSetup} from "../shared/AlloSetup.sol";
 import {RegistrySetupFull} from "../shared/RegistrySetup.sol";
 import {MockStrategy} from "../../utils/MockStrategy.sol";
-
-import {EventSetup} from "../shared/EventSetup.sol";
 
 contract BaseStrategyTest is Test, AlloSetup, RegistrySetupFull {
     MockStrategy strategy;

@@ -4,11 +4,8 @@ pragma solidity 0.8.19;
 import "forge-std/Test.sol";
 
 // Strategy Contracts
-import {DonationVotingStrategy} from "../../../contracts/strategies/donation-voting/DonationVotingStrategy.sol";
 import {SimpleProjectRegistry} from
     "../../../contracts/strategies/donation-voting-custom-registry/SimpleProjectRegistry.sol";
-// Internal Core libraries
-import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
 // Test Libraries
 import {Accounts} from "../shared/Accounts.sol";
 

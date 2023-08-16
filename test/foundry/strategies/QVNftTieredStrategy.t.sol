@@ -10,7 +10,6 @@ import {ERC721} from "solady/src/tokens/ERC721.sol";
 
 // Test libraries
 import {QVBaseStrategyTest} from "./QVBaseStrategy.t.sol";
-import {MockERC20Vote} from "../../utils/MockERC20Vote.sol";
 import {MockERC721} from "../../utils/MockERC721.sol";
 
 // Core contracts

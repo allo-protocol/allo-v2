@@ -12,8 +12,7 @@ import {Native} from "../../../contracts/core/libraries/Native.sol";
 
 import {IStrategy} from "../../../contracts/strategies/IStrategy.sol";
 import {QVBaseStrategy} from "../../../contracts/strategies/qv-base/QVBaseStrategy.sol";
-// External Libraries
-import {ERC721} from "solady/src/tokens/ERC721.sol";
+
 import {
     Attestation,
     AttestationRequest,
