@@ -26,7 +26,7 @@ contract QVGovernanceERC20Votes is QVBaseStrategy {
     /// @notice Initialize the strategy
     /// @param _poolId The pool id
     /// @param _data The data
-    function initialize(uint256 _poolId, bytes memory _data) public override {
+    function initialize(uint256 _poolId, bytes memory _data) external override {
         (
             address _govToken,
             uint256 _timestamp,

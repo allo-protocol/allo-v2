@@ -82,7 +82,7 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
     /// @dev Initializes the strategy
     /// @param _poolId The pool ID for this strategy
     /// @param _data The data to initialize the strategy with
-    function initialize(uint256 _poolId, bytes memory _data) public override onlyAllo {
+    function initialize(uint256 _poolId, bytes memory _data) external override onlyAllo {
         (EASInfo memory _easInfo, address _nft, bytes memory _qvSimpleInitData) =
             abi.decode(_data, (EASInfo, address, bytes));
 
@@ -408,7 +408,7 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
 
     /// @notice Returns if the attestation is expired or not
     /// @param _recipientId The recipient ID to check
-    function isAttestationExpired(address _recipientId) public view returns (bool) {
+    function isAttestationExpired(address _recipientId) external view returns (bool) {
         if (easInfo.eas.getAttestation(recipientIdToUID[_recipientId]).expirationTime < block.timestamp) {
             return true;
         }

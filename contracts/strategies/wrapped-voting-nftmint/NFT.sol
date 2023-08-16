@@ -40,7 +40,7 @@ contract NFT is ERC721, Ownable {
         return __symbol;
     }
 
-    function mintTo(address to) public payable {
+    function mintTo(address to) external payable {
         if (msg.value != MINT_PRICE) {
             revert MintPriceNotPaid();
         }

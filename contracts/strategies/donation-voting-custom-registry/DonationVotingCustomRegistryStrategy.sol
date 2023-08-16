@@ -13,7 +13,7 @@ contract DonationVotingCustomRegistryStrategy is DonationVotingStrategy {
 
     constructor(address _allo, string memory _name) DonationVotingStrategy(_allo, _name) {}
 
-    function initialize(uint256 _poolId, bytes memory _data) public virtual override onlyAllo {
+    function initialize(uint256 _poolId, bytes memory _data) external virtual override onlyAllo {
         (
             address _customRegistry,
             bool _metadataRequired,

@@ -40,7 +40,7 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
 
     /// @notice Modifier to check if the caller is the owner of the profile
     modifier onlyProfileOwner(bytes32 _profileId) {
-        if (!isOwnerOfProfile(_profileId, msg.sender)) {
+        if (!_isOwnerOfProfile(_profileId, msg.sender)) {
             revert UNAUTHORIZED();
         }
         _;
@@ -59,13 +59,13 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
 
     /// @notice Retrieve profile by profileId
     /// @param profileId The profileId of the profile
-    function getProfileById(bytes32 profileId) public view returns (Profile memory) {
+    function getProfileById(bytes32 profileId) external view returns (Profile memory) {
         return profilesById[profileId];
     }
 
     /// @notice Retrieve profile by anchor
     /// @param _anchor The anchor of the profile
-    function getProfileByAnchor(address _anchor) public view returns (Profile memory) {
+    function getProfileByAnchor(address _anchor) external view returns (Profile memory) {
         bytes32 profileId = anchorToProfileId[_anchor];
         return profilesById[profileId];
     }
@@ -147,7 +147,6 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
 
         emit ProfileNameUpdated(_profileId, _name, anchor);
 
-        // TODO: should we return profile
         return anchor;
     }
 
@@ -167,22 +166,22 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
     /// @notice Returns if the given address is an owner or member of the profile
     /// @param _profileId The profileId of the profile
     /// @param _account The address to check
-    function isOwnerOrMemberOfProfile(bytes32 _profileId, address _account) public view returns (bool) {
-        return isOwnerOfProfile(_profileId, _account) || isMemberOfProfile(_profileId, _account);
+    function isOwnerOrMemberOfProfile(bytes32 _profileId, address _account) external view returns (bool) {
+        return _isOwnerOfProfile(_profileId, _account) || _isMemberOfProfile(_profileId, _account);
     }
 
     /// @notice Returns if the given address is an owner of the profile
     /// @param _profileId The profileId of the profile
     /// @param _owner The address to check
-    function isOwnerOfProfile(bytes32 _profileId, address _owner) public view returns (bool) {
-        return profilesById[_profileId].owner == _owner;
+    function isOwnerOfProfile(bytes32 _profileId, address _owner) external view returns (bool) {
+        return _isOwnerOfProfile(_profileId, _owner);
     }
 
     /// @notice Returns if the given address is an member of the profile
     /// @param _profileId The profileId of the profile
     /// @param _member The address to check
-    function isMemberOfProfile(bytes32 _profileId, address _member) public view returns (bool) {
-        return hasRole(_profileId, _member);
+    function isMemberOfProfile(bytes32 _profileId, address _member) external view returns (bool) {
+        return _isMemberOfProfile(_profileId, _member);
     }
 
     /// @notice Updates the pending owner of the profile
@@ -267,6 +266,20 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
     /// @param _nonce Nonce used to generate profileId
     function _generateProfileId(uint256 _nonce) internal view returns (bytes32) {
         return keccak256(abi.encodePacked(_nonce, msg.sender));
+    }
+
+    /// @notice Returns if the given address is an owner of the profile
+    /// @param _profileId The profileId of the profile
+    /// @param _owner The address to check
+    function _isOwnerOfProfile(bytes32 _profileId, address _owner) internal view returns (bool) {
+        return profilesById[_profileId].owner == _owner;
+    }
+
+    /// @notice Returns if the given address is an member of the profile
+    /// @param _profileId The profileId of the profile
+    /// @param _member The address to check
+    function _isMemberOfProfile(bytes32 _profileId, address _member) internal view returns (bool) {
+        return hasRole(_profileId, _member);
     }
 
     /// @notice Transfer thefunds recovered  to the recipient

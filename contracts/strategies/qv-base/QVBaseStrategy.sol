@@ -121,7 +121,7 @@ abstract contract QVBaseStrategy is BaseStrategy {
     /// =========== Initialize =============
     /// ====================================
 
-    function initialize(uint256 _poolId, bytes memory _data) public virtual;
+    function initialize(uint256 _poolId, bytes memory _data) external virtual;
 
     /// @dev Internal initialize function
     /// @param _poolId The pool id
@@ -395,6 +395,7 @@ abstract contract QVBaseStrategy is BaseStrategy {
     /// @notice Calculate the square root of a number (Babylonian method)
     /// @param x The number
     /// @return y The square root
+    // TODO: sqrt function should be internal. Only public for testing purposes?!
     function sqrt(uint256 x) public pure returns (uint256 y) {
         uint256 z = (x + 1) / 2;
         y = x;
