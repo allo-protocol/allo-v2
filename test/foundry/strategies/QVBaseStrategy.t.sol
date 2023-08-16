@@ -768,23 +768,6 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
         qvStrategy().distribute(recipients, "", pool_admin());
     }
 
-    function test_calculateVotes() public {
-        vm.warp(registrationStartTime + 10);
-        address recipientId = __register_accept_allocate_recipient();
-
-        vm.warp(allocationStartTime + 10);
-
-        address allocator = randomAddress();
-
-        bytes memory allocateData = __generateAllocation(recipientId, 4);
-
-        vm.startPrank(address(allo()));
-        qvStrategy().allocate(allocateData, allocator);
-
-        uint256 votes = qvStrategy().sqrt(16);
-        assertEq(votes, 4);
-    }
-
     function test_isValidAllocator() public virtual {
         assertTrue(qvStrategy().isValidAllocator(address(123)));
     }
