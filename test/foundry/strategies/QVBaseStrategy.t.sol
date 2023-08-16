@@ -76,6 +76,8 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
         __RegistrySetupFull();
         __AlloSetup(address(registry()));
 
+        poolId = 1;
+
         token = new MockERC20();
         token.mint(address(this), 100e18);
 
@@ -99,20 +101,6 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
     }
 
     function _initialize() internal virtual {
-        vm.startPrank(address(allo()));
-        qvStrategy().initialize(
-            poolId,
-            abi.encode(
-                registryGating,
-                metadataRequired,
-                2,
-                registrationStartTime,
-                registrationEndTime,
-                allocationStartTime,
-                allocationEndTime
-            )
-        );
-
         vm.startPrank(pool_admin());
         _createPoolWithCustomStrategy();
         vm.stopPrank();
@@ -766,23 +754,6 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
 
         vm.startPrank(address(allo()));
         qvStrategy().distribute(recipients, "", pool_admin());
-    }
-
-    function test_calculateVotes() public {
-        vm.warp(registrationStartTime + 10);
-        address recipientId = __register_accept_allocate_recipient();
-
-        vm.warp(allocationStartTime + 10);
-
-        address allocator = randomAddress();
-
-        bytes memory allocateData = __generateAllocation(recipientId, 4);
-
-        vm.startPrank(address(allo()));
-        qvStrategy().allocate(allocateData, allocator);
-
-        uint256 votes = qvStrategy().sqrt(16);
-        assertEq(votes, 4);
     }
 
     function test_isValidAllocator() public virtual {

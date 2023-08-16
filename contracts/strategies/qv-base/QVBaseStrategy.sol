@@ -121,7 +121,7 @@ abstract contract QVBaseStrategy is BaseStrategy {
     /// =========== Initialize =============
     /// ====================================
 
-    function initialize(uint256 _poolId, bytes memory _data) public virtual;
+    function initialize(uint256 _poolId, bytes memory _data) external virtual;
 
     /// @dev Internal initialize function
     /// @param _poolId The pool id
@@ -385,17 +385,10 @@ abstract contract QVBaseStrategy is BaseStrategy {
     /// ============ QV Helper ==============
     /// ====================================
 
-    /// @notice Calculate the votes for a given amount
-    /// @param amount The amount to calculate votes for
-    /// @return votes
-    function _calculateVotes(uint256 amount) internal pure returns (uint256) {
-        return sqrt(amount);
-    }
-
     /// @notice Calculate the square root of a number (Babylonian method)
     /// @param x The number
     /// @return y The square root
-    function sqrt(uint256 x) public pure returns (uint256 y) {
+    function _sqrt(uint256 x) internal pure returns (uint256 y) {
         uint256 z = (x + 1) / 2;
         y = x;
         while (z < y) {
@@ -420,7 +413,7 @@ abstract contract QVBaseStrategy is BaseStrategy {
         uint256 votesCastToRecipient = _allocator.votesCastToRecipient[_recipientId];
 
         uint256 totalCredits = _voiceCreditsToAllocate + creditsCastToRecipient;
-        uint256 voteResult = _calculateVotes(totalCredits * 1e18);
+        uint256 voteResult = _sqrt(totalCredits * 1e18);
         voteResult -= votesCastToRecipient;
         totalRecipientVotes += voteResult;
         _recipient.totalVotesReceived += voteResult;

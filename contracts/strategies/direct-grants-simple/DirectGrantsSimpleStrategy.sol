@@ -92,7 +92,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// ========= Initialize ==========
     /// ===============================
 
-    function initialize(uint256 _poolId, bytes memory _data) public virtual override {
+    function initialize(uint256 _poolId, bytes memory _data) external virtual override {
         (bool _registryGating, bool _metadataRequired, bool _grantAmountRequired) =
             abi.decode(_data, (bool, bool, bool));
         __DirectGrantsSimpleStrategy_init(_poolId, _registryGating, _metadataRequired, _grantAmountRequired);
@@ -146,7 +146,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Get the status of the milestone of an recipient
     /// @param _recipientId Id of the recipient
     /// @param _milestoneId Id of the milestone
-    function getMilestoneStatus(address _recipientId, uint256 _milestoneId) public view returns (RecipientStatus) {
+    function getMilestoneStatus(address _recipientId, uint256 _milestoneId) external view returns (RecipientStatus) {
         return milestones[_recipientId][_milestoneId].milestoneStatus;
     }
 

@@ -10,7 +10,6 @@ import {ERC721} from "solady/src/tokens/ERC721.sol";
 
 // Test libraries
 import {QVBaseStrategyTest} from "./QVBaseStrategy.t.sol";
-import {MockERC20Vote} from "../../utils/MockERC20Vote.sol";
 import {MockERC721} from "../../utils/MockERC721.sol";
 
 // Core contracts
@@ -39,22 +38,6 @@ contract QVNftTieredStrategyTest is QVBaseStrategyTest {
     }
 
     function _initialize() internal override {
-        vm.startPrank(address(allo()));
-        qvNftStrategy().initialize(
-            poolId,
-            abi.encode(
-                registryGating,
-                metadataRequired,
-                nfts,
-                maxVoiceCreditsPerNft,
-                2,
-                registrationStartTime,
-                registrationEndTime,
-                allocationStartTime,
-                allocationEndTime
-            )
-        );
-
         vm.startPrank(pool_admin());
         _createPoolWithCustomStrategy();
 

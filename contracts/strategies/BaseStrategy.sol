@@ -103,6 +103,9 @@ abstract contract BaseStrategy is IStrategy, Transfer {
         if (poolId != 0) {
             revert BaseStrategy_ALREADY_INITIALIZED();
         }
+        if (_poolId == 0) {
+            revert BaseStrategy_INVALID();
+        }
         poolId = _poolId;
     }
 

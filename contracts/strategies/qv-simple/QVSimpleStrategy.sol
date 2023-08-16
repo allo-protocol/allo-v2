@@ -21,7 +21,7 @@ contract QVSimpleStrategy is QVBaseStrategy {
     /// @notice Initialize the strategy
     /// @param _poolId The pool id
     /// @param _data The data
-    function initialize(uint256 _poolId, bytes memory _data) public virtual override onlyAllo {
+    function initialize(uint256 _poolId, bytes memory _data) external virtual override onlyAllo {
         (
             bool _registryGating,
             bool _metadataRequired,

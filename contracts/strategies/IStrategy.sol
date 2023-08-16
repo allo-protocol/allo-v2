@@ -32,6 +32,7 @@ interface IStrategy {
     error BaseStrategy_POOL_INACTIVE();
     error BaseStrategy_POOL_ACTIVE();
     error BaseStrategy_ARRAY_MISMATCH();
+    error BaseStrategy_INVALID();
 
     /// ======================
     /// ======= Events =======

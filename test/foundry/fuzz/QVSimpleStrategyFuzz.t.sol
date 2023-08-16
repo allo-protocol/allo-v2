@@ -82,6 +82,8 @@ contract QVSimpleStrategyTest is Accounts, StrategySetup, RegistrySetupFull, All
         __RegistrySetupFull();
         __AlloSetup(address(registry()));
 
+        poolId = 1337;
+
         registrationStartTime = today();
         registrationEndTime = nextWeek();
         allocationStartTime = weekAfterNext();
@@ -105,8 +107,10 @@ contract QVSimpleStrategyTest is Accounts, StrategySetup, RegistrySetupFull, All
         //     0x0000000000000000000000000000000000000000000000000000000000000001, address(0), address(strategy)
         // );
 
+        QVSimpleStrategy testStrategy = new QVSimpleStrategy(address(allo()), "QVSimpleStrategy");
+
         vm.prank(address(allo()));
-        strategy.initialize(
+        testStrategy.initialize(
             poolId,
             abi.encode(
                 registryGating,
@@ -118,26 +122,6 @@ contract QVSimpleStrategyTest is Accounts, StrategySetup, RegistrySetupFull, All
                 allocationStartTime,
                 allocationEndTime
             )
-        );
-
-        vm.prank(pool_manager1());
-        poolId = allo().createPoolWithCustomStrategy(
-            poolProfile_id(),
-            address(strategy),
-            abi.encode(
-                registryGating,
-                metadataRequired,
-                1,
-                maxVoiceCreditsPerAllocator,
-                registrationStartTime,
-                registrationEndTime,
-                allocationStartTime,
-                allocationEndTime
-            ),
-            address(token),
-            0,
-            poolMetadata,
-            pool_managers()
         );
     }
 

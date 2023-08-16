@@ -124,7 +124,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     /// ========= Initialize ==========
     /// ===============================
 
-    function initialize(uint256 _poolId, bytes memory _data) public virtual override onlyAllo {
+    function initialize(uint256 _poolId, bytes memory _data) external virtual override onlyAllo {
         (
             bool _useRegistryAnchor,
             bool _metadataRequired,

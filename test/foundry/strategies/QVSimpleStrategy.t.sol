@@ -27,21 +27,6 @@ contract QVSimpleStrategyTest is QVBaseStrategyTest {
     }
 
     function _initialize() internal override {
-        vm.startPrank(address(allo()));
-        qvSimpleStrategy().initialize(
-            poolId,
-            abi.encode(
-                registryGating,
-                metadataRequired,
-                2,
-                maxVoiceCreditsPerAllocator,
-                registrationStartTime,
-                registrationEndTime,
-                allocationStartTime,
-                allocationEndTime
-            )
-        );
-
         vm.startPrank(pool_admin());
         _createPoolWithCustomStrategy();
         qvSimpleStrategy().addAllocator(randomAddress());

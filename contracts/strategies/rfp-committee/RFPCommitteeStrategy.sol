@@ -29,7 +29,7 @@ contract RFPCommitteeStrategy is RFPSimpleStrategy {
     /// ========= Initialize ==========
     /// ===============================
 
-    function initialize(uint256 _poolId, bytes memory _data) public override {
+    function initialize(uint256 _poolId, bytes memory _data) external override {
         (uint256 _maxBid, bool _registryGating, bool _metadataRequired, uint256 _voteThreshold) =
             abi.decode(_data, (uint256, bool, bool, uint256));
         __RPFCommiteeStrategy_init(_poolId, _maxBid, _registryGating, _metadataRequired, _voteThreshold);

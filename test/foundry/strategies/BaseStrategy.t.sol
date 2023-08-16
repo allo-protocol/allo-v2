@@ -2,22 +2,13 @@ pragma solidity 0.8.19;
 
 import "forge-std/Test.sol";
 
-// Interfaces
-import {IAllo} from "../../../contracts/core/Allo.sol";
-import {IStrategy} from "../../../contracts/strategies/IStrategy.sol";
-// Core contracts
-import {BaseStrategy} from "../../../contracts/strategies/BaseStrategy.sol";
-import {DonationVotingStrategy} from "../../../contracts/strategies/donation-voting/DonationVotingStrategy.sol";
-// Internal libraries
-import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
-import {Native} from "../../../contracts/core/libraries/Native.sol";
-
 // Test libraries
 import {AlloSetup} from "../shared/AlloSetup.sol";
 import {RegistrySetupFull} from "../shared/RegistrySetup.sol";
 import {MockStrategy} from "../../utils/MockStrategy.sol";
 
-import {EventSetup} from "../shared/EventSetup.sol";
+// Core contracts
+import {IStrategy} from "../../../contracts/strategies/IStrategy.sol";
 
 contract BaseStrategyTest is Test, AlloSetup, RegistrySetupFull {
     MockStrategy strategy;
@@ -27,6 +18,13 @@ contract BaseStrategyTest is Test, AlloSetup, RegistrySetupFull {
         __AlloSetup(address(registry()));
 
         strategy = new MockStrategy(address(allo()));
+    }
+
+    function testRevert_initialize_INVALID_zeroPoolId() public {
+        vm.expectRevert(IStrategy.BaseStrategy_INVALID.selector);
+
+        vm.prank(address(allo()));
+        strategy.initialize(0, "");
     }
 
     function test_getAllo() public {

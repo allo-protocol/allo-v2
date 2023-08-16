@@ -81,7 +81,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// ========= Initialize ==========
     /// ===============================
 
-    function initialize(uint256 _poolId, bytes memory _data) public virtual override {
+    function initialize(uint256 _poolId, bytes memory _data) external virtual override {
         (uint256 _maxBid, bool _useRegistryAnchor, bool _metadataRequired) = abi.decode(_data, (uint256, bool, bool));
         __RFPSimpleStrategy_init(_poolId, _maxBid, _useRegistryAnchor, _metadataRequired);
     }
@@ -128,7 +128,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Get the status of the milestone
     /// @param _milestoneId Id of the milestone
-    function getMilestoneStatus(uint256 _milestoneId) public view returns (RecipientStatus) {
+    function getMilestoneStatus(uint256 _milestoneId) external view returns (RecipientStatus) {
         return milestones[_milestoneId].milestoneStatus;
     }
 
