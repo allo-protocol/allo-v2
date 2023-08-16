@@ -76,6 +76,8 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
         __RegistrySetupFull();
         __AlloSetup(address(registry()));
 
+        poolId = 1;
+
         token = new MockERC20();
         token.mint(address(this), 100e18);
 
