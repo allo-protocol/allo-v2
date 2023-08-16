@@ -80,29 +80,11 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
     }
 
     function _initialize() internal override {
-        vm.startPrank(address(allo()));
-        hQvStrategy().initialize(
-            poolId,
-            abi.encode(
-                easInfo,
-                address(nft),
-                abi.encode(
-                    metadataRequired,
-                    maxVoiceCreditsPerAllocator,
-                    registrationStartTime,
-                    registrationEndTime,
-                    allocationStartTime,
-                    allocationEndTime
-                )
-            )
-        );
-
         _createPoolWithCustomStrategy();
         _fundPool(poolId);
     }
 
     function _createPoolWithCustomStrategy() internal override {
-        vm.stopPrank();
         vm.startPrank(pool_admin());
         poolId = allo().createPoolWithCustomStrategy(
             poolProfile_id(),

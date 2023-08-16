@@ -101,20 +101,6 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
     }
 
     function _initialize() internal virtual {
-        vm.startPrank(address(allo()));
-        qvStrategy().initialize(
-            poolId,
-            abi.encode(
-                registryGating,
-                metadataRequired,
-                2,
-                registrationStartTime,
-                registrationEndTime,
-                allocationStartTime,
-                allocationEndTime
-            )
-        );
-
         vm.startPrank(pool_admin());
         _createPoolWithCustomStrategy();
         vm.stopPrank();

@@ -35,22 +35,6 @@ contract QVGovernanceERC20VotesTest is QVBaseStrategyTest {
     }
 
     function _initialize() internal override {
-        vm.startPrank(address(allo()));
-        qvGovStrategy().initialize(
-            poolId,
-            abi.encode(
-                address(govToken),
-                timestamp,
-                2,
-                registryGating,
-                metadataRequired,
-                registrationStartTime,
-                registrationEndTime,
-                allocationStartTime,
-                allocationEndTime
-            )
-        );
-
         vm.startPrank(pool_admin());
         _createPoolWithCustomStrategy();
     }

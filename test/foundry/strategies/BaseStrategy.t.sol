@@ -7,6 +7,9 @@ import {AlloSetup} from "../shared/AlloSetup.sol";
 import {RegistrySetupFull} from "../shared/RegistrySetup.sol";
 import {MockStrategy} from "../../utils/MockStrategy.sol";
 
+// Core contracts
+import {IStrategy} from "../../../contracts/strategies/IStrategy.sol";
+
 contract BaseStrategyTest is Test, AlloSetup, RegistrySetupFull {
     MockStrategy strategy;
 
@@ -15,6 +18,13 @@ contract BaseStrategyTest is Test, AlloSetup, RegistrySetupFull {
         __AlloSetup(address(registry()));
 
         strategy = new MockStrategy(address(allo()));
+    }
+
+    function testRevert_initialize_INVALID_zeroPoolId() public {
+        vm.expectRevert(IStrategy.BaseStrategy_INVALID.selector);
+
+        vm.prank(address(allo()));
+        strategy.initialize(0, "");
     }
 
     function test_getAllo() public {

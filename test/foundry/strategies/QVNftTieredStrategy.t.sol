@@ -38,22 +38,6 @@ contract QVNftTieredStrategyTest is QVBaseStrategyTest {
     }
 
     function _initialize() internal override {
-        vm.startPrank(address(allo()));
-        qvNftStrategy().initialize(
-            poolId,
-            abi.encode(
-                registryGating,
-                metadataRequired,
-                nfts,
-                maxVoiceCreditsPerNft,
-                2,
-                registrationStartTime,
-                registrationEndTime,
-                allocationStartTime,
-                allocationEndTime
-            )
-        );
-
         vm.startPrank(pool_admin());
         _createPoolWithCustomStrategy();
 
