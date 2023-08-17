@@ -74,7 +74,7 @@ export async function createPool() {
         ['0xB8cEF765721A6da910f14Be93e7684e9a3714123'] // _managers
     );
 
-    console.log("pool created at:", instance);
+    console.log("pool created at:", instance.target);
   
     return instance.target;
 }
