@@ -40,7 +40,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
 
     /// @notice Fee percentage
     /// @dev 1e18 = 100%, 1e17 = 10%, 1e16 = 1%, 1e15 = 0.1%
-    uint256 private feePercentage;
+    uint256 private percentFee;
 
     /// @notice Base fee
     uint256 internal baseFee;
@@ -71,9 +71,9 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
     /// @dev During upgrade -> an higher version should be passed to reinitializer
     /// @param _registry The address of the registry
     /// @param _treasury The address of the treasury
-    /// @param _feePercentage The fee percentage
+    /// @param _percentFee The percentage fee
     /// @param _baseFee The base fee
-    function initialize(address _registry, address payable _treasury, uint256 _feePercentage, uint256 _baseFee)
+    function initialize(address _registry, address payable _treasury, uint256 _percentFee, uint256 _baseFee)
         external
         reinitializer(1)
     {
@@ -81,7 +81,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
 
         _updateRegistry(_registry);
         _updateTreasury(_treasury);
-        _updateFeePercentage(_feePercentage);
+        _updatePercentFee(_percentFee);
         _updateBaseFee(_baseFee);
     }
 
@@ -191,10 +191,10 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
     }
 
     /// @notice Updates the fee percentage
-    /// @param _feePercentage The new fee
+    /// @param _percentFee The new fee
     /// @dev Only callable by the owner
-    function updateFeePercentage(uint256 _feePercentage) external onlyOwner {
-        _updateFeePercentage(_feePercentage);
+    function updatePercentFee(uint256 _percentFee) external onlyOwner {
+        _updatePercentFee(_percentFee);
     }
 
     /// @notice Updates the base fee
@@ -430,8 +430,8 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
         Pool storage pool = pools[_poolId];
         address _token = pool.token;
 
-        if (feePercentage > 0) {
-            feeAmount = (_amount * feePercentage) / FEE_DENOMINATOR;
+        if (percentFee > 0) {
+            feeAmount = (_amount * percentFee) / FEE_DENOMINATOR;
             amountAfterFee -= feeAmount;
 
             _transferAmountFrom(_token, TransferData({from: msg.sender, to: treasury, amount: feeAmount}));
@@ -486,14 +486,14 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
     }
 
     /// @notice Updates the fee percentage
-    /// @param _feePercentage The new fee
-    function _updateFeePercentage(uint256 _feePercentage) internal {
-        if (_feePercentage > 1e18) {
+    /// @param _percentFee The new fee
+    function _updatePercentFee(uint256 _percentFee) internal {
+        if (_percentFee > 1e18) {
             revert INVALID_FEE();
         }
-        feePercentage = _feePercentage;
+        percentFee = _percentFee;
 
-        emit FeePercentageUpdated(feePercentage);
+        emit PercentFeeUpdated(percentFee);
     }
 
     /// @notice Updates the base fee
@@ -531,8 +531,8 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
     }
 
     /// @notice return fee percentage
-    function getFeePercentage() external view returns (uint256) {
-        return feePercentage;
+    function getPercentFee() external view returns (uint256) {
+        return percentFee;
     }
 
     /// @notice return base fee

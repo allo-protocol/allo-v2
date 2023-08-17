@@ -64,6 +64,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     uint256 public maxBid;
     uint256 public upcomingMilestone;
     address public acceptedRecipientId;
+    IRegistry private _registry;
 
     address[] private _recipientIds;
     Milestone[] public milestones;
@@ -94,6 +95,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         metadataRequired = _metadataRequired;
         _setPoolActive(true);
         _increaseMaxBid(_maxBid);
+        _registry = allo.getRegistry();
     }
 
     /// ===============================
@@ -108,7 +110,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Checks if msg.sender is eligible for RFP allocation
     /// @param _recipientId Id of the recipient
-    function getRecipientStatus(address _recipientId) external view override returns (RecipientStatus) {
+    function _getRecipientStatus(address _recipientId) internal view override returns (RecipientStatus) {
         return _getRecipient(_recipientId).recipientStatus;
     }
 
@@ -332,9 +334,8 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _anchor Anchor of the profile
     /// @param _sender The sender of the transaction
     function _isProfileMember(address _anchor, address _sender) internal view returns (bool) {
-        IRegistry registry = allo.getRegistry();
-        IRegistry.Profile memory profile = registry.getProfileByAnchor(_anchor);
-        return registry.isOwnerOrMemberOfProfile(profile.id, _sender);
+        IRegistry.Profile memory profile = _registry.getProfileByAnchor(_anchor);
+        return _registry.isOwnerOrMemberOfProfile(profile.id, _sender);
     }
 
     /// @notice Get the recipient

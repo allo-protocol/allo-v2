@@ -79,6 +79,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     uint256 public allocationStartTime;
     uint256 public allocationEndTime;
     uint256 public totalPayoutAmount;
+    IRegistry private _registry;
 
     /// @notice token -> bool
     mapping(address => bool) public allowedTokens;
@@ -159,6 +160,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
         __BaseStrategy_init(_poolId);
         useRegistryAnchor = _useRegistryAnchor;
         metadataRequired = _metadataRequired;
+        _registry = allo.getRegistry();
 
         _isPoolTimestampValid(_registrationStartTime, _registrationEndTime, _allocationStartTime, _allocationEndTime);
 
@@ -201,7 +203,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Get recipient status
     /// @param _recipientId Id of the recipient
-    function getRecipientStatus(address _recipientId) external view override returns (RecipientStatus) {
+    function _getRecipientStatus(address _recipientId) internal view override returns (RecipientStatus) {
         InternalRecipientStatus internalStatus = _getRecipient(_recipientId).recipientStatus;
         if (internalStatus == InternalRecipientStatus.Appealed) {
             return RecipientStatus.Pending;
@@ -307,7 +309,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
                 revert INVALID();
             }
 
-            claims[singleClaim.recipientId][singleClaim.token] = 0;
+            delete claims[singleClaim.recipientId][singleClaim.token];
 
             address token = singleClaim.token;
 
@@ -488,7 +490,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
             }
 
             uint256 amount = payoutSummaries[recipientId].amount;
-            payoutSummaries[recipientId].amount = 0;
+            delete payoutSummaries[recipientId].amount;
 
             if (amount == 0) {
                 revert INVALID();
@@ -508,9 +510,8 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _anchor Anchor of the profile
     /// @param _sender The sender of the transaction
     function _isProfileMember(address _anchor, address _sender) internal view virtual returns (bool) {
-        IRegistry registry = allo.getRegistry();
-        IRegistry.Profile memory profile = registry.getProfileByAnchor(_anchor);
-        return registry.isOwnerOrMemberOfProfile(profile.id, _sender);
+        IRegistry.Profile memory profile = _registry.getProfileByAnchor(_anchor);
+        return _registry.isOwnerOrMemberOfProfile(profile.id, _sender);
     }
 
     /// @notice Get the recipient

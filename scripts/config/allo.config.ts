@@ -4,7 +4,7 @@ type AlloConfig = {
 	alloImplementation: string;
 	alloProxy: string,
 	treasury: string;
-	feePercentage: number;
+	percentFee: number;
 	baseFee: number;
 };
 
@@ -17,7 +17,7 @@ export const alloConfig: DeployParams = {
     alloImplementation: "0x0",
     alloProxy: "0x0",
     treasury: "0x0",
-    feePercentage: 0,
+    percentFee: 0,
     baseFee: 0,
   },
   // Goerli
@@ -25,7 +25,7 @@ export const alloConfig: DeployParams = {
     alloImplementation: "0x8dde1922d5f772890f169714faceef9551791caf",
     alloProxy: "0x79536CC062EE8FAFA7A19a5fa07783BD7F792206",
     treasury: "0xBa0BBfB320486119f97Ea9C4671dE5e45441B2b7",
-    feePercentage: 0,
+    percentFee: 0,
     baseFee: 0,
   },
   // Sepolia
@@ -33,7 +33,7 @@ export const alloConfig: DeployParams = {
     alloImplementation: "0x8dde1922d5f772890f169714faceef9551791caf",
     alloProxy: "0x79536CC062EE8FAFA7A19a5fa07783BD7F792206",
     treasury: "0xBa0BBfB320486119f97Ea9C4671dE5e45441B2b7",
-    feePercentage: 0,
+    percentFee: 0,
     baseFee: 0,
   },
   // PGN
@@ -41,7 +41,7 @@ export const alloConfig: DeployParams = {
     alloImplementation: "0x0",
     alloProxy: "0x0",
     treasury: "0x0",
-    feePercentage: 0,
+    percentFee: 0,
     baseFee: 0,
   },
   // PGN Sepolia
@@ -49,7 +49,7 @@ export const alloConfig: DeployParams = {
     alloImplementation: "0x8dde1922d5f772890f169714faceef9551791caf",
     alloProxy: "0x79536CC062EE8FAFA7A19a5fa07783BD7F792206",
     treasury: "0xBa0BBfB320486119f97Ea9C4671dE5e45441B2b7",
-    feePercentage: 0,
+    percentFee: 0,
     baseFee: 0,
   },
   // Optimism
@@ -57,7 +57,7 @@ export const alloConfig: DeployParams = {
     alloImplementation: "0x0",
     alloProxy: "0x0",
     treasury: "0x0",
-    feePercentage: 0,
+    percentFee: 0,
     baseFee: 0,
   },
   // Optimism Goerli
@@ -65,7 +65,7 @@ export const alloConfig: DeployParams = {
     alloImplementation: "0x8dde1922d5f772890f169714faceef9551791caf",
     alloProxy: "0x79536CC062EE8FAFA7A19a5fa07783BD7F792206",
     treasury: "0xBa0BBfB320486119f97Ea9C4671dE5e45441B2b7",
-    feePercentage: 0,
+    percentFee: 0,
     baseFee: 0,
   },
   // Fantom
@@ -73,7 +73,7 @@ export const alloConfig: DeployParams = {
     alloImplementation: "0x0",
     alloProxy: "0x0",
     treasury: "0x0",
-    feePercentage: 0,
+    percentFee: 0,
     baseFee: 0,
   },
   // Fantom Testnet
@@ -81,7 +81,7 @@ export const alloConfig: DeployParams = {
     alloImplementation: "0x0",
     alloProxy: "0x0",
     treasury: "0xBa0BBfB320486119f97Ea9C4671dE5e45441B2b7",
-    feePercentage: 0,
+    percentFee: 0,
     baseFee: 0,
   },
   // Celo Mainnet
@@ -89,7 +89,7 @@ export const alloConfig: DeployParams = {
     alloImplementation: "0x0",
     alloProxy: "0x0",
     treasury: "0X0",
-    feePercentage: 0,
+    percentFee: 0,
     baseFee: 0,
   },
   // Celo Testnet Alfajores
@@ -97,7 +97,7 @@ export const alloConfig: DeployParams = {
     alloImplementation: "0x8dde1922d5f772890f169714faceef9551791caf",
     alloProxy: "0x79536CC062EE8FAFA7A19a5fa07783BD7F792206",
     treasury: "0xBa0BBfB320486119f97Ea9C4671dE5e45441B2b7",
-    feePercentage: 0,
+    percentFee: 0,
     baseFee: 0,
   },
 };

@@ -31,7 +31,7 @@ export async function deployAllo(_registryAddress? : string) {
     network: networkName,
     registry: registryAddress,
     treasury: alloParams.treasury,
-    feePercentage: alloParams.feePercentage,
+    percentFee: alloParams.percentFee,
     baseFee: alloParams.baseFee,
     deployerAddress: deployerAddress,
     balance: prettyNum(balance.toString()),
@@ -43,7 +43,7 @@ export async function deployAllo(_registryAddress? : string) {
   const instance = await upgrades.deployProxy(Allo, [
     registryAddress,
     alloParams.treasury,
-    alloParams.feePercentage,
+    alloParams.percentFee,
     alloParams.baseFee,
   ]);
   // await instance.waitForDeployment();

@@ -99,6 +99,7 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
     uint256 public allocationEndTime;
     uint256 public totalPayoutAmount;
     uint256 public recipientsCounter;
+    IRegistry private _registry;
 
     /// @notice merkle root generated from distribution
     bytes32 public merkleRoot;
@@ -201,6 +202,7 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         __BaseStrategy_init(_poolId);
         useRegistryAnchor = _useRegistryAnchor;
         metadataRequired = _metadataRequired;
+        _registry = allo.getRegistry();
 
         _isPoolTimestampValid(_registrationStartTime, _registrationEndTime, _allocationStartTime, _allocationEndTime);
 
@@ -241,13 +243,13 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
     /// @notice Get Internal recipient status
     /// @param _recipientId Id of the recipient
     function getInternalRecipientStatus(address _recipientId) external view returns (InternalRecipientStatus) {
-        return InternalRecipientStatus(_getRecipientStatus(_recipientId));
+        return InternalRecipientStatus(_getUintRecipientStatus(_recipientId));
     }
 
     /// @notice Get recipient status
     /// @param _recipientId Id of the recipient
-    function getRecipientStatus(address _recipientId) external view override returns (RecipientStatus) {
-        InternalRecipientStatus internalStatus = InternalRecipientStatus(_getRecipientStatus(_recipientId));
+    function _getRecipientStatus(address _recipientId) internal view override returns (RecipientStatus) {
+        InternalRecipientStatus internalStatus = InternalRecipientStatus(_getUintRecipientStatus(_recipientId));
         if (internalStatus == InternalRecipientStatus.Appealed) {
             return RecipientStatus.Pending;
         } else {
@@ -339,7 +341,7 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
                 revert INVALID();
             }
 
-            claims[singleClaim.recipientId][singleClaim.token] = 0;
+            delete claims[singleClaim.recipientId][singleClaim.token];
 
             address token = singleClaim.token;
 
@@ -462,7 +464,7 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         recipient.metadata = metadata;
         recipient.useRegistryAnchor = useRegistryAnchor ? true : isUsingRegistryAnchor;
 
-        uint8 currentStatus = _getRecipientStatus(recipientId);
+        uint8 currentStatus = _getUintRecipientStatus(recipientId);
 
         if (currentStatus == uint8(InternalRecipientStatus.Rejected)) {
             _setRecipientStatus(recipientId, uint8(InternalRecipientStatus.Appealed));
@@ -487,7 +489,7 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
     {
         (address recipientId, uint256 amount, address token) = abi.decode(_data, (address, uint256, address));
 
-        if (InternalRecipientStatus(_getRecipientStatus(recipientId)) != InternalRecipientStatus.Accepted) {
+        if (InternalRecipientStatus(_getUintRecipientStatus(recipientId)) != InternalRecipientStatus.Accepted) {
             revert RECIPIENT_ERROR(recipientId);
         }
 
@@ -533,9 +535,8 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
     /// @param _anchor Anchor of the profile
     /// @param _sender The sender of the transaction
     function _isProfileMember(address _anchor, address _sender) internal view virtual returns (bool) {
-        IRegistry registry = allo.getRegistry();
-        IRegistry.Profile memory profile = registry.getProfileByAnchor(_anchor);
-        return registry.isOwnerOrMemberOfProfile(profile.id, _sender);
+        IRegistry.Profile memory profile = _registry.getProfileByAnchor(_anchor);
+        return _registry.isOwnerOrMemberOfProfile(profile.id, _sender);
     }
 
     /// @notice Get the recipient
@@ -634,7 +635,7 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
     /// @notice Get recipient status
     /// @param _recipientId index of the recipient
     /// @return status status of the recipient
-    function _getRecipientStatus(address _recipientId) internal view returns (uint8) {
+    function _getUintRecipientStatus(address _recipientId) internal view returns (uint8) {
         (, uint256 colIndex, uint256 currentRow) = _getStatusRowColumn(_recipientId);
         uint8 status = uint8((currentRow >> colIndex) & 15);
         return status;

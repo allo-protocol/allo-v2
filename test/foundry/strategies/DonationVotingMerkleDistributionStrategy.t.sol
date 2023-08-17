@@ -64,7 +64,7 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
         allowedTokens[0] = NATIVE;
 
         vm.prank(allo_owner());
-        allo().updateFeePercentage(0);
+        allo().updatePercentFee(0);
 
         vm.deal(pool_admin(), 1e18);
         vm.prank(pool_admin());

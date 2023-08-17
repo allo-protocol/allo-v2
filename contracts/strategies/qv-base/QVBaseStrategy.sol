@@ -75,6 +75,8 @@ abstract contract QVBaseStrategy is BaseStrategy {
     uint256 public totalRecipientVotes;
     uint256 public reviewThreshold;
 
+    IRegistry private _registry;
+
     /// @notice recipientId => Recipient
     mapping(address => Recipient) public recipients;
     /// @notice allocator address => Allocator
@@ -145,6 +147,7 @@ abstract contract QVBaseStrategy is BaseStrategy {
 
         registryGating = _registryGating;
         metadataRequired = _metadataRequired;
+        _registry = allo.getRegistry();
 
         if (
             block.timestamp > _registrationStartTime || _registrationStartTime > _registrationEndTime
@@ -184,7 +187,7 @@ abstract contract QVBaseStrategy is BaseStrategy {
 
     /// @notice Get recipient status
     /// @param _recipientId Id of the recipient
-    function getRecipientStatus(address _recipientId) external view virtual override returns (RecipientStatus) {
+    function _getRecipientStatus(address _recipientId) internal view virtual override returns (RecipientStatus) {
         InternalRecipientStatus internalStatus = _getRecipient(_recipientId).recipientStatus;
         if (internalStatus == InternalRecipientStatus.Appealed) {
             return RecipientStatus.Pending;
@@ -370,9 +373,8 @@ abstract contract QVBaseStrategy is BaseStrategy {
     /// @param _anchor Anchor of the profile
     /// @param _sender The sender of the transaction
     function _isProfileMember(address _anchor, address _sender) internal view returns (bool) {
-        IRegistry registry = allo.getRegistry();
-        IRegistry.Profile memory profile = registry.getProfileByAnchor(_anchor);
-        return registry.isOwnerOrMemberOfProfile(profile.id, _sender);
+        IRegistry.Profile memory profile = _registry.getProfileByAnchor(_anchor);
+        return _registry.isOwnerOrMemberOfProfile(profile.id, _sender);
     }
 
     /// @notice Get the recipient

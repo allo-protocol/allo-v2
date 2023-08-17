@@ -45,7 +45,7 @@ contract MockStrategy is BaseStrategy {
     // probably tracked in a mapping, but will depend on the implementation
     // for example, the OpenSelfRegistration only maps users to bool, and then assumes Accepted for those
     // since there is no need for Pending or Rejected
-    function getRecipientStatus(address _recipientId) external view returns (RecipientStatus) {
+    function _getRecipientStatus(address _recipientId) internal view override returns (RecipientStatus) {
         surpressStateMutabilityWarning;
         return _recipientId == address(0) ? RecipientStatus.Rejected : RecipientStatus.Accepted;
     }

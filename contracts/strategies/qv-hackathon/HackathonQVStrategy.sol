@@ -321,7 +321,7 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
                     tmp.recipientId = _tmpRecipient;
 
                     if (i == totalWinners - 1) {
-                        recipientIdToIndex[tmp.recipientId] = 0;
+                        delete recipientIdToIndex[tmp.recipientId];
                     }
                 }
 
