@@ -47,6 +47,20 @@ export async function createPool() {
         ]
     );
 
+
+    console.log(        '0xb2a02f1bb0d07456d929eb7bf31c49b69f756ba90f64c0288488fb1a4cd6abef', // _profileId
+    '0xC88612a4541A28c221F3d03b6Cf326dCFC557C4E', // _strategy donationVotingMerkleStrategy
+    initStrategyData,   // _initStrategyData
+    '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE', // _token
+    0, // _amount
+    {
+        protocol: 1,
+        pointer: "bafybeia4khbew3r2mkflyn7nzlvfzcb3qpfeftz5ivpzfwn77ollj47gqi"
+    }, // _metadata
+    ['0xB8cEF765721A6da910f14Be93e7684e9a3714123'] // _managers
+    );
+    
+
     await instance.createPool(
         '0xb2a02f1bb0d07456d929eb7bf31c49b69f756ba90f64c0288488fb1a4cd6abef', // _profileId
         '0xC88612a4541A28c221F3d03b6Cf326dCFC557C4E', // _strategy donationVotingMerkleStrategy
