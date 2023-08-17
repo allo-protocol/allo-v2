@@ -37,7 +37,7 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
 
         vm.startPrank(allo_owner());
         allo().addToCloneableStrategies(address(strategyImplementation));
-        allo().updateFeePercentage(0);
+        allo().updatePercentFee(0);
 
         vm.stopPrank();
 

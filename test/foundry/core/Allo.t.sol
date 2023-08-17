@@ -33,7 +33,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
     event PoolFunded(uint256 indexed poolId, uint256 amount, uint256 fee);
     event BaseFeePaid(uint256 indexed poolId, uint256 amount);
     event TreasuryUpdated(address treasury);
-    event FeePercentageUpdated(uint256 feePercentage);
+    event PercentFeeUpdated(uint256 percentFee);
     event BaseFeeUpdated(uint256 baseFee);
     event RegistryUpdated(address registry);
     event StrategyApproved(address strategy);
@@ -83,19 +83,19 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
 
         emit RegistryUpdated(address(registry()));
         emit TreasuryUpdated(address(allo_treasury()));
-        emit FeePercentageUpdated(1e16);
+        emit PercentFeeUpdated(1e16);
         emit BaseFeeUpdated(1e16);
 
         coreContract.initialize(
             address(registry()), // _registry
             allo_treasury(), // _treasury
-            1e16, // _feePercentage
+            1e16, // _percentFee
             1e15 // _baseFee
         );
 
         assertEq(address(coreContract.getRegistry()), address(registry()));
         assertEq(coreContract.getTreasury(), allo_treasury());
-        assertEq(coreContract.getFeePercentage(), 1e16);
+        assertEq(coreContract.getPercentFee(), 1e16);
         assertEq(coreContract.getBaseFee(), 1e15);
     }
 
@@ -105,7 +105,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
         allo().initialize(
             address(registry()), // _registry
             allo_treasury(), // _treasury
-            1e16, // _feePercentage
+            1e16, // _percentFee
             1e15 // _baseFee
         );
     }
@@ -292,27 +292,27 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
         allo().updateTreasury(newTreasury);
     }
 
-    function test_updateFeePercentage() public {
+    function test_updatePercentFee() public {
         vm.expectEmit(true, false, false, false);
 
         uint256 newFee = 1e17;
-        emit FeePercentageUpdated(newFee);
+        emit PercentFeeUpdated(newFee);
 
-        allo().updateFeePercentage(newFee);
+        allo().updatePercentFee(newFee);
 
-        assertEq(allo().getFeePercentage(), newFee);
+        assertEq(allo().getPercentFee(), newFee);
     }
 
-    function test_updateFeePercentage_INVALID_FEE() public {
+    function test_updatePercentFee_INVALID_FEE() public {
         vm.expectRevert(IAllo.INVALID_FEE.selector);
-        allo().updateFeePercentage(2 * 1e18);
+        allo().updatePercentFee(2 * 1e18);
     }
 
-    function testRevert_updateFeePercentage_UNAUTHORIZED() public {
+    function testRevert_updatePercentFee_UNAUTHORIZED() public {
         vm.expectRevert();
 
         vm.prank(makeAddr("anon"));
-        allo().updateFeePercentage(2000);
+        allo().updatePercentFee(2000);
     }
 
     function test_updateBaseFee() public {

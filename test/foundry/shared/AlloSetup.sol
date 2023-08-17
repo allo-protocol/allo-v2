@@ -17,7 +17,7 @@ contract AlloSetup is Test, Accounts {
         _allo_.initialize(
             _registry, // _registry
             allo_treasury(), // _treasury
-            1e16, // _feePercentage
+            1e16, // _percentFee
             0 // _baseFee
         );
         vm.stopPrank();

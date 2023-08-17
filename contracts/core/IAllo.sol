@@ -49,7 +49,7 @@ interface IAllo {
     event PoolFunded(uint256 indexed poolId, uint256 amount, uint256 fee);
     event BaseFeePaid(uint256 indexed poolId, uint256 amount);
     event TreasuryUpdated(address treasury);
-    event FeePercentageUpdated(uint256 feePercentage);
+    event PercentFeeUpdated(uint256 percentFee);
     event BaseFeeUpdated(uint256 baseFee);
     event RegistryUpdated(address registry);
     event StrategyApproved(address strategy);
@@ -59,13 +59,12 @@ interface IAllo {
     /// ==== External/Public Functions =====
     /// ====================================
 
-    function initialize(address _registry, address payable _treasury, uint256 _feePercentage, uint256 _baseFee)
-        external;
+    function initialize(address _registry, address payable _treasury, uint256 _percentFee, uint256 _baseFee) external;
 
     function updatePoolMetadata(uint256 _poolId, Metadata memory _metadata) external;
     function updateRegistry(address _registry) external;
     function updateTreasury(address payable _treasury) external;
-    function updateFeePercentage(uint256 _feePercentage) external;
+    function updatePercentFee(uint256 _percentFee) external;
     function updateBaseFee(uint256 _baseFee) external;
     function addToCloneableStrategies(address _strategy) external;
     function removeFromCloneableStrategies(address _strategy) external;
@@ -90,7 +89,7 @@ interface IAllo {
     function isCloneableStrategy(address) external view returns (bool);
 
     function getStrategy(uint256 _poolId) external view returns (address);
-    function getFeePercentage() external view returns (uint256);
+    function getPercentFee() external view returns (uint256);
     function getBaseFee() external view returns (uint256);
     function getTreasury() external view returns (address payable);
     function getRegistry() external view returns (IRegistry);
