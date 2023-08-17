@@ -307,7 +307,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
                 revert INVALID();
             }
 
-            claims[singleClaim.recipientId][singleClaim.token] = 0;
+            delete claims[singleClaim.recipientId][singleClaim.token];
 
             address token = singleClaim.token;
 
@@ -488,7 +488,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
             }
 
             uint256 amount = payoutSummaries[recipientId].amount;
-            payoutSummaries[recipientId].amount = 0;
+            delete payoutSummaries[recipientId].amount;
 
             if (amount == 0) {
                 revert INVALID();

@@ -200,7 +200,7 @@ contract WrappedVotingNftMintStrategy is Native, BaseStrategy, Initializable, Re
             revert INVALID();
         }
 
-        poolAmount = 0;
+        delete poolAmount;
 
         _transferAmount(pool.token, currentWinner, poolAmount);
 

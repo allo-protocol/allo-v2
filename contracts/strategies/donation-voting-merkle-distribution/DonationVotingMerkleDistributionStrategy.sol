@@ -339,7 +339,7 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
                 revert INVALID();
             }
 
-            claims[singleClaim.recipientId][singleClaim.token] = 0;
+            delete claims[singleClaim.recipientId][singleClaim.token];
 
             address token = singleClaim.token;
 
