@@ -14,8 +14,8 @@ import "./libraries/Native.sol";
 import "./libraries/Transfer.sol";
 
 /// @title Registry
-/// @notice Registry contract for identities
-/// @dev This contract is used to create and manage identities
+/// @notice Registry contract for profiles
+/// @dev This contract is used to create and manage profiles
 /// @author allo-team
 contract Registry is IRegistry, Native, AccessControl, Transfer {
     /// ==========================
@@ -26,7 +26,7 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
     mapping(address => bytes32) public anchorToProfileId;
 
     /// @notice Profile.id -> Profile
-    mapping(bytes32 => Profile) public identitiesById;
+    mapping(bytes32 => Profile) public profilesById;
 
     /// @notice Profile.id -> pending owner
     mapping(bytes32 => address) public profileIdToPendingOwner;
@@ -60,14 +60,14 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
     /// @notice Retrieve profile by profileId
     /// @param profileId The profileId of the profile
     function getProfileById(bytes32 profileId) public view returns (Profile memory) {
-        return identitiesById[profileId];
+        return profilesById[profileId];
     }
 
     /// @notice Retrieve profile by anchor
     /// @param _anchor The anchor of the profile
     function getProfileByAnchor(address _anchor) public view returns (Profile memory) {
         bytes32 profileId = anchorToProfileId[_anchor];
-        return identitiesById[profileId];
+        return profilesById[profileId];
     }
 
     /// @notice Creates a new profile
@@ -86,7 +86,7 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
     ) external returns (bytes32) {
         bytes32 profileId = _generateProfileId(_nonce);
 
-        if (identitiesById[profileId].anchor != address(0)) {
+        if (profilesById[profileId].anchor != address(0)) {
             revert NONCE_NOT_AVAILABLE();
         }
 
@@ -103,7 +103,7 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
             anchor: _generateAnchor(profileId, _name)
         });
 
-        identitiesById[profileId] = profile;
+        profilesById[profileId] = profile;
         anchorToProfileId[profile.anchor] = profileId;
 
         // assign roles
@@ -135,7 +135,7 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
     {
         address anchor = _generateAnchor(_profileId, _name);
 
-        Profile storage profile = identitiesById[_profileId];
+        Profile storage profile = profilesById[_profileId];
         profile.name = _name;
 
         // remove old anchor
@@ -159,7 +159,7 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
         external
         onlyProfileOwner(_profileId)
     {
-        identitiesById[_profileId].metadata = _metadata;
+        profilesById[_profileId].metadata = _metadata;
 
         emit ProfileMetadataUpdated(_profileId, _metadata);
     }
@@ -175,7 +175,7 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
     /// @param _profileId The profileId of the profile
     /// @param _owner The address to check
     function isOwnerOfProfile(bytes32 _profileId, address _owner) public view returns (bool) {
-        return identitiesById[_profileId].owner == _owner;
+        return profilesById[_profileId].owner == _owner;
     }
 
     /// @notice Returns if the given address is an member of the profile
@@ -201,7 +201,7 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
     /// @param _profileId The profileId of the profile
     /// @dev Only pending owner can claim ownership.
     function acceptProfileOwnership(bytes32 _profileId) external {
-        Profile storage profile = identitiesById[_profileId];
+        Profile storage profile = profilesById[_profileId];
         address newOwner = profileIdToPendingOwner[_profileId];
 
         if (msg.sender != newOwner) {

@@ -436,6 +436,21 @@ abstract contract QVBaseStrategy is BaseStrategy {
     /// @return true if the recipient is accepted
     function _isAcceptedRecipient(address _recipientId) internal view virtual returns (bool);
 
+    /// @notice Checks if the allocator is valid
+    /// @param _allocator The allocator address
+    /// @return true if the allocator is valid
+    function _isValidAllocator(address _allocator) internal view virtual override returns (bool);
+
+    /// @notice Checks if the allocator has voice credits left
+    /// @param _voiceCreditsToAllocate The voice credits to allocate
+    /// @param _allocatedVoiceCredits The allocated voice credits
+    /// @return true if the allocator has voice credits left
+    function _hasVoiceCreditsLeft(uint256 _voiceCreditsToAllocate, uint256 _allocatedVoiceCredits)
+        internal
+        view
+        virtual
+        returns (bool);
+
     /// @notice Get the payout for a single recipient
     /// @param _recipientId The recipient id
     /// @return The payout as a PayoutSummary struct

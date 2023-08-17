@@ -3,7 +3,6 @@ pragma solidity 0.8.19;
 import "forge-std/Test.sol";
 
 // Interfaces
-import {IAllo} from "../../../contracts/core/Allo.sol";
 import {IStrategy} from "../../../contracts/strategies/IStrategy.sol";
 // Core contracts
 import {BaseStrategy} from "../../../contracts/strategies/BaseStrategy.sol";
@@ -26,7 +25,6 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
     event RecipientStatusUpdated(
         address indexed recipientId, DonationVotingStrategy.InternalRecipientStatus recipientStatus, address sender
     );
-    event Claimed(address indexed recipientId, address recipientAddress, uint256 amount, address token);
 
     bool public useRegistryAnchor;
     bool public metadataRequired;
@@ -46,7 +44,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
 
     uint256 public poolId;
 
-    function setUp() public {
+    function setUp() public virtual {
         __RegistrySetupFull();
         __AlloSetup(address(registry()));
 
@@ -245,9 +243,8 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         vm.prank(address(allo()));
         address sender = recipient();
         address recipientAddress = recipientAddress();
-        Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
 
-        bytes memory data = abi.encode(recipientAddress, false, metadata);
+        bytes memory data = __getEncodedData(recipientAddress, 1, "metadata");
 
         address recipientId = strategy.registerRecipient(data, sender);
 
@@ -259,7 +256,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         vm.warp(registrationStartTime + 10);
         vm.prank(address(allo()));
         address sender = recipient();
-        address recipientId = strategy.registerRecipient(__generateRecipientWithoutId(false), sender);
+        address recipientId = strategy.registerRecipient(__generateRecipientWithoutId(), sender);
 
         DonationVotingStrategy.InternalRecipientStatus recipientStatus =
             strategy.getInternalRecipientStatus(recipientId);
@@ -270,7 +267,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         vm.warp(registrationStartTime + 10);
         vm.prank(address(allo()));
         address sender = recipient();
-        address recipientId = strategy.registerRecipient(__generateRecipientWithoutId(false), sender);
+        address recipientId = strategy.registerRecipient(__generateRecipientWithoutId(), sender);
 
         BaseStrategy.RecipientStatus recipientStatus = strategy.getRecipientStatus(recipientId);
         assertEq(uint8(IStrategy.RecipientStatus.Pending), uint8(recipientStatus));
@@ -283,7 +280,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         address[] memory recipientIds = new address[](1);
         recipientIds[0] = recipientId;
 
-        bytes memory data = __generateRecipientWithoutId(false);
+        bytes memory data = __generateRecipientWithoutId();
         vm.prank(address(allo()));
         strategy.registerRecipient(data, sender);
 
@@ -310,7 +307,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         vm.warp(registrationStartTime + 10);
         vm.prank(address(allo()));
         address sender = recipient();
-        address recipientId = strategy.registerRecipient(__generateRecipientWithoutId(false), sender);
+        address recipientId = strategy.registerRecipient(__generateRecipientWithoutId(), sender);
 
         address[] memory recipientIds = new address[](1);
         recipientIds[0] = recipientId;
@@ -554,12 +551,6 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         strategy.withdraw(9.9e17); // 1e18 - 1e17 fee = 9.9e17
     }
 
-    function testRevert_withdraw_ALLOCATION_NOT_ENDED() public {
-        vm.expectRevert(DonationVotingStrategy.ALLOCATION_NOT_ENDED.selector);
-        vm.prank(pool_admin());
-        strategy.withdraw(1e18);
-    }
-
     function testRevert_withdraw_NOT_ALLOWED_30days() public {
         vm.warp(allocationEndTime + 1 days);
 
@@ -591,8 +582,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
     function test_registerRecipient_new() public {
         vm.warp(registrationStartTime + 1);
         address sender = recipient();
-        Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
-        bytes memory data = abi.encode(recipientAddress(), false, metadata);
+        bytes memory data = __getEncodedData(sender, 1, "metadata");
 
         vm.expectEmit(true, false, false, true);
         emit Registered(sender, data, sender);
@@ -639,7 +629,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         // register
         vm.prank(address(allo()));
         address sender = recipient();
-        address recipientId = strategy.registerRecipient(__generateRecipientWithoutId(false), sender);
+        address recipientId = strategy.registerRecipient(__generateRecipientWithoutId(), sender);
 
         // reject
         address[] memory recipientIds = new address[](1);
@@ -652,7 +642,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         strategy.reviewRecipients(recipientIds, recipientStatuses);
 
         // appeal
-        bytes memory data = __generateRecipientWithoutId(false);
+        bytes memory data = __generateRecipientWithoutId();
         vm.expectEmit(true, false, false, true);
         emit Appealed(recipientId, data, sender);
 
@@ -663,7 +653,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
     function testRevert_registerRecipient_UNAUTHORIZED() public {
         vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
         vm.prank(randomAddress());
-        bytes memory data = __generateRecipientWithoutId(false);
+        bytes memory data = __generateRecipientWithoutId();
         strategy.registerRecipient(data, msg.sender);
     }
 
@@ -672,7 +662,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         vm.warp(registrationEndTime + 10);
 
         vm.prank(address(allo()));
-        bytes memory data = __generateRecipientWithoutId(false);
+        bytes memory data = __generateRecipientWithoutId();
         strategy.registerRecipient(data, recipient());
     }
 
@@ -722,11 +712,10 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
 
         address sender = recipient();
         address recipientAddress = address(0);
-        Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
 
         vm.expectRevert(abi.encodeWithSelector(DonationVotingStrategy.RECIPIENT_ERROR.selector, sender));
 
-        bytes memory data = abi.encode(recipientAddress, false, metadata);
+        bytes memory data = __getEncodedData(recipientAddress, 1, "metadata");
 
         vm.prank(address(allo()));
         strategy.registerRecipient(data, sender);
@@ -740,18 +729,14 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         // pointer is empty
         vm.expectRevert(DonationVotingStrategy.INVALID_METADATA.selector);
         address recipientAddress = recipientAddress();
-        Metadata memory metadata = Metadata({protocol: 1, pointer: ""});
-
-        bytes memory data = abi.encode(recipientAddress, false, metadata);
+        bytes memory data = __getEncodedData(recipientAddress, 1, "");
 
         vm.prank(address(allo()));
         strategy.registerRecipient(data, sender);
 
         // protocol is 0
         vm.expectRevert(DonationVotingStrategy.INVALID_METADATA.selector);
-        metadata = Metadata({protocol: 0, pointer: "metadata"});
-
-        data = abi.encode(recipientAddress, false, metadata);
+        data = __getEncodedData(recipientAddress, 0, "metadata");
 
         vm.prank(address(allo()));
         strategy.registerRecipient(data, sender);
@@ -795,7 +780,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         strategy.allocate(allocateData, msg.sender);
     }
 
-    function testRevert_allocate_INVALID_invalidToken() public {
+    function testRevert_allocate_INVALID_invalidToken() public virtual {
         allowedTokens = new address[](1);
         allowedTokens[0] = makeAddr("token");
 
@@ -855,7 +840,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         assertEq(address(recipientAddress()).balance, 9.9e17);
     }
 
-    function test_distribute_twice_to_same_recipient() public {
+    function testRevert_distribute_twice_to_same_recipient() public {
         __register_accept_setPayout_recipient();
 
         address[] memory recipients = new address[](2);
@@ -881,10 +866,8 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         strategy.distribute(recipients, "", pool_admin());
     }
 
-    function __generateRecipientWithoutId(bool _isUsingRegistryAnchor) internal returns (bytes memory) {
-        Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
-
-        return abi.encode(recipientAddress(), _isUsingRegistryAnchor, metadata);
+    function __generateRecipientWithoutId() internal returns (bytes memory) {
+        return __getEncodedData(recipientAddress(), 1, "metadata");
     }
 
     function __generateRecipientWithId(address _recipientId) internal returns (bytes memory) {
@@ -898,7 +881,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
 
         // register
         vm.prank(address(allo()));
-        bytes memory data = __generateRecipientWithoutId(false);
+        bytes memory data = __generateRecipientWithoutId();
         address recipientId = strategy.registerRecipient(data, recipient());
 
         // accept
@@ -918,7 +901,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
 
         // register
         vm.prank(address(allo()));
-        bytes memory data = __generateRecipientWithoutId(false);
+        bytes memory data = __generateRecipientWithoutId();
         address recipientId = strategy.registerRecipient(data, recipient());
 
         // accept
@@ -952,5 +935,14 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         strategy.setPayout(recipientIds, amounts);
 
         return recipientId;
+    }
+
+    function __getEncodedData(address _recipientAddress, uint256 _protocol, string memory _pointer)
+        internal
+        virtual
+        returns (bytes memory data)
+    {
+        Metadata memory metadata = Metadata({protocol: _protocol, pointer: _pointer});
+        data = abi.encode(_recipientAddress, false, metadata);
     }
 }

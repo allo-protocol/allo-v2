@@ -211,7 +211,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     }
 
     /// @notice Checks if address is elgible allocator
-    function isValidAllocator(address) external pure returns (bool) {
+    function _isValidAllocator(address) internal pure override returns (bool) {
         return true;
     }
 
@@ -345,7 +345,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Withdraw funds from pool
     /// @param _amount The amount to be withdrawn
-    function withdraw(uint256 _amount) external onlyPoolManager(msg.sender) onlyAfterAllocation {
+    function withdraw(uint256 _amount) external onlyPoolManager(msg.sender) {
         if (block.timestamp <= allocationEndTime + 30 days) {
             revert NOT_ALLOWED();
         }
@@ -507,7 +507,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Check if sender is profile owner or member
     /// @param _anchor Anchor of the profile
     /// @param _sender The sender of the transaction
-    function _isProfileMember(address _anchor, address _sender) internal view returns (bool) {
+    function _isProfileMember(address _anchor, address _sender) internal view virtual returns (bool) {
         IRegistry registry = allo.getRegistry();
         IRegistry.Profile memory profile = registry.getProfileByAnchor(_anchor);
         return registry.isOwnerOrMemberOfProfile(profile.id, _sender);

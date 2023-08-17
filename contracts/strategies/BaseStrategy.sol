@@ -3,7 +3,6 @@ pragma solidity 0.8.19;
 
 import "./IStrategy.sol";
 
-import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {Transfer} from "../core/libraries/Transfer.sol";
 
 abstract contract BaseStrategy is IStrategy, Transfer {
@@ -141,6 +140,9 @@ abstract contract BaseStrategy is IStrategy, Transfer {
         returns (PayoutSummary[] memory)
     {
         uint256 length = _recipientIds.length;
+        if (length != _data.length) {
+            revert BaseStrategy_ARRAY_MISMATCH();
+        }
         PayoutSummary[] memory payouts = new PayoutSummary[](length);
         for (uint256 i = 0; i < length;) {
             payouts[i] = _getPayout(_recipientIds[i], _data[i]);
@@ -149,6 +151,10 @@ abstract contract BaseStrategy is IStrategy, Transfer {
             }
         }
         return payouts;
+    }
+
+    function isValidAllocator(address _allocator) external view virtual override returns (bool) {
+        return _isValidAllocator(_allocator);
     }
 
     /// ====================================
@@ -165,6 +171,11 @@ abstract contract BaseStrategy is IStrategy, Transfer {
     function _isPoolActive() internal view virtual returns (bool) {
         return poolActive;
     }
+
+    /// @notice Checks if the allocator is valid
+    /// @param _allocator The allocator address
+    /// @return true if the allocator is valid
+    function _isValidAllocator(address _allocator) internal view virtual returns (bool);
 
     // this is called via allo.sol to register recipients
     // it can change their status all the way to Accepted, or to Pending if there are more steps

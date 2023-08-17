@@ -21,11 +21,11 @@ export const deployerContractAddress: DeployerConfig = {
   },
   // Goerli
   5: {
-    address: "0x339d087B3ab5DF79c6c3617B2487e5340F2DBE3f",
+    address: "0x737b811828B34838e2188c59cfF72BD1019A1070",
   },
   // Sepolia
   11155111: {
-    address: "0x339d087B3ab5DF79c6c3617B2487e5340F2DBE3f",
+    address: "0x737b811828B34838e2188c59cfF72BD1019A1070",
   },
   // PGN
   424: {
@@ -33,7 +33,7 @@ export const deployerContractAddress: DeployerConfig = {
   },
   // PGN Sepolia
   58008: {
-    address: "0x339d087B3ab5DF79c6c3617B2487e5340F2DBE3f",
+    address: "0x737b811828B34838e2188c59cfF72BD1019A1070",
   },
   // Optimism
   10: {
@@ -41,11 +41,23 @@ export const deployerContractAddress: DeployerConfig = {
   },
   // Optimism Goerli
   420: {
-    address: "0x339d087B3ab5DF79c6c3617B2487e5340F2DBE3f",
+    address: "0x737b811828B34838e2188c59cfF72BD1019A1070",
   },
   // Fantom
   250: {
     address: "",
+  },
+  // Fantom Testnet
+  4002: {
+    address: "",
+  },
+  // Celo Mainnet
+  42220: {
+    address: "",
+  },
+  // Celo Alfajores
+  44787: {
+    address: "0x737b811828B34838e2188c59cfF72BD1019A1070",
   },
 };
 
@@ -64,7 +76,7 @@ export const nameConfig: DeployParams = {
     "donation-voting": {
       name: "DonationVotingStrategy",
       version: "v1",
-      address: "0x4AB4eF1aa0c2f63FFE77b245E679fb7B38681470",
+      address: "",
     },
   },
   // Sepolia
@@ -72,7 +84,7 @@ export const nameConfig: DeployParams = {
     "donation-voting": {
       name: "DonationVotingStrategy",
       version: "v1",
-      address: "0x4AB4eF1aa0c2f63FFE77b245E679fb7B38681470",
+      address: "",
     },
   },
   // PGN
@@ -88,7 +100,7 @@ export const nameConfig: DeployParams = {
     "donation-voting": {
       name: "DonationVotingStrategy",
       version: "v1",
-      address: "0x4AB4eF1aa0c2f63FFE77b245E679fb7B38681470",
+      address: "",
     },
   },
   // Optimism
@@ -104,7 +116,7 @@ export const nameConfig: DeployParams = {
     "donation-voting": {
       name: "DonationVotingStrategy",
       version: "v1",
-      address: "0x4AB4eF1aa0c2f63FFE77b245E679fb7B38681470",
+      address: "",
     },
   },
   // Fantom
@@ -112,6 +124,30 @@ export const nameConfig: DeployParams = {
     "donation-voting": {
       name: "",
       version: "",
+      address: "",
+    },
+  },
+  // Fantom Testnet
+  4002: {
+    "donation-voting": {
+      name: "",
+      version: "",
+      address: "",
+    },
+  },
+  // Celo Mainnet
+  42220: {
+    "donation-voting": {
+      name: "",
+      version: "",
+      address: "",
+    },
+  },
+  // Celo Alfajores
+  44787: {
+    "donation-voting": {
+      name: "DonationVotingStrategy",
+      version: "v1",
       address: "",
     },
   },

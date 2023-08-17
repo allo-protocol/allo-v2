@@ -8,15 +8,21 @@ contract NFTFactory {
 
     event NFTContractCreated(address nftContractAddress);
 
-    function createNFTContract(string memory name, string memory symbol, uint256 price) external {
+    function createNFTContract(string memory _name, string memory _symbol, uint256 _price, address _owner)
+        external
+        returns (address)
+    {
         NFT nft = new NFT(
-            name,
-            symbol,
-            price
+            _name,
+            _symbol,
+            _price,
+            _owner
         );
 
         isNFTContract[address(nft)] = true;
 
         emit NFTContractCreated(address(nft));
+
+        return address(nft);
     }
 }

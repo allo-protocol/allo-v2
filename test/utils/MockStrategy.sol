@@ -41,12 +41,6 @@ contract MockStrategy is BaseStrategy {
         _sender;
     }
 
-    // simply returns whether a allocator is valid or not, will usually be true for all
-    function isValidAllocator(address _allocator) external view returns (bool) {
-        surpressStateMutabilityWarning;
-        return _allocator == address(0) ? false : true;
-    }
-
     // simply returns the status of a recipient
     // probably tracked in a mapping, but will depend on the implementation
     // for example, the OpenSelfRegistration only maps users to bool, and then assumes Accepted for those
@@ -67,17 +61,28 @@ contract MockStrategy is BaseStrategy {
 
         PayoutSummary[] memory payouts = new PayoutSummary[](_recipientIds.length);
 
-        for(uint256 i = 0; i < _recipientIds.length; i++) {
+        for (uint256 i = 0; i < _recipientIds.length; i++) {
             payouts[i] = abi.decode(_data[i], (PayoutSummary));
         }
 
         return payouts;
     }
 
-    function _getPayout(address _recipientId, bytes memory _data) internal view override returns (PayoutSummary memory) {
+    function _getPayout(address _recipientId, bytes memory _data)
+        internal
+        view
+        override
+        returns (PayoutSummary memory)
+    {
         surpressStateMutabilityWarning;
         _data;
         return PayoutSummary(_recipientId, 0);
+    }
+
+    // simply returns whether a allocator is valid or not, will usually be true for all
+    function _isValidAllocator(address _allocator) internal view override returns (bool) {
+        surpressStateMutabilityWarning;
+        return _allocator == address(0) ? false : true;
     }
 
     function setPoolActive(bool _active) external {

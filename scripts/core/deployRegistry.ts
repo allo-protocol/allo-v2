@@ -1,6 +1,6 @@
 import hre, { ethers } from "hardhat";
 import { registryConfig } from "../config/registry.config";
-import { confirmContinue, prettyNum } from "../utils/script-utils";
+import { confirmContinue, prettyNum, verifyContract } from "../utils/scripts";
 
 export async function deployRegistry() {
     const network = await ethers.provider.getNetwork();
@@ -34,6 +34,8 @@ export async function deployRegistry() {
     const instance = await Registry.deploy(registryConfig[chainId].owner);
 
     // await instance.deploymentTransaction()?.wait(blocksToWait);
+
+    // await verifyContract(instance.target.toString(), [registryConfig[chainId].owner]);
 
     console.log("Registry deployed to:", instance.target);
   

@@ -1,7 +1,7 @@
 import hre from "hardhat";
 import { deployRegistry } from "./deployRegistry";
 import { deployAllo } from "./deployAllo";
-import { deployDeployer } from "./deployDeployer";
+import { deployContractFactory } from "./deployContractFactory";
 
 async function deployCore() {
   const networkName = await hre.network.name;
@@ -10,27 +10,26 @@ async function deployCore() {
     ////////////////////////////////////////////////////
     Deploy core Allo V2 contracts to ${networkName}
     ======================================
+    - ContractFactory (used for strategy deployments)
     - Registry
     - Allo
-    - Deployer (used for strategy deployments)
     ////////////////////////////////////////////////////`
   );
 
-  // Registry
-  deployRegistry().then(registryAddress => {
-    // Allo
-    deployAllo(registryAddress.toString()).then(alloAddress => {
-        // Deployer
-        deployDeployer().then(deployerAddress => {
-
+  // ContractFactory
+  deployContractFactory().then(deployedContract => {
+    // Registry
+    deployRegistry().then(registryAddress => {
+      // Allo
+      deployAllo(registryAddress.toString()).then(alloAddress => {
           // Log deployed addresses
           console.log(`
             ////////////////////////////////////////////////////
             Core Allo V2 deployed to:
             ======================================
+            ContractFactory: ${deployedContract}
             Registry: ${registryAddress}
             Allo: ${alloAddress}
-            Deployer: ${deployerAddress}
             ////////////////////////////////////////////////////`
           );
         });

@@ -8,7 +8,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "compile": "forge build",
+    "build": "forge build",
     "test": "forge test",
     "fmt": "forge fmt contracts/**/*.sol && forge fmt test/**/*.sol",
     "fork": "anvil --fork-url",
@@ -23,7 +23,10 @@
     "deploy-allo": "npx hardhat run scripts/core/deployAllo.ts --network",
     "deploy-registry": "npx hardhat run scripts/core/deployRegistry.ts --network",
     "upgrade-allo": "npx hardhat run scripts/core/deployAllo.ts --network",
-    "deploy-deployer": "npx hardhat run scripts/core/deployDeployer.ts --network"
+    "deploy-deployer": "npx hardhat run scripts/core/deployDeployer.ts --network",
+    "/////// deploy-test ///////": "echo 'deploy test scripts'",
+    "create-profile": "npx hardhat run scripts/test/createProfile.ts --network",
+    "create-pool": "npx hardhat run scripts/test/createPool.ts --network"
   },
   "devDependencies": {
     "@ethereum-attestation-service/eas-contracts": "^0.28.1",

@@ -4,7 +4,7 @@ pragma solidity 0.8.19;
 // Core Contracts
 import {RFPSimpleStrategy} from "../rfp-simple/RFPSimpleStrategy.sol";
 
-contract RFPCommiteeStrategy is RFPSimpleStrategy {
+contract RFPCommitteeStrategy is RFPSimpleStrategy {
     /// ===============================
     /// ========== Events =============
     /// ===============================
@@ -58,22 +58,26 @@ contract RFPCommiteeStrategy is RFPSimpleStrategy {
             revert RECIPIENT_ALREADY_ACCEPTED();
         }
 
-        address votedForOld = votedFor[_sender];
-        if (votedForOld != address(0)) {
-            votes[votedForOld] -= 1;
+        // check if the sender has already vote
+        address voteCastedTo = votedFor[_sender];
+        if (voteCastedTo != address(0)) {
+            // remove the old vote
+            votes[voteCastedTo] -= 1;
         }
 
         address recipientId = abi.decode(_data, (address));
-
         votes[recipientId] += 1;
         votedFor[_sender] = recipientId;
         emit Voted(recipientId, _sender);
 
         if (votes[recipientId] == voteThreshold) {
             acceptedRecipientId = recipientId;
-            emit Allocated(
-                acceptedRecipientId, _getRecipient(recipientId).proposalBid, allo.getPool(poolId).token, address(0)
-            );
+
+            Recipient storage recipient = _recipients[acceptedRecipientId];
+            recipient.recipientStatus = RecipientStatus.Accepted;
+            _setPoolActive(false);
+
+            emit Allocated(acceptedRecipientId, recipient.proposalBid, allo.getPool(poolId).token, address(0));
         }
     }
 }

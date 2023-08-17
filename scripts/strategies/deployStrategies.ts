@@ -2,7 +2,7 @@ import { AbiCoder, concat, hexlify } from "ethers";
 import hre, { ethers } from "hardhat";
 import { alloConfig } from "../config/allo.config";
 import { deployerContractAddress } from "../config/strategies.config";
-import { confirmContinue, prettyNum } from "../utils/script-utils";
+import { confirmContinue, prettyNum } from "../utils/scripts";
 
 export async function deployStrategies(strategyName: string, version: string) {
   const network = await ethers.provider.getNetwork();
@@ -52,7 +52,7 @@ export async function deployStrategies(strategyName: string, version: string) {
     //get bytecode of strategy
     creationCode = Strategy.bytecode;
 
-    const allo = alloConfig[chainId].allo;
+    const allo = alloConfig[chainId].alloProxy;
     const name = strategyName + version;
 
     //abi.encodePacked(creationCode, abi.encode(address(allo), "TestStrategy"))

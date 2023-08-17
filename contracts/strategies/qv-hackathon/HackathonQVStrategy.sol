@@ -8,8 +8,7 @@ import {
     AttestationRequest,
     AttestationRequestData,
     IEAS,
-    RevocationRequest,
-    RevocationRequestData
+    RevocationRequest
 } from "@ethereum-attestation-service/eas-contracts/contracts/IEAS.sol";
 import {
     ISchemaRegistry,
@@ -54,7 +53,6 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
     /// ======================
 
     bytes32 constant _NO_RELATED_ATTESTATION_UID = 0;
-    ISchemaRegistry public schemaRegistry;
     uint256[] public payoutPercentages;
     uint256[] public votesByRank;
     EASInfo public easInfo;
@@ -70,17 +68,6 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
     mapping(address => uint256) public recipientIdToIndex;
     // Winner list index => recipientId
     mapping(uint256 => address) public indexToRecipientId;
-
-    /// ======================
-    /// ===== Modifiers ======
-    /// ======================
-
-    modifier onlyBeforeAllocation() {
-        if (block.timestamp > allocationStartTime) {
-            revert ALLOCATION_STARTED();
-        }
-        _;
-    }
 
     /// ======================
     /// ===== Constructor ====
@@ -145,10 +132,10 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
         if (bytes(_easInfo.schema).length > 0) {
             // if the schema is present, then register schema and update uid
             easInfo.schemaUID =
-                schemaRegistry.register(_easInfo.schema, ISchemaResolver(address(this)), _easInfo.revocable);
+                easInfo.schemaRegistry.register(_easInfo.schema, ISchemaResolver(address(this)), _easInfo.revocable);
         } else {
             // compare SchemaRecord to data passed in
-            SchemaRecord memory record = schemaRegistry.getSchema(_easInfo.schemaUID);
+            SchemaRecord memory record = easInfo.schemaRegistry.getSchema(_easInfo.schemaUID);
             if (
                 record.uid != _easInfo.schemaUID || record.revocable != _easInfo.revocable
                     || keccak256(abi.encode(record.schema)) != keccak256(abi.encode(_easInfo.schema))
@@ -188,11 +175,11 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
 
     /// @notice Set the winner payoutPercentages per rank
     /// @param _payoutPercentages The payoutPercentages to set
-    function setPayoutPercentages(uint256[] memory _payoutPercentages)
-        external
-        onlyPoolManager(msg.sender)
-        onlyBeforeAllocation
-    {
+    function setPayoutPercentages(uint256[] memory _payoutPercentages) external onlyPoolManager(msg.sender) {
+        if (block.timestamp > allocationStartTime || payoutPercentages.length != 0) {
+            revert ALLOCATION_STARTED();
+        }
+
         uint256 percentageLength = _payoutPercentages.length;
         uint256 totalPayoutPercentages = 0;
 
@@ -203,7 +190,8 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
 
         for (uint256 i = 0; i < percentageLength;) {
             uint256 payoutPercentage = _payoutPercentages[i];
-            payoutPercentages[i] = payoutPercentage;
+            payoutPercentages.push(payoutPercentage);
+            votesByRank.push(0);
             totalPayoutPercentages += payoutPercentage;
             unchecked {
                 i++;
@@ -242,7 +230,7 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
 
     function _getPayout(address _recipientId, bytes memory) internal view override returns (PayoutSummary memory) {
         uint256 payoutPercentage = payoutPercentages[recipientIdToIndex[_recipientId]];
-        uint256 amount = poolAmount * payoutPercentage / 1e18;
+        uint256 amount = (paidOut[_recipientId]) ? 0 : poolAmount * payoutPercentage / 1e18;
 
         return PayoutSummary(recipients[_recipientId].recipientAddress, amount);
     }
@@ -260,10 +248,16 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
         onlyActiveRegistration
         returns (address recipientId)
     {
+        recipientId = super._registerRecipient(_data, _sender);
+
         if (recipientIdToUID[recipientId] == 0) {
             revert UNAUTHORIZED();
         }
-        super._registerRecipient(_data, _sender);
+
+        Recipient storage recipient = recipients[recipientId];
+        if (recipient.recipientStatus == InternalRecipientStatus.Pending) {
+            recipient.recipientStatus = InternalRecipientStatus.Accepted;
+        }
     }
 
     /// @notice Allocate votes to a recipient
@@ -283,7 +277,7 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
         Recipient storage recipient = recipients[recipientId];
         Allocator storage allocator = allocators[_sender];
 
-        if (voiceCreditsToAllocate + voiceCreditsUsedPerNftId[nftId] > maxVoiceCreditsPerAllocator) {
+        if (!_hasVoiceCreditsLeft(voiceCreditsToAllocate, voiceCreditsUsedPerNftId[nftId])) {
             revert INVALID();
         }
 
@@ -294,6 +288,10 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
         TmpRecipient memory tmp = TmpRecipient({recipientId: address(0), voteRank: 0, foundRecipientAtIndex: 0});
 
         uint256 totalWinners = payoutPercentages.length;
+
+        if (totalWinners == 0) {
+            revert INVALID();
+        }
 
         if (recipient.totalVotesReceived > votesByRank[totalWinners - 1]) {
             for (uint256 i = 0; i < totalWinners;) {
@@ -321,11 +319,15 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
                     // update the temp values to the next index values
                     tmp.voteRank = _tmpVoteRank;
                     tmp.recipientId = _tmpRecipient;
+
+                    if (i == totalWinners - 1) {
+                        recipientIdToIndex[tmp.recipientId] = 0;
+                    }
                 }
 
                 // if recipient is in winner list add him and store the temp values to push the rest of the list by 1 in the next loop
                 if (tmp.foundRecipientAtIndex == 0 && recipient.totalVotesReceived > votesByRank[i]) {
-                    tmp.foundRecipientAtIndex = i;
+                    tmp.foundRecipientAtIndex = 1;
                     // store the previous winner at index i in tmp variables
                     tmp.voteRank = votesByRank[i];
                     tmp.recipientId = indexToRecipientId[i];
@@ -395,13 +397,13 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
     /// @dev Gets a schema from the SchemaRegistry contract using the UID
     /// @param uid The UID of the schema to get.
     function getSchema(bytes32 uid) external view returns (SchemaRecord memory) {
-        return schemaRegistry.getSchema(uid);
+        return easInfo.schemaRegistry.getSchema(uid);
     }
 
-    /// @notice Returns if the attestation is payable or not
+    /// @notice Returns if the this contract is payable or not
     /// @return True if the attestation is payable, false otherwise
     function isPayable() public pure override returns (bool) {
-        return false;
+        return true;
     }
 
     /// @notice Returns if the attestation is expired or not
@@ -428,7 +430,16 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
     /// @notice Checks if the allocator is valid
     /// @param _allocator The allocator address
     /// @return true if the allocator is valid
-    function isValidAllocator(address _allocator) external view virtual override returns (bool) {
+    function _isValidAllocator(address _allocator) internal view virtual override returns (bool) {
         return nft.balanceOf(_allocator) > 0;
+    }
+
+    function _hasVoiceCreditsLeft(uint256 _voiceCreditsToAllocate, uint256 _voiceCreditsUsed)
+        internal
+        view
+        override
+        returns (bool)
+    {
+        return (_voiceCreditsToAllocate + _voiceCreditsUsed) <= maxVoiceCreditsPerAllocator;
     }
 }

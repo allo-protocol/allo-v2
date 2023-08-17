@@ -1,56 +1,246 @@
+// SPDX-License Identifier: MIT
 pragma solidity 0.8.19;
 
-import "forge-std/Test.sol";
+// Interfaces
+import {IStrategy} from "../../../contracts/strategies/IStrategy.sol";
+import {QVBaseStrategy} from "../../../contracts/strategies/qv-base/QVBaseStrategy.sol";
 
-import {IAllo} from "../../../contracts/core/Allo.sol";
-import {Allo} from "../../../contracts/core/Allo.sol";
-import {BaseStrategy} from "../../../contracts/strategies/BaseStrategy.sol";
+// External Libraries
+import "@openzeppelin/contracts/governance/utils/IVotes.sol";
+
+// Test libraries
+import {QVBaseStrategyTest} from "./QVBaseStrategy.t.sol";
+import {MockERC20Vote} from "../../utils/MockERC20Vote.sol";
+import {MockERC20} from "../../utils/MockERC20.sol";
+
+// Core contracts
 import {QVGovernanceERC20Votes} from "../../../contracts/strategies/qv-governance/QVGovernanceERC20Votes.sol";
-import {MockToken} from "../../utils/MockToken.sol";
 
-contract QVGovernanceERC20VotesTest is Test {
-    struct InitializationData {
-        address govToken;
-        uint256 timestamp;
-        uint256 reviewThreshold;
-        bool registryGating;
-        bool metadataRequired;
-        uint256 registrationStartTime;
-        uint256 registrationEndTime;
-        uint256 allocationStartTime;
-        uint256 allocationEndTime;
+contract QVGovernanceERC20VotesTest is QVBaseStrategyTest {
+    IVotes public govToken;
+    uint256 public timestamp;
+
+    function setUp() public override {
+        govToken = IVotes(address(new MockERC20Vote()));
+        timestamp = block.timestamp;
+        super.setUp();
     }
 
-    Allo public allo;
-    QVGovernanceERC20Votes public strategy;
-    MockToken public token;
-
-    function setUp() public {
-        allo = new Allo();
-        // InitializationData memory data = InitializationData(address(allo), 0, 0, false, false, 0, 0, 0, 0);
-
-        token = new MockToken();
-        // strategy = new QVGovernanceERC20Votes(address(0), "QVGovernanceERC20Votes");
-        // strategy.initialize(0, abi.encode(data));
+    function _createStrategy() internal override returns (address) {
+        return address(new QVGovernanceERC20Votes(address(allo()), "MockStrategy"));
     }
 
-    function test_initialize() public {}
+    function qvGovStrategy() internal view returns (QVGovernanceERC20Votes) {
+        return (QVGovernanceERC20Votes(_strategy));
+    }
 
-    function testRevert_initialize_STRATEGY_ALREADY_INITIALIZED() public {}
+    function _initialize() internal override {
+        vm.startPrank(address(allo()));
+        qvGovStrategy().initialize(
+            poolId,
+            abi.encode(
+                address(govToken),
+                timestamp,
+                2,
+                registryGating,
+                metadataRequired,
+                registrationStartTime,
+                registrationEndTime,
+                allocationStartTime,
+                allocationEndTime
+            )
+        );
 
-    function test_reviewRecipients() public {}
+        vm.startPrank(pool_admin());
+        _createPoolWithCustomStrategy();
+    }
 
-    function testRevert_reviewRecipients_INVALID() public {}
+    function _createPoolWithCustomStrategy() internal override {
+        poolId = allo().createPoolWithCustomStrategy(
+            poolProfile_id(),
+            address(_strategy),
+            abi.encode(
+                address(govToken),
+                timestamp,
+                2,
+                registryGating,
+                metadataRequired,
+                registrationStartTime,
+                registrationEndTime,
+                allocationStartTime,
+                allocationEndTime
+            ),
+            address(token),
+            0 ether, // TODO: setup tests for failed transfers when a value is passed here.
+            poolMetadata,
+            pool_managers()
+        );
+    }
 
-    function testRevert_reviewRecipients_RECIPIENT_ERROR() public {}
+    function test_isValidAllocator() public override {
+        assertFalse(qvGovStrategy().isValidAllocator(address(123)));
+        assertTrue(qvGovStrategy().isValidAllocator(randomAddress()));
+    }
 
-    function test_isValidAllocator() public {}
+    function testRevert_initialize_ALREADY_INITIALIZED() public override {
+        vm.expectRevert(IStrategy.BaseStrategy_ALREADY_INITIALIZED.selector);
 
-    function test_allocate() public {}
+        vm.startPrank(address(allo()));
+        QVGovernanceERC20Votes(_strategy).initialize(
+            poolId,
+            abi.encode(
+                address(govToken),
+                timestamp,
+                2,
+                registryGating,
+                metadataRequired,
+                registrationStartTime,
+                registrationEndTime,
+                allocationStartTime,
+                allocationEndTime
+            )
+        );
+    }
 
-    function testRevert_allocate_INVALID() public {}
+    function test_initilize_QVGovernance() public {
+        assertEq(address(govToken), address(qvGovStrategy().govToken()));
+        assertEq(timestamp, qvGovStrategy().timestamp());
+    }
 
-    function testRevert_allocate_ALLOCATION_NOT_ACTIVE() public {}
+    function testRevert_initialize_noGovToken() public {
+        QVGovernanceERC20Votes strategy = new QVGovernanceERC20Votes(address(allo()), "MockStrategy");
+        MockERC20 noGovToken = new MockERC20();
+        // when no valid governance token is passes
 
-    function testRevert_allocate_INSUFFICIENT_VOICE_CREDITS() public {}
+        vm.expectRevert();
+        vm.startPrank(address(allo()));
+        strategy.initialize(
+            poolId,
+            abi.encode(
+                address(noGovToken),
+                timestamp,
+                2,
+                registryGating,
+                metadataRequired,
+                registrationStartTime,
+                registrationEndTime,
+                allocationStartTime,
+                allocationEndTime
+            )
+        );
+    }
+
+    function testRevert_initialize_INVALID() public override {
+        QVGovernanceERC20Votes strategy = new QVGovernanceERC20Votes(address(allo()), "MockStrategy");
+
+        // when registrationStartTime is in the past
+        vm.expectRevert(QVBaseStrategy.INVALID.selector);
+        vm.startPrank(address(allo()));
+        strategy.initialize(
+            poolId,
+            abi.encode(
+                address(govToken),
+                timestamp,
+                2,
+                registryGating,
+                metadataRequired,
+                today() - 1,
+                registrationEndTime,
+                allocationStartTime,
+                allocationEndTime
+            )
+        );
+
+        // when registrationStartTime > registrationEndTime
+        vm.expectRevert(QVBaseStrategy.INVALID.selector);
+        vm.startPrank(address(allo()));
+        strategy.initialize(
+            poolId,
+            abi.encode(
+                address(govToken),
+                timestamp,
+                2,
+                registryGating,
+                metadataRequired,
+                weekAfterNext(),
+                registrationEndTime,
+                allocationStartTime,
+                allocationEndTime
+            )
+        );
+
+        // when allocationStartTime > allocationEndTime
+        vm.expectRevert(QVBaseStrategy.INVALID.selector);
+        vm.stopPrank();
+        vm.startPrank(address(allo()));
+        strategy.initialize(
+            poolId,
+            abi.encode(
+                address(govToken),
+                timestamp,
+                2,
+                registryGating,
+                metadataRequired,
+                registrationStartTime,
+                registrationEndTime,
+                oneMonthFromNow() + today(),
+                allocationEndTime
+            )
+        );
+
+        // when  registrationEndTime > allocationEndTime
+        vm.expectRevert(QVBaseStrategy.INVALID.selector);
+        vm.startPrank(address(allo()));
+        strategy.initialize(
+            poolId,
+            abi.encode(
+                address(govToken),
+                timestamp,
+                2,
+                registryGating,
+                metadataRequired,
+                registrationStartTime,
+                oneMonthFromNow() + today(),
+                allocationStartTime,
+                allocationEndTime
+            )
+        );
+    }
+
+    function testRevert_allocate_RECIPIENT_ERROR() public {
+        address recipientId = __register_reject_recipient();
+        address allocator = randomAddress();
+
+        vm.expectRevert(abi.encodeWithSelector(QVBaseStrategy.RECIPIENT_ERROR.selector, recipientId));
+        vm.warp(allocationStartTime + 10);
+
+        bytes memory allocateData = __generateAllocation(recipientId, 4);
+        vm.startPrank(address(allo()));
+        qvGovStrategy().allocate(allocateData, allocator);
+    }
+
+    function testRevert_allocate_INVALID_tooManyVoiceCredits() public {
+        address recipientId = __register_accept_recipient();
+        address allocator = randomAddress();
+
+        vm.expectRevert(abi.encodeWithSelector(QVBaseStrategy.INVALID.selector));
+        vm.warp(allocationStartTime + 10);
+
+        bytes memory allocateData = __generateAllocation(recipientId, 4000);
+
+        vm.startPrank(address(allo()));
+        qvGovStrategy().allocate(allocateData, allocator);
+    }
+
+    function testRevert_allocate_INVALID_noVoiceTokens() public {
+        address recipientId = __register_accept_recipient();
+        vm.warp(allocationStartTime + 10);
+
+        address allocator = randomAddress();
+        bytes memory allocateData = __generateAllocation(recipientId, 0);
+
+        vm.expectRevert(QVBaseStrategy.INVALID.selector);
+        vm.startPrank(address(allo()));
+        qvGovStrategy().allocate(allocateData, allocator);
+    }
 }

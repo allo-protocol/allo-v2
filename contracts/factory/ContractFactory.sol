@@ -3,12 +3,14 @@ pragma solidity 0.8.19;
 
 import {CREATE3} from "solady/src/utils/CREATE3.sol";
 
-contract Deployer {
+contract ContractFactory {
     error SALT_USED();
     error UNAUTHORIZED();
 
     mapping(bytes32 => bool) public usedSalts;
     mapping(address => bool) public isDeployer;
+
+    event Deployed(address indexed deployed, bytes32 indexed salt);
 
     constructor() {
         isDeployer[msg.sender] = true;
@@ -25,9 +27,9 @@ contract Deployer {
         external
         payable
         onlyDeployer
-        returns (address deployed)
+        returns (address deployedContract)
     {
-        // hash salt with the deployer address to give each deployer its own namespace
+        // hash salt with the contract name and version
         bytes32 salt = keccak256(abi.encodePacked(_contractName, _version));
 
         // ensure salt has not been used
@@ -36,10 +38,13 @@ contract Deployer {
         }
 
         usedSalts[salt] = true;
-        return CREATE3.deploy(salt, creationCode, msg.value);
+
+        deployedContract = CREATE3.deploy(salt, creationCode, msg.value);
+
+        emit Deployed(deployedContract, salt);
     }
 
-    function setDeployer(address _deployer, bool _isDeployer) external onlyDeployer {
-        isDeployer[_deployer] = _isDeployer;
+    function setDeployer(address _deployer, bool _allowedToDeploy) external onlyDeployer {
+        isDeployer[_deployer] = _allowedToDeploy;
     }
 }

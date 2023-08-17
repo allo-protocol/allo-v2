@@ -50,13 +50,6 @@ contract QVSimpleStrategy is QVBaseStrategy {
     /// ==== View Functions =====
     /// =========================
 
-    /// @notice Checks if the allocator is valid
-    /// @param _allocator The allocator address
-    /// @return true if the allocator is valid
-    function isValidAllocator(address _allocator) external view virtual override returns (bool) {
-        return allowedAllocators[_allocator];
-    }
-
     /// ====================================
     /// ==== External/Public Functions =====
     /// ====================================
@@ -89,7 +82,7 @@ contract QVSimpleStrategy is QVBaseStrategy {
         Allocator storage allocator = allocators[_sender];
 
         // check that the sender can allocate votes
-        if (!allowedAllocators[_sender]) {
+        if (!_isValidAllocator(_sender)) {
             revert UNAUTHORIZED();
         }
 
@@ -97,14 +90,37 @@ contract QVSimpleStrategy is QVBaseStrategy {
             revert RECIPIENT_ERROR(recipientId);
         }
 
-        if (voiceCreditsToAllocate + allocator.voiceCredits > maxVoiceCreditsPerAllocator) {
+        if (!_hasVoiceCreditsLeft(voiceCreditsToAllocate, allocator.voiceCredits)) {
             revert INVALID();
         }
 
         _qv_allocate(allocator, recipient, recipientId, voiceCreditsToAllocate, _sender);
     }
 
+    /// @notice Returns if the recipient is accepted
+    /// @param _recipientId The recipient id
+    /// @return true if the recipient is accepted
     function _isAcceptedRecipient(address _recipientId) internal view override returns (bool) {
         return recipients[_recipientId].recipientStatus == InternalRecipientStatus.Accepted;
+    }
+
+    /// @notice Checks if the allocator is valid
+    /// @param _allocator The allocator address
+    /// @return true if the allocator is valid
+    function _isValidAllocator(address _allocator) internal view override returns (bool) {
+        return allowedAllocators[_allocator];
+    }
+
+    /// @notice Checks if the allocator has voice credits left
+    /// @param _voiceCreditsToAllocate The voice credits to allocate
+    /// @param _allocatedVoiceCredits The allocated voice credits
+    /// @return true if the allocator has voice credits left
+    function _hasVoiceCreditsLeft(uint256 _voiceCreditsToAllocate, uint256 _allocatedVoiceCredits)
+        internal
+        view
+        override
+        returns (bool)
+    {
+        return _voiceCreditsToAllocate + _allocatedVoiceCredits <= maxVoiceCreditsPerAllocator;
     }
 }

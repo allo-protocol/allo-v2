@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity 0.8.19;
 
 import "forge-std/Test.sol";
@@ -7,8 +8,7 @@ import {IAllo} from "../../../contracts/core/Allo.sol";
 import {IStrategy} from "../../../contracts/strategies/IStrategy.sol";
 // Core contracts
 import {BaseStrategy} from "../../../contracts/strategies/BaseStrategy.sol";
-import {IStrategy} from "../../../contracts/strategies/IStrategy.sol";
-
+// Strategy contracts
 import {RFPSimpleStrategy} from "../../../contracts/strategies/rfp-simple/RFPSimpleStrategy.sol";
 // Internal libraries
 import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
