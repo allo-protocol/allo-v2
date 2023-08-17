@@ -79,6 +79,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     uint256 public allocationStartTime;
     uint256 public allocationEndTime;
     uint256 public totalPayoutAmount;
+    IRegistry private _registry;
 
     /// @notice token -> bool
     mapping(address => bool) public allowedTokens;
@@ -159,6 +160,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
         __BaseStrategy_init(_poolId);
         useRegistryAnchor = _useRegistryAnchor;
         metadataRequired = _metadataRequired;
+        _registry = allo.getRegistry();
 
         _isPoolTimestampValid(_registrationStartTime, _registrationEndTime, _allocationStartTime, _allocationEndTime);
 
@@ -508,9 +510,8 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _anchor Anchor of the profile
     /// @param _sender The sender of the transaction
     function _isProfileMember(address _anchor, address _sender) internal view virtual returns (bool) {
-        IRegistry registry = allo.getRegistry();
-        IRegistry.Profile memory profile = registry.getProfileByAnchor(_anchor);
-        return registry.isOwnerOrMemberOfProfile(profile.id, _sender);
+        IRegistry.Profile memory profile = _registry.getProfileByAnchor(_anchor);
+        return _registry.isOwnerOrMemberOfProfile(profile.id, _sender);
     }
 
     /// @notice Get the recipient

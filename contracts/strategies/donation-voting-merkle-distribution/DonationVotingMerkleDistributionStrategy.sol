@@ -99,6 +99,7 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
     uint256 public allocationEndTime;
     uint256 public totalPayoutAmount;
     uint256 public recipientsCounter;
+    IRegistry private _registry;
 
     /// @notice merkle root generated from distribution
     bytes32 public merkleRoot;
@@ -201,6 +202,7 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         __BaseStrategy_init(_poolId);
         useRegistryAnchor = _useRegistryAnchor;
         metadataRequired = _metadataRequired;
+        _registry = allo.getRegistry();
 
         _isPoolTimestampValid(_registrationStartTime, _registrationEndTime, _allocationStartTime, _allocationEndTime);
 
@@ -533,9 +535,8 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
     /// @param _anchor Anchor of the profile
     /// @param _sender The sender of the transaction
     function _isProfileMember(address _anchor, address _sender) internal view virtual returns (bool) {
-        IRegistry registry = allo.getRegistry();
-        IRegistry.Profile memory profile = registry.getProfileByAnchor(_anchor);
-        return registry.isOwnerOrMemberOfProfile(profile.id, _sender);
+        IRegistry.Profile memory profile = _registry.getProfileByAnchor(_anchor);
+        return _registry.isOwnerOrMemberOfProfile(profile.id, _sender);
     }
 
     /// @notice Get the recipient

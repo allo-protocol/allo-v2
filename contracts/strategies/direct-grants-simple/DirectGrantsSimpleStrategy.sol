@@ -71,6 +71,8 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     bool public metadataRequired;
     bool public grantAmountRequired;
     uint256 public allocatedGrantAmount;
+    IRegistry private _registry;
+
     address[] private _acceptedRecipientIds;
 
     /// @notice recipientId -> Recipient
@@ -107,6 +109,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         __BaseStrategy_init(_poolId);
         registryGating = _registryGating;
         metadataRequired = _metadataRequired;
+        _registry = allo.getRegistry();
         grantAmountRequired = _grantAmountRequired;
         _setPoolActive(true);
     }
@@ -418,9 +421,8 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _anchor Anchor of the profile
     /// @param _sender The sender of the transaction
     function _isProfileMember(address _anchor, address _sender) internal view returns (bool) {
-        IRegistry registry = allo.getRegistry();
-        IRegistry.Profile memory profile = registry.getProfileByAnchor(_anchor);
-        return registry.isOwnerOrMemberOfProfile(profile.id, _sender);
+        IRegistry.Profile memory profile = _registry.getProfileByAnchor(_anchor);
+        return _registry.isOwnerOrMemberOfProfile(profile.id, _sender);
     }
 
     /// @notice Get the recipient
