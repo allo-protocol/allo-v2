@@ -92,6 +92,10 @@ abstract contract BaseStrategy is IStrategy, Transfer {
         return _isPoolActive();
     }
 
+    function getRecipientStatus(address _recipientId) external view virtual returns (RecipientStatus) {
+        return _getRecipientStatus(_recipientId);
+    }
+
     /// ====================================
     /// =========== Functions ==============
     /// ====================================
@@ -201,4 +205,6 @@ abstract contract BaseStrategy is IStrategy, Transfer {
         view
         virtual
         returns (PayoutSummary memory);
+
+    function _getRecipientStatus(address _recipientId) internal view virtual returns (RecipientStatus);
 }

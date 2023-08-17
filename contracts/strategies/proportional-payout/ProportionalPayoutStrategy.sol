@@ -121,7 +121,7 @@ contract ProportionalPayoutStrategy is BaseStrategy {
 
     /// @notice Checks if msg.sender is eligible for RFP allocation
     /// @param _recipientId Id of the recipient
-    function getRecipientStatus(address _recipientId) external view override returns (RecipientStatus) {
+    function _getRecipientStatus(address _recipientId) internal view override returns (RecipientStatus) {
         return _getRecipient(_recipientId).recipientStatus;
     }
 

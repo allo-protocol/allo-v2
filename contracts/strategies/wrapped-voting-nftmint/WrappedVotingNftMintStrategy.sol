@@ -148,7 +148,7 @@ contract WrappedVotingNftMintStrategy is Native, BaseStrategy, Initializable, Re
     /// @notice Returns the status of the recipient based on whether it is an NFT contract created by the factory
     /// @param _recipientId The address of the recipient
     /// @return The RecipientStatus of the recipient
-    function getRecipientStatus(address _recipientId) external view override returns (RecipientStatus) {
+    function _getRecipientStatus(address _recipientId) internal view override returns (RecipientStatus) {
         return nftFactory.isNFTContract(_recipientId) ? RecipientStatus.Accepted : RecipientStatus.None;
     }
 

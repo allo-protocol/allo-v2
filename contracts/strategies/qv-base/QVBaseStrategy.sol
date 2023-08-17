@@ -187,7 +187,7 @@ abstract contract QVBaseStrategy is BaseStrategy {
 
     /// @notice Get recipient status
     /// @param _recipientId Id of the recipient
-    function getRecipientStatus(address _recipientId) external view virtual override returns (RecipientStatus) {
+    function _getRecipientStatus(address _recipientId) internal view virtual override returns (RecipientStatus) {
         InternalRecipientStatus internalStatus = _getRecipient(_recipientId).recipientStatus;
         if (internalStatus == InternalRecipientStatus.Appealed) {
             return RecipientStatus.Pending;
