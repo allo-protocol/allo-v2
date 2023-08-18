@@ -27,68 +27,103 @@ import {Transfer} from "./libraries/Transfer.sol";
  *         \/__/          \/__/      \/__/      \/__/
  */
 
-/// @title Allo
-/// @notice The Allo contract
-/// @author allo-team
+/**
+ * @title Allo
+ * @notice The Allo core contract
+ * @dev This contract is used to create pools and manage the protocol
+ * @author allo-team
+ */
 contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl {
-    /// @notice Fee denominator
+    /* @notice Fee denominator */
     uint256 public constant FEE_DENOMINATOR = 1e18;
 
-    /// ==========================
-    /// === Storage Variables ====
-    /// ==========================
+    // ==========================
+    // === Storage Variables ====
+    // ==========================
 
-    /// @notice Fee percentage
-    /// @dev 1e18 = 100%, 1e17 = 10%, 1e16 = 1%, 1e15 = 0.1%
+    /**
+     * @notice Fee percentage
+     * @dev 1e18 = 100%, 1e17 = 10%, 1e16 = 1%, 1e15 = 0.1%
+     */
     uint256 private percentFee;
 
-    /// @notice Base fee
+    /**
+     * @notice Base fee
+     */
     uint256 internal baseFee;
 
-    /// @notice Incremental index
+    /**
+     * @notice Incremental index
+     */
     uint256 private _poolIndex;
 
-    /// @notice Allo treasury
+    /**
+     * @notice Allo treasury
+     */
     address payable private treasury;
 
-    /// @notice Registry of pool creators
+    /**
+     * @notice Registry of pool creators
+     */
     IRegistry private registry;
 
-    /// @notice msg.sender -> nonce for cloning strategies
+    /**
+     * @notice msg.sender -> nonce for cloning strategies
+     */
     mapping(address => uint256) private _nonces;
 
-    /// @notice Pool.id -> Pool
+    /**
+     * @notice Pool.id -> Pool
+     */
     mapping(uint256 => Pool) private pools;
 
-    /// @notice Strategy -> bool
+    /**
+     * @notice Strategy -> bool
+     */
     mapping(address => bool) private cloneableStrategies;
 
-    /// ====================================
-    /// =========== Intializer =============
-    /// ====================================
+    // ====================================
+    // =========== Intializer =============
+    // ====================================
 
-    /// @notice Initializes the contract after an upgrade
-    /// @dev During upgrade -> an higher version should be passed to reinitializer
-    /// @param _registry The address of the registry
-    /// @param _treasury The address of the treasury
-    /// @param _percentFee The percentage fee
-    /// @param _baseFee The base fee
+    /**
+     * @notice Initializes the contract after an upgrade
+     * @dev During upgrade -> an higher version should be passed to reinitializer
+     * @param _registry The address of the registry
+     * @param _treasury The address of the treasury
+     * @param _percentFee The percentage fee
+     * @param _baseFee The base fee
+     */
     function initialize(address _registry, address payable _treasury, uint256 _percentFee, uint256 _baseFee)
         external
         reinitializer(1)
     {
+        // Initialize the owner using Solady ownable library
         _initializeOwner(msg.sender);
 
+        // Set the address of the registry
         _updateRegistry(_registry);
+
+        // Set the address of the treasury
         _updateTreasury(_treasury);
+
+        // Set the fee percentage
         _updatePercentFee(_percentFee);
+
+        // Set the base fee
         _updateBaseFee(_baseFee);
     }
 
-    /// ====================================
-    /// =========== Modifier ===============
-    /// ====================================
+    // ====================================
+    // =========== Modifier ===============
+    // ====================================
 
+    /* Both modifiers below are using OpenZeppelin's AccessControl.sol with custom roles under the hood */
+
+    /**
+     * @notice Reverts UNAUTHORIZED() if the caller is not a pool manager
+     * @param _poolId The pool id
+     */
     modifier onlyPoolManager(uint256 _poolId) {
         if (!_isPoolManager(_poolId, msg.sender)) {
             revert UNAUTHORIZED();
@@ -96,6 +131,10 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
         _;
     }
 
+    /**
+     * @notice Reverts UNAUTHORIZED() if the caller is not a pool admin
+     * @param _poolId The pool id
+     */
     modifier onlyPoolAdmin(uint256 _poolId) {
         if (!_isPoolAdmin(_poolId, msg.sender)) {
             revert UNAUTHORIZED();
@@ -103,18 +142,28 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
         _;
     }
 
-    /// ====================================
-    /// ==== External/Public Functions =====
-    /// ====================================
+    //  ====================================
+    //  ==== External/Public Functions =====
+    //  ====================================
 
-    /// @notice Creates a new pool (with custom strategy)
-    /// @param _profileId The profileId of the pool
-    /// @param _strategy The address of strategy
-    /// @param _initStrategyData The data to initialize the strategy
-    /// @param _token The address of the token
-    /// @param _amount The amount of the token
-    /// @param _metadata The metadata of the pool
-    /// @param _managers The managers of the pool
+    /**
+     * @notice Creates a new pool (with custom strategy)
+     * @dev Must be a member or owner of a profile to create a pool with or without a custom strategy
+     *
+     * Requirements: The strategy address passed must not be a cloneable strategy
+     *               The strategy address passed must not be the zero address
+     *               The caller must be a member or owner of the profile
+     *
+     * @param _profileId The profileId of the pool, used to check if the caller is a member or owner of the profile
+     * @param _strategy The address of the deployed custom strategy
+     * @param _initStrategyData The data to initialize the strategy
+     * @param _token The address of the token you want to use in your pool
+     * @param _amount The amount of the token you want to deposit into the pool on initialization
+     * @param _metadata The metadata of the pool, this uses our 'Meatdata.sol' struct (consistent throughout the protocol)
+     * @param _managers The managers of the pool, and can be added/removed later by the pool admin
+     * @custom:initstrategydata The encoded data will be specific to a given strategy requirements, reference the strategy implementation of 'initialize()'
+     * @return poolId The id of the pool
+     */
     function createPoolWithCustomStrategy(
         bytes32 _profileId,
         address _strategy,
@@ -124,23 +173,33 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
         Metadata memory _metadata,
         address[] memory _managers
     ) external payable returns (uint256 poolId) {
+        // Revert if the strategy address passed is the zero address with 'ZERO_ADDRESS()'
         if (_strategy == address(0)) {
             revert ZERO_ADDRESS();
         }
+        // Revert if we already have this strategy in our cloneable mapping with 'IS_APPROVED_STRATEGY()' (only non-cloneable strategies can be used)
         if (_isCloneableStrategy(_strategy)) {
             revert IS_APPROVED_STRATEGY();
         }
 
+        // Call the internal '_createPool()' function and return the 'poolId'
         return _createPool(_profileId, IStrategy(_strategy), _initStrategyData, _token, _amount, _metadata, _managers);
     }
 
-    /// @notice Creates a new pool (by cloning a cloneable strategies)
-    /// @param _profileId The profileId of the pool
-    /// @param _initStrategyData The data to initialize the strategy
-    /// @param _token The address of the token
-    /// @param _amount The amount of the token
-    /// @param _metadata The metadata of the pool
-    /// @param _managers The managers of the pool
+    /**
+     * @notice Creates a new pool (by cloning a cloneable strategies)
+     *
+     * Requirements: 'msg.sender' must be owner or member of the profile id passed as '_profileId'
+     *
+     * @param _profileId The profileId of the pool
+     * @param _initStrategyData The data to initialize the strategy
+     * @param _token The address of the token
+     * @param _amount The amount of the token
+     * @param _metadata The metadata of the pool
+     * @param _managers The managers of the pool
+     * @custom:initstrategydata The encoded data will be specific to a given strategy requirements,
+     *    reference the strategy implementation of 'initialize()'
+     */
     function createPool(
         bytes32 _profileId,
         address _strategy,
@@ -154,6 +213,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
             revert NOT_APPROVED_STRATEGY();
         }
 
+        // Returns the created pool id
         return _createPool(
             _profileId,
             IStrategy(Clone.createClone(_strategy, _nonces[msg.sender]++)),
@@ -165,10 +225,15 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
         );
     }
 
-    /// @notice Update pool metadata
-    /// @param _poolId id of the pool
-    /// @param _metadata new metadata of the pool
-    /// @dev Only callable by the pool managers
+    /**
+     * @notice Update pool metadata
+     * @dev Only callable by the pool managers, emits 'PoolMetadataUpdated()' event
+     *
+     * Requirements: The caller must be a pool manager
+     *
+     * @param _poolId id of the pool
+     * @param _metadata new metadata of the pool
+     */
     function updatePoolMetadata(uint256 _poolId, Metadata memory _metadata) external onlyPoolManager(_poolId) {
         Pool storage pool = pools[_poolId];
         pool.metadata = _metadata;
@@ -176,37 +241,62 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
         emit PoolMetadataUpdated(_poolId, _metadata);
     }
 
-    /// @notice Updates the registry address
-    /// @param _registry The new registry address
-    /// @dev Only callable by the owner if the current registry cannot be used
+    /**
+     * @notice Updates the registry address
+     * @dev Use this to update the registry address
+     *
+     * Requirements: The caller must be allo owner
+     *
+     * @param _registry The new registry address
+     */
     function updateRegistry(address _registry) external onlyOwner {
         _updateRegistry(_registry);
     }
 
-    /// @notice Updates the treasury address
-    /// @param _treasury The new treasury address
-    /// @dev Only callable by the owner
+    /**
+     * @notice Updates the treasury address
+     * @dev Use this to update the treasury address
+     *
+     * Requirements: The caller must be allo owner
+     *
+     * @param _treasury The new treasury address
+     */
     function updateTreasury(address payable _treasury) external onlyOwner {
         _updateTreasury(_treasury);
     }
 
-    /// @notice Updates the fee percentage
-    /// @param _percentFee The new fee
-    /// @dev Only callable by the owner
+    /**
+     * @notice Updates the fee percentage
+     * @dev Use this to update the fee percentage
+     *
+     * Requirements: The caller must be allo owner
+     *
+     * @param _percentFee The new fee
+     */
     function updatePercentFee(uint256 _percentFee) external onlyOwner {
         _updatePercentFee(_percentFee);
     }
 
-    /// @notice Updates the base fee
-    /// @param _baseFee The new base fee
-    /// @dev Only callable by the owner
+    /**
+     * @notice Updates the base fee
+     * @dev Use this to update the base fee
+     *
+     * Requirements: The caller must be allo owner
+     *
+     * @param _baseFee The new base fee
+     */
     function updateBaseFee(uint256 _baseFee) external onlyOwner {
         _updateBaseFee(_baseFee);
     }
 
-    /// @notice Add a strategy to the allowlist
-    /// @param _strategy The address of the strategy
-    /// @dev Only callable by the owner
+    /**
+     * @notice Add a strategy to the allowlist
+     * @dev Only callable by the owner, emits the 'StrategyApproved()' event
+     *
+     * Requirements: The caller must be allo owner
+     *
+     * @param _strategy The address of the strategy
+     */
     function addToCloneableStrategies(address _strategy) external onlyOwner {
         if (_strategy == address(0)) {
             revert ZERO_ADDRESS();
@@ -215,66 +305,113 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
         emit StrategyApproved(_strategy);
     }
 
-    /// @notice Remove a strategy from the allowlist
-    /// @param _strategy The address of the strategy
-    /// @dev Only callable by the owner
+    /**
+     * @notice Remove a strategy from the allowlist
+     * @dev Only callable by the owner, emits 'StrategyRemoved()' event
+     *
+     * Requirements: The caller must be allo owner
+     *
+     * @param _strategy The address of the strategy
+     */
     function removeFromCloneableStrategies(address _strategy) external onlyOwner {
+        // Set the strategy to false in the cloneableStrategies mapping
         cloneableStrategies[_strategy] = false;
+
+        // Emit the StrategyRemoved event
         emit StrategyRemoved(_strategy);
     }
 
-    /// @notice Add a pool manager
-    /// @param _poolId The pool id
-    /// @param _manager The address to add
+    /**
+     * @notice Add a pool manager
+     * @dev emits 'RoleGranted()' event
+     *
+     * Requirements: The caller must be a pool admin
+     *
+     * @param _poolId The pool id
+     * @param _manager The address to add
+     */
     function addPoolManager(uint256 _poolId, address _manager) external onlyPoolAdmin(_poolId) {
+        // Reverts if the address is the zero address with 'ZERO_ADDRESS()'
         if (_manager == address(0)) {
             revert ZERO_ADDRESS();
         }
+
+        // Grants the pool manager role to the '_manager' address
         _grantRole(pools[_poolId].managerRole, _manager);
     }
 
-    /// @notice Remove a pool manager
-    /// @param _poolId The pool id
-    /// @param _manager The address remove
+    /**
+     * @notice Remove a pool manager
+     * @dev emits 'RoleRevoked()' event
+     *
+     * Requirements: The caller must be a pool admin
+     *
+     * @param _poolId The pool id
+     * @param _manager The address remove
+     */
     function removePoolManager(uint256 _poolId, address _manager) external onlyPoolAdmin(_poolId) {
         _revokeRole(pools[_poolId].managerRole, _manager);
     }
 
-    /// @notice Transfer thefunds recovered  to the recipient
-    /// @param _token The address of the token to transfer
-    /// @param _recipient The address of the recipient
+    /**
+     * @notice Transfer thefunds recovered  to the recipient
+     *
+     * Requirements: The caller must be a pool owner
+     *
+     * @param _token The address of the token to transfer
+     * @param _recipient The address of the recipient
+     */
     function recoverFunds(address _token, address _recipient) external onlyOwner {
+        // Get the amount of the token to transfer, which is always the entire balance of the contract address
         uint256 amount = _token == NATIVE ? address(this).balance : IERC20Upgradeable(_token).balanceOf(address(this));
+
+        // Transfer the amount to the recipient (pool owner)
         _transferAmount(_token, _recipient, amount);
     }
 
-    /// ====================================
-    /// ======= Strategy Functions =========
-    /// ====================================
+    // ====================================
+    // ======= Strategy Functions =========
+    // ====================================
 
-    /// @notice passes _data through to the strategy for that pool
-    /// @notice returns the recipientId from the strategy
-    /// @param _poolId id of the pool
-    /// @param _data encoded data unique to the strategy for that pool
+    /**
+     * @notice Passes _data through to the strategy for that pool
+     *
+     * Requirements: This will be determined by the strategy
+     *
+     * @param _poolId Id of the pool
+     * @param _data Encoded data unique to a strategy that registerRecipient() requires
+     * @custom:data The encoded data will be specific to a given strategy requirements, reference the strategy implementation of registerRecipient()
+     * @return recipientId The recipientId that has been registered
+     */
     function registerRecipient(uint256 _poolId, bytes memory _data) external payable returns (address) {
+        // Return the recipientId (address) from the strategy
         return pools[_poolId].strategy.registerRecipient(_data, msg.sender);
     }
 
-    /// @notice register to multiple pools
-    /// @notice returns the recipientIds from the strategy
-    /// @param _poolIds id of the pools
-    /// @param _data encoded data unique to strategy for each pool
+    /**
+     * @notice Register multiple recipients to multiple pools
+     * @dev Returns the recipientIds from the strategy that have been registered from calling this funciton
+     *
+     * Requirements: Encoded '_data' length must match _poolIds length or this will revert with MISMATCH()
+     *               Other requirements will be determined by the strategy
+     *
+     * @param _poolIds Id of the pools
+     * @param _data Encoded data unique to a strategy that registerRecipient() requires
+     * @custom:data The encoded data will be specific to a given strategy requirements, reference the strategy implementation of registerRecipient()
+     * @return recipientIds The recipientIds that have been registered
+     */
     function batchRegisterRecipient(uint256[] memory _poolIds, bytes[] memory _data)
         external
-        returns (address[] memory)
+        returns (address[] memory recipientIds)
     {
         uint256 poolIdLength = _poolIds.length;
-        address[] memory recipientIds = new address[](poolIdLength);
+        recipientIds = new address[](poolIdLength);
 
         if (poolIdLength != _data.length) {
             revert MISMATCH();
         }
 
+        // Loop through the _poolIds & _data and call the internal _registerRecipient() function
         for (uint256 i = 0; i < poolIdLength;) {
             recipientIds[i] = pools[_poolIds[i]].strategy.registerRecipient(_data[i], msg.sender);
             unchecked {
@@ -282,35 +419,60 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
             }
         }
 
+        // Return the recipientIds that have been registered
         return recipientIds;
     }
 
-    /// @notice Fund a pool
-    /// @param _poolId id of the pool
-    /// @param _amount extra amount of the token to be deposited into the pool
-    /// @dev Anyone can fund a pool
+    /**
+     * @notice Fund a pool
+     * @dev Calls the internal _fundPool() function
+     *
+     * Requirements: None, anyone can fund a pool
+     *
+     * @param _poolId id of the pool
+     * @param _amount extra amount of the token to be deposited into the pool
+     */
     function fundPool(uint256 _poolId, uint256 _amount) external payable {
+        // if amount is 0, revert with 'NOT_ENOUGH_FUNDS()' error
         if (_amount == 0) {
             revert NOT_ENOUGH_FUNDS();
         }
+
+        // Call the internal fundPool() function
         _fundPool(_amount, _poolId, pools[_poolId].strategy);
     }
 
-    /// @notice passes _data & msg.sender through to the strategy for that pool
-    /// @param _poolId id of the pool
-    /// @param _data encoded data unique to the strategy for that pool
+    /**
+     * @notice passes _data & msg.sender through to the strategy for that pool
+     * @dev Calls the internal _allocate() function
+     *
+     * Requirements: This will be determined by the strategy
+     *
+     * @param _poolId id of the pool
+     * @param _data encoded data unique to the strategy for that pool
+     */
     function allocate(uint256 _poolId, bytes memory _data) external payable {
         _allocate(_poolId, _data);
     }
 
-    /// @notice vote to multiple pools
-    /// @param _poolIds ids of the pools
-    /// @param _datas encoded data unique to the strategy for that pool
+    /**
+     * @notice vote to multiple pools
+     *
+     * Requirements: This will be determined by the strategy
+     *
+     * @param _poolIds ids of the pools
+     * @param _datas encoded data unique to the strategy for that pool
+     * @custom:datas The encoded data will be specific to a given strategy requirements, reference the strategy implementation of allocate()
+     */
     function batchAllocate(uint256[] calldata _poolIds, bytes[] memory _datas) external {
         uint256 numPools = _poolIds.length;
+
+        // Reverts if the length of _poolIds does not match the length of _datas with 'MISMATCH()' error
         if (numPools != _datas.length) {
             revert MISMATCH();
         }
+
+        // Loop through the _poolIds & _datas and call the internal _allocate() function
         for (uint256 i = 0; i < numPools;) {
             _allocate(_poolIds[i], _datas[i]);
             unchecked {
@@ -319,9 +481,15 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
         }
     }
 
-    /// @notice passes _data & msg.sender through to the disribution strategy for that pool
-    /// @param _poolId id of the pool
-    /// @param _data encoded data unique to the strategy for that pool
+    /**
+     * @notice passes _data & msg.sender through to the disribution strategy for that pool
+     *
+     * Requirements: This will be determined by the strategy
+     *
+     * @param _poolId id of the pool
+     * @param _data encoded data unique to the strategy for that pool
+     * @custom:data The encoded data will be specific to a given strategy requirements, reference the strategy implementation of distribute()
+     */
     function distribute(uint256 _poolId, address[] memory _recipientIds, bytes memory _data) external {
         pools[_poolId].strategy.distribute(_recipientIds, _data, msg.sender);
     }
@@ -330,14 +498,18 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
     /// ======= Internal Functions =========
     /// ====================================
 
-    /// @notice Creates a new pool
-    /// @param _profileId The profileId of the pool creator in the registry
-    /// @param _strategy The address of strategy
-    /// @param _initStrategyData The data to initialize the strategy
-    /// @param _token The address of the token that the pool is denominated in
-    /// @param _amount The amount of the token to be deposited into the pool
-    /// @param _metadata The metadata of the pool
-    /// @param _managers The managers of the pool
+    /**
+     * @notice Creates a new pool
+     * @dev Must be a member or owner of a profile to create a pool
+     * @param _profileId The profileId of the pool creator in the registry
+     * @param _strategy The address of strategy
+     * @param _initStrategyData The data to initialize the strategy
+     * @param _token The address of the token that the pool is denominated in
+     * @param _amount The amount of the token to be deposited into the pool
+     * @param _metadata The metadata of the pool
+     * @param _managers The managers of the pool
+     * @return poolId The id of the pool
+     */
     function _createPool(
         bytes32 _profileId,
         IStrategy _strategy,
@@ -353,10 +525,11 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
 
         poolId = ++_poolIndex;
 
-        // access control
+        // Generate the manager & admin roles for the pool (this is the way we do this throughout the protocol for consistency)
         bytes32 POOL_MANAGER_ROLE = bytes32(poolId);
         bytes32 POOL_ADMIN_ROLE = keccak256(abi.encodePacked(poolId, "admin"));
 
+        // Create the Pool instance
         Pool memory pool = Pool({
             profileId: _profileId,
             strategy: _strategy,
@@ -366,15 +539,17 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
             adminRole: POOL_ADMIN_ROLE
         });
 
+        // Add the pool to the mapping of created pools
         pools[poolId] = pool;
 
-        // grant admin roles to pool creator
+        // Grant admin roles to the pool creator
         _grantRole(POOL_ADMIN_ROLE, msg.sender);
-        // set admin role for POOL_MANAGER_ROLE
+
+        // Set admin role for POOL_MANAGER_ROLE
         _setRoleAdmin(POOL_MANAGER_ROLE, POOL_ADMIN_ROLE);
 
         // initialize strategies
-        // @dev Initialization is expect to revert when invoked more than once
+        // Initialization is expected to revert when invoked more than once with 'BaseStrategy_ALREADY_INITIALIZED()' error
         _strategy.initialize(poolId, _initStrategyData);
 
         if (_strategy.getPoolId() != poolId || address(_strategy.getAllo()) != address(this)) {
@@ -412,17 +587,21 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
         emit PoolCreated(poolId, _profileId, _strategy, _token, _amount, _metadata);
     }
 
-    /// @notice passes _data & msg.sender through to the strategy for that pool
-    /// @param _poolId id of the pool
-    /// @param _data encoded data unique to the strategy for that pool
+    /**
+     * @notice passes _data & msg.sender through to the strategy for that pool
+     * @param _poolId id of the pool
+     * @param _data encoded data unique to the strategy for that pool
+     */
     function _allocate(uint256 _poolId, bytes memory _data) internal {
         pools[_poolId].strategy.allocate{value: msg.value}(_data, msg.sender);
     }
 
-    /// @notice Deduct the fee and transfers the amount to the distribution strategy
-    /// @param _amount The amount to transfer
-    /// @param _poolId The pool id
-    /// @param _strategy The address of the strategy
+    /**
+     * @notice Deducts the fee and transfers the amount to the distribution strategy
+     * @param _amount The amount to transfer
+     * @param _poolId The pool id
+     * @param _strategy The address of the strategy
+     */
     function _fundPool(uint256 _amount, uint256 _poolId, IStrategy _strategy) internal {
         uint256 feeAmount = 0;
         uint256 amountAfterFee = _amount;
@@ -443,30 +622,39 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
         emit PoolFunded(_poolId, amountAfterFee, feeAmount);
     }
 
-    /// @notice Checks if the strategy is cloneable
-    /// @param _strategy The address of the strategy
+    /**
+     * @notice Checks if the strategy is cloneable
+     * @param _strategy The address of the strategy
+     * @return bool
+     */
     function _isCloneableStrategy(address _strategy) internal view returns (bool) {
         return cloneableStrategies[_strategy];
     }
 
-    /// @notice Checks if the address is a pool admin
-    /// @param _poolId The pool id
-    /// @param _address The address to check
-    /// @return bool
+    /**
+     * @notice Checks if the address is a pool admin
+     * @param _poolId The pool id
+     * @param _address The address to check
+     * @return bool
+     */
     function _isPoolAdmin(uint256 _poolId, address _address) internal view returns (bool) {
         return hasRole(pools[_poolId].adminRole, _address);
     }
 
-    /// @notice Checks if the address is a pool manager
-    /// @param _poolId The pool id
-    /// @param _address The address to check
-    /// @return bool
+    /**
+     * @notice Checks if the address is a pool manager
+     * @param _poolId The pool id
+     * @param _address The address to check
+     * @return bool
+     */
     function _isPoolManager(uint256 _poolId, address _address) internal view returns (bool) {
         return hasRole(pools[_poolId].managerRole, _address) || _isPoolAdmin(_poolId, _address);
     }
 
-    /// @notice Updates the registry address
-    /// @param _registry The new registry address
+    /**
+     * @notice Updates the registry address
+     * @param _registry The new registry address
+     */
     function _updateRegistry(address _registry) internal {
         if (_registry == address(0)) {
             revert ZERO_ADDRESS();
@@ -475,8 +663,10 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
         emit RegistryUpdated(_registry);
     }
 
-    /// @notice Updates the treasury address
-    /// @param _treasury The new treasury address
+    /**
+     * @notice Updates the treasury address
+     * @param _treasury The new treasury address
+     */
     function _updateTreasury(address payable _treasury) internal {
         if (_treasury == address(0)) {
             revert ZERO_ADDRESS();
@@ -485,8 +675,10 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
         emit TreasuryUpdated(treasury);
     }
 
-    /// @notice Updates the fee percentage
-    /// @param _percentFee The new fee
+    /**
+     * @notice Updates the fee percentage
+     * @param _percentFee The new fee
+     */
     function _updatePercentFee(uint256 _percentFee) internal {
         if (_percentFee > 1e18) {
             revert INVALID_FEE();
@@ -496,66 +688,86 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
         emit PercentFeeUpdated(percentFee);
     }
 
-    /// @notice Updates the base fee
-    /// @param _baseFee The new base fee
+    /**
+     * @notice Updates the base fee
+     * @param _baseFee The new base fee
+     */
     function _updateBaseFee(uint256 _baseFee) internal {
         baseFee = _baseFee;
         emit BaseFeeUpdated(baseFee);
     }
 
-    /// =========================
-    /// ==== View Functions =====
-    /// =========================
+    // =========================
+    // ==== View Functions =====
+    // =========================
 
-    /// @notice Checks if the address is a pool admin
-    /// @param _poolId The pool id
-    /// @param _address The address to check
-    /// @return bool
+    /**
+     * @notice Checks if the address is a pool admin
+     * @param _poolId The pool id
+     * @param _address The address to check
+     * @return bool
+     */
     function isPoolAdmin(uint256 _poolId, address _address) external view returns (bool) {
         return _isPoolAdmin(_poolId, _address);
     }
 
-    /// @notice Checks if the address is a pool manager
-    /// @param _poolId The pool id
-    /// @param _address The address to check
-    /// @return bool
+    /**
+     * @notice Checks if the address is a pool manager
+     * @param _poolId The pool id
+     * @param _address The address to check
+     * @return bool
+     */
     function isPoolManager(uint256 _poolId, address _address) external view returns (bool) {
         return _isPoolManager(_poolId, _address);
     }
 
-    /// @notice Return the strategy for a pool
-    /// @param _poolId The pool id
-    /// @return address
+    /**
+     * @notice Return the strategy for a pool
+     * @param _poolId The pool id
+     * @return address
+     */
     function getStrategy(uint256 _poolId) external view returns (address) {
         return address(pools[_poolId].strategy);
     }
 
-    /// @notice return fee percentage
+    /**
+     * @notice return fee percentage
+     */
     function getPercentFee() external view returns (uint256) {
         return percentFee;
     }
 
-    /// @notice return base fee
+    /**
+     * @notice return base fee
+     */
     function getBaseFee() external view returns (uint256) {
         return baseFee;
     }
 
-    /// @notice return treasury
+    /**
+     * @notice return treasury
+     */
     function getTreasury() external view returns (address payable) {
         return treasury;
     }
 
-    /// @notice return registry
+    /**
+     * @notice return registry
+     */
     function getRegistry() external view returns (IRegistry) {
         return registry;
     }
 
-    /// @notice return boolean if strategy is cloneable
+    /**
+     * @notice return boolean if strategy is cloneable
+     */
     function isCloneableStrategy(address _strategy) external view returns (bool) {
         return _isCloneableStrategy(_strategy);
     }
 
-    /// @notice return the pool
+    /**
+     * @notice return the pool
+     */
     function getPool(uint256 _poolId) external view returns (Pool memory) {
         return pools[_poolId];
     }
