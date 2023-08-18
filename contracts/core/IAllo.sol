@@ -151,7 +151,7 @@ interface IAllo {
     function updatePoolMetadata(uint256 _poolId, Metadata memory _metadata) external;
 
     /**
-     * @dev Updates the registry address and emits a 'RegistryUpdated' event
+     * @dev Updates the registry address and emits a {RegistryUpdated} event
      *
      * Requirements: 'msg.sender' must be the allo contract owner
      *
@@ -159,7 +159,7 @@ interface IAllo {
     function updateRegistry(address _registry) external;
 
     /**
-     * @dev Updates the treasury address and emits a 'TreasuryUpdated' event
+     * @dev Updates the treasury address and emits a {TreasuryUpdated} event
      *
      * Requirements: 'msg.sender' must be the allo contract owner
      *
@@ -167,7 +167,7 @@ interface IAllo {
     function updateTreasury(address payable _treasury) external;
 
     /**
-     * @dev Updates the percent fee and emits a 'PercentFeeUpdated' event
+     * @dev Updates the percent fee and emits a {PercentFeeUpdated} event
      *
      * Requirements: 'msg.sender' must be the allo contract owner
      *
@@ -175,7 +175,7 @@ interface IAllo {
     function updatePercentFee(uint256 _percentFee) external;
 
     /**
-     * @dev Updates the base fee and emits a 'BaseFeeUpdated' event
+     * @dev Updates the base fee and emits a {BaseFeeUpdated} event
      *
      * Requirements: 'msg.sender' must be the allo contract owner
      *
@@ -183,7 +183,7 @@ interface IAllo {
     function updateBaseFee(uint256 _baseFee) external;
 
     /**
-     * @dev Adds a strategy to the cloneable strategies mapping and emits a 'StrategyApproved' event
+     * @dev Adds a strategy to the cloneable strategies mapping and emits a {StrategyApproved} event
      *
      * Requirements: 'msg.sender' must be the allo contract owner
      *
@@ -191,7 +191,7 @@ interface IAllo {
     function addToCloneableStrategies(address _strategy) external;
 
     /**
-     * @dev Removes a strategy from the cloneable strategies mapping and emits a 'StrategyRemoved' event
+     * @dev Removes a strategy from the cloneable strategies mapping and emits a {StrategyRemoved} event
      *
      * Requirements: 'msg.sender' must be the allo contract owner
      *
@@ -199,7 +199,7 @@ interface IAllo {
     function removeFromCloneableStrategies(address _strategy) external;
 
     /**
-     * @dev Adds a pool manager to the pool and emits 'RoleGranted' event
+     * @dev Adds a pool manager to the pool and emits {RoleGranted} event
      *
      * Requirements: 'msg.sender' must be a pool admin
      *
@@ -207,7 +207,7 @@ interface IAllo {
     function addPoolManager(uint256 _poolId, address _manager) external;
 
     /**
-     * @dev Removes a pool manager from the pool and emits 'RoleRevoked' event
+     * @dev Removes a pool manager from the pool and emits {RoleRevoked} event
      *
      * Requirements: 'msg.sender' must be a pool admin
      *
@@ -223,7 +223,7 @@ interface IAllo {
     function recoverFunds(address _token, address _recipient) external;
 
     /**
-     * @dev Registers a recipient and emits 'Registered' event if successful and may be handled differently by each strategy
+     * @dev Registers a recipient and emits {Registered} event if successful and may be handled differently by each strategy
      *
      * Requirements: determined by the strategy
      *
@@ -231,7 +231,7 @@ interface IAllo {
     function registerRecipient(uint256 _poolId, bytes memory _data) external payable returns (address);
 
     /**
-     * @dev Registers a batch of recipients and emits 'Registered' event if successful for each recipient
+     * @dev Registers a batch of recipients and emits {Registered} event if successful for each recipient
      *      and may be handled differently by each strategy
      *
      * Requirements: determined by the strategy
@@ -242,7 +242,7 @@ interface IAllo {
         returns (address[] memory);
 
     /**
-     * @dev Funds a pool and emits 'PoolFunded' event if successful
+     * @dev Funds a pool and emits {PoolFunded} event if successful
      *
      * Requirements: None, but 'msg.value' must be greater than 0 if the token is the native token
      *               or '_amount' must be greater than 0 if the token is not the native token
@@ -251,21 +251,21 @@ interface IAllo {
     function fundPool(uint256 _poolId, uint256 _amount) external payable;
 
     /**
-     * @dev Allocates funds to a recipient and emits 'Allocated' event if successful
+     * @dev Allocates funds to a recipient and emits {Allocated} event if successful
      *
      * Note: Each strategy will handle the allocation of funds differently
      */
     function allocate(uint256 _poolId, bytes memory _data) external payable;
 
     /**
-     * @dev Allocates funds to multiple recipients and emits 'Allocated' event if successful for each recipient
+     * @dev Allocates funds to multiple recipients and emits {Allocated} event if successful for each recipient
      *
      * Note: Each strategy will handle the allocation of funds differently
      */
     function batchAllocate(uint256[] calldata _poolIds, bytes[] memory _datas) external;
 
     /**
-     * @dev Distributes funds to recipients and emits 'Distributed' event if successful
+     * @dev Distributes funds to recipients and emits {Distributed} event if successful
      *
      * Note: Each strategy will handle the distribution of funds differently
      */
