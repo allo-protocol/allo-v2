@@ -24,7 +24,9 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         InReview
     }
 
-    /// @notice Struct to hold details of an recipient
+    /**
+     * @notice Struct to hold details of an recipient
+     */
     struct Recipient {
         bool useRegistryAnchor;
         address recipientAddress;
@@ -34,7 +36,9 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         RecipientStatus milestonesReviewStatus;
     }
 
-    /// @notice Struct to hold milestone details
+    /**
+     * @notice Struct to hold milestone details
+     */
     struct Milestone {
         uint256 amountPercentage;
         Metadata metadata;
@@ -77,13 +81,21 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
     address[] private _acceptedRecipientIds;
 
-    /// @notice recipientId -> Recipient
+    /**
+     * @notice recipientId -> Recipient
+     */
     mapping(address => Recipient) private _recipients;
-    /// @notice recipientId -> Milestone[]
+    /**
+     * @notice recipientId -> Milestone[]
+     */
     mapping(address => Milestone[]) public milestones;
-    /// @notice recipientId -> Next Milestone for the recipient
+    /**
+     * @notice recipientId -> Next Milestone for the recipient
+     */
     mapping(address => uint256) public upcomingMilestone;
-    /// @notice recipientId -> Total Milestones for the recipient
+    /**
+     * @notice recipientId -> Total Milestones for the recipient
+     */
     mapping(address => uint256) public totalMilestones;
 
     /// ===============================
@@ -120,19 +132,25 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// ============ Views ============
     /// ===============================
 
-    /// @notice Get the recipient
+    /**
+     * @notice Get the recipient
+     */
     function getRecipient(address _recipientId) external view returns (Recipient memory) {
         return _getRecipient(_recipientId);
     }
 
-    /// @notice Get Internal recipient status
-    /// @param _recipientId Id of the recipient
+    /**
+     * @notice Get Internal recipient status
+     * @param _recipientId Id of the recipient
+     */
     function getInternalRecipientStatus(address _recipientId) external view returns (InternalRecipientStatus) {
         return _getRecipient(_recipientId).recipientStatus;
     }
 
-    /// @notice Get recipient status
-    /// @param _recipientId Id of the recipient
+    /**
+     * @notice Get recipient status
+     * @param _recipientId Id of the recipient
+     */
     function _getRecipientStatus(address _recipientId) internal view override returns (RecipientStatus) {
         InternalRecipientStatus internalStatus = _getRecipient(_recipientId).recipientStatus;
         if (internalStatus == InternalRecipientStatus.InReview) {
@@ -142,21 +160,27 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         }
     }
 
-    /// @notice Checks if address is elgible allocator
-    /// @param _allocator Address of the allocator
+    /**
+     * @notice Checks if address is elgible allocator
+     * @param _allocator Address of the allocator
+     */
     function _isValidAllocator(address _allocator) internal view override returns (bool) {
         return allo.isPoolManager(poolId, _allocator);
     }
 
-    /// @notice Get the status of the milestone of an recipient
-    /// @param _recipientId Id of the recipient
-    /// @param _milestoneId Id of the milestone
+    /**
+     * @notice Get the status of the milestone of an recipient
+     * @param _recipientId Id of the recipient
+     * @param _milestoneId Id of the milestone
+     */
     function getMilestoneStatus(address _recipientId, uint256 _milestoneId) external view returns (RecipientStatus) {
         return milestones[_recipientId][_milestoneId].milestoneStatus;
     }
 
-    /// @notice Get the milestones
-    /// @param _recipientId Id of the recipient
+    /**
+     * @notice Get the milestones
+     * @param _recipientId Id of the recipient
+     */
     function getMilestones(address _recipientId) external view returns (Milestone[] memory) {
         return milestones[_recipientId];
     }
@@ -212,9 +236,15 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         }
     }
 
-    /// @notice Submit milestone by the recipient
-    /// @param _recipientId Id of the recipient
-    /// @param _metadata The proof of work
+    /**
+     * @notice Submit milestone by the recipient
+     *
+     * Requirements: Must be a member of a 'Profile' to sumbit a milestone and '_recipientId'
+     *               must NOT be the same as 'msg.sender'
+     *
+     * @param _recipientId Id of the recipient
+     * @param _metadata The proof of work
+     */
     function submitMilestone(address _recipientId, uint256 _milestoneId, Metadata calldata _metadata) external {
         if (_recipientId != msg.sender && !_isProfileMember(_recipientId, msg.sender)) {
             revert UNAUTHORIZED();
@@ -243,9 +273,14 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         emit MilestoneSubmitted(_recipientId, _milestoneId, _metadata);
     }
 
-    /// @notice Reject pending milestone of the recipient
-    /// @param _recipientId Id of the recipient
-    /// @param _milestoneId Id of the milestone
+    /**
+     * @notice Reject pending milestone of the recipient
+     *
+     * Requirements: Only the pool manager can reject the milestone
+     *
+     * @param _recipientId Id of the recipient
+     * @param _milestoneId Id of the milestone
+     */
     function rejectMilestone(address _recipientId, uint256 _milestoneId) external onlyPoolManager(msg.sender) {
         Milestone[] storage recipientMilestones = milestones[_recipientId];
         if (_milestoneId > recipientMilestones.length) {
@@ -281,10 +316,18 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         }
     }
 
-    /// @notice Withdraw funds from pool
-    /// @param _amount The amount to be withdrawn
+    /**
+     * @notice Withdraw funds from pool
+     *
+     * Requirements: Only the pool manager can withdraw
+     *
+     * @param _amount The amount to be withdrawn
+     */
     function withdraw(uint256 _amount) external onlyPoolManager(msg.sender) {
+        // Decrement the pool amount
         poolAmount -= _amount;
+
+        // Transfer the amount to the pool manager
         _transferAmount(allo.getPool(poolId).token, msg.sender, _amount);
     }
 
@@ -292,9 +335,15 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// ============ Internal ==============
     /// ====================================
 
-    /// @notice Register to the pool
-    /// @param _data The data to be decoded
-    /// @param _sender The sender of the transaction
+    /**
+     * @dev Register a recipient to the pool
+     *
+     * @param _data The data to be decoded
+     * @custom:data (address recipientId, address recipientAddress, uint256 grantAmount, Metadata metadata)
+     * @param _sender The sender of the transaction
+     *
+     * @return recipientId The id of the recipient
+     */
     function _registerRecipient(bytes memory _data, address _sender)
         internal
         override
@@ -307,7 +356,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         uint256 grantAmount;
         Metadata memory metadata;
 
-        // decode data custom to this strategy
+        // Decode '_data'
         if (registryGating) {
             (recipientId, recipientAddress, grantAmount, metadata) =
                 abi.decode(_data, (address, address, uint256, Metadata));
@@ -351,9 +400,12 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         emit Registered(recipientId, _data, _sender);
     }
 
-    /// @notice Allocate amount to recipent for direct grants
-    /// @param _data The data to be decoded
-    /// @param _sender The sender of the allocation
+    /**
+     * @notice Allocate amount to recipent for direct grants
+     * @param _data The data to be decoded
+     * @custom:data (address recipientId, InternalRecipientStatus recipientStatus, uint256 grantAmount)
+     * @param _sender The sender of the allocation
+     */
     function _allocate(bytes memory _data, address _sender)
         internal
         virtual
@@ -361,6 +413,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         nonReentrant
         onlyPoolManager(_sender)
     {
+        // Decode the '_data'
         (address recipientId, InternalRecipientStatus recipientStatus, uint256 grantAmount) =
             abi.decode(_data, (address, InternalRecipientStatus, uint256));
 
@@ -371,12 +424,13 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         }
 
         if (
-            recipient.recipientStatus != InternalRecipientStatus.Accepted // no need to accept twice
+            recipient.recipientStatus != InternalRecipientStatus.Accepted
                 && recipientStatus == InternalRecipientStatus.Accepted
         ) {
             IAllo.Pool memory pool = allo.getPool(poolId);
             allocatedGrantAmount += grantAmount;
 
+            // Check if the allocated grant amount exceeds the pool amount and reverts if it does
             if (allocatedGrantAmount > poolAmount) {
                 revert ALLOCATION_EXCEEDS_POOL_AMOUNT();
             }
@@ -384,19 +438,32 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
             recipient.grantAmount = grantAmount;
             recipient.recipientStatus = InternalRecipientStatus.Accepted;
 
+            // Emit event for the acceptance
             emit RecipientStatusChanged(recipientId, InternalRecipientStatus.Accepted);
+
+            // Emit event for the allocation
             emit Allocated(recipientId, recipient.grantAmount, pool.token, _sender);
         } else if (
             recipient.recipientStatus != InternalRecipientStatus.Rejected // no need to reject twice
                 && recipientStatus == InternalRecipientStatus.Rejected
         ) {
             recipient.recipientStatus = InternalRecipientStatus.Rejected;
+
+            // Emit event for the rejection
             emit RecipientStatusChanged(recipientId, InternalRecipientStatus.Rejected);
         }
     }
 
-    /// @notice Distribute the upcoming milestone
-    /// @param _sender The sender of the distribution
+    /**
+     * @dev Distribute the upcoming milestone to a array of recipients
+     *
+     * @param _recipientIds The recipient ids of the distribution
+     * @param _sender The sender of the distribution
+     *
+     * Requirements: Only the pool manager can distribute
+     *
+     * @param _sender The sender of the distribution
+     */
     function _distribute(address[] memory _recipientIds, bytes memory, address _sender)
         internal
         virtual
@@ -412,6 +479,12 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         }
     }
 
+    /**
+     * @dev Distribute the upcoming milestone
+     *
+     * @param _recipientId The recipient of the distribution
+     * @param _sender The sender of the distribution
+     */
     function _distributeUpcomingMilestone(address _recipientId, address _sender) private {
         uint256 milestoneToBeDistributed = upcomingMilestone[_recipientId];
         Milestone[] storage recipientMilestones = milestones[_recipientId];
@@ -427,36 +500,55 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
             revert INVALID_MILESTONE();
         }
 
+        // Calculate the amount to be distributed for the milestone
         uint256 amount = recipient.grantAmount * milestone.amountPercentage / 1e18;
 
+        // Get the pool, subtract the amount and transfer to the recipient
         IAllo.Pool memory pool = allo.getPool(poolId);
 
         poolAmount -= amount;
         _transferAmount(pool.token, recipient.recipientAddress, amount);
 
+        // Set the milestone status to 'Accepted'
         milestone.milestoneStatus = RecipientStatus.Accepted;
 
+        // Increment the upcoming milestone
         upcomingMilestone[_recipientId]++;
 
+        // Emit events for the milestone and the distribution
         emit MilestoneStatusChanged(_recipientId, milestoneToBeDistributed, RecipientStatus.Accepted);
         emit Distributed(_recipientId, recipient.recipientAddress, amount, _sender);
     }
 
-    /// @notice Check if sender is profile owner or member
-    /// @param _anchor Anchor of the profile
-    /// @param _sender The sender of the transaction
+    /**
+     * @dev Check if sender is profile owner or member
+     *
+     * @param _anchor Anchor of the profile
+     * @param _sender The sender of the transaction
+     *
+     * @return bool True if the sender is the owner or member of the profile, otherwise false
+     */
     function _isProfileMember(address _anchor, address _sender) internal view returns (bool) {
         IRegistry.Profile memory profile = _registry.getProfileByAnchor(_anchor);
         return _registry.isOwnerOrMemberOfProfile(profile.id, _sender);
     }
 
-    /// @notice Get the recipient
-    /// @param _recipientId Id of the recipient
+    /**
+     * @dev Get the recipient
+     *
+     * @param _recipientId Id of the recipient
+     *
+     * @return recipient Returns the recipient
+     */
     function _getRecipient(address _recipientId) internal view returns (Recipient memory recipient) {
         recipient = _recipients[_recipientId];
     }
 
-    /// @notice Returns the payout summary for the accepted recipient
+    /**
+     * @dev Get the payout summary for the accepted recipient
+     *
+     * @return PayoutSummary Returns the payout summary for the accepted recipient
+     */
     function _getPayout(address _recipientId, bytes memory) internal view override returns (PayoutSummary memory) {
         Recipient memory recipient = _getRecipient(_recipientId);
         return PayoutSummary(recipient.recipientAddress, recipient.grantAmount);
