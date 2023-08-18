@@ -383,6 +383,7 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
 
         bytes memory creationCode = abi.encodePacked(type(Anchor).creationCode, abi.encode(_profileId));
 
+        // Use CREATE3 to deploy the anchor contract
         anchor = CREATE3.deploy(salt, creationCode, 0);
     }
 
