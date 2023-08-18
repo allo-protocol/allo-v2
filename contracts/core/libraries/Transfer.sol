@@ -7,7 +7,7 @@ import {SafeTransferLib} from "solady/src/utils/SafeTransferLib.sol";
 import "./Native.sol";
 
 /// @title Transfer contract
-/// @notice A helper contract to transfer tokens
+/// @notice A helper contract to transfer tokens within Allo protocol
 /// @dev Handles the transfer of tokens to an address
 contract Transfer is Native {
     error AMOUNT_MISMATCH();

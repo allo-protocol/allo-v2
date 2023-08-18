@@ -485,9 +485,9 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
         uint256 poolId = _utilCreatePool(0);
 
         vm.expectEmit(true, false, false, true);
-        emit PoolFunded(poolId, 9.9e18, 1e17);
+        emit PoolFunded(poolId, 9.9e19, 1e18);
 
-        allo().fundPool(poolId, 10 * 10 ** 18);
+        allo().fundPool(poolId, 10 * 10e18);
     }
 
     function testRevert_fundPool_NOT_ENOUGH_FUNDS() public {

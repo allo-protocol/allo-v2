@@ -13,6 +13,8 @@ library Clone {
     /// @param _nonce The nonce to use for the clone
     function createClone(address _contract, uint256 _nonce) internal returns (address) {
         bytes32 salt = keccak256(abi.encodePacked(msg.sender, _nonce));
+
+        // Return the address of the contract
         return ClonesUpgradeable.cloneDeterministic(_contract, salt);
     }
 }

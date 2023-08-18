@@ -13,44 +13,32 @@ import {Metadata} from "./libraries/Metadata.sol";
 import "./libraries/Native.sol";
 import "./libraries/Transfer.sol";
 
-/**
- * @title Registry
- * @notice Registry contract for creating and managing profiles
- * @dev This contract is used to create and manage profiles for the Allo protocol
- * @author allo-team
- */
+/// @title Registry
+/// @notice Registry contract for creating and managing profiles
+/// @dev This contract is used to create and manage profiles for the Allo protocol
+/// @author allo-team
 contract Registry is IRegistry, Native, AccessControl, Transfer {
     /// ==========================
     /// === Storage Variables ====
     /// ==========================
 
-    /**
-     * @notice anchor -> Profile.id
-     */
+    /// @notice anchor -> Profile.id
     mapping(address => bytes32) public anchorToProfileId;
 
-    /**
-     * @notice Profile.id -> Profile
-     */
+    /// @notice Profile.id -> Profile
     mapping(bytes32 => Profile) public profilesById;
 
-    /**
-     * @notice Profile.id -> pending owner
-     */
+    /// @notice Profile.id -> pending owner
     mapping(bytes32 => address) public profileIdToPendingOwner;
 
-    /**
-     * @notice Allo Owner Role for fund recovery
-     */
+    /// @notice Allo Owner Role for fund recovery
     bytes32 public constant ALLO_OWNER = keccak256("ALLO_OWNER");
 
     /// ====================================
     /// =========== Modifier ===============
     /// ====================================
 
-    /**
-     * @notice Modifier to check if the caller is the owner of the profile
-     */
+    /// @notice Modifier to check if the caller is the owner of the profile
     modifier onlyProfileOwner(bytes32 _profileId) {
         if (!_isOwnerOfProfile(_profileId, msg.sender)) {
             revert UNAUTHORIZED();
@@ -58,11 +46,9 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
         _;
     }
 
-    /**
-     * @notice Contract constructor
-     *
-     * @param _owner The owner of the contract
-     */
+    /// @notice Contract constructor
+    ///
+    /// @param _owner The owner of the contract
     constructor(address _owner) {
         // Make sure the owner is not the zero address
         if (_owner == address(0)) {
@@ -77,43 +63,37 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
     /// ==== External/Public Functions =====
     /// ====================================
 
-    /**
-     * @notice Retrieve profile by profileId
-     * @dev This can be used when you have the 'profileId' and want to retrieve the profile
-     *
-     * @param _profileId The profileId of the profile
-     *
-     * @return Profile The profile for the profileId
-     */
+    /// @notice Retrieve profile by profileId
+    /// @dev This can be used when you have the 'profileId' and want to retrieve the profile
+    ///
+    /// @param _profileId The profileId of the profile
+    ///
+    /// @return Profile The profile for the profileId
     function getProfileById(bytes32 _profileId) external view returns (Profile memory) {
         return profilesById[_profileId];
     }
 
-    /**
-     * @notice Retrieve profile by anchor
-     * @dev This can be used when you have the 'anchor' address and want to retrieve the profile
-     * @param _anchor The anchor of the profile
-     *
-     * @return Profile The profile for the anchor passed
-     */
+    /// @notice Retrieve profile by anchor
+    /// @dev This can be used when you have the 'anchor' address and want to retrieve the profile
+    /// @param _anchor The anchor of the profile
+    ///
+    /// @return Profile The profile for the anchor passed
     function getProfileByAnchor(address _anchor) external view returns (Profile memory) {
         bytes32 profileId = anchorToProfileId[_anchor];
         return profilesById[profileId];
     }
 
-    /**
-     * @notice Creates a new profile
-     * @dev This will also generate the 'profileId' and 'anchor' address, emits a {ProfileCreated} event
-     *
-     * Note: The 'nonce' is used to generate the 'profileId' and should be unique for each profile
-     * Note: The 'name' and 'profileId' are used to generate the 'anchor' address
-     *
-     * @param _nonce Nonce used to generate profileId
-     * @param _name The name of the profile
-     * @param _metadata The metadata of the profile
-     * @param _members The members of the profile
-     * @param _owner The owner of the profile
-     */
+    /// @notice Creates a new profile
+    /// @dev This will also generate the 'profileId' and 'anchor' address, emits a {ProfileCreated} event
+    ///
+    /// Note: The 'nonce' is used to generate the 'profileId' and should be unique for each profile
+    /// Note: The 'name' and 'profileId' are used to generate the 'anchor' address
+    ///
+    /// @param _nonce Nonce used to generate profileId
+    /// @param _name The name of the profile
+    /// @param _metadata The metadata of the profile
+    /// @param _members The members of the profile
+    /// @param _owner The owner of the profile
     function createProfile(
         uint256 _nonce,
         string memory _name,
@@ -176,18 +156,16 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
         return profileId;
     }
 
-    /**
-     * @notice Updates the name of the profile and generates new anchor
-     *
-     * Requirements: Must be the owner of the profile
-     *
-     * Note: Use caution when updating your profile name as it will generate a new anchor address
-     * Note: You can always update the name back to the original name to get the original anchor address
-     *
-     * @param _profileId The profileId of the profile
-     * @param _name The new name of the profile
-     * @dev Only owner can update the name
-     */
+    /// @notice Updates the name of the profile and generates new anchor
+    ///
+    /// Requirements: Must be the owner of the profile
+    ///
+    /// Note: Use caution when updating your profile name as it will generate a new anchor address
+    /// Note: You can always update the name back to the original name to get the original anchor address
+    ///
+    /// @param _profileId The profileId of the profile
+    /// @param _name The new name of the profile
+    /// @dev Only owner can update the name
     function updateProfileName(bytes32 _profileId, string memory _name)
         external
         onlyProfileOwner(_profileId)
@@ -218,14 +196,12 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
         return anchor;
     }
 
-    /**
-     * @notice Update the metadata of the profile
-     *
-     * Requirements: Must be the owner of the profile to update the metadata
-     *
-     * @param _profileId The profileId of the profile
-     * @param _metadata The new metadata of the profile
-     */
+    /// @notice Update the metadata of the profile
+    ///
+    /// Requirements: Must be the owner of the profile to update the metadata
+    ///
+    /// @param _profileId The profileId of the profile
+    /// @param _metadata The new metadata of the profile
     function updateProfileMetadata(bytes32 _profileId, Metadata memory _metadata)
         external
         onlyProfileOwner(_profileId)
@@ -237,47 +213,39 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
         emit ProfileMetadataUpdated(_profileId, _metadata);
     }
 
-    /**
-     * @notice Returns if the given address is an owner or member of the profile
-     * @param _profileId The profileId of the profile
-     * @param _account The address to check
-     *
-     * @return bool Returns true if the address is an owner or member of the profile
-     */
+    /// @notice Returns if the given address is an owner or member of the profile
+    /// @param _profileId The profileId of the profile
+    /// @param _account The address to check
+    ///
+    /// @return bool Returns true if the address is an owner or member of the profile
     function isOwnerOrMemberOfProfile(bytes32 _profileId, address _account) external view returns (bool) {
         return _isOwnerOfProfile(_profileId, _account) || _isMemberOfProfile(_profileId, _account);
     }
 
-    /**
-     * @notice Returns if the given address is an owner of the profile
-     * @param _profileId The profileId of the profile
-     * @param _owner The address to check
-     *
-     * @return bool Returns true if the address is an owner of the profile
-     */
+    /// @notice Returns if the given address is an owner of the profile
+    /// @param _profileId The profileId of the profile
+    /// @param _owner The address to check
+    ///
+    /// @return bool Returns true if the address is an owner of the profile
     function isOwnerOfProfile(bytes32 _profileId, address _owner) external view returns (bool) {
         return _isOwnerOfProfile(_profileId, _owner);
     }
 
-    /**
-     * @notice Returns if the given address is an member of the profile
-     * @param _profileId The profileId of the profile
-     * @param _member The address to check
-     *
-     * @return bool Returns true if the address is an member of the profile
-     */
+    /// @notice Returns if the given address is an member of the profile
+    /// @param _profileId The profileId of the profile
+    /// @param _member The address to check
+    ///
+    /// @return bool Returns true if the address is an member of the profile
     function isMemberOfProfile(bytes32 _profileId, address _member) external view returns (bool) {
         return _isMemberOfProfile(_profileId, _member);
     }
 
-    /**
-     * @notice Updates the pending owner of the profile
-     *
-     * Requirements: Must be the owner of the profile to update the owner
-     *
-     * @param _profileId The profileId of the profile
-     * @param _pendingOwner New pending owner
-     */
+    /// @notice Updates the pending owner of the profile
+    ///
+    /// Requirements: Must be the owner of the profile to update the owner
+    ///
+    /// @param _profileId The profileId of the profile
+    /// @param _pendingOwner New pending owner
     function updateProfilePendingOwner(bytes32 _profileId, address _pendingOwner)
         external
         onlyProfileOwner(_profileId)
@@ -289,14 +257,12 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
         emit ProfilePendingOwnerUpdated(_profileId, _pendingOwner);
     }
 
-    /**
-     * @notice Transfers the ownership of the profile to the pending owner
-     *
-     * Requirements: Must be the pending owner of the profile to accept ownership
-     *
-     * @param _profileId The profileId of the profile
-     * @dev Only pending owner can claim ownership
-     */
+    /// @notice Transfers the ownership of the profile to the pending owner
+    ///
+    /// Requirements: Must be the pending owner of the profile to accept ownership
+    ///
+    /// @param _profileId The profileId of the profile
+    /// @dev Only pending owner can claim ownership
     function acceptProfileOwnership(bytes32 _profileId) external {
         // Get the profile from the mapping
         Profile storage profile = profilesById[_profileId];
@@ -317,14 +283,12 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
         emit ProfileOwnerUpdated(_profileId, profile.owner);
     }
 
-    /**
-     * @notice Adds members to the profile
-     *
-     * Requirements: Must be the owner of the profile to add members
-     *
-     * @param _profileId The profileId of the profile
-     * @param _members The members to add
-     */
+    /// @notice Adds members to the profile
+    ///
+    /// Requirements: Must be the owner of the profile to add members
+    ///
+    /// @param _profileId The profileId of the profile
+    /// @param _members The members to add
     function addMembers(bytes32 _profileId, address[] memory _members) external onlyProfileOwner(_profileId) {
         uint256 memberLength = _members.length;
 
@@ -345,14 +309,12 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
         }
     }
 
-    /**
-     * @notice Removes members from the profile
-     *
-     * Requirements: Must be the owner of the profile to remove members
-     *
-     * @param _profileId The profileId of the profile
-     * @param _members The members to remove
-     */
+    /// @notice Removes members from the profile
+    ///
+    /// Requirements: Must be the owner of the profile to remove members
+    ///
+    /// @param _profileId The profileId of the profile
+    /// @param _members The members to remove
     function removeMembers(bytes32 _profileId, address[] memory _members) external onlyProfileOwner(_profileId) {
         uint256 memberLength = _members.length;
 
@@ -370,14 +332,12 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
     /// ======== Internal Functions ========
     /// ====================================
 
-    /**
-     * @dev Generates and deploys the anchor for the given profileId and name
-     *
-     * @param _profileId Id of the profile
-     * @param _name The name of the profile
-     *
-     * @return anchor The address of the deployed anchor contract
-     */
+    /// @dev Generates and deploys the anchor for the given profileId and name
+    ///
+    /// @param _profileId Id of the profile
+    /// @param _name The name of the profile
+    ///
+    /// @return anchor The address of the deployed anchor contract
     function _generateAnchor(bytes32 _profileId, string memory _name) internal returns (address anchor) {
         bytes32 salt = keccak256(abi.encodePacked(_profileId, _name));
 
@@ -387,50 +347,42 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
         anchor = CREATE3.deploy(salt, creationCode, 0);
     }
 
-    /**
-     * @dev Generates the profileId based on msg.sender
-     *
-     * @param _nonce Nonce used to generate profileId
-     *
-     * @return profileId The profileId of the profile
-     */
+    /// @dev Generates the profileId based on msg.sender
+    ///
+    /// @param _nonce Nonce used to generate profileId
+    ///
+    /// @return profileId The profileId of the profile
     function _generateProfileId(uint256 _nonce) internal view returns (bytes32) {
         return keccak256(abi.encodePacked(_nonce, msg.sender));
     }
 
-    /**
-     * @dev Returns if the given address is an owner of the profile
-     *
-     * @param _profileId The profileId of the profile
-     * @param _owner The address to check
-     *
-     * @return bool Returns true if the address is an owner of the profile
-     */
+    /// @dev Returns if the given address is an owner of the profile
+    ///
+    /// @param _profileId The profileId of the profile
+    /// @param _owner The address to check
+    ///
+    /// @return bool Returns true if the address is an owner of the profile
     function _isOwnerOfProfile(bytes32 _profileId, address _owner) internal view returns (bool) {
         return profilesById[_profileId].owner == _owner;
     }
 
-    /**
-     * @dev Returns if the given address is an member of the profile
-     *
-     * @param _profileId The profileId of the profile
-     * @param _member The address to check
-     *
-     * @return bool Returns true if the address is an member of the profile
-     */
+    /// @dev Returns if the given address is an member of the profile
+    ///
+    /// @param _profileId The profileId of the profile
+    /// @param _member The address to check
+    ///
+    /// @return bool Returns true if the address is an member of the profile
     function _isMemberOfProfile(bytes32 _profileId, address _member) internal view returns (bool) {
         return hasRole(_profileId, _member);
     }
 
-    /**
-     * @dev Transfer thefunds recovered  to the recipient
-     *
-     * @param _token The address of the token to transfer
-     * @param _recipient The address of the recipient
-     *
-     * Requirements: Only the Allo owner can recover funds
-     *
-     */
+    /// @dev Transfer thefunds recovered  to the recipient
+    ///
+    /// @param _token The address of the token to transfer
+    /// @param _recipient The address of the recipient
+    ///
+    /// Requirements: Only the Allo owner can recover funds
+    ///
     function recoverFunds(address _token, address _recipient) external onlyRole(ALLO_OWNER) {
         if (_recipient == address(0)) {
             revert ZERO_ADDRESS();
