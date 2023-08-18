@@ -13,7 +13,7 @@ import {Clone} from "./libraries/Clone.sol";
 import "./libraries/Native.sol";
 import {Transfer} from "./libraries/Transfer.sol";
 
-///          ___            ___        ___        ___
+/// @title   ___            ___        ___        ___
 ///         /\  \          /\__\      /\__\      /\  \
 ///        /::\  \        /:/  /     /:/  /     /::\  \
 ///       /:/\:\  \      /:/  /     /:/  /     /:/\:\  \
@@ -24,15 +24,15 @@ import {Transfer} from "./libraries/Transfer.sol";
 ///          /:/  /      \:\  \     \:\  \     \:\/:/  /
 ///         /:/  /        \:\__\     \:\__\     \::/  /
 ///         \/__/          \/__/      \/__/      \/__/
-
-/// @title Allo
+///
 /// @notice The Allo core contract
-/// @dev This contract is used to create pools and manage the protocol
+/// @dev This contract is used to create & manage pools as well as manage the protocol. It
+///      is the core of all things Allo.
+///
+/// Requirements: The contract must be initialized with the 'initialize()' function
+///
 /// @author allo-team
 contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl {
-    /// @notice Fee denominator
-    uint256 public constant FEE_DENOMINATOR = 1e18;
-
     // ==========================
     // === Storage Variables ====
     // ==========================
@@ -542,7 +542,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
         address _token = pool.token;
 
         if (percentFee > 0) {
-            feeAmount = (_amount * percentFee) / FEE_DENOMINATOR;
+            feeAmount = (_amount * percentFee) / getFeeDenominator();
             amountAfterFee -= feeAmount;
 
             _transferAmountFrom(_token, TransferData({from: msg.sender, to: treasury, amount: feeAmount}));
@@ -619,6 +619,12 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
     // ==== View Functions =====
     // =========================
 
+    /// @notice Getter for the fee denominator
+    /// @return FEE_DENOMINATOR The fee denominator (1e18) which represents 100%
+    function getFeeDenominator() public pure returns (uint256 FEE_DENOMINATOR) {
+        return 1e18;
+    }
+
     /// @notice Checks if the address is a pool admin
     /// @param _poolId The pool id
     /// @param _address The address to check
@@ -642,32 +648,32 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
         return address(pools[_poolId].strategy);
     }
 
-    /// @notice return fee percentage
+    /// @notice Getter for fee percentage
     function getPercentFee() external view returns (uint256) {
         return percentFee;
     }
 
-    /// @notice return base fee
+    /// @notice Getter for base fee
     function getBaseFee() external view returns (uint256) {
         return baseFee;
     }
 
-    /// @notice return treasury
+    /// @notice Getter for treasury address
     function getTreasury() external view returns (address payable) {
         return treasury;
     }
 
-    /// @notice return registry
+    /// @notice Getter for registry
     function getRegistry() external view returns (IRegistry) {
         return registry;
     }
 
-    /// @notice return boolean if strategy is cloneable
+    /// @notice Getter for if strategy is cloneable
     function isCloneableStrategy(address _strategy) external view returns (bool) {
         return _isCloneableStrategy(_strategy);
     }
 
-    /// @notice return the pool
+    /// @notice Getter for the 'Pool'
     function getPool(uint256 _poolId) external view returns (Pool memory) {
         return pools[_poolId];
     }

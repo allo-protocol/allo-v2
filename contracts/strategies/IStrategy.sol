@@ -7,7 +7,9 @@ import {IAllo} from "../core/IAllo.sol";
 /// @title IStrategy Interface
 /// @author allo-team
 ///
-/// @dev Interface for the Strategy contract and exposes all functions needed to use the Strategies
+/// @dev Interface for strategy imlementations, BaseStrategy inherits from this
+///
+/// NOTE: BaseStrategy is the base contract that all strategies should inherit from
 interface IStrategy {
     /// ======================
     /// ======= Storage ======
@@ -31,28 +33,28 @@ interface IStrategy {
     /// ======= Errors =======
     /// ======================
 
-    /// Returns when calls to Base Strategy are unauthorized
+    /// @dev Returns when calls to Base Strategy are unauthorized
     error BaseStrategy_UNAUTHORIZED();
 
-    /// Returns when Base Strategy is already initialized
+    /// @dev Returns when Base Strategy is already initialized
     error BaseStrategy_ALREADY_INITIALIZED();
 
-    /// Returns when Base Strategy is not initialized
+    /// @dev Returns when Base Strategy is not initialized
     error BaseStrategy_NOT_INITIALIZED();
 
-    /// Returns when an invalid address is used
+    /// @dev Returns when an invalid address is used
     error BaseStrategy_INVALID_ADDRESS();
 
-    /// Returns when a pool is inactive
+    /// @dev Returns when a pool is inactive
     error BaseStrategy_POOL_INACTIVE();
 
-    /// Returns when a pool is active
+    /// @dev Returns when a pool is already active
     error BaseStrategy_POOL_ACTIVE();
 
-    /// Returns when two arrays length are not equal
+    /// @dev Returns when two arrays length are not equal
     error BaseStrategy_ARRAY_MISMATCH();
 
-    /// Returns as a general error when either a recipient address or an amount is invalid
+    /// @dev Returns as a general error when either a recipient address or an amount is invalid
     error BaseStrategy_INVALID();
 
     /// ======================
@@ -78,32 +80,31 @@ interface IStrategy {
     /// ======= Views ========
     /// ======================
 
-    /// @return Address of the Allo contract
+    /// @dev Getter for the address of the Allo contract
     function getAllo() external view returns (IAllo);
 
-    /// @return Pool ID for this strategy
+    /// @dev Getter for the 'poolId' for this strategy
     function getPoolId() external view returns (uint256);
 
-    /// @return The id of the strategy
+    /// @dev Getter for the 'id' of the strategy
     function getStrategyId() external view returns (bytes32);
 
-    /// @return whether a allocator is valid or not, will usually be true for all
+    /// @dev Returns whether a allocator is valid or not, will usually be true for all
+    ///      and will depend on the strategy implementation
     function isValidAllocator(address _allocator) external view returns (bool);
 
-    /// @return whether pool is active
+    /// @dev whether pool is active
     function isPoolActive() external returns (bool);
 
-    /// @return returns the amount of tokens in the pool
+    /// @dev returns the amount of tokens in the pool
     function getPoolAmount() external view returns (uint256);
 
     /// incrases the poolAmount which is set on invoking Allo.fundPool
     function increasePoolAmount(uint256 _amount) external;
 
-    /// @dev Simply returns the status of a recipient
-    ///      probably tracked in a mapping, but will depend on the implementation
+    /// @dev Returns the status of a recipient probably tracked in a mapping, but will depend on the implementation
     ///      for example, the OpenSelfRegistration only maps users to bool, and then assumes Accepted for those
     ///      since there is no need for Pending or Rejected
-    ///
     function getRecipientStatus(address _recipientId) external view returns (RecipientStatus);
 
     /// @return Input the values you would send to distribute(), get the amounts each recipient in the array would receive
@@ -120,7 +121,7 @@ interface IStrategy {
     ///      if a strtegy wants to use it, they will overwrite it, use it, and then call super.initialize()
     function initialize(uint256 _poolId, bytes memory _data) external;
 
-    /// @dev This is called via allo.sol to register recipients
+    /// @dev This is called via Allo.sol to register recipients
     ///      it can change their status all the way to Accepted, or to Pending if there are more steps
     ///      if there are more steps, additional functions should be added to allow the owner to check
     ///      this could also check attestations directly and then Accept
@@ -129,7 +130,7 @@ interface IStrategy {
     ///
     function registerRecipient(bytes memory _data, address _sender) external payable returns (address);
 
-    /// @dev Only called via allo.sol by users to allocate to a recipient
+    /// @dev Only called via Allo.sol by users to allocate to a recipient
     ///      this will update some data in this contract to store votes, etc
     ///
     /// Requirements: This will be determined by the strategy
@@ -137,8 +138,9 @@ interface IStrategy {
     function allocate(bytes memory _data, address _sender) external payable;
 
     /// @dev This will distribute tokens to recipients
-    ///      most strategies will track a TOTAL amount per recipient, and a PAID amount, and pay the difference
-    ///      this contract will need to track the amount paid already, so that it doesn't double pay
+    ///
+    /// NOTE: Most strategies will track a TOTAL amount per recipient, and a PAID amount, and pay the difference.
+    ///       This contract will need to track the amount paid already, so that it doesn't double pay
     ///
     /// Requirements: This will be determined by the strategy
     ///

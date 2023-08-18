@@ -230,6 +230,6 @@ interface IAllo {
     /// @dev Returns the 'Pool' struct for a given 'poolId'
     function getPool(uint256) external view returns (Pool memory);
 
-    /// @dev Returns the current fee denominator - set at 1e18 at launch
-    function FEE_DENOMINATOR() external view returns (uint256);
+    /// @dev Returns the current fee denominator - set at 1e18 to represent 100%
+    function getFeeDenominator() external view returns (uint256);
 }

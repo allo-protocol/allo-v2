@@ -104,9 +104,7 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
         // Generate a profile id using a nonce and the msg.sender
         bytes32 profileId = _generateProfileId(_nonce);
 
-        // Make sure the profile's anchor is not address zero
-        // TODO: How can we check the anchor if its not created yet? It will always be address zero wont it?
-        // TODO: And would the profile even exist in the profilesById mapping yet? @thelostone-mc @kurtmerbeth
+        // Make sure the nonce is available
         if (profilesById[profileId].anchor != address(0)) {
             revert NONCE_NOT_AVAILABLE();
         }
@@ -127,9 +125,6 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
         });
 
         profilesById[profileId] = profile;
-
-        // TODO: Maybe put the check above here... @thelostone-mc @kurtmerbeth
-
         anchorToProfileId[profile.anchor] = profileId;
 
         // Assign roles for the profile members
