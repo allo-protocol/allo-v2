@@ -197,6 +197,9 @@ interface IAllo {
     /// @dev Distributes funds to recipients and emits {Distributed} event if successful
     ///
     /// Note: Each strategy will handle the distribution of funds differently
+    /// @param _poolId The pool id to distribute from
+    /// @param _recipientIds The recipient ids to distribute to
+    /// @param _data The data to pass to the strategy and may be handled differently by each strategy
     function distribute(uint256 _poolId, address[] memory _recipientIds, bytes memory _data) external;
 
     /// =========================
@@ -204,15 +207,20 @@ interface IAllo {
     /// =========================
 
     /// @dev Checks if an address is a pool admin and returns a boolean
+    /// @param _poolId The pool id to check
+    /// @param _address The address to check
     function isPoolAdmin(uint256 _poolId, address _address) external view returns (bool);
 
     /// @dev Checks if an address is a pool manager and returns a boolean
+    /// @param _poolId The pool id to check
+    /// @param _address The address to check
     function isPoolManager(uint256 _poolId, address _address) external view returns (bool);
 
     /// @dev Checks if a strategy is cloneable (is in the cloneableStrategies mapping) and returns a boolean
     function isCloneableStrategy(address) external view returns (bool);
 
     /// @dev Returns the address of the strategy for a given 'poolId'
+    /// @param _poolId The pool id to check
     function getStrategy(uint256 _poolId) external view returns (address);
 
     /// @dev Returns the current percent fee
