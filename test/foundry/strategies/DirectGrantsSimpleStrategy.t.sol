@@ -332,6 +332,7 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
         strategy.reviewSetMilestones(recipientId, IStrategy.RecipientStatus.Rejected);
         vm.stopPrank();
 
+        recipient = strategy.getRecipient(profile1_anchor());
         assertEq(uint8(recipient.milestonesReviewStatus), uint8(IStrategy.RecipientStatus.Rejected));
 
         vm.startPrank(pool_manager1());
@@ -341,12 +342,14 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
 
         strategy.reviewSetMilestones(recipientId, IStrategy.RecipientStatus.Accepted);
         vm.stopPrank();
+
+        recipient = strategy.getRecipient(profile1_anchor());
         assertEq(uint8(recipient.milestonesReviewStatus), uint8(IStrategy.RecipientStatus.Accepted));
     }
 
     function testRevert_reviewSetMilestones_UNAUTHORIZED() public {
         address recipientId = _register_recipient_allocate_accept_set_milestones_by_recipient();
-        vm.expectRevert(DirectGrantsSimpleStrategy.UNAUTHORIZED.selector);
+        vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
 
         vm.startPrank(randomAddress());
         strategy.reviewSetMilestones(recipientId, IStrategy.RecipientStatus.Rejected);

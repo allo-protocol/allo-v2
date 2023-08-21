@@ -170,7 +170,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _recipientId Id of the recipient
     /// @param _milestones The milestones to be set
     function setMilestones(address _recipientId, Milestone[] memory _milestones) external {
-        Recipient memory recipient = _getRecipient(_recipientId);
+        Recipient storage recipient = _recipients[_recipientId];
 
         if (recipient.recipientStatus != InternalRecipientStatus.Accepted) {
             revert RECIPIENT_NOT_ACCEPTED();
@@ -197,7 +197,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Review the set milestones of the recipient
     /// @param _recipientId Id of the recipient
     function reviewSetMilestones(address _recipientId, RecipientStatus _status) external onlyPoolManager(msg.sender) {
-        Recipient memory recipient = _getRecipient(_recipientId);
+        Recipient storage recipient = _recipients[_recipientId];
         if (recipient.milestonesReviewStatus == RecipientStatus.Accepted) {
             revert MILESTONES_ALREADY_SET();
         }
