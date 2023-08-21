@@ -43,8 +43,8 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
     ///
     /// For example, if we have 5 recipients, the bitmap will look like this:
     /// | recipient1 | recipient2 | recipient3 | recipient4 | recipient5 | 'rowIndex'
-    /// |     0000   |    0001    |    0010    |    0100    |    1000    | 'statusRow'
-    /// |     none   |   pending  |  accepted  |  rejected  |  appealed  | converted status (0, 1, 2, 4, 8)
+    /// |     0000   |    0001    |    0010    |    0011    |    0100    | 'statusRow'
+    /// |     none   |   pending  |  accepted  |  rejected  |  appealed  | converted status (0, 1, 2, 3, 4)
     ///
     struct ApplicationStatus {
         uint256 index;
@@ -207,7 +207,7 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
     /// 4: appealed
     ///
     /// Since it's a mapping the storage it's pre-allocated with zero values, so if we check the
-    /// status of an existing recipient, the value is by default 0 (pending)
+    /// status of an existing recipient, the value is by default 0 (none)
     /// If we want to check the status of an recipient, we take its index from the `recipients` array
     /// and convert it to the 2-bits position in the bitmap.
     mapping(uint256 => uint256) public statusesBitMap;
@@ -487,9 +487,11 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         _transferAmount(pool.token, msg.sender, _amount);
     }
 
-    // TODO: This naming seems a bit off to me, but I'm not sure what a better name would be? @thelostone-mc @KurtMerbeth WDYT?
     /// @notice Claim allocated tokens to an array of recipients
-    /// @dev This can only be called after the allocation has ended
+    /// @dev Uses the merkle root to verify the claims
+    ///
+    /// Requirements: Allocation must have ended
+    ///
     /// @param _claims Claims to be claimed
     function claim(Claim[] calldata _claims) external nonReentrant onlyAfterAllocation {
         uint256 claimsLength = _claims.length;

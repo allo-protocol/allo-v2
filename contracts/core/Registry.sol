@@ -13,9 +13,14 @@ import {Metadata} from "./libraries/Metadata.sol";
 import "./libraries/Native.sol";
 import "./libraries/Transfer.sol";
 
-/// @title Registry
+/// @title Registry Contract
 /// @notice Registry contract for creating and managing profiles
+///
 /// @dev This contract is used to create and manage profiles for the Allo protocol
+///      It is also used to deploy the anchor contract for each profile which acts as a proxy
+///      for the profile and is used to receive funds and execute transactions on behalf of the profile
+///      The Registry is also used to add and remove members from a profile and update the profile 'Metadata'
+///
 /// @author allo-team
 contract Registry is IRegistry, Native, AccessControl, Transfer {
     /// ==========================
@@ -49,8 +54,9 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
     /// @notice Contract constructor
     ///
     /// @param _owner The owner of the contract
+    /// @dev Reverts if the '_owner' is the 'address(0)'
     constructor(address _owner) {
-        // Make sure the owner is not the zero address
+        // Make sure the owner is not 'address(0)'
         if (_owner == address(0)) {
             revert ZERO_ADDRESS();
         }
@@ -153,7 +159,7 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
 
     /// @notice Updates the name of the profile and generates new anchor
     ///
-    /// Requirements: Must be the owner of the profile
+    /// Requirements: 'msg.sender' must be the owner of the profile
     ///
     /// Note: Use caution when updating your profile name as it will generate a new anchor address
     /// Note: You can always update the name back to the original name to get the original anchor address
@@ -166,7 +172,6 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
         onlyProfileOwner(_profileId)
         returns (address)
     {
-        // TODO: Do we want to check if the string is empty? @thelostone-mc @kurtmerbeth
         // Generate a new anchor address
         address anchor = _generateAnchor(_profileId, _name);
 
@@ -177,7 +182,6 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
         profile.name = _name;
 
         // Remove old anchor
-        // TODO: Why do we set to address zero to only update again with new anchor? @thelostone-mc @kurtmerbeth
         anchorToProfileId[profile.anchor] = bytes32(0);
 
         // Set new anchor
@@ -191,25 +195,25 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
         return anchor;
     }
 
-    /// @notice Update the metadata of the profile
+    /// @notice Update the 'Metadata' of the profile
     ///
-    /// Requirements: Must be the owner of the profile to update the metadata
+    /// Requirements: 'msg.sender' must be the owner of the profile to update the 'Metadata'
     ///
-    /// @param _profileId The profileId of the profile
-    /// @param _metadata The new metadata of the profile
+    /// @param _profileId The 'profileId' of the profile
+    /// @param _metadata The new 'Metadata' of the profile
     function updateProfileMetadata(bytes32 _profileId, Metadata memory _metadata)
         external
         onlyProfileOwner(_profileId)
     {
-        // Get the profile using the profileId from the mapping and update the metadata value
+        // Get the profile using the 'profileId' from the mapping and update the 'Metadata' value
         profilesById[_profileId].metadata = _metadata;
 
-        // Emit the event that the metadata was updated
+        // Emit the event that the 'Metadata' was updated
         emit ProfileMetadataUpdated(_profileId, _metadata);
     }
 
     /// @notice Returns if the given address is an owner or member of the profile
-    /// @param _profileId The profileId of the profile
+    /// @param _profileId The 'profileId' of the profile
     /// @param _account The address to check
     ///
     /// @return bool Returns true if the address is an owner or member of the profile
@@ -218,7 +222,7 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
     }
 
     /// @notice Returns if the given address is an owner of the profile
-    /// @param _profileId The profileId of the profile
+    /// @param _profileId The 'profileId' of the profile
     /// @param _owner The address to check
     ///
     /// @return bool Returns true if the address is an owner of the profile
@@ -227,7 +231,7 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
     }
 
     /// @notice Returns if the given address is an member of the profile
-    /// @param _profileId The profileId of the profile
+    /// @param _profileId The 'profileId' of the profile
     /// @param _member The address to check
     ///
     /// @return bool Returns true if the address is an member of the profile
@@ -236,10 +240,11 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
     }
 
     /// @notice Updates the pending owner of the profile
+    /// @dev This is used to transfer ownership of the profile to a new owner
     ///
     /// Requirements: Must be the owner of the profile to update the owner
     ///
-    /// @param _profileId The profileId of the profile
+    /// @param _profileId The 'profileId' of the profile
     /// @param _pendingOwner New pending owner
     function updateProfilePendingOwner(bytes32 _profileId, address _pendingOwner)
         external
@@ -256,7 +261,7 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
     ///
     /// Requirements: Must be the pending owner of the profile to accept ownership
     ///
-    /// @param _profileId The profileId of the profile
+    /// @param _profileId The 'profileId' of the profile
     /// @dev Only pending owner can claim ownership
     function acceptProfileOwnership(bytes32 _profileId) external {
         // Get the profile from the mapping
@@ -282,7 +287,7 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
     ///
     /// Requirements: Must be the owner of the profile to add members
     ///
-    /// @param _profileId The profileId of the profile
+    /// @param _profileId The 'profileId' of the profile
     /// @param _members The members to add
     function addMembers(bytes32 _profileId, address[] memory _members) external onlyProfileOwner(_profileId) {
         uint256 memberLength = _members.length;
@@ -308,7 +313,7 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
     ///
     /// Requirements: Must be the owner of the profile to remove members
     ///
-    /// @param _profileId The profileId of the profile
+    /// @param _profileId The 'profileId' of the profile
     /// @param _members The members to remove
     function removeMembers(bytes32 _profileId, address[] memory _members) external onlyProfileOwner(_profileId) {
         uint256 memberLength = _members.length;
@@ -327,7 +332,7 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
     /// ======== Internal Functions ========
     /// ====================================
 
-    /// @dev Generates and deploys the anchor for the given profileId and name
+    /// @dev Generates and deploys the anchor for the given 'profileId' and name
     ///
     /// @param _profileId Id of the profile
     /// @param _name The name of the profile
@@ -342,18 +347,18 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
         anchor = CREATE3.deploy(salt, creationCode, 0);
     }
 
-    /// @dev Generates the profileId based on msg.sender
+    /// @dev Generates the 'profileId' based on msg.sender
     ///
-    /// @param _nonce Nonce used to generate profileId
+    /// @param _nonce Nonce used to generate 'profileId'
     ///
-    /// @return profileId The profileId of the profile
+    /// @return 'profileId' The 'profileId' of the profile
     function _generateProfileId(uint256 _nonce) internal view returns (bytes32) {
         return keccak256(abi.encodePacked(_nonce, msg.sender));
     }
 
     /// @dev Returns if the given address is an owner of the profile
     ///
-    /// @param _profileId The profileId of the profile
+    /// @param _profileId The 'profileId' of the profile
     /// @param _owner The address to check
     ///
     /// @return bool Returns true if the address is an owner of the profile
@@ -363,7 +368,7 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
 
     /// @dev Returns if the given address is an member of the profile
     ///
-    /// @param _profileId The profileId of the profile
+    /// @param _profileId The 'profileId' of the profile
     /// @param _member The address to check
     ///
     /// @return bool Returns true if the address is an member of the profile

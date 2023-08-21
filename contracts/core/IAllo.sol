@@ -7,10 +7,10 @@ import {IStrategy} from "../strategies/IStrategy.sol";
 // Internal Libraries
 import {Metadata} from "./libraries/Metadata.sol";
 
-// @title Allo Interface
-// @author allo-team
-// @notice Interface for the Allo contract and exposes all functions needed to use the Allo protocol
-// @dev This is the main contract that will be used to interact with the Allo protocol
+/// @title Allo Interface
+/// @author allo-team
+/// @notice Interface for the Allo contract and exposes all functions needed to use the Allo protocol
+/// @dev This is the main contract that will be used to interact with the Allo protocol
 interface IAllo {
     /// ======================
     /// ======= Structs ======
@@ -30,32 +30,32 @@ interface IAllo {
     /// ======= Errors =======
     /// ======================
 
-    // @dev Returned when access is not authorized
+    /// @dev Returned when access is not authorized
     error UNAUTHORIZED();
 
-    // @dev Returned when the 'msg.sender' has not sent enough funds
+    /// @dev Returned when the 'msg.sender' has not sent enough funds
     error NOT_ENOUGH_FUNDS();
 
-    // @dev Returned when the strategy is not approved
+    /// @dev Returned when the strategy is not approved
     error NOT_APPROVED_STRATEGY();
 
-    // @dev Returned when the strategy is approved and should be cloned
+    /// @dev Returned when the strategy is approved and should be cloned
     error IS_APPROVED_STRATEGY();
 
-    // @dev Returned when Encoded '_data' length does not match _poolIds length
+    /// @dev Returned when Encoded '_data' length does not match _poolIds length
     error MISMATCH();
 
-    // @dev Returned when any address is the zero address
+    /// @dev Returned when any address is the zero address
     error ZERO_ADDRESS();
 
-    // @dev Returned when the fee is below 1e18 which is the fee percentage denominator
+    /// @dev Returned when the fee is below 1e18 which is the fee percentage denominator
     error INVALID_FEE();
 
     /// ======================
     /// ======= Events =======
     /// ======================
 
-    // @dev Event emitted when a new pool is created
+    /// @dev Event emitted when a new pool is created
     event PoolCreated(
         uint256 indexed poolId,
         bytes32 indexed profileId,
@@ -65,99 +65,99 @@ interface IAllo {
         Metadata metadata
     );
 
-    // @dev Event emitted when a pools metadata is updated
+    /// @dev Event emitted when a pools metadata is updated
     event PoolMetadataUpdated(uint256 indexed poolId, Metadata metadata);
 
-    // @dev Event emitted when a pool is funded
+    /// @dev Event emitted when a pool is funded
     event PoolFunded(uint256 indexed poolId, uint256 amount, uint256 fee);
 
-    // @dev Event emitted when the base fee is paid
+    /// @dev Event emitted when the base fee is paid
     event BaseFeePaid(uint256 indexed poolId, uint256 amount);
 
-    // @dev Event emitted when the treasury address is updated
+    /// @dev Event emitted when the treasury address is updated
     event TreasuryUpdated(address treasury);
 
-    // @dev Event emitted when the percent fee is updated
+    /// @dev Event emitted when the percent fee is updated
     event PercentFeeUpdated(uint256 percentFee);
 
-    // @dev Event emitted when the base fee is updated
+    /// @dev Event emitted when the base fee is updated
     event BaseFeeUpdated(uint256 baseFee);
 
-    // @dev Event emitted when the registry address is updated
+    /// @dev Event emitted when the registry address is updated
     event RegistryUpdated(address registry);
 
-    // @dev Event emitted when a strategy is approved and added to the cloneable strategies mapping
+    /// @dev Event emitted when a strategy is approved and added to the cloneable strategies mapping
     event StrategyApproved(address strategy);
 
-    // @dev Event emitted when a strategy is removed from the cloneable strategies mapping
+    /// @dev Event emitted when a strategy is removed from the cloneable strategies mapping
     event StrategyRemoved(address strategy);
 
     /// ====================================
     /// ==== External/Public Functions =====
     /// ====================================
 
-    // @dev Initialize the Allo contract
-    //
-    // Requirements:
-    //
+    /// @dev Initialize the Allo contract
+    ///
+    /// Requirements:
+    ///
     function initialize(address _registry, address payable _treasury, uint256 _percentFee, uint256 _baseFee) external;
 
-    // @dev Updates the pools metadata
-    //
-    // Requirements: 'msg.sender' must be a pool admin
-    //
+    /// @dev Updates the pools metadata
+    ///
+    /// Requirements: 'msg.sender' must be a pool admin
+    ///
     function updatePoolMetadata(uint256 _poolId, Metadata memory _metadata) external;
 
-    // @dev Updates the registry address and emits a {RegistryUpdated} event
-    //
-    // Requirements: 'msg.sender' must be the allo contract owner
-    //
+    /// @dev Updates the registry address and emits a {RegistryUpdated} event
+    ///
+    /// Requirements: 'msg.sender' must be the allo contract owner
+    ///
     function updateRegistry(address _registry) external;
 
-    // @dev Updates the treasury address and emits a {TreasuryUpdated} event
-    //
-    // Requirements: 'msg.sender' must be the allo contract owner
-    //
+    /// @dev Updates the treasury address and emits a {TreasuryUpdated} event
+    ///
+    /// Requirements: 'msg.sender' must be the allo contract owner
+    ///
     function updateTreasury(address payable _treasury) external;
 
-    // @dev Updates the percent fee and emits a {PercentFeeUpdated} event
-    //
-    // Requirements: 'msg.sender' must be the allo contract owner
-    //
+    /// @dev Updates the percent fee and emits a {PercentFeeUpdated} event
+    ///
+    /// Requirements: 'msg.sender' must be the allo contract owner
+    ///
     function updatePercentFee(uint256 _percentFee) external;
 
-    // @dev Updates the base fee and emits a {BaseFeeUpdated} event
-    //
-    // Requirements: 'msg.sender' must be the allo contract owner
-    //
+    /// @dev Updates the base fee and emits a {BaseFeeUpdated} event
+    ///
+    /// Requirements: 'msg.sender' must be the allo contract owner
+    ///
     function updateBaseFee(uint256 _baseFee) external;
 
-    // @dev Adds a strategy to the cloneable strategies mapping and emits a {StrategyApproved} event
-    //
-    // Requirements: 'msg.sender' must be the allo contract owner
-    //
+    /// @dev Adds a strategy to the cloneable strategies mapping and emits a {StrategyApproved} event
+    ///
+    /// Requirements: 'msg.sender' must be the allo contract owner
+    ///
     function addToCloneableStrategies(address _strategy) external;
 
-    // @dev Removes a strategy from the cloneable strategies mapping and emits a {StrategyRemoved} event
-    //
-    // Requirements: 'msg.sender' must be the allo contract owner
-    //
+    /// @dev Removes a strategy from the cloneable strategies mapping and emits a {StrategyRemoved} event
+    ///
+    /// Requirements: 'msg.sender' must be the allo contract owner
+    ///
     function removeFromCloneableStrategies(address _strategy) external;
 
-    // @dev Adds a pool manager to the pool and emits {RoleGranted} event
-    //
-    // Requirements: 'msg.sender' must be a pool admin
-    //
+    /// @dev Adds a pool manager to the pool and emits {RoleGranted} event
+    ///
+    /// Requirements: 'msg.sender' must be a pool admin
+    ///
     function addPoolManager(uint256 _poolId, address _manager) external;
 
-    // @dev Removes a pool manager from the pool and emits {RoleRevoked} event
-    //
-    // Requirements: 'msg.sender' must be a pool admin
-    //
+    /// @dev Removes a pool manager from the pool and emits {RoleRevoked} event
+    ///
+    /// Requirements: 'msg.sender' must be a pool admin
+    ///
     function removePoolManager(uint256 _poolId, address _manager) external;
 
-    // @dev Recovers funds from a pool
-    //
+    /// @dev Recovers funds from a pool
+    ///
     /// Requirements: 'msg.sender' must be a pool admin
     ///
     function recoverFunds(address _token, address _recipient) external;

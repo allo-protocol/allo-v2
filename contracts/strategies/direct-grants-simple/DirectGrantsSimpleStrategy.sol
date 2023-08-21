@@ -125,11 +125,6 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @dev Mapping of the 'recipientId' to the 'nextMilestone' index
     mapping(address => uint256) public upcomingMilestone;
 
-    /// @notice This maps accepted recipients to their total milestones
-    // TODO: (payouts or count?) @thelostone-mc @KurtMerbeth
-    // NOTE: Were not using this in the contract, but it is here for future use?
-    // mapping(address => uint256) public totalMilestones;
-
     /// ===============================
     /// ======== Constructor ==========
     /// ===============================
