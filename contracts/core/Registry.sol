@@ -14,14 +14,12 @@ import "./libraries/Native.sol";
 import "./libraries/Transfer.sol";
 
 /// @title Registry Contract
+/// @author @thelostone-mc <aditya@gitcoin.co>, @KurtMerbeth <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>
 /// @notice Registry contract for creating and managing profiles
-///
 /// @dev This contract is used to create and manage profiles for the Allo protocol
 ///      It is also used to deploy the anchor contract for each profile which acts as a proxy
 ///      for the profile and is used to receive funds and execute transactions on behalf of the profile
 ///      The Registry is also used to add and remove members from a profile and update the profile 'Metadata'
-///
-/// @author allo-team
 contract Registry is IRegistry, Native, AccessControl, Transfer {
     /// ==========================
     /// === Storage Variables ====

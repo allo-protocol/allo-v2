@@ -5,20 +5,16 @@ pragma solidity 0.8.19;
 import {Metadata} from "./libraries/Metadata.sol";
 
 /// @title IRegistry Interface
-///
+/// @author @thelostone-mc <aditya@gitcoin.co>, @KurtMerbeth <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>
+/// @notice Interface for the Registry contract and exposes all functions needed to use the Registry
+///         within the Allo protocol.
 /// @dev The Registry Interface is used to interact with the Allo protocol and create profiles
 ///      that can be used to interact with the Allo protocol. The Registry is the main contract
 ///      that all other contracts interact with to get the 'Profile' information needed to
 ///      interact with the Allo protocol. The Registry is also used to create new profiles
 ///      and update existing profiles. The Registry is also used to add and remove members
-///      from a profile.
-///
-/// Note: The Registry will not always be used in a strategy and will depend on the strategy being used.
-///
-/// @author allo-team
-/// @notice Interface for the Registry contract and exposes all functions needed to use the Registry
-///         within the Allo protocol
-///
+///      from a profile. The Registry will not always be used in a strategy and will depend on
+///      the strategy being used.
 interface IRegistry {
     /// ======================
     /// ======= Structs ======
@@ -38,43 +34,37 @@ interface IRegistry {
     /// ======= Errors =======
     /// ======================
 
-    /// @dev Returned when the nonce passed has been used or not available
+    /// @dev Thrown when the nonce passed has been used or not available
     error NONCE_NOT_AVAILABLE();
 
-    /// @dev Returned when the 'msg.sender' is not the pending owner on ownership transfer
+    /// @dev Thrown when the 'msg.sender' is not the pending owner on ownership transfer
     error NOT_PENDING_OWNER();
 
-    /// @dev Returned when the 'msg.sender' is not authorized
+    /// @dev Thrown when the 'msg.sender' is not authorized
     error UNAUTHORIZED();
 
-    /// @dev Returned if any address check is the zero address
+    /// @dev Thrown if any address check is the zero address
     error ZERO_ADDRESS();
 
     /// ======================
     /// ======= Events =======
     /// ======================
 
-    /// @dev Event emitted when a profile is created
-    ///
-    /// Note: This will return your anchor address
-    ///
+    /// @dev Emitted when a profile is created. This will return your anchor address.
     event ProfileCreated(
         bytes32 indexed profileId, uint256 nonce, string name, Metadata metadata, address owner, address anchor
     );
 
-    /// @dev Event emitted when a profile name is updated
-    ///
-    /// Note: This will update the anchor when the name is updated and return it
-    ///
+    /// @dev Emitted when a profile name is updated. This will update the anchor when the name is updated and return it.
     event ProfileNameUpdated(bytes32 indexed profileId, string name, address anchor);
 
-    /// @dev Event emitted when a profile's metadata is updated
+    /// @dev Emitted when a profile's metadata is updated.
     event ProfileMetadataUpdated(bytes32 indexed profileId, Metadata metadata);
 
-    /// @dev Event emitted when a profile owner is updated
+    /// @dev Emitted when a profile owner is updated.
     event ProfileOwnerUpdated(bytes32 indexed profileId, address owner);
 
-    /// @dev Event emitted when a profile pending owner is updated
+    /// @dev Emitted when a profile pending owner is updated.
     event ProfilePendingOwnerUpdated(bytes32 indexed profileId, address pendingOwner);
 
     /// =========================

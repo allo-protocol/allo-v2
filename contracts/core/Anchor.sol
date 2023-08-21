@@ -5,9 +5,11 @@ pragma solidity 0.8.19;
 import {Registry} from "./Registry.sol";
 
 /// @title Anchor contract
+/// @author @thelostone-mc <aditya@gitcoin.co>, @KurtMerbeth <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>
 /// @notice This contract is used to execute calls to a target address
-/// @dev The Anhor is used as an primary entry point for the protocol and is an 'anchor' to your profile
-/// @dev it gives the protocol a way to send funds to a target address and not get stuck in a contract
+// TODO: Fix this
+/// @dev The Anhor is used as an identifier for your profile, it gives the protocol a way to send funds to a target
+///      address and not get stuck in a contract.
 contract Anchor {
     /// ==========================
     /// === Storage Variables ====
