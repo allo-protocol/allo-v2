@@ -83,7 +83,7 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
         assertTrue(recipient.metadata.protocol == 1);
         assertTrue(recipient.recipientStatus == DirectGrantsSimpleStrategy.InternalRecipientStatus.Pending);
         assertTrue(recipient.milestonesReviewStatus == IStrategy.RecipientStatus.Pending);
-        assertTrue(recipient.creator = profile1_member1());
+        assertEq(recipient.creator, profile1_member1());
         assertTrue(recipient.useRegistryAnchor);
 
         IStrategy.RecipientStatus status = strategy.getRecipientStatus(recipientId);
@@ -321,11 +321,12 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
 
     function test_reviewSetMilestones() public {
         address recipientId = _register_recipient_allocate_accept_set_milestones_by_recipient();
+        DirectGrantsSimpleStrategy.Recipient memory recipient = strategy.getRecipient(profile1_anchor());
 
         assertEq(uint8(recipient.milestonesReviewStatus), uint8(IStrategy.RecipientStatus.Pending));
 
         vm.expectEmit(false, false, false, true);
-        emit Registered(MilestonesReviewed, IStrategy.RecipientStatus.Rejected);
+        emit MilestonesReviewed(recipientId, IStrategy.RecipientStatus.Rejected);
 
         vm.startPrank(pool_manager1());
         strategy.reviewSetMilestones(recipientId, IStrategy.RecipientStatus.Rejected);
@@ -336,7 +337,7 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
         vm.startPrank(pool_manager1());
 
         vm.expectEmit(false, false, false, true);
-        emit Registered(MilestonesReviewed, IStrategy.RecipientStatus.Accepted);
+        emit MilestonesReviewed(recipientId, IStrategy.RecipientStatus.Accepted);
 
         strategy.reviewSetMilestones(recipientId, IStrategy.RecipientStatus.Accepted);
         vm.stopPrank();
