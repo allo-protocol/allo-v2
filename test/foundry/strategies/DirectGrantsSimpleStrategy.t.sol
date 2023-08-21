@@ -433,6 +433,46 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
         vm.stopPrank();
     }
 
+    function testRevert_setMilestones_INVALID_MILESTONE_exceed_percentage_doubled() public {
+        address recipientId = _register_recipient_allocate_accept();
+        DirectGrantsSimpleStrategy.Milestone[] memory milestones = new DirectGrantsSimpleStrategy.Milestone[](2);
+
+        milestones[0] = DirectGrantsSimpleStrategy.Milestone({
+            amountPercentage: 0.3e18,
+            metadata: Metadata(1, "milestone-1"),
+            milestoneStatus: IStrategy.RecipientStatus.None
+        });
+
+        milestones[1] = DirectGrantsSimpleStrategy.Milestone({
+            amountPercentage: 0.7e18,
+            metadata: Metadata(1, "milestone-2"),
+            milestoneStatus: IStrategy.RecipientStatus.None
+        });
+
+        vm.startPrank(profile1_member1());
+
+        // set to 100%
+        strategy.setMilestones(recipientId, milestones);
+
+        // todo:
+        // set to 100% again => 200% -> should revert
+        vm.expectRevert(DirectGrantsSimpleStrategy.INVALID_MILESTONE.selector);
+        strategy.setMilestones(recipientId, milestones);
+
+        // check if sum of milestones are equal to 100% (1e18)
+        DirectGrantsSimpleStrategy.Milestone[] memory setMilestones = strategy.getMilestones(recipientId);
+
+        uint256 totalAllocated = 0;
+
+        for (uint256 i = 0; i < setMilestones.length; i++) {
+            totalAllocated += setMilestones[i].amountPercentage;
+        }
+
+        assertEq(totalAllocated, 1e18);
+
+        vm.stopPrank();
+    }
+
     function testRevert_setMilestones_INVALID_MILESTONE_wrong_status() public {
         address recipientId = _register_recipient_allocate_accept();
         DirectGrantsSimpleStrategy.Milestone[] memory milestones = new DirectGrantsSimpleStrategy.Milestone[](2);

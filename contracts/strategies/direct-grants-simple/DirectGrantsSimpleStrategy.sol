@@ -355,6 +355,8 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
         Recipient storage recipient = _recipients[recipientId];
 
+        // TODO: should we check if the milestoneReviewStatus is accepted? instead? 
+        // an accepted milestoneReviewStatus means that the milestones are set and they can only be set if recipient is accepted
         if (
             recipient.recipientStatus != InternalRecipientStatus.Accepted // no need to accept twice
                 && recipientStatus == InternalRecipientStatus.Accepted
