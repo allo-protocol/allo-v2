@@ -29,15 +29,15 @@ The `DirectGrantsSimpleStrategy` contract represents a smart contract governing 
 
 **Storage Variables:**
 
-1. `registryGating`: A flag indicating whether registry gating is enabled.
+1. `registryGating`: A flag indicating whether registry gating is enabled (recipients need to be registred on the Registry.sol to be register to the pool).
 2. `metadataRequired`: A flag indicating whether metadata is required for recipient registration.
-3. `grantAmountRequired`: A flag indicating whether a grant amount is required for recipient registration.
-4. `allocatedGrantAmount`: The total grant amount allocated across recipients.
+3. `grantAmountRequired`: A flag indicating whether a grant amount can be proposed by recipient during registration.
+4. `allocatedGrantAmount`: The total grant amount allocated across recipients by the pool managers.
 5. `_registry`: A reference to the Allo registry contract.
 6. `_acceptedRecipientIds`: An array storing the IDs of accepted recipients.
 7. `_recipients`: A mapping from recipient IDs to recipient data.
 8. `milestones`: A mapping from recipient IDs to their associated milestones.
-9. `upcomingMilestone`: A mapping from recipient IDs to the index of the next upcoming milestone.
+9. `upcomingMilestone`: A mapping from recipient IDs to the index of the next upcoming milestone which is pending payment.
 10. `totalMilestones`: A mapping from recipient IDs to the total number of milestones.
 
 **Constructor:**
@@ -87,9 +87,20 @@ In essence, the `DirectGrantsSimpleStrategy` contract extends the functionalitie
 
 1. Recipient or Profile Owner initiates a registration request.
     
-2. If `registryGating` is enabled: a. Submits recipient ID, recipient address, grant amount, and metadata. b. Verifies sender's authorization. c. Validates the provided data. d. If recipient is already accepted, reverts. e. Registers recipient as "Pending" with provided details. f. Emits `Registered` event.
+2. If `registryGating` is enabled: 
+    - a. Submits recipient ID, recipient address, grant amount, and metadata.
+    - b. Verifies sender's authorization.
+    - c. Validates the provided data. 
+    - d. If recipient is already accepted, reverts. 
+    - e. Registers recipient as "Pending" with provided details. - f. Emits `Registered` event.
     
-3. If `registryGating` is disabled: a. Submits recipient address, registry anchor (optional), grant amount, and metadata. b. Determines if registry anchor is being used. c. Verifies sender's authorization. d. Validates the provided data. e. If recipient is already accepted, reverts. f. Registers recipient as "Pending" with provided details. g. Emits `Registered` event.
+3. If `registryGating` is disabled: 
+    - a. Submits recipient address, registry anchor (optional), grant amount, and metadata.
+    - b. Determines if registry anchor is being used. 
+    - c. Verifies sender's authorization.
+    - d. Validates the provided data. 
+    - e. If recipient is already accepted, reverts. 
+    - f. Registers recipient as "Pending" with provided details. - g. Emits `Registered` event.
     
 
 * * *
@@ -97,7 +108,7 @@ In essence, the `DirectGrantsSimpleStrategy` contract extends the functionalitie
 **User Flow: Setting Milestones**
 
 1. Recipient or Pool Manager initiates a milestone setting request.
-2. Verifies if sender is authorized to set milestones for the recipient.
+2. Verifies if sender is authorized to set milestones for the recipient. (This can be recipient owner or the pool manager)
 3. If recipient's status is not "Accepted," reverts.
 4. If milestones are already set or milestones review status is "Accepted," reverts.
 5. Sets provided milestones for the recipient.
@@ -143,8 +154,16 @@ In essence, the `DirectGrantsSimpleStrategy` contract extends the functionalitie
 2. Decodes recipient ID, internal recipient status, and grant amount from provided data.
 3. Verifies if sender is a pool manager.
 4. Checks if upcoming milestone is not already set for the recipient.
-5. If recipient's status is "Accepted": a. Allocates grant amount to recipient. b. Updates allocated grant amount. c. If allocation exceeds pool amount, reverts. d. Sets recipient's grant amount and status to "Accepted." e. Emits `RecipientStatusChanged` event. f. Emits `Allocated` event.
-6. If recipient's status is "Rejected": a. Sets recipient's status to "Rejected." b. Emits `RecipientStatusChanged` event.
+5. If recipient's status is "Accepted": 
+    - a. Allocates grant amount to recipient. 
+    - b. Updates allocated grant amount. 
+    - c. If allocation exceeds pool amount, reverts. 
+    - d. Sets recipient's grant amount and status to "Accepted." 
+    - e. Emits `RecipientStatusChanged` event. 
+    - f. Emits `Allocated` event.
+6. If recipient's status is "Rejected": 
+    - a. Sets recipient's status to "Rejected." 
+    - b. Emits `RecipientStatusChanged` event.
 
 * * *
 
@@ -152,7 +171,15 @@ In essence, the `DirectGrantsSimpleStrategy` contract extends the functionalitie
 
 1. Pool Manager initiates a distribution request.
 2. Verifies if sender is a pool manager.
-3. Loops through recipient list: a. Checks if milestone to be distributed is valid. b. Checks if milestone is pending for distribution. c. Calculates distribution amount based on grant amount and milestone percentage. d. Deducts amount from pool. e. Transfers amount to recipient's address. f. Updates milestone's status to "Accepted." g. Emits `MilestoneStatusChanged` event. h. Emits `Distributed` event.
+3. Loops through recipient list: 
+    - a. Checks if milestone to be distributed is valid. 
+    - b. Checks if milestone is pending for distribution.
+    - c. Calculates distribution amount based on grant amount and milestone percentage.
+    - d. Deducts amount from pool. 
+    - e. Transfers amount to recipient's address. 
+    - f. Updates milestone's status to "Accepted." 
+    - g. Emits `MilestoneStatusChanged` event. 
+    - h. Emits `Distributed` event.
 
 * * *
 
