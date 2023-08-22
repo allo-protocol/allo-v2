@@ -220,6 +220,11 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
             revert UNAUTHORIZED();
         }
 
+        Recipient memory recipient = _recipients[_recipientId];
+        if (recipient.recipientStatus != InternalRecipientStatus.Accepted) {
+            revert RECIPIENT_NOT_ACCEPTED();
+        }
+
         Milestone[] storage recipientMilestones = milestones[_recipientId];
 
         if (_milestoneId > recipientMilestones.length) {

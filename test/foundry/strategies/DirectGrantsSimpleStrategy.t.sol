@@ -551,6 +551,17 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
         assertEq(uint8(milestones[1].milestoneStatus), uint8(IStrategy.RecipientStatus.Pending));
     }
 
+    function testRever_submitMilestones_RECIPIENT_NOT_ACCEPTED() public {
+        address recipientId = _register_recipient_allocate_reject();
+
+        Metadata memory metadata2 = Metadata(1, "milestone-2");
+
+        vm.expectRevert(DirectGrantsSimpleStrategy.RECIPIENT_NOT_ACCEPTED.selector);
+        vm.startPrank(profile1_member1());
+        strategy.submitMilestone(recipientId, 1, metadata2);
+        vm.stopPrank();
+    }
+
     function testRevert_submitMilestone_UNAUTHORIZED() public {
         address recipientId = _register_recipient_allocate_accept_set_milestones_by_pool_manager();
 
