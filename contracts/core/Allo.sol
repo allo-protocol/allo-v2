@@ -28,9 +28,8 @@ import {Transfer} from "./libraries/Transfer.sol";
 
 /// @title Allo
 /// @author @thelostone-mc <aditya@gitcoin.co>, @KurtMerbeth <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>
-/// @notice The Allo core contract
-/// @dev This contract is used to create & manage pools as well as manage the protocol. The contract must be initialized
-///      with the 'initialize()' function.
+/// @notice This contract is used to create & manage pools as well as manage the protocol.
+/// @dev The contract must be initialized with the 'initialize()' function.
 contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl {
     // ==========================
     // === Storage Variables ====
@@ -360,9 +359,8 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
     /// @notice Allocate to multiple pools
     /// @dev The encoded data will be specific to a given strategy requirements, reference the strategy
     ///      implementation of allocate(). Please note that this is not a 'payable' function, so if you
-    ///      want to send funds to the strategy, you must send the funds using 'fundPool()'
-    /// Requirements: This will be determined by the strategy
-    /// @param _poolIds ids of the pools
+    ///      want to send funds to the strategy, you must send the funds using 'fundPool()'.
+    /// @param _poolIds IDs of the pools
     /// @param _datas encoded data unique to the strategy for that pool
     function batchAllocate(uint256[] calldata _poolIds, bytes[] memory _datas) external {
         uint256 numPools = _poolIds.length;
@@ -398,7 +396,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
     /// @dev This is an internal function that is called by the 'createPool()' & 'createPoolWithCustomStrategy()' functions
     ///      It is used to create a new pool and is called by both functions. The 'msg.sender' must be a member or owner of
     ///      a profile to create a pool.
-    /// @param _profileId The 'profileId' of the pool creator in the registry
+    /// @param _profileId The ID of the profile of for pool creator in the registry
     /// @param _strategy The address of strategy
     /// @param _initStrategyData The data to initialize the strategy
     /// @param _token The address of the token that the pool is denominated in
@@ -483,9 +481,9 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
         emit PoolCreated(poolId, _profileId, _strategy, _token, _amount, _metadata);
     }
 
-    /// @notice Allocate to recipient
-    /// @dev Passes '_data' & 'msg.sender' through to the strategy for that pool
-    ///      This is an internal function that is called by the 'allocate()' & 'batchAllocate()' functions
+    /// @notice Allocate to recipient(s).
+    /// @dev Passes '_data' & 'msg.sender' through to the strategy for that pool.
+    ///      This is an internal function that is called by the 'allocate()' & 'batchAllocate()' functions.
     /// @param _poolId ID of the pool
     /// @param _data Encoded data unique to the strategy for that pool
     function _allocate(uint256 _poolId, bytes memory _data) internal {
@@ -525,7 +523,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
     }
 
     /// @notice Checks if the address is a pool admin
-    /// @param _poolId The pool id
+    /// @param _poolId The ID of the pool
     /// @param _address The address to check
     /// @return This will return 'true' if the address is a pool admin, otherwise 'false'
     function _isPoolAdmin(uint256 _poolId, address _address) internal view returns (bool) {
@@ -533,7 +531,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
     }
 
     /// @notice Checks if the address is a pool manager
-    /// @param _poolId The pool id
+    /// @param _poolId The ID of the pool
     /// @param _address The address to check
     /// @return This will return 'true' if the address is a pool manager, otherwise 'false'
     function _isPoolManager(uint256 _poolId, address _address) internal view returns (bool) {
@@ -588,63 +586,63 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
         return 1e18;
     }
 
-    /// @notice Checks if the address is a pool admin
-    /// @param _poolId The pool id
+    /// @notice Checks if the address is a pool admin.
+    /// @param _poolId The ID of the pool
     /// @param _address The address to check
-    /// @return Returns 'true' if the address is a pool admin, otherwise 'false'
+    /// @return 'true' if the address is a pool admin, otherwise 'false'
     function isPoolAdmin(uint256 _poolId, address _address) external view returns (bool) {
         return _isPoolAdmin(_poolId, _address);
     }
 
     /// @notice Checks if the address is a pool manager
-    /// @param _poolId The pool id
+    /// @param _poolId The ID of the pool
     /// @param _address The address to check
-    /// @return Returns 'true' if the address is a pool manager, otherwise 'false'
+    /// @return 'true' if the address is a pool manager, otherwise 'false'
     function isPoolManager(uint256 _poolId, address _address) external view returns (bool) {
         return _isPoolManager(_poolId, _address);
     }
 
-    /// @notice Return the strategy for a pool
-    /// @param _poolId The pool id
-    /// @return Returns the address of the strategy
+    /// @notice Getter for the strategy.
+    /// @param _poolId The ID of the pool
+    /// @return The address of the strategy
     function getStrategy(uint256 _poolId) external view returns (address) {
         return address(pools[_poolId].strategy);
     }
 
-    /// @notice Getter for fee percentage
-    /// @return Returns the fee percentage
+    /// @notice Getter for fee percentage.
+    /// @return The fee percentage
     function getPercentFee() external view returns (uint256) {
         return percentFee;
     }
 
-    /// @notice Getter for base fee
-    /// @return Returns the base fee
+    /// @notice Getter for base fee.
+    /// @return The base fee
     function getBaseFee() external view returns (uint256) {
         return baseFee;
     }
 
-    /// @notice Getter for treasury address
-    /// @return Returns the treasury address
+    /// @notice Getter for treasury address.
+    /// @return The treasury address
     function getTreasury() external view returns (address payable) {
         return treasury;
     }
 
-    /// @notice Getter for registry
-    /// @return Returns the registry address
+    /// @notice Getter for registry.
+    /// @return The registry address
     function getRegistry() external view returns (IRegistry) {
         return registry;
     }
 
-    /// @notice Getter for if strategy is cloneable
+    /// @notice Getter for if strategy is cloneable.
     /// @param _strategy The address of the strategy
-    /// @return Returns 'true' if the strategy is cloneable, otherwise 'false'
+    /// @return Ttrue' if the strategy is cloneable, otherwise 'false'
     function isCloneableStrategy(address _strategy) external view returns (bool) {
         return _isCloneableStrategy(_strategy);
     }
 
-    /// @notice Getter for the 'Pool'
-    /// @param _poolId The pool id
-    /// @return Returns the 'Pool' struct
+    /// @notice Getter for the 'Pool'.
+    /// @param _poolId The ID of the pool
+    /// @return The 'Pool' struct
     function getPool(uint256 _poolId) external view returns (Pool memory) {
         return pools[_poolId];
     }

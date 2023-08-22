@@ -205,7 +205,7 @@ interface IAllo {
 
     /// @notice Distributes funds to recipients and emits {Distributed} event if successful
     /// @dev Each strategy will handle the distribution of funds differently
-    /// @param _poolId The pool id to distribute from
+    /// @param _poolId The ID of the pool to distribute from
     /// @param _recipientIds The recipient ids to distribute to
     /// @param _data The data to pass to the strategy and may be handled differently by each strategy
     function distribute(uint256 _poolId, address[] memory _recipientIds, bytes memory _data) external;
@@ -258,7 +258,7 @@ interface IAllo {
     function getPool(uint256 _poolId) external view returns (Pool memory);
 
     /// @notice Returns the current fee denominator
-    /// @dev Set at 1e18 to represent 100%
+    /// @dev 1e18 represents 100%
     /// @return feeDenominator The current fee denominator
     function getFeeDenominator() external view returns (uint256);
 }

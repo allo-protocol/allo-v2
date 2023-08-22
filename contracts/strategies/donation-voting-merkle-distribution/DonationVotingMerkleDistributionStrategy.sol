@@ -904,7 +904,7 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         return status;
     }
 
-    /// @notice get recipient status rowIndex, colIndex and currentRow
+    /// @notice Get recipient status 'rowIndex', 'colIndex' and 'currentRow'.
     /// @param _recipientId ID of the recipient
     /// @return (rowIndex, colIndex, currentRow)
     function _getStatusRowColumn(address _recipientId) internal view returns (uint256, uint256, uint256) {
@@ -917,5 +917,5 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
     }
 
     /// @notice Contract should be able to receive ETH
-    receive() external payable virtual {}
+    receive() external payable {}
 }

@@ -6,10 +6,9 @@ import {Registry} from "./Registry.sol";
 
 /// @title Anchor contract
 /// @author @thelostone-mc <aditya@gitcoin.co>, @KurtMerbeth <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>
-/// @notice This contract is used to execute calls to a target address
-// TODO: Fix this
-/// @dev The Anhor is used as an identifier for your profile, it gives the protocol a way to send funds to a target
-///      address and not get stuck in a contract.
+/// @notice Anchors are associated with profiles and are accessible exclusively by the profile owner. This contract ensures secure
+///         and authorized interaction with external addresses, enhancing the capabilities of profiles and enabling controlled
+///         execution of operations. The contract leverages the `Registry` contract for ownership verification and access control.
 contract Anchor {
     /// ==========================
     /// === Storage Variables ====
@@ -25,19 +24,19 @@ contract Anchor {
     /// ======== Errors ==========
     /// ==========================
 
-    /// @dev Error when the caller is not the owner of the profile
+    /// @notice Throws when the caller is not the owner of the profile
     error UNAUTHORIZED();
 
-    /// @dev Error when the call to the target address fails
+    /// @notice Throws when the call to the target address fails
     error CALL_FAILED();
 
     /// ==========================
     /// ======= Constructor ======
     /// ==========================
 
-    /// @notice Construct a new Anchor contract
-    /// @param _profileId The profileId of the allowed profile to execute calls
-    /// @dev We also want to pass msg.sender to the Registry contract to set the owner
+    /// @notice Constructor
+    /// @dev We create an instance of the 'Registry' contract using the 'msg.sender' and set the profileId.
+    /// @param _profileId The ID of the allowed profile to execute calls
     constructor(bytes32 _profileId) {
         registry = Registry(msg.sender);
         profileId = _profileId;
@@ -64,4 +63,7 @@ contract Anchor {
         }
         return data;
     }
+
+    /// @notice This contract should be able to receive native token
+    receive() external payable {}
 }
