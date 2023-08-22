@@ -15,14 +15,14 @@ import {Metadata} from "../../core/libraries/Metadata.sol";
 import {Native} from "../../core/libraries/Native.sol";
 
 /// @title Donation Voting Merkle Distribution Strategy
-/// @author allo-team
+/// @author @thelostone-mc <aditya@gitcoin.co>, @KurtMerbeth <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>
 /// @notice Strategy for donation voting allocation with a merkle distribution
 contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGuard, Multicall {
     /// ================================
     /// ========== Struct ==============
     /// ================================
 
-    /// @notice Struct for the internal status of a recipient
+    /// @notice Stores the internal status of a recipient for this strategy.
     enum InternalRecipientStatus {
         None,
         Pending,
@@ -51,7 +51,7 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         uint256 statusRow;
     }
 
-    /// @notice Struct to hold details of the recipients
+    /// @notice Stores the details of the recipients.
     struct Recipient {
         // If false, the recipientAddress is the anchor of the profile
         bool useRegistryAnchor;
@@ -59,13 +59,13 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         Metadata metadata;
     }
 
-    /// @notice Struct to hold details of the allocations to claim
+    /// @notice Stores the details of the allocations to claim.
     struct Claim {
         address recipientId;
         address token;
     }
 
-    /// @notice Struct to hold details of the distribution
+    /// @notice Stores the details of the distribution.
     struct Distribution {
         uint256 index;
         address recipientId;
@@ -77,32 +77,33 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
     /// ========== Errors =============
     /// ===============================
 
-    /// @dev Returns when the sender is not not a profile member
+    /// @notice Throws when the sender is not not a profile member.
     error UNAUTHORIZED();
 
-    /// @dev Returns when registration is not active
+    /// @notice Throws when registration is not active.
     error REGISTRATION_NOT_ACTIVE();
 
-    /// @dev Returns when allocation is not active
+    /// @notice Throws when allocation is not active.
     error ALLOCATION_NOT_ACTIVE();
 
-    /// @dev Returns when allocation has not ended
+    /// @notice Throws when allocation has not ended.
     error ALLOCATION_NOT_ENDED();
 
-    /// @dev Returns when there is an error with the recipient. This can occur when the recipient
-    ///      is not registered or the recipient is not accepted
+    /// @notice Throws when there is an error with the recipient. This can occur when the recipient
+    ///      is not registered or the recipient is not accepted.
     /// @param recipientId Id of the recipient
     error RECIPIENT_ERROR(address recipientId);
 
+    /// @notice Throws when a genral error occurs.
     /// @dev Used as a general error message for this strategy. This can occur when a token is not
-    ///      allowed or the amount is invalid and is specific to this strategy
+    ///      allowed or the amount is invalid and is specific to this strategy.
     error INVALID();
 
-    /// @dev Returns when 30 days have not passed since the end of the allocation or
-    ///      the amount is greater than the pool amount
+    /// @notice Throws when 30 days have not passed since the end of the allocation or
+    ///         the amount is greater than the pool amount.
     error NOT_ALLOWED();
 
-    /// @dev Returns when the metadata is invalid, protocol or pointer is not set
+    /// @notice Throws when the metadata is invalid, protocol or pointer is not set.
     error INVALID_METADATA();
 
     /// ===============================
@@ -162,42 +163,38 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
     /// ========== Storage =============
     /// ================================
 
-    /// @dev Metadata containing the distribution data
+    /// @notice Metadata containing the distribution data.
     Metadata public distributionMetadata;
 
-    /// @dev If true, the recipientAddress is the anchor of the profile
+    /// @notice Flag to indicate whether to use the registry anchor or not.
     bool public useRegistryAnchor;
 
-    /// @dev If true, the metadata is required
+    /// @notice Flag to indicate whether metadata is required or not.
     bool public metadataRequired;
 
-    /// @dev If true, the distribution has started
+    /// @notice Flag to indicate whether the distribution has started or not.
     bool public distributionStarted;
 
-    /// @dev The timestamps are in milliseconds
+    /// @notice The timestamps in milliseconds for the start and end times.
     uint256 public registrationStartTime;
     uint256 public registrationEndTime;
     uint256 public allocationStartTime;
     uint256 public allocationEndTime;
 
-    /// @dev The total amount of tokens allocated
+    /// @notice The total amount of tokens allocated to the payout.
     uint256 public totalPayoutAmount;
 
-    /// @dev The total amount of recipients
+    /// @notice The total number of recipients.
     uint256 public recipientsCounter;
 
-    /// @dev The registry contract interface
+    /// @notice The registry contract interface.
     IRegistry private _registry;
 
-    /// @notice merkle root generated from distribution
+    /// @notice The merkle root of the distribution will be set by the pool manager.
     bytes32 public merkleRoot;
 
-    /// @dev This is a packed array of booleans
-    ///
-    /// statuses[0] is the first row of the bitmap and allows to store 256 bits to describe
-    /// the status of 256 projects.
-    /// statuses[1] is the second row, and so on
-    ///
+    /// @notice This is a packed array of booleans, 'statuses[0]' is the first row of the bitmap and allows to
+    /// store 256 bits to describe the status of 256 projects. 'statuses[1]' is the second row, and so on
     /// Instead of using 1 bit for each recipient status, we will use 4 bits for each status
     /// to allow 5 statuses:
     /// 0: none
@@ -205,39 +202,36 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
     /// 2: accepted
     /// 3: rejected
     /// 4: appealed
-    ///
     /// Since it's a mapping the storage it's pre-allocated with zero values, so if we check the
-    /// status of an existing recipient, the value is by default 0 (none)
+    /// status of an existing recipient, the value is by default 0 (none).
     /// If we want to check the status of an recipient, we take its index from the `recipients` array
     /// and convert it to the 2-bits position in the bitmap.
     mapping(uint256 => uint256) public statusesBitMap;
 
-    /// @notice This is a mapping of 'recipientId' => 'statusIndex'
-    /// @dev 'statusIndex' is the index of the recipient in the 'statusesBitMap' bitmap
+    /// @notice 'recipientId' => 'statusIndex'
+    /// @dev 'statusIndex' is the index of the recipient in the 'statusesBitMap' bitmap.
     mapping(address => uint256) public recipientToStatusIndexes;
 
-    /// @notice This is a packed array of booleans to keep track of claims distributed
+    /// @notice This is a packed array of booleans to keep track of claims distributed.
     /// @dev distributedBitMap[0] is the first row of the bitmap and allows to store 256 bits to describe
     /// the status of 256 claims
     mapping(uint256 => uint256) private distributedBitMap;
 
-    /// @notice This is a mapping of 'token' address => boolean (allowed = true)
-    /// @dev If true, the token is allowed. This can be set by the pool manager
+    /// @notice 'token' address => boolean (allowed = true).
+    /// @dev This can be updated by the pool manager.
     mapping(address => bool) public allowedTokens;
 
-    /// @notice This is a mapping of 'recipientId' => 'Recipient' struct
-    /// @dev 'Recipient' struct contains the recipient details
+    /// @notice 'recipientId' => 'Recipient' struct.
     mapping(address => Recipient) private _recipients;
 
-    /// @notice This is a mapping of 'recipientId' => 'token' address => 'amount' uint256
-    /// @dev 'amount' is the amount of tokens allocated to the recipient
+    /// @notice 'recipientId' => 'token' => 'amount'.
     mapping(address => mapping(address => uint256)) public claims;
 
     /// ================================
     /// ========== Modifier ============
     /// ================================
 
-    /// @dev Checks if the registration is active and reverts if not
+    /// @dev Checks if the registration is active and reverts if not.
     modifier onlyActiveRegistration() {
         if (registrationStartTime > block.timestamp || block.timestamp > registrationEndTime) {
             revert REGISTRATION_NOT_ACTIVE();
@@ -245,7 +239,7 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         _;
     }
 
-    /// @dev Checks if the allocation is active and reverts if not
+    /// @dev Checks if the allocation is active and reverts if not.
     modifier onlyActiveAllocation() {
         if (allocationStartTime > block.timestamp || block.timestamp > allocationEndTime) {
             revert ALLOCATION_NOT_ACTIVE();
@@ -253,7 +247,7 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         _;
     }
 
-    /// @dev Checks if the allocation has ended and reverts if not
+    /// @dev Checks if the allocation has ended and reverts if not.
     modifier onlyAfterAllocation() {
         if (block.timestamp < allocationEndTime) {
             revert ALLOCATION_NOT_ENDED();
@@ -266,7 +260,7 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
     /// ===============================
 
     /// @notice Constructor for the Donation Voting Merkle Distribution Strategy
-    /// @param _allo The address of the Allo token
+    /// @param _allo The 'Allo' contract
     /// @param _name The name of the strategy
     constructor(address _allo, string memory _name) BaseStrategy(_allo, _name) {}
 
@@ -274,8 +268,8 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
     /// ========= Initialize ==========
     /// ===============================
 
-    /// @notice Initialize the strategy
-    /// @dev This will revert if the strategy is already initialized
+    /// @notice Initializes the strategy
+    /// @dev This will revert if the strategy is already initialized and 'msg.sender' is not the 'Allo' contract.
     /// @param _poolId The 'poolId' to initialize
     /// @param _data The data to be decoded to initialize the strategy
     /// @custom:data (bool _useRegistryAnchor, bool _metadataRequired, uint256 _registrationStartTime,
@@ -303,8 +297,8 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         );
     }
 
-    /// @notice Initialize this strategy as well as the BaseStrategy
-    /// @dev This will revert if the strategy is already initialized
+    /// @notice Initializes this strategy as well as the BaseStrategy.
+    /// @dev This will revert if the strategy is already initialized.
     /// @param _poolId The 'poolId' to initialize
     /// @param _useRegistryAnchor If 'true', the 'recipientAddress' is the anchor of the profile
     /// @param _metadataRequired If 'true', the metadata is required
@@ -366,8 +360,8 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
     /// ============ Views ============
     /// ===============================
 
-    /// @notice Get the recipient
-    /// @param _recipientId Id of the recipient
+    /// @notice Get a recipient with a '_recipientId'
+    /// @param _recipientId ID of the recipient
     /// @return recipient Returns the recipient details
     function getRecipient(address _recipientId) external view returns (Recipient memory recipient) {
         return _getRecipient(_recipientId);
@@ -377,18 +371,18 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
     /// @dev This will return the 'InternalRecipientStatus' of the recipient, the 'InternalRecipientStatus' is
     ///      used at the protocol level and is different from the 'RecipientStatus' which is used at the strategy
     ///      level
-    /// @param _recipientId Id of the recipient
-    /// @return status Status of the recipient
-    function getInternalRecipientStatus(address _recipientId) external view returns (InternalRecipientStatus status) {
+    /// @param _recipientId ID of the recipient
+    /// @return Status of the recipient
+    function getInternalRecipientStatus(address _recipientId) external view returns (InternalRecipientStatus) {
         return InternalRecipientStatus(_getUintRecipientStatus(_recipientId));
     }
 
     /// @notice Get recipient status
     /// @dev This will return the 'RecipientStatus' of the recipient, the 'RecipientStatus' is used at the strategy
     ///      level and is different from the 'InternalRecipientStatus' which is used at the protocol level
-    /// @param _recipientId Id of the recipient
-    /// @return status Status of the recipient
-    function _getRecipientStatus(address _recipientId) internal view override returns (RecipientStatus status) {
+    /// @param _recipientId ID of the recipient
+    /// @return Status of the recipient
+    function _getRecipientStatus(address _recipientId) internal view override returns (RecipientStatus) {
         InternalRecipientStatus internalStatus = InternalRecipientStatus(_getUintRecipientStatus(_recipientId));
 
         // If the 'internalStatus' is 'Appealed' we will return 'Pending' instead
@@ -403,20 +397,16 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
     /// ======= External/Custom =======
     /// ===============================
 
-    /// @notice Set recipient statuses
-    /// @dev The statuses are stored in a bitmap of 4 bits for each recipient
-    ///      The first 4 bits of the 256 bits represent the status of the first recipient,
-    ///      the second 4 bits represent the status of the second recipient, and so on.
-    ///
+    /// @notice Sets recipient statuses.
+    /// @dev The statuses are stored in a bitmap of 4 bits for each recipient. The first 4 bits of the 256 bits represent
+    ///      the status of the first recipient, the second 4 bits represent the status of the second recipient, and so on.
+    ///      'msg.sender' must be a pool manager and the registration must be active.
     /// Statuses:
     /// - 0: none
     /// - 1: pending
     /// - 2: accepted
     /// - 3: rejected
     /// - 4: appealed
-    ///
-    /// Requirements: 'msg.sender' must be a pool manager
-    ///
     /// @param statuses new statuses
     function reviewRecipients(ApplicationStatus[] memory statuses)
         external
@@ -439,9 +429,8 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         }
     }
 
-    /// @notice Set the start and end dates for the pool
-    /// @dev The timestamps are in milliseconds
-    /// Requirements: 'msg.sender' must be a pool manager
+    /// @notice Sets the start and end dates.
+    /// @dev The timestamps are in milliseconds for the start and end times. The 'msg.sender' must be a pool manager.
     /// @param _registrationStartTime The start time for the registration
     /// @param _registrationEndTime The end time for the registration
     /// @param _allocationStartTime The start time for the allocation
@@ -468,9 +457,8 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
     }
 
     /// @notice Withdraw funds from pool
-    /// @dev This can only be called after the allocation has ended and 30 days have passed
-    ///      If the '_amount' is greater than the pool amount, it will revert
-    /// Requirements: 'msg.sender' must be a pool manager
+    /// @dev This can only be called after the allocation has ended and 30 days have passed. If the
+    ///      '_amount' is greater than the pool amount or if 'msg.sender' is not a pool manager.
     /// @param _amount The amount to be withdrawn
     function withdraw(uint256 _amount) external onlyPoolManager(msg.sender) {
         if (block.timestamp <= allocationEndTime + 30 days) {
@@ -484,14 +472,13 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         }
 
         poolAmount -= _amount;
+
+        // Transfer the tokens to the 'msg.sender' (pool manager calling function)
         _transferAmount(pool.token, msg.sender, _amount);
     }
 
-    /// @notice Claim allocated tokens to an array of recipients
-    /// @dev Uses the merkle root to verify the claims
-    ///
-    /// Requirements: Allocation must have ended
-    ///
+    /// @notice Claim allocated tokens for recipients.
+    /// @dev Uses the merkle root to verify the claims. Allocation must have ended to claim.
     /// @param _claims Claims to be claimed
     function claim(Claim[] calldata _claims) external nonReentrant onlyAfterAllocation {
         uint256 claimsLength = _claims.length;
@@ -527,11 +514,8 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
     /// ============ Merkle ==============
     /// ==================================
 
-    /// @notice Invoked by round operator to update the merkle root and distribution Metadata
-    /// @dev This can only be called after the allocation has ended
-    ///
-    /// Requirements: 'msg.sender' must be a pool manager and allocation must have ended
-    ///
+    /// @notice Invoked by round operator to update the merkle root and distribution Metadata.
+    /// @dev This can only be called after the allocation has ended and 'msg.sender' must be a pool manager and allocation must have ended.
     /// @param _merkleRoot The merkle root of the distribution
     /// @param _distributionMetadata The metadata of the distribution
     function updateDistribution(bytes32 _merkleRoot, Metadata memory _distributionMetadata)
@@ -552,16 +536,16 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         emit DistributionUpdated(merkleRoot, distributionMetadata);
     }
 
-    /// @notice Checks if distribution is set
-    /// @return isSet 'true' if distribution is set
-    function isDistributionSet() external view returns (bool isSet) {
+    /// @notice Checks if distribution is set.
+    /// @return Whether the distribution is set or not
+    function isDistributionSet() external view returns (bool) {
         return merkleRoot != "";
     }
 
-    /// @notice Utility function to check if distribution is done
+    /// @notice Utility function to check if distribution is done.
     /// @param _index index of the distribution
-    /// @return isDistributed 'true' if distribution is done
-    function hasBeenDistributed(uint256 _index) external view returns (bool isDistributed) {
+    /// @return Whether the distribution is completed or not
+    function hasBeenDistributed(uint256 _index) external view returns (bool) {
         return _hasBeenDistributed(_index);
     }
 
@@ -569,24 +553,19 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
     /// ============ Internal ==============
     /// ====================================
 
-    /// @notice Checks if address is elgible allocator
-    /// @dev This will alway return true for this strategy
-    /// @return isValidAllocator Always true
-    function _isValidAllocator(address) internal pure override returns (bool isValidAllocator) {
+    /// @notice Checks if address is elgible allocator.
+    /// @return Always returns true for this strategy
+    function _isValidAllocator(address) internal pure override returns (bool) {
         return true;
     }
 
-    /// @notice Checks if the timestamps are valid
+    /// @notice Checks if the timestamps are valid.
     /// @dev This will revert if any of the timestamps are invalid. This is determined by the strategy
-    ///      and may vary from strategy to strategy
-    ///
-    /// Checks if '_registrationStartTime' is less than the current 'block.timestamp'
-    /// or if '_registrationStartTime' is greater than the '_registrationEndTime'
-    /// or if '_registrationStartTime' is greater than the '_allocationStartTime'
-    /// or if '_registrationEndTime' is greater than the '_allocationEndTime'
-    /// or if '_allocationStartTime' is greater than the '_allocationEndTime'
-    /// If any of these conditions are true, this will revert
-    ///
+    /// and may vary from strategy to strategy. Checks if '_registrationStartTime' is less than the
+    /// current 'block.timestamp' or if '_registrationStartTime' is greater than the '_registrationEndTime'
+    /// or if '_registrationStartTime' is greater than the '_allocationStartTime' or if '_registrationEndTime'
+    /// is greater than the '_allocationEndTime' or if '_allocationStartTime' is greater than the '_allocationEndTime'.
+    /// If any of these conditions are true, this will revert.
     /// @param _registrationStartTime The start time for the registration
     /// @param _registrationEndTime The end time for the registration
     /// @param _allocationStartTime The start time for the allocation
@@ -606,22 +585,23 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         }
     }
 
-    /// @notice Returns whether a pool is active or not
+    /// @notice Checks whether a pool is active or not.
     /// @dev This will return true if the current 'block timestamp' is greater than or equal to the
-    ///      'registrationStartTime' and less than or equal to the 'registrationEndTime'
-    /// @return isActive 'true' if the pool is active
-    function _isPoolActive() internal view override returns (bool isActive) {
+    /// 'registrationStartTime' and less than or equal to the 'registrationEndTime'.
+    /// @return Whether the pool is active or not
+    function _isPoolActive() internal view override returns (bool) {
         if (registrationStartTime <= block.timestamp && block.timestamp <= registrationEndTime) {
             return true;
         }
         return false;
     }
 
-    /// @notice Submit recipient to pool to allow allocation
-    /// @param _data The data to be decoded
+    /// @notice Submit recipient to pool and set their status.
+    /// @param _data The data to be decoded.
     /// @custom:data if 'useRegistryAnchor' is 'true' (address recipientId, address recipientAddress, Metadata metadata)
     /// @custom:data if 'useRegistryAnchor' is 'false' (address recipientAddress, address registryAnchor, Metadata metadata)
     /// @param _sender The sender of the transaction
+    /// @return recipientId The ID of the recipient
     function _registerRecipient(bytes memory _data, address _sender)
         internal
         override
@@ -690,8 +670,8 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         }
     }
 
-    /// @notice Allocate tokens to recipient to be distributed after allocation period has ended
-    /// @dev This can only be called after durting the allocation period
+    /// @notice Allocate tokens to recipient.
+    /// @dev This can only be called during the allocation period.
     /// @param _data The data to be decoded
     /// @custom:data (address recipientId, uint256 amount, address token)
     /// @param _sender The sender of the transaction
@@ -730,8 +710,8 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         emit Allocated(recipientId, amount, token, _sender);
     }
 
-    /// @notice Distribute funds to recipients
-    /// @dev 'distributionStarted' will be set to 'true' when called
+    /// @notice Distribute funds to recipients.
+    /// @dev 'distributionStarted' will be set to 'true' when called. Only the pool manager can call.
     /// @param _data The data to be decoded
     /// @custom:data '(Distribution[] distributions)'
     /// @param _sender The sender of the transaction
@@ -761,32 +741,27 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         emit BatchPayoutSuccessful(_sender);
     }
 
-    /// @notice Check if sender is profile owner or member
+    /// @notice Check if sender is profile owner or member.
     /// @param _anchor Anchor of the profile
     /// @param _sender The sender of the transaction
-    /// @return isProfileMember 'true' if sender is profile owner or member
-    function _isProfileMember(address _anchor, address _sender) internal view virtual returns (bool isProfileMember) {
+    /// @return Whether the '_sender' is a profile member or not
+    function _isProfileMember(address _anchor, address _sender) internal view virtual returns (bool) {
         IRegistry.Profile memory profile = _registry.getProfileByAnchor(_anchor);
         return _registry.isOwnerOrMemberOfProfile(profile.id, _sender);
     }
 
-    /// @notice Get the recipient details
+    /// @notice Get the recipient details.
     /// @param _recipientId Id of the recipient
-    /// @return recipient Returns the recipient details
-    function _getRecipient(address _recipientId) internal view returns (Recipient memory recipient) {
+    /// @return Recipient details
+    function _getRecipient(address _recipientId) internal view returns (Recipient memory) {
         return _recipients[_recipientId];
     }
 
-    /// @notice Returns the payout summary for the accepted recipient
+    /// @notice Returns the payout summary for the accepted recipient.
     /// @param _data The data to be decoded
     /// @custom:data '(Distribution)'
-    /// @return payoutSummary Returns the 'PayoutSummary' for a recipient
-    function _getPayout(address, bytes memory _data)
-        internal
-        view
-        override
-        returns (PayoutSummary memory payoutSummary)
-    {
+    /// @return 'PayoutSummary' for a recipient
+    function _getPayout(address, bytes memory _data) internal view override returns (PayoutSummary memory) {
         // Decode the '_data' to get the distribution
         Distribution memory distribution = abi.decode(_data, (Distribution));
 
@@ -807,20 +782,20 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         return PayoutSummary(recipientAddress, 0);
     }
 
-    /// @notice Validate the distribution for the payout
+    /// @notice Validate the distribution for the payout.
     /// @param _index index of the distribution
     /// @param _recipientId Id of the recipient
     /// @param _recipientAddress Address of the recipient
     /// @param _amount Amount of tokens to be distributed
     /// @param _merkleProof Merkle proof of the distribution
-    /// @return isValid 'true' if the distribution is valid
+    /// @return Whether the distribution is valid or not
     function _validateDistribution(
         uint256 _index,
         address _recipientId,
         address _recipientAddress,
         uint256 _amount,
         bytes32[] memory _merkleProof
-    ) internal view returns (bool isValid) {
+    ) internal view returns (bool) {
         // If the '_index' has been distributed this will return 'false'
         if (_hasBeenDistributed(_index)) {
             return false;
@@ -838,10 +813,10 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         return true;
     }
 
-    /// @notice Check if the distribution has been distributed
+    /// @notice Check if the distribution has been distributed.
     /// @param _index index of the distribution
-    /// @return distributed 'true' if the distribution has been distributed
-    function _hasBeenDistributed(uint256 _index) internal view returns (bool distributed) {
+    /// @return Whether the distribution has been distributed or not
+    function _hasBeenDistributed(uint256 _index) internal view returns (bool) {
         // Get the word index by dividing the '_index' by 256
         uint256 distributedWordIndex = _index / 256;
 
@@ -858,7 +833,7 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         return distributedWord & mask == mask;
     }
 
-    /// @notice Util function to mark distribution as done
+    /// @notice Mark distribution as done.
     /// @param _index index of the distribution
     function _setDistributed(uint256 _index) private {
         // Get the word index by dividing the '_index' by 256
@@ -871,8 +846,8 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         distributedBitMap[distributedWordIndex] |= (1 << distributedBitIndex);
     }
 
-    /// @notice Util function to distribute funds to recipient
-    /// @param _distribution encoded distribution
+    /// @notice Distribute funds to recipient.
+    /// @param _distribution Distribution to be distributed
     function _distributeSingle(Distribution memory _distribution) private {
         uint256 index = _distribution.index;
         address recipientId = _distribution.recipientId;
@@ -901,8 +876,8 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         }
     }
 
-    /// @notice Set the recipient status
-    /// @param _recipientId Id of the recipient
+    /// @notice Set the recipient status.
+    /// @param _recipientId ID of the recipient
     /// @param _status Status of the recipient
     function _setRecipientStatus(address _recipientId, uint256 _status) internal {
         // Get the row index, column index and current row
@@ -916,7 +891,7 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
     }
 
     /// @notice Get recipient status
-    /// @param _recipientId index of the recipient
+    /// @param _recipientId ID of the recipient
     /// @return status status of the recipient
     function _getUintRecipientStatus(address _recipientId) internal view returns (uint8 status) {
         // Get the column index and current row
@@ -930,7 +905,7 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
     }
 
     /// @notice get recipient status rowIndex, colIndex and currentRow
-    /// @param _recipientId Id of the recipient
+    /// @param _recipientId ID of the recipient
     /// @return (rowIndex, colIndex, currentRow)
     function _getStatusRowColumn(address _recipientId) internal view returns (uint256, uint256, uint256) {
         uint256 recipientIndex = recipientToStatusIndexes[_recipientId];

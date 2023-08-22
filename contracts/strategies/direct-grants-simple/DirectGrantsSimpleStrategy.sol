@@ -11,19 +11,19 @@ import {BaseStrategy} from "../BaseStrategy.sol";
 // Internal Libraries
 import {Metadata} from "../../core/libraries/Metadata.sol";
 
-/// @title Direct Grants Simple Strategy
-/// @notice A strategy is used to allocate & distribute funds to recipients with milestone payouts
-/// @author allo-team
-///
-/// @dev This strategy is used to allocate & distribute funds to recipients with milestone payouts
+/// @title Direct Grants Simple Strategy.
+/// @author @thelostone-mc <aditya@gitcoin.co>, @KurtMerbeth <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>
+/// @notice Strategy used to allocate & distribute funds to recipients with milestone payouts. The milestones
+///         are set by the recipient and the pool manager can accept or reject the milestone. The pool manager
+///         can also reject the recipient.
 contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// ================================
     /// ========== Storage =============
     /// ================================
 
-    /// @notice Enum to hold the internal status of the recipient
-    /// @dev This status is specific to this strategy and is used to track the status of the recipient and milestones
-    ///      Note: This is not the same as the global 'RecipientStatus' enum
+    /// @notice Enum to hold the internal status of the recipient.
+    /// @dev This status is specific to this strategy and is used to track the status of the recipient and milestones.
+    ///      This is not the same as the global 'RecipientStatus' enum
     enum InternalRecipientStatus {
         None,
         Pending,
@@ -104,25 +104,34 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// ========== Storage =============
     /// ================================
 
+    /// @notice Flag to check if registry gating is enabled.
     bool public registryGating;
+
+    /// @notice Flag to check if metadata is required.
     bool public metadataRequired;
+
+    /// @notice Flag to check if grant amount is required.
     bool public grantAmountRequired;
+
+    /// @notice The total amount allocated to grant/recipient.
     uint256 public allocatedGrantAmount;
+
+    /// @notice The 'Registry' contract interface.
     IRegistry private _registry;
 
-    /// @dev Internal collection of accepted recipients able to submit milestones
+    /// @notice Internal collection of accepted recipients able to submit milestones
     address[] private _acceptedRecipientIds;
 
     /// @notice This maps accepted recipients to their details
-    /// @dev Mapping of the 'recipientId' to the 'Recipient' struct
+    /// @dev 'recipientId' to 'Recipient'
     mapping(address => Recipient) private _recipients;
 
     /// @notice This maps accepted recipients to their milestones
-    /// @dev Mapping of the 'recipientId' to the 'Milestone' struct
+    /// @dev 'recipientId' to 'Milestone'
     mapping(address => Milestone[]) public milestones;
 
     /// @notice This maps accepted recipients to their upcoming milestone
-    /// @dev Mapping of the 'recipientId' to the 'nextMilestone' index
+    /// @dev 'recipientId' to 'nextMilestone'
     mapping(address => uint256) public upcomingMilestone;
 
     /// ===============================
@@ -130,9 +139,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// ===============================
 
     /// @notice Constructor for the Direct Grants Simple Strategy
-    /// @dev Pass the Allo contract address for the network you choose and the name of the strategy
-    ///      Note: The parameters just get passed on to the BaseStrategy
-    /// @param _allo The address of the Allo contract
+    /// @param _allo The 'Allo' contract
     /// @param _name The name of the strategy
     constructor(address _allo, string memory _name) BaseStrategy(_allo, _name) {}
 
@@ -141,7 +148,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// ===============================
 
     /// @notice Initialize the strategy
-    /// @param _poolId Id of the pool
+    /// @param _poolId ID of the pool
     /// @param _data The data to be decoded
     /// @custom:data (bool registryGating, bool metadataRequired, bool grantAmountRequired)
     function initialize(uint256 _poolId, bytes memory _data) external virtual override {
@@ -152,7 +159,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice This initializes the BaseStrategy
     /// @dev You only need to pass the 'poolId' to initialize the BaseStrategy and the rest is specific to the strategy
-    /// @param _poolId Id of the pool - required to initialize the BaseStrategy
+    /// @param _poolId ID of the pool - required to initialize the BaseStrategy
     /// @param _registryGating Flag to check if registry gating is enabled
     /// @param _metadataRequired Flag to check if metadata is required
     /// @param _grantAmountRequired Flag to check if grant amount is required
@@ -210,7 +217,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         }
     }
 
-    /// @notice Checks if address is elgible allocator
+    /// @notice Checks if address is elgible allocator.
     /// @dev This is used to check if the allocator is a pool manager and able to allocate funds from the pool
     /// @param _allocator Address of the allocator
     /// @return bool Returns true if the allocator is a pool manager, otherwise false
@@ -218,7 +225,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         return allo.isPoolManager(poolId, _allocator);
     }
 
-    /// @notice Get the status of the milestone of an recipient
+    /// @notice Get the status of the milestone of an recipient.
     /// @dev This is used to check the status of the milestone of an recipient and is strategy specific
     /// @param _recipientId Id of the recipient
     /// @param _milestoneId Id of the milestone
@@ -227,7 +234,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         return milestones[_recipientId][_milestoneId].milestoneStatus;
     }
 
-    /// @notice Get the milestones
+    /// @notice Get the milestones.
     /// @param _recipientId Id of the recipient
     /// @return Milestone[] Returns the milestones for a 'recipientId'
     function getMilestones(address _recipientId) external view returns (Milestone[] memory) {
@@ -238,7 +245,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// ======= External/Custom =======
     /// ===============================
 
-    /// @notice Set milestones for recipient
+    /// @notice Set milestones for recipient.
     /// @param _recipientId Id of the recipient
     /// @param _milestones The milestones to be set
     function setMilestones(address _recipientId, Milestone[] memory _milestones) external {
@@ -286,7 +293,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         }
     }
 
-    /// @notice Submit milestone by the recipient
+    /// @notice Submit milestone by the recipient.
     ///
     /// Requirements: Must be a member of a 'Profile' to sumbit a milestone and '_recipientId'
     ///               must NOT be the same as 'msg.sender'
@@ -326,7 +333,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         emit MilestoneSubmitted(_recipientId, _milestoneId, _metadata);
     }
 
-    /// @notice Reject pending milestone of the recipient
+    /// @notice Reject pending milestone of the recipient.
     ///
     /// Requirements: Only the pool manager can reject the milestone
     ///
@@ -370,10 +377,8 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         }
     }
 
-    /// @notice Withdraw funds from pool
-    ///
-    /// Requirements: Only the pool manager can withdraw
-    ///
+    /// @notice Withdraw funds from pool.
+    /// @dev Only the pool manager can withdraw.
     /// @param _amount The amount to be withdrawn
     function withdraw(uint256 _amount) external onlyPoolManager(msg.sender) {
         // Decrement the pool amount
@@ -387,13 +392,11 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// ============ Internal ==============
     /// ====================================
 
-    /// @dev Register a recipient to the pool
-    ///
+    /// @dev Register a recipient to the pool.
     /// @param _data The data to be decoded
     /// @custom:data when 'registryGating' is 'true' -> (address recipientId, address recipientAddress, uint256 grantAmount, Metadata metadata)
     ///              when 'registryGating' is 'false' -> (address recipientAddress, address registryAnchor, uint256 grantAmount, Metadata metadata)
     /// @param _sender The sender of the transaction
-    ///
     /// @return recipientId The id of the recipient
     function _registerRecipient(bytes memory _data, address _sender)
         internal
@@ -463,7 +466,8 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         emit Registered(recipientId, _data, _sender);
     }
 
-    /// @notice Allocate amount to recipent for direct grants
+    /// @notice Allocate amount to recipent for direct grants.
+    /// @dev Only the pool manager can allocate.
     /// @param _data The data to be decoded
     /// @custom:data (address recipientId, InternalRecipientStatus recipientStatus, uint256 grantAmount)
     /// @param _sender The sender of the allocation
@@ -515,13 +519,10 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         }
     }
 
-    /// @dev Distribute the upcoming milestone to a array of recipients
-    ///
+    /// @notice Distribute the upcoming milestone to recipients.
+    /// @dev Only the pool manager can distribute.
     /// @param _recipientIds The recipient ids of the distribution
     /// @param _sender The sender of the distribution
-    ///
-    /// Requirements: Only the pool manager can distribute
-    ///
     /// @param _sender The sender of the distribution
     function _distribute(address[] memory _recipientIds, bytes memory, address _sender)
         internal
@@ -538,8 +539,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         }
     }
 
-    /// @dev Distribute the upcoming milestone
-    ///
+    /// @dev Distribute the upcoming milestone.
     /// @param _recipientId The recipient of the distribution
     /// @param _sender The sender of the distribution
     function _distributeUpcomingMilestone(address _recipientId, address _sender) private {
@@ -577,29 +577,24 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         emit Distributed(_recipientId, recipient.recipientAddress, amount, _sender);
     }
 
-    /// @dev Check if sender is profile owner or member
-    ///
+    /// @notice Check if sender is profile owner or member.
     /// @param _anchor Anchor of the profile
     /// @param _sender The sender of the transaction
-    ///
-    /// @return bool True if the sender is the owner or member of the profile, otherwise false
+    /// @return 'true' if the sender is the owner or member of the profile, otherwise 'false'
     function _isProfileMember(address _anchor, address _sender) internal view returns (bool) {
         IRegistry.Profile memory profile = _registry.getProfileByAnchor(_anchor);
         return _registry.isOwnerOrMemberOfProfile(profile.id, _sender);
     }
 
-    /// @dev Get the recipient
-    ///
+    /// @notice Get the recipient
     /// @param _recipientId Id of the recipient
-    ///
     /// @return recipient Returns the recipient
     function _getRecipient(address _recipientId) internal view returns (Recipient memory recipient) {
         recipient = _recipients[_recipientId];
     }
 
-    /// @dev Get the payout summary for the accepted recipient
-    ///
-    /// @return PayoutSummary Returns the payout summary for the accepted recipient
+    /// @notice Get the payout summary for the accepted recipient.
+    /// @return Returns the payout summary for the accepted recipient
     function _getPayout(address _recipientId, bytes memory) internal view override returns (PayoutSummary memory) {
         Recipient memory recipient = _getRecipient(_recipientId);
         return PayoutSummary(recipient.recipientAddress, recipient.grantAmount);
