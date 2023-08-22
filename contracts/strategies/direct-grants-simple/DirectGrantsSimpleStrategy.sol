@@ -32,7 +32,6 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         Metadata metadata;
         InternalRecipientStatus recipientStatus;
         RecipientStatus milestonesReviewStatus;
-        address creator;
     }
 
     /// @notice Struct to hold milestone details
@@ -180,7 +179,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
             revert MILESTONES_ALREADY_SET();
         }
 
-        bool isRecipientCreator = recipient.creator == msg.sender;
+        bool isRecipientCreator = (msg.sender == _recipientId) || _isProfileMember(_recipientId, msg.sender);
         bool isPoolManager = allo.isPoolManager(poolId, msg.sender);
         if (!isRecipientCreator && !isPoolManager) {
             revert UNAUTHORIZED();
@@ -327,8 +326,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
             grantAmount: grantAmount,
             metadata: metadata,
             recipientStatus: InternalRecipientStatus.Pending,
-            milestonesReviewStatus: RecipientStatus.Pending,
-            creator: _sender
+            milestonesReviewStatus: RecipientStatus.Pending
         });
 
         _recipients[recipientId] = recipient;

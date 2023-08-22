@@ -83,7 +83,6 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
         assertTrue(recipient.metadata.protocol == 1);
         assertTrue(recipient.recipientStatus == DirectGrantsSimpleStrategy.InternalRecipientStatus.Pending);
         assertTrue(recipient.milestonesReviewStatus == IStrategy.RecipientStatus.Pending);
-        assertEq(recipient.creator, profile1_member1());
         assertTrue(recipient.useRegistryAnchor);
 
         IStrategy.RecipientStatus status = strategy.getRecipientStatus(recipientId);
