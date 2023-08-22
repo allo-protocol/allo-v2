@@ -243,11 +243,11 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _milestoneId Id of the milestone
     function rejectMilestone(address _recipientId, uint256 _milestoneId) external onlyPoolManager(msg.sender) {
         Milestone[] storage recipientMilestones = milestones[_recipientId];
-        Milestone storage milestone = recipientMilestones[_milestoneId];
-
         if (_milestoneId > recipientMilestones.length) {
             revert INVALID_MILESTONE();
         }
+
+        Milestone storage milestone = recipientMilestones[_milestoneId];
 
         if (milestone.milestoneStatus == RecipientStatus.Accepted) {
             revert MILESTONE_ALREADY_ACCEPTED();
