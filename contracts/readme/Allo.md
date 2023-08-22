@@ -229,7 +229,7 @@ sequenceDiagram
     Allo-->>Allo: iterate and invoke registerRecipient
     Allo->>Pool1_Strategy: registerRecipient in pool1
     Allo->>Pool2_Strategy: registerRecipient to pool2
-    Allo-->>Bob: registered to pools
+    Allo-->>Bob: returns [recipientId1, recipientId2]
 ```
 
 **Allocate**
@@ -241,8 +241,9 @@ sequenceDiagram
 
     Bob->>Allo: Allocate Funds using allocate
     Allo->>Strategy: Execute Allocation in Strategy
-    Allo-->>Bob: allocated to pool
 ```
+
+**Batch Allocate**
 
 ```mermaid
 sequenceDiagram
@@ -255,7 +256,6 @@ sequenceDiagram
     Allo-->>Allo: iterate and invoke allocate
     Allo->>Pool1_Strategy: allocate to pool1
     Allo->>Pool2_Strategy: allocate to pool2
-    Allo-->>Bob: allocated to pools
 ```
 
 **Distribute**
@@ -268,5 +268,4 @@ sequenceDiagram
 
     Alice->>Allo: Distribute Funds using distribute
     Allo->>Strategy: Execute Distribution in Strategy
-    Allo-->>Bob: distributed in pool
 ```
