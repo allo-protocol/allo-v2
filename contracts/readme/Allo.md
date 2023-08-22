@@ -139,3 +139,103 @@ In summary, the "Allo" smart contract provides a framework for creating and mana
     
     * Users can distribute funds to recipients using a pool's distribution strategy by calling the `distribute` function.
     * The function requires the `_poolId`, `_recipientIds`, and `_data` as parameters, and it passes the data to the strategy for distribution.
+
+
+**Create Pool**
+
+```mermaid
+sequenceDiagram
+    participant AlloOwner as Allo Owner
+    participant Registry as Registry
+    participant Strategy as Strategy
+    participant Alice as Alice
+    participant Allo as Allo Contract
+    participant Treasury as Treasury
+
+    AlloOwner->>Strategy: Deploy Strategy
+    AlloOwner->>Allo: Add Strategy to Cloneable Strategies
+    Alice->>Allo: Create Pool using createPool
+    Allo-->>Registry: Get Identity Profile
+    Registry-->Allo: Validates Alice is profile member
+    Registry-->>Registry: Validates if strategy is cloneable
+    Registry-->>Registry: Clones strategy
+    Alice->>Allo: Pay Protocol Fee
+    Allo->>Treasury: Transfer Protocol Fee
+    Alice->>Strategy: Fund Pool
+```
+
+
+**Create Pool with Custom Strategy**
+
+```mermaid
+sequenceDiagram
+    participant Registry as Registry
+    participant Strategy as Strategy
+    participant Allo as Allo Contract
+    participant Alice as Alice
+    participant Treasury as Treasury
+
+    Alice->>CustomStrategy: Deploy Strategy
+    Alice->>Allo: Create Pool using createPool using customStrategy
+    Allo-->>Registry: Get Identity Profile
+    Registry-->Allo: Validates Alice is profile member
+    Registry-->>Registry: Validates if strategy is not approved
+    Alice->>Allo: Pay Protocol Fee
+    Allo-->>Treasury: Transfer Protocol Fee
+    Allo-->>Strategy: Transfer Funds to Pool
+    Allo-->>Alice: Pool created
+```
+
+**Fund Pool**
+```mermaid
+sequenceDiagram
+    participant Bob as Bob
+    participant Allo as Allo Contract
+    participant Treasury as Treasury
+    participant Strategy as Strategy
+
+    Bob->>Allo: Fund Pool
+    Allo-->>Allo: Deduct Protocol Fee
+    Allo-->>Treasury: Transfer Protocol Fee
+    Allo-->>Strategy: Transfer Funds to Pool
+    Allo-->>Bob: Pool funded
+```
+
+**Register Recipient**
+
+```mermaid
+sequenceDiagram
+    participant Alice as Alice
+    participant Allo as Allo Contract
+    participant Strategy as Strategy
+
+    Alice->>Allo: Register Recipient using registerRecipient
+    Allo->>Strategy: Execute Recipient Registration in Strategy
+    Allo-->>Alice: registered to pool
+```
+
+**Allocate**
+```mermaid
+sequenceDiagram
+    participant Bob as Bob
+    participant Allo as Allo Contract
+    participant Strategy as Strategy
+
+    Bob->>Allo: Allocate Funds using allocate
+    Allo->>Strategy: Execute Allocation in Strategy
+    Allo-->>Bob: allocated to pool
+```
+
+
+**Distribute**
+
+```mermaid
+sequenceDiagram
+    participant Alice as Alice
+    participant Allo as Allo Contract
+    participant Strategy as Strategy
+
+    Alice->>Allo: Distribute Funds using distribute
+    Allo->>Strategy: Execute Distribution in Strategy
+    Allo-->>Bob: distributed in pool
+```
