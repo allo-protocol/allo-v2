@@ -99,3 +99,183 @@ The Allo Protocol is a technologically advanced framework for decentralized fund
 4. Strategies (inherited from `BaseStrategy`) within the `Allo` contract handle allocation, distribution, and management of funds based on specific logic.
 5. The `Anchor` contract allows for dynamic execution of arbitrary calls based on predefined conditions, often triggered by events in the `Allo` ecosystem.
 6. Together, these contracts create an ecosystem where users can manage and allocate funds according to various strategies while adhering to predefined permissions and conditions.
+
+
+### Registry Core Interactions
+
+**Creating A Profile**
+
+```mermaid
+sequenceDiagram
+    Alice ->>+Registry: createProfile
+    Registry ->>+Anchor: CREATE3 deploy (using anchor)
+    Anchor -->>-Registry: returns reference to deployed contract
+    Registry-->>-Alice: profileId : 1
+```
+
+**Updates Profile**
+
+```mermaid
+sequenceDiagram
+    Alice ->>+Registry: updateProfileMetadata(profileId, newMetadata)
+    Registry -->>Registry: Update metadata for profileId
+    Registry -->>-Alice: Metadata updated successfully
+```
+
+```mermaid
+sequenceDiagram
+    Alice ->>+Registry: updateProfileName(profileId, newName)
+    Registry ->>+Anchor: CREATE3 deploy (using new anchor)
+    Anchor -->>-Registry: Returns reference to deployed contract
+    Registry -->>Registry: Update anchor and profile name for profileId
+    Registry -->>-Alice: Profile name and anchor updated successfully
+```
+
+**Member Management**
+```mermaid
+sequenceDiagram
+    Alice ->>+Registry: addMembers(profileId, [Bob])
+    Registry -->>-Alice: Bob added as a member to profileId
+    Alice ->>+Registry: removeMembers(profileId, [Bob])
+    Registry -->>-Alice: Bob removed from members of profileId
+```
+
+**Profile Owner Transfer**
+```mermaid
+sequenceDiagram
+    Alice ->>+Registry: updateProfilePendingOwner(profileId, Bob)
+    Registry -->>-Alice: Pending owner updated for profileId
+    Bob ->>+Registry: acceptProfileOwnership(profileId)
+    Registry -->>-Bob: Ownership transferred for profileId
+```
+
+### Allo Core Interactions
+
+**Create Pool**
+
+```mermaid
+sequenceDiagram
+    participant AlloOwner as Allo Owner
+    participant Alice as Alice
+    participant Registry as Registry
+    participant Strategy as Strategy
+    participant Allo as Allo Contract
+    participant Treasury as Treasury
+    participant StrategyClone as StrategyClone
+
+    AlloOwner->>Strategy: Deploy Strategy
+    AlloOwner->>Allo: addToCloneableStrategies()
+    Alice->>Allo: Create Pool using createPool()
+    Allo-->>Allo: Validates if strategy is cloneable
+    Allo->>StrategyClone: Creates clone of strategy
+    Allo->>Registry: Validate if Alice is Profile Member
+    Registry-->>Allo: returns True/False
+    Allo->>Treasury: Transfer Protocol Fee
+    Allo->>StrategyClone: Transfer Funds
+    Allo-->>Alice: Returns poolId
+```
+
+
+**Create Pool with Custom Strategy**
+
+```mermaid
+sequenceDiagram
+    participant Alice as Alice
+    participant Registry as Registry
+    participant Allo as Allo Contract
+    participant Treasury as Treasury
+    participant CustomStrategy as CustomStrategy
+
+    Alice->>CustomStrategy: Deploy Strategy
+    CustomStrategy-->>Alice: Success
+    Alice->>Allo: Create Pool using createPoolWithCustomStrategy()
+    Allo-->>Allo: Validates if strategy is not approved
+    Allo->>Registry: Validate if Alice is Profile Member
+    Registry-->>Allo: returns True/False
+    Allo->>Treasury: Transfer Protocol Fee
+    Allo->>CustomStrategy: Transfer Funds
+    Allo-->>Alice: Returns poolId
+```
+
+**Fund Pool**
+```mermaid
+sequenceDiagram
+    participant Bob as Bob
+    participant Allo as Allo Contract
+    participant Treasury as Treasury
+    participant Strategy as Strategy
+
+    Bob->>Allo: Fund Pool
+    Allo-->>Allo: Deduct Protocol Fee
+    Allo-->>Treasury: Transfer Protocol Fee
+    Allo-->>Strategy: Transfer Funds to Pool
+    Strategy-->>Strategy: updated pool amount
+```
+
+**Register Recipient**
+
+```mermaid
+sequenceDiagram
+    participant Alice as Alice
+    participant Allo as Allo Contract
+    participant Strategy as Strategy
+
+    Alice->>Allo: Register Recipient using registerRecipient
+    Allo->>Strategy: Execute Recipient Registration in Strategy
+    Strategy-->>Allo: returns recipientId
+    Allo-->>Alice: returns recipientId
+```
+
+**Batch Register Recipient**
+
+```mermaid
+sequenceDiagram
+    participant Bob as Bob
+    participant Allo as Allo Contract
+    participant Pool1_Strategy as Pool1_Strategy
+    participant Pool2_Strategy as Pool2_Strategy
+
+    Bob->>Allo: batchRegisterRecipient to pool1 and pool2
+    Allo-->>Allo: iterate and invoke registerRecipient
+    Allo->>Pool1_Strategy: registerRecipient in pool1
+    Allo->>Pool2_Strategy: registerRecipient to pool2
+    Allo-->>Bob: returns [recipientId1, recipientId2]
+```
+
+**Allocate**
+```mermaid
+sequenceDiagram
+    participant Bob as Bob
+    participant Allo as Allo Contract
+    participant Strategy as Strategy
+
+    Bob->>Allo: Allocate Funds using allocate
+    Allo->>Strategy: Execute Allocation in Strategy
+```
+
+**Batch Allocate**
+
+```mermaid
+sequenceDiagram
+    participant Bob as Bob
+    participant Allo as Allo Contract
+    participant Pool1_Strategy as Pool1_Strategy
+    participant Pool2_Strategy as Pool2_Strategy
+
+    Bob->>Allo: batchAllocate to pool1 and pool2
+    Allo-->>Allo: iterate and invoke allocate
+    Allo->>Pool1_Strategy: allocate to pool1
+    Allo->>Pool2_Strategy: allocate to pool2
+```
+
+**Distribute**
+
+```mermaid
+sequenceDiagram
+    participant Alice as Alice
+    participant Allo as Allo Contract
+    participant Strategy as Strategy
+
+    Alice->>Allo: Distribute Funds using distribute
+    Allo->>Strategy: Execute Distribution in Strategy
+```
