@@ -37,7 +37,7 @@ contract Anchor {
             revert UNAUTHORIZED();
         }
 
-        if (_target == address(this)) {
+        if (_target == address(0)) {
             revert CALL_FAILED();
         }
 
