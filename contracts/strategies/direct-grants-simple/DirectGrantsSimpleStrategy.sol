@@ -188,7 +188,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// ===============================
 
     /// @notice Get the recipient
-    /// @param _recipientId Id of the recipient
+    /// @param _recipientId ID of the recipient
     /// @return Recipient Returns the recipient
     function getRecipient(address _recipientId) external view returns (Recipient memory) {
         return _getRecipient(_recipientId);
@@ -196,7 +196,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Get Internal recipient status
     /// @dev This status is specific to this strategy and is used to track the status of the recipient
-    /// @param _recipientId Id of the recipient
+    /// @param _recipientId ID of the recipient
     /// @return InternalRecipientStatus Returns the internal recipient status specific to this strategy
     function getInternalRecipientStatus(address _recipientId) external view returns (InternalRecipientStatus) {
         return _getRecipient(_recipientId).recipientStatus;
@@ -206,7 +206,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @dev The global 'RecipientStatus' is used at the protocol level and most strategies may want to
     ///      add a additional InternalRecipientStatus to track the status of the recipient and map back to
     ///      the global 'RecipientStatus'
-    /// @param _recipientId Id of the recipient
+    /// @param _recipientId ID of the recipient
     /// @return RecipientStatus Returns the global recipient status
     function _getRecipientStatus(address _recipientId) internal view override returns (RecipientStatus) {
         InternalRecipientStatus internalStatus = _getRecipient(_recipientId).recipientStatus;
@@ -227,15 +227,15 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Get the status of the milestone of an recipient.
     /// @dev This is used to check the status of the milestone of an recipient and is strategy specific
-    /// @param _recipientId Id of the recipient
-    /// @param _milestoneId Id of the milestone
+    /// @param _recipientId ID of the recipient
+    /// @param _milestoneId ID of the milestone
     /// @return RecipientStatus Returns the status of the milestone using the 'RecipientStatus' enum
     function getMilestoneStatus(address _recipientId, uint256 _milestoneId) external view returns (RecipientStatus) {
         return milestones[_recipientId][_milestoneId].milestoneStatus;
     }
 
     /// @notice Get the milestones.
-    /// @param _recipientId Id of the recipient
+    /// @param _recipientId ID of the recipient
     /// @return Milestone[] Returns the milestones for a 'recipientId'
     function getMilestones(address _recipientId) external view returns (Milestone[] memory) {
         return milestones[_recipientId];
@@ -246,7 +246,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// ===============================
 
     /// @notice Set milestones for recipient.
-    /// @param _recipientId Id of the recipient
+    /// @param _recipientId ID of the recipient
     /// @param _milestones The milestones to be set
     function setMilestones(address _recipientId, Milestone[] memory _milestones) external {
         bool isRecipientCreator = (msg.sender == _recipientId) || _isProfileMember(_recipientId, msg.sender);
@@ -275,7 +275,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     }
 
     /// @notice Review the set milestones of the recipient
-    /// @param _recipientId Id of the recipient
+    /// @param _recipientId ID of the recipient
     /// @param _status The status of the milestone review
     function reviewSetMilestones(address _recipientId, RecipientStatus _status) external onlyPoolManager(msg.sender) {
         Recipient storage recipient = _recipients[_recipientId];
@@ -294,11 +294,10 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     }
 
     /// @notice Submit milestone by the recipient.
-    ///
-    /// Requirements: Must be a member of a 'Profile' to sumbit a milestone and '_recipientId'
-    ///               must NOT be the same as 'msg.sender'
-    ///
-    /// @param _recipientId Id of the recipient
+    /// @dev 'msg.sender' must be the 'recipientId' (this depends on whether your using registry gating) and must be a member 
+    ///      of a 'Profile' to sumbit a milestone and '_recipientId'.
+    ///      must NOT be the same as 'msg.sender'.
+    /// @param _recipientId ID of the recipient
     /// @param _metadata The proof of work
     function submitMilestone(address _recipientId, uint256 _milestoneId, Metadata calldata _metadata) external {
         if (_recipientId != msg.sender && !_isProfileMember(_recipientId, msg.sender)) {
@@ -334,11 +333,9 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     }
 
     /// @notice Reject pending milestone of the recipient.
-    ///
-    /// Requirements: Only the pool manager can reject the milestone
-    ///
-    /// @param _recipientId Id of the recipient
-    /// @param _milestoneId Id of the milestone
+    /// @dev Only the pool manager can reject the milestone.
+    /// @param _recipientId ID of the recipient
+    /// @param _milestoneId ID of the milestone
     function rejectMilestone(address _recipientId, uint256 _milestoneId) external onlyPoolManager(msg.sender) {
         Milestone[] storage recipientMilestones = milestones[_recipientId];
         if (_milestoneId > recipientMilestones.length) {
@@ -358,8 +355,8 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         emit MilestoneStatusChanged(_recipientId, _milestoneId, RecipientStatus.Rejected);
     }
 
-    /// @notice Set the internal status of the recipient to InReview
-    /// @param _recipientIds Ids of the recipients
+    /// @notice Set the internal status of the recipient to 'InReview'
+    /// @param _recipientIds IDs of the recipients
     function setInternalRecipientStatusToInReview(address[] calldata _recipientIds)
         external
         onlyPoolManager(msg.sender)
@@ -392,7 +389,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// ============ Internal ==============
     /// ====================================
 
-    /// @dev Register a recipient to the pool.
+    /// @notice Register a recipient to the pool.
     /// @param _data The data to be decoded
     /// @custom:data when 'registryGating' is 'true' -> (address recipientId, address recipientAddress, uint256 grantAmount, Metadata metadata)
     ///              when 'registryGating' is 'false' -> (address recipientAddress, address registryAnchor, uint256 grantAmount, Metadata metadata)
@@ -467,7 +464,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     }
 
     /// @notice Allocate amount to recipent for direct grants.
-    /// @dev Only the pool manager can allocate.
+    /// @dev '_sender' must be a pool manager to allocate.
     /// @param _data The data to be decoded
     /// @custom:data (address recipientId, InternalRecipientStatus recipientStatus, uint256 grantAmount)
     /// @param _sender The sender of the allocation
@@ -520,7 +517,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     }
 
     /// @notice Distribute the upcoming milestone to recipients.
-    /// @dev Only the pool manager can distribute.
+    /// @dev '_sender' must be a pool manager to distribute.
     /// @param _recipientIds The recipient ids of the distribution
     /// @param _sender The sender of the distribution
     /// @param _sender The sender of the distribution
@@ -539,7 +536,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         }
     }
 
-    /// @dev Distribute the upcoming milestone.
+    /// @notice Distribute the upcoming milestone.
     /// @param _recipientId The recipient of the distribution
     /// @param _sender The sender of the distribution
     function _distributeUpcomingMilestone(address _recipientId, address _sender) private {
@@ -577,7 +574,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         emit Distributed(_recipientId, recipient.recipientAddress, amount, _sender);
     }
 
-    /// @notice Check if sender is profile owner or member.
+    /// @notice Check if sender is a profile owner or member.
     /// @param _anchor Anchor of the profile
     /// @param _sender The sender of the transaction
     /// @return 'true' if the sender is the owner or member of the profile, otherwise 'false'
@@ -586,8 +583,8 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         return _registry.isOwnerOrMemberOfProfile(profile.id, _sender);
     }
 
-    /// @notice Get the recipient
-    /// @param _recipientId Id of the recipient
+    /// @notice Get the recipient.
+    /// @param _recipientId ID of the recipient
     /// @return recipient Returns the recipient
     function _getRecipient(address _recipientId) internal view returns (Recipient memory recipient) {
         recipient = _recipients[_recipientId];
@@ -600,8 +597,8 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         return PayoutSummary(recipient.recipientAddress, recipient.grantAmount);
     }
 
-    /// @notice Set the milestones for the recipient
-    /// @param _recipientId Id of the recipient
+    /// @notice Set the milestones for the recipient.
+    /// @param _recipientId ID of the recipient
     /// @param _milestones The milestones to be set
     function _setMilestones(address _recipientId, Milestone[] memory _milestones) internal {
         uint256 totalAmountPercentage;
@@ -632,5 +629,6 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         emit MilestonesSet(_recipientId);
     }
 
+    /// @notice This contract should be able to receive native token
     receive() external payable {}
 }
