@@ -214,6 +214,20 @@ sequenceDiagram
     Allo-->>Alice: registered to pool
 ```
 
+```mermaid
+sequenceDiagram
+    participant Bob as Bob
+    participant Allo as Allo Contract
+    participant Pool1_Strategy as Pool1_Strategy
+    participant Pool2_Strategy as Pool2_Strategy
+
+    Bob->>Allo: batchRegisterRecipient to pool1 and pool2
+    Allo-->>Allo: iterate and invoke registerRecipient
+    Allo->>Pool1_Strategy: registerRecipient in pool1
+    Allo->>Pool2_Strategy: registerRecipient to pool2
+    Allo-->>Bob: registered to pools
+```
+
 **Allocate**
 ```mermaid
 sequenceDiagram
@@ -226,6 +240,19 @@ sequenceDiagram
     Allo-->>Bob: allocated to pool
 ```
 
+```mermaid
+sequenceDiagram
+    participant Bob as Bob
+    participant Allo as Allo Contract
+    participant Pool1_Strategy as Pool1_Strategy
+    participant Pool2_Strategy as Pool2_Strategy
+
+    Bob->>Allo: batchAllocate to pool1 and pool2
+    Allo-->>Allo: iterate and invoke allocate
+    Allo->>Pool1_Strategy: allocate to pool1
+    Allo->>Pool2_Strategy: allocate to pool2
+    Allo-->>Bob: allocated to pools
+```
 
 **Distribute**
 
