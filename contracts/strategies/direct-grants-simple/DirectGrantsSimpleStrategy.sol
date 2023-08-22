@@ -31,6 +31,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         uint256 grantAmount;
         Metadata metadata;
         InternalRecipientStatus recipientStatus;
+        RecipientStatus milestonesReviewStatus;
     }
 
     /// @notice Struct to hold milestone details
@@ -62,6 +63,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     event MilestoneSubmitted(address recipientId, uint256 milestoneId, Metadata metadata);
     event MilestoneStatusChanged(address recipientId, uint256 milestoneId, RecipientStatus status);
     event MilestonesSet(address recipientId);
+    event MilestonesReviewed(address recipientId, RecipientStatus status);
 
     /// ================================
     /// ========== Storage =============
@@ -166,38 +168,48 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Set milestones for recipient
     /// @param _recipientId Id of the recipient
     /// @param _milestones The milestones to be set
-    function setMilestones(address _recipientId, Milestone[] memory _milestones) external onlyPoolManager(msg.sender) {
-        if (upcomingMilestone[_recipientId] != 0) {
-            revert MILESTONES_ALREADY_SET();
+    function setMilestones(address _recipientId, Milestone[] memory _milestones) external {
+        bool isRecipientCreator = (msg.sender == _recipientId) || _isProfileMember(_recipientId, msg.sender);
+        bool isPoolManager = allo.isPoolManager(poolId, msg.sender);
+        if (!isRecipientCreator && !isPoolManager) {
+            revert UNAUTHORIZED();
         }
 
-        Recipient memory recipient = _getRecipient(_recipientId);
+        Recipient storage recipient = _recipients[_recipientId];
 
         if (recipient.recipientStatus != InternalRecipientStatus.Accepted) {
             revert RECIPIENT_NOT_ACCEPTED();
         }
 
-        uint256 totalAmountPercentage;
-
-        uint256 milestonesLength = _milestones.length;
-        for (uint256 i = 0; i < milestonesLength;) {
-            Milestone memory milestone = _milestones[i];
-            if (milestone.milestoneStatus != RecipientStatus.None) {
-                revert INVALID_MILESTONE();
-            }
-            totalAmountPercentage += milestone.amountPercentage;
-            milestones[_recipientId].push(milestone);
-
-            unchecked {
-                i++;
-            }
+        if (recipient.milestonesReviewStatus == RecipientStatus.Accepted) {
+            revert MILESTONES_ALREADY_SET();
         }
 
-        if (totalAmountPercentage != 1e18) {
+        _setMilestones(_recipientId, _milestones);
+
+        if (isPoolManager) {
+            recipient.milestonesReviewStatus = RecipientStatus.Accepted;
+            emit MilestonesReviewed(_recipientId, RecipientStatus.Accepted);
+        }
+    }
+
+    /// @notice Review the set milestones of the recipient
+    /// @param _recipientId Id of the recipient
+    /// @param _status The status of the milestone review
+    function reviewSetMilestones(address _recipientId, RecipientStatus _status) external onlyPoolManager(msg.sender) {
+        Recipient storage recipient = _recipients[_recipientId];
+
+        if (milestones[_recipientId].length == 0) {
             revert INVALID_MILESTONE();
         }
 
-        emit MilestonesSet(_recipientId);
+        if (recipient.milestonesReviewStatus == RecipientStatus.Accepted) {
+            revert MILESTONES_ALREADY_SET();
+        }
+        if (_status == RecipientStatus.Accepted || _status == RecipientStatus.Rejected) {
+            recipient.milestonesReviewStatus = _status;
+            emit MilestonesReviewed(_recipientId, _status);
+        }
     }
 
     /// @notice Submit milestone by the recipient
@@ -206,6 +218,11 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     function submitMilestone(address _recipientId, uint256 _milestoneId, Metadata calldata _metadata) external {
         if (_recipientId != msg.sender && !_isProfileMember(_recipientId, msg.sender)) {
             revert UNAUTHORIZED();
+        }
+
+        Recipient memory recipient = _recipients[_recipientId];
+        if (recipient.recipientStatus != InternalRecipientStatus.Accepted) {
+            revert RECIPIENT_NOT_ACCEPTED();
         }
 
         Milestone[] storage recipientMilestones = milestones[_recipientId];
@@ -230,7 +247,13 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _recipientId Id of the recipient
     /// @param _milestoneId Id of the milestone
     function rejectMilestone(address _recipientId, uint256 _milestoneId) external onlyPoolManager(msg.sender) {
-        Milestone storage milestone = milestones[_recipientId][_milestoneId];
+        Milestone[] storage recipientMilestones = milestones[_recipientId];
+        if (_milestoneId > recipientMilestones.length) {
+            revert INVALID_MILESTONE();
+        }
+
+        Milestone storage milestone = recipientMilestones[_milestoneId];
+
         if (milestone.milestoneStatus == RecipientStatus.Accepted) {
             revert MILESTONE_ALREADY_ACCEPTED();
         }
@@ -241,7 +264,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Set the internal status of the recipient to InReview
     /// @param _recipientIds Ids of the recipients
-    function setIntenalRecipientStatusToInReview(address[] calldata _recipientIds)
+    function setInternalRecipientStatusToInReview(address[] calldata _recipientIds)
         external
         onlyPoolManager(msg.sender)
     {
@@ -319,7 +342,8 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
             useRegistryAnchor: registryGating ? true : isUsingRegistryAnchor,
             grantAmount: grantAmount,
             metadata: metadata,
-            recipientStatus: InternalRecipientStatus.Pending
+            recipientStatus: InternalRecipientStatus.Pending,
+            milestonesReviewStatus: RecipientStatus.Pending
         });
 
         _recipients[recipientId] = recipient;
@@ -340,11 +364,11 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         (address recipientId, InternalRecipientStatus recipientStatus, uint256 grantAmount) =
             abi.decode(_data, (address, InternalRecipientStatus, uint256));
 
+        Recipient storage recipient = _recipients[recipientId];
+
         if (upcomingMilestone[recipientId] != 0) {
             revert MILESTONES_ALREADY_SET();
         }
-
-        Recipient storage recipient = _recipients[recipientId];
 
         if (
             recipient.recipientStatus != InternalRecipientStatus.Accepted // no need to accept twice
@@ -395,6 +419,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         Recipient memory recipient = _recipients[_recipientId];
         Milestone storage milestone = recipientMilestones[milestoneToBeDistributed];
 
+        // check if milestone is not rejected or already paid out
         if (
             milestoneToBeDistributed > recipientMilestones.length
                 || milestone.milestoneStatus != RecipientStatus.Pending
@@ -435,6 +460,38 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     function _getPayout(address _recipientId, bytes memory) internal view override returns (PayoutSummary memory) {
         Recipient memory recipient = _getRecipient(_recipientId);
         return PayoutSummary(recipient.recipientAddress, recipient.grantAmount);
+    }
+
+    /// @notice Set the milestones for the recipient
+    /// @param _recipientId Id of the recipient
+    /// @param _milestones The milestones to be set
+    function _setMilestones(address _recipientId, Milestone[] memory _milestones) internal {
+        uint256 totalAmountPercentage;
+
+        // TODO: check if delete resets index to 0
+        if (milestones[_recipientId].length > 0) {
+            delete milestones[_recipientId];
+        }
+
+        uint256 milestonesLength = _milestones.length;
+        for (uint256 i = 0; i < milestonesLength;) {
+            Milestone memory milestone = _milestones[i];
+            if (milestone.milestoneStatus != RecipientStatus.None) {
+                revert INVALID_MILESTONE();
+            }
+            totalAmountPercentage += milestone.amountPercentage;
+            milestones[_recipientId].push(milestone);
+
+            unchecked {
+                i++;
+            }
+        }
+
+        if (totalAmountPercentage != 1e18) {
+            revert INVALID_MILESTONE();
+        }
+
+        emit MilestonesSet(_recipientId);
     }
 
     receive() external payable {}
