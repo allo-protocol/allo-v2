@@ -16,7 +16,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// ========== Storage =============
     /// ================================
 
-    /// @notice Struct to hold details of an recipient
+    /// @notice Struct to hold details of a recipient
     struct Recipient {
         bool useRegistryAnchor;
         address recipientAddress;
@@ -61,10 +61,10 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
     bool public useRegistryAnchor;
     bool public metadataRequired;
-    uint256 public maxBid;
-    uint256 public upcomingMilestone;
     address public acceptedRecipientId;
     IRegistry private _registry;
+    uint256 public maxBid;
+    uint256 public upcomingMilestone;
 
     address[] private _recipientIds;
     Milestone[] public milestones;
@@ -214,7 +214,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// ============ Internal ==============
     /// ====================================
 
-    /// @notice Submit proposal to RFP pool
+    /// @notice Submit a proposal to RFP pool
     /// @param _data The data to be decoded
     /// @param _sender The sender of the transaction
     function _registerRecipient(bytes memory _data, address _sender)
@@ -330,7 +330,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         emit Distributed(acceptedRecipientId, recipient.recipientAddress, amount, _sender);
     }
 
-    /// @notice Check if sender is profile owner or member
+    /// @notice Check if the sender is a profile owner or member
     /// @param _anchor Anchor of the profile
     /// @param _sender The sender of the transaction
     function _isProfileMember(address _anchor, address _sender) internal view returns (bool) {
@@ -365,7 +365,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         return PayoutSummary(recipient.recipientAddress, recipient.proposalBid);
     }
 
-    /// @notice Checks if address is elgible allocator
+    /// @notice Checks if address is eligible allocator
     /// @param _allocator Address of the allocator
     function _isValidAllocator(address _allocator) internal view override returns (bool) {
         return allo.isPoolManager(poolId, _allocator);
