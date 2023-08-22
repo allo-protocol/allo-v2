@@ -10,7 +10,7 @@ The `Anchor` contract serves as a crucial utility within the Allo ecosystem, fac
 **Storage Variables:**
 
 1. `registry` (Public Immutable): A reference to the `Registry` contract instance, enabling access to profile ownership information and access control.
-2. `profileId` (Public): The profile ID associated with the anchor, used to verify the caller's ownership.
+2. `profileId` (Public Immutable): The profile ID associated with the anchor, used to verify the caller's ownership.
 
 **Errors:**
 

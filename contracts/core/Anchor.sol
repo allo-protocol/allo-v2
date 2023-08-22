@@ -8,7 +8,7 @@ contract Anchor {
     /// === Storage Variables ====
     /// ==========================
     Registry public immutable registry;
-    bytes32 public profileId;
+    bytes32 public immutable profileId;
 
     /// ==========================
     /// ======== Errors ==========
@@ -35,6 +35,10 @@ contract Anchor {
     function execute(address _target, uint256 _value, bytes memory _data) external returns (bytes memory) {
         if (!registry.isOwnerOfProfile(profileId, msg.sender)) {
             revert UNAUTHORIZED();
+        }
+
+        if (_target == address(this)) {
+            revert CALL_FAILED();
         }
 
         (bool success, bytes memory data) = _target.call{value: _value}(_data);
