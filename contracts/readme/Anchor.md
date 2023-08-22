@@ -15,7 +15,7 @@ The `Anchor` contract serves as a crucial utility within the Allo ecosystem, fac
 **Errors:**
 
 1. `UNAUTHORIZED()`: An error triggered when an unauthorized caller attempts to execute a function reserved for the profile owner.
-2. `CALL_FAILED()`: An error triggered when a call to a target address fails.
+2. `CALL_FAILED()`: An error triggered when a call to a target address fails or is 0.
 
 **Constructor:**
 
@@ -43,6 +43,7 @@ In summary, the `Anchor` smart contract offers a secure and controlled mechanism
     * Users can execute a call to a target address by calling the `execute` function.
     * The function requires `_target`, `_value`, and `_data` as parameters.
     * The function checks if the caller is the owner of the specified profile using the `isOwnerOfProfile` function from the `Registry` contract.
+    * Reverts if `_target` address is `address(0)`
     * It then attempts to call the `_target` address with the provided `_value` and `_data`.
     * If the call is successful, the function returns the data returned by the target call.
     * If the call fails, the function reverts with a `CALL_FAILED` error.
