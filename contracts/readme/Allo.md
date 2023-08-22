@@ -146,22 +146,23 @@ In summary, the "Allo" smart contract provides a framework for creating and mana
 ```mermaid
 sequenceDiagram
     participant AlloOwner as Allo Owner
+    participant Alice as Alice
     participant Registry as Registry
     participant Strategy as Strategy
-    participant Alice as Alice
     participant Allo as Allo Contract
     participant Treasury as Treasury
+    participant StrategyClone as StrategyClone
 
     AlloOwner->>Strategy: Deploy Strategy
-    AlloOwner->>Allo: Add Strategy to Cloneable Strategies
-    Alice->>Allo: Create Pool using createPool
-    Allo-->>Registry: Get Identity Profile
-    Registry-->Allo: Validates Alice is profile member
-    Registry-->>Registry: Validates if strategy is cloneable
-    Registry-->>Registry: Clones strategy
-    Alice->>Allo: Pay Protocol Fee
+    AlloOwner->>Allo: addToCloneableStrategies()
+    Alice->>Allo: Create Pool using createPool()
+    Allo-->>Allo: Validates if strategy is cloneable
+    Allo->>StrategyClone: Creates clone of strategy
+    Allo->>Registry: Validate if Alice is Profile Member
+    Registry-->>Allo: returns True/False
     Allo->>Treasury: Transfer Protocol Fee
-    Alice->>Strategy: Fund Pool
+    Allo->>StrategyClone: Transfer Funds
+    Allo-->>Alice: Returns poolId
 ```
 
 
@@ -169,21 +170,21 @@ sequenceDiagram
 
 ```mermaid
 sequenceDiagram
-    participant Registry as Registry
-    participant Strategy as Strategy
-    participant Allo as Allo Contract
     participant Alice as Alice
+    participant Registry as Registry
+    participant Allo as Allo Contract
     participant Treasury as Treasury
+    participant CustomStrategy as CustomStrategy
 
     Alice->>CustomStrategy: Deploy Strategy
-    Alice->>Allo: Create Pool using createPool using customStrategy
-    Allo-->>Registry: Get Identity Profile
-    Registry-->Allo: Validates Alice is profile member
-    Registry-->>Registry: Validates if strategy is not approved
-    Alice->>Allo: Pay Protocol Fee
-    Allo-->>Treasury: Transfer Protocol Fee
-    Allo-->>Strategy: Transfer Funds to Pool
-    Allo-->>Alice: Pool created
+    CustomStrategy-->>Alice: Success
+    Alice->>Allo: Create Pool using createPoolWithCustomStrategy()
+    Allo-->>Allo: Validates if strategy is not approved
+    Allo->>Registry: Validate if Alice is Profile Member
+    Registry-->>Allo: returns True/False
+    Allo->>Treasury: Transfer Protocol Fee
+    Allo->>CustomStrategy: Transfer Funds
+    Allo-->>Alice: Returns poolId
 ```
 
 **Fund Pool**
@@ -198,7 +199,7 @@ sequenceDiagram
     Allo-->>Allo: Deduct Protocol Fee
     Allo-->>Treasury: Transfer Protocol Fee
     Allo-->>Strategy: Transfer Funds to Pool
-    Allo-->>Bob: Pool funded
+    Strategy-->>Strategy: updated pool amount
 ```
 
 **Register Recipient**
@@ -211,8 +212,11 @@ sequenceDiagram
 
     Alice->>Allo: Register Recipient using registerRecipient
     Allo->>Strategy: Execute Recipient Registration in Strategy
-    Allo-->>Alice: registered to pool
+    Strategy-->>Allo: returns recipientId
+    Allo-->>Alice: returns recipientId
 ```
+
+**Batch Register Recipient**
 
 ```mermaid
 sequenceDiagram
