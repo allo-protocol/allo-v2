@@ -274,21 +274,28 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         }
     }
 
-    /// @notice Review the set milestones of the recipient
+    /// @notice Set milestones of the recipient
     /// @param _recipientId ID of the recipient
     /// @param _status The status of the milestone review
     function reviewSetMilestones(address _recipientId, RecipientStatus _status) external onlyPoolManager(msg.sender) {
         Recipient storage recipient = _recipients[_recipientId];
 
+        // Check if the recipient has any milestones, otherwise revert
         if (milestones[_recipientId].length == 0) {
             revert INVALID_MILESTONE();
         }
 
+        // Check if the recipient is 'Accepted', otherwise revert
         if (recipient.milestonesReviewStatus == RecipientStatus.Accepted) {
             revert MILESTONES_ALREADY_SET();
         }
+
+        // Check if the status is 'Accepted' or 'Rejected', otherwise revert
         if (_status == RecipientStatus.Accepted || _status == RecipientStatus.Rejected) {
+            // Set the status of the milestone review
             recipient.milestonesReviewStatus = _status;
+
+            // Emit event for the milestone review
             emit MilestonesReviewed(_recipientId, _status);
         }
     }
@@ -300,11 +307,15 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _recipientId ID of the recipient
     /// @param _metadata The proof of work
     function submitMilestone(address _recipientId, uint256 _milestoneId, Metadata calldata _metadata) external {
+        // Check if the '_recipientId' is the same as 'msg.sender' and if it is NOT, revert. This
+        // also checks if the '_recipientId' is a member of the 'Profile' and if it is NOT, revert.
         if (_recipientId != msg.sender && !_isProfileMember(_recipientId, msg.sender)) {
             revert UNAUTHORIZED();
         }
 
         Recipient memory recipient = _recipients[_recipientId];
+
+        // Check if the recipient is 'Accepted', otherwise revert
         if (recipient.recipientStatus != InternalRecipientStatus.Accepted) {
             revert RECIPIENT_NOT_ACCEPTED();
         }
@@ -316,7 +327,6 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
             revert INVALID_MILESTONE();
         }
 
-        // Get the milestone using the '_milestoneId'
         Milestone storage milestone = recipientMilestones[_milestoneId];
 
         // Check if the milestone is accepted, otherwise revert
@@ -333,17 +343,20 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     }
 
     /// @notice Reject pending milestone of the recipient.
-    /// @dev Only the pool manager can reject the milestone.
+    /// @dev 'msg.sender' must be a pool manager to reject a milestone.
     /// @param _recipientId ID of the recipient
     /// @param _milestoneId ID of the milestone
     function rejectMilestone(address _recipientId, uint256 _milestoneId) external onlyPoolManager(msg.sender) {
         Milestone[] storage recipientMilestones = milestones[_recipientId];
+
+        // Check if the milestone is the upcoming one
         if (_milestoneId > recipientMilestones.length) {
             revert INVALID_MILESTONE();
         }
 
         Milestone storage milestone = recipientMilestones[_milestoneId];
 
+        // Check if the milestone is NOT 'Accepted' already, and revert if it is
         if (milestone.milestoneStatus == RecipientStatus.Accepted) {
             revert MILESTONE_ALREADY_ACCEPTED();
         }
@@ -375,7 +388,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     }
 
     /// @notice Withdraw funds from pool.
-    /// @dev Only the pool manager can withdraw.
+    /// @dev 'msg.sender' must be a pool manager to withdraw funds.
     /// @param _amount The amount to be withdrawn
     function withdraw(uint256 _amount) external onlyPoolManager(msg.sender) {
         // Decrement the pool amount
@@ -604,17 +617,27 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         uint256 totalAmountPercentage;
 
         // TODO: check if delete resets index to 0
+        // Clear out the milestones and reset the index to 0
         if (milestones[_recipientId].length > 0) {
             delete milestones[_recipientId];
         }
 
         uint256 milestonesLength = _milestones.length;
+
+        // Loop through the milestones and set them
         for (uint256 i = 0; i < milestonesLength;) {
             Milestone memory milestone = _milestones[i];
+
+            // Reverts if the milestone status is 'None'
             if (milestone.milestoneStatus != RecipientStatus.None) {
                 revert INVALID_MILESTONE();
             }
+
+            // TODO: I see we check on line 649, but it seems we need to check when added it is NOT greater than 100%?
+            // Add the milestone percentage amount to the total percentage amount
             totalAmountPercentage += milestone.amountPercentage;
+
+            // Add the milestone to the recipient's milestones
             milestones[_recipientId].push(milestone);
 
             unchecked {

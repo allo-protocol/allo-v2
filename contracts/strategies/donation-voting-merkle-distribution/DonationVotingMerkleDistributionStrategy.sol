@@ -110,26 +110,26 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
     /// ========== Events =============
     /// ===============================
 
-    /// @notice Event emitted when a recipient appeals their previous Rejected status
+    /// @notice Emitted when a recipient appeals their previous Rejected status
     /// @param recipientId Id of the recipient
     /// @param data The encoded data - (address recipientId, address recipientAddress, Metadata metadata)
     /// @param sender The sender of the transaction
     event Appealed(address indexed recipientId, bytes data, address sender);
 
-    /// @notice Event emitted when a recipient is registered and the status is updated
+    /// @notice Emitted when a recipient is registered and the status is updated
     /// @param rowIndex The index of the row in the bitmap
     /// @param fullRow The value of the row
     /// @param sender The sender of the transaction
     event RecipientStatusUpdated(uint256 indexed rowIndex, uint256 fullRow, address sender);
 
-    /// @notice Event emitted when a recipient has claimed their allocated funds
+    /// @notice Emitted when a recipient has claimed their allocated funds
     /// @param recipientId Id of the recipient
     /// @param recipientAddress Address of the recipient
     /// @param amount Amount of tokens claimed
     /// @param token Address of the token
     event Claimed(address indexed recipientId, address recipientAddress, uint256 amount, address token);
 
-    /// @notice Event emitted when the timestamps are updated
+    /// @notice Emitted when the timestamps are updated
     /// @param registrationStartTime The start time for the registration
     /// @param registrationEndTime The end time for the registration
     /// @param allocationStartTime The start time for the allocation
@@ -143,19 +143,19 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         address sender
     );
 
-    /// @notice Event emitted when the distribution has been updated with a new merkle root or metadata
+    /// @notice Emitted when the distribution has been updated with a new merkle root or metadata
     /// @param merkleRoot The merkle root of the distribution
     /// @param metadata The metadata of the distribution
     event DistributionUpdated(bytes32 merkleRoot, Metadata metadata);
 
-    /// @notice Event emitted when funds are distributed to a recipient
+    /// @notice Emitted when funds are distributed to a recipient
     /// @param amount The amount of tokens distributed
     /// @param grantee The address of the recipient
     /// @param token The address of the token
     /// @param recipientId The id of the recipient
     event FundsDistributed(uint256 amount, address grantee, address indexed token, address indexed recipientId);
 
-    /// @notice Event emitted when a batch payout is successful
+    /// @notice Emitted when a batch payout is successful
     /// @param sender The sender of the transaction
     event BatchPayoutSuccessful(address indexed sender);
 
@@ -231,7 +231,7 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
     /// ========== Modifier ============
     /// ================================
 
-    /// @dev Checks if the registration is active and reverts if not.
+    /// @notice Checks if the registration is active and reverts if not.
     modifier onlyActiveRegistration() {
         if (registrationStartTime > block.timestamp || block.timestamp > registrationEndTime) {
             revert REGISTRATION_NOT_ACTIVE();
@@ -239,7 +239,7 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         _;
     }
 
-    /// @dev Checks if the allocation is active and reverts if not.
+    /// @notice Checks if the allocation is active and reverts if not.
     modifier onlyActiveAllocation() {
         if (allocationStartTime > block.timestamp || block.timestamp > allocationEndTime) {
             revert ALLOCATION_NOT_ACTIVE();
@@ -247,7 +247,7 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         _;
     }
 
-    /// @dev Checks if the allocation has ended and reverts if not.
+    /// @notice Checks if the allocation has ended and reverts if not.
     modifier onlyAfterAllocation() {
         if (block.timestamp < allocationEndTime) {
             revert ALLOCATION_NOT_ENDED();

@@ -9,7 +9,7 @@ import {Metadata} from "./libraries/Metadata.sol";
 
 /// @title Allo Interface
 /// @author @thelostone-mc <aditya@gitcoin.co>, @KurtMerbeth <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>
-/// @notice Interface for the Allo contract. It exposes all functions needed to use the Allo protocol
+/// @notice Interface for the Allo contract. It exposes all functions needed to use the Allo protocol.
 interface IAllo {
     /// ======================
     /// ======= Structs ======

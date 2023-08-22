@@ -6,7 +6,7 @@ import {IAllo} from "../core/IAllo.sol";
 
 /// @title IStrategy Interface
 /// @author @thelostone-mc <aditya@gitcoin.co>, @KurtMerbeth <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>
-/// @dev BaseStrategy is the base contract that all strategies should inherit from, it uses this interface.
+/// @notice BaseStrategy is the base contract that all strategies should inherit from and uses this interface.
 interface IStrategy {
     /// ======================
     /// ======= Storage ======
@@ -151,9 +151,9 @@ interface IStrategy {
 
     /// @notice This will register a recipient, set their status (and any other strategy specific values), and
     ///         return the ID of the recipient.
-    /// @dev Able to change status all the way up to Accepted, or to Pending and if there are more steps, additional
+    /// @dev Able to change status all the way up to 'Accepted', or to 'Pending' and if there are more steps, additional
     ///      functions should be added to allow the owner to check this. The owner could also check attestations directly
-    ///      and then Accept for instance.
+    ///      and then accept for instance. The '_data' will be determined by the strategy implementation.
     /// @param _data The data to use to register the recipient
     /// @param _sender The address of the sender
     /// @return The ID of the recipient
