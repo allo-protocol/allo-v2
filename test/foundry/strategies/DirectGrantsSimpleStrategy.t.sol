@@ -232,7 +232,7 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
         emit RecipientStatusChanged(recipientId, DirectGrantsSimpleStrategy.InternalRecipientStatus.InReview);
 
         vm.startPrank(pool_manager1());
-        strategy.setIntenalRecipientStatusToInReview(recipients);
+        strategy.setInternalRecipientStatusToInReview(recipients);
         IStrategy.RecipientStatus status = strategy.getRecipientStatus(recipientId);
         assertTrue(uint8(status) == uint8(IStrategy.RecipientStatus.Pending));
 
@@ -432,9 +432,9 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
         vm.stopPrank();
     }
 
-    function testRevert_setMilestones_INVALID_MILESTONE_exceed_percentage_doubled() public {
+    function test_setMilestones_by_overriding_existing_milestones() public {
         address recipientId = _register_recipient_allocate_accept();
-        DirectGrantsSimpleStrategy.Milestone[] memory milestones = new DirectGrantsSimpleStrategy.Milestone[](2);
+        DirectGrantsSimpleStrategy.Milestone[] memory milestones = new DirectGrantsSimpleStrategy.Milestone[](3);
 
         milestones[0] = DirectGrantsSimpleStrategy.Milestone({
             amountPercentage: 0.3e18,
@@ -443,8 +443,14 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
         });
 
         milestones[1] = DirectGrantsSimpleStrategy.Milestone({
-            amountPercentage: 0.7e18,
+            amountPercentage: 0.3e18,
             metadata: Metadata(1, "milestone-2"),
+            milestoneStatus: IStrategy.RecipientStatus.None
+        });
+
+        milestones[2] = DirectGrantsSimpleStrategy.Milestone({
+            amountPercentage: 0.4e18,
+            metadata: Metadata(1, "milestone-3"),
             milestoneStatus: IStrategy.RecipientStatus.None
         });
 
@@ -453,13 +459,24 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
         // set to 100%
         strategy.setMilestones(recipientId, milestones);
 
-        // todo:
-        // set to 100% again => 200% -> should revert
-        vm.expectRevert(DirectGrantsSimpleStrategy.INVALID_MILESTONE.selector);
-        strategy.setMilestones(recipientId, milestones);
+        DirectGrantsSimpleStrategy.Milestone[] memory setMilestones = strategy.getMilestones(recipientId);
+        assertEq(setMilestones.length, 3);
+
+        // Override with new milestones
+
+        DirectGrantsSimpleStrategy.Milestone[] memory anotherMilestones = new DirectGrantsSimpleStrategy.Milestone[](1);
+
+        anotherMilestones[0] = DirectGrantsSimpleStrategy.Milestone({
+            amountPercentage: 1e18,
+            metadata: Metadata(1, "milestone-1"),
+            milestoneStatus: IStrategy.RecipientStatus.None
+        });
+
+        // set to 100% again => should override older setting
+        strategy.setMilestones(recipientId, anotherMilestones);
 
         // check if sum of milestones are equal to 100% (1e18)
-        DirectGrantsSimpleStrategy.Milestone[] memory setMilestones = strategy.getMilestones(recipientId);
+        setMilestones = strategy.getMilestones(recipientId);
 
         uint256 totalAllocated = 0;
 
@@ -468,6 +485,7 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
         }
 
         assertEq(totalAllocated, 1e18);
+        assertEq(setMilestones.length, 1);
 
         vm.stopPrank();
     }

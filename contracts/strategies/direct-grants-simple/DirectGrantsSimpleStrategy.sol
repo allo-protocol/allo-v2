@@ -169,6 +169,12 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _recipientId Id of the recipient
     /// @param _milestones The milestones to be set
     function setMilestones(address _recipientId, Milestone[] memory _milestones) external {
+        bool isRecipientCreator = (msg.sender == _recipientId) || _isProfileMember(_recipientId, msg.sender);
+        bool isPoolManager = allo.isPoolManager(poolId, msg.sender);
+        if (!isRecipientCreator && !isPoolManager) {
+            revert UNAUTHORIZED();
+        }
+
         Recipient storage recipient = _recipients[_recipientId];
 
         if (recipient.recipientStatus != InternalRecipientStatus.Accepted) {
@@ -177,12 +183,6 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
         if (recipient.milestonesReviewStatus == RecipientStatus.Accepted) {
             revert MILESTONES_ALREADY_SET();
-        }
-
-        bool isRecipientCreator = (msg.sender == _recipientId) || _isProfileMember(_recipientId, msg.sender);
-        bool isPoolManager = allo.isPoolManager(poolId, msg.sender);
-        if (!isRecipientCreator && !isPoolManager) {
-            revert UNAUTHORIZED();
         }
 
         _setMilestones(_recipientId, _milestones);
@@ -195,8 +195,14 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Review the set milestones of the recipient
     /// @param _recipientId Id of the recipient
+    /// @param _status The status of the milestone review
     function reviewSetMilestones(address _recipientId, RecipientStatus _status) external onlyPoolManager(msg.sender) {
         Recipient storage recipient = _recipients[_recipientId];
+
+        if (milestones[_recipientId].length == 0) {
+            revert INVALID_MILESTONE();
+        }
+
         if (recipient.milestonesReviewStatus == RecipientStatus.Accepted) {
             revert MILESTONES_ALREADY_SET();
         }
@@ -236,7 +242,13 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _recipientId Id of the recipient
     /// @param _milestoneId Id of the milestone
     function rejectMilestone(address _recipientId, uint256 _milestoneId) external onlyPoolManager(msg.sender) {
-        Milestone storage milestone = milestones[_recipientId][_milestoneId];
+        Milestone[] storage recipientMilestones = milestones[_recipientId];
+        Milestone storage milestone = recipientMilestones[_milestoneId];
+
+        if (_milestoneId > recipientMilestones.length) {
+            revert INVALID_MILESTONE();
+        }
+
         if (milestone.milestoneStatus == RecipientStatus.Accepted) {
             revert MILESTONE_ALREADY_ACCEPTED();
         }
@@ -247,7 +259,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Set the internal status of the recipient to InReview
     /// @param _recipientIds Ids of the recipients
-    function setIntenalRecipientStatusToInReview(address[] calldata _recipientIds)
+    function setInternalRecipientStatusToInReview(address[] calldata _recipientIds)
         external
         onlyPoolManager(msg.sender)
     {
@@ -347,14 +359,12 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         (address recipientId, InternalRecipientStatus recipientStatus, uint256 grantAmount) =
             abi.decode(_data, (address, InternalRecipientStatus, uint256));
 
+        Recipient storage recipient = _recipients[recipientId];
+
         if (upcomingMilestone[recipientId] != 0) {
             revert MILESTONES_ALREADY_SET();
         }
 
-        Recipient storage recipient = _recipients[recipientId];
-
-        // TODO: should we check if the milestoneReviewStatus is accepted? instead? 
-        // an accepted milestoneReviewStatus means that the milestones are set and they can only be set if recipient is accepted
         if (
             recipient.recipientStatus != InternalRecipientStatus.Accepted // no need to accept twice
                 && recipientStatus == InternalRecipientStatus.Accepted
@@ -404,6 +414,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         Recipient memory recipient = _recipients[_recipientId];
         Milestone storage milestone = recipientMilestones[milestoneToBeDistributed];
 
+        // check if milestone is not rejected or already paid out
         if (
             milestoneToBeDistributed > recipientMilestones.length
                 || milestone.milestoneStatus != RecipientStatus.Pending
@@ -451,6 +462,11 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _milestones The milestones to be set
     function _setMilestones(address _recipientId, Milestone[] memory _milestones) internal {
         uint256 totalAmountPercentage;
+
+        // TODO: check if delete resets index to 0
+        if (milestones[_recipientId].length > 0) {
+            delete milestones[_recipientId];
+        }
 
         uint256 milestonesLength = _milestones.length;
         for (uint256 i = 0; i < milestonesLength;) {
