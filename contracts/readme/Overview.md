@@ -4,6 +4,16 @@ The Allo Protocol introduces a sophisticated decentralized finance (DeFi) ecosys
 
 ### Smart Contracts and Components
 
+```mermaid
+flowchart
+    Actor --> |profile management| Registry.sol --> |deploys|Anchor.sol
+    PoolManager --> |createPool for profile| Allo.sol --> |validate profile| Registry.sol
+
+    PoolManager --> |pool manager actions| Allo.sol --> |invoke pool function| BaseStrategy.sol
+
+    PoolManager/Recipient/Allocator --> |invoke function unique to strategy implmentation|BaseStrategy.sol
+```
+
 #### 1. **Registry Contract (`Registry.sol`):**
 
 The `Registry` contract serves as the foundational building block of the Allo Protocol. It facilitates the creation, attestation, and management of profiles. A profile is a unique entity representing a user's identity within the protocol. This contract offers functions to query profiles by ID and anchor, as well as to create new profiles with personalized metadata, attestation addresses, and members.
