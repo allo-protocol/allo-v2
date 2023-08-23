@@ -2,6 +2,31 @@
 
 The `DonationVotingMerkleDistributionStrategy` contract presents an advanced fund distribution approach within the Allo ecosystem, combining Merkle trees, recipient statuses, and precise timestamps for secure and equitable allocation. This contract builds upon the `BaseStrategy` while integrating OpenZeppelin's `ReentrancyGuard` and `Multicall` libraries, ensuring heightened security, prevention of reentrancy attacks, and optimized batch operations.
 
+
+```mermaid
+sequenceDiagram
+    participant Alice
+    participant Bob
+    participant PoolManager
+    participant Allo
+    participant DonationVotingMerkle
+
+    PoolManager->>Allo: createPool with DonationVotingMerkle
+    Allo-->>PoolManager: poolId
+    PoolManager->>DonationVotingMerkle: updatePoolTimestamps()
+    Alice->>+Allo: registerRecipient
+    Allo->>DonationVotingMerkle: registerRecipient
+    DonationVotingMerkle-->>Allo: recipient1
+    Allo-->>-Alice: recipientId 1
+    PoolManager-->DonationVotingMerkle: reviewRecipients()
+    Bob-->>+Allo: allocate()
+    Allo-->>-DonationVotingMerkle: allocate() funds are stored in contract
+    PoolManager->>DonationVotingMerkle: setPayouts() to upload root
+    PoolManager->>+Allo: distribute()
+    Allo-->>-DonationVotingMerkle: distribute()
+    Alice->>DonationVotingMerkle: claim() funds from allocation
+```
+
 **Smart Contract Overview:**
 
 * **License:** The `DonationVotingMerkleDistributionStrategy` contract adheres to the AGPL-3.0-only License, promoting open-source usage with specific terms.

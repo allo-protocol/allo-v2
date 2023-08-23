@@ -2,6 +2,31 @@
 
 The `DirectGrantsSimpleStrategy` contract represents a smart contract governing direct grant allocations to recipients within the Allo ecosystem. It extends the capabilities of the `BaseStrategy` contract and integrates features specifically tailored for managing recipient registration, milestone submissions, and reviews for direct grants. The contract also incorporates the `ReentrancyGuard` library to prevent reentrant attacks.
 
+```mermaid
+sequenceDiagram
+    participant Alice
+    participant PoolManager
+    participant Allo
+    participant DirectGrantsStrategy
+
+    PoolManager->>Allo: createPool() with DirectGrants
+    Allo-->>PoolManager: poolId
+    Alice->>+Allo: registerRecipient()
+    Allo->>DirectGrantsStrategy: registerRecipient()
+    DirectGrantsStrategy-->>Allo: recipient1
+    Allo-->>-Alice: recipientId 1
+    PoolManager->>DirectGrantsStrategy: setInternalRecipientStatusToInReview()
+    Alice->> DirectGrantsStrategy: setMilestones()
+    PoolManager->> DirectGrantsStrategy: reviewSetMilestone()
+    PoolManager->> DirectGrantsStrategy: setMilestone() on behalf of user
+    PoolManager->>+Allo: allocate() (decide how much recipient gets)
+    Allo-->>-DirectGrantsStrategy: allocate() (decide how much recipient gets)
+    Alice->>DirectGrantsStrategy: submitMilestone()
+    PoolManager->>DirectGrantsStrategy: rejectMilestone()
+    PoolManager->>+Allo: distribute() (next milestone for recipient)
+    Allo-->>-DirectGrantsStrategy: distribute() (next milestone for recipient)
+    PoolManager->>DirectGrantsStrategy: setPoolActive() to close pool
+```
 **Smart Contract Overview:**
 
 * **License:** The `DirectGrantsSimpleStrategy` contract operates under the AGPL-3.0-only License, fostering open-source usage under specific terms.
