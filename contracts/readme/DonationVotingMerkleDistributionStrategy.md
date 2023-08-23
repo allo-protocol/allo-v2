@@ -2,6 +2,36 @@
 
 The `DonationVotingMerkleDistributionStrategy` contract presents an advanced fund distribution approach within the Allo ecosystem, combining Merkle trees, recipient statuses, and precise timestamps for secure and equitable allocation. This contract builds upon the `BaseStrategy` while integrating OpenZeppelin's `ReentrancyGuard` and `Multicall` libraries, ensuring heightened security, prevention of reentrancy attacks, and optimized batch operations.
 
+## Table of Contents
+- [DonationVotingMerkleDistributionStrategy.sol](#donationvotingmerkledistributionstrategysol)
+  - [Table of Contents](#table-of-contents)
+  - [Sequence Diagram](#sequence-diagram)
+  - [Smart Contract Overview](#smart-contract-overview)
+    - [Structs and Enums](#structs-and-enums)
+    - [Modifiers](#modifiers)
+    - [Constructor](#constructor)
+    - [Views and Queries](#views-and-queries)
+    - [External/Custom Functions](#externalcustom-functions)
+    - [Internal Functions](#internal-functions)
+    - [Recipient Status Bitmap](#recipient-status-bitmap)
+    - [Merkle Tree Distribution](#merkle-tree-distribution)
+  - [User Flows](#user-flows)
+    - [Registering a Recipient](#registering-a-recipient)
+    - [Reviewing Recipients](#reviewing-recipients)
+    - [Updating Pool Timestamps](#updating-pool-timestamps)
+    - [Withdrawing Funds from Pool](#withdrawing-funds-from-pool)
+    - [Claiming Allocated Tokens](#claiming-allocated-tokens)
+    - [Updating Distribution](#updating-distribution)
+    - [Distributing Funds](#distributing-funds)
+    - [Checking Distribution Status](#checking-distribution-status)
+    - [Checking Distribution Set Status](#checking-distribution-set-status)
+    - [Marking Recipient as Appealed](#marking-recipient-as-appealed)
+    - [Checking Recipient Status](#checking-recipient-status)
+    - [Getting Recipient Details](#getting-recipient-details)
+    - [Getting Payout Summary](#getting-payout-summary)
+    - [Receiving Ether (Fallback Function)](#receiving-ether-fallback-function)
+
+## Sequence Diagram
 
 ```mermaid
 sequenceDiagram
@@ -13,7 +43,6 @@ sequenceDiagram
 
     PoolManager->>Allo: createPool with DonationVotingMerkle
     Allo-->>PoolManager: poolId
-    PoolManager->>DonationVotingMerkle: updatePoolTimestamps()
     Alice->>+Allo: registerRecipient
     Allo->>DonationVotingMerkle: registerRecipient
     DonationVotingMerkle-->>Allo: recipient1
@@ -27,7 +56,7 @@ sequenceDiagram
     Alice->>DonationVotingMerkle: claim() funds from allocation
 ```
 
-**Smart Contract Overview:**
+## Smart Contract Overview
 
 * **License:** The `DonationVotingMerkleDistributionStrategy` contract adheres to the AGPL-3.0-only License, promoting open-source usage with specific terms.
 * **Solidity Version:** Developed using Solidity version 0.8.19, leveraging the latest Ethereum smart contract advancements.
@@ -35,7 +64,7 @@ sequenceDiagram
 * **Interfaces:** Interfaces with the `IAllo` and `IRegistry` components for external communication.
 * **Inheritance:** Inherits from the `BaseStrategy` contract, inheriting and expanding core strategy functionalities.
 
-**Structs and Enums:**
+### Structs and Enums
 
 1. `InternalRecipientStatus`: Enumerates the internal status of recipients, indicating pending, accepted, rejected, appealed, or no status.
 2. `ApplicationStatus`: Contains the recipient application's index and status row.
@@ -43,24 +72,24 @@ sequenceDiagram
 4. `Claim`: Describes a claim for allocated tokens.
 5. `Distribution`: Represents fund distribution, encompassing an index, recipient ID, allocation amount, and Merkle proof.
 
-**Modifiers:**
+### Modifiers
 
 * `onlyActiveRegistration`: Restricts actions to the active registration period.
 * `onlyActiveAllocation`: Permits actions only during the active allocation phase.
 * `onlyAfterAllocation`: Allows actions after the allocation period concludes.
 
-**Constructor:**
+### Constructor
 
 The constructor initializes the strategy with essential parameters and configurations.
 
-**Views and Queries:**
+### Views and Queries
 
 1. `getRecipient`: Retrieves recipient details using their ID.
 2. `getInternalRecipientStatus`: Fetches the internal status of a recipient.
 3. `isDistributionSet`: Checks if the distribution is configured.
 4. `hasBeenDistributed`: Verifies if a distribution has occurred.
 
-**External/Custom Functions:**
+### External/Custom Functions
 
 1. `reviewRecipients`: Enables pool managers to update recipient application statuses.
 2. `updatePoolTimestamps`: Allows pool managers to adjust pool phase timestamps.
@@ -71,7 +100,7 @@ The constructor initializes the strategy with essential parameters and configura
 7. `getRecipient`: Retrieves recipient details using their ID.
 8. `getInternalRecipientStatus`: Fetches the internal status of a recipient.
 
-**Internal Functions:**
+### Internal Functions
 
 1. `_isValidAllocator`: Validates an address as an eligible allocator.
 2. `_isPoolTimestampValid`: Validates the pool's timestamp configuration.
@@ -89,125 +118,118 @@ The constructor initializes the strategy with essential parameters and configura
 14. `_validateDistribution`: Validates a distribution with a provided Merkle proof.
 15. `_hasBeenDistributed`: Checks if a distribution has occurred.
 
-**Recipient Status Bitmap:**
+### Recipient Status Bitmap
 
 The contract employs a bitmap to efficiently store recipient statuses. Each bit in the bitmap represents a specific recipient's status (pending, accepted, rejected, appealed). By using 4 bits per recipient, the bitmap optimally accommodates five status levels.
 
-**Merkle Tree Distribution:**
+### Merkle Tree Distribution
 
-The contract implements a Merkle tree structure for fund distribution. Recipients receive a Merkle proof along with their allocation data. To claim funds, recipients submit their proof, and the contract verifies it against the Merkle root, ensuring the validity of distributions.
+The contract implements a Merkle tree structure for fund distribution. The Merkle tree is stored in the `distributionMetadata` and the Merkle root is stored in `merkleRoot`. To distribute funds, a pool manager submits the proofs, and the contract verifies it against the Merkle root, ensuring the validity of distributions.
 
 In summary, the `DonationVotingMerkleDistributionStrategy` contract introduces a sophisticated fund distribution mechanism within the Allo ecosystem. By integrating Merkle trees, precise timestamps, and recipient status management, the contract guarantees secure and fair fund allocation. With the integration of external libraries and meticulous contract design, the strategy fosters efficient and secure fund distribution.
 
 ## User Flows
 
-**User Flow: Registering a Recipient**
+### Registering a Recipient
 
-1. Recipient initiates a registration request.
-2. If `useRegistryAnchor` is enabled: a. Decodes recipient ID, recipient address, and metadata from provided data. b. Verifies sender's authorization as a profile member. c. Validates the provided data. d. If recipient ID is not a profile member, reverts. e. Registers recipient as "Pending" with provided details. f. Emits `Registered` event.
-3. If `useRegistryAnchor` is disabled: a. Decodes recipient address, registry anchor (optional), and metadata from provided data. b. Determines if registry anchor is being used. c. Verifies sender's authorization as a profile member if using registry anchor. d. Validates the provided data. e. If registry anchor is used and recipient ID is not a profile member, reverts. f. Registers recipient as "Pending" with provided details. g. Emits `Registered` event.
+* Recipient initiates a registration request.
+* If `useRegistryAnchor` is enabled: 
+  *  Decodes recipient ID, recipient address, and metadata from provided data. 
+  * Verifies sender's authorization as a profile member. 
+  * Validates the provided data. 
+  * If recipient ID is not a profile member, reverts. 
+  * Registers recipient as "Pending" with provided details. 
+  * Emits `Registered` event.
+* If `useRegistryAnchor` is disabled: 
+  * Decodes recipient address, registry anchor (optional), and metadata from provided data. 
+  * Determines if registry anchor is being used. 
+  * Verifies sender's authorization as a profile member if using registry anchor. 
+  * Validates the provided data. 
+  * If registry anchor is used and recipient ID is not a profile member, reverts. 
+  * Registers recipient as "Pending" with provided details. 
+  * Emits `Registered` event.
 
-* * *
+### Reviewing Recipients
 
-**User Flow: Reviewing Recipients**
+* Pool Manager initiates a recipient status review request.
+* Verifies if sender is a pool manager.
+* Loops through provided application statuses and
+  * Updates recipient's internal status based on the application status. 
+  * Emits `RecipientStatusUpdated` event.
 
-1. Pool Manager initiates a recipient status review request.
-2. Verifies if sender is a pool manager.
-3. Loops through provided application statuses: a. Updates recipient's internal status based on the application status. b. Emits `RecipientStatusUpdated` event.
+### Updating Pool Timestamps
 
-* * *
+* Pool Manager initiates a pool timestamp update request.
+* Verifies if sender is a pool manager.
+* Updates registration and allocation timestamps.
+* Emits `TimestampsUpdated` event.
 
-**User Flow: Updating Pool Timestamps**
+### Withdrawing Funds from Pool
 
-1. Pool Manager initiates a pool timestamp update request.
-2. Verifies if sender is a pool manager.
-3. Updates registration and allocation timestamps.
-4. Emits `TimestampsUpdated` event.
+* Pool Manager initiates a withdrawal request.
+* Verifies if sender is a pool manager.
+* Deducts the specified amount from the pool amount.
+* Transfers the specified amount to the sender's address.
 
-* * *
+### Claiming Allocated Tokens
 
-**User Flow: Withdrawing Funds from Pool**
+* Recipient initiates a claim request.
+* Verifies if claim amount is greater than zero.
+* Transfers the claim amount of tokens from the contract to the recipient's address.
+* Emits `Claimed` event.
 
-1. Pool Manager initiates a withdrawal request.
-2. Verifies if sender is a pool manager.
-3. Deducts the specified amount from the pool amount.
-4. Transfers the specified amount to the sender's address.
+### Updating Distribution
 
-* * *
+* Pool Manager initiates a distribution update request.
+* Verifies if sender is a pool manager.
+* Checks if distribution has started, reverts if it has.
+* Updates merkle root and distribution metadata.
+* Emits `DistributionUpdated` event.
 
-**User Flow: Claiming Allocated Tokens**
+### Distributing Funds
 
-1. Recipient initiates a claim request.
-2. Verifies if claim amount is greater than zero.
-3. Transfers the claim amount of tokens from the contract to the recipient's address.
-4. Emits `Claimed` event.
+* Pool Manager initiates a batch payout request.
+* Verifies if sender is a pool manager.
+* Checks if distribution has started.
+* Decodes distribution data and loops through distributions and
+  * Validates the distribution using merkle proof. 
+  * Deducts the distributed amount from the pool amount. 
+  * Transfers the distributed amount to the recipient's address. 
+  * Marks the distribution as done. e. Emits `FundsDistributed` event.
 
-* * *
+### Checking Distribution Status
 
-**User Flow: Updating Distribution**
+* User initiates a distribution status check request.
+* Checks if the specified distribution index has been marked as distributed.
 
-1. Pool Manager initiates a distribution update request.
-2. Verifies if sender is a pool manager.
-3. Checks if distribution has started, reverts if it has.
-4. Updates merkle root and distribution metadata.
-5. Emits `DistributionUpdated` event.
+### Checking Distribution Set Status
 
-* * *
+* User initiates a distribution set status check request.
+* Checks if the merkle root for distribution has been set.
 
-**User Flow: Distributing Funds**
+### Marking Recipient as Appealed
 
-1. Pool Manager initiates a batch payout request.
-2. Verifies if sender is a pool manager.
-3. Checks if distribution has started.
-4. Decodes distribution data and loops through distributions: a. Validates the distribution using merkle proof. b. Deducts the distributed amount from the pool amount. c. Transfers the distributed amount to the recipient's address. d. Marks the distribution as done. e. Emits `FundsDistributed` event.
+* Recipient initiates an appeal request.
+* Checks if the recipient's internal status is "Rejected."
+* Updates recipient's internal status to "Appealed."
+* Emits `Appealed` event.
 
-* * *
+### Checking Recipient Status
 
-**User Flow: Checking Distribution Status**
+* User initiates a recipient status check request.
+* Retrieves and returns the internal recipient status.
 
-1. User initiates a distribution status check request.
-2. Checks if the specified distribution index has been marked as distributed.
+### Getting Recipient Details
 
-* * *
+* User initiates a recipient details request.
+* Retrieves and returns recipient details, including recipient address and metadata.
 
-**User Flow: Checking Distribution Set Status**
+### Getting Payout Summary
 
-1. User initiates a distribution set status check request.
-2. Checks if the merkle root for distribution has been set.
+ * Pool Manager initiates a payout summary request.
+ * Decodes distribution data and retrieves recipient address and payout amount for a distribution.
 
-* * *
+### Receiving Ether (Fallback Function)
 
-**User Flow: Marking Recipient as Appealed**
-
-1. Recipient initiates an appeal request.
-2. Checks if the recipient's internal status is "Rejected."
-3. Updates recipient's internal status to "Appealed."
-4. Emits `Appealed` event.
-
-* * *
-
-**User Flow: Checking Recipient Status**
-
-1. User initiates a recipient status check request.
-2. Retrieves and returns the internal recipient status.
-
-* * *
-
-**User Flow: Getting Recipient Details**
-
-1. User initiates a recipient details request.
-2. Retrieves and returns recipient details, including recipient address and metadata.
-
-* * *
-
-**User Flow: Getting Payout Summary**
-
-1. Pool Manager initiates a payout summary request.
-2. Decodes distribution data and retrieves recipient address and payout amount for a distribution.
-
-* * *
-
-**User Flow: Receiving Ether (Fallback Function)**
-
-1. The contract receives Ether from external transactions.
-2. Ether is added to the contract's balance.
+* The contract receives Ether from external transactions.
+* Ether is added to the contract's balance.

@@ -2,6 +2,36 @@
 
 The `DirectGrantsSimpleStrategy` contract represents a smart contract governing direct grant allocations to recipients within the Allo ecosystem. It extends the capabilities of the `BaseStrategy` contract and integrates features specifically tailored for managing recipient registration, milestone submissions, and reviews for direct grants. The contract also incorporates the `ReentrancyGuard` library to prevent reentrant attacks.
 
+## Table of Contents
+
+- [DirectGrantsSimpleStrategy.sol](#directgrantssimplestrategysol)
+  - [Table of Contents](#table-of-contents)
+  - [Sequence Diagram](#sequence-diagram)
+  - [Smart Contract Overview](#smart-contract-overview)
+    - [Enums](#enums)
+    - [Structs](#structs)
+    - [Events](#events)
+    - [Storage Variables](#storage-variables)
+    - [Constructor](#constructor)
+    - [Initialize Function](#initialize-function)
+    - [Views and Queries](#views-and-queries)
+    - [External Functions](#external-functions)
+    - [Internal Functions](#internal-functions)
+    - [Receive Function](#receive-function)
+  - [User Flows](#user-flows)
+    - [Registering a Recipient](#registering-a-recipient)
+    - [Setting Milestones](#setting-milestones)
+    - [Reviewing Set Milestones](#reviewing-set-milestones)
+    - [Submitting a Milestone Proof](#submitting-a-milestone-proof)
+    - [Rejecting a Pending Milestone](#rejecting-a-pending-milestone)
+    - [Allocating Grant Amounts](#allocating-grant-amounts)
+    - [Distributing Upcoming Milestone](#distributing-upcoming-milestone)
+    - [Withdrawing Funds from Pool](#withdrawing-funds-from-pool)
+    - [Setting Internal Recipient Status to InReview](#setting-internal-recipient-status-to-inreview)
+    - [Receiving Ether (Fallback Function)](#receiving-ether-fallback-function)
+
+## Sequence Diagram 
+
 ```mermaid
 sequenceDiagram
     participant Alice
@@ -14,37 +44,39 @@ sequenceDiagram
     Alice->>+Allo: registerRecipient()
     Allo->>DirectGrantsStrategy: registerRecipient()
     DirectGrantsStrategy-->>Allo: recipient1
-    Allo-->>-Alice: recipientId 1
+    Allo-->>-Alice: recipientId1
     PoolManager->>DirectGrantsStrategy: setInternalRecipientStatusToInReview()
+    PoolManager->>+Allo: allocate() (decide how much recipient gets)
+    Allo-->>-DirectGrantsStrategy: allocate() (decide how much recipient gets)
     Alice->> DirectGrantsStrategy: setMilestones()
     PoolManager->> DirectGrantsStrategy: reviewSetMilestone()
     PoolManager->> DirectGrantsStrategy: setMilestone() on behalf of user
-    PoolManager->>+Allo: allocate() (decide how much recipient gets)
-    Allo-->>-DirectGrantsStrategy: allocate() (decide how much recipient gets)
     Alice->>DirectGrantsStrategy: submitMilestone()
     PoolManager->>DirectGrantsStrategy: rejectMilestone()
+    Alice->>DirectGrantsStrategy: submitMilestone()
     PoolManager->>+Allo: distribute() (next milestone for recipient)
     Allo-->>-DirectGrantsStrategy: distribute() (next milestone for recipient)
     PoolManager->>DirectGrantsStrategy: setPoolActive() to close pool
 ```
-**Smart Contract Overview:**
 
-* **License:** The `DirectGrantsSimpleStrategy` contract operates under the AGPL-3.0-only License, fostering open-source usage under specific terms.
-* **Solidity Version:** Developed using Solidity version 0.8.19, capitalizing on the latest Ethereum smart contract functionalities.
-* **External Libraries:** Utilizes the `ReentrancyGuard` library from the OpenZeppelin contracts to prevent reentrant attacks.
-* **Interfaces:** Inherits from the `BaseStrategy` contract, extending its functionalities for direct grant allocation strategies.
-* **Internal Libraries:** Imports the `Metadata` library from the Allo core for metadata management.
+## Smart Contract Overview
 
-**Enums:**
+- **License:** The `DirectGrantsSimpleStrategy` contract operates under the AGPL-3.0-only License, fostering open-source usage under specific terms.
+- **Solidity Version:** Developed using Solidity version 0.8.19, capitalizing on the latest Ethereum smart contract functionalities.
+- **External Libraries:** Utilizes the `ReentrancyGuard` library from the OpenZeppelin contracts to prevent reentrant attacks.
+- **Interfaces:** Inherits from the `BaseStrategy` contract, extending its functionalities for direct grant allocation strategies.
+- **Internal Libraries:** Imports the `Metadata` library from the Allo core for metadata management.
+
+### Enums
 
 1. `InternalRecipientStatus`: An internal enumeration representing the status of a recipient within the strategy. Possible values include None, Pending, Accepted, Rejected, and InReview.
 
-**Structs:**
+### Structs
 
 1. `Recipient`: Contains recipient-related data, such as the recipient's address, grant amount, metadata, and status.
 2. `Milestone`: Holds details about a milestone, including the amount percentage, metadata, and status.
 
-**Events:**
+### Events
 
 1. `RecipientStatusChanged`: Emitted when the status of a recipient changes.
 2. `MilestoneSubmitted`: Emitted when a milestone is submitted by a recipient.
@@ -52,7 +84,7 @@ sequenceDiagram
 4. `MilestonesSet`: Emitted when milestones are set for a recipient.
 5. `MilestonesReviewed`: Emitted when the set milestones are reviewed.
 
-**Storage Variables:**
+### Storage Variables
 
 1. `registryGating`: A flag indicating whether registry gating is enabled (recipients need to be registred on the Registry.sol to be register to the pool).
 2. `metadataRequired`: A flag indicating whether metadata is required for recipient registration.
@@ -65,22 +97,22 @@ sequenceDiagram
 9. `upcomingMilestone`: A mapping from recipient IDs to the index of the next upcoming milestone which is pending payment.
 10. `totalMilestones`: A mapping from recipient IDs to the total number of milestones.
 
-**Constructor:**
+### Constructor
 
 The constructor initializes the strategy by accepting the address of the `IAllo` contract and a name. The initialization parameters include flags for registry gating, metadata requirements, and grant amount requirements.
 
-**Initialize Function:**
+### Initialize Function
 
 The `initialize` function decodes and initializes parameters passed during strategy creation. It sets the pool active and initializes registry gating, metadata requirements, and grant amount requirements.
 
-**Views and Queries:**
+### Views and Queries
 
 1. `getRecipient`: Retrieves recipient details.
 2. `getInternalRecipientStatus`: Retrieves the internal recipient status.
 3. `getMilestoneStatus`: Retrieves the status of a milestone for a recipient.
 4. `getMilestones`: Retrieves all milestones for a recipient.
 
-**External Functions:**
+### External Functions
 
 1. `setMilestones`: Sets milestones for a recipient, can only be called by the recipient or a pool manager.
 2. `reviewSetMilestones`: Reviews the set milestones of a recipient, only callable by a pool manager.
@@ -89,7 +121,7 @@ The `initialize` function decodes and initializes parameters passed during strat
 5. `setInternalRecipientStatusToInReview`: Sets the internal status of recipients to "InReview", callable by a pool manager.
 6. `withdraw`: Allows pool managers to withdraw funds from the pool.
 
-**Internal Functions:**
+### Internal Functions
 
 1. `_registerRecipient`: Handles recipient registration, processing the provided data.
 2. `_allocate`: Allocates funds to recipients based on provided data.
@@ -100,7 +132,7 @@ The `initialize` function decodes and initializes parameters passed during strat
 7. `_getPayout`: Returns the payout summary for an accepted recipient.
 8. `_setMilestones`: Sets milestones for a recipient.
 
-**Receive Function:**
+### Receive Function
 
 The `receive` function allows the contract to receive Ether through direct transactions.
 
@@ -108,124 +140,107 @@ In essence, the `DirectGrantsSimpleStrategy` contract extends the functionalitie
 
 ## User Flows
 
-**User Flow: Registering a Recipient**
+### Registering a Recipient
 
-1. Recipient or Profile Owner initiates a registration request.
-    
-2. If `registryGating` is enabled: 
-    - a. Submits recipient ID, recipient address, grant amount, and metadata.
-    - b. Verifies sender's authorization.
-    - c. Validates the provided data. 
-    - d. If recipient is already accepted, reverts. 
-    - e. Registers recipient as "Pending" with provided details. - f. Emits `Registered` event.
-    
-3. If `registryGating` is disabled: 
-    - a. Submits recipient address, registry anchor (optional), grant amount, and metadata.
-    - b. Determines if registry anchor is being used. 
-    - c. Verifies sender's authorization.
-    - d. Validates the provided data. 
-    - e. If recipient is already accepted, reverts. 
-    - f. Registers recipient as "Pending" with provided details. - g. Emits `Registered` event.
-    
+* Recipient or Profile Owner initiates a registration request.
+* If `registryGating` is enabled:
+  * Submits recipient ID, recipient address, grant amount, and metadata.
+  * Verifies sender's authorization.
+  * Validates the provided data.
+  * If recipient is already accepted, reverts.
+  * Registers recipient as "Pending" with provided details. 
+  * Emits `Registered` event.
+*  If `registryGating` is disabled:
+   *  Submits recipient address, registry anchor (optional), grant amount, and metadata.
+   *  Determines if registry anchor is being used.
+   *  Verifies sender's authorization.
+   *  Validates the provided data.
+   *  If recipient is already accepted, reverts.
+   *  Registers recipient as "Pending" with provided details. 
+   *  Emits `Registered` event.
 
-* * *
+### Setting Milestones
 
-**User Flow: Setting Milestones**
+* Recipient or Pool Manager initiates a milestone setting request.
+* Verifies if sender is authorized to set milestones for the recipient. (This can be recipient owner or the pool manager)
+* If recipient's status is not "Accepted," reverts.
+* If milestones are already set or milestones review status is "Accepted," reverts.
+* Sets provided milestones for the recipient.
+* If sender is a Pool Manager, sets recipient's milestones review status to "Accepted."
+* Emits `MilestonesSet` event (if milestones were successfully set).
+* Emits `MilestonesReviewed` event (if milestones review status was changed by Pool Manager).
 
-1. Recipient or Pool Manager initiates a milestone setting request.
-2. Verifies if sender is authorized to set milestones for the recipient. (This can be recipient owner or the pool manager)
-3. If recipient's status is not "Accepted," reverts.
-4. If milestones are already set or milestones review status is "Accepted," reverts.
-5. Sets provided milestones for the recipient.
-6. If sender is a Pool Manager, sets recipient's milestones review status to "Accepted."
-7. Emits `MilestonesSet` event (if milestones were successfully set).
-8. Emits `MilestonesReviewed` event (if milestones review status was changed by Pool Manager).
+### Reviewing Set Milestones
 
-* * *
+* Pool Manager initiates a milestone review request.
+* Verifies if milestone list for the recipient is not empty.
+* If milestones are already reviewed and accepted, reverts.
+* If review status is "Accepted" or "Rejected," updates recipient's milestones review status.
+* Emits `MilestonesReviewed` event.
 
-**User Flow: Reviewing Set Milestones**
+### Submitting a Milestone Proof
 
-1. Pool Manager initiates a milestone review request.
-2. Verifies if milestone list for the recipient is not empty.
-3. If milestones are already reviewed and accepted, reverts.
-4. If review status is "Accepted" or "Rejected," updates recipient's milestones review status.
-5. Emits `MilestonesReviewed` event.
+* Recipient initiates a milestone proof submission.
+* Verifies if sender is authorized to submit the proof (recipient or profile member).
+* Checks if milestone is pending for the recipient.
+* Updates milestone's metadata and status to "Pending."
+* Emits `MilestoneSubmitted` event.
 
-* * *
+### Rejecting a Pending Milestone
 
-**User Flow: Submitting a Milestone Proof**
+* Pool Manager initiates a milestone rejection request.
+* Verifies if sender is authorized to reject milestones.
+* Verifies if milestone exists and is not already accepted.
+* Sets milestone's status to "Rejected."
+* Emits `MilestoneStatusChanged` event.
 
-1. Recipient initiates a milestone proof submission.
-2. Verifies if sender is authorized to submit the proof (recipient or profile member).
-3. Checks if milestone is pending for the recipient.
-4. Updates milestone's metadata and status to "Pending."
-5. Emits `MilestoneSubmitted` event.
+### Allocating Grant Amounts
 
-* * *
+* Pool Manager initiates an allocation request.
+* Decodes recipient ID, internal recipient status, and grant amount from provided data.
+* Verifies if sender is a pool manager.
+* Checks if upcoming milestone is not already set for the recipient.
+* If recipient's status is "Accepted":
+  * Allocates grant amount to recipient.
+  * Updates allocated grant amount.
+  * If allocation exceeds pool amount, reverts.
+  * Sets recipient's grant amount and status to "Accepted".
+  * Emits `RecipientStatusChanged` event.
+  * Emits `Allocated` event.
+ * If recipient's status is "Rejected":
+   * Sets recipient's status to "Rejected".
+   * Emits `RecipientStatusChanged` event.
 
-**User Flow: Rejecting a Pending Milestone**
+### Distributing Upcoming Milestone
 
-1. Pool Manager initiates a milestone rejection request.
-2. Verifies if sender is authorized to reject milestones.
-3. Verifies if milestone exists and is not already accepted.
-4. Sets milestone's status to "Rejected."
-5. Emits `MilestoneStatusChanged` event.
+* Pool Manager initiates a distribution request.
+* Verifies if sender is a pool manager.
+* Loops through recipient list:
+  * Checks if milestone to be distributed is valid.
+  * Checks if milestone is pending for distribution.
+  * Calculates distribution amount based on grant amount and milestone percentage.
+  * Deducts amount from pool.
+  * Transfers amount to recipient's address.
+  * Updates milestone's status to "Accepted."
+  * Emits `MilestoneStatusChanged` event.
+  * Emits `Distributed` event.
 
-* * *
+### Withdrawing Funds from Pool
 
-**User Flow: Allocating Grant Amounts**
+* Pool Manager initiates a withdrawal request.
+* Verifies if sender is a pool manager.
+* Deducts specified amount from the pool balance.
+* Transfers the specified amount to the sender's address.
 
-1. Pool Manager initiates an allocation request.
-2. Decodes recipient ID, internal recipient status, and grant amount from provided data.
-3. Verifies if sender is a pool manager.
-4. Checks if upcoming milestone is not already set for the recipient.
-5. If recipient's status is "Accepted": 
-    - a. Allocates grant amount to recipient. 
-    - b. Updates allocated grant amount. 
-    - c. If allocation exceeds pool amount, reverts. 
-    - d. Sets recipient's grant amount and status to "Accepted." 
-    - e. Emits `RecipientStatusChanged` event. 
-    - f. Emits `Allocated` event.
-6. If recipient's status is "Rejected": 
-    - a. Sets recipient's status to "Rejected." 
-    - b. Emits `RecipientStatusChanged` event.
+### Setting Internal Recipient Status to InReview
 
-* * *
+*  Pool Manager initiates a recipient status change request.
+*  Verifies if sender is a pool manager.
+*  Loops through provided recipient IDs: 
+   *  Sets recipient's internal status to "InReview." 
+   *  Emits `RecipientStatusChanged` event.
 
-**User Flow: Distributing Upcoming Milestone**
+### Receiving Ether (Fallback Function)
 
-1. Pool Manager initiates a distribution request.
-2. Verifies if sender is a pool manager.
-3. Loops through recipient list: 
-    - a. Checks if milestone to be distributed is valid. 
-    - b. Checks if milestone is pending for distribution.
-    - c. Calculates distribution amount based on grant amount and milestone percentage.
-    - d. Deducts amount from pool. 
-    - e. Transfers amount to recipient's address. 
-    - f. Updates milestone's status to "Accepted." 
-    - g. Emits `MilestoneStatusChanged` event. 
-    - h. Emits `Distributed` event.
-
-* * *
-
-**User Flow: Withdrawing Funds from Pool**
-
-1. Pool Manager initiates a withdrawal request.
-2. Verifies if sender is a pool manager.
-3. Deducts specified amount from the pool balance.
-4. Transfers the specified amount to the sender's address.
-
-* * *
-
-**User Flow: Setting Internal Recipient Status to InReview**
-
-1. Pool Manager initiates a recipient status change request.
-2. Verifies if sender is a pool manager.
-3. Loops through provided recipient IDs: a. Sets recipient's internal status to "InReview." b. Emits `RecipientStatusChanged` event.
-
-* * *
-
-**User Flow: Receiving Ether (Fallback Function)**
-
-1. The contract receives Ether from external transactions.
-2. Ether is added to the contract's balance.
+* The contract receives Ether from external transactions.
+* Ether is added to the contract's balance.

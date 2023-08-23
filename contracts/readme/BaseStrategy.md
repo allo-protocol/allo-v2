@@ -2,14 +2,25 @@
 
 The `BaseStrategy` contract serves as a foundational building block within the Allo ecosystem, forming the basis for more specialized allocation strategies. By integrating essential functions and variables, this abstract contract establishes a standardized approach for implementing distribution strategies.
 
-**Smart Contract Overview:**
+## Table of Contents
+- [BaseStrategy.sol](#basestrategysol)
+  - [Table of Contents](#table-of-contents)
+  - [Smart Contract Overview](#smart-contract-overview)
+    - [Storage Variables](#storage-variables)
+    - [Constructor](#constructor)
+    - [Modifiers](#modifiers)
+    - [Views and Queries](#views-and-queries)
+    - [Functions](#functions)
+    - [Internal Functions](#internal-functions)
+
+## Smart Contract Overview
 
 * **License:** The `BaseStrategy` contract adheres to the AGPL-3.0-only License, promoting open-source usage with specific terms.
 * **Solidity Version:** Developed using Solidity version 0.8.19, leveraging the latest Ethereum smart contract advancements.
 * **External Libraries:** Imports `Transfer` library from the Allo core for optimized token transfers.
 * **Interfaces:** Implements the `IStrategy` interface, facilitating interaction with external components.
 
-**Storage Variables:**
+### Storage Variables
 
 1. `allo`: An immutable reference to the `IAllo` contract, enabling communication with the Allo ecosystem.
 2. `poolId`: Identifies the pool to which this strategy is associated.
@@ -17,11 +28,11 @@ The `BaseStrategy` contract serves as a foundational building block within the A
 4. `poolAmount`: The current amount of tokens in the pool.
 5. `poolActive`: A flag indicating whether the pool is active.
 
-**Constructor:**
+### Constructor
 
 The constructor initializes the strategy by accepting the address of the `IAllo` contract and a name.
 
-**Modifiers:**
+### Modifiers
 
 * `onlyAllo`: Validates that the caller is the Allo contract.
 * `onlyPoolManager`: Ensures that the caller is a pool manager.
@@ -29,7 +40,7 @@ The constructor initializes the strategy by accepting the address of the `IAllo`
 * `onlyInactivePool`: Permits actions only when the pool is inactive.
 * `onlyInitialized`: Requires that the strategy is initialized.
 
-**Views and Queries:**
+### Views and Queries
 
 1. `getAllo`: Retrieves the `IAllo` contract reference.
 2. `getPoolId`: Retrieves the pool's ID.
@@ -38,7 +49,7 @@ The constructor initializes the strategy by accepting the address of the `IAllo`
 5. `isPoolActive`: Checks if the pool is active.
 6. `getRecipientStatus`: Retrieves the status of a recipient.
 
-**Functions:**
+### Functions
 
 1. `increasePoolAmount`: Allows the Allo contract to increase the pool's amount.
 2. `registerRecipient`: Registers a recipient's application and updates their status.
@@ -47,7 +58,7 @@ The constructor initializes the strategy by accepting the address of the `IAllo`
 5. `getPayouts`: Retrieves payout summaries for recipients and data pairs.
 6. `isValidAllocator`: Validates whether an address is a valid allocator.
 
-**Internal Functions:**
+### Internal Functions
 
 1. `_setPoolActive`: Sets the pool's activity status.
 2. `_isPoolActive`: Checks if the pool is currently active.
