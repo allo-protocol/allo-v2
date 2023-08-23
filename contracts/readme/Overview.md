@@ -146,46 +146,67 @@ The Allo Protocol is a technologically advanced framework for decentralized fund
 
 ```mermaid
 sequenceDiagram
-    Alice ->>+Registry: createProfile
-    Registry ->>+Anchor: CREATE3 deploy (using anchor)
-    Anchor -->>-Registry: returns reference to deployed contract
-    Registry-->>-Alice: profileId : 1
+    participant Alice
+    participant Registry
+    participant Anchor
+
+    Alice ->>+ Registry: createProfile
+    Registry ->>+ Anchor: CREATE3 deploy (using anchor)
+    Anchor -->>- Registry: Returns reference to deployed contract
+    Registry -->>- Alice: profileId : 1
 ```
 
 **Updates Profile**
 
 ```mermaid
 sequenceDiagram
-    Alice ->>+Registry: updateProfileMetadata(profileId, newMetadata)
-    Registry -->>Registry: Update metadata for profileId
-    Registry -->>-Alice: Metadata updated successfully
+    participant Alice
+    participant Registry
+
+    Alice ->>+ Registry: updateProfileMetadata(profileId, newMetadata)
+    Registry -->> Registry: Update metadata for profileId
+    Registry -->>- Alice: Metadata updated successfully
 ```
 
 ```mermaid
 sequenceDiagram
-    Alice ->>+Registry: updateProfileName(profileId, newName)
-    Registry ->>+Anchor: CREATE3 deploy (using new anchor)
-    Anchor -->>-Registry: Returns reference to deployed contract
-    Registry -->>Registry: Update anchor and profile name for profileId
-    Registry -->>-Alice: Profile name and anchor updated successfully
+    participant Alice
+    participant Registry
+    participant Anchor
+
+    Alice ->>+ Registry: updateProfileName(profileId, newName)
+    Registry ->>+ Anchor: CREATE3 deploy (using new anchor)
+    Anchor -->>- Registry: Returns reference to deployed contract
+    Registry -->> Registry: Update anchor and profile name for profileId
+    Registry -->>- Alice: Profile name and anchor updated successfully
+
 ```
 
 **Member Management**
 ```mermaid
 sequenceDiagram
-    Alice ->>+Registry: addMembers(profileId, [Bob])
-    Registry -->>-Alice: Bob added as a member to profileId
-    Alice ->>+Registry: removeMembers(profileId, [Bob])
-    Registry -->>-Alice: Bob removed from members of profileId
+    participant Alice
+    participant Bob
+    participant Registry
+
+    Alice ->>+ Registry: addMembers(profileId, [Bob])
+    Registry -->>- Alice: Bob added as a member to profileId
+    Alice ->>+ Registry: removeMembers(profileId, [Bob])
+    Registry -->>- Alice: Bob removed from members of profileId
 ```
 
 **Profile Owner Transfer**
 ```mermaid
 sequenceDiagram
-    Alice ->>+Registry: updateProfilePendingOwner(profileId, Bob)
-    Registry -->>-Alice: Pending owner updated for profileId
-    Bob ->>+Registry: acceptProfileOwnership(profileId)
-    Registry -->>-Bob: Ownership transferred for profileId
+sequenceDiagram
+    participant Alice
+    participant Bob
+    participant Registry
+
+    Alice ->>+ Registry: updateProfilePendingOwner(profileId, Bob)
+    Registry -->>- Alice: Pending owner updated for profileId
+    Bob ->>+ Registry: acceptProfileOwnership(profileId)
+    Registry -->>- Bob: Ownership transferred for profileId
 ```
 
 ### Allo Core Interactions
