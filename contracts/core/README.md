@@ -1,6 +1,6 @@
 # Allo Ecosystem Contracts
 
-Welcome to the documentation for the Allo Ecosystem Contracts. This repository contains three smart contracts that form a crucial part of the Allo decentralized finance ecosystem. Each contract serves a specific purpose and interacts with the others to enable decentralized fund allocation, profile management, and secure execution of calls.
+Welcome to the documentation for the Allo Ecosystem Contracts. This repository contains three smart contracts that form a crucial part of the Allo  ecosystem. Each contract serves a specific purpose and interacts with the others to enable decentralized fund allocation, profile management, and secure execution of calls.
 
 ## Contracts
 
