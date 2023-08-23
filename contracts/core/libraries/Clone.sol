@@ -2,7 +2,7 @@
 pragma solidity 0.8.19;
 
 // External Libraries
-import "@openzeppelin/contracts-upgradeable/proxy/ClonesUpgradeable.sol";
+import "openzeppelin-contracts-upgradeable/contracts/proxy/ClonesUpgradeable.sol";
 
 /// @title Clone library
 /// @author @thelostone-mc <aditya@gitcoin.co>, @KurtMerbeth <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>

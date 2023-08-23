@@ -9,12 +9,12 @@ import {
     AttestationRequestData,
     IEAS,
     RevocationRequest
-} from "@ethereum-attestation-service/eas-contracts/contracts/IEAS.sol";
+} from "eas-contracts/IEAS.sol";
 import {
     ISchemaRegistry,
     ISchemaResolver,
     SchemaRecord
-} from "@ethereum-attestation-service/eas-contracts/contracts/ISchemaRegistry.sol";
+} from "eas-contracts/ISchemaRegistry.sol";
 // Core Contracts
 import {SchemaResolver} from "./SchemaResolver.sol";
 import {QVBaseStrategy} from "../qv-base/QVBaseStrategy.sol";

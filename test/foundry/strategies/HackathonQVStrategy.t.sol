@@ -19,12 +19,12 @@ import {
     AttestationRequestData,
     IEAS,
     RevocationRequest
-} from "@ethereum-attestation-service/eas-contracts/contracts/IEAS.sol";
+} from "eas-contracts/IEAS.sol";
 import {
     ISchemaRegistry,
     ISchemaResolver,
     SchemaRecord
-} from "@ethereum-attestation-service/eas-contracts/contracts/ISchemaRegistry.sol";
+} from "eas-contracts/ISchemaRegistry.sol";
 // Mocks
 import {MockEAS, MockSchemaRegistry} from "../../utils/MockEAS.sol";
 
