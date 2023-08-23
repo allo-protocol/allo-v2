@@ -392,11 +392,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _flag The flag to set the pool to active or inactive
     function setPoolActive(bool _flag) external onlyPoolManager(msg.sender) {
         _setPoolActive(_flag);
-        if (_flag) {
-            emit BaseStrategy_POOL_ACTIVE();
-        } else {
-            emit BaseStrategy_POOL_INACTIVE();
-        }
+        emit PoolActive(_flag);
     }
 
     /// @notice Withdraw funds from pool.

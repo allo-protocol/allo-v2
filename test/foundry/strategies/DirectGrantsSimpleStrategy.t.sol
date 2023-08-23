@@ -243,6 +243,24 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
         vm.stopPrank();
     }
 
+    function test_isPoolActive() public {
+        vm.expectEmit(false, false, false, true);
+        emit PoolActive(true);
+
+        vm.startPrank(pool_manager1());
+        strategy.setPoolActive(true);
+        assertTrue(strategy.isPoolActive());
+
+        vm.expectEmit(false, false, false, true);
+        emit PoolActive(false);
+
+        vm.startPrank(pool_manager1());
+        strategy.setPoolActive(false);
+        assertFalse(strategy.isPoolActive());
+
+        vm.stopPrank();
+    }
+
     function test_allocate_accept() public {
         address recipientId = _register_recipient_allocate_accept();
         assertEq(strategy.allocatedGrantAmount(), 1e18);
