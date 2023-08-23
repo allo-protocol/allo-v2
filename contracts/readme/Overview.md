@@ -14,6 +14,35 @@ flowchart
     PoolManager/Recipient/Allocator --> |invoke function unique to strategy implmentation|BaseStrategy.sol
 ```
 
+#### Contract Overview
+
+<table>
+<thead>
+  <tr>
+    <th>Contract</th>
+    <th>Purpose</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td>Registry.sol</td>
+    <td>Registry of profile which offers profile management</td>
+  </tr>
+  <tr>
+    <td>Anchor.sol</td>
+    <td>- Contract which can recieve funds / execute transaction.<br>- Generated using identityId and name of the profile<br>- Is linked to a profile in Registry.sol</td>
+  </tr>
+  <tr>
+    <td>Allo.sol</td>
+    <td>- Management of a pool<br>- Requires a profile from registry to create a pool<br>- Expects a strategy which implements BaseStrategy.sol<br>- Expects all interactions with the functions on BaseStrategys.sol to happen via Allo.sol</td>
+  </tr>
+  <tr>
+    <td>BaseStrategy.sol</td>
+    <td>- Abstract contract which implements IStrategy.sol<br>- Every strategy should override the internal functions to be deemed as a valid strategy <br>- Can have other functions unique to the strategy which can be invoked directly on the startegy</td>
+  </tr>
+</tbody>
+</table>
+
 #### 1. **Registry Contract (`Registry.sol`):**
 
 The `Registry` contract serves as the foundational building block of the Allo Protocol. It facilitates the creation, attestation, and management of profiles. A profile is a unique entity representing a user's identity within the protocol. This contract offers functions to query profiles by ID and anchor, as well as to create new profiles with personalized metadata, attestation addresses, and members.
