@@ -54,7 +54,6 @@ abstract contract BaseStrategy is IStrategy, Transfer {
         _;
     }
 
-    /// @notice Modifier to check if the pool is inactive
     modifier onlyInactivePool() {
         if (poolActive) {
             revert BaseStrategy_POOL_ACTIVE();
@@ -62,7 +61,6 @@ abstract contract BaseStrategy is IStrategy, Transfer {
         _;
     }
 
-    /// @notice Modifier to check if the pool is initialized
     modifier onlyInitialized() {
         if (poolId == 0) {
             revert BaseStrategy_NOT_INITIALIZED();
