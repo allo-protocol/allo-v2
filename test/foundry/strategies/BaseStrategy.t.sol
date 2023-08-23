@@ -8,7 +8,7 @@ import {RegistrySetupFull} from "../shared/RegistrySetup.sol";
 import {MockStrategy} from "../../utils/MockStrategy.sol";
 
 // Core contracts
-import {IStrategy} from "../../../contracts/strategies/IStrategy.sol";
+import {IStrategy} from "../../../contracts/core/interfaces/IStrategy.sol";
 
 contract BaseStrategyTest is Test, AlloSetup, RegistrySetupFull {
     MockStrategy strategy;

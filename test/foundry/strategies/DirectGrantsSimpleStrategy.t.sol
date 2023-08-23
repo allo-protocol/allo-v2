@@ -6,7 +6,7 @@ import "forge-std/Test.sol";
 import {Native} from "../../../contracts/core/libraries/Native.sol";
 import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
 
-import {IStrategy} from "../../../contracts/strategies/IStrategy.sol";
+import {IStrategy} from "../../../contracts/core/interfaces/IStrategy.sol";
 
 // Test libraries
 import {AlloSetup} from "../shared/AlloSetup.sol";

@@ -3,9 +3,9 @@ pragma solidity 0.8.19;
 
 // Interfaces
 import {IRegistry} from "./IRegistry.sol";
-import {IStrategy} from "../strategies/IStrategy.sol";
+import {IStrategy} from "./IStrategy.sol";
 // Internal Libraries
-import {Metadata} from "./libraries/Metadata.sol";
+import {Metadata} from "../libraries/Metadata.sol";
 
 /// @title Allo Interface
 /// @author @thelostone-mc <aditya@gitcoin.co>, @KurtMerbeth <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>

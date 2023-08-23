@@ -2,7 +2,7 @@
 pragma solidity 0.8.19;
 
 // Interfaces
-import {IStrategy} from "../../../contracts/strategies/IStrategy.sol";
+import {IStrategy} from "../../../contracts/core/interfaces/IStrategy.sol";
 import {QVBaseStrategy} from "../../../contracts/strategies/qv-base/QVBaseStrategy.sol";
 
 // Test libraries

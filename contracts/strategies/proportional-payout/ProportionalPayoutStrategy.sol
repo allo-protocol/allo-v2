@@ -2,7 +2,7 @@
 pragma solidity 0.8.19;
 
 import {ERC721} from "solady/src/tokens/ERC721.sol";
-import {IAllo} from "../../core/IAllo.sol";
+import {IAllo} from "../../core/interfaces/IAllo.sol";
 import {BaseStrategy} from "./../BaseStrategy.sol";
 import {Metadata} from "../../core/libraries/Metadata.sol";
 

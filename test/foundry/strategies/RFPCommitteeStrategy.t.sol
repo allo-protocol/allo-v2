@@ -3,10 +3,8 @@ pragma solidity 0.8.19;
 import "forge-std/Test.sol";
 
 // Interfaces
-import {IStrategy} from "../../../contracts/strategies/IStrategy.sol";
+import {IStrategy} from "../../../contracts/core/interfaces/IStrategy.sol";
 // Core contracts
-import {IStrategy} from "../../../contracts/strategies/IStrategy.sol";
-
 import {RFPSimpleStrategy} from "../../../contracts/strategies/rfp-simple/RFPSimpleStrategy.sol";
 import {RFPCommitteeStrategy} from "../../../contracts/strategies/rfp-committee/RFPCommitteeStrategy.sol";
 // Internal libraries

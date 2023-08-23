@@ -6,7 +6,7 @@ import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {CREATE3} from "solady/src/utils/CREATE3.sol";
 import {ERC20} from "solady/src/tokens/ERC20.sol";
 // Interfaces
-import "./IRegistry.sol";
+import "./interfaces/IRegistry.sol";
 // Internal Libraries
 import {Anchor} from "./Anchor.sol";
 import {Metadata} from "./libraries/Metadata.sol";
