@@ -12,6 +12,8 @@ import "hardhat-gas-reporter";
 import { HardhatUserConfig } from "hardhat/config";
 import { NetworkUserConfig } from "hardhat/types";
 import "solidity-coverage";
+import "hardhat-preprocessor";
+import fs from "fs";
 
 dotenv.config();
 
@@ -42,6 +44,18 @@ if (!deployPrivateKey) {
 }
 
 const infuraIdKey = process.env.INFURA_RPC_ID as string;
+
+/**
+ * Reads the remappings.txt file and returns an array of arrays.
+ * @returns {string[][]}
+ */
+function getRemappings() {
+  return fs
+    .readFileSync("remappings.txt", "utf8")
+    .split("\n")
+    .filter(Boolean) // remove empty lines
+    .map((line) => line.trim().split("="));
+}
 
 /**
  * Generates hardhat network configuration the test networks.
@@ -237,6 +251,25 @@ const config: HardhatUserConfig = {
   },
   abiExporter: abiExporter,
   dodoc: dodoc,
+  preprocess: {
+    eachLine: (hre) => ({
+      transform: (line: string) => {
+        if (line.match(/^\s*import /i)) {
+          for (const [from, to] of getRemappings()) {
+            if (line.includes(from)) {
+              line = line.replace(from, to);
+              break;
+            }
+          }
+        }
+        return line;
+      },
+    }),
+  },
+  paths: {
+    sources: "./src",
+    cache: "./cache_hardhat",
+  },
 };
 
 export default config;
