@@ -4,6 +4,7 @@ import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-solhint";
 import "@nomiclabs/hardhat-waffle";
 import "@openzeppelin/hardhat-upgrades";
+import "@primitivefi/hardhat-dodoc";
 import "@typechain/hardhat";
 import "hardhat-abi-exporter";
 import "hardhat-contract-sizer";
@@ -19,15 +20,15 @@ const chainIds = {
   localhost: 31337,
 
   // testnet
-  "goerli": 5,
-  "sepolia": 11155111,
+  goerli: 5,
+  sepolia: 11155111,
   "optimism-goerli": 420,
   "fantom-testnet": 4002,
   "pgn-sepolia": 58008,
   "celo-testnet": 44787,
 
   // mainnet
-  "mainnet": 1,
+  mainnet: 1,
   "optimism-mainnet": 10,
   "pgn-mainnet": 424,
   "fantom-mainnet": 250,
@@ -50,7 +51,7 @@ const infuraIdKey = process.env.INFURA_RPC_ID as string;
  */
 function createTestnetConfig(
   network: keyof typeof chainIds,
-  url?: string,
+  url?: string
 ): NetworkUserConfig {
   if (!url) {
     url = `https://${network}.infura.io/v3/${infuraIdKey}`;
@@ -72,7 +73,7 @@ function createTestnetConfig(
  */
 function createMainnetConfig(
   network: keyof typeof chainIds,
-  url?: string,
+  url?: string
 ): NetworkUserConfig {
   if (!url) {
     url = `https://${network}.infura.io/v3/${infuraIdKey}`;
@@ -98,6 +99,12 @@ const abiExporter = [
   },
 ];
 
+const dodoc = {
+  outputDir: "./docs/contracts",
+  include: ["contracts"],
+  exclude: ["lib", "test"],
+};
+
 const config: HardhatUserConfig = {
   solidity: {
     version: "0.8.19",
@@ -115,7 +122,7 @@ const config: HardhatUserConfig = {
     "optimism-mainnet": createMainnetConfig("optimism-mainnet"),
     "fantom-mainnet": createMainnetConfig(
       "fantom-mainnet",
-      "https://rpc.ftm.tools",
+      "https://rpc.ftm.tools"
     ),
     "pgn-mainnet": {
       accounts: [deployPrivateKey],
@@ -138,7 +145,7 @@ const config: HardhatUserConfig = {
     ),
     "fantom-testnet": createTestnetConfig(
       "fantom-testnet",
-      "https://rpc.testnet.fantom.network/",
+      "https://rpc.testnet.fantom.network/"
     ),
     "optimism-goerli": {
       accounts: [deployPrivateKey],
@@ -229,6 +236,7 @@ const config: HardhatUserConfig = {
     ],
   },
   abiExporter: abiExporter,
+  dodoc: dodoc,
 };
 
 export default config;

@@ -1,13 +1,18 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
+// Interfaces
 import {IAllo} from "../core/IAllo.sol";
 
+/// @title IStrategy Interface
+/// @author @thelostone-mc <aditya@gitcoin.co>, @KurtMerbeth <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>
+/// @notice BaseStrategy is the base contract that all strategies should inherit from and uses this interface.
 interface IStrategy {
     /// ======================
     /// ======= Storage ======
     /// ======================
 
+    /// @notice The RecipientStatus enum that all recipients are based from
     enum RecipientStatus {
         None,
         Pending,
@@ -15,6 +20,7 @@ interface IStrategy {
         Rejected
     }
 
+    /// @notice Payout summary struct to hold the payout data
     struct PayoutSummary {
         address recipientAddress;
         uint256 amount;
@@ -24,58 +30,109 @@ interface IStrategy {
     /// ======= Errors =======
     /// ======================
 
-    // BaseStrategy errors
+    /// @notice Throws when calls to Base Strategy are unauthorized
     error BaseStrategy_UNAUTHORIZED();
+
+    /// @notice Throws when Base Strategy is already initialized
     error BaseStrategy_ALREADY_INITIALIZED();
+
+    /// @notice Throws when Base Strategy is not initialized
     error BaseStrategy_NOT_INITIALIZED();
+
+    /// @notice Throws when an invalid address is used
     error BaseStrategy_INVALID_ADDRESS();
+
+    /// @notice Throws when a pool is inactive
     error BaseStrategy_POOL_INACTIVE();
+
+    /// @notice Throws when a pool is already active
     error BaseStrategy_POOL_ACTIVE();
+
+    /// @notice Throws when two arrays length are not equal
     error BaseStrategy_ARRAY_MISMATCH();
+
+    /// @notice Throws as a general error when either a recipient address or an amount is invalid
     error BaseStrategy_INVALID();
 
     /// ======================
     /// ======= Events =======
     /// ======================
 
+    /// @notice Emitted when strategy is initialized.
+    /// @param allo The Allo contract
+    /// @param profileId The ID of the profile
+    /// @param poolId The ID of the pool
     event Initialized(address allo, bytes32 profileId, uint256 poolId, bytes data);
+
+    /// @notice Emitted when a recipient is registered.
+    /// @param recipientId The ID of the recipient
+    /// @param data The data passed to the 'registerRecipient' function
+    /// @param sender The sender
     event Registered(address indexed recipientId, bytes data, address sender);
+
+    /// @notice Emitted when a recipient is allocated to.
+    /// @param recipientId The ID of the recipient
+    /// @param amount The amount allocated
+    /// @param token The token allocated
     event Allocated(address indexed recipientId, uint256 amount, address token, address sender);
+
+    /// @notice Emitted when tokens are distributed.
+    /// @param recipientId The ID of the recipient
+    /// @param recipientAddress The recipient
+    /// @param amount The amount distributed
+    /// @param sender The sender
     event Distributed(address indexed recipientId, address recipientAddress, uint256 amount, address sender);
+
+    /// @notice Emitted when pool is set to active status.
+    /// @param active The status of the pool
     event PoolActive(bool active);
 
     /// ======================
     /// ======= Views ========
     /// ======================
 
-    /// @return Address of the Allo contract
+    /// @notice Getter for the address of the Allo contract.
+    /// @return The 'Allo' contract
     function getAllo() external view returns (IAllo);
 
-    /// @return Pool ID for this strategy
+    /// @notice Getter for the 'poolId' for this strategy.
+    /// @return The ID of the pool
     function getPoolId() external view returns (uint256);
 
-    /// @return The id of the strategy
+    /// @notice Getter for the 'id' of the strategy.
+    /// @return The ID of the strategy
     function getStrategyId() external view returns (bytes32);
 
-    /// @return whether a allocator is valid or not, will usually be true for all
+    /// @notice Checks whether a allocator is valid or not, will usually be true for all strategies
+    ///      and will depend on the strategy implementation.
+    /// @param _allocator The allocator to check
+    /// @return Whether the allocator is valid or not
     function isValidAllocator(address _allocator) external view returns (bool);
 
-    /// @return whether pool is active
+    /// @notice whether pool is active.
+    /// @return Whether the pool is active or not
     function isPoolActive() external returns (bool);
 
-    /// @return returns the amount of tokens in the pool
+    /// @notice Checks the amount of tokens in the pool.
+    /// @return The balance of the pool
     function getPoolAmount() external view returns (uint256);
 
-    /// incrases the poolAmount which is set on invoking Allo.fundPool
+    /// @notice Incrases the balance of the pool.
+    /// @param _amount The amount to increase the pool by
     function increasePoolAmount(uint256 _amount) external;
 
-    // simply returns the status of a recipient
-    // probably tracked in a mapping, but will depend on the implementation
-    // for example, the OpenSelfRegistration only maps users to bool, and then assumes Accepted for those
-    // since there is no need for Pending or Rejected
+    /// @notice Checks the status of a recipient probably tracked in a mapping, but will depend on the implementation
+    ///      for example, the OpenSelfRegistration only maps users to bool, and then assumes Accepted for those
+    ///      since there is no need for Pending or Rejected.
+    /// @param _recipientId The ID of the recipient
+    /// @return The status of the recipient
     function getRecipientStatus(address _recipientId) external view returns (RecipientStatus);
 
-    /// @return Input the values you would send to distribute(), get the amounts each recipient in the array would receive
+    /// @notice Checks the amount allocated to a recipient for distribution.
+    /// @dev Input the values you would send to distribute(), get the amounts each recipient in the array would receive.
+    ///      The encoded '_data' will be determined by the strategy, and will be used to determine the payout.
+    /// @param _recipientIds The IDs of the recipients
+    /// @param _data The encoded data
     function getPayouts(address[] memory _recipientIds, bytes[] memory _data)
         external
         view
@@ -85,22 +142,31 @@ interface IStrategy {
     /// ===== Functions ======
     /// ======================
 
-    // the default BaseStrategy version will not use the data
-    // if a strtegy wants to use it, they will overwrite it, use it, and then call super.initialize()
+    /// @notice
+    /// @dev The default BaseStrategy version will not use the data  if a strtegy wants to use it, they will overwrite it,
+    ///      use it, and then call super.initialize().
+    /// @param _poolId The ID of the pool
+    /// @param _data The encoded data
     function initialize(uint256 _poolId, bytes memory _data) external;
 
-    // this is called via allo.sol to register recipients
-    // it can change their status all the way to Accepted, or to Pending if there are more steps
-    // if there are more steps, additional functions should be added to allow the owner to check
-    // this could also check attestations directly and then Accept
+    /// @notice This will register a recipient, set their status (and any other strategy specific values), and
+    ///         return the ID of the recipient.
+    /// @dev Able to change status all the way up to 'Accepted', or to 'Pending' and if there are more steps, additional
+    ///      functions should be added to allow the owner to check this. The owner could also check attestations directly
+    ///      and then accept for instance. The '_data' will be determined by the strategy implementation.
+    /// @param _data The data to use to register the recipient
+    /// @param _sender The address of the sender
+    /// @return The ID of the recipient
     function registerRecipient(bytes memory _data, address _sender) external payable returns (address);
 
-    // only called via allo.sol by users to allocate to a recipient
-    // this will update some data in this contract to store votes, etc.
+    /// @notice This will allocate to a recipient.
+    /// @dev The encoded '_data' will be dermined by the strategy implementation.
+    /// @param _data The data to use to allocate to the recipient
+    /// @param _sender The address of the sender
     function allocate(bytes memory _data, address _sender) external payable;
 
-    // this will distribute tokens to recipients
-    // most strategies will track a TOTAL amount per recipient, and a PAID amount, and pay the difference
-    // this contract will need to track the amount paid already, so that it doesn't double pay
+    /// @notice This will distribute funds (tokens) to recipients.
+    /// @dev most strategies will track a TOTAL amount per recipient, and a PAID amount, and pay the difference
+    /// this contract will need to track the amount paid already, so that it doesn't double pay.
     function distribute(address[] memory _recipientIds, bytes memory _data, address _sender) external;
 }
