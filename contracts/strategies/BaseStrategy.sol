@@ -149,7 +149,7 @@ abstract contract BaseStrategy is IStrategy, Transfer {
     }
 
     /// @notice Registers a recipient.
-    /// @dev Registers a recipient and returns the ID of the recipient. The encoded '_data' will be dermined by the
+    /// @dev Registers a recipient and returns the ID of the recipient. The encoded '_data' will be determined by the
     ///      strategy implementation. Only 'Allo' contract can call this when it is initialized.
     /// @param _data The data to use to register the recipient
     /// @param _sender The address of the sender
@@ -165,7 +165,7 @@ abstract contract BaseStrategy is IStrategy, Transfer {
     }
 
     /// @notice Allocates to a recipient.
-    /// @dev The encoded '_data' will be dermined by the strategy implementation. Only 'Allo' contract can
+    /// @dev The encoded '_data' will be determined by the strategy implementation. Only 'Allo' contract can
     ///      call this when it is initialized.
     /// @param _data The data to use to allocate to the recipient
     /// @param _sender The address of the sender
@@ -174,7 +174,7 @@ abstract contract BaseStrategy is IStrategy, Transfer {
     }
 
     /// @notice Distributes funds (tokens) to recipients.
-    /// @dev The encoded '_data' will be dermined by the strategy implementation. Only 'Allo' contract can
+    /// @dev The encoded '_data' will be determined by the strategy implementation. Only 'Allo' contract can
     ///      call this when it is initialized.
     /// @param _recipientIds The IDs of the recipients
     /// @param _data The data to use to distribute to the recipients
@@ -188,7 +188,7 @@ abstract contract BaseStrategy is IStrategy, Transfer {
     }
 
     /// @notice Gets the payout summary for recipients.
-    /// @dev The encoded '_data' will be dermined by the strategy implementation.
+    /// @dev The encoded '_data' will be determined by the strategy implementation.
     /// @param _recipientIds The IDs of the recipients
     /// @param _data The data to use to get the payout summary for the recipients
     /// @return The payout summary for the recipients
@@ -255,7 +255,7 @@ abstract contract BaseStrategy is IStrategy, Transfer {
     function _registerRecipient(bytes memory _data, address _sender) internal virtual returns (address);
 
     /// @notice This will allocate to a recipient.
-    /// @dev The encoded '_data' will be dermined by the strategy implementation.
+    /// @dev The encoded '_data' will be determined by the strategy implementation.
     /// @param _data The data to use to allocate to the recipient
     /// @param _sender The address of the sender
     function _allocate(bytes memory _data, address _sender) internal virtual;
@@ -266,7 +266,7 @@ abstract contract BaseStrategy is IStrategy, Transfer {
     function _distribute(address[] memory _recipientIds, bytes memory _data, address _sender) internal virtual;
 
     /// @notice This will get the payout summary for a recipient.
-    /// @dev The encoded '_data' will be dermined by the strategy implementation.
+    /// @dev The encoded '_data' will be determined by the strategy implementation.
     /// @param _recipientId The ID of the recipient
     /// @param _data The data to use to get the payout summary for the recipient
     /// @return The payout summary for the recipient
