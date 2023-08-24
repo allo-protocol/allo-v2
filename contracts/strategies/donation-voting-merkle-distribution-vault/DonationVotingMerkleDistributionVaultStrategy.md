@@ -1,9 +1,9 @@
-# DonationVotingMerkleDistributionStrategy.sol
+# DonationVotingMerkleDistributionVaultStrategy.sol
 
-The `DonationVotingMerkleDistributionStrategy` contract presents an advanced fund distribution approach within the Allo ecosystem, combining Merkle trees, recipient statuses, and precise timestamps for secure and equitable allocation. This contract builds upon the `BaseStrategy` while integrating OpenZeppelin's `ReentrancyGuard` and `Multicall` libraries, ensuring heightened security, prevention of reentrancy attacks, and optimized batch operations.
+The `DonationVotingMerkleDistributionVaultStrategy` contract presents an advanced fund distribution approach within the Allo ecosystem, combining Merkle trees, recipient statuses, and precise timestamps for secure and equitable allocation. This contract builds upon the `BaseStrategy` while integrating OpenZeppelin's `ReentrancyGuard` and `Multicall` libraries, ensuring heightened security, prevention of reentrancy attacks, and optimized batch operations.
 
 ## Table of Contents
-- [DonationVotingMerkleDistributionStrategy.sol](#donationvotingmerkledistributionstrategysol)
+- [DonationVotingMerkleDistributionVaultStrategy.sol](#donationvotingmerkledistributionvaultstrategysol)
   - [Table of Contents](#table-of-contents)
   - [Sequence Diagram](#sequence-diagram)
   - [Smart Contract Overview](#smart-contract-overview)
@@ -58,7 +58,7 @@ sequenceDiagram
 
 ## Smart Contract Overview
 
-* **License:** The `DonationVotingMerkleDistributionStrategy` contract adheres to the AGPL-3.0-only License, promoting open-source usage with specific terms.
+* **License:** The `DonationVotingMerkleDistributionVaultStrategy` contract adheres to the AGPL-3.0-only License, promoting open-source usage with specific terms.
 * **Solidity Version:** Developed using Solidity version 0.8.19, leveraging the latest Ethereum smart contract advancements.
 * **External Libraries:** Utilizes the `MerkleProof`, `ReentrancyGuard`, and `Multicall` libraries from OpenZeppelin for enhanced security, efficiency, and reentrancy protection.
 * **Interfaces:** Interfaces with the `IAllo` and `IRegistry` components for external communication.
@@ -126,7 +126,7 @@ The contract employs a bitmap to efficiently store recipient statuses. Each bit 
 
 The contract implements a Merkle tree structure for fund distribution. The Merkle tree is stored in the `distributionMetadata` and the Merkle root is stored in `merkleRoot`. To distribute funds, a pool manager submits the proofs, and the contract verifies it against the Merkle root, ensuring the validity of distributions.
 
-In summary, the `DonationVotingMerkleDistributionStrategy` contract introduces a sophisticated fund distribution mechanism within the Allo ecosystem. By integrating Merkle trees, precise timestamps, and recipient status management, the contract guarantees secure and fair fund allocation. With the integration of external libraries and meticulous contract design, the strategy fosters efficient and secure fund distribution.
+In summary, the `DonationVotingMerkleDistributionVaultStrategy` contract introduces a sophisticated fund distribution mechanism within the Allo ecosystem. By integrating Merkle trees, precise timestamps, and recipient status management, the contract guarantees secure and fair fund allocation. With the integration of external libraries and meticulous contract design, the strategy fosters efficient and secure fund distribution.
 
 ## User Flows
 
