@@ -28,8 +28,8 @@ In this strategy, prospective recipients need to apply and be approved by a numb
         - For example, if the threshold is set to `2`, then two separate managers must approve or reject an application before its status updates. 
     - pool managers must have a function for reviewing / approving applications.
         - as soon as the recipient receives the required threshold of rejections or  approvals, the recipient status is updated and managers can no longer take any action on that application unless the recipient re-applies. 
-            - if the recipient receives a number of approvals equal to the threshold, they are approved and their global / local status are set to to `Approved`
-            - if the recipient receives a number of rejections equal to the threshold, they are approved and their global / local status are set to to `Rejected`
+            - if the recipient receives a number of approvals equal to the threshold, they are approved and their global / local status are set to `Approved`
+            - if the recipient receives a number of rejections equal to the threshold, they are approved and their global / local status are set to `Rejected`
             - if managers have reviewed the application but it has not yet hit the threshold for approval or rejection, the global / local status remains `Pending`
     - Recipients are only able to have one registration in a pool. Re-registrations should be handled as follows:
         - If a recipient's current status is `Pending`, then their application info is updated and their status remains `Pending` (global and local)
