@@ -96,5 +96,4 @@ contract TestStrategy is IStrategy {
     function setPoolId(uint256 _poolId_) external {
         poolId = _poolId_;
     }
-
 }
