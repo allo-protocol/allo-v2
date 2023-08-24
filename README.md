@@ -1,6 +1,6 @@
 # Allo Protocol
 
-The Allo Protocol introduces a sophisticated  (DeFi) ecosystem on the Ethereum blockchain, enabling automated and decentralized fund allocation and distribution. The protocol comprises a set of meticulously designed smart contracts that collectively offer an advanced framework for fund management, fee handling, and governance. The technical architecture and interactions within the protocol are elucidated below.
+The Allo Protocol introduces a sophisticated ecosystem on the Ethereum blockchain, enabling automated and decentralized fund allocation and distribution. The protocol comprises a set of smart contracts that collectively offer an advanced framework for fund management, fee handling, and governance. The technical architecture and interactions within the protocol are explained below.
 
 ## Table of Contents
 
