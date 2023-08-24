@@ -14,17 +14,9 @@ import {IStrategy} from "../../../contracts/strategies/IStrategy.sol";
 import {QVBaseStrategy} from "../../../contracts/strategies/qv-base/QVBaseStrategy.sol";
 
 import {
-    Attestation,
-    AttestationRequest,
-    AttestationRequestData,
-    IEAS,
-    RevocationRequest
+    Attestation, AttestationRequest, AttestationRequestData, IEAS, RevocationRequest
 } from "eas-contracts/IEAS.sol";
-import {
-    ISchemaRegistry,
-    ISchemaResolver,
-    SchemaRecord
-} from "eas-contracts/ISchemaRegistry.sol";
+import {ISchemaRegistry, ISchemaResolver, SchemaRecord} from "eas-contracts/ISchemaRegistry.sol";
 // Mocks
 import {MockEAS, MockSchemaRegistry} from "../../utils/MockEAS.sol";
 
