@@ -18,7 +18,7 @@ contract Anchor {
     Registry public immutable registry;
 
     /// @notice The profileId of the allowed profile to execute calls
-    bytes32 public profileId;
+    bytes32 public immutable profileId;
 
     /// ==========================
     /// ======== Errors ==========
@@ -54,6 +54,10 @@ contract Anchor {
         // Check if the caller is the owner of the profile
         if (!registry.isOwnerOfProfile(profileId, msg.sender)) {
             revert UNAUTHORIZED();
+        }
+
+        if (_target == address(0)) {
+            revert CALL_FAILED();
         }
 
         // Call the target address and return the data

@@ -6,7 +6,7 @@ import "forge-std/Test.sol";
 import {Native} from "../../../contracts/core/libraries/Native.sol";
 import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
 
-import {IStrategy} from "../../../contracts/strategies/IStrategy.sol";
+import {IStrategy} from "../../../contracts/core/interfaces/IStrategy.sol";
 
 // Test libraries
 import {AlloSetup} from "../shared/AlloSetup.sol";
@@ -239,6 +239,24 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
         DirectGrantsSimpleStrategy.InternalRecipientStatus internalStatus =
             strategy.getInternalRecipientStatus(recipientId);
         assertTrue(uint8(internalStatus) == uint8(DirectGrantsSimpleStrategy.InternalRecipientStatus.InReview));
+
+        vm.stopPrank();
+    }
+
+    function test_isPoolActive() public {
+        vm.expectEmit(false, false, false, true);
+        emit PoolActive(true);
+
+        vm.startPrank(pool_manager1());
+        strategy.setPoolActive(true);
+        assertTrue(strategy.isPoolActive());
+
+        vm.expectEmit(false, false, false, true);
+        emit PoolActive(false);
+
+        vm.startPrank(pool_manager1());
+        strategy.setPoolActive(false);
+        assertFalse(strategy.isPoolActive());
 
         vm.stopPrank();
     }

@@ -61,6 +61,14 @@ contract AnchorTest is Test {
         anchor.execute(address(incrementer), 0, data);
     }
 
+    function test_execute_CALL_FAILED_zeroAddress() public {
+        mockRegistry.setOwnerOfProfile(profileId, address(this)); // Set the caller as the owner of the profile
+        vm.expectRevert(Anchor.CALL_FAILED.selector); // Expect a revert with the CALL_FAILED error
+        // Try to execute a call to the contract (should revert because the call will fail)
+        bytes memory data = abi.encodeWithSignature("increment(uint256)", 10);
+        anchor.execute(address(0), 1 ether, data);
+    }
+
     function test_execute_CALL_FAILED() public {
         mockRegistry.setOwnerOfProfile(profileId, address(this)); // Set the caller as the owner of the profile
         // Deploy a contract without a fallback function (cannot receive ETH)

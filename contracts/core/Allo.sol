@@ -7,7 +7,7 @@ import "openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.s
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 import "openzeppelin-contracts/contracts/access/AccessControl.sol";
 // Interfaces
-import "./IAllo.sol";
+import "./interfaces/IAllo.sol";
 
 // Internal Libraries
 import {Clone} from "./libraries/Clone.sol";

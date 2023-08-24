@@ -5,7 +5,7 @@ pragma solidity 0.8.19;
 import {Initializable} from "openzeppelin-contracts/contracts/proxy/utils/Initializable.sol";
 import {ReentrancyGuard} from "openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
 // Interfaces
-import {IAllo} from "../../core/IAllo.sol";
+import {IAllo} from "../../core/interfaces/IAllo.sol";
 // Core Contracts
 import {BaseStrategy} from "../BaseStrategy.sol";
 // Internal Libraries

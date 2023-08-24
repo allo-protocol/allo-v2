@@ -2,7 +2,7 @@
 pragma solidity 0.8.19;
 
 // Internal Libraries
-import {Metadata} from "./libraries/Metadata.sol";
+import {Metadata} from "../libraries/Metadata.sol";
 
 /// @title IRegistry Interface
 /// @author @thelostone-mc <aditya@gitcoin.co>, @KurtMerbeth <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>
