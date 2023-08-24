@@ -26,6 +26,7 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
     event ProfileCreated(
         bytes32 profileId, uint256 nonce, string name, Metadata metadata, address indexed owner, address indexed anchor
     );
+    event UpdatedRegistration(address indexed recipientId, bytes data, address sender, uint8 status);
 
     bool public useRegistryAnchor;
     bool public metadataRequired;
@@ -296,7 +297,7 @@ contract DonationVotingMerkleDistributionStrategyTest is Test, AlloSetup, Regist
         bytes memory data = __generateRecipientWithId(profile1_anchor());
 
         vm.expectEmit(false, false, false, true);
-        emit Appealed(profile1_anchor(), data, profile1_member1());
+        emit UpdatedRegistration(profile1_anchor(), data, profile1_member1(), 4);
 
         vm.prank(address(allo()));
         strategy.registerRecipient(data, profile1_member1());

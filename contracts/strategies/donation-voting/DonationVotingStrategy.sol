@@ -56,7 +56,12 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     /// ========== Events =============
     /// ===============================
 
-    event Appealed(address indexed recipientId, bytes data, address sender);
+    /// @notice Emitted when a recipient updates their registration
+    /// @param recipientId Id of the recipient
+    /// @param data The encoded data - (address recipientId, address recipientAddress, Metadata metadata)
+    /// @param sender The sender of the transaction
+    /// @param status The updated status of the recipient
+    event UpdatedRegistration(address indexed recipientId, bytes data, address sender, InternalRecipientStatus status);
     event RecipientStatusUpdated(address indexed recipientId, InternalRecipientStatus recipientStatus, address sender);
     event Claimed(address indexed recipientId, address recipientAddress, uint256 amount, address token);
     event TimestampsUpdated(
@@ -433,12 +438,21 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
         recipient.metadata = metadata;
         recipient.useRegistryAnchor = useRegistryAnchor ? true : isUsingRegistryAnchor;
 
-        if (recipient.recipientStatus == InternalRecipientStatus.Rejected) {
-            recipient.recipientStatus = InternalRecipientStatus.Appealed;
-            emit Appealed(recipientId, _data, _sender);
-        } else {
+        InternalRecipientStatus currentStatus = recipient.recipientStatus;
+
+        if (currentStatus == InternalRecipientStatus.None) {
+            // recipient registering new application
             recipient.recipientStatus = InternalRecipientStatus.Pending;
             emit Registered(recipientId, _data, _sender);
+        } else {
+            if (currentStatus == InternalRecipientStatus.Accepted) {
+                // recipient updating accepted application
+                recipient.recipientStatus = InternalRecipientStatus.Pending;
+            } else if (currentStatus == InternalRecipientStatus.Rejected) {
+                // recipient updating rejected application
+                recipient.recipientStatus = InternalRecipientStatus.Appealed;
+            }
+            emit UpdatedRegistration(recipientId, _data, _sender, recipient.recipientStatus);
         }
     }
 

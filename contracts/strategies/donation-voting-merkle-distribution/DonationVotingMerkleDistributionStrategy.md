@@ -25,7 +25,7 @@ The `DonationVotingMerkleDistributionStrategy` contract presents an advanced fun
     - [Distributing Funds](#distributing-funds)
     - [Checking Distribution Status](#checking-distribution-status)
     - [Checking Distribution Set Status](#checking-distribution-set-status)
-    - [Marking Recipient as Appealed](#marking-recipient-as-appealed)
+    - [Updating Recipient Registration](#updating-recipient-registration)
     - [Checking Recipient Status](#checking-recipient-status)
     - [Getting Recipient Details](#getting-recipient-details)
     - [Getting Payout Summary](#getting-payout-summary)
@@ -207,12 +207,13 @@ In summary, the `DonationVotingMerkleDistributionStrategy` contract introduces a
 * User initiates a distribution set status check request.
 * Checks if the merkle root for distribution has been set.
 
-### Marking Recipient as Appealed
+### Updating Recipient Registration
 
-* Recipient initiates an appeal request.
-* Checks if the recipient's internal status is "Rejected."
-* Updates recipient's internal status to "Appealed."
-* Emits `Appealed` event.
+* Updates recipient metadata via `registerRecipient`
+* Checks if the recipient's internal status is "Rejected.", then update internal status to "Appealed."
+* Checks if the recipient's internal status is "Accepted.", then update internal status to "Pending."
+* Checks if the recipient's internal status is "Pending"/"Appealed", no change in status.
+* Emits `UpdatedRegistration` event.
 
 ### Checking Recipient Status
 
