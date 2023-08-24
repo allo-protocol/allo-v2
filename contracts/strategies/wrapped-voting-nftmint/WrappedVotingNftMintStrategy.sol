@@ -34,7 +34,7 @@ contract WrappedVotingNftMintStrategy is Native, BaseStrategy, Initializable, Re
     /// ========== Events =============
     /// ===============================
 
-    event Appealed(address indexed recipientId, bytes data, address sender);
+    event UpdatedRegistration(address indexed recipientId, bytes data, address sender, InternalRecipientStatus status);
     event RecipientStatusUpdated(address indexed recipientId, InternalRecipientStatus recipientStatus, address sender);
     event Claimed(address indexed recipientId, address recipientAddress, uint256 amount, address token);
     event TimestampsUpdated(uint256 allocationStartTime, uint256 allocationEndTime, address sender);

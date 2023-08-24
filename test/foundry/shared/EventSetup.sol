@@ -7,7 +7,6 @@ contract EventSetup {
     event Allocated(address indexed recipientId, uint256 amount, address token, address sender);
     event Distributed(address indexed recipientId, address recipientAddress, uint256 amount, address sender);
     event PoolActive(bool active);
-    event Appealed(address indexed recipientId, bytes data, address sender);
     event RoleGranted(address indexed recipientId, address indexed account, bytes32 indexed role);
     event RoleAdminChanged(
         bytes32 indexed newAdminRole, address indexed recipientId, address indexed previousAdminRole

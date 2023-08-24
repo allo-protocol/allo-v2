@@ -53,7 +53,6 @@ contract QVSimpleStrategyTest is Accounts, StrategySetup, RegistrySetupFull, All
     QVSimpleStrategy public strategy;
     Metadata public poolMetadata;
 
-    event Appealed(address indexed recipientId, bytes data, address sender);
     event Reviewed(address indexed recipientId, QVBaseStrategy.InternalRecipientStatus status, address sender);
     event RoleGranted(address indexed recipientId, address indexed account, bytes32 indexed role);
     event RoleAdminChanged(

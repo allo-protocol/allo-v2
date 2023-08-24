@@ -26,7 +26,12 @@ abstract contract QVBaseStrategy is BaseStrategy {
     /// ======= Events =======
     /// ======================
 
-    event Appealed(address indexed recipientId, bytes data, address sender);
+    /// @notice Emitted when a recipient updates their registration
+    /// @param recipientId Id of the recipient
+    /// @param data The encoded data - (address recipientId, address recipientAddress, Metadata metadata)
+    /// @param sender The sender of the transaction
+    /// @param status The updated status of the recipient
+    event UpdatedRegistration(address indexed recipientId, bytes data, address sender, InternalRecipientStatus status);
     event RecipientStatusUpdated(address indexed recipientId, InternalRecipientStatus status, address sender);
     event TimestampsUpdated(
         uint256 registrationStartTime,
@@ -323,15 +328,21 @@ abstract contract QVBaseStrategy is BaseStrategy {
         recipient.metadata = metadata;
         recipient.useRegistryAnchor = registryGating ? true : isUsingRegistryAnchor;
 
-        // NOTE: do we need this? the status is not ever set to anything but None
-        // on creation? Shouldn't we be setting the status on review or setting it to
-        // Pending? Will it ever be Rejected when this is called? @thelostone-mc @KurtMerbeth
-        if (recipient.recipientStatus == InternalRecipientStatus.Rejected) {
-            recipient.recipientStatus = InternalRecipientStatus.Appealed;
-            emit Appealed(recipientId, _data, _sender);
-        } else {
+        InternalRecipientStatus currentStatus = recipient.recipientStatus;
+
+        if (currentStatus == InternalRecipientStatus.None) {
+            // recipient registering new application
             recipient.recipientStatus = InternalRecipientStatus.Pending;
             emit Registered(recipientId, _data, _sender);
+        } else {
+            if (currentStatus == InternalRecipientStatus.Accepted) {
+                // recipient updating accepted application
+                recipient.recipientStatus = InternalRecipientStatus.Pending;
+            } else if (currentStatus == InternalRecipientStatus.Rejected) {
+                // recipient updating rejected application
+                recipient.recipientStatus = InternalRecipientStatus.Appealed;
+            }
+            emit UpdatedRegistration(recipientId, _data, _sender, recipient.recipientStatus);
         }
     }
 
