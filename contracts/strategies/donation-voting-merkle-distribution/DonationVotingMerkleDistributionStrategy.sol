@@ -110,11 +110,12 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
     /// ========== Events =============
     /// ===============================
 
-    /// @notice Emitted when a recipient appeals their previous Rejected status
+    /// @notice Emitted when a recipient updates their registration
     /// @param recipientId Id of the recipient
     /// @param data The encoded data - (address recipientId, address recipientAddress, Metadata metadata)
     /// @param sender The sender of the transaction
-    event Appealed(address indexed recipientId, bytes data, address sender);
+    /// @param status The updated status of the recipient
+    event UpdatedRegistration(address indexed recipientId, bytes data, address sender, uint8 status);
 
     /// @notice Emitted when a recipient is registered and the status is updated
     /// @param rowIndex The index of the row in the bitmap
@@ -656,10 +657,8 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
 
         uint8 currentStatus = _getUintRecipientStatus(recipientId);
 
-        if (currentStatus == uint8(InternalRecipientStatus.Rejected)) {
-            _setRecipientStatus(recipientId, uint8(InternalRecipientStatus.Appealed));
-            emit Appealed(recipientId, _data, _sender);
-        } else {
+        if (currentStatus == uint8(InternalRecipientStatus.None)) {
+            // recipient registring new application
             recipientToStatusIndexes[recipientId] = recipientsCounter;
             _setRecipientStatus(recipientId, uint8(InternalRecipientStatus.Pending));
 
@@ -667,6 +666,15 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
             emit Registered(recipientId, extendedData, _sender);
 
             recipientsCounter++;
+        } else {
+            if (currentStatus == uint8(InternalRecipientStatus.Accepted)) {
+                // recipient updating accepted application
+                _setRecipientStatus(recipientId, uint8(InternalRecipientStatus.Pending));
+            } else if (currentStatus == uint8(InternalRecipientStatus.Rejected)) {
+                // recipient updating rejected application
+                _setRecipientStatus(recipientId, uint8(InternalRecipientStatus.Appealed));
+            }
+            emit UpdatedRegistration(recipientId, _data, _sender, _getUintRecipientStatus(recipientId));
         }
     }
 
