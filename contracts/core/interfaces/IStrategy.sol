@@ -2,7 +2,7 @@
 pragma solidity 0.8.19;
 
 // Interfaces
-import {IAllo} from "../core/IAllo.sol";
+import {IAllo} from "./IAllo.sol";
 
 /// @title IStrategy Interface
 /// @author @thelostone-mc <aditya@gitcoin.co>, @KurtMerbeth <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>

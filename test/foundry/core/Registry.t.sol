@@ -5,7 +5,7 @@ import "forge-std/Test.sol";
 import "../shared/RegistrySetup.sol";
 
 // Interfaces
-import {IRegistry} from "../../../contracts/core/IRegistry.sol";
+import {IRegistry} from "../../../contracts/core/interfaces/IRegistry.sol";
 // Core Contracts
 import {Registry} from "../../../contracts/core/Registry.sol";
 // Internal libraries

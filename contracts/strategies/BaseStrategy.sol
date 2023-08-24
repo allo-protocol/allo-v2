@@ -2,7 +2,7 @@
 pragma solidity 0.8.19;
 
 // Interfaces
-import "./IStrategy.sol";
+import "../core/interfaces/IStrategy.sol";
 
 // Libraries
 import {Transfer} from "../core/libraries/Transfer.sol";

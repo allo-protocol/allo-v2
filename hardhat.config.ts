@@ -100,7 +100,7 @@ const abiExporter = [
 ];
 
 const dodoc = {
-  outputDir: "./docs/contracts",
+  outputDir: "./generated-docs/contracts",
   include: ["contracts"],
   exclude: ["lib", "test"],
 };

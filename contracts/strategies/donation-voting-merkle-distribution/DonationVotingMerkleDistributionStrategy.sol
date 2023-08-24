@@ -6,8 +6,8 @@ import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProo
 import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import {Multicall} from "@openzeppelin/contracts/utils/Multicall.sol";
 // Interfaces
-import {IAllo} from "../../core/IAllo.sol";
-import {IRegistry} from "../../core/IRegistry.sol";
+import {IAllo} from "../../core/interfaces/IAllo.sol";
+import {IRegistry} from "../../core/interfaces/IRegistry.sol";
 // Core Contracts
 import {BaseStrategy} from "../BaseStrategy.sol";
 // Internal Libraries

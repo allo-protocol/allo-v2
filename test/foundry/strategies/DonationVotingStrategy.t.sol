@@ -3,7 +3,7 @@ pragma solidity 0.8.19;
 import "forge-std/Test.sol";
 
 // Interfaces
-import {IStrategy} from "../../../contracts/strategies/IStrategy.sol";
+import {IStrategy} from "../../../contracts/core/interfaces/IStrategy.sol";
 // Core contracts
 import {BaseStrategy} from "../../../contracts/strategies/BaseStrategy.sol";
 import {DonationVotingStrategy} from "../../../contracts/strategies/donation-voting/DonationVotingStrategy.sol";

@@ -4,8 +4,8 @@ pragma solidity 0.8.19;
 // External Libraries
 import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 // Intefaces
-import {IAllo} from "../../core/IAllo.sol";
-import {IRegistry} from "../../core/IRegistry.sol";
+import {IAllo} from "../../core/interfaces/IAllo.sol";
+import {IRegistry} from "../../core/interfaces/IRegistry.sol";
 // Core Contracts
 import {BaseStrategy} from "../BaseStrategy.sol";
 // Internal Libraries
@@ -385,6 +385,14 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
                 i++;
             }
         }
+    }
+
+    /// @notice Closes the pool by setting the pool to inactive
+    /// @dev 'msg.sender' must be a pool manager to close the pool.
+    /// @param _flag The flag to set the pool to active or inactive
+    function setPoolActive(bool _flag) external onlyPoolManager(msg.sender) {
+        _setPoolActive(_flag);
+        emit PoolActive(_flag);
     }
 
     /// @notice Withdraw funds from pool.

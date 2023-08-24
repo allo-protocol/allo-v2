@@ -1,10 +1,10 @@
 # Strategy Folder
 
-This folder contains the implementation of various strategies for managing recipients and distributing tokens. Each subfolder represents a specific strategy and contains one or more Solidity smart contracts along with their specifications `README.md`.
+This folder contains the implementation of various strategies for managing recipients and distributing tokens. Each subfolder represents a specific strategy and contains one or more Solidity smart contracts along with their specifications `SpecTemplate.md`.
 
 ## Introduction
 
-The strategy folder in our GitHub repository is dedicated to housing different strategies for managing recipients and facilitating token distribution. The purpose of this `README.md` file is to guide the developers in writing comprehensive specifications for each strategy. The specifications should provide a clear understanding of the strategy's flow, functions, and variables. By following this template, developers will be able to create detailed and well-documented specifications for their strategies.
+The strategy folder in our GitHub repository is dedicated to housing different strategies for managing recipients and facilitating token distribution. The purpose of this `SpecTemplate.md` file is to guide the developers in writing comprehensive specifications for each strategy. The specifications should provide a clear understanding of the strategy's flow, functions, and variables. By following this template, developers will be able to create detailed and well-documented specifications for their strategies.
 
 ----
 Spec: Strategy Name

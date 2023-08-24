@@ -4,8 +4,8 @@ pragma solidity 0.8.19;
 import "forge-std/Test.sol";
 
 // Interfaces
-import {IAllo} from "../../../contracts/core/IAllo.sol";
-import {IStrategy} from "../../../contracts/strategies/IStrategy.sol";
+import {IAllo} from "../../../contracts/core/interfaces/IAllo.sol";
+import {IStrategy} from "../../../contracts/core/interfaces/IStrategy.sol";
 // Core contracts
 import {Allo} from "../../../contracts/core/Allo.sol";
 import {Registry} from "../../../contracts/core/Registry.sol";
