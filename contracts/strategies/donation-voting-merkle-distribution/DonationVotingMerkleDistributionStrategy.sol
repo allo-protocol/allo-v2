@@ -658,7 +658,7 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         uint8 currentStatus = _getUintRecipientStatus(recipientId);
 
         if (currentStatus == uint8(InternalRecipientStatus.None)) {
-            // recipient registring new application
+            // recipient registering new application
             recipientToStatusIndexes[recipientId] = recipientsCounter;
             _setRecipientStatus(recipientId, uint8(InternalRecipientStatus.Pending));
 

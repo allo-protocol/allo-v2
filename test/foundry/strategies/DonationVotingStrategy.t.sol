@@ -22,6 +22,9 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
     /// ========== Events =============
     /// ===============================
 
+    event UpdatedRegistration(
+        address indexed recipientId, bytes data, address sender, DonationVotingStrategy.InternalRecipientStatus status
+    );
     event RecipientStatusUpdated(
         address indexed recipientId, DonationVotingStrategy.InternalRecipientStatus recipientStatus, address sender
     );
@@ -644,7 +647,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         // appeal
         bytes memory data = __generateRecipientWithoutId();
         vm.expectEmit(true, false, false, true);
-        emit Appealed(recipientId, data, sender);
+        emit UpdatedRegistration(recipientId, data, sender, DonationVotingStrategy.InternalRecipientStatus.Appealed);
 
         vm.prank(address(allo()));
         strategy.registerRecipient(data, sender);
