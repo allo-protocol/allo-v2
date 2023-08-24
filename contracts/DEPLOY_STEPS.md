@@ -41,7 +41,7 @@ yarn compile
 The tests have been written in foundry.
 For detailed information on how the testing framework works, refer https://book.getfoundry.sh/forge/tests
 
-Run all tests witout verbosity
+Run all tests without verbosity
 ```bash
 yarn test
 yarn test -vvvv # with verbosity
