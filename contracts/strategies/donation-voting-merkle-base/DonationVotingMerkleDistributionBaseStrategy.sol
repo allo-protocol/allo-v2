@@ -17,7 +17,7 @@ import {Native} from "../../core/libraries/Native.sol";
 /// @title Donation Voting Merkle Distribution Strategy
 /// @author @thelostone-mc <aditya@gitcoin.co>, @KurtMerbeth <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>
 /// @notice Strategy for donation voting allocation with a merkle distribution
-contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGuard, Multicall {
+abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseStrategy, ReentrancyGuard, Multicall {
     /// ================================
     /// ========== Struct ==============
     /// ================================
@@ -57,12 +57,6 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         bool useRegistryAnchor;
         address recipientAddress;
         Metadata metadata;
-    }
-
-    /// @notice Stores the details of the allocations to claim.
-    struct Claim {
-        address recipientId;
-        address token;
     }
 
     /// @notice Stores the details of the distribution.
@@ -122,13 +116,6 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
     /// @param fullRow The value of the row
     /// @param sender The sender of the transaction
     event RecipientStatusUpdated(uint256 indexed rowIndex, uint256 fullRow, address sender);
-
-    /// @notice Emitted when a recipient has claimed their allocated funds
-    /// @param recipientId Id of the recipient
-    /// @param recipientAddress Address of the recipient
-    /// @param amount Amount of tokens claimed
-    /// @param token Address of the token
-    event Claimed(address indexed recipientId, address recipientAddress, uint256 amount, address token);
 
     /// @notice Emitted when the timestamps are updated
     /// @param registrationStartTime The start time for the registration
@@ -223,10 +210,7 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
     mapping(address => bool) public allowedTokens;
 
     /// @notice 'recipientId' => 'Recipient' struct.
-    mapping(address => Recipient) private _recipients;
-
-    /// @notice 'recipientId' => 'token' => 'amount'.
-    mapping(address => mapping(address => uint256)) public claims;
+    mapping(address => Recipient) internal _recipients;
 
     /// ================================
     /// ========== Modifier ============
@@ -478,39 +462,6 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         _transferAmount(pool.token, msg.sender, _amount);
     }
 
-    /// @notice Claim allocated tokens for recipients.
-    /// @dev Uses the merkle root to verify the claims. Allocation must have ended to claim.
-    /// @param _claims Claims to be claimed
-    function claim(Claim[] calldata _claims) external nonReentrant onlyAfterAllocation {
-        uint256 claimsLength = _claims.length;
-
-        // Loop through the claims
-        for (uint256 i; i < claimsLength;) {
-            Claim memory singleClaim = _claims[i];
-            Recipient memory recipient = _recipients[singleClaim.recipientId];
-            uint256 amount = claims[singleClaim.recipientId][singleClaim.token];
-
-            // If the claim amount is zero this will revert
-            if (amount == 0) {
-                revert INVALID();
-            }
-
-            /// Delete the claim from the mapping
-            delete claims[singleClaim.recipientId][singleClaim.token];
-
-            address token = singleClaim.token;
-
-            // Transfer the tokens to the recipient
-            _transferAmount(token, recipient.recipientAddress, amount);
-
-            // Emit that the tokens have been claimed and sent to the recipient
-            emit Claimed(singleClaim.recipientId, recipient.recipientAddress, amount, token);
-            unchecked {
-                i++;
-            }
-        }
-    }
-
     /// ==================================
     /// ============ Merkle ==============
     /// ==================================
@@ -678,46 +629,6 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         }
     }
 
-    /// @notice Allocate tokens to recipient.
-    /// @dev This can only be called during the allocation period.
-    /// @param _data The data to be decoded
-    /// @custom:data (address recipientId, uint256 amount, address token)
-    /// @param _sender The sender of the transaction
-    function _allocate(bytes memory _data, address _sender)
-        internal
-        virtual
-        override
-        nonReentrant
-        onlyActiveAllocation
-    {
-        // Decode the '_data' to get the recipientId, amount and token
-        (address recipientId, uint256 amount, address token) = abi.decode(_data, (address, uint256, address));
-
-        // If the recipient status is not 'Accepted' this will revert, the recipient must be accepted through registration
-        if (InternalRecipientStatus(_getUintRecipientStatus(recipientId)) != InternalRecipientStatus.Accepted) {
-            revert RECIPIENT_ERROR(recipientId);
-        }
-
-        // The token must be in the allowed token list and not be native token or zero address
-        if (!allowedTokens[token] && !allowedTokens[address(0)]) {
-            revert INVALID();
-        }
-
-        // If the token is native, the amount must be equal to the value sent, otherwise it reverts
-        if (msg.value > 0 && token != NATIVE || token == NATIVE && msg.value != amount) {
-            revert INVALID();
-        }
-
-        // Transfer the amount to this contract (strategy)
-        _transferAmount(token, address(this), amount);
-
-        // Update the total payout amount for the claim
-        claims[recipientId][token] += amount;
-
-        // Emit that the amount has been allocated to the recipient by the sender
-        emit Allocated(recipientId, amount, token, _sender);
-    }
-
     /// @notice Distribute funds to recipients.
     /// @dev 'distributionStarted' will be set to 'true' when called. Only the pool manager can call.
     /// @param _data The data to be decoded
@@ -748,6 +659,49 @@ contract DonationVotingMerkleDistributionStrategy is BaseStrategy, ReentrancyGua
         // Emit that the batch payout was successful
         emit BatchPayoutSuccessful(_sender);
     }
+
+    /// @notice Allocate tokens to recipient.
+    /// @dev This can only be called during the allocation period.
+    /// @param _data The data to be decoded
+    /// @custom:data (address recipientId, uint256 amount, address token)
+    /// @param _sender The sender of the transaction
+    function _allocate(bytes memory _data, address _sender)
+        internal
+        virtual
+        override
+        nonReentrant
+        onlyActiveAllocation
+    {
+        // Decode the '_data' to get the recipientId, amount and token
+        (address recipientId, uint256 amount, address token) = abi.decode(_data, (address, uint256, address));
+
+        // If the recipient status is not 'Accepted' this will revert, the recipient must be accepted through registration
+        if (InternalRecipientStatus(_getUintRecipientStatus(recipientId)) != InternalRecipientStatus.Accepted) {
+            revert RECIPIENT_ERROR(recipientId);
+        }
+
+        // The token must be in the allowed token list and not be native token or zero address
+        if (!allowedTokens[token] && !allowedTokens[address(0)]) {
+            revert INVALID();
+        }
+
+        // If the token is native, the amount must be equal to the value sent, otherwise it reverts
+        if (msg.value > 0 && token != NATIVE || token == NATIVE && msg.value != amount) {
+            revert INVALID();
+        }
+
+        _onAllocate(recipientId, amount, token, _sender);
+
+        // Emit that the amount has been allocated to the recipient by the sender
+        emit Allocated(recipientId, amount, token, _sender);
+    }
+
+    /// @notice Custom allocate logic
+    /// @param _recipientId Id of the recipient
+    /// @param _amount Amount of tokens to be distributed
+    /// @param _token Address of the token
+    /// @param _sender The sender of the transaction
+    function _onAllocate(address _recipientId, uint256 _amount, address _token, address _sender) internal virtual;
 
     /// @notice Check if sender is profile owner or member.
     /// @param _anchor Anchor of the profile
