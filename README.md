@@ -105,8 +105,6 @@ The Allo Protocol delegates distinct roles to participants to foster efficient g
 * **Profile Owners:** Users who create profiles using the `Registry` contract. These profiles are central to protocol interactions, offering a unique identity for users and enabling secure external calls through the `Anchor` contract.
     
 * **Allo Owner:** Individuals who control the `Allo` contract, possessing the authority to manage fund recovery, fee parameters, and treasury addresses. Their role is pivotal in ensuring the protocol's financial stability.
-
-* **Profile Owner:** A user who owns a Registry profile can perform actions such as updating profile attributes, managing members, and transferring ownership.
   
 * **Profile Member:** Members of a Registry profile have specific access rights as defined by the profile's owner.
     
