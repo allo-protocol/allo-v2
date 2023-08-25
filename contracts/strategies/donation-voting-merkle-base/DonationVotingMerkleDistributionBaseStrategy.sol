@@ -3,7 +3,6 @@ pragma solidity 0.8.19;
 
 // External Libraries
 import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
-import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import {Multicall} from "@openzeppelin/contracts/utils/Multicall.sol";
 // Interfaces
 import {IAllo} from "../../core/interfaces/IAllo.sol";
@@ -17,7 +16,7 @@ import {Native} from "../../core/libraries/Native.sol";
 /// @title Donation Voting Merkle Distribution Strategy
 /// @author @thelostone-mc <aditya@gitcoin.co>, @KurtMerbeth <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>
 /// @notice Strategy for donation voting allocation with a merkle distribution
-abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseStrategy, ReentrancyGuard, Multicall {
+abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseStrategy, Multicall {
     /// ================================
     /// ========== Struct ==============
     /// ================================
@@ -669,7 +668,6 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
         internal
         virtual
         override
-        nonReentrant
         onlyActiveAllocation
     {
         // Decode the '_data' to get the recipientId, amount and token
