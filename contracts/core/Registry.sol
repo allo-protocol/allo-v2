@@ -339,10 +339,21 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
     function _generateAnchor(bytes32 _profileId, string memory _name) internal returns (address anchor) {
         bytes32 salt = keccak256(abi.encodePacked(_profileId, _name));
 
-        bytes memory creationCode = abi.encodePacked(type(Anchor).creationCode, abi.encode(_profileId));
+        address preCalculatedAddress = CREATE3.getDeployed(salt);
 
-        // Use CREATE3 to deploy the anchor contract
-        anchor = CREATE3.deploy(salt, creationCode, 0);
+        // check if the contract already exists and if the profileId matches
+        if (preCalculatedAddress.code.length > 0) {
+            if (Anchor(payable(preCalculatedAddress)).profileId() != _profileId) {
+                revert ANCHOR_ERROR();
+            }
+            anchor = preCalculatedAddress;
+        } else {
+            // check if the contract has already been deployed by checking code size of address
+            bytes memory creationCode = abi.encodePacked(type(Anchor).creationCode, abi.encode(_profileId));
+
+            // Use CREATE3 to deploy the anchor contract
+            anchor = CREATE3.deploy(salt, creationCode, 0);
+        }
     }
 
     /// @dev Generates the 'profileId' based on msg.sender

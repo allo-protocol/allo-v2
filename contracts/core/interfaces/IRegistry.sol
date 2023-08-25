@@ -46,6 +46,9 @@ interface IRegistry {
     /// @dev Thrown if any address check is the zero address
     error ZERO_ADDRESS();
 
+    /// @dev Thrown if the anchor creation fails
+    error ANCHOR_ERROR();
+
     /// ======================
     /// ======= Events =======
     /// ======================
