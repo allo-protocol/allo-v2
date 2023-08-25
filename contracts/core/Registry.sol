@@ -3,6 +3,7 @@ pragma solidity 0.8.19;
 
 // External Libraries
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {CREATE3} from "solady/src/utils/CREATE3.sol";
 import {ERC20} from "solady/src/tokens/ERC20.sol";
 // Interfaces
@@ -20,7 +21,7 @@ import "./libraries/Transfer.sol";
 ///      It is also used to deploy the anchor contract for each profile which acts as a proxy
 ///      for the profile and is used to receive funds and execute transactions on behalf of the profile
 ///      The Registry is also used to add and remove members from a profile and update the profile 'Metadata'
-contract Registry is IRegistry, Native, AccessControl, Transfer {
+contract Registry is IRegistry, Native, AccessControl, Transfer, Initializable {
     /// ==========================
     /// === Storage Variables ====
     /// ==========================
@@ -49,11 +50,15 @@ contract Registry is IRegistry, Native, AccessControl, Transfer {
         _;
     }
 
-    /// @notice Contract constructor
-    ///
+    // ====================================
+    // =========== Initializer =============
+    // ====================================
+
+    /// @notice Initializes the contract after an upgrade
+    /// @dev During upgrade -> an higher version should be passed to reinitializer
     /// @param _owner The owner of the contract
     /// @dev Reverts if the '_owner' is the 'address(0)'
-    constructor(address _owner) {
+    function initialize(address _owner) external reinitializer(1) {
         // Make sure the owner is not 'address(0)'
         if (_owner == address(0)) {
             revert ZERO_ADDRESS();

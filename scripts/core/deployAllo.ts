@@ -23,7 +23,7 @@ export async function deployAllo(_registryAddress? : string) {
     throw new Error(`Allo params not found for chainId: ${chainId}`);
   }
 
-  const registryAddress = _registryAddress ? _registryAddress : registryConfig[chainId].registry;
+  const registryAddress = _registryAddress ? _registryAddress : registryConfig[chainId].registryProxy;
 
   await confirmContinue({
     contract: "Deploy Allo.sol",
@@ -52,6 +52,15 @@ export async function deployAllo(_registryAddress? : string) {
   // await verifyContract(instance.target.toString());
 
   console.log("Allo.sol deployed to:", instance.target);
+
+  console.log("Initializing...", instance.target);
+  await instance.initialize(
+    registryAddress,
+    alloParams.treasury,
+    alloParams.percentFee,
+    alloParams.baseFee,
+  );
+  console.log("Registry initialized!");
 
   return instance.target;
 }

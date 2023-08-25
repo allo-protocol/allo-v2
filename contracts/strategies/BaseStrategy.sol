@@ -17,10 +17,10 @@ abstract contract BaseStrategy is IStrategy, Transfer {
     /// ==========================
 
     IAllo internal immutable allo;
-    uint256 internal poolId;
-    bytes32 internal strategyId;
-    uint256 internal poolAmount;
+    bytes32 internal immutable strategyId;
     bool internal poolActive;
+    uint256 internal poolId;
+    uint256 internal poolAmount;
 
     /// ====================================
     /// ========== Constructor =============

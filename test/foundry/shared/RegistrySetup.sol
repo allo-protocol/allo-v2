@@ -13,7 +13,8 @@ contract RegistrySetup is Test, Accounts {
     Registry internal _registry_;
 
     function __RegistrySetup() internal {
-        _registry_ = new Registry(registry_owner());
+        _registry_ = new Registry();
+        _registry_.initialize(registry_owner());
     }
 
     function registry() public view returns (Registry) {
