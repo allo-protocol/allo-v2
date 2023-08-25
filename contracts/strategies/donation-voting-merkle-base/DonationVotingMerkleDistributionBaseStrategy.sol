@@ -664,12 +664,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     /// @param _data The data to be decoded
     /// @custom:data (address recipientId, uint256 amount, address token)
     /// @param _sender The sender of the transaction
-    function _allocate(bytes memory _data, address _sender)
-        internal
-        virtual
-        override
-        onlyActiveAllocation
-    {
+    function _allocate(bytes memory _data, address _sender) internal virtual override onlyActiveAllocation {
         // Decode the '_data' to get the recipientId, amount and token
         (address recipientId, uint256 amount, address token) = abi.decode(_data, (address, uint256, address));
 

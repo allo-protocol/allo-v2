@@ -8,7 +8,10 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 /// @title Donation Voting Merkle Distribution Strategy
 /// @author @thelostone-mc <aditya@gitcoin.co>, @KurtMerbeth <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>
 /// @notice Strategy for donation voting allocation with a merkle distribution
-contract DonationVotingMerkleDistributionVaultStrategy is DonationVotingMerkleDistributionBaseStrategy , ReentrancyGuard {
+contract DonationVotingMerkleDistributionVaultStrategy is
+    DonationVotingMerkleDistributionBaseStrategy,
+    ReentrancyGuard
+{
     /// @notice Stores the details of the allocations to claim.
     struct Claim {
         address recipientId;

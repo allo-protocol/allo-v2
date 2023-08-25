@@ -340,7 +340,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
     /// @dev Anyone can fund a pool and call this function.
     /// @param _poolId ID of the pool
     /// @param _amount amount to be deposited into the pool
-    function fundPool(uint256 _poolId, uint256 _amount) external nonReentrant payable {
+    function fundPool(uint256 _poolId, uint256 _amount) external payable nonReentrant {
         // if amount is 0, revert with 'NOT_ENOUGH_FUNDS()' error
         if (_amount == 0) {
             revert NOT_ENOUGH_FUNDS();
@@ -354,7 +354,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
     /// @dev Calls the 'strategy.allocate()' function with encoded '_data' defined by the strategy.
     /// @param _poolId ID of the pool
     /// @param _data Encoded data unique to the strategy for that pool
-    function allocate(uint256 _poolId, bytes memory _data) external nonReentrant payable {
+    function allocate(uint256 _poolId, bytes memory _data) external payable nonReentrant {
         _allocate(_poolId, _data);
     }
 
