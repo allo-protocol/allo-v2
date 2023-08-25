@@ -1,4 +1,4 @@
-import hre, { ethers } from "hardhat";
+import hre, { ethers, upgrades } from "hardhat";
 import { registryConfig } from "../config/registry.config";
 import { confirmContinue, prettyNum, verifyContract } from "../utils/scripts";
 
@@ -31,13 +31,21 @@ export async function deployRegistry() {
     console.log("Deploying Registry...");
 
     const Registry = await ethers.getContractFactory("Registry");
-    const instance = await Registry.deploy(registryConfig[chainId].owner);
+    const instance = await upgrades.deployProxy(Registry, [
+        registryConfig[chainId].owner
+    ]);
 
     // await instance.deploymentTransaction()?.wait(blocksToWait);
 
     // await verifyContract(instance.target.toString(), [registryConfig[chainId].owner]);
 
     console.log("Registry deployed to:", instance.target);
+
+    console.log("Intializing...", instance.target);
+    await instance.initialize(
+        registryConfig[chainId].owner
+    );
+    console.log("Registry Intializied!");
   
     return instance.target;
 }
