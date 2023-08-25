@@ -16,12 +16,4 @@ contract DonationVotingMerkleDistributionBaseMock is DonationVotingMerkleDistrib
     /// @param _allo The 'Allo' contract
     /// @param _name The name of the strategy
     constructor(address _allo, string memory _name) DonationVotingMerkleDistributionBaseStrategy(_allo, _name) {}
-
-    /// ====================================
-    /// ============ Internal ==============
-    /// ====================================
-
-    function _onAllocate(address _recipientId, uint256 _amount, address _token, address _sender) internal override {
-        // do nothing
-    }
 }

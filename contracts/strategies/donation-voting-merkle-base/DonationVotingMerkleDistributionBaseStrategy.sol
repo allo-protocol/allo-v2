@@ -690,18 +690,9 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
             revert INVALID();
         }
 
-        _onAllocate(recipientId, amount, token, _sender);
-
         // Emit that the amount has been allocated to the recipient by the sender
         emit Allocated(recipientId, amount, token, _sender);
     }
-
-    /// @notice Custom allocate logic
-    /// @param _recipientId Id of the recipient
-    /// @param _amount Amount of tokens to be distributed
-    /// @param _token Address of the token
-    /// @param _sender The sender of the transaction
-    function _onAllocate(address _recipientId, uint256 _amount, address _token, address _sender) internal virtual;
 
     /// @notice Check if sender is profile owner or member.
     /// @param _anchor Anchor of the profile
