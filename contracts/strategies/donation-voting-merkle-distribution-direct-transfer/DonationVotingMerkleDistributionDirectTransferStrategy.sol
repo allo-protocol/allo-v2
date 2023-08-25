@@ -17,19 +17,20 @@ contract DonationVotingMerkleDistributionDirectTransferStrategy is DonationVotin
     /// @param _name The name of the strategy
     constructor(address _allo, string memory _name) DonationVotingMerkleDistributionBaseStrategy(_allo, _name) {}
 
-    /// ====================================
-    /// ============ Internal ==============
-    /// ====================================
+    /// ================================
+    /// ============ Hooks =============
+    /// ================================
 
-    // @notice Allocate tokens to the recipientAddress
-    // @param _recipientId Id of the recipient
-    // @param _amount Amount of tokens to allocate
-    // @param _token Address of the token
-    // @param _sender Address of the sender
-    function _onAllocate(address _recipientId, uint256 _amount, address _token, address _sender) internal override {
+    /// @notice After allocation hook to transfer the allocated tokens to the recipients
+    /// @param _data The encoded recipientId, amount and token
+    /// @param _sender The sender of the allocation
+    function _afterAllocate(bytes memory _data, address _sender) internal override {
+        // Decode the '_data' to get the recipientId, amount and token
+        (address recipientId, uint256 amount, address token) = abi.decode(_data, (address, uint256, address));
+
         // Transfer the amount to recipient
         _transferAmountFrom(
-            _token, TransferData({from: _sender, to: _recipients[_recipientId].recipientAddress, amount: _amount})
+            token, TransferData({from: _sender, to: _recipients[recipientId].recipientAddress, amount: amount})
         );
     }
 }

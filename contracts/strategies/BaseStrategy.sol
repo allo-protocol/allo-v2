@@ -145,7 +145,9 @@ abstract contract BaseStrategy is IStrategy, Transfer {
     /// @dev Increases the 'poolAmount' by '_amount'. Only 'Allo' contract can call this.
     /// @param _amount The amount to increase the pool by
     function increasePoolAmount(uint256 _amount) external override onlyAllo {
+        _beforeIncreasePoolAmount(_amount);
         poolAmount += _amount;
+        _afterIncreasePoolAmount(_amount);
     }
 
     /// @notice Registers a recipient.
@@ -153,7 +155,7 @@ abstract contract BaseStrategy is IStrategy, Transfer {
     ///      strategy implementation. Only 'Allo' contract can call this when it is initialized.
     /// @param _data The data to use to register the recipient
     /// @param _sender The address of the sender
-    /// @return The ID of the recipient
+    /// @return recipientId
     function registerRecipient(bytes memory _data, address _sender)
         external
         payable
@@ -161,7 +163,11 @@ abstract contract BaseStrategy is IStrategy, Transfer {
         onlyInitialized
         returns (address)
     {
-        return _registerRecipient(_data, _sender);
+        _beforeRegisterRecipient(_data, _sender);
+        address recipientId = _registerRecipient(_data, _sender);
+        _afterRegisterRecipient(_data, _sender);
+
+        return recipientId;
     }
 
     /// @notice Allocates to a recipient.
@@ -170,7 +176,9 @@ abstract contract BaseStrategy is IStrategy, Transfer {
     /// @param _data The data to use to allocate to the recipient
     /// @param _sender The address of the sender
     function allocate(bytes memory _data, address _sender) external payable onlyAllo onlyInitialized {
-        return _allocate(_data, _sender);
+        _beforeAllocate(_data, _sender);
+        _allocate(_data, _sender);
+        _afterAllocate(_data, _sender);
     }
 
     /// @notice Distributes funds (tokens) to recipients.
@@ -184,7 +192,9 @@ abstract contract BaseStrategy is IStrategy, Transfer {
         onlyAllo
         onlyInitialized
     {
-        return _distribute(_recipientIds, _data, _sender);
+        _beforeDistribute(_recipientIds, _data, _sender);
+        _distribute(_recipientIds, _data, _sender);
+        _afterDistribute(_recipientIds, _data, _sender);
     }
 
     /// @notice Gets the payout summary for recipients.
@@ -280,4 +290,48 @@ abstract contract BaseStrategy is IStrategy, Transfer {
     /// @param _recipientId The ID of the recipient
     /// @return The status of the recipient
     function _getRecipientStatus(address _recipientId) internal view virtual returns (RecipientStatus);
+
+    /// ===================================
+    /// ============== Hooks ==============
+    /// ===================================
+
+    /// @notice Hook called before increasing the pool amount.
+    /// @param _amount The amount to increase the pool by
+    function _beforeIncreasePoolAmount(uint256 _amount) internal virtual {}
+
+    /// @notice Hook called after increasing the pool amount.
+    /// @param _amount The amount to increase the pool by
+    function _afterIncreasePoolAmount(uint256 _amount) internal virtual {}
+
+    /// @notice Hook called before registering a recipient.
+    /// @param _data The data to use to register the recipient
+    /// @param _sender The address of the sender
+    function _beforeRegisterRecipient(bytes memory _data, address _sender) internal virtual {}
+
+    /// @notice Hook called after registering a recipient.
+    /// @param _data The data to use to register the recipient
+    /// @param _sender The address of the sender
+    function _afterRegisterRecipient(bytes memory _data, address _sender) internal virtual {}
+
+    /// @notice Hook called before allocating to a recipient.
+    /// @param _data The data to use to allocate to the recipient
+    /// @param _sender The address of the sender
+    function _beforeAllocate(bytes memory _data, address _sender) internal virtual {}
+
+    /// @notice Hook called after allocating to a recipient.
+    /// @param _data The data to use to allocate to the recipient
+    /// @param _sender The address of the sender
+    function _afterAllocate(bytes memory _data, address _sender) internal virtual {}
+
+    /// @notice Hook called before distributing funds (tokens) to recipients.
+    /// @param _recipientIds The IDs of the recipients
+    /// @param _data The data to use to distribute to the recipients
+    /// @param _sender The address of the sender
+    function _beforeDistribute(address[] memory _recipientIds, bytes memory _data, address _sender) internal virtual {}
+
+    /// @notice Hook called after distributing funds (tokens) to recipients.
+    /// @param _recipientIds The IDs of the recipients
+    /// @param _data The data to use to distribute to the recipients
+    /// @param _sender The address of the sender
+    function _afterDistribute(address[] memory _recipientIds, bytes memory _data, address _sender) internal virtual {}
 }
