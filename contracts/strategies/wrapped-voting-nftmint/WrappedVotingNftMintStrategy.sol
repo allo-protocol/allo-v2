@@ -2,7 +2,6 @@
 pragma solidity 0.8.19;
 
 // External Libraries
-import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 // Interfaces
 import {IAllo} from "../../core/interfaces/IAllo.sol";
@@ -13,7 +12,7 @@ import {Native} from "../../core/libraries/Native.sol";
 import {NFT} from "./NFT.sol";
 import {NFTFactory} from "./NFTFactory.sol";
 
-contract WrappedVotingNftMintStrategy is Native, BaseStrategy, Initializable, ReentrancyGuard {
+contract WrappedVotingNftMintStrategy is Native, BaseStrategy, ReentrancyGuard {
     enum InternalRecipientStatus {
         Pending,
         Accepted,
