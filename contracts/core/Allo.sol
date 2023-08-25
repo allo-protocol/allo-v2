@@ -6,6 +6,7 @@ import "solady/src/auth/Ownable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 // Interfaces
 import "./interfaces/IAllo.sol";
 
@@ -30,7 +31,7 @@ import {Transfer} from "./libraries/Transfer.sol";
 /// @author @thelostone-mc <aditya@gitcoin.co>, @KurtMerbeth <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>
 /// @notice This contract is used to create & manage pools as well as manage the protocol.
 /// @dev The contract must be initialized with the 'initialize()' function.
-contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl {
+contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl, ReentrancyGuard {
     // ==========================
     // === Storage Variables ====
     // ==========================
@@ -177,7 +178,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
         uint256 _amount,
         Metadata memory _metadata,
         address[] memory _managers
-    ) external payable returns (uint256 poolId) {
+    ) external payable nonReentrant returns (uint256 poolId) {
         if (!_isCloneableStrategy(_strategy)) {
             revert NOT_APPROVED_STRATEGY();
         }
@@ -299,7 +300,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
     /// @param _poolId ID of the pool
     /// @param _data Encoded data unique to a strategy that registerRecipient() requires
     /// @return recipientId The recipientId that has been registered
-    function registerRecipient(uint256 _poolId, bytes memory _data) external payable returns (address) {
+    function registerRecipient(uint256 _poolId, bytes memory _data) external payable nonReentrant returns (address) {
         // Return the recipientId (address) from the strategy
         return pools[_poolId].strategy.registerRecipient(_data, msg.sender);
     }
@@ -313,6 +314,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
     /// @return recipientIds The recipientIds that have been registered
     function batchRegisterRecipient(uint256[] memory _poolIds, bytes[] memory _data)
         external
+        nonReentrant
         returns (address[] memory recipientIds)
     {
         uint256 poolIdLength = _poolIds.length;
@@ -338,7 +340,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
     /// @dev Anyone can fund a pool and call this function.
     /// @param _poolId ID of the pool
     /// @param _amount amount to be deposited into the pool
-    function fundPool(uint256 _poolId, uint256 _amount) external payable {
+    function fundPool(uint256 _poolId, uint256 _amount) external payable nonReentrant {
         // if amount is 0, revert with 'NOT_ENOUGH_FUNDS()' error
         if (_amount == 0) {
             revert NOT_ENOUGH_FUNDS();
@@ -352,7 +354,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
     /// @dev Calls the 'strategy.allocate()' function with encoded '_data' defined by the strategy.
     /// @param _poolId ID of the pool
     /// @param _data Encoded data unique to the strategy for that pool
-    function allocate(uint256 _poolId, bytes memory _data) external payable {
+    function allocate(uint256 _poolId, bytes memory _data) external payable nonReentrant {
         _allocate(_poolId, _data);
     }
 
@@ -362,7 +364,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
     ///      want to send funds to the strategy, you must send the funds using 'fundPool()'.
     /// @param _poolIds IDs of the pools
     /// @param _datas encoded data unique to the strategy for that pool
-    function batchAllocate(uint256[] calldata _poolIds, bytes[] memory _datas) external {
+    function batchAllocate(uint256[] calldata _poolIds, bytes[] memory _datas) external nonReentrant {
         uint256 numPools = _poolIds.length;
 
         // Reverts if the length of _poolIds does not match the length of _datas with 'MISMATCH()' error
@@ -384,7 +386,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
     ///      implementation of 'strategy.distribute()'.
     /// @param _poolId ID of the pool
     /// @param _data Encoded data unique to the strategy
-    function distribute(uint256 _poolId, address[] memory _recipientIds, bytes memory _data) external {
+    function distribute(uint256 _poolId, address[] memory _recipientIds, bytes memory _data) external nonReentrant {
         pools[_poolId].strategy.distribute(_recipientIds, _data, msg.sender);
     }
 
