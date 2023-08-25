@@ -41,11 +41,11 @@ export async function deployRegistry() {
 
     console.log("Registry deployed to:", instance.target);
 
-    console.log("Intializing...", instance.target);
+    console.log("initializing...", instance.target);
     await instance.initialize(
         registryConfig[chainId].owner
     );
-    console.log("Registry Intializied!");
+    console.log("Registry initializing!");
   
     return instance.target;
 }

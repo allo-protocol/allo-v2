@@ -67,7 +67,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl 
     mapping(address => bool) private cloneableStrategies;
 
     // ====================================
-    // =========== Intializer =============
+    // =========== Initializer =============
     // ====================================
 
     /// @notice Initializes the contract after an upgrade

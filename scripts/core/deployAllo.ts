@@ -53,14 +53,14 @@ export async function deployAllo(_registryAddress? : string) {
 
   console.log("Allo.sol deployed to:", instance.target);
 
-  console.log("Intializing...", instance.target);
+  console.log("Initializing...", instance.target);
   await instance.initialize(
     registryAddress,
     alloParams.treasury,
     alloParams.percentFee,
     alloParams.baseFee,
   );
-  console.log("Registry Intializied!");
+  console.log("Registry initialized!");
 
   return instance.target;
 }

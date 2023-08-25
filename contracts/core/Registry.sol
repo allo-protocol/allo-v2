@@ -51,7 +51,7 @@ contract Registry is IRegistry, Native, AccessControl, Transfer, Initializable {
     }
 
     // ====================================
-    // =========== Intializer =============
+    // =========== Initializer =============
     // ====================================
 
     /// @notice Initializes the contract after an upgrade
