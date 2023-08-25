@@ -4,7 +4,9 @@ import {ISablierV2LockupDynamic} from "@sablier/v2-core/src/interfaces/ISablierV
 import {Broker, LockupDynamic} from "@sablier/v2-core/src/types/DataTypes.sol";
 import {UD2x18} from "@sablier/v2-core/src/types/Math.sol";
 
+import {IStrategy} from "../../../../contracts/strategies/IStrategy.sol";
 import {LockupDynamicStrategy} from "../../../../contracts/strategies/sablier-v2/LockupDynamicStrategy.sol";
+import {Metadata} from "../../../../contracts/core/libraries/Metadata.sol";
 
 import {LockupBase_Test} from "./LockupBase.t.sol";
 
@@ -16,8 +18,8 @@ contract LockupDynamicStrategyTest is LockupBase_Test {
     uint256 internal poolId;
 
     bool internal registryGating = false;
-    bool internal metadataRequired = false;
-    bool internal grantAmountRequired = false;
+    bool internal metadataRequired = true;
+    bool internal grantAmountRequired = true;
     bytes internal setUpData = abi.encode(registryGating, metadataRequired, grantAmountRequired);
 
     function setUp() public override {
@@ -57,15 +59,7 @@ contract LockupDynamicStrategyTest is LockupBase_Test {
         uint256 refundedAmount;
     }
 
-    function test_initialize() public {}
-
-    function test_initialize_BaseStrategy_UNAUTHORIZED() public {}
-
-    function testRevert_initialize_BaseStrategy_ALREADY_INITIALIZED() public {}
-
-    function testRevert_initialize_INVALID() public {}
-
-    function testForkFuzz_RegisterRecipientAllocateDistributeCancelStream(Params memory params) public {
+    function testForkFuzz_registerRecipient_allocate_distribute_cancelStream(Params memory params) public {
         vm.assume(params.recipientAddress != address(0) && params.recipientAddress != pool_manager1());
 
         params.fundPoolAmount = uint128(_bound(params.fundPoolAmount, 1, type(uint96).max - 1));
@@ -176,26 +170,37 @@ contract LockupDynamicStrategyTest is LockupBase_Test {
         );
     }
 
-    function test_ChangeRecipientDurations() public {
+    function testRevert_cancelStream_STATUS_NOT_ACCEPTED() public {
+        vm.expectRevert(LockupDynamicStrategy.STATUS_NOT_ACCEPTED.selector);
+        strategy.cancelStream(recipient(), 0);
+    }
+
+    function testRevert_changeRecipientSegments_STATUS_NOT_PENDING_OR_INREVIEW() public {
+        vm.expectRevert(LockupDynamicStrategy.STATUS_NOT_PENDING_OR_INREVIEW.selector);
+        strategy.changeRecipientSegments(recipient(), registerSegments());
+    }
+
+    function test_changeRecipientSegments() public {
         address recipientAddress = makeAddr("recipientAddress");
         bool cancelable = true;
         uint256 grantAmount = 1000e18;
-        LockupDynamic.SegmentWithDelta[] memory registerSegments = new LockupDynamic.SegmentWithDelta[](2);
-        registerSegments[0].delta = 3 days;
-        registerSegments[1].delta = 4 days;
-        registerSegments[0].amount = 300e18;
-        registerSegments[1].amount = 700e18;
-        registerSegments[0].exponent = UD2x18.wrap(3.14e18);
-        registerSegments[1].exponent = UD2x18.wrap(2.71e18);
+        LockupDynamic.SegmentWithDelta[] memory _registerSegments = new LockupDynamic.SegmentWithDelta[](2);
+        _registerSegments[0].delta = 3 days;
+        _registerSegments[1].delta = 4 days;
+        _registerSegments[0].amount = 300e18;
+        _registerSegments[1].amount = 700e18;
+        _registerSegments[0].exponent = UD2x18.wrap(3.14e18);
+        _registerSegments[1].exponent = UD2x18.wrap(2.71e18);
 
-        bytes memory registerRecipientData =
-            abi.encode(recipientAddress, useRegistryAnchor, cancelable, grantAmount, registerSegments, strategyMetadata);
+        bytes memory registerRecipientData = abi.encode(
+            recipientAddress, useRegistryAnchor, cancelable, grantAmount, _registerSegments, strategyMetadata
+        );
 
         address[] memory recipientIds = new address[](1);
         recipientIds[0] = allo().registerRecipient(poolId, registerRecipientData);
 
         LockupDynamicStrategy.Recipient memory recipient = strategy.getRecipient(recipientIds[0]);
-        assertEq(recipient.segments, registerSegments, "recipient.segments");
+        assertEq(recipient.segments, _registerSegments, "recipient.segments");
 
         LockupDynamic.SegmentWithDelta[] memory newSegments = new LockupDynamic.SegmentWithDelta[](2);
         newSegments[0].delta = 6 days;
@@ -213,9 +218,256 @@ contract LockupDynamicStrategyTest is LockupBase_Test {
         assertEq(recipient.segments, newSegments, "recipient.segments");
     }
 
-    function test_SetBroker() public {
+    function test_setBroker() public {
         strategy.setBroker(broker);
         assertEq(strategy.getBroker(), broker);
+    }
+
+    function test_initialize() public {
+        strategy.setBroker(broker);
+        assertEq(strategy.getBroker(), broker);
+        assertEq(registryGating, strategy.registryGating());
+        assertEq(metadataRequired, strategy.metadataRequired());
+        assertEq(grantAmountRequired, strategy.grantAmountRequired());
+    }
+
+    function test_initialize_BaseStrategy_UNAUTHORIZED() public {
+        changePrank(randomAddress());
+        vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
+        strategy.initialize(poolId, setUpData);
+    }
+
+    function testRevert_initialize_BaseStrategy_ALREADY_INITIALIZED() public {
+        vm.expectRevert(IStrategy.BaseStrategy_ALREADY_INITIALIZED.selector);
+
+        vm.startPrank(address(allo()));
+        strategy.initialize(poolId, setUpData);
+    }
+
+    function test_isPoolActiv() public {
+        LockupDynamicStrategy _strategy = new LockupDynamicStrategy(
+            lockupDynamic,
+            address(allo()),
+            "LockupDynamicStrategy"
+        );
+        assertFalse(_strategy.isPoolActive());
+        __StrategySetup(address(_strategy), setUpData);
+        assertTrue(_strategy.isPoolActive());
+    }
+
+    function test_registerRecipient() public {
+        bool cancelable = true;
+        uint256 grantAmount = 100e18;
+        bytes memory registerRecipientData = abi.encode(
+            pool_manager1(), useRegistryAnchor, cancelable, grantAmount, registerSegments(), strategyMetadata
+        );
+
+        address[] memory recipientIds = new address[](1);
+
+        vm.expectEmit({emitter: address(strategy)});
+        emit Registered(pool_manager1(), registerRecipientData, pool_manager1());
+        recipientIds[0] = allo().registerRecipient(poolId, registerRecipientData);
+        assertEq(recipientIds[0], pool_manager1());
+    }
+
+    function testRevert_registerRecipient_UNAUTHORIZED_REGISTRY_GATING() public {
+        bool _registryGating = true;
+        LockupDynamicStrategy _strategy = new LockupDynamicStrategy(
+            lockupDynamic,
+            address(allo()),
+            "LockupDynamicStrategy"
+        );
+        bytes memory _setUpData = abi.encode(_registryGating, metadataRequired, grantAmountRequired);
+        uint256 _poolId = __StrategySetup(address(_strategy), _setUpData);
+
+        bool cancelable = true;
+        uint256 grantAmount;
+        bytes memory registerRecipientData =
+            abi.encode(randomAddress(), randomAddress(), cancelable, grantAmount, registerSegments(), strategyMetadata);
+
+        vm.startPrank(randomAddress());
+        vm.expectRevert(LockupDynamicStrategy.UNAUTHORIZED.selector);
+        allo().registerRecipient(_poolId, registerRecipientData);
+        vm.stopPrank();
+    }
+
+    function testRevert_registerRecipient_UNAUTHORIZED_NOT_PROFILE_MEMBER() public {
+        bool _useRegistryAnchor = true;
+        bool cancelable = true;
+        uint256 grantAmount;
+        bytes memory registerRecipientData = abi.encode(
+            randomAddress(), _useRegistryAnchor, cancelable, grantAmount, registerSegments(), strategyMetadata
+        );
+
+        vm.startPrank(randomAddress());
+        vm.expectRevert(LockupDynamicStrategy.UNAUTHORIZED.selector);
+        allo().registerRecipient(poolId, registerRecipientData);
+        vm.stopPrank();
+    }
+
+    function testRevert_registerRecipient_INVALID_REGISTRATION() public {
+        bool cancelable = true;
+        bytes memory registerRecipientData =
+            abi.encode(pool_manager1(), useRegistryAnchor, cancelable, 0, registerSegments(), strategyMetadata);
+
+        vm.expectRevert(LockupDynamicStrategy.INVALID_REGISTRATION.selector);
+        allo().registerRecipient(poolId, registerRecipientData);
+    }
+
+    function testRevert_registerRecipient_RECIPIENT_ALREADY_ACCEPTED() public {
+        bool cancelable = true;
+        uint256 grantAmount = 100e18;
+        bytes memory registerRecipientData = abi.encode(
+            pool_manager1(), useRegistryAnchor, cancelable, grantAmount, registerSegments(), strategyMetadata
+        );
+
+        address[] memory recipientIds = new address[](1);
+        recipientIds[0] = allo().registerRecipient(poolId, registerRecipientData);
+
+        deal({token: address(GTC), to: pool_manager1(), give: grantAmount});
+        GTC.approve(address(allo()), uint96(grantAmount));
+        allo().fundPool(poolId, grantAmount);
+        bytes memory allocateData =
+            abi.encode(recipientIds[0], LockupDynamicStrategy.InternalRecipientStatus.Accepted, grantAmount - 1e18);
+        allo().allocate(poolId, allocateData);
+
+        vm.expectRevert(LockupDynamicStrategy.RECIPIENT_ALREADY_ACCEPTED.selector);
+        allo().registerRecipient(poolId, registerRecipientData);
+    }
+
+    function testRevert_registerRecipient_INVALID_METADATA() public {
+        bool cancelable = true;
+        uint256 grantAmount = 100e18;
+        bytes memory registerRecipientData = abi.encode(
+            pool_manager1(),
+            useRegistryAnchor,
+            cancelable,
+            grantAmount,
+            registerSegments(),
+            Metadata({protocol: 0, pointer: ""})
+        );
+
+        vm.expectRevert(LockupDynamicStrategy.INVALID_METADATA.selector);
+        allo().registerRecipient(poolId, registerRecipientData);
+    }
+
+    function testRevert_allocate_ALLOCATION_EXCEEDS_POOL_AMOUNT() public {
+        bool cancelable = true;
+        uint256 grantAmount = 100e18;
+        bytes memory registerRecipientData = abi.encode(
+            pool_manager1(), useRegistryAnchor, cancelable, grantAmount, registerSegments(), strategyMetadata
+        );
+
+        address[] memory recipientIds = new address[](1);
+        recipientIds[0] = allo().registerRecipient(poolId, registerRecipientData);
+
+        deal({token: address(GTC), to: pool_manager1(), give: grantAmount});
+        GTC.approve(address(allo()), uint96(grantAmount));
+        allo().fundPool(poolId, grantAmount);
+        bytes memory allocateData =
+            abi.encode(recipientIds[0], LockupDynamicStrategy.InternalRecipientStatus.Accepted, grantAmount);
+        vm.expectRevert(LockupDynamicStrategy.ALLOCATION_EXCEEDS_POOL_AMOUNT.selector);
+        allo().allocate(poolId, allocateData);
+    }
+
+    function test_allocate_Rejected() public {
+        bool cancelable = true;
+        uint256 grantAmount = 100e18;
+        bytes memory registerRecipientData = abi.encode(
+            pool_manager1(), useRegistryAnchor, cancelable, grantAmount, registerSegments(), strategyMetadata
+        );
+
+        address[] memory recipientIds = new address[](1);
+        recipientIds[0] = allo().registerRecipient(poolId, registerRecipientData);
+
+        bytes memory allocateData =
+            abi.encode(recipientIds[0], LockupDynamicStrategy.InternalRecipientStatus.Rejected, 0);
+        allo().allocate(poolId, allocateData);
+
+        assertEq(
+            uint8(strategy.getRecipientStatus(recipientIds[0])),
+            uint8(LockupDynamicStrategy.InternalRecipientStatus.Rejected)
+        );
+    }
+
+    function test_getAllRecipientStreamIds() public {
+        address[] memory recipientIds = new address[](1);
+        uint256[] memory streamIds = strategy.getAllRecipientStreamIds(recipientIds[0]);
+        assertEq(streamIds.length, 0);
+
+        bool cancelable = true;
+        uint256 grantAmount = 100e18;
+        bytes memory registerRecipientData = abi.encode(
+            pool_manager1(), useRegistryAnchor, cancelable, grantAmount, registerSegments(), strategyMetadata
+        );
+        recipientIds[0] = allo().registerRecipient(poolId, registerRecipientData);
+
+        deal({token: address(GTC), to: pool_manager1(), give: 2 * grantAmount});
+        GTC.approve(address(allo()), uint96(2 * grantAmount));
+        allo().fundPool(poolId, 2 * grantAmount);
+
+        bytes memory allocateData =
+            abi.encode(recipientIds[0], LockupDynamicStrategy.InternalRecipientStatus.Accepted, grantAmount);
+        allo().allocate(poolId, allocateData);
+
+        allo().distribute(poolId, recipientIds, "");
+        streamIds = strategy.getAllRecipientStreamIds(recipientIds[0]);
+        assertEq(streamIds.length, 1);
+    }
+
+    function test_getPayouts_ARRAY_MISMATCH() public {
+        address[] memory recipientIds = new address[](1);
+        bytes[] memory data = new bytes[](2);
+        vm.expectRevert(IStrategy.BaseStrategy_ARRAY_MISMATCH.selector);
+        strategy.getPayouts(recipientIds, data);
+    }
+
+    function test_GetPayouts() public {
+        address[] memory recipientIds = new address[](1);
+        recipientIds[0] = recipient();
+        assertEq(strategy.getPayouts(recipientIds, "").length, 1);
+    }
+
+    function test_getRecipientStatus() public {
+        // get the status - should be None
+        assertEq(uint8(strategy.getRecipientStatus(recipient())), 0); // None
+
+        // Register a new recipient
+        bool cancelable = true;
+        uint256 grantAmount = 100e18;
+        bytes memory registerRecipientData = abi.encode(
+            pool_manager1(), useRegistryAnchor, cancelable, grantAmount, registerSegments(), strategyMetadata
+        );
+        address[] memory recipientIds = new address[](1);
+
+        vm.expectEmit({emitter: address(strategy)});
+        emit Registered(pool_manager1(), registerRecipientData, pool_manager1());
+        recipientIds[0] = allo().registerRecipient(poolId, registerRecipientData);
+
+        assertEq(recipientIds[0], pool_manager1());
+
+        // Set the recipient status to InReview
+        strategy.setInternalRecipientStatusToInReview(recipientIds);
+        assertEq(uint8(strategy.getRecipientStatus(recipientIds[0])), 1); // Pending
+    }
+
+    function test_isValidAllocator() public {
+        assertTrue(strategy.isValidAllocator(pool_manager1()));
+        assertFalse(strategy.isValidAllocator(randomAddress()));
+    }
+
+    function test_withdraw() public {
+        uint256 amount = 100e18;
+        deal({token: address(GTC), to: pool_manager1(), give: amount});
+        GTC.approve(address(allo()), uint96(amount));
+        allo().fundPool(poolId, amount);
+
+        uint256 amountMinFee = amount - 1e18;
+        assertEq(GTC.balanceOf(address(strategy)), amountMinFee);
+
+        uint256 amountToWithdraw = 20e18;
+        strategy.withdraw(amountToWithdraw);
+        assertEq(GTC.balanceOf(address(strategy)), amountMinFee - amountToWithdraw);
     }
 
     /// ===============================
@@ -234,5 +486,13 @@ contract LockupDynamicStrategyTest is LockupBase_Test {
         string memory message
     ) internal {
         assertEq(keccak256(abi.encode(a)), keccak256(abi.encode(b)), message);
+    }
+
+    function registerSegments() internal pure returns (LockupDynamic.SegmentWithDelta[] memory) {
+        LockupDynamic.SegmentWithDelta[] memory _registerSegments = new LockupDynamic.SegmentWithDelta[](1);
+        _registerSegments[0].delta = 3 days;
+        _registerSegments[0].amount = 100e18;
+        _registerSegments[0].exponent = UD2x18.wrap(3.14e18);
+        return _registerSegments;
     }
 }
