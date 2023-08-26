@@ -3,7 +3,7 @@ pragma solidity 0.8.19;
 
 // External Libraries
 import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-// Intefaces
+// Interfaces
 import {IAllo} from "../../core/interfaces/IAllo.sol";
 import {IRegistry} from "../../core/interfaces/IRegistry.sol";
 // Core Contracts
@@ -113,11 +113,11 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Flag to check if grant amount is required.
     bool public grantAmountRequired;
 
-    /// @notice The total amount allocated to grant/recipient.
-    uint256 public allocatedGrantAmount;
-
     /// @notice The 'Registry' contract interface.
     IRegistry private _registry;
+
+    /// @notice The total amount allocated to grant/recipient.
+    uint256 public allocatedGrantAmount;
 
     /// @notice Internal collection of accepted recipients able to submit milestones
     address[] private _acceptedRecipientIds;
@@ -217,7 +217,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         }
     }
 
-    /// @notice Checks if address is elgible allocator.
+    /// @notice Checks if address is eligible allocator.
     /// @dev This is used to check if the allocator is a pool manager and able to allocate funds from the pool
     /// @param _allocator Address of the allocator
     /// @return bool Returns true if the allocator is a pool manager, otherwise false
@@ -301,8 +301,8 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     }
 
     /// @notice Submit milestone by the recipient.
-    /// @dev 'msg.sender' must be the 'recipientId' (this depends on whether your using registry gating) and must be a member
-    ///      of a 'Profile' to sumbit a milestone and '_recipientId'.
+    /// @dev 'msg.sender' must be the 'recipientId' (this depends on whether you are using registry gating) and must be a member
+    ///      of a 'Profile' to submit a milestone and '_recipientId'.
     ///      must NOT be the same as 'msg.sender'.
     /// @param _recipientId ID of the recipient
     /// @param _metadata The proof of work
@@ -442,7 +442,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
             (recipientAddress, registryAnchor, grantAmount, metadata) =
                 abi.decode(_data, (address, address, uint256, Metadata));
 
-            // Check if the registry anchor is valid so we know to use it or not
+            // Check if the registry anchor is valid so we know whether to use it or not
             isUsingRegistryAnchor = registryAnchor != address(0);
 
             // Ternerary to set the recipient id based on whether or not we are using the 'registryAnchor' or '_sender'
@@ -484,7 +484,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         emit Registered(recipientId, _data, _sender);
     }
 
-    /// @notice Allocate amount to recipent for direct grants.
+    /// @notice Allocate amount to recipient for direct grants.
     /// @dev '_sender' must be a pool manager to allocate.
     /// @param _data The data to be decoded
     /// @custom:data (address recipientId, InternalRecipientStatus recipientStatus, uint256 grantAmount)
