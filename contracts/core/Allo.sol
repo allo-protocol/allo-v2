@@ -72,7 +72,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
     // ====================================
 
     /// @notice Initializes the contract after an upgrade
-    /// @dev During upgrade -> an higher version should be passed to reinitializer
+    /// @dev During upgrade -> a higher version should be passed to reinitializer
     /// @param _registry The address of the registry
     /// @param _treasury The address of the treasury
     /// @param _percentFee The percentage fee
@@ -163,6 +163,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
     /// @notice Creates a new pool (by cloning a cloneable strategies).
     /// @dev 'msg.sender' must be owner or member of the profile id passed as '_profileId'.
     /// @param _profileId The ID of the registry profile, used to check if 'msg.sender' is a member or owner of the profile
+    /// @param _strategy The address of the strategy contract the pool will use.
     /// @param _initStrategyData The data to initialize the strategy
     /// @param _token The address of the token
     /// @param _amount The amount of the token
@@ -235,7 +236,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
     }
 
     /// @notice Add a strategy to the allowlist.
-    /// @dev Only callable by Allo owner, emits the 'StrategyApproved()' event. 'msg.sender' must be Allo owner.
+    /// @dev Emits the 'StrategyApproved()' event. 'msg.sender' must be Allo owner.
     /// @param _strategy The address of the strategy
     function addToCloneableStrategies(address _strategy) external onlyOwner {
         if (_strategy == address(0)) {
@@ -246,7 +247,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
     }
 
     /// @notice Remove a strategy from the allowlist
-    /// @dev Only callable by Allo owner, emits 'StrategyRemoved()' event. 'msg.sender must be Allo owner.
+    /// @dev Emits 'StrategyRemoved()' event. 'msg.sender must be Allo owner.
     /// @param _strategy The address of the strategy
     function removeFromCloneableStrategies(address _strategy) external onlyOwner {
         // Set the strategy to false in the cloneableStrategies mapping
@@ -273,13 +274,13 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
     /// @notice Remove a pool manager
     /// @dev Emits 'RoleRevoked()' event. 'msg.sender' must be a pool admin.
     /// @param _poolId ID of the pool
-    /// @param _manager The address remove
+    /// @param _manager The address to remove
     function removePoolManager(uint256 _poolId, address _manager) external onlyPoolAdmin(_poolId) {
         _revokeRole(pools[_poolId].managerRole, _manager);
     }
 
-    /// @notice Transfer thefunds recovered  to the recipient
-    /// Requirements: 'msg.sender' must be Allo owner
+    /// @notice Transfer the funds recovered  to the recipient
+    /// @dev 'msg.sender' must be Allo owner
     /// @param _token The address of the token to transfer
     /// @param _recipient The address of the recipient
     function recoverFunds(address _token, address _recipient) external onlyOwner {
@@ -351,7 +352,8 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
     }
 
     /// @notice Allocate to a recipient or multiple recipients.
-    /// @dev Calls the 'strategy.allocate()' function with encoded '_data' defined by the strategy.
+    /// @dev The encoded data will be specific to a given strategy requirements, reference the strategy
+    ///      implementation of allocate().
     /// @param _poolId ID of the pool
     /// @param _data Encoded data unique to the strategy for that pool
     function allocate(uint256 _poolId, bytes memory _data) external payable nonReentrant {
@@ -385,6 +387,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
     /// @dev The encoded data will be specific to a given strategy requirements, reference the strategy
     ///      implementation of 'strategy.distribute()'.
     /// @param _poolId ID of the pool
+    /// @param _recipientIds Ids of the recipients of the distribution
     /// @param _data Encoded data unique to the strategy
     function distribute(uint256 _poolId, address[] memory _recipientIds, bytes memory _data) external nonReentrant {
         pools[_poolId].strategy.distribute(_recipientIds, _data, msg.sender);
@@ -494,6 +497,10 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
 
     /// @notice Fund a pool.
     /// @dev Deducts the fee and transfers the amount to the distribution strategy.
+    ///      Emits a 'PoolFunded' event.
+    /// @param _amount 
+    /// @param _poolId 
+    /// @param _strategy 
     /// @param _amount The amount to transfer
     /// @param _poolId The 'poolId' for the pool you are funding
     /// @param _strategy The address of the strategy
@@ -517,7 +524,9 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
         emit PoolFunded(_poolId, amountAfterFee, feeAmount);
     }
 
-    /// @notice Checks if the strategy is cloneable
+    /// @notice Checks if the strategy is an approved cloneable strategy.
+    /// @dev Internal function used by createPoolwithCustomStrategy and createPool to 
+    ///      determine if a strategy is in the cloneable strategy allow list.
     /// @param _strategy The address of the strategy
     /// @return This will return 'true' if the strategy is cloneable, otherwise 'false'
     function _isCloneableStrategy(address _strategy) internal view returns (bool) {
@@ -525,6 +534,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
     }
 
     /// @notice Checks if the address is a pool admin
+    /// @dev Internal function used to determine if an address is a pool admin
     /// @param _poolId The ID of the pool
     /// @param _address The address to check
     /// @return This will return 'true' if the address is a pool admin, otherwise 'false'
@@ -533,6 +543,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
     }
 
     /// @notice Checks if the address is a pool manager
+    /// @dev Internal function used to determine if an address is a pool manager
     /// @param _poolId The ID of the pool
     /// @param _address The address to check
     /// @return This will return 'true' if the address is a pool manager, otherwise 'false'
@@ -541,6 +552,8 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
     }
 
     /// @notice Updates the registry address
+    /// @dev Internal function used to update the registry address.  
+    ///      Emits a RegistryUpdated event.
     /// @param _registry The new registry address
     function _updateRegistry(address _registry) internal {
         if (_registry == address(0)) {
@@ -551,6 +564,8 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
     }
 
     /// @notice Updates the treasury address
+    /// @dev Internal function used to update the treasury address.  
+    ///      Emits a TreasuryUpdated event.
     /// @param _treasury The new treasury address
     function _updateTreasury(address payable _treasury) internal {
         if (_treasury == address(0)) {
@@ -561,6 +576,8 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
     }
 
     /// @notice Updates the fee percentage
+    /// @dev Internal function used to update the percentage fee.  
+    ///      Emits a PercentFeeUpdated event.
     /// @param _percentFee The new fee
     function _updatePercentFee(uint256 _percentFee) internal {
         if (_percentFee > 1e18) {
@@ -572,6 +589,8 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
     }
 
     /// @notice Updates the base fee
+    /// @dev Internal function used to update the base fee.  
+    ///      Emits a BaseFeeUpdated event.
     /// @param _baseFee The new base fee
     function _updateBaseFee(uint256 _baseFee) internal {
         baseFee = _baseFee;
@@ -637,7 +656,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
 
     /// @notice Getter for if strategy is cloneable.
     /// @param _strategy The address of the strategy
-    /// @return Ttrue' if the strategy is cloneable, otherwise 'false'
+    /// @return 'true' if the strategy is cloneable, otherwise 'false'
     function isCloneableStrategy(address _strategy) external view returns (bool) {
         return _isCloneableStrategy(_strategy);
     }
