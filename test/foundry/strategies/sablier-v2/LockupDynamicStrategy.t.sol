@@ -4,7 +4,7 @@ import {ISablierV2LockupDynamic} from "@sablier/v2-core/src/interfaces/ISablierV
 import {Broker, LockupDynamic} from "@sablier/v2-core/src/types/DataTypes.sol";
 import {UD2x18} from "@sablier/v2-core/src/types/Math.sol";
 
-import {IStrategy} from "../../../../contracts/strategies/IStrategy.sol";
+import {IStrategy} from "../../../../contracts/core/interfaces/IStrategy.sol";
 import {LockupDynamicStrategy} from "../../../../contracts/strategies/sablier-v2/LockupDynamicStrategy.sol";
 import {Metadata} from "../../../../contracts/core/libraries/Metadata.sol";
 
@@ -66,7 +66,7 @@ contract LockupDynamicStrategyTest is LockupBase_Test {
 
         Vars memory vars;
 
-        uint256 feeAmount = (params.fundPoolAmount * allo().getFeePercentage()) / allo().FEE_DENOMINATOR();
+        uint256 feeAmount = (params.fundPoolAmount * allo().getPercentFee()) / allo().getFeeDenominator();
         vars.grantAmount = params.fundPoolAmount - uint128(feeAmount);
 
         vars.segments = new LockupDynamic.SegmentWithDelta[](2);

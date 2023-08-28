@@ -8,8 +8,8 @@ import {ISablierV2LockupLinear} from "@sablier/v2-core/src/interfaces/ISablierV2
 import {Broker, LockupLinear} from "@sablier/v2-core/src/types/DataTypes.sol";
 import {IERC20 as SablierIERC20} from "@sablier/v2-core/src/types/Tokens.sol";
 
-import {IAllo} from "../../core/IAllo.sol";
-import {IRegistry} from "../../core/IRegistry.sol";
+import {IAllo} from "../../core/interfaces/IAllo.sol";
+import {IRegistry} from "../../core/interfaces/IRegistry.sol";
 import {Metadata} from "../../core/libraries/Metadata.sol";
 import {BaseStrategy} from "../BaseStrategy.sol";
 
@@ -161,7 +161,7 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Get recipient status
     /// @param _recipientId Id of the recipient
-    function getRecipientStatus(address _recipientId) external view override returns (RecipientStatus) {
+    function _getRecipientStatus(address _recipientId) internal view override returns (RecipientStatus) {
         InternalRecipientStatus internalStatus = _getRecipient(_recipientId).recipientStatus;
         if (internalStatus == InternalRecipientStatus.InReview) {
             return RecipientStatus.Pending;

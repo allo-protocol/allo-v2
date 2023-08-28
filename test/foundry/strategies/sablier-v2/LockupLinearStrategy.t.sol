@@ -4,7 +4,7 @@ import {ISablierV2LockupLinear} from "@sablier/v2-core/src/interfaces/ISablierV2
 import {Broker, LockupLinear} from "@sablier/v2-core/src/types/DataTypes.sol";
 import {UD60x18} from "@sablier/v2-core/src/types/Math.sol";
 
-import {IStrategy} from "../../../../contracts/strategies/IStrategy.sol";
+import {IStrategy} from "../../../../contracts/core/interfaces/IStrategy.sol";
 import {LockupLinearStrategy} from "../../../../contracts/strategies/sablier-v2/LockupLinearStrategy.sol";
 import {Metadata} from "../../../../contracts/core/libraries/Metadata.sol";
 
@@ -68,7 +68,7 @@ contract LockupLinearStrategyTest is LockupBase_Test {
 
         Vars memory vars;
 
-        uint256 feeAmount = (params.fundPoolAmount * allo().getFeePercentage()) / allo().FEE_DENOMINATOR();
+        uint256 feeAmount = (params.fundPoolAmount * allo().getPercentFee()) / allo().getFeeDenominator();
         vars.grantAmount = params.fundPoolAmount - feeAmount;
 
         deal({token: address(GTC), to: pool_manager1(), give: params.fundPoolAmount});
