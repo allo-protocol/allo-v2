@@ -101,7 +101,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
 
     function testRevert_initialize_ALREADY_INITIALIZED() public {
         vm.expectRevert(AlreadyInitialized.selector);
-        
+
         allo().initialize(
             address(registry()), // _registry
             allo_treasury(), // _treasury
