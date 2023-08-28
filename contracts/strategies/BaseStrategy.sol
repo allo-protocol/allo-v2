@@ -175,7 +175,7 @@ abstract contract BaseStrategy is IStrategy, Transfer {
     ///      call this when it is initialized.
     /// @param _data The data to use to allocate to the recipient
     /// @param _sender The address of the sender
-    function arellocate(bytes memory _data, address _sender) external payable onlyAllo onlyInitialized {
+    function allocate(bytes memory _data, address _sender) external payable onlyAllo onlyInitialized {
         _beforeAllocate(_data, _sender);
         _allocate(_data, _sender);
         _afterAllocate(_data, _sender);
