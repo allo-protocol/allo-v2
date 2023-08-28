@@ -392,7 +392,7 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
         return easInfo.schemaRegistry.getSchema(uid);
     }
 
-    /// @notice Returns if the this contract is payable or not
+    /// @notice Returns if this contract is payable or not
     /// @return True if the attestation is payable, false otherwise
     function isPayable() public pure override returns (bool) {
         return true;

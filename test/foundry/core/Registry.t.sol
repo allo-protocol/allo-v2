@@ -109,6 +109,25 @@ contract RegistryTest is Test, RegistrySetup, Native {
         assertEq(registry().anchorToProfileId(newAnchor), newProfileId, "new anchor");
     }
 
+    function test_updateProfileName_toTheNameBefore() public {
+        bytes32 newProfileId = registry().createProfile(nonce, name, metadata, profile1_owner(), profile1_members());
+
+        string memory newName = "New Name";
+        Registry.Profile memory profile = registry().getProfileById(newProfileId);
+
+        address currentAnchor = profile.anchor;
+
+        vm.startPrank(profile1_owner());
+
+        address newAnchor = registry().updateProfileName(newProfileId, newName);
+        assertNotEq(currentAnchor, newAnchor, "new anchor");
+
+        address oldAnchor = registry().updateProfileName(newProfileId, name);
+        assertEq(currentAnchor, oldAnchor, "old anchor");
+
+        vm.stopPrank();
+    }
+
     function testRevert_updateProfileNameForInvalidId() public {
         bytes32 invalidProfileId = TestUtilities._testUtilGenerateProfileId(nonce, address(this));
         string memory newName = "New Name";

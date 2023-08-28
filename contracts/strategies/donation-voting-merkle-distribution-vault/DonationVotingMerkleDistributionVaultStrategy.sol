@@ -3,12 +3,15 @@ pragma solidity 0.8.19;
 
 import {DonationVotingMerkleDistributionBaseStrategy} from
     "../donation-voting-merkle-base/DonationVotingMerkleDistributionBaseStrategy.sol";
-import {Native} from "../../core/libraries/Native.sol";
+import "openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
 
 /// @title Donation Voting Merkle Distribution Strategy
 /// @author @thelostone-mc <aditya@gitcoin.co>, @KurtMerbeth <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>
 /// @notice Strategy for donation voting allocation with a merkle distribution
-contract DonationVotingMerkleDistributionVaultStrategy is DonationVotingMerkleDistributionBaseStrategy {
+contract DonationVotingMerkleDistributionVaultStrategy is
+    DonationVotingMerkleDistributionBaseStrategy,
+    ReentrancyGuard
+{
     /// @notice Stores the details of the allocations to claim.
     struct Claim {
         address recipientId;
@@ -75,14 +78,20 @@ contract DonationVotingMerkleDistributionVaultStrategy is DonationVotingMerkleDi
         }
     }
 
-    /// ====================================
-    /// ============ Internal ==============
-    /// ====================================
+    /// ================================
+    /// ============ Hooks =============
+    /// ================================
 
-    function _onAllocate(address _recipientId, uint256 _amount, address _token, address _sender) internal override {
-        _transferAmountFrom(_token, TransferData({from: _sender, to: address(this), amount: _amount}));
+    /// @notice After allocation hook to store the allocated tokens in the vault
+    /// @param _data The encoded recipientId, amount and token
+    /// @param _sender The sender of the allocation
+    function _afterAllocate(bytes memory _data, address _sender) internal override {
+        // Decode the '_data' to get the recipientId, amount and token
+        (address recipientId, uint256 amount, address token) = abi.decode(_data, (address, uint256, address));
+
+        _transferAmountFrom(token, TransferData({from: _sender, to: address(this), amount: amount}));
 
         // Update the total payout amount for the claim
-        claims[_recipientId][_token] += _amount;
+        claims[recipientId][token] += amount;
     }
 }

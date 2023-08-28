@@ -14,7 +14,7 @@ export async function createProfile() {
 
     const balance = await ethers.provider.getBalance(deployerAddress);
 
-    const registry = registryConfig[chainId].registry;
+    const registry = registryConfig[chainId].registryProxy;
 
     await confirmContinue({
         contract: "registry: create profile",

@@ -3,7 +3,6 @@ pragma solidity 0.8.19;
 
 // External Libraries
 import {MerkleProof} from "openzeppelin-contracts/contracts/utils/cryptography/MerkleProof.sol";
-import {ReentrancyGuard} from "openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
 import {Multicall} from "openzeppelin-contracts/contracts/utils/Multicall.sol";
 // Interfaces
 import {IAllo} from "../../core/interfaces/IAllo.sol";
@@ -17,7 +16,7 @@ import {Native} from "../../core/libraries/Native.sol";
 /// @title Donation Voting Merkle Distribution Strategy
 /// @author @thelostone-mc <aditya@gitcoin.co>, @KurtMerbeth <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>
 /// @notice Strategy for donation voting allocation with a merkle distribution
-abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseStrategy, ReentrancyGuard, Multicall {
+abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseStrategy, Multicall {
     /// ================================
     /// ========== Struct ==============
     /// ================================
@@ -665,13 +664,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     /// @param _data The data to be decoded
     /// @custom:data (address recipientId, uint256 amount, address token)
     /// @param _sender The sender of the transaction
-    function _allocate(bytes memory _data, address _sender)
-        internal
-        virtual
-        override
-        nonReentrant
-        onlyActiveAllocation
-    {
+    function _allocate(bytes memory _data, address _sender) internal virtual override onlyActiveAllocation {
         // Decode the '_data' to get the recipientId, amount and token
         (address recipientId, uint256 amount, address token) = abi.decode(_data, (address, uint256, address));
 
@@ -690,18 +683,9 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
             revert INVALID();
         }
 
-        _onAllocate(recipientId, amount, token, _sender);
-
         // Emit that the amount has been allocated to the recipient by the sender
         emit Allocated(recipientId, amount, token, _sender);
     }
-
-    /// @notice Custom allocate logic
-    /// @param _recipientId Id of the recipient
-    /// @param _amount Amount of tokens to be distributed
-    /// @param _token Address of the token
-    /// @param _sender The sender of the transaction
-    function _onAllocate(address _recipientId, uint256 _amount, address _token, address _sender) internal virtual;
 
     /// @notice Check if sender is profile owner or member.
     /// @param _anchor Anchor of the profile
