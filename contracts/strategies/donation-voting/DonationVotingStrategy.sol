@@ -79,12 +79,12 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
 
     bool public useRegistryAnchor;
     bool public metadataRequired;
+    IRegistry private _registry;
     uint256 public registrationStartTime;
     uint256 public registrationEndTime;
     uint256 public allocationStartTime;
     uint256 public allocationEndTime;
     uint256 public totalPayoutAmount;
-    IRegistry private _registry;
 
     /// @notice token -> bool
     mapping(address => bool) public allowedTokens;
@@ -217,7 +217,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
         }
     }
 
-    /// @notice Checks if address is elgible allocator
+    /// @notice Checks if address is eligible allocator
     function _isValidAllocator(address) internal pure override returns (bool) {
         return true;
     }
@@ -433,7 +433,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
 
         Recipient storage recipient = _recipients[recipientId];
 
-        // update the recipients data
+        // update the recipient's data
         recipient.recipientAddress = recipientAddress;
         recipient.metadata = metadata;
         recipient.useRegistryAnchor = useRegistryAnchor ? true : isUsingRegistryAnchor;
