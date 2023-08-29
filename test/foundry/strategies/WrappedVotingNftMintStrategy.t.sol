@@ -128,7 +128,7 @@ contract WrappedVotingNftMintStrategyTest is Test, AlloSetup, RegistrySetupFull,
     function testRevert_initialize_INVALID_NFT_FACTORY_ADDRESS() public {
         WrappedVotingNftMintStrategy testStrategy = __createTestStrategy();
 
-        vm.expectRevert(abi.encodeWithSelector(WrappedVotingNftMintStrategy.INVALID.selector));
+        vm.expectRevert(abi.encodeWithSelector(INVALID.selector));
 
         vm.prank(address(allo()));
         testStrategy.initialize(poolId, abi.encode(address(0), allocationStartTime, allocationEndTime));
@@ -138,7 +138,7 @@ contract WrappedVotingNftMintStrategyTest is Test, AlloSetup, RegistrySetupFull,
     function testRevert_initialize_INVALID_TIMESTAMPS() public {
         WrappedVotingNftMintStrategy testStrategy = __createTestStrategy();
 
-        vm.expectRevert(abi.encodeWithSelector(WrappedVotingNftMintStrategy.INVALID.selector));
+        vm.expectRevert(abi.encodeWithSelector(INVALID.selector));
 
         vm.prank(address(allo()));
         testStrategy.initialize(poolId, abi.encode(address(0), allocationEndTime, allocationStartTime));
@@ -272,7 +272,7 @@ contract WrappedVotingNftMintStrategyTest is Test, AlloSetup, RegistrySetupFull,
         payoutData[1] = abi.encode("");
         payoutData[2] = abi.encode("");
 
-        vm.expectRevert(IStrategy.ARRAY_MISMATCH.selector);
+        vm.expectRevert(ARRAY_MISMATCH.selector);
 
         strategy.getPayouts(recipients, payoutData);
     }

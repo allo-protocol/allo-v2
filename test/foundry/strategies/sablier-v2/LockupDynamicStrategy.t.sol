@@ -287,7 +287,7 @@ contract LockupDynamicStrategyTest is LockupBase_Test, Errors {
             abi.encode(randomAddress(), randomAddress(), cancelable, grantAmount, registerSegments(), strategyMetadata);
 
         vm.startPrank(randomAddress());
-        vm.expectRevert(LockupDynamicStrategy.UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
         allo().registerRecipient(_poolId, registerRecipientData);
         vm.stopPrank();
     }
@@ -301,7 +301,7 @@ contract LockupDynamicStrategyTest is LockupBase_Test, Errors {
         );
 
         vm.startPrank(randomAddress());
-        vm.expectRevert(LockupDynamicStrategy.UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
         allo().registerRecipient(poolId, registerRecipientData);
         vm.stopPrank();
     }
@@ -311,7 +311,7 @@ contract LockupDynamicStrategyTest is LockupBase_Test, Errors {
         bytes memory registerRecipientData =
             abi.encode(pool_manager1(), useRegistryAnchor, cancelable, 0, registerSegments(), strategyMetadata);
 
-        vm.expectRevert(LockupDynamicStrategy.INVALID_REGISTRATION.selector);
+        vm.expectRevert(INVALID_REGISTRATION.selector);
         allo().registerRecipient(poolId, registerRecipientData);
     }
 
@@ -332,7 +332,7 @@ contract LockupDynamicStrategyTest is LockupBase_Test, Errors {
             abi.encode(recipientIds[0], LockupDynamicStrategy.InternalRecipientStatus.Accepted, grantAmount - 1e18);
         allo().allocate(poolId, allocateData);
 
-        vm.expectRevert(LockupDynamicStrategy.RECIPIENT_ALREADY_ACCEPTED.selector);
+        vm.expectRevert(RECIPIENT_ALREADY_ACCEPTED.selector);
         allo().registerRecipient(poolId, registerRecipientData);
     }
 
@@ -348,7 +348,7 @@ contract LockupDynamicStrategyTest is LockupBase_Test, Errors {
             Metadata({protocol: 0, pointer: ""})
         );
 
-        vm.expectRevert(LockupDynamicStrategy.INVALID_METADATA.selector);
+        vm.expectRevert(INVALID_METADATA.selector);
         allo().registerRecipient(poolId, registerRecipientData);
     }
 
@@ -419,7 +419,7 @@ contract LockupDynamicStrategyTest is LockupBase_Test, Errors {
     function test_getPayouts_ARRAY_MISMATCH() public {
         address[] memory recipientIds = new address[](1);
         bytes[] memory data = new bytes[](2);
-        vm.expectRevert(IStrategy.ARRAY_MISMATCH.selector);
+        vm.expectRevert(ARRAY_MISMATCH.selector);
         strategy.getPayouts(recipientIds, data);
     }
 

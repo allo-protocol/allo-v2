@@ -432,7 +432,7 @@ contract DonationVotingMerkleDistributionBaseMockTest is
     function testRevert_withdraw_NOT_ALLOWED_30days() public {
         vm.warp(allocationEndTime + 1 days);
 
-        vm.expectRevert(NOT_ALLOWED.selector);
+        vm.expectRevert(INVALID.selector);
         vm.prank(pool_admin());
         strategy.withdraw(1e18);
     }
@@ -440,7 +440,7 @@ contract DonationVotingMerkleDistributionBaseMockTest is
     function testRevert_withdraw_NOT_ALLOWED_exceed_amount() public {
         vm.warp(block.timestamp + 31 days);
 
-        vm.expectRevert(NOT_ALLOWED.selector);
+        vm.expectRevert(INVALID.selector);
         vm.prank(pool_admin());
         strategy.withdraw(2e18);
     }
@@ -486,7 +486,7 @@ contract DonationVotingMerkleDistributionBaseMockTest is
     }
 
     function testRevert_updateDistribution_ALLOCATION_NOT_ENDED() public {
-        vm.expectRevert(DonationVotingMerkleDistributionBaseStrategy.ALLOCATION_NOT_ENDED.selector);
+        vm.expectRevert(ALLOCATION_NOT_ENDED.selector);
 
         vm.prank(pool_admin());
         strategy.updateDistribution("", Metadata({protocol: 1, pointer: "metadata"}));
@@ -589,7 +589,7 @@ contract DonationVotingMerkleDistributionBaseMockTest is
 
         bytes memory data = abi.encode(recipientAddress(), profile1_anchor(), Metadata(1, "metadata"));
 
-        vm.expectRevert(DonationVotingMerkleDistributionBaseStrategy.UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
         vm.prank(address(allo()));
         _strategy.registerRecipient(data, profile2_member1());
     }
@@ -597,7 +597,7 @@ contract DonationVotingMerkleDistributionBaseMockTest is
     function testRevert_registerRecipient_UNAUTHORIZED() public {
         vm.warp(registrationStartTime + 10);
 
-        vm.expectRevert(DonationVotingMerkleDistributionBaseStrategy.UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
 
         vm.prank(address(allo()));
         bytes memory data = __generateRecipientWithId(profile1_anchor());
@@ -616,11 +616,7 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
         vm.warp(registrationStartTime + 10);
 
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                DonationVotingMerkleDistributionBaseStrategy.RECIPIENT_ERROR.selector, profile1_anchor()
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, profile1_anchor()));
 
         vm.prank(address(allo()));
 
@@ -645,18 +641,14 @@ contract DonationVotingMerkleDistributionBaseMockTest is
     }
 
     function testRevert_allocate_ALLOCATION_NOT_ACTIVE() public {
-        vm.expectRevert(DonationVotingMerkleDistributionBaseStrategy.ALLOCATION_NOT_ACTIVE.selector);
+        vm.expectRevert(ALLOCATION_NOT_ACTIVE.selector);
 
         vm.prank(pool_admin());
         allo().allocate(poolId, abi.encode(recipient1(), address(0), 1e18));
     }
 
     function testRevert_allocate_RECIPIENT_ERROR() public {
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                DonationVotingMerkleDistributionBaseStrategy.RECIPIENT_ERROR.selector, randomAddress()
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, randomAddress()));
 
         vm.warp(allocationStartTime + 1);
         vm.deal(pool_admin(), 1e20);
@@ -733,11 +725,7 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         vm.prank(address(allo()));
         strategy.distribute(new address[](0), abi.encode(distributions), pool_admin());
 
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                DonationVotingMerkleDistributionBaseStrategy.RECIPIENT_ERROR.selector, profile1_anchor()
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, profile1_anchor()));
         vm.prank(address(allo()));
         strategy.distribute(new address[](0), abi.encode(distributions), pool_admin());
     }
@@ -758,11 +746,7 @@ contract DonationVotingMerkleDistributionBaseMockTest is
 
         distributions[0].merkleProof[0] = bytes32(0);
 
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                DonationVotingMerkleDistributionBaseStrategy.RECIPIENT_ERROR.selector, profile1_anchor()
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, profile1_anchor()));
         vm.prank(address(allo()));
         strategy.distribute(new address[](0), abi.encode(distributions), pool_admin());
     }
@@ -781,11 +765,7 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         allo().fundPool{value: 3e18}(poolId, 3e18);
 
         vm.prank(address(allo()));
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                DonationVotingMerkleDistributionBaseStrategy.RECIPIENT_ERROR.selector, profile2_anchor()
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, profile2_anchor()));
         strategy.distribute(new address[](0), abi.encode(distributions), pool_admin());
     }
 

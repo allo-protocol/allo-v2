@@ -135,7 +135,7 @@ contract RFPCommitteeStrategyTest is Test, RegistrySetupFull, AlloSetup, Native,
     function testRevert_allocate_RECIPIENT_ALREADY_ACCEPTED() public {
         __register_setMilestones_allocate();
         vm.prank(address(allo()));
-        vm.expectRevert(RFPSimpleStrategy.RECIPIENT_ALREADY_ACCEPTED.selector);
+        vm.expectRevert(RECIPIENT_ALREADY_ACCEPTED.selector);
         strategy.allocate(abi.encode(randomAddress()), address(pool_admin()));
     }
 

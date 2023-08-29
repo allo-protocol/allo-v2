@@ -128,7 +128,7 @@ contract QVNftTieredStrategyTest is QVBaseStrategyTest {
         wrongMaxVoiceCreditsPerNftLength[1] = (420);
         wrongMaxVoiceCreditsPerNftLength[2] = (69);
 
-        vm.expectRevert(QVBaseStrategy.INVALID.selector);
+        vm.expectRevert(INVALID.selector);
 
         vm.stopPrank();
         vm.startPrank(address(allo()));
@@ -154,7 +154,7 @@ contract QVNftTieredStrategyTest is QVBaseStrategyTest {
         wrongNftsLength[1] = (ERC721(address(new MockERC721())));
         wrongNftsLength[2] = (ERC721(address(new MockERC721())));
 
-        vm.expectRevert(QVBaseStrategy.INVALID.selector);
+        vm.expectRevert(INVALID.selector);
 
         vm.stopPrank();
         vm.startPrank(address(allo()));
@@ -198,7 +198,7 @@ contract QVNftTieredStrategyTest is QVBaseStrategyTest {
         QVNftTieredStrategy strategy = new QVNftTieredStrategy(address(allo()), "MockStrategy");
 
         // when registrationStartTime is in the past
-        vm.expectRevert(QVBaseStrategy.INVALID.selector);
+        vm.expectRevert(INVALID.selector);
         vm.startPrank(address(allo()));
         strategy.initialize(
             poolId,
@@ -216,7 +216,7 @@ contract QVNftTieredStrategyTest is QVBaseStrategyTest {
         );
 
         // when registrationStartTime > registrationEndTime
-        vm.expectRevert(QVBaseStrategy.INVALID.selector);
+        vm.expectRevert(INVALID.selector);
         vm.startPrank(address(allo()));
         strategy.initialize(
             poolId,
@@ -234,7 +234,7 @@ contract QVNftTieredStrategyTest is QVBaseStrategyTest {
         );
 
         // when allocationStartTime > allocationEndTime
-        vm.expectRevert(QVBaseStrategy.INVALID.selector);
+        vm.expectRevert(INVALID.selector);
         vm.startPrank(address(allo()));
         strategy.initialize(
             poolId,
@@ -252,7 +252,7 @@ contract QVNftTieredStrategyTest is QVBaseStrategyTest {
         );
 
         // when  registrationEndTime > allocationEndTime
-        vm.expectRevert(QVBaseStrategy.INVALID.selector);
+        vm.expectRevert(INVALID.selector);
         vm.startPrank(address(allo()));
         strategy.initialize(
             poolId,
@@ -274,7 +274,7 @@ contract QVNftTieredStrategyTest is QVBaseStrategyTest {
         address recipientId = __register_reject_recipient();
         address allocator = makeAddr("allocator");
 
-        vm.expectRevert(abi.encodeWithSelector(QVBaseStrategy.UNAUTHORIZED.selector));
+        vm.expectRevert(abi.encodeWithSelector(UNAUTHORIZED.selector));
         vm.warp(allocationStartTime + 10);
 
         bytes memory allocateData = __generateAllocation(recipientId, 4);
@@ -287,7 +287,7 @@ contract QVNftTieredStrategyTest is QVBaseStrategyTest {
         address recipientId = __register_reject_recipient();
         address allocator = randomAddress();
 
-        vm.expectRevert(abi.encodeWithSelector(QVBaseStrategy.RECIPIENT_ERROR.selector, recipientId));
+        vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, recipientId));
         vm.warp(allocationStartTime + 10);
 
         bytes memory allocateData = __generateAllocation(recipientId, 4);
@@ -299,7 +299,7 @@ contract QVNftTieredStrategyTest is QVBaseStrategyTest {
         address recipientId = __register_accept_recipient();
         address allocator = randomAddress();
 
-        vm.expectRevert(abi.encodeWithSelector(QVBaseStrategy.INVALID.selector));
+        vm.expectRevert(abi.encodeWithSelector(INVALID.selector));
         vm.warp(allocationStartTime + 10);
 
         bytes memory allocateData = __generateAllocation(recipientId, 4000);
@@ -315,7 +315,7 @@ contract QVNftTieredStrategyTest is QVBaseStrategyTest {
         address allocator = randomAddress();
         bytes memory allocateData = __generateAllocation(recipientId, 0);
 
-        vm.expectRevert(QVBaseStrategy.INVALID.selector);
+        vm.expectRevert(INVALID.selector);
         vm.startPrank(address(allo()));
         qvNftStrategy().allocate(allocateData, allocator);
     }

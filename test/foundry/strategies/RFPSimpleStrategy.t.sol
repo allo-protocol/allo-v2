@@ -204,7 +204,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
     }
 
     function testRevert_submitUpcomingMilestone_UNAUTHORIZED() public {
-        vm.expectRevert(RFPSimpleStrategy.UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
         Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
         vm.prank(makeAddr("not_recipient"));
         strategy.submitUpcomingMilestone(metadata);
@@ -277,7 +277,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
     }
 
     function testRevert_withdraw_POOL_ACTIVE() public {
-        vm.expectRevert(IStrategy.POOL_ACTIVE.selector);
+        vm.expectRevert(POOL_ACTIVE.selector);
         vm.prank(pool_admin());
         strategy.withdraw(1e18);
     }
@@ -335,7 +335,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
 
     function testRevert_registerRecipient_POOL_INACTIVE() public {
         __register_setMilestones_allocate();
-        vm.expectRevert(IStrategy.POOL_INACTIVE.selector);
+        vm.expectRevert(POOL_INACTIVE.selector);
         __register_recipient();
     }
 
@@ -349,7 +349,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
 
         bytes memory data = abi.encode(anchor, 1e18, metadata);
 
-        vm.expectRevert(RFPSimpleStrategy.UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
         vm.prank(address(allo()));
         testStrategy.registerRecipient(data, profile1_notAMember());
     }
@@ -360,7 +360,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
 
         bytes memory data = abi.encode(sender, true, 1e18, metadata);
 
-        vm.expectRevert(RFPSimpleStrategy.UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
         vm.prank(address(allo()));
         strategy.registerRecipient(data, sender);
     }
@@ -371,7 +371,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
 
         bytes memory data = abi.encode(recipientAddress(), false, 1e18, metadata);
 
-        vm.expectRevert(RFPSimpleStrategy.INVALID_METADATA.selector);
+        vm.expectRevert(INVALID_METADATA.selector);
         vm.prank(address(allo()));
         strategy.registerRecipient(data, sender);
     }
@@ -401,14 +401,15 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
 
     function testRevert_allocate_POOL_INACTIVE() public {
         address recipientId = __register_setMilestones_allocate();
-        vm.expectRevert(IStrategy.POOL_INACTIVE.selector);
+        vm.expectRevert(POOL_INACTIVE.selector);
         vm.prank(address(allo()));
         strategy.allocate(abi.encode(recipientId), address(pool_admin()));
     }
 
-    function testRevert_allocate_INVALID_RECIPIENT() public {
+    function testRevert_allocate_RECIPIENT_ERROR() public {
         vm.prank(address(allo()));
-        vm.expectRevert(RFPSimpleStrategy.INVALID_RECIPIENT.selector);
+        vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, address(randomAddress())));
+
         strategy.allocate(abi.encode(randomAddress()), address(pool_admin()));
     }
 
@@ -425,7 +426,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
     }
 
     function testRevert_distribute_POOL_ACTIVE() public {
-        vm.expectRevert(IStrategy.POOL_ACTIVE.selector);
+        vm.expectRevert(POOL_ACTIVE.selector);
         vm.prank(address(allo()));
         strategy.distribute(new address[](0), "", pool_admin());
     }
@@ -444,7 +445,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
     function testRevert_distribute_NOT_ENOUGH_FUNDS() public {
         __register_setMilestones_allocate_submitUpcomingMilestone();
         __setMilestones();
-        vm.expectRevert(RFPSimpleStrategy.NOT_ENOUGH_FUNDS.selector);
+        vm.expectRevert(NOT_ENOUGH_FUNDS.selector);
         vm.prank(address(allo()));
         strategy.distribute(new address[](0), "", pool_admin());
     }
