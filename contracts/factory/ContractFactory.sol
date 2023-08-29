@@ -5,7 +5,8 @@ pragma solidity 0.8.19;
 import {CREATE3} from "solady/src/utils/CREATE3.sol";
 
 /// @title ContractFactory
-/// @author @thelostone-mc <aditya@gitcoin.co>, @KurtMerbeth <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>
+/// @author @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>, 
+///         @0xZakk <zakk@gitcoin.co>, @nfrgosselin <nate@gitcoin.co>
 /// @dev ContractFactory is used internally to deploy our contracts using CREATE3
 contract ContractFactory {
     /// ======================

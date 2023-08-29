@@ -12,7 +12,8 @@ import {BaseStrategy} from "../BaseStrategy.sol";
 import {Metadata} from "../../core/libraries/Metadata.sol";
 
 /// @title Direct Grants Simple Strategy.
-/// @author @thelostone-mc <aditya@gitcoin.co>, @KurtMerbeth <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>
+/// @author @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>, 
+///         @0xZakk <zakk@gitcoin.co>, @nfrgosselin <nate@gitcoin.co>
 /// @notice Strategy used to allocate & distribute funds to recipients with milestone payouts. The milestones
 ///         are set by the recipient and the pool manager can accept or reject the milestone. The pool manager
 ///         can also reject the recipient.

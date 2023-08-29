@@ -5,7 +5,8 @@ pragma solidity 0.8.19;
 import {IAllo} from "./IAllo.sol";
 
 /// @title IStrategy Interface
-/// @author @thelostone-mc <aditya@gitcoin.co>, @KurtMerbeth <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>
+/// @author @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>, 
+///         @0xZakk <zakk@gitcoin.co>, @nfrgosselin <nate@gitcoin.co>
 /// @notice BaseStrategy is the base contract that all strategies should inherit from and uses this interface.
 interface IStrategy {
     /// ======================
