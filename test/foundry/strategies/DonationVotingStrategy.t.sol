@@ -33,10 +33,10 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
     bool public useRegistryAnchor;
     bool public metadataRequired;
 
-    uint256 public registrationStartTime;
-    uint256 public registrationEndTime;
-    uint256 public allocationStartTime;
-    uint256 public allocationEndTime;
+    uint64 public registrationStartTime;
+    uint64 public registrationEndTime;
+    uint64 public allocationStartTime;
+    uint64 public allocationEndTime;
 
     address[] public allowedTokens;
 
@@ -52,10 +52,10 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         __RegistrySetupFull();
         __AlloSetup(address(registry()));
 
-        registrationStartTime = block.timestamp + 10;
-        registrationEndTime = block.timestamp + 300;
-        allocationStartTime = block.timestamp + 301;
-        allocationEndTime = block.timestamp + 600;
+        registrationStartTime = uint64(block.timestamp + 10);
+        registrationEndTime = uint64(block.timestamp + 300);
+        allocationStartTime = uint64(block.timestamp + 301);
+        allocationEndTime = uint64(block.timestamp + 600);
 
         useRegistryAnchor = false;
         metadataRequired = true;
@@ -103,7 +103,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         assertTrue(strategy.allowedTokens(address(0)));
     }
 
-    function testRevert_initialize_withNoAllowedToken() public {
+    function testRevert_initialize_withNoAllowedToken() public virtual {
         strategy = new DonationVotingStrategy(address(allo()), "DonationVotingStrategy");
         // when _registrationStartTime is in past
         vm.prank(address(allo()));
@@ -140,7 +140,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         );
     }
 
-    function testRevert_initialize_ALREADY_INITIALIZED() public {
+    function testRevert_initialize_ALREADY_INITIALIZED() public virtual {
         vm.expectRevert(ALREADY_INITIALIZED.selector);
 
         vm.prank(address(allo()));
@@ -158,7 +158,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         );
     }
 
-    function testRevert_initialize_INVALID() public {
+    function testRevert_initialize_INVALID() public virtual {
         strategy = new DonationVotingStrategy(address(allo()), "DonationVotingStrategy");
         // when _registrationStartTime is in past
         vm.expectRevert(INVALID.selector);
@@ -604,13 +604,15 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         strategy.initialize(
             poolId,
             abi.encode(
-                true,
-                metadataRequired,
-                registrationStartTime,
-                registrationEndTime,
-                allocationStartTime,
-                allocationEndTime,
-                allowedTokens
+                DonationVotingStrategy.InitializeData(
+                    true,
+                    metadataRequired,
+                    registrationStartTime,
+                    registrationEndTime,
+                    allocationStartTime,
+                    allocationEndTime,
+                    allowedTokens
+                )
             )
         );
 
@@ -691,13 +693,15 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         strategy.initialize(
             poolId,
             abi.encode(
-                true,
-                metadataRequired,
-                registrationStartTime,
-                registrationEndTime,
-                allocationStartTime,
-                allocationEndTime,
-                allowedTokens
+                DonationVotingStrategy.InitializeData(
+                    true,
+                    metadataRequired,
+                    registrationStartTime,
+                    registrationEndTime,
+                    allocationStartTime,
+                    allocationEndTime,
+                    allowedTokens
+                )
             )
         );
 
@@ -785,8 +789,8 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
     }
 
     function testRevert_allocate_INVALID_invalidToken() public virtual {
-        allowedTokens = new address[](1);
-        allowedTokens[0] = makeAddr("token");
+        address[] memory allowedTokens_ = new address[](1);
+        allowedTokens_[0] = makeAddr("token");
 
         strategy = new DonationVotingStrategy(address(allo()), "DonationVotingStrategy");
         vm.prank(address(allo()));
@@ -799,7 +803,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
                 registrationEndTime,
                 allocationStartTime,
                 allocationEndTime,
-                allowedTokens
+                allowedTokens_
             )
         );
 

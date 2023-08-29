@@ -66,6 +66,17 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
         bytes32[] merkleProof;
     }
 
+    /// @notice Stores the initialize data for the strategy
+    struct InitializeData {
+        bool useRegistryAnchor;
+        bool metadataRequired;
+        uint64 registrationStartTime;
+        uint64 registrationEndTime;
+        uint64 allocationStartTime;
+        uint64 allocationEndTime;
+        address[] allowedTokens;
+    }
+
     /// ===============================
     /// ========== Events =============
     /// ===============================
@@ -223,74 +234,42 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     /// @dev This will revert if the strategy is already initialized and 'msg.sender' is not the 'Allo' contract.
     /// @param _poolId The 'poolId' to initialize
     /// @param _data The data to be decoded to initialize the strategy
-    /// @custom:data (bool _useRegistryAnchor, bool _metadataRequired, uint256 _registrationStartTime,
-    ///               uint256 _registrationEndTime, uint256 _allocationStartTime, uint256 _allocationEndTime,
+    /// @custom:data InitializeData(bool _useRegistryAnchor, bool _metadataRequired, uint64 _registrationStartTime,
+    ///               uint64 _registrationEndTime, uint64 _allocationStartTime, uint64 _allocationEndTime,
     ///               address[] memory _allowedTokens)
     function initialize(uint256 _poolId, bytes memory _data) external virtual override onlyAllo {
-        (
-            bool _useRegistryAnchor,
-            bool _metadataRequired,
-            uint256 _registrationStartTime,
-            uint256 _registrationEndTime,
-            uint256 _allocationStartTime,
-            uint256 _allocationEndTime,
-            address[] memory _allowedTokens
-        ) = abi.decode(_data, (bool, bool, uint256, uint256, uint256, uint256, address[]));
-        __DonationVotingStrategy_init(
-            _poolId,
-            _useRegistryAnchor,
-            _metadataRequired,
-            _registrationStartTime,
-            _registrationEndTime,
-            _allocationStartTime,
-            _allocationEndTime,
-            _allowedTokens
-        );
+        (InitializeData memory initializeData) = abi.decode(_data, (InitializeData));
+        __DonationVotingStrategy_init(_poolId, initializeData);
     }
 
     /// @notice Initializes this strategy as well as the BaseStrategy.
     /// @dev This will revert if the strategy is already initialized. Emits a 'TimestampsUpdated()' event.
     /// @param _poolId The 'poolId' to initialize
-    /// @param _useRegistryAnchor If 'true', the 'recipientAddress' is the anchor of the profile
-    /// @param _metadataRequired If 'true', the metadata is required
-    /// @param _registrationStartTime The start time for the registration
-    /// @param _registrationEndTime The end time for the registration
-    /// @param _allocationStartTime The start time for the allocation
-    /// @param _allocationEndTime The end time for the allocation
-    /// @param _allowedTokens The addresses of the allowed tokens you want for the strategy
-    function __DonationVotingStrategy_init(
-        uint256 _poolId,
-        bool _useRegistryAnchor,
-        bool _metadataRequired,
-        uint256 _registrationStartTime,
-        uint256 _registrationEndTime,
-        uint256 _allocationStartTime,
-        uint256 _allocationEndTime,
-        address[] memory _allowedTokens
-    ) internal {
+    /// @param _initializeData The data to be decoded to initialize the strategy
+    function __DonationVotingStrategy_init(uint256 _poolId, InitializeData memory _initializeData) internal {
         // Initialize the BaseStrategy with the '_poolId'
         __BaseStrategy_init(_poolId);
 
         // Initialize required values
-        useRegistryAnchor = _useRegistryAnchor;
-        metadataRequired = _metadataRequired;
+        useRegistryAnchor = _initializeData.useRegistryAnchor;
+        metadataRequired = _initializeData.metadataRequired;
         _registry = allo.getRegistry();
 
-        // If the timestamps are invalid this will revert - See details in '_isPoolTimestampValid'
-        _isPoolTimestampValid(_registrationStartTime, _registrationEndTime, _allocationStartTime, _allocationEndTime);
-
         // Set the updated timestamps
-        registrationStartTime = _registrationStartTime;
-        registrationEndTime = _registrationEndTime;
-        allocationStartTime = _allocationStartTime;
-        allocationEndTime = _allocationEndTime;
+        registrationStartTime = _initializeData.registrationStartTime;
+        registrationEndTime = _initializeData.registrationEndTime;
+        allocationStartTime = _initializeData.allocationStartTime;
+        allocationEndTime = _initializeData.allocationEndTime;
+
+        // If the timestamps are invalid this will revert - See details in '_isPoolTimestampValid'
+        _isPoolTimestampValid(registrationStartTime, registrationEndTime, allocationStartTime, allocationEndTime);
 
         // Emit that the timestamps have been updated with the updated values
         emit TimestampsUpdated(
             registrationStartTime, registrationEndTime, allocationStartTime, allocationEndTime, msg.sender
         );
 
-        uint256 allowedTokensLength = _allowedTokens.length;
+        uint256 allowedTokensLength = _initializeData.allowedTokens.length;
 
         // If the length of the allowed tokens is zero, we will allow all tokens
         if (allowedTokensLength == 0) {
@@ -300,7 +279,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
 
         // Loop through the allowed tokens and set them to true
         for (uint256 i = 0; i < allowedTokensLength;) {
-            allowedTokens[_allowedTokens[i]] = true;
+            allowedTokens[_initializeData.allowedTokens[i]] = true;
             unchecked {
                 i++;
             }

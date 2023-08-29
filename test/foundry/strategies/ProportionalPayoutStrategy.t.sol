@@ -31,10 +31,10 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
     /// ================================
 
     /// @notice When the allocation (voting) period starts
-    uint256 public startTime;
+    uint64 public startTime;
 
     /// @notice When the allocation (voting) period ends
-    uint256 public endTime;
+    uint64 public endTime;
 
     /// @notice The nft required for voting
     MockERC721 public nft;
@@ -68,8 +68,8 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
         __RegistrySetupFull();
         __AlloSetup(address(registry()));
 
-        startTime = block.timestamp + 100;
-        endTime = block.timestamp + 600;
+        startTime = uint64(block.timestamp + 100);
+        endTime = uint64(block.timestamp + 600);
         poolMetadata = Metadata({protocol: 1, pointer: "PoolMetadata"});
         strategy = new ProportionalPayoutStrategy(address(allo()), "ProportionalPayoutStrategy");
         initialized = false;
@@ -149,8 +149,8 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
     }
 
     function test_setAllocationTimes() public {
-        uint256 _startTime = block.timestamp + 100;
-        uint256 _endTime = block.timestamp + 600;
+        uint64 _startTime = uint64(block.timestamp + 100);
+        uint64 _endTime = uint64(block.timestamp + 600);
 
         vm.expectEmit(true, false, false, true);
         emit AllocationTimeSet(_startTime, _endTime);
@@ -163,8 +163,8 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
     }
 
     function testRevert_setAllocationTimes_UNAUTHORIZED() public {
-        uint256 _startTime = block.timestamp + 100;
-        uint256 _endTime = block.timestamp + 600;
+        uint64 _startTime = uint64(block.timestamp + 100);
+        uint64 _endTime = uint64(block.timestamp + 600);
 
         vm.expectRevert(abi.encodeWithSelector(UNAUTHORIZED.selector));
         emit AllocationTimeSet(_startTime, _endTime);
@@ -174,8 +174,8 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
     }
 
     function testRevert_setAllocationTimes_INVALID() public {
-        uint256 _startTime = block.timestamp - 1;
-        uint256 _endTime = block.timestamp + 600;
+        uint64 _startTime = uint64(block.timestamp - 1);
+        uint64 _endTime = uint64(block.timestamp + 600);
 
         vm.expectRevert(INVALID.selector);
         vm.prank(pool_manager1());

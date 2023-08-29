@@ -40,10 +40,10 @@ contract DonationVotingMerkleDistributionBaseMockTest is
     bool public useRegistryAnchor;
     bool public metadataRequired;
 
-    uint256 public registrationStartTime;
-    uint256 public registrationEndTime;
-    uint256 public allocationStartTime;
-    uint256 public allocationEndTime;
+    uint64 public registrationStartTime;
+    uint64 public registrationEndTime;
+    uint64 public allocationStartTime;
+    uint64 public allocationEndTime;
     uint256 public poolId;
 
     address[] public allowedTokens;
@@ -57,10 +57,10 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         __RegistrySetupFull();
         __AlloSetup(address(registry()));
 
-        registrationStartTime = block.timestamp + 10;
-        registrationEndTime = block.timestamp + 300;
-        allocationStartTime = block.timestamp + 301;
-        allocationEndTime = block.timestamp + 600;
+        registrationStartTime = uint64(block.timestamp + 10);
+        registrationEndTime = uint64(block.timestamp + 300);
+        allocationStartTime = uint64(block.timestamp + 301);
+        allocationEndTime = uint64(block.timestamp + 600);
 
         useRegistryAnchor = true;
         metadataRequired = true;
@@ -81,13 +81,15 @@ contract DonationVotingMerkleDistributionBaseMockTest is
             poolProfile_id(),
             address(strategy),
             abi.encode(
-                useRegistryAnchor,
-                metadataRequired,
-                registrationStartTime,
-                registrationEndTime,
-                allocationStartTime,
-                allocationEndTime,
-                allowedTokens
+                DonationVotingMerkleDistributionBaseStrategy.InitializeData(
+                    useRegistryAnchor,
+                    metadataRequired,
+                    registrationStartTime,
+                    registrationEndTime,
+                    allocationStartTime,
+                    allocationEndTime,
+                    allowedTokens
+                )
             ),
             NATIVE,
             1e18,
@@ -130,13 +132,15 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         strategy.initialize(
             poolId,
             abi.encode(
-                useRegistryAnchor,
-                metadataRequired,
-                registrationStartTime,
-                registrationEndTime,
-                allocationStartTime,
-                allocationEndTime,
-                new address[](0)
+                DonationVotingMerkleDistributionBaseStrategy.InitializeData(
+                    useRegistryAnchor,
+                    metadataRequired,
+                    registrationStartTime,
+                    registrationEndTime,
+                    allocationStartTime,
+                    allocationEndTime,
+                    new address[](0)
+                )
             )
         );
         assertTrue(strategy.allowedTokens(address(0)));
@@ -151,13 +155,15 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         testSrategy.initialize(
             poolId,
             abi.encode(
-                useRegistryAnchor,
-                metadataRequired,
-                registrationStartTime,
-                registrationEndTime,
-                allocationStartTime,
-                allocationEndTime,
-                tokensAllowed
+                DonationVotingMerkleDistributionBaseStrategy.InitializeData(
+                    useRegistryAnchor,
+                    metadataRequired,
+                    registrationStartTime,
+                    registrationEndTime,
+                    allocationStartTime,
+                    allocationEndTime,
+                    tokensAllowed
+                )
             )
         );
         assertFalse(testSrategy.allowedTokens(makeAddr("not-allowed-token")));
@@ -170,13 +176,15 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         strategy.initialize(
             poolId,
             abi.encode(
-                useRegistryAnchor,
-                metadataRequired,
-                registrationStartTime,
-                registrationEndTime,
-                allocationStartTime,
-                allocationEndTime,
-                allowedTokens
+                DonationVotingMerkleDistributionBaseStrategy.InitializeData(
+                    useRegistryAnchor,
+                    metadataRequired,
+                    registrationStartTime,
+                    registrationEndTime,
+                    allocationStartTime,
+                    allocationEndTime,
+                    allowedTokens
+                )
             )
         );
     }
@@ -188,13 +196,15 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         strategy.initialize(
             poolId,
             abi.encode(
-                useRegistryAnchor,
-                metadataRequired,
-                registrationStartTime,
-                registrationEndTime,
-                allocationStartTime,
-                allocationEndTime,
-                allowedTokens
+                DonationVotingMerkleDistributionBaseStrategy.InitializeData(
+                    useRegistryAnchor,
+                    metadataRequired,
+                    registrationStartTime,
+                    registrationEndTime,
+                    allocationStartTime,
+                    allocationEndTime,
+                    allowedTokens
+                )
             )
         );
     }
@@ -208,13 +218,15 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         strategy.initialize(
             poolId,
             abi.encode(
-                useRegistryAnchor,
-                metadataRequired,
-                block.timestamp - 1,
-                registrationEndTime,
-                allocationStartTime,
-                allocationEndTime,
-                allowedTokens
+                DonationVotingMerkleDistributionBaseStrategy.InitializeData(
+                    useRegistryAnchor,
+                    metadataRequired,
+                    uint64(block.timestamp - 1),
+                    registrationEndTime,
+                    allocationStartTime,
+                    allocationEndTime,
+                    allowedTokens
+                )
             )
         );
 
@@ -224,13 +236,15 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         strategy.initialize(
             poolId,
             abi.encode(
-                useRegistryAnchor,
-                metadataRequired,
-                registrationStartTime,
-                block.timestamp,
-                allocationStartTime,
-                allocationEndTime,
-                allowedTokens
+                DonationVotingMerkleDistributionBaseStrategy.InitializeData(
+                    useRegistryAnchor,
+                    metadataRequired,
+                    registrationStartTime,
+                    uint64(block.timestamp),
+                    allocationStartTime,
+                    allocationEndTime,
+                    allowedTokens
+                )
             )
         );
 
@@ -240,13 +254,15 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         strategy.initialize(
             poolId,
             abi.encode(
-                useRegistryAnchor,
-                metadataRequired,
-                registrationStartTime,
-                registrationEndTime,
-                block.timestamp,
-                allocationEndTime,
-                allowedTokens
+                DonationVotingMerkleDistributionBaseStrategy.InitializeData(
+                    useRegistryAnchor,
+                    metadataRequired,
+                    registrationStartTime,
+                    registrationEndTime,
+                    uint64(block.timestamp),
+                    allocationEndTime,
+                    allowedTokens
+                )
             )
         );
 
@@ -256,13 +272,15 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         strategy.initialize(
             poolId,
             abi.encode(
-                useRegistryAnchor,
-                metadataRequired,
-                registrationStartTime,
-                registrationEndTime,
-                allocationStartTime,
-                block.timestamp,
-                allowedTokens
+                DonationVotingMerkleDistributionBaseStrategy.InitializeData(
+                    useRegistryAnchor,
+                    metadataRequired,
+                    registrationStartTime,
+                    registrationEndTime,
+                    allocationStartTime,
+                    uint64(block.timestamp),
+                    allowedTokens
+                )
             )
         );
 
@@ -272,13 +290,15 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         strategy.initialize(
             poolId,
             abi.encode(
-                useRegistryAnchor,
-                metadataRequired,
-                registrationStartTime,
-                registrationEndTime,
-                allocationStartTime,
-                registrationStartTime - 1,
-                allowedTokens
+                DonationVotingMerkleDistributionBaseStrategy.InitializeData(
+                    useRegistryAnchor,
+                    metadataRequired,
+                    registrationStartTime,
+                    registrationEndTime,
+                    allocationStartTime,
+                    registrationStartTime - 1,
+                    allowedTokens
+                )
             )
         );
     }
@@ -543,13 +563,15 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         _strategy.initialize(
             poolId,
             abi.encode(
-                false,
-                metadataRequired,
-                registrationStartTime,
-                registrationEndTime,
-                allocationStartTime,
-                allocationEndTime,
-                allowedTokens
+                DonationVotingMerkleDistributionBaseStrategy.InitializeData(
+                    false,
+                    metadataRequired,
+                    registrationStartTime,
+                    registrationEndTime,
+                    allocationStartTime,
+                    allocationEndTime,
+                    allowedTokens
+                )
             )
         );
 
@@ -575,13 +597,15 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         _strategy.initialize(
             poolId,
             abi.encode(
-                false,
-                metadataRequired,
-                registrationStartTime,
-                registrationEndTime,
-                allocationStartTime,
-                allocationEndTime,
-                allowedTokens
+                DonationVotingMerkleDistributionBaseStrategy.InitializeData(
+                    false,
+                    metadataRequired,
+                    registrationStartTime,
+                    registrationEndTime,
+                    allocationStartTime,
+                    allocationEndTime,
+                    allowedTokens
+                )
             )
         );
 
