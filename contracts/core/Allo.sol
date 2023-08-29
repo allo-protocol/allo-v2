@@ -29,8 +29,7 @@ import {Transfer} from "./libraries/Transfer.sol";
 //         \/__/          \/__/      \/__/      \/__/
 
 /// @title Allo
-/// @author @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>,
-///         @0xZakk <zakk@gitcoin.co>, @nfrgosselin <nate@gitcoin.co>
+/// @author @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>, @0xZakk <zakk@gitcoin.co>, @nfrgosselin <nate@gitcoin.co>
 /// @notice This contract is used to create & manage pools as well as manage the protocol.
 /// @dev The contract must be initialized with the 'initialize()' function.
 contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl, ReentrancyGuard, Errors {

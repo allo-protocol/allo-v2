@@ -5,8 +5,7 @@ pragma solidity 0.8.19;
 import {Metadata} from "../libraries/Metadata.sol";
 
 /// @title IRegistry Interface
-/// @author @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>, 
-///         @0xZakk <zakk@gitcoin.co>, @nfrgosselin <nate@gitcoin.co>
+/// @author @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>, @0xZakk <zakk@gitcoin.co>, @nfrgosselin <nate@gitcoin.co>
 /// @notice Interface for the Registry contract and exposes all functions needed to use the Registry
 ///         within the Allo protocol.
 /// @dev The Registry Interface is used to interact with the Allo protocol and create profiles

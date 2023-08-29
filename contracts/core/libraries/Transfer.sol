@@ -7,8 +7,7 @@ import {SafeTransferLib} from "solady/src/utils/SafeTransferLib.sol";
 import "./Native.sol";
 
 /// @title Transfer contract
-/// @author @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>, 
-///         @0xZakk <zakk@gitcoin.co>, @nfrgosselin <nate@gitcoin.co>
+/// @author @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>, @0xZakk <zakk@gitcoin.co>, @nfrgosselin <nate@gitcoin.co>
 /// @notice A helper contract to transfer tokens within Allo protocol
 /// @dev Handles the transfer of tokens to an address
 contract Transfer is Native {
