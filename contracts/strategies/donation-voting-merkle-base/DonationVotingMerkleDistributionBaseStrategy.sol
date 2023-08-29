@@ -2,8 +2,8 @@
 pragma solidity 0.8.19;
 
 // External Libraries
-import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
-import {Multicall} from "@openzeppelin/contracts/utils/Multicall.sol";
+import {MerkleProof} from "openzeppelin-contracts/contracts/utils/cryptography/MerkleProof.sol";
+import {Multicall} from "openzeppelin-contracts/contracts/utils/Multicall.sol";
 // Interfaces
 import {IAllo} from "../../core/interfaces/IAllo.sol";
 import {IRegistry} from "../../core/interfaces/IRegistry.sol";

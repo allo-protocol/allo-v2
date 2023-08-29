@@ -14,17 +14,9 @@ import {IStrategy} from "../../../contracts/core/interfaces/IStrategy.sol";
 import {QVBaseStrategy} from "../../../contracts/strategies/qv-base/QVBaseStrategy.sol";
 
 import {
-    Attestation,
-    AttestationRequest,
-    AttestationRequestData,
-    IEAS,
-    RevocationRequest
-} from "@ethereum-attestation-service/eas-contracts/contracts/IEAS.sol";
-import {
-    ISchemaRegistry,
-    ISchemaResolver,
-    SchemaRecord
-} from "@ethereum-attestation-service/eas-contracts/contracts/ISchemaRegistry.sol";
+    Attestation, AttestationRequest, AttestationRequestData, IEAS, RevocationRequest
+} from "eas-contracts/IEAS.sol";
+import {ISchemaRegistry, ISchemaResolver, SchemaRecord} from "eas-contracts/ISchemaRegistry.sol";
 // Mocks
 import {MockEAS, MockSchemaRegistry} from "../../utils/MockEAS.sol";
 

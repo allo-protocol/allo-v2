@@ -2,21 +2,11 @@
 pragma solidity 0.8.19;
 
 import {
-    Attestation,
-    AttestationRequest,
-    AttestationRequestData,
-    EIP712Signature,
-    IEAS,
-    RevocationRequest
-} from "@ethereum-attestation-service/eas-contracts/contracts/IEAS.sol";
-import {
-    ISchemaRegistry,
-    ISchemaResolver,
-    SchemaRecord
-} from "@ethereum-attestation-service/eas-contracts/contracts/ISchemaRegistry.sol";
+    Attestation, AttestationRequest, AttestationRequestData, IEAS, RevocationRequest
+} from "eas-contracts/IEAS.sol";
+import {ISchemaRegistry, ISchemaResolver, SchemaRecord} from "eas-contracts/ISchemaRegistry.sol";
 
 contract MockEAS {
-
     Attestation public mockAttestation = Attestation({
         uid: bytes32("123"),
         schema: bytes32("123"),
@@ -30,12 +20,10 @@ contract MockEAS {
         data: abi.encode("123")
     });
 
-
     function attest(AttestationRequest calldata request) external payable returns (bytes32) {
         request;
         return bytes32("123");
     }
-
 
     function getAttestation(bytes32 uid) external view returns (Attestation memory) {
         uid;

@@ -2,8 +2,8 @@
 pragma solidity 0.8.19;
 
 // External Libraries
-import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {AccessControl} from "openzeppelin-contracts/contracts/access/AccessControl.sol";
+import "openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
 import {CREATE3} from "solady/src/utils/CREATE3.sol";
 import {ERC20} from "solady/src/tokens/ERC20.sol";
 // Interfaces

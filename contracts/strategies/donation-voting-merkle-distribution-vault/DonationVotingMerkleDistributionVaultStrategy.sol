@@ -3,7 +3,7 @@ pragma solidity 0.8.19;
 
 import {DonationVotingMerkleDistributionBaseStrategy} from
     "../donation-voting-merkle-base/DonationVotingMerkleDistributionBaseStrategy.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
 
 /// @title Donation Voting Merkle Distribution Strategy
 /// @author @thelostone-mc <aditya@gitcoin.co>, @KurtMerbeth <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>

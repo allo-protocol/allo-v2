@@ -6,7 +6,7 @@ import {IStrategy} from "../../../contracts/core/interfaces/IStrategy.sol";
 import {QVBaseStrategy} from "../../../contracts/strategies/qv-base/QVBaseStrategy.sol";
 
 // External Libraries
-import "@openzeppelin/contracts/governance/utils/IVotes.sol";
+import "openzeppelin-contracts/contracts/governance/utils/IVotes.sol";
 
 // Test libraries
 import {QVBaseStrategyTest} from "./QVBaseStrategy.t.sol";
