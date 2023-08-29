@@ -142,7 +142,7 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
     }
 
     function testRevert_initialize_ALREADY_INITIALIZED() public override {
-        vm.expectRevert(IStrategy.BaseStrategy_ALREADY_INITIALIZED.selector);
+        vm.expectRevert(ALREADY_INITIALIZED.selector);
 
         vm.startPrank(address(allo()));
         qvStrategy().initialize(
@@ -252,7 +252,7 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
         address sender = recipient1();
 
         // pointer is empty
-        vm.expectRevert(QVBaseStrategy.INVALID_METADATA.selector);
+        vm.expectRevert(INVALID_METADATA.selector);
         Metadata memory metadata = Metadata({protocol: 1, pointer: ""});
 
         bytes memory data = abi.encode(profile1_anchor(), recipient1(), metadata);
@@ -261,7 +261,7 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
         qvStrategy().registerRecipient(data, sender);
 
         // protocol is 0
-        vm.expectRevert(QVBaseStrategy.INVALID_METADATA.selector);
+        vm.expectRevert(INVALID_METADATA.selector);
         metadata = Metadata({protocol: 0, pointer: "metadata"});
 
         data = abi.encode(profile1_anchor(), recipient1(), metadata);
@@ -279,7 +279,7 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
 
         bytes memory data = abi.encode(profile2_anchor(), sender, metadata);
 
-        vm.expectRevert(QVBaseStrategy.UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
 
         vm.prank(address(allo()));
         hQvStrategy().registerRecipient(data, sender);
@@ -293,7 +293,7 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
 
         bytes memory data = abi.encode(randomAddress(), recipient1(), metadata);
 
-        vm.expectRevert(QVBaseStrategy.UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
 
         vm.prank(address(allo()));
         hQvStrategy().registerRecipient(data, sender);
@@ -306,7 +306,7 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
         address sender = recipient1();
 
         // pointer is empty
-        vm.expectRevert(abi.encodeWithSelector(QVBaseStrategy.RECIPIENT_ERROR.selector, profile1_anchor()));
+        vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, profile1_anchor()));
         Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
 
         bytes memory data = abi.encode(profile1_anchor(), address(0), metadata);
@@ -318,7 +318,7 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
     function testRevert_allocate_UNAUTHORIZED() public {
         address recipientId = __register_accept_recipient();
 
-        vm.expectRevert(QVBaseStrategy.UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
 
         vm.warp(allocationStartTime + 10);
         bytes memory allocation = __generateAllocation(recipientId, 1);
@@ -334,7 +334,7 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
         vm.startPrank(address(allo()));
         qvStrategy().allocate(allocation, randomAddress());
 
-        vm.expectRevert(QVBaseStrategy.INVALID.selector);
+        vm.expectRevert(INVALID.selector);
 
         qvStrategy().allocate(allocation, randomAddress());
         vm.stopPrank();
@@ -347,7 +347,7 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
         bytes memory allocation = __generateAllocation(recipientId, 5);
         vm.startPrank(address(allo()));
 
-        vm.expectRevert(QVBaseStrategy.INVALID.selector);
+        vm.expectRevert(INVALID.selector);
 
         qvStrategy().allocate(allocation, randomAddress());
         vm.stopPrank();
@@ -479,12 +479,12 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
     }
 
     /// @notice Tests the payout percentages will revert if allocation has started
-    function testRevert_setPayoutPercentages_ALLOCATION_STARTED() public {
+    function testRevert_setPayoutPercentages_ALLOCATION_ACTIVE() public {
         uint256[] memory amounts = new uint256[](2);
         amounts[0] = 6e17;
         amounts[1] = 4e17;
 
-        vm.expectRevert(HackathonQVStrategy.ALLOCATION_STARTED.selector);
+        vm.expectRevert(ALLOCATION_ACTIVE.selector);
         vm.warp(allocationStartTime + 10);
         vm.prank(pool_admin());
         hQvStrategy().setPayoutPercentages(amounts);
@@ -508,7 +508,7 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
         amounts[0] = 6e17;
         amounts[1] = 3e17;
 
-        vm.expectRevert(QVBaseStrategy.INVALID.selector);
+        vm.expectRevert(INVALID.selector);
 
         vm.prank(pool_admin());
         hQvStrategy().setPayoutPercentages(amounts);

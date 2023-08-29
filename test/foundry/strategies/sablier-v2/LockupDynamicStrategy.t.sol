@@ -6,11 +6,12 @@ import {UD2x18} from "@sablier/v2-core/src/types/Math.sol";
 
 import {IStrategy} from "../../../../contracts/core/interfaces/IStrategy.sol";
 import {LockupDynamicStrategy} from "../../../../contracts/strategies/sablier-v2/LockupDynamicStrategy.sol";
+import {Errors} from "../../../../contracts/core/libraries/Errors.sol";
 import {Metadata} from "../../../../contracts/core/libraries/Metadata.sol";
 
 import {LockupBase_Test} from "./LockupBase.t.sol";
 
-contract LockupDynamicStrategyTest is LockupBase_Test {
+contract LockupDynamicStrategyTest is LockupBase_Test, Errors {
     event RecipientSegmentsChanged(address recipientId, LockupDynamic.SegmentWithDelta[] segments);
 
     ISablierV2LockupDynamic internal lockupDynamic = ISablierV2LockupDynamic(0x39EFdC3dbB57B2388CcC4bb40aC4CB1226Bc9E44);
@@ -231,14 +232,14 @@ contract LockupDynamicStrategyTest is LockupBase_Test {
         assertEq(grantAmountRequired, strategy.grantAmountRequired());
     }
 
-    function test_initialize_BaseStrategy_UNAUTHORIZED() public {
+    function test_initialize_UNAUTHORIZED() public {
         changePrank(randomAddress());
-        vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
         strategy.initialize(poolId, setUpData);
     }
 
-    function testRevert_initialize_BaseStrategy_ALREADY_INITIALIZED() public {
-        vm.expectRevert(IStrategy.BaseStrategy_ALREADY_INITIALIZED.selector);
+    function testRevert_initialize_ALREADY_INITIALIZED() public {
+        vm.expectRevert(ALREADY_INITIALIZED.selector);
 
         vm.startPrank(address(allo()));
         strategy.initialize(poolId, setUpData);
@@ -286,7 +287,7 @@ contract LockupDynamicStrategyTest is LockupBase_Test {
             abi.encode(randomAddress(), randomAddress(), cancelable, grantAmount, registerSegments(), strategyMetadata);
 
         vm.startPrank(randomAddress());
-        vm.expectRevert(LockupDynamicStrategy.UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
         allo().registerRecipient(_poolId, registerRecipientData);
         vm.stopPrank();
     }
@@ -300,7 +301,7 @@ contract LockupDynamicStrategyTest is LockupBase_Test {
         );
 
         vm.startPrank(randomAddress());
-        vm.expectRevert(LockupDynamicStrategy.UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
         allo().registerRecipient(poolId, registerRecipientData);
         vm.stopPrank();
     }
@@ -310,7 +311,7 @@ contract LockupDynamicStrategyTest is LockupBase_Test {
         bytes memory registerRecipientData =
             abi.encode(pool_manager1(), useRegistryAnchor, cancelable, 0, registerSegments(), strategyMetadata);
 
-        vm.expectRevert(LockupDynamicStrategy.INVALID_REGISTRATION.selector);
+        vm.expectRevert(INVALID_REGISTRATION.selector);
         allo().registerRecipient(poolId, registerRecipientData);
     }
 
@@ -331,7 +332,7 @@ contract LockupDynamicStrategyTest is LockupBase_Test {
             abi.encode(recipientIds[0], LockupDynamicStrategy.InternalRecipientStatus.Accepted, grantAmount - 1e18);
         allo().allocate(poolId, allocateData);
 
-        vm.expectRevert(LockupDynamicStrategy.RECIPIENT_ALREADY_ACCEPTED.selector);
+        vm.expectRevert(RECIPIENT_ALREADY_ACCEPTED.selector);
         allo().registerRecipient(poolId, registerRecipientData);
     }
 
@@ -347,7 +348,7 @@ contract LockupDynamicStrategyTest is LockupBase_Test {
             Metadata({protocol: 0, pointer: ""})
         );
 
-        vm.expectRevert(LockupDynamicStrategy.INVALID_METADATA.selector);
+        vm.expectRevert(INVALID_METADATA.selector);
         allo().registerRecipient(poolId, registerRecipientData);
     }
 
@@ -418,7 +419,7 @@ contract LockupDynamicStrategyTest is LockupBase_Test {
     function test_getPayouts_ARRAY_MISMATCH() public {
         address[] memory recipientIds = new address[](1);
         bytes[] memory data = new bytes[](2);
-        vm.expectRevert(IStrategy.BaseStrategy_ARRAY_MISMATCH.selector);
+        vm.expectRevert(ARRAY_MISMATCH.selector);
         strategy.getPayouts(recipientIds, data);
     }
 

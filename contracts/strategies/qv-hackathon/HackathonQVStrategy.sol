@@ -38,7 +38,6 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
     error ALREADY_ADDED();
     error OUT_OF_BOUNDS();
     error INVALID_SCHEMA();
-    error ALLOCATION_STARTED();
 
     /// ======================
     /// ====== Storage =======
@@ -169,7 +168,7 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
     /// @param _payoutPercentages The payoutPercentages to set
     function setPayoutPercentages(uint256[] memory _payoutPercentages) external onlyPoolManager(msg.sender) {
         if (block.timestamp > allocationStartTime || payoutPercentages.length != 0) {
-            revert ALLOCATION_STARTED();
+            revert ALLOCATION_ACTIVE();
         }
 
         uint256 percentageLength = _payoutPercentages.length;

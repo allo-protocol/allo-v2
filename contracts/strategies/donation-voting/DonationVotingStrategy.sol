@@ -40,19 +40,6 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     }
 
     /// ===============================
-    /// ========== Errors =============
-    /// ===============================
-
-    error UNAUTHORIZED();
-    error REGISTRATION_NOT_ACTIVE();
-    error ALLOCATION_NOT_ACTIVE();
-    error ALLOCATION_NOT_ENDED();
-    error RECIPIENT_ERROR(address recipientId);
-    error INVALID();
-    error NOT_ALLOWED();
-    error INVALID_METADATA();
-
-    /// ===============================
     /// ========== Events =============
     /// ===============================
 
@@ -354,12 +341,12 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _amount The amount to be withdrawn
     function withdraw(uint256 _amount) external onlyPoolManager(msg.sender) {
         if (block.timestamp <= allocationEndTime + 30 days) {
-            revert NOT_ALLOWED();
+            revert INVALID();
         }
 
         IAllo.Pool memory pool = allo.getPool(poolId);
         if (poolAmount - totalPayoutAmount < _amount) {
-            revert NOT_ALLOWED();
+            revert INVALID();
         }
 
         poolAmount -= _amount;

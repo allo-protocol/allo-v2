@@ -20,16 +20,6 @@ contract WrappedVotingNftMintStrategy is Native, BaseStrategy, ReentrancyGuard {
     }
 
     /// ===============================
-    /// ========== Errors =============
-    /// ===============================
-
-    error REGISTRATION_NOT_ACTIVE();
-    error ALLOCATION_NOT_ACTIVE();
-    error ALLOCATION_NOT_ENDED();
-    error RECIPIENT_ERROR(address recipientId);
-    error INVALID();
-
-    /// ===============================
     /// ========== Events =============
     /// ===============================
 

@@ -35,7 +35,7 @@ contract DonationVotingCustomRegistryStrategy is DonationVotingStrategy {
         );
 
         if (_customRegistry == address(0)) {
-            revert BaseStrategy_INVALID_ADDRESS();
+            revert INVALID_ADDRESS();
         }
 
         registry = SimpleProjectRegistry(_customRegistry);

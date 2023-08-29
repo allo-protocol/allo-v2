@@ -20,12 +20,7 @@ contract ProportionalPayoutStrategy is BaseStrategy {
     /// ======= Errors ======
     /// =====================
 
-    error RECIPIENT_ERROR(address recipientId);
-    error UNAUTHORIZED();
     error MAX_REACHED();
-    error ALLOCATION_NOT_ACTIVE();
-    error ALLOCATION_NOT_ENDED();
-    error INVALID();
 
     /// ======================
     /// ====== Modifier ======

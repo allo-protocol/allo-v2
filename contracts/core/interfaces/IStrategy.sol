@@ -27,34 +27,6 @@ interface IStrategy {
     }
 
     /// ======================
-    /// ======= Errors =======
-    /// ======================
-
-    /// @notice Throws when calls to Base Strategy are unauthorized
-    error BaseStrategy_UNAUTHORIZED();
-
-    /// @notice Throws when Base Strategy is already initialized
-    error BaseStrategy_ALREADY_INITIALIZED();
-
-    /// @notice Throws when Base Strategy is not initialized
-    error BaseStrategy_NOT_INITIALIZED();
-
-    /// @notice Throws when an invalid address is used
-    error BaseStrategy_INVALID_ADDRESS();
-
-    /// @notice Throws when a pool is inactive
-    error BaseStrategy_POOL_INACTIVE();
-
-    /// @notice Throws when a pool is already active
-    error BaseStrategy_POOL_ACTIVE();
-
-    /// @notice Throws when two arrays length are not equal
-    error BaseStrategy_ARRAY_MISMATCH();
-
-    /// @notice Throws as a general error when either a recipient address or an amount is invalid
-    error BaseStrategy_INVALID();
-
-    /// ======================
     /// ======= Events =======
     /// ======================
 

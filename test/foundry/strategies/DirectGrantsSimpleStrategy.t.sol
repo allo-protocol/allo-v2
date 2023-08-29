@@ -7,7 +7,8 @@ import {Native} from "../../../contracts/core/libraries/Native.sol";
 import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
 
 import {IStrategy} from "../../../contracts/core/interfaces/IStrategy.sol";
-
+// Internal libraries
+import {Errors} from "../../../contracts/core/libraries/Errors.sol";
 // Test libraries
 import {AlloSetup} from "../shared/AlloSetup.sol";
 import {RegistrySetupFull} from "../shared/RegistrySetup.sol";
@@ -18,7 +19,7 @@ import {EventSetup} from "../shared/EventSetup.sol";
 import {DirectGrantsSimpleStrategy} from
     "../../../contracts/strategies/direct-grants-simple/DirectGrantsSimpleStrategy.sol";
 
-contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, RegistrySetupFull, Native {
+contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, RegistrySetupFull, Native, Errors {
     event RecipientStatusChanged(address recipientId, DirectGrantsSimpleStrategy.InternalRecipientStatus status);
     event MilestoneSubmitted(address recipientId, uint256 milestoneId, Metadata metadata);
     event MilestoneStatusChanged(address recipientId, uint256 milestoneId, IStrategy.RecipientStatus status);
@@ -99,7 +100,7 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
         bytes memory data = abi.encode(recipientId, recipientAddress, grantAmount, metadata);
         vm.startPrank(address(allo()));
 
-        vm.expectRevert(DirectGrantsSimpleStrategy.UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
 
         strategy.registerRecipient(data, sender);
         vm.stopPrank();
@@ -141,7 +142,7 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
 
         bytes memory data = abi.encode(recipientAddress, recipientId, grantAmount, metadata);
 
-        vm.expectRevert(DirectGrantsSimpleStrategy.UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
 
         vm.startPrank(address(allo()));
         newStrategy.registerRecipient(data, profile2_member1());
@@ -158,7 +159,7 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
         bytes memory data = abi.encode(recipientId, recipientAddress, grantAmount, metadata);
         vm.startPrank(address(allo()));
 
-        vm.expectRevert(DirectGrantsSimpleStrategy.INVALID_REGISTRATION.selector);
+        vm.expectRevert(INVALID_REGISTRATION.selector);
 
         strategy.registerRecipient(data, sender);
         vm.stopPrank();
@@ -174,14 +175,14 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
         bytes memory data = abi.encode(recipientId, recipientAddress, grantAmount, metadata);
         vm.startPrank(address(allo()));
 
-        vm.expectRevert(DirectGrantsSimpleStrategy.INVALID_METADATA.selector);
+        vm.expectRevert(INVALID_METADATA.selector);
 
         strategy.registerRecipient(data, sender);
 
         metadata = Metadata(1, "");
         data = abi.encode(recipientId, recipientAddress, grantAmount, metadata);
 
-        vm.expectRevert(DirectGrantsSimpleStrategy.INVALID_METADATA.selector);
+        vm.expectRevert(INVALID_METADATA.selector);
 
         strategy.registerRecipient(data, sender);
 
@@ -200,7 +201,7 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
 
         vm.startPrank(address(allo()));
 
-        vm.expectRevert(DirectGrantsSimpleStrategy.RECIPIENT_ALREADY_ACCEPTED.selector);
+        vm.expectRevert(RECIPIENT_ALREADY_ACCEPTED.selector);
 
         strategy.registerRecipient(data, sender);
         vm.stopPrank();
@@ -351,7 +352,7 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
             milestoneStatus: IStrategy.RecipientStatus.None
         });
 
-        vm.expectRevert(DirectGrantsSimpleStrategy.UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
         vm.startPrank(randomAddress());
         strategy.setMilestones(recipientId, milestones);
         vm.stopPrank();
@@ -387,7 +388,7 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
 
     function testRevert_reviewSetMilestones_UNAUTHORIZED() public {
         address recipientId = _register_recipient_allocate_accept_set_milestones_by_recipient();
-        vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
 
         vm.startPrank(randomAddress());
         strategy.reviewSetMilestones(recipientId, IStrategy.RecipientStatus.Rejected);
@@ -449,7 +450,7 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
             milestoneStatus: IStrategy.RecipientStatus.None
         });
 
-        vm.expectRevert(DirectGrantsSimpleStrategy.RECIPIENT_NOT_ACCEPTED.selector);
+        vm.expectRevert(RECIPIENT_NOT_ACCEPTED.selector);
 
         vm.startPrank(pool_manager1());
         strategy.setMilestones(randomAddress(), milestones);
@@ -574,7 +575,7 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
 
         Metadata memory metadata2 = Metadata(1, "milestone-2");
 
-        vm.expectRevert(DirectGrantsSimpleStrategy.RECIPIENT_NOT_ACCEPTED.selector);
+        vm.expectRevert(RECIPIENT_NOT_ACCEPTED.selector);
         vm.startPrank(profile1_member1());
         strategy.submitMilestone(recipientId, 1, metadata2);
         vm.stopPrank();
@@ -585,7 +586,7 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
 
         Metadata memory metadata = Metadata(1, "milestone-1");
 
-        vm.expectRevert(DirectGrantsSimpleStrategy.UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
 
         vm.startPrank(randomAddress());
         strategy.submitMilestone(recipientId, 0, metadata);

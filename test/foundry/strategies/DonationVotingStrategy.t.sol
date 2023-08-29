@@ -8,6 +8,7 @@ import {IStrategy} from "../../../contracts/core/interfaces/IStrategy.sol";
 import {BaseStrategy} from "../../../contracts/strategies/BaseStrategy.sol";
 import {DonationVotingStrategy} from "../../../contracts/strategies/donation-voting/DonationVotingStrategy.sol";
 // Internal libraries
+import {Errors} from "../../../contracts/core/libraries/Errors.sol";
 import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
 import {Native} from "../../../contracts/core/libraries/Native.sol";
 
@@ -17,7 +18,7 @@ import {RegistrySetupFull} from "../shared/RegistrySetup.sol";
 
 import {EventSetup} from "../shared/EventSetup.sol";
 
-contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, EventSetup, Native {
+contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, EventSetup, Native, Errors {
     /// ===============================
     /// ========== Events =============
     /// ===============================
@@ -121,8 +122,8 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         assertTrue(strategy.allowedTokens(address(0)));
     }
 
-    function test_initialize_BaseStrategy_UNAUTHORIZED() public {
-        vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
+    function test_initialize_UNAUTHORIZED() public {
+        vm.expectRevert(UNAUTHORIZED.selector);
 
         vm.prank(randomAddress());
         strategy.initialize(
@@ -139,8 +140,8 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         );
     }
 
-    function testRevert_initialize_BaseStrategy_ALREADY_INITIALIZED() public {
-        vm.expectRevert(IStrategy.BaseStrategy_ALREADY_INITIALIZED.selector);
+    function testRevert_initialize_ALREADY_INITIALIZED() public {
+        vm.expectRevert(ALREADY_INITIALIZED.selector);
 
         vm.prank(address(allo()));
         strategy.initialize(
@@ -160,7 +161,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
     function testRevert_initialize_INVALID() public {
         strategy = new DonationVotingStrategy(address(allo()), "DonationVotingStrategy");
         // when _registrationStartTime is in past
-        vm.expectRevert(DonationVotingStrategy.INVALID.selector);
+        vm.expectRevert(INVALID.selector);
         vm.prank(address(allo()));
         strategy.initialize(
             poolId,
@@ -176,7 +177,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         );
 
         // when _registrationStartTime > _registrationEndTime
-        vm.expectRevert(DonationVotingStrategy.INVALID.selector);
+        vm.expectRevert(INVALID.selector);
         vm.prank(address(allo()));
         strategy.initialize(
             poolId,
@@ -192,7 +193,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         );
 
         // when _registrationStartTime > _allocationStartTime
-        vm.expectRevert(DonationVotingStrategy.INVALID.selector);
+        vm.expectRevert(INVALID.selector);
         vm.prank(address(allo()));
         strategy.initialize(
             poolId,
@@ -208,7 +209,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         );
 
         // when _allocationStartTime > _allocationEndTime
-        vm.expectRevert(DonationVotingStrategy.INVALID.selector);
+        vm.expectRevert(INVALID.selector);
         vm.prank(address(allo()));
         strategy.initialize(
             poolId,
@@ -224,7 +225,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         );
 
         // when  _registrationEndTime > _allocationEndTime
-        vm.expectRevert(DonationVotingStrategy.INVALID.selector);
+        vm.expectRevert(INVALID.selector);
         vm.prank(address(allo()));
         strategy.initialize(
             poolId,
@@ -329,14 +330,14 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
     }
 
     function testRevert_reviewRecipients_REGISTRATION_NOT_ACTIVE() public {
-        vm.expectRevert(DonationVotingStrategy.REGISTRATION_NOT_ACTIVE.selector);
+        vm.expectRevert(REGISTRATION_NOT_ACTIVE.selector);
         vm.prank(pool_admin());
         strategy.reviewRecipients(new address[](1), new DonationVotingStrategy.InternalRecipientStatus[](1));
     }
 
     function testRevert_reviewRecipients_INVALID() public {
         vm.warp(registrationStartTime + 10);
-        vm.expectRevert(DonationVotingStrategy.INVALID.selector);
+        vm.expectRevert(INVALID.selector);
         vm.prank(pool_admin());
         strategy.reviewRecipients(new address[](1), new DonationVotingStrategy.InternalRecipientStatus[](0));
     }
@@ -351,7 +352,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
             new DonationVotingStrategy.InternalRecipientStatus[](1);
         recipientStatuses[0] = DonationVotingStrategy.InternalRecipientStatus.None;
 
-        vm.expectRevert(abi.encodeWithSelector(DonationVotingStrategy.RECIPIENT_ERROR.selector, recipients[0]));
+        vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, recipients[0]));
         vm.prank(pool_admin());
 
         strategy.reviewRecipients(recipients, recipientStatuses);
@@ -367,7 +368,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
             new DonationVotingStrategy.InternalRecipientStatus[](1);
         recipientStatuses[0] = DonationVotingStrategy.InternalRecipientStatus.Appealed;
 
-        vm.expectRevert(abi.encodeWithSelector(DonationVotingStrategy.RECIPIENT_ERROR.selector, recipients[0]));
+        vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, recipients[0]));
         vm.prank(pool_admin());
 
         strategy.reviewRecipients(recipients, recipientStatuses);
@@ -375,7 +376,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
 
     function testRevert_reviewRecipients_UNAUTHORIZED() public {
         vm.warp(registrationStartTime + 10);
-        vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
         vm.prank(randomAddress());
         strategy.reviewRecipients(new address[](1), new DonationVotingStrategy.InternalRecipientStatus[](1));
     }
@@ -402,14 +403,14 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         strategy.setPayout(recipientIds, amounts);
     }
 
-    function testRevert_setPayout_BaseStrategy_UNAUTHORIZED() public {
-        vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
+    function testRevert_setPayout_UNAUTHORIZED() public {
+        vm.expectRevert(UNAUTHORIZED.selector);
         vm.prank(makeAddr("random"));
         strategy.setPayout(new address[](1), new uint256[](2));
     }
 
     function testRevert_setPayout_ALLOCATION_NOT_ENDED() public {
-        vm.expectRevert(DonationVotingStrategy.ALLOCATION_NOT_ENDED.selector);
+        vm.expectRevert(ALLOCATION_NOT_ENDED.selector);
         vm.prank(pool_admin());
         strategy.setPayout(new address[](1), new uint256[](2));
     }
@@ -422,7 +423,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = 1e18;
 
-        vm.expectRevert(DonationVotingStrategy.INVALID.selector);
+        vm.expectRevert(INVALID.selector);
 
         vm.prank(pool_admin());
         vm.warp(allocationEndTime + 10);
@@ -431,7 +432,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
 
     function testRevert_setPayout_INVALID_mismatchLength() public {
         vm.warp(allocationEndTime + 10);
-        vm.expectRevert(DonationVotingStrategy.INVALID.selector);
+        vm.expectRevert(INVALID.selector);
         vm.prank(pool_admin());
         strategy.setPayout(new address[](1), new uint256[](2));
     }
@@ -440,7 +441,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         address recipientId = __register_accept_setPayout_recipient();
 
         address sender = recipient();
-        vm.expectRevert(abi.encodeWithSelector(DonationVotingStrategy.RECIPIENT_ERROR.selector, sender));
+        vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, sender));
 
         address[] memory recipientIds = new address[](1);
         recipientIds[0] = recipientId;
@@ -462,7 +463,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = 1e18;
 
-        vm.expectRevert(DonationVotingStrategy.INVALID.selector);
+        vm.expectRevert(INVALID.selector);
         vm.warp(allocationEndTime + 10);
         vm.prank(pool_admin());
         strategy.setPayout(recipientIds, amounts);
@@ -511,7 +512,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         claim[0] = DonationVotingStrategy.Claim({recipientId: no_recipient(), token: NATIVE});
 
         vm.warp(allocationEndTime + 10);
-        vm.expectRevert(DonationVotingStrategy.INVALID.selector);
+        vm.expectRevert(INVALID.selector);
 
         strategy.claim(claim);
     }
@@ -534,7 +535,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
     }
 
     function testRevert_updatePoolTimestamps_UNAUTHORIZED() public {
-        vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
         vm.prank(randomAddress());
         strategy.updatePoolTimestamps(
             registrationStartTime, registrationEndTime, allocationStartTime, allocationEndTime + 10
@@ -542,7 +543,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
     }
 
     function testRevert_updatePoolTimestamps_INVALID() public {
-        vm.expectRevert(DonationVotingStrategy.INVALID.selector);
+        vm.expectRevert(INVALID.selector);
         vm.prank(pool_admin());
         strategy.updatePoolTimestamps(block.timestamp - 1, registrationEndTime, allocationStartTime, allocationEndTime);
     }
@@ -557,7 +558,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
     function testRevert_withdraw_NOT_ALLOWED_30days() public {
         vm.warp(allocationEndTime + 1 days);
 
-        vm.expectRevert(DonationVotingStrategy.NOT_ALLOWED.selector);
+        vm.expectRevert(INVALID.selector);
         vm.prank(pool_admin());
         strategy.withdraw(1e18);
     }
@@ -565,13 +566,13 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
     function testRevert_withdraw_NOT_ALLOWED_exceed_amount() public {
         vm.warp(block.timestamp + 31 days);
 
-        vm.expectRevert(DonationVotingStrategy.NOT_ALLOWED.selector);
+        vm.expectRevert(INVALID.selector);
         vm.prank(pool_admin());
         strategy.withdraw(1e18);
     }
 
     function testRevert_withdraw_UNAUTHORIZED() public {
-        vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
         vm.prank(randomAddress());
         strategy.withdraw(1e18);
     }
@@ -654,14 +655,14 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
     }
 
     function testRevert_registerRecipient_UNAUTHORIZED() public {
-        vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
         vm.prank(randomAddress());
         bytes memory data = __generateRecipientWithoutId();
         strategy.registerRecipient(data, msg.sender);
     }
 
     function testRevert_registerRecipient_REGISTRATION_NOT_ACTIVE() public {
-        vm.expectRevert(DonationVotingStrategy.REGISTRATION_NOT_ACTIVE.selector);
+        vm.expectRevert(REGISTRATION_NOT_ACTIVE.selector);
         vm.warp(registrationEndTime + 10);
 
         vm.prank(address(allo()));
@@ -676,7 +677,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         address recipientAddress = address(0);
         Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
 
-        vm.expectRevert(DonationVotingStrategy.UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
 
         bytes memory data = abi.encode(recipientAddress, true, metadata);
 
@@ -701,7 +702,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         );
 
         vm.warp(registrationStartTime + 1);
-        vm.expectRevert(DonationVotingStrategy.UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
 
         address sender = recipient();
         bytes memory data = __generateRecipientWithId(sender);
@@ -716,7 +717,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         address sender = recipient();
         address recipientAddress = address(0);
 
-        vm.expectRevert(abi.encodeWithSelector(DonationVotingStrategy.RECIPIENT_ERROR.selector, sender));
+        vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, sender));
 
         bytes memory data = __getEncodedData(recipientAddress, 1, "metadata");
 
@@ -730,7 +731,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         address sender = recipient();
 
         // pointer is empty
-        vm.expectRevert(DonationVotingStrategy.INVALID_METADATA.selector);
+        vm.expectRevert(INVALID_METADATA.selector);
         address recipientAddress = recipientAddress();
         bytes memory data = __getEncodedData(recipientAddress, 1, "");
 
@@ -738,7 +739,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         strategy.registerRecipient(data, sender);
 
         // protocol is 0
-        vm.expectRevert(DonationVotingStrategy.INVALID_METADATA.selector);
+        vm.expectRevert(INVALID_METADATA.selector);
         data = __getEncodedData(recipientAddress, 0, "metadata");
 
         vm.prank(address(allo()));
@@ -766,7 +767,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
     function testRevert_allocate_ALLOCATION_NOT_ACTIVE() public {
         address recipientId = __register_accept_recipient();
 
-        vm.expectRevert(DonationVotingStrategy.ALLOCATION_NOT_ACTIVE.selector);
+        vm.expectRevert(ALLOCATION_NOT_ACTIVE.selector);
 
         vm.prank(address(allo()));
         bytes memory allocateData = abi.encode(recipientId, 1e18, NATIVE);
@@ -776,7 +777,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
     function testRevert_allocate_RECIPIENT_ERROR() public {
         address recipientId = __register_reject_recipient();
 
-        vm.expectRevert(abi.encodeWithSelector(DonationVotingStrategy.RECIPIENT_ERROR.selector, recipientId));
+        vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, recipientId));
         vm.warp(allocationStartTime + 10);
         bytes memory allocateData = abi.encode(recipientId, 1e18, NATIVE);
         vm.prank(address(allo()));
@@ -803,7 +804,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         );
 
         address recipientId = __register_accept_recipient();
-        vm.expectRevert(DonationVotingStrategy.INVALID.selector);
+        vm.expectRevert(INVALID.selector);
 
         vm.warp(allocationStartTime + 10);
 
@@ -820,7 +821,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         address recipientId = __register_accept_recipient();
 
         vm.warp(allocationStartTime + 10);
-        vm.expectRevert(DonationVotingStrategy.INVALID.selector);
+        vm.expectRevert(INVALID.selector);
 
         bytes memory allocateData = abi.encode(recipientId, 1e18, NATIVE);
         vm.prank(address(allo()));
@@ -851,7 +852,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         recipients[1] = recipient();
 
         vm.prank(address(allo()));
-        vm.expectRevert(abi.encodeWithSelector(DonationVotingStrategy.INVALID.selector));
+        vm.expectRevert(abi.encodeWithSelector(INVALID.selector));
 
         strategy.distribute(recipients, "", pool_admin());
     }
@@ -864,7 +865,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         recipients[1] = no_recipient();
 
         vm.prank(address(allo()));
-        vm.expectRevert(abi.encodeWithSelector(DonationVotingStrategy.RECIPIENT_ERROR.selector, recipients[1]));
+        vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, recipients[1]));
 
         strategy.distribute(recipients, "", pool_admin());
     }
