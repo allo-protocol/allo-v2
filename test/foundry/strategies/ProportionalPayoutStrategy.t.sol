@@ -117,13 +117,13 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
         vm.startPrank(address(allo()));
         testStrategy.initialize(1337, abi.encode(address(nft), 2, startTime, endTime));
 
-        vm.expectRevert(IStrategy.BaseStrategy_ALREADY_INITIALIZED.selector);
+        vm.expectRevert(IStrategy.ALREADY_INITIALIZED.selector);
         testStrategy.initialize(1337, abi.encode(address(nft), 2, startTime, endTime));
     }
 
     function testRevert_initialize_UNAUTHORIZED() public {
         ProportionalPayoutStrategy testStrategy = __createTestStrategy();
-        vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
+        vm.expectRevert(IStrategy.UNAUTHORIZED.selector);
 
         testStrategy.initialize(1337, abi.encode(address(nft), 2, startTime, endTime));
     }
@@ -171,7 +171,7 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
         uint256 _startTime = block.timestamp + 100;
         uint256 _endTime = block.timestamp + 600;
 
-        vm.expectRevert(abi.encodeWithSelector(IStrategy.BaseStrategy_UNAUTHORIZED.selector));
+        vm.expectRevert(abi.encodeWithSelector(IStrategy.UNAUTHORIZED.selector));
         emit AllocationTimeSet(_startTime, _endTime);
 
         vm.prank(pool_notAManager());
@@ -276,7 +276,7 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
         Metadata memory metadata = Metadata({protocol: 1, pointer: "Test Metadata"});
         bytes memory data = abi.encode(recipient1(), recipient1(), IStrategy.RecipientStatus.Accepted, metadata);
 
-        vm.expectRevert(abi.encodeWithSelector(IStrategy.BaseStrategy_UNAUTHORIZED.selector));
+        vm.expectRevert(abi.encodeWithSelector(IStrategy.UNAUTHORIZED.selector));
 
         vm.prank(pool_notAManager());
         allo().registerRecipient(poolId, data);
@@ -298,7 +298,7 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
         address[] memory recipientIds = new address[](1);
         recipientIds[0] = recipientId;
 
-        vm.expectRevert(IStrategy.BaseStrategy_ARRAY_MISMATCH.selector);
+        vm.expectRevert(IStrategy.ARRAY_MISMATCH.selector);
 
         strategy.getPayouts(recipientIds, new bytes[](0));
     }

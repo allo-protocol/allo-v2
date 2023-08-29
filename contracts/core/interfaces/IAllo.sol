@@ -26,31 +26,6 @@ interface IAllo {
     }
 
     /// ======================
-    /// ======= Errors =======
-    /// ======================
-
-    /// @notice Thrown when access is not authorized
-    error UNAUTHORIZED();
-
-    /// @notice Thrown when the 'msg.sender' has not sent enough funds
-    error NOT_ENOUGH_FUNDS();
-
-    /// @notice Thrown when the strategy is not approved
-    error NOT_APPROVED_STRATEGY();
-
-    /// @notice Thrown when the strategy is approved and should be cloned
-    error IS_APPROVED_STRATEGY();
-
-    /// @notice Thrown when Encoded '_data' length does not match _poolIds length
-    error MISMATCH();
-
-    /// @notice Thrown when any address is the zero address
-    error ZERO_ADDRESS();
-
-    /// @notice Thrown when the fee is below 1e18 which is the fee percentage denominator
-    error INVALID_FEE();
-
-    /// ======================
     /// ======= Events =======
     /// ======================
 

@@ -155,8 +155,8 @@ contract DonationVotingMerkleDistributionBaseMockTest is Test, AlloSetup, Regist
         assertFalse(testSrategy.allowedTokens(makeAddr("not-allowed-token")));
     }
 
-    function test_initialize_BaseStrategy_UNAUTHORIZED() public {
-        vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
+    function test_initialize_UNAUTHORIZED() public {
+        vm.expectRevert(IStrategy.UNAUTHORIZED.selector);
 
         vm.prank(randomAddress());
         strategy.initialize(
@@ -173,8 +173,8 @@ contract DonationVotingMerkleDistributionBaseMockTest is Test, AlloSetup, Regist
         );
     }
 
-    function testRevert_initialize_BaseStrategy_ALREADY_INITIALIZED() public {
-        vm.expectRevert(IStrategy.BaseStrategy_ALREADY_INITIALIZED.selector);
+    function testRevert_initialize_ALREADY_INITIALIZED() public {
+        vm.expectRevert(IStrategy.ALREADY_INITIALIZED.selector);
 
         vm.prank(address(allo()));
         strategy.initialize(
@@ -345,7 +345,7 @@ contract DonationVotingMerkleDistributionBaseMockTest is Test, AlloSetup, Regist
     // Tests that only the pool admin can review recipients
     function testRevert_reviewRecipients_UNAUTHORIZED() public {
         __register_recipient();
-        vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
+        vm.expectRevert(IStrategy.UNAUTHORIZED.selector);
         vm.warp(registrationStartTime + 1);
 
         DonationVotingMerkleDistributionBaseStrategy.ApplicationStatus[] memory statuses =
@@ -408,7 +408,7 @@ contract DonationVotingMerkleDistributionBaseMockTest is Test, AlloSetup, Regist
     }
 
     function testRevert_updatePoolTimestamps_UNAUTHORIZED() public {
-        vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
+        vm.expectRevert(IStrategy.UNAUTHORIZED.selector);
         vm.prank(randomAddress());
         strategy.updatePoolTimestamps(
             registrationStartTime, registrationEndTime, allocationStartTime, allocationEndTime + 10
@@ -438,7 +438,7 @@ contract DonationVotingMerkleDistributionBaseMockTest is Test, AlloSetup, Regist
     }
 
     function testRevert_withdraw_UNAUTHORIZED() public {
-        vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
+        vm.expectRevert(IStrategy.UNAUTHORIZED.selector);
         vm.prank(randomAddress());
         strategy.withdraw(1e18);
     }
@@ -486,7 +486,7 @@ contract DonationVotingMerkleDistributionBaseMockTest is Test, AlloSetup, Regist
 
     function testRevert_updateDistribution_UNAUTHORIZED() public {
         vm.warp(allocationEndTime + 1);
-        vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
+        vm.expectRevert(IStrategy.UNAUTHORIZED.selector);
 
         vm.prank(randomAddress());
         strategy.updateDistribution("", Metadata({protocol: 1, pointer: "metadata"}));

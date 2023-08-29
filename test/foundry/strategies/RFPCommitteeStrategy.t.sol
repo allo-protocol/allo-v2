@@ -85,13 +85,13 @@ contract RFPCommitteeStrategyTest is Test, RegistrySetupFull, AlloSetup, Native,
         vm.startPrank(address(allo()));
         testStrategy.initialize(1337, abi.encode(maxBid, useRegistryAnchor, metadataRequired, voteThreshold));
 
-        vm.expectRevert(IStrategy.BaseStrategy_ALREADY_INITIALIZED.selector);
+        vm.expectRevert(IStrategy.ALREADY_INITIALIZED.selector);
         testStrategy.initialize(1337, abi.encode(maxBid, useRegistryAnchor, metadataRequired, voteThreshold));
     }
 
     function testRevert_initialize_UNAUTHORIZED() public {
         RFPCommitteeStrategy testStrategy = new RFPCommitteeStrategy(address(allo()), "RFPCommitteeStrategy");
-        vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
+        vm.expectRevert(IStrategy.UNAUTHORIZED.selector);
         testStrategy.initialize(1337, abi.encode(maxBid, useRegistryAnchor, metadataRequired, voteThreshold));
     }
 
@@ -126,7 +126,7 @@ contract RFPCommitteeStrategyTest is Test, RegistrySetupFull, AlloSetup, Native,
     }
 
     function testRevert_allocate_UNAUTHORIZED() public {
-        vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
+        vm.expectRevert(IStrategy.UNAUTHORIZED.selector);
         vm.prank(makeAddr("not_pool_manager"));
         strategy.allocate(abi.encode(recipientAddress()), recipient());
     }

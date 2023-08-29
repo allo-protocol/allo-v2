@@ -121,8 +121,8 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         assertTrue(strategy.allowedTokens(address(0)));
     }
 
-    function test_initialize_BaseStrategy_UNAUTHORIZED() public {
-        vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
+    function test_initialize_UNAUTHORIZED() public {
+        vm.expectRevert(IStrategy.UNAUTHORIZED.selector);
 
         vm.prank(randomAddress());
         strategy.initialize(
@@ -139,8 +139,8 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         );
     }
 
-    function testRevert_initialize_BaseStrategy_ALREADY_INITIALIZED() public {
-        vm.expectRevert(IStrategy.BaseStrategy_ALREADY_INITIALIZED.selector);
+    function testRevert_initialize_ALREADY_INITIALIZED() public {
+        vm.expectRevert(IStrategy.ALREADY_INITIALIZED.selector);
 
         vm.prank(address(allo()));
         strategy.initialize(
@@ -375,7 +375,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
 
     function testRevert_reviewRecipients_UNAUTHORIZED() public {
         vm.warp(registrationStartTime + 10);
-        vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
+        vm.expectRevert(IStrategy.UNAUTHORIZED.selector);
         vm.prank(randomAddress());
         strategy.reviewRecipients(new address[](1), new DonationVotingStrategy.InternalRecipientStatus[](1));
     }
@@ -402,8 +402,8 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         strategy.setPayout(recipientIds, amounts);
     }
 
-    function testRevert_setPayout_BaseStrategy_UNAUTHORIZED() public {
-        vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
+    function testRevert_setPayout_UNAUTHORIZED() public {
+        vm.expectRevert(IStrategy.UNAUTHORIZED.selector);
         vm.prank(makeAddr("random"));
         strategy.setPayout(new address[](1), new uint256[](2));
     }
@@ -534,7 +534,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
     }
 
     function testRevert_updatePoolTimestamps_UNAUTHORIZED() public {
-        vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
+        vm.expectRevert(IStrategy.UNAUTHORIZED.selector);
         vm.prank(randomAddress());
         strategy.updatePoolTimestamps(
             registrationStartTime, registrationEndTime, allocationStartTime, allocationEndTime + 10
@@ -571,7 +571,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
     }
 
     function testRevert_withdraw_UNAUTHORIZED() public {
-        vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
+        vm.expectRevert(IStrategy.UNAUTHORIZED.selector);
         vm.prank(randomAddress());
         strategy.withdraw(1e18);
     }
@@ -654,7 +654,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
     }
 
     function testRevert_registerRecipient_UNAUTHORIZED() public {
-        vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
+        vm.expectRevert(IStrategy.UNAUTHORIZED.selector);
         vm.prank(randomAddress());
         bytes memory data = __generateRecipientWithoutId();
         strategy.registerRecipient(data, msg.sender);

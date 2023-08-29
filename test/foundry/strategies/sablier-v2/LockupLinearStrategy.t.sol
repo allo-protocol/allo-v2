@@ -217,14 +217,14 @@ contract LockupLinearStrategyTest is LockupBase_Test {
         assertEq(grantAmountRequired, strategy.grantAmountRequired());
     }
 
-    function test_initialize_BaseStrategy_UNAUTHORIZED() public {
+    function test_initialize_UNAUTHORIZED() public {
         changePrank(randomAddress());
-        vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
+        vm.expectRevert(IStrategy.UNAUTHORIZED.selector);
         strategy.initialize(poolId, setUpData);
     }
 
-    function testRevert_initialize_BaseStrategy_ALREADY_INITIALIZED() public {
-        vm.expectRevert(IStrategy.BaseStrategy_ALREADY_INITIALIZED.selector);
+    function testRevert_initialize_ALREADY_INITIALIZED() public {
+        vm.expectRevert(IStrategy.ALREADY_INITIALIZED.selector);
 
         vm.startPrank(address(allo()));
         strategy.initialize(poolId, setUpData);
@@ -401,7 +401,7 @@ contract LockupLinearStrategyTest is LockupBase_Test {
     function test_getPayouts_ARRAY_MISMATCH() public {
         address[] memory recipientIds = new address[](1);
         bytes[] memory data = new bytes[](2);
-        vm.expectRevert(IStrategy.BaseStrategy_ARRAY_MISMATCH.selector);
+        vm.expectRevert(IStrategy.ARRAY_MISMATCH.selector);
         strategy.getPayouts(recipientIds, data);
     }
 

@@ -67,39 +67,6 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     }
 
     /// ===============================
-    /// ========== Errors =============
-    /// ===============================
-
-    /// @notice Throws when the sender is not a profile member.
-    error UNAUTHORIZED();
-
-    /// @notice Throws when registration is not active.
-    error REGISTRATION_NOT_ACTIVE();
-
-    /// @notice Throws when allocation is not active.
-    error ALLOCATION_NOT_ACTIVE();
-
-    /// @notice Throws when allocation has not ended.
-    error ALLOCATION_NOT_ENDED();
-
-    /// @notice Throws when there is an error with the recipient. This can occur when the recipient
-    ///      is not registered or the recipient is not accepted.
-    /// @param recipientId Id of the recipient
-    error RECIPIENT_ERROR(address recipientId);
-
-    /// @notice Throws when a general error occurs.
-    /// @dev Used as a general error message for this strategy. This can occur when a token is not
-    ///      allowed or the amount is invalid and is specific to this strategy.
-    error INVALID();
-
-    /// @notice Throws when 30 days have not passed since the end of the allocation or
-    ///         the amount is greater than the pool amount.
-    error NOT_ALLOWED();
-
-    /// @notice Throws when the metadata is invalid, protocol or pointer is not set.
-    error INVALID_METADATA();
-
-    /// ===============================
     /// ========== Events =============
     /// ===============================
 
@@ -446,13 +413,13 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     /// @param _amount The amount to be withdrawn
     function withdraw(uint256 _amount) external onlyPoolManager(msg.sender) {
         if (block.timestamp <= allocationEndTime + 30 days) {
-            revert NOT_ALLOWED();
+            revert INVALID();
         }
 
         IAllo.Pool memory pool = allo.getPool(poolId);
 
         if (_amount > poolAmount) {
-            revert NOT_ALLOWED();
+            revert INVALID();
         }
 
         poolAmount -= _amount;

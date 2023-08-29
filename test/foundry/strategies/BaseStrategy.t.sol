@@ -21,7 +21,7 @@ contract BaseStrategyTest is Test, AlloSetup, RegistrySetupFull {
     }
 
     function testRevert_initialize_INVALID_zeroPoolId() public {
-        vm.expectRevert(IStrategy.BaseStrategy_INVALID.selector);
+        vm.expectRevert(IStrategy.INVALID.selector);
 
         vm.prank(address(allo()));
         strategy.initialize(0, "");

@@ -387,7 +387,7 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
 
     function testRevert_reviewSetMilestones_UNAUTHORIZED() public {
         address recipientId = _register_recipient_allocate_accept_set_milestones_by_recipient();
-        vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
+        vm.expectRevert(IStrategy.UNAUTHORIZED.selector);
 
         vm.startPrank(randomAddress());
         strategy.reviewSetMilestones(recipientId, IStrategy.RecipientStatus.Rejected);

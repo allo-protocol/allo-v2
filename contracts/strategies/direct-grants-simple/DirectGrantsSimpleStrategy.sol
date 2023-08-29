@@ -53,35 +53,17 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// ========== Errors =============
     /// ===============================
 
-    /// @notice Throws when recipient is already accepted.
-    error RECIPIENT_ALREADY_ACCEPTED();
-
-    /// @notice Throws when the user address is not authorized.
-    error UNAUTHORIZED();
-
     /// @notice Throws when the milestone is invalid.
     error INVALID_MILESTONE();
 
     /// @notice Throws when the milestone is already accepted.
     error MILESTONE_ALREADY_ACCEPTED();
 
-    /// @notice Throws when the milestone is already rejected.
-    //error MILESTONE_ALREADY_REJECTED();
-
     /// @notice Throws when the milestones are already set.
     error MILESTONES_ALREADY_SET();
 
-    /// @notice Throws when the registration is invalid.
-    error INVALID_REGISTRATION();
-
     /// @notice Throws when the allocation exceeds the pool amount.
     error ALLOCATION_EXCEEDS_POOL_AMOUNT();
-
-    /// @notice Throws when the metadata is invalid.
-    error INVALID_METADATA();
-
-    /// @notice Throws when the recipient is not accepted.
-    error RECIPIENT_NOT_ACCEPTED();
 
     /// ===============================
     /// ========== Events =============

@@ -10,6 +10,7 @@ import {ERC20} from "solady/src/tokens/ERC20.sol";
 import "./interfaces/IRegistry.sol";
 // Internal Libraries
 import {Anchor} from "./Anchor.sol";
+import {Errors} from "./libraries/Errors.sol";
 import {Metadata} from "./libraries/Metadata.sol";
 import "./libraries/Native.sol";
 import "./libraries/Transfer.sol";
@@ -21,7 +22,7 @@ import "./libraries/Transfer.sol";
 ///      It is also used to deploy the anchor contract for each profile which acts as a proxy
 ///      for the profile and is used to receive funds and execute transactions on behalf of the profile
 ///      The Registry is also used to add and remove members from a profile and update the profile 'Metadata'
-contract Registry is IRegistry, Native, AccessControl, Transfer, Initializable {
+contract Registry is IRegistry, Native, AccessControl, Transfer, Initializable, Errors {
     /// ==========================
     /// === Storage Variables ====
     /// ==========================

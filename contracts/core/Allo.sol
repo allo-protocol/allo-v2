@@ -12,6 +12,7 @@ import "./interfaces/IAllo.sol";
 
 // Internal Libraries
 import {Clone} from "./libraries/Clone.sol";
+import {Errors} from "./libraries/Errors.sol";
 import "./libraries/Native.sol";
 import {Transfer} from "./libraries/Transfer.sol";
 
@@ -31,7 +32,7 @@ import {Transfer} from "./libraries/Transfer.sol";
 /// @author @thelostone-mc <aditya@gitcoin.co>, @KurtMerbeth <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>
 /// @notice This contract is used to create & manage pools as well as manage the protocol.
 /// @dev The contract must be initialized with the 'initialize()' function.
-contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl, ReentrancyGuard {
+contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl, ReentrancyGuard, Errors {
     // ==========================
     // === Storage Variables ====
     // ==========================
@@ -445,7 +446,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
         _setRoleAdmin(POOL_MANAGER_ROLE, POOL_ADMIN_ROLE);
 
         // initialize strategies
-        // Initialization is expected to revert when invoked more than once with 'BaseStrategy_ALREADY_INITIALIZED()' error
+        // Initialization is expected to revert when invoked more than once with 'ALREADY_INITIALIZED()' error
         _strategy.initialize(poolId, _initStrategyData);
 
         if (_strategy.getPoolId() != poolId || address(_strategy.getAllo()) != address(this)) {

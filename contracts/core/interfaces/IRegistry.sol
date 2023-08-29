@@ -31,25 +31,6 @@ interface IRegistry {
     }
 
     /// ======================
-    /// ======= Errors =======
-    /// ======================
-
-    /// @dev Thrown when the nonce passed has been used or not available
-    error NONCE_NOT_AVAILABLE();
-
-    /// @dev Thrown when the 'msg.sender' is not the pending owner on ownership transfer
-    error NOT_PENDING_OWNER();
-
-    /// @dev Thrown when the 'msg.sender' is not authorized
-    error UNAUTHORIZED();
-
-    /// @dev Thrown if any address check is the zero address
-    error ZERO_ADDRESS();
-
-    /// @dev Thrown if the anchor creation fails
-    error ANCHOR_ERROR();
-
-    /// ======================
     /// ======= Events =======
     /// ======================
 
