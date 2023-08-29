@@ -8,6 +8,7 @@ import {IStrategy} from "../../../contracts/core/interfaces/IStrategy.sol";
 import {WrappedVotingNftMintStrategy} from
     "../../../contracts/strategies/wrapped-voting-nftmint/WrappedVotingNftMintStrategy.sol";
 // Internal libraries
+import {Errors} from "../../../contracts/core/libraries/Errors.sol";
 import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
 import {Native} from "../../../contracts/core/libraries/Native.sol";
 import {NFT} from "../../../contracts/strategies/wrapped-voting-nftmint/NFT.sol";
@@ -19,14 +20,7 @@ import {RegistrySetupFull} from "../shared/RegistrySetup.sol";
 import {EventSetup} from "../shared/EventSetup.sol";
 import {MockRevertingReceiver} from "../../utils/MockRevertingReceiver.sol";
 
-contract WrappedVotingNftMintStrategyTest is Test, AlloSetup, RegistrySetupFull, EventSetup, Native {
-    error UNAUTHORIZED();
-    error REGISTRATION_NOT_ACTIVE();
-    error ALLOCATION_NOT_ACTIVE();
-    error ALLOCATION_NOT_ENDED();
-    error RECIPIENT_ERROR(address recipientId);
-    error INVALID();
-
+contract WrappedVotingNftMintStrategyTest is Test, AlloSetup, RegistrySetupFull, EventSetup, Native, Errors {
     event RecipientStatusUpdated(address indexed recipientId, InternalRecipientStatus recipientStatus, address sender);
 
     enum InternalRecipientStatus {
@@ -118,14 +112,14 @@ contract WrappedVotingNftMintStrategyTest is Test, AlloSetup, RegistrySetupFull,
         vm.startPrank(address(allo()));
         testStrategy.initialize(poolId, abi.encode(address(nftFactoryAddress), allocationStartTime, allocationEndTime));
 
-        vm.expectRevert(IStrategy.ALREADY_INITIALIZED.selector);
+        vm.expectRevert(ALREADY_INITIALIZED.selector);
         testStrategy.initialize(poolId, abi.encode(address(nftFactoryAddress), allocationStartTime, allocationEndTime));
     }
 
     // Test that the initialize() will revert if not called by the pool admin
     function testRevert_initialize_UNAUTHORIZED() public {
         WrappedVotingNftMintStrategy testStrategy = __createTestStrategy();
-        vm.expectRevert(IStrategy.UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
 
         testStrategy.initialize(poolId, abi.encode(address(nftFactoryAddress), allocationStartTime, allocationEndTime));
     }
@@ -311,7 +305,7 @@ contract WrappedVotingNftMintStrategyTest is Test, AlloSetup, RegistrySetupFull,
 
         vm.warp(allocationEndTime + 1);
         vm.prank(randomAddress());
-        vm.expectRevert(IStrategy.UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
 
         strategy.distribute(recipients, payoutData, address(this));
     }

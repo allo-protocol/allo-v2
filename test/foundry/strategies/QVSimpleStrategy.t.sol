@@ -62,7 +62,7 @@ contract QVSimpleStrategyTest is QVBaseStrategyTest {
     function test_initialize_UNAUTHORIZED() public override {
         vm.startPrank(allo_owner());
         QVSimpleStrategy strategy = new QVSimpleStrategy(address(allo()), "MockStrategy");
-        vm.expectRevert(IStrategy.UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
         vm.stopPrank();
         vm.startPrank(randomAddress());
         strategy.initialize(
@@ -81,7 +81,7 @@ contract QVSimpleStrategyTest is QVBaseStrategyTest {
     }
 
     function testRevert_initialize_ALREADY_INITIALIZED() public override {
-        vm.expectRevert(IStrategy.ALREADY_INITIALIZED.selector);
+        vm.expectRevert(ALREADY_INITIALIZED.selector);
 
         vm.startPrank(address(allo()));
         QVSimpleStrategy(_strategy).initialize(
@@ -185,7 +185,7 @@ contract QVSimpleStrategyTest is QVBaseStrategyTest {
         vm.startPrank(randomAddress());
         address allocator = makeAddr("allocator");
 
-        vm.expectRevert(IStrategy.UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
 
         qvSimpleStrategy().addAllocator(allocator);
     }
@@ -204,7 +204,7 @@ contract QVSimpleStrategyTest is QVBaseStrategyTest {
         vm.startPrank(randomAddress());
         address allocator = makeAddr("allocator");
 
-        vm.expectRevert(IStrategy.UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
 
         qvSimpleStrategy().removeAllocator(allocator);
     }

@@ -8,6 +8,7 @@ import {IStrategy} from "../../../contracts/core/interfaces/IStrategy.sol";
 import {BaseStrategy} from "../../../contracts/strategies/BaseStrategy.sol";
 import {QVBaseStrategy} from "../../../contracts/strategies/qv-base/QVBaseStrategy.sol";
 // Internal libraries
+import {Errors} from "../../../contracts/core/libraries/Errors.sol";
 import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
 
 // Test libraries
@@ -22,9 +23,7 @@ import {MockERC20} from "../../utils/MockERC20.sol";
 /// @title QVBaseStrategyTest
 /// @notice Test suite for QVBaseStrategy
 /// @author allo-team
-contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup, EventSetup {
-    error ALLOCATION_NOT_ACTIVE();
-
+contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup, EventSetup, Errors {
     struct Recipient {
         bool useRegistryAnchor;
         address recipientAddress;
@@ -143,7 +142,7 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
     function test_initialize_UNAUTHORIZED() public virtual {
         vm.startPrank(allo_owner());
         address strategy = address(new QVBaseStrategyTestMock(address(allo()), "MockStrategy"));
-        vm.expectRevert(IStrategy.UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
         vm.stopPrank();
         vm.startPrank(randomAddress());
         QVBaseStrategyTestMock(strategy).initialize(
@@ -161,7 +160,7 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
     }
 
     function testRevert_initialize_ALREADY_INITIALIZED() public virtual {
-        vm.expectRevert(IStrategy.ALREADY_INITIALIZED.selector);
+        vm.expectRevert(ALREADY_INITIALIZED.selector);
 
         vm.startPrank(address(allo()));
         qvStrategy().initialize(
@@ -309,7 +308,7 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
     }
 
     function testRevert_registerRecipient_UNAUTHORIZED() public virtual {
-        vm.expectRevert(IStrategy.UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
         vm.startPrank(randomAddress());
         bytes memory data = __generateRecipientWithoutId(false);
         qvStrategy().registerRecipient(data, msg.sender);
@@ -474,7 +473,7 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
     }
 
     function testRevert_updatePoolTimestamps_UNAUTHORIZED() public {
-        vm.expectRevert(IStrategy.UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
         vm.startPrank(randomAddress());
         qvStrategy().updatePoolTimestamps(
             registrationStartTime, registrationEndTime, allocationStartTime, allocationEndTime + 10
@@ -626,7 +625,7 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
     }
 
     function testRevert_ReviewRecipients_UNAUTHORIZED() public {
-        vm.expectRevert(IStrategy.UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
         address[] memory recipients = new address[](2);
         QVBaseStrategy.InternalRecipientStatus[] memory recipientStatuses =
             new QVBaseStrategy.InternalRecipientStatus[](2);
@@ -659,7 +658,7 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
 
     function testRevert_reviewRecipients_UNAUTHORIZED() public {
         vm.warp(registrationStartTime + 10);
-        vm.expectRevert(IStrategy.UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
         vm.startPrank(randomAddress());
         qvStrategy().reviewRecipients(new address[](1), new QVBaseStrategy.InternalRecipientStatus[](1));
     }

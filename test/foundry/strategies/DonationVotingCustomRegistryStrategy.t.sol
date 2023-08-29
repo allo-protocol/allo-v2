@@ -81,7 +81,7 @@ contract DonationVotingCustomRegistryStrategyTest is Test, DonationVotingStrateg
         DonationVotingStrategy testStrategy =
             new DonationVotingCustomRegistryStrategy(address(allo()), "testing registry");
 
-        // vm.expectRevert(IStrategy.ALREADY_INITIALIZED.selector);
+        // vm.expectRevert(ALREADY_INITIALIZED.selector);
         vm.prank(address(pool_admin()));
         poolId = allo().createPoolWithCustomStrategy(
             poolProfile_id(),
@@ -101,7 +101,7 @@ contract DonationVotingCustomRegistryStrategyTest is Test, DonationVotingStrateg
             pool_managers()
         );
 
-        vm.expectRevert(IStrategy.ALREADY_INITIALIZED.selector);
+        vm.expectRevert(ALREADY_INITIALIZED.selector);
         vm.prank(address(allo()));
         testStrategy.initialize(
             777,
@@ -122,7 +122,7 @@ contract DonationVotingCustomRegistryStrategyTest is Test, DonationVotingStrateg
         DonationVotingStrategy testStrategy =
             new DonationVotingCustomRegistryStrategy(address(allo()), "testing registry");
 
-        vm.expectRevert(IStrategy.INVALID_ADDRESS.selector);
+        vm.expectRevert(INVALID_ADDRESS.selector);
         vm.prank(address(pool_admin()));
         poolId = allo().createPoolWithCustomStrategy(
             poolProfile_id(),
@@ -173,7 +173,7 @@ contract DonationVotingCustomRegistryStrategyTest is Test, DonationVotingStrateg
         );
 
         address recipientId = __register_accept_recipient();
-        vm.expectRevert(DonationVotingStrategy.INVALID.selector);
+        vm.expectRevert(INVALID.selector);
 
         vm.warp(allocationStartTime + 10);
 

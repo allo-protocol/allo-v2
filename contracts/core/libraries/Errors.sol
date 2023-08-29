@@ -4,7 +4,7 @@ pragma solidity 0.8.19;
 /// @title Errors
 /// @author @thelostone-mc <aditya@gitcoin.co>, @KurtMerbeth <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>
 /// @notice Library containing all custom errors the protocol may revert with.
-library Errors {
+contract Errors {
     /// ======================
     /// ====== Generic =======
     /// ======================

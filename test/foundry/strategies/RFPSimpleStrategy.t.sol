@@ -8,6 +8,7 @@ import {IStrategy} from "../../../contracts/core/interfaces/IStrategy.sol";
 // Strategy contracts
 import {RFPSimpleStrategy} from "../../../contracts/strategies/rfp-simple/RFPSimpleStrategy.sol";
 // Internal libraries
+import {Errors} from "../../../contracts/core/libraries/Errors.sol";
 import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
 import {Native} from "../../../contracts/core/libraries/Native.sol";
 // Test libraries
@@ -15,7 +16,7 @@ import {AlloSetup} from "../shared/AlloSetup.sol";
 import {RegistrySetupFull} from "../shared/RegistrySetup.sol";
 import {EventSetup} from "../shared/EventSetup.sol";
 
-contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, EventSetup {
+contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, EventSetup, Errors {
     // Events
     event MaxBidIncreased(uint256 maxBid);
     event MilstoneSubmitted(uint256 milestoneId);
@@ -83,13 +84,13 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         vm.startPrank(address(allo()));
         testStrategy.initialize(1337, abi.encode(maxBid, useRegistryAnchor, metadataRequired));
 
-        vm.expectRevert(IStrategy.ALREADY_INITIALIZED.selector);
+        vm.expectRevert(ALREADY_INITIALIZED.selector);
         testStrategy.initialize(1337, abi.encode(maxBid, useRegistryAnchor, metadataRequired));
     }
 
     function testRevert_initialize_UNAUTHORIZED() public {
         RFPSimpleStrategy testStrategy = new RFPSimpleStrategy(address(allo()), "RFPSimpleStrategy");
-        vm.expectRevert(IStrategy.UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
         testStrategy.initialize(1337, abi.encode(maxBid, useRegistryAnchor, metadataRequired));
     }
 
@@ -166,7 +167,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
     }
 
     function testRevert_setMilestone_UNAUTHORIZED() public {
-        vm.expectRevert(IStrategy.UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
 
         RFPSimpleStrategy.Milestone[] memory milestones = new RFPSimpleStrategy.Milestone[](0);
         vm.prank(makeAddr("not_pool_admin"));
@@ -230,7 +231,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
     }
 
     function testRevert_increaseMaxBid_UNAUTHORIZED() public {
-        vm.expectRevert(IStrategy.UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
         strategy.increaseMaxBid(2e18);
     }
 
@@ -251,7 +252,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
     }
 
     function testRevert_rejectMilestone_UNAUTHORIZED() public {
-        vm.expectRevert(IStrategy.UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
         strategy.rejectMilestone(0);
     }
 
@@ -271,7 +272,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
     }
 
     function testRevert_withdraw_UNAUTHORIZED() public {
-        vm.expectRevert(IStrategy.UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
         strategy.withdraw(1e18);
     }
 
@@ -393,7 +394,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
     }
 
     function testRevert_allocate_UNAUTHORIZED() public {
-        vm.expectRevert(IStrategy.UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
         vm.prank(makeAddr("not_pool_manager"));
         strategy.allocate(abi.encode(recipientAddress()), recipient());
     }
@@ -418,7 +419,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
 
     function testRevert_distribute_UNAUTHORIZED() public {
         __register_setMilestones_allocate_submitUpcomingMilestone();
-        vm.expectRevert(IStrategy.UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
         vm.prank(makeAddr("not_owner"));
         strategy.distribute(new address[](0), "", pool_admin());
     }

@@ -2,6 +2,8 @@ pragma solidity 0.8.19;
 
 import "forge-std/Test.sol";
 
+// Internal libraries
+import {Errors} from "../../../contracts/core/libraries/Errors.sol";
 // Test libraries
 import {AlloSetup} from "../shared/AlloSetup.sol";
 import {RegistrySetupFull} from "../shared/RegistrySetup.sol";
@@ -10,7 +12,7 @@ import {MockStrategy} from "../../utils/MockStrategy.sol";
 // Core contracts
 import {IStrategy} from "../../../contracts/core/interfaces/IStrategy.sol";
 
-contract BaseStrategyTest is Test, AlloSetup, RegistrySetupFull {
+contract BaseStrategyTest is Test, AlloSetup, RegistrySetupFull, Errors {
     MockStrategy strategy;
 
     function setUp() public {
@@ -21,7 +23,7 @@ contract BaseStrategyTest is Test, AlloSetup, RegistrySetupFull {
     }
 
     function testRevert_initialize_INVALID_zeroPoolId() public {
-        vm.expectRevert(IStrategy.INVALID.selector);
+        vm.expectRevert(INVALID.selector);
 
         vm.prank(address(allo()));
         strategy.initialize(0, "");

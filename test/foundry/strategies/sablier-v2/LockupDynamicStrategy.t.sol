@@ -6,11 +6,12 @@ import {UD2x18} from "@sablier/v2-core/src/types/Math.sol";
 
 import {IStrategy} from "../../../../contracts/core/interfaces/IStrategy.sol";
 import {LockupDynamicStrategy} from "../../../../contracts/strategies/sablier-v2/LockupDynamicStrategy.sol";
+import {Errors} from "../../../../contracts/core/libraries/Errors.sol";
 import {Metadata} from "../../../../contracts/core/libraries/Metadata.sol";
 
 import {LockupBase_Test} from "./LockupBase.t.sol";
 
-contract LockupDynamicStrategyTest is LockupBase_Test {
+contract LockupDynamicStrategyTest is LockupBase_Test, Errors {
     event RecipientSegmentsChanged(address recipientId, LockupDynamic.SegmentWithDelta[] segments);
 
     ISablierV2LockupDynamic internal lockupDynamic = ISablierV2LockupDynamic(0x39EFdC3dbB57B2388CcC4bb40aC4CB1226Bc9E44);
@@ -233,12 +234,12 @@ contract LockupDynamicStrategyTest is LockupBase_Test {
 
     function test_initialize_UNAUTHORIZED() public {
         changePrank(randomAddress());
-        vm.expectRevert(IStrategy.UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
         strategy.initialize(poolId, setUpData);
     }
 
     function testRevert_initialize_ALREADY_INITIALIZED() public {
-        vm.expectRevert(IStrategy.ALREADY_INITIALIZED.selector);
+        vm.expectRevert(ALREADY_INITIALIZED.selector);
 
         vm.startPrank(address(allo()));
         strategy.initialize(poolId, setUpData);

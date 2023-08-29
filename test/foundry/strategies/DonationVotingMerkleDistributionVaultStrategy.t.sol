@@ -56,7 +56,7 @@ contract DonationVotingMerkleDistributionVaultStrategyTest is DonationVotingMerk
         claim[0] =
             DonationVotingMerkleDistributionVaultStrategy.Claim({recipientId: profile1_anchor(), token: address(123)});
 
-        vm.expectRevert(DonationVotingMerkleDistributionBaseStrategy.INVALID.selector);
+        vm.expectRevert(INVALID.selector);
 
         _strategy.claim(claim);
     }

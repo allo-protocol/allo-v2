@@ -142,7 +142,7 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
     }
 
     function testRevert_initialize_ALREADY_INITIALIZED() public override {
-        vm.expectRevert(IStrategy.ALREADY_INITIALIZED.selector);
+        vm.expectRevert(ALREADY_INITIALIZED.selector);
 
         vm.startPrank(address(allo()));
         qvStrategy().initialize(

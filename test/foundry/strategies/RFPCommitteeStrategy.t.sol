@@ -8,6 +8,7 @@ import {IStrategy} from "../../../contracts/core/interfaces/IStrategy.sol";
 import {RFPSimpleStrategy} from "../../../contracts/strategies/rfp-simple/RFPSimpleStrategy.sol";
 import {RFPCommitteeStrategy} from "../../../contracts/strategies/rfp-committee/RFPCommitteeStrategy.sol";
 // Internal libraries
+import {Errors} from "../../../contracts/core/libraries/Errors.sol";
 import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
 import {Native} from "../../../contracts/core/libraries/Native.sol";
 // Test libraries
@@ -15,7 +16,7 @@ import {AlloSetup} from "../shared/AlloSetup.sol";
 import {RegistrySetupFull} from "../shared/RegistrySetup.sol";
 import {EventSetup} from "../shared/EventSetup.sol";
 
-contract RFPCommitteeStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, EventSetup {
+contract RFPCommitteeStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, EventSetup, Errors {
     // Events
     event Voted(address indexed recipientId, address voter);
 
@@ -85,13 +86,13 @@ contract RFPCommitteeStrategyTest is Test, RegistrySetupFull, AlloSetup, Native,
         vm.startPrank(address(allo()));
         testStrategy.initialize(1337, abi.encode(maxBid, useRegistryAnchor, metadataRequired, voteThreshold));
 
-        vm.expectRevert(IStrategy.ALREADY_INITIALIZED.selector);
+        vm.expectRevert(ALREADY_INITIALIZED.selector);
         testStrategy.initialize(1337, abi.encode(maxBid, useRegistryAnchor, metadataRequired, voteThreshold));
     }
 
     function testRevert_initialize_UNAUTHORIZED() public {
         RFPCommitteeStrategy testStrategy = new RFPCommitteeStrategy(address(allo()), "RFPCommitteeStrategy");
-        vm.expectRevert(IStrategy.UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
         testStrategy.initialize(1337, abi.encode(maxBid, useRegistryAnchor, metadataRequired, voteThreshold));
     }
 
@@ -126,7 +127,7 @@ contract RFPCommitteeStrategyTest is Test, RegistrySetupFull, AlloSetup, Native,
     }
 
     function testRevert_allocate_UNAUTHORIZED() public {
-        vm.expectRevert(IStrategy.UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
         vm.prank(makeAddr("not_pool_manager"));
         strategy.allocate(abi.encode(recipientAddress()), recipient());
     }
