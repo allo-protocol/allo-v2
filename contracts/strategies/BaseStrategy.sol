@@ -8,8 +8,7 @@ import "../core/interfaces/IStrategy.sol";
 import {Transfer} from "../core/libraries/Transfer.sol";
 
 /// @title BaseStrategy Contract
-/// @author @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>, 
-///         @0xZakk <zakk@gitcoin.co>, @nfrgosselin <nate@gitcoin.co>
+/// @author @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>, @0xZakk <zakk@gitcoin.co>, @nfrgosselin <nate@gitcoin.co>
 /// @notice This contract is the base contract for all strategies
 /// @dev This contract is implemented by all strategies.
 abstract contract BaseStrategy is IStrategy, Transfer {

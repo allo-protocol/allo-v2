@@ -5,8 +5,7 @@ pragma solidity 0.8.19;
 import "openzeppelin-contracts-upgradeable/contracts/proxy/ClonesUpgradeable.sol";
 
 /// @title Clone library
-/// @author @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>, 
-///         @0xZakk <zakk@gitcoin.co>, @nfrgosselin <nate@gitcoin.co>
+/// @author @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>, @0xZakk <zakk@gitcoin.co>, @nfrgosselin <nate@gitcoin.co>
 /// @notice A helper library to create deterministic clones of the strategy contracts when a pool is created
 /// @dev Handles the creation of clones for the strategy contracts and returns the address of the clone
 library Clone {

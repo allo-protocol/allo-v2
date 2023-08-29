@@ -5,8 +5,7 @@ pragma solidity 0.8.19;
 import {Registry} from "./Registry.sol";
 
 /// @title Anchor contract
-/// @author @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>, 
-///         @0xZakk <zakk@gitcoin.co>, @nfrgosselin <nate@gitcoin.co>
+/// @author @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>, @0xZakk <zakk@gitcoin.co>, @nfrgosselin <nate@gitcoin.co>
 /// @notice Anchors are associated with profiles and are accessible exclusively by the profile owner. This contract ensures secure
 ///         and authorized interaction with external addresses, enhancing the capabilities of profiles and enabling controlled
 ///         execution of operations. The contract leverages the `Registry` contract for ownership verification and access control.
