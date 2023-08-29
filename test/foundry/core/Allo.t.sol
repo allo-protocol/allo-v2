@@ -15,7 +15,6 @@ import {Native} from "../../../contracts/core/libraries/Native.sol";
 // Test libraries
 import {AlloSetup} from "../shared/AlloSetup.sol";
 import {RegistrySetupFull} from "../shared/RegistrySetup.sol";
-import {TestUtilities} from "../../utils/TestUtilities.sol";
 import {TestStrategy} from "../../utils/TestStrategy.sol";
 import {MockStrategy} from "../../utils/MockStrategy.sol";
 import {MockERC20} from "../../utils/MockERC20.sol";
@@ -100,7 +99,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
     }
 
     function testRevert_initialize_ALREADY_INITIALIZED() public {
-        vm.expectRevert(AlreadyInitialized.selector);
+        vm.expectRevert("Initializable: contract is already initialized");
 
         allo().initialize(
             address(registry()), // _registry
