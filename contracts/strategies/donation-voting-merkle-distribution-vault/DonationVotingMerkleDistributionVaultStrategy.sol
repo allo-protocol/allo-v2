@@ -6,7 +6,8 @@ import {DonationVotingMerkleDistributionBaseStrategy} from
 import "openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
 
 /// @title Donation Voting Merkle Distribution Strategy
-/// @author @thelostone-mc <aditya@gitcoin.co>, @KurtMerbeth <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>
+/// @author @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>, 
+///         @0xZakk <zakk@gitcoin.co>, @nfrgosselin <nate@gitcoin.co>
 /// @notice Strategy for donation voting allocation with a merkle distribution
 contract DonationVotingMerkleDistributionVaultStrategy is
     DonationVotingMerkleDistributionBaseStrategy,
