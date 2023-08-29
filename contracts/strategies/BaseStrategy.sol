@@ -130,6 +130,7 @@ abstract contract BaseStrategy is IStrategy, Transfer {
     /// ====================================
 
     /// @notice Initializes the 'Basetrategy'.
+    /// @dev Will revert if the poolId is invalid or already initialized
     /// @param _poolId ID of the pool
     function __BaseStrategy_init(uint256 _poolId) internal virtual onlyAllo {
         if (poolId != 0) {
@@ -155,7 +156,7 @@ abstract contract BaseStrategy is IStrategy, Transfer {
     ///      strategy implementation. Only 'Allo' contract can call this when it is initialized.
     /// @param _data The data to use to register the recipient
     /// @param _sender The address of the sender
-    /// @return recipientId
+    /// @return The recipientId
     function registerRecipient(bytes memory _data, address _sender)
         external
         payable
@@ -226,6 +227,7 @@ abstract contract BaseStrategy is IStrategy, Transfer {
     /// @notice Checks if the '_allocator' is a valid allocator.
     /// @dev How the allocator is determined is up to the strategy implementation.
     /// @param _allocator The address to check if it is a valid allocator for the strategy.
+    /// @return 'true' if the address is a valid allocator, 'false' otherwise
     function isValidAllocator(address _allocator) external view virtual override returns (bool) {
         return _isValidAllocator(_allocator);
     }
@@ -235,8 +237,8 @@ abstract contract BaseStrategy is IStrategy, Transfer {
     /// ====================================
 
     /// @notice Set the pool to active or inactive status.
-    /// @dev This will emit a 'PoolActive' event. Used by the strategy implementation.
-    /// @param _active The status to set the pool to
+    /// @dev This will emit a 'PoolActive()' event. Used by the strategy implementation.
+    /// @param _active The status to set, 'true' means active, 'false' means inactive
     function _setPoolActive(bool _active) internal {
         poolActive = _active;
         emit PoolActive(_active);
@@ -251,7 +253,7 @@ abstract contract BaseStrategy is IStrategy, Transfer {
 
     /// @notice Checks if the allocator is valid
     /// @param _allocator The allocator address
-    /// @return true if the allocator is valid
+    /// @return 'true' if the allocator is valid, otherwise 'false'
     function _isValidAllocator(address _allocator) internal view virtual returns (bool);
 
     /// @notice This will register a recipient, set their status (and any other strategy specific values), and
@@ -273,6 +275,9 @@ abstract contract BaseStrategy is IStrategy, Transfer {
     /// @notice This will distribute funds (tokens) to recipients.
     /// @dev most strategies will track a TOTAL amount per recipient, and a PAID amount, and pay the difference
     /// this contract will need to track the amount paid already, so that it doesn't double pay.
+    /// @param _recipientIds The ids of the recipients to distribute to
+    /// @param _data Data required will depend on the strategy implementation
+    /// @param _sender The address of the sender
     function _distribute(address[] memory _recipientIds, bytes memory _data, address _sender) internal virtual;
 
     /// @notice This will get the payout summary for a recipient.
