@@ -70,7 +70,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     /// ========== Errors =============
     /// ===============================
 
-    /// @notice Throws when the sender is not not a profile member.
+    /// @notice Throws when the sender is not a profile member.
     error UNAUTHORIZED();
 
     /// @notice Throws when registration is not active.
@@ -87,7 +87,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     /// @param recipientId Id of the recipient
     error RECIPIENT_ERROR(address recipientId);
 
-    /// @notice Throws when a genral error occurs.
+    /// @notice Throws when a general error occurs.
     /// @dev Used as a general error message for this strategy. This can occur when a token is not
     ///      allowed or the amount is invalid and is specific to this strategy.
     error INVALID();
@@ -504,7 +504,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     /// ============ Internal ==============
     /// ====================================
 
-    /// @notice Checks if address is elgible allocator.
+    /// @notice Checks if address is eligible allocator.
     /// @return Always returns true for this strategy
     function _isValidAllocator(address) internal pure override returns (bool) {
         return true;
