@@ -245,7 +245,7 @@ contract LockupDynamicStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Withdraw funds from pool
     /// @param _amount The amount to be withdrawn
-    function withdraw(uint256 _amount) external onlyPoolManager(msg.sender) {
+    function withdraw(uint256 _amount) external onlyPoolManager(msg.sender) nonReentrant {
         poolAmount -= _amount;
         _transferAmount(allo.getPool(poolId).token, msg.sender, _amount);
     }

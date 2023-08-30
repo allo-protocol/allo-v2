@@ -380,7 +380,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Withdraw funds from pool.
     /// @dev 'msg.sender' must be a pool manager to withdraw funds.
     /// @param _amount The amount to be withdrawn
-    function withdraw(uint256 _amount) external onlyPoolManager(msg.sender) {
+    function withdraw(uint256 _amount) external onlyPoolManager(msg.sender) nonReentrant {
         // Decrement the pool amount
         poolAmount -= _amount;
 

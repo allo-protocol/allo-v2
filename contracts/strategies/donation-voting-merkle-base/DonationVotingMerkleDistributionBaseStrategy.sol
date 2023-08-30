@@ -4,6 +4,7 @@ pragma solidity 0.8.19;
 // External Libraries
 import {MerkleProof} from "openzeppelin-contracts/contracts/utils/cryptography/MerkleProof.sol";
 import {Multicall} from "openzeppelin-contracts/contracts/utils/Multicall.sol";
+import {ReentrancyGuard} from "openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
 // Interfaces
 import {IAllo} from "../../core/interfaces/IAllo.sol";
 import {IRegistry} from "../../core/interfaces/IRegistry.sol";
@@ -16,7 +17,7 @@ import {Native} from "../../core/libraries/Native.sol";
 /// @title Donation Voting Merkle Distribution Strategy
 /// @author @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>, @0xZakk <zakk@gitcoin.co>, @nfrgosselin <nate@gitcoin.co>
 /// @notice Strategy for donation voting allocation with a merkle distribution
-abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseStrategy, Multicall {
+abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseStrategy, Multicall, ReentrancyGuard {
     /// ================================
     /// ========== Struct ==============
     /// ================================
@@ -411,7 +412,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     /// @dev This can only be called after the allocation has ended and 30 days have passed. If the
     ///      '_amount' is greater than the pool amount or if 'msg.sender' is not a pool manager.
     /// @param _amount The amount to be withdrawn
-    function withdraw(uint256 _amount) external onlyPoolManager(msg.sender) {
+    function withdraw(uint256 _amount) external onlyPoolManager(msg.sender) nonReentrant {
         if (block.timestamp <= allocationEndTime + 30 days) {
             revert INVALID();
         }

@@ -339,7 +339,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Withdraw funds from pool
     /// @param _amount The amount to be withdrawn
-    function withdraw(uint256 _amount) external onlyPoolManager(msg.sender) {
+    function withdraw(uint256 _amount) external onlyPoolManager(msg.sender) nonReentrant {
         if (block.timestamp <= allocationEndTime + 30 days) {
             revert INVALID();
         }

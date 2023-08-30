@@ -200,7 +200,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Withdraw funds from RFP pool
     /// @param _amount The amount to be withdrawn
-    function withdraw(uint256 _amount) external onlyPoolManager(msg.sender) onlyInactivePool {
+    function withdraw(uint256 _amount) external onlyPoolManager(msg.sender) onlyInactivePool nonReentrant {
         poolAmount -= _amount;
         _transferAmount(allo.getPool(poolId).token, msg.sender, _amount);
     }
