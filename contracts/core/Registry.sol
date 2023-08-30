@@ -95,7 +95,7 @@ contract Registry is IRegistry, Native, AccessControl, Transfer, Initializable, 
     /// @dev This will also generate the 'profileId' and 'anchor' address, emits a 'ProfileCreated()' event
     /// Note: The 'nonce' is used to generate the 'profileId' and should be unique for each profile
     /// Note: The 'name' and 'profileId' are used to generate the 'anchor' address
-    /// @param _nonce Nonce used to generate profileId. Can be any integer, but should be unique 
+    /// @param _nonce Nonce used to generate profileId. Can be any integer, but should be unique
     ///               for each profile.
     /// @param _name The name of the profile
     /// @param _metadata The metadata of the profile
@@ -159,7 +159,7 @@ contract Registry is IRegistry, Native, AccessControl, Transfer, Initializable, 
         return profileId;
     }
 
-    /// @notice Updates the name of the profile and generates new anchor. 
+    /// @notice Updates the name of the profile and generates new anchor.
     ///         Emits a 'ProfileNameUpdated()' event.
     /// Note: Use caution when updating your profile name as it will generate a new anchor address
     /// Note: You can always update the name back to the original name to get the original anchor address
@@ -195,7 +195,7 @@ contract Registry is IRegistry, Native, AccessControl, Transfer, Initializable, 
         return anchor;
     }
 
-    /// @notice Update the 'Metadata' of the profile. Emits a 'ProfileMetadataUpdated()' event. 
+    /// @notice Update the 'Metadata' of the profile. Emits a 'ProfileMetadataUpdated()' event.
     /// @dev 'msg.sender' must be the owner of the profile
     /// @param _profileId The 'profileId' of the profile
     /// @param _metadata The new 'Metadata' of the profile
@@ -235,7 +235,7 @@ contract Registry is IRegistry, Native, AccessControl, Transfer, Initializable, 
     }
 
     /// @notice Updates the pending owner of the profile. Emits a 'ProfilePendingOwnership()' event.
-    /// @dev 'msg.sender' must be the owner of the profile. 
+    /// @dev 'msg.sender' must be the owner of the profile.
     ///       This is step one of two when transferring ownership.
     /// @param _profileId The 'profileId' of the profile
     /// @param _pendingOwner New pending owner

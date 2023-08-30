@@ -400,7 +400,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @custom:data when 'registryGating' is 'true' -> (address recipientId, address recipientAddress, uint256 grantAmount, Metadata metadata)
     ///              when 'registryGating' is 'false' -> (address recipientAddress, address registryAnchor, uint256 grantAmount, Metadata metadata)
     /// @param _sender The sender of the transaction
-    /// @return The id of the recipient
+    /// @return recipientId The id of the recipient
     function _registerRecipient(bytes memory _data, address _sender)
         internal
         override
@@ -592,7 +592,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Get the recipient.
     /// @param _recipientId ID of the recipient
-    /// @return Returns the recipient information
+    /// @return recipient Returns the recipient information
     function _getRecipient(address _recipientId) internal view returns (Recipient memory recipient) {
         recipient = _recipients[_recipientId];
     }
@@ -610,7 +610,6 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     function _setMilestones(address _recipientId, Milestone[] memory _milestones) internal {
         uint256 totalAmountPercentage;
 
-        // TODO: check if delete resets index to 0
         // Clear out the milestones and reset the index to 0
         if (milestones[_recipientId].length > 0) {
             delete milestones[_recipientId];

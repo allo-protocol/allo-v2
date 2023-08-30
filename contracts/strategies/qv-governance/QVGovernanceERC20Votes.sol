@@ -11,6 +11,12 @@ contract QVGovernanceERC20Votes is QVBaseStrategy {
     /// ======= Storage ======
     /// ======================
 
+    struct InitializeParamsGov {
+        address govToken;
+        uint256 timestamp;
+        InitializeParams params;
+    }
+
     IVotes public govToken;
     uint256 public timestamp;
 
@@ -27,55 +33,14 @@ contract QVGovernanceERC20Votes is QVBaseStrategy {
     /// @param _poolId The pool id
     /// @param _data The data
     function initialize(uint256 _poolId, bytes memory _data) external override {
-        (
-            address _govToken,
-            uint256 _timestamp,
-            uint256 _reviewThreshold,
-            bool _registryGating,
-            bool _metadataRequired,
-            uint256 _registrationStartTime,
-            uint256 _registrationEndTime,
-            uint256 _allocationStartTime,
-            uint256 _allocationEndTime
-        ) = abi.decode(_data, (address, uint256, uint256, bool, bool, uint256, uint256, uint256, uint256));
-        __QVGovernanceERC20Votes_init(
-            _govToken,
-            _timestamp,
-            _reviewThreshold,
-            _poolId,
-            _registryGating,
-            _metadataRequired,
-            _registrationStartTime,
-            _registrationEndTime,
-            _allocationStartTime,
-            _allocationEndTime
-        );
+        (InitializeParamsGov memory initializeParamsGov) = abi.decode(_data, (InitializeParamsGov));
+        __QVGovernanceERC20Votes_init(_poolId, initializeParamsGov);
     }
 
-    function __QVGovernanceERC20Votes_init(
-        address _govToken,
-        uint256 _timestamp,
-        uint256 _reviewThreshold,
-        uint256 _poolId,
-        bool _registryGating,
-        bool _metadataRequired,
-        uint256 _registrationStartTime,
-        uint256 _registrationEndTime,
-        uint256 _allocationStartTime,
-        uint256 _allocationEndTime
-    ) internal {
-        __QVBaseStrategy_init(
-            _poolId,
-            _registryGating,
-            _metadataRequired,
-            _reviewThreshold,
-            _registrationStartTime,
-            _registrationEndTime,
-            _allocationStartTime,
-            _allocationEndTime
-        );
-        govToken = IVotes(_govToken);
-        timestamp = _timestamp;
+    function __QVGovernanceERC20Votes_init(uint256 _poolId, InitializeParamsGov memory _initializeParamsGov) internal {
+        __QVBaseStrategy_init(_poolId, _initializeParamsGov.params);
+        govToken = IVotes(_initializeParamsGov.govToken);
+        timestamp = _initializeParamsGov.timestamp;
 
         // sanity check if token implements getPastVotes
         // should revert if function is not available

@@ -35,8 +35,8 @@ contract WrappedVotingNftMintStrategyTest is Test, AlloSetup, RegistrySetupFull,
 
     Metadata public metadata;
 
-    uint256 public allocationStartTime;
-    uint256 public allocationEndTime;
+    uint64 public allocationStartTime;
+    uint64 public allocationEndTime;
     uint256 public poolId;
 
     // The current winner of the pool balance
@@ -57,8 +57,8 @@ contract WrappedVotingNftMintStrategyTest is Test, AlloSetup, RegistrySetupFull,
         nftFactory = new NFTFactory();
         nftFactoryAddress = address(nftFactory);
 
-        allocationStartTime = block.timestamp;
-        allocationEndTime = block.timestamp + 1 weeks;
+        allocationStartTime = uint64(block.timestamp);
+        allocationEndTime = uint64(block.timestamp + 1 weeks);
 
         metadata = Metadata({protocol: 1, pointer: "0x007"});
         strategy = new WrappedVotingNftMintStrategy(
@@ -170,7 +170,7 @@ contract WrappedVotingNftMintStrategyTest is Test, AlloSetup, RegistrySetupFull,
     }
 
     // Fuzz test the timestamps with some assumtions to avoid reversion
-    function testFuzz_setAllocationTimestamps(uint256 _startTime, uint256 _endTime) public {
+    function testFuzz_setAllocationTimestamps(uint64 _startTime, uint64 _endTime) public {
         vm.assume(_startTime < _endTime);
         vm.assume(_startTime > block.timestamp);
         vm.assume(_startTime > 0);
@@ -184,8 +184,8 @@ contract WrappedVotingNftMintStrategyTest is Test, AlloSetup, RegistrySetupFull,
 
     // Tests that ths allocation timestamps are updated correctly
     function test_setAllocationTimestamps() public {
-        uint256 newAllocationStartTime = block.timestamp + 1 weeks;
-        uint256 newAllocationEndTime = block.timestamp + 2 weeks;
+        uint64 newAllocationStartTime = uint64(block.timestamp + 1 weeks);
+        uint64 newAllocationEndTime = uint64(block.timestamp + 2 weeks);
 
         vm.expectEmit(true, false, false, true);
         emit TimestampsUpdated(newAllocationStartTime, newAllocationEndTime, pool_manager1());
@@ -199,8 +199,8 @@ contract WrappedVotingNftMintStrategyTest is Test, AlloSetup, RegistrySetupFull,
 
     // Tests that this reverts when the timestamps are invalid
     function testRevert_setAllocationTimestamps_INVALID() public {
-        uint256 newAllocationStartTime = block.timestamp + 1 weeks;
-        uint256 newAllocationEndTime = block.timestamp + 2 weeks;
+        uint64 newAllocationStartTime = uint64(block.timestamp + 1 weeks);
+        uint64 newAllocationEndTime = uint64(block.timestamp + 2 weeks);
 
         vm.expectRevert();
         vm.prank(pool_manager1());
@@ -209,8 +209,8 @@ contract WrappedVotingNftMintStrategyTest is Test, AlloSetup, RegistrySetupFull,
 
     // Tests that this reverts when the user is not the pool manager
     function test_setAllocationTimestamps_UNAUTHORIZED() public {
-        uint256 newAllocationStartTime = block.timestamp + 1 weeks;
-        uint256 newAllocationEndTime = block.timestamp + 2 weeks;
+        uint64 newAllocationStartTime = uint64(block.timestamp + 1 weeks);
+        uint64 newAllocationEndTime = uint64(block.timestamp + 2 weeks);
 
         vm.expectRevert();
         vm.prank(randomAddress());

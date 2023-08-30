@@ -101,10 +101,10 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     /// @param allocationEndTime The end time for the allocation
     /// @param sender The sender of the transaction
     event TimestampsUpdated(
-        uint256 registrationStartTime,
-        uint256 registrationEndTime,
-        uint256 allocationStartTime,
-        uint256 allocationEndTime,
+        uint64 registrationStartTime,
+        uint64 registrationEndTime,
+        uint64 allocationStartTime,
+        uint64 allocationEndTime,
         address sender
     );
 
@@ -141,10 +141,10 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     bool public distributionStarted;
 
     /// @notice The timestamps in milliseconds for the start and end times.
-    uint256 public registrationStartTime;
-    uint256 public registrationEndTime;
-    uint256 public allocationStartTime;
-    uint256 public allocationEndTime;
+    uint64 public registrationStartTime;
+    uint64 public registrationEndTime;
+    uint64 public allocationStartTime;
+    uint64 public allocationEndTime;
 
     /// @notice The total amount of tokens allocated to the payout.
     uint256 public totalPayoutAmount;
@@ -292,7 +292,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
 
     /// @notice Get a recipient with a '_recipientId'
     /// @param _recipientId ID of the recipient
-    /// @return The recipient details
+    /// @return recipient The recipient details
     function getRecipient(address _recipientId) external view returns (Recipient memory recipient) {
         return _getRecipient(_recipientId);
     }
@@ -368,10 +368,10 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     /// @param _allocationStartTime The start time for the allocation
     /// @param _allocationEndTime The end time for the allocation
     function updatePoolTimestamps(
-        uint256 _registrationStartTime,
-        uint256 _registrationEndTime,
-        uint256 _allocationStartTime,
-        uint256 _allocationEndTime
+        uint64 _registrationStartTime,
+        uint64 _registrationEndTime,
+        uint64 _allocationStartTime,
+        uint64 _allocationEndTime
     ) external onlyPoolManager(msg.sender) {
         // If the timestamps are invalid this will revert - See details in '_isPoolTimestampValid'
         _isPoolTimestampValid(_registrationStartTime, _registrationEndTime, _allocationStartTime, _allocationEndTime);
@@ -471,10 +471,10 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     /// @param _allocationStartTime The start time for the allocation
     /// @param _allocationEndTime The end time for the allocation
     function _isPoolTimestampValid(
-        uint256 _registrationStartTime,
-        uint256 _registrationEndTime,
-        uint256 _allocationStartTime,
-        uint256 _allocationEndTime
+        uint64 _registrationStartTime,
+        uint64 _registrationEndTime,
+        uint64 _allocationStartTime,
+        uint64 _allocationEndTime
     ) internal view {
         if (
             block.timestamp > _registrationStartTime || _registrationStartTime > _registrationEndTime
@@ -789,7 +789,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
 
     /// @notice Get recipient status
     /// @param _recipientId ID of the recipient
-    /// @return The status of the recipient
+    /// @return status The status of the recipient
     function _getUintRecipientStatus(address _recipientId) internal view returns (uint8 status) {
         // Get the column index and current row
         (, uint256 colIndex, uint256 currentRow) = _getStatusRowColumn(_recipientId);

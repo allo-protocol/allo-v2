@@ -62,10 +62,10 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     event RecipientStatusUpdated(address indexed recipientId, InternalRecipientStatus recipientStatus, address sender);
     event Claimed(address indexed recipientId, address recipientAddress, uint256 amount, address token);
     event TimestampsUpdated(
-        uint256 registrationStartTime,
-        uint256 registrationEndTime,
-        uint256 allocationStartTime,
-        uint256 allocationEndTime,
+        uint64 registrationStartTime,
+        uint64 registrationEndTime,
+        uint64 allocationStartTime,
+        uint64 allocationEndTime,
         address sender
     );
     event PayoutSet(bytes recipientIds);
@@ -77,11 +77,11 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     bool public useRegistryAnchor;
     bool public metadataRequired;
     IRegistry private _registry;
-    uint256 public registrationStartTime;
-    uint256 public registrationEndTime;
-    uint256 public allocationStartTime;
-    uint256 public allocationEndTime;
     uint256 public totalPayoutAmount;
+    uint64 public registrationStartTime;
+    uint64 public registrationEndTime;
+    uint64 public allocationStartTime;
+    uint64 public allocationEndTime;
 
     /// @notice token -> bool
     mapping(address => bool) public allowedTokens;
@@ -309,10 +309,10 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _allocationStartTime The start time for the allocation
     /// @param _allocationEndTime The end time for the allocation
     function updatePoolTimestamps(
-        uint256 _registrationStartTime,
-        uint256 _registrationEndTime,
-        uint256 _allocationStartTime,
-        uint256 _allocationEndTime
+        uint64 _registrationStartTime,
+        uint64 _registrationEndTime,
+        uint64 _allocationStartTime,
+        uint64 _allocationEndTime
     ) external onlyPoolManager(msg.sender) {
         _isPoolTimestampValid(_registrationStartTime, _registrationEndTime, _allocationStartTime, _allocationEndTime);
 
@@ -347,10 +347,10 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     /// ====================================
 
     function _isPoolTimestampValid(
-        uint256 _registrationStartTime,
-        uint256 _registrationEndTime,
-        uint256 _allocationStartTime,
-        uint256 _allocationEndTime
+        uint64 _registrationStartTime,
+        uint64 _registrationEndTime,
+        uint64 _allocationStartTime,
+        uint64 _allocationEndTime
     ) internal view {
         if (
             block.timestamp > _registrationStartTime || _registrationStartTime > _registrationEndTime

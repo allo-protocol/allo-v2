@@ -157,19 +157,17 @@ abstract contract BaseStrategy is IStrategy, Transfer, Errors {
     ///      strategy implementation. Only 'Allo' contract can call this when it is initialized.
     /// @param _data The data to use to register the recipient
     /// @param _sender The address of the sender
-    /// @return The recipientId
+    /// @return recipientId The recipientId
     function registerRecipient(bytes memory _data, address _sender)
         external
         payable
         onlyAllo
         onlyInitialized
-        returns (address)
+        returns (address recipientId)
     {
         _beforeRegisterRecipient(_data, _sender);
-        address recipientId = _registerRecipient(_data, _sender);
+        recipientId = _registerRecipient(_data, _sender);
         _afterRegisterRecipient(_data, _sender);
-
-        return recipientId;
     }
 
     /// @notice Allocates to a recipient.

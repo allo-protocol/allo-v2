@@ -44,10 +44,10 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
 
     uint256 public totalRecipientVotes;
 
-    uint256 public registrationStartTime;
-    uint256 public registrationEndTime;
-    uint256 public allocationStartTime;
-    uint256 public allocationEndTime;
+    uint64 public registrationStartTime;
+    uint64 public registrationEndTime;
+    uint64 public allocationStartTime;
+    uint64 public allocationEndTime;
 
     address internal _strategy;
     MockERC20 public token;
@@ -80,10 +80,10 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
         token = new MockERC20();
         token.mint(address(this), 100e18);
 
-        registrationStartTime = today();
-        registrationEndTime = nextWeek();
-        allocationStartTime = weekAfterNext();
-        allocationEndTime = oneMonthFromNow();
+        registrationStartTime = uint64(today());
+        registrationEndTime = uint64(nextWeek());
+        allocationStartTime = uint64(weekAfterNext());
+        allocationEndTime = uint64(oneMonthFromNow());
 
         registryGating = false;
         metadataRequired = true;
@@ -484,7 +484,7 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
         vm.expectRevert(INVALID.selector);
         vm.startPrank(pool_admin());
         qvStrategy().updatePoolTimestamps(
-            block.timestamp - 1, registrationEndTime, allocationStartTime, allocationEndTime
+            uint64(block.timestamp - 1), registrationEndTime, allocationStartTime, allocationEndTime
         );
     }
 

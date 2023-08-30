@@ -56,7 +56,7 @@ contract RFPCommitteeStrategyTest is Test, RegistrySetupFull, AlloSetup, Native,
         poolId = allo().createPoolWithCustomStrategy(
             poolProfile_id(),
             address(strategy),
-            abi.encode(maxBid, useRegistryAnchor, metadataRequired, voteThreshold),
+            abi.encode(voteThreshold, maxBid, useRegistryAnchor, metadataRequired),
             NATIVE,
             0,
             poolMetadata,
@@ -73,7 +73,7 @@ contract RFPCommitteeStrategyTest is Test, RegistrySetupFull, AlloSetup, Native,
     function test_initialize() public {
         RFPCommitteeStrategy testStrategy = new RFPCommitteeStrategy(address(allo()), "RFPCommitteeStrategy");
         vm.prank(address(allo()));
-        testStrategy.initialize(1337, abi.encode(maxBid, useRegistryAnchor, metadataRequired, voteThreshold));
+        testStrategy.initialize(1337, abi.encode(voteThreshold, maxBid, useRegistryAnchor, metadataRequired));
         assertEq(testStrategy.getPoolId(), 1337);
         assertEq(testStrategy.useRegistryAnchor(), useRegistryAnchor);
         assertEq(testStrategy.metadataRequired(), metadataRequired);
@@ -84,16 +84,16 @@ contract RFPCommitteeStrategyTest is Test, RegistrySetupFull, AlloSetup, Native,
     function testRevert_initialize_ALREADY_INITIALIZED() public {
         RFPCommitteeStrategy testStrategy = new RFPCommitteeStrategy(address(allo()), "RFPCommitteeStrategy");
         vm.startPrank(address(allo()));
-        testStrategy.initialize(1337, abi.encode(maxBid, useRegistryAnchor, metadataRequired, voteThreshold));
+        testStrategy.initialize(1337, abi.encode(voteThreshold, maxBid, useRegistryAnchor, metadataRequired));
 
         vm.expectRevert(ALREADY_INITIALIZED.selector);
-        testStrategy.initialize(1337, abi.encode(maxBid, useRegistryAnchor, metadataRequired, voteThreshold));
+        testStrategy.initialize(1337, abi.encode(voteThreshold, maxBid, useRegistryAnchor, metadataRequired));
     }
 
     function testRevert_initialize_UNAUTHORIZED() public {
         RFPCommitteeStrategy testStrategy = new RFPCommitteeStrategy(address(allo()), "RFPCommitteeStrategy");
         vm.expectRevert(UNAUTHORIZED.selector);
-        testStrategy.initialize(1337, abi.encode(maxBid, useRegistryAnchor, metadataRequired, voteThreshold));
+        testStrategy.initialize(1337, abi.encode(voteThreshold, maxBid, useRegistryAnchor, metadataRequired));
     }
 
     function test_allocate() public {

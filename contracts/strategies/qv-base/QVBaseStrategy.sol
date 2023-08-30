@@ -22,10 +22,10 @@ abstract contract QVBaseStrategy is BaseStrategy {
     event UpdatedRegistration(address indexed recipientId, bytes data, address sender, InternalRecipientStatus status);
     event RecipientStatusUpdated(address indexed recipientId, InternalRecipientStatus status, address sender);
     event TimestampsUpdated(
-        uint256 registrationStartTime,
-        uint256 registrationEndTime,
-        uint256 allocationStartTime,
-        uint256 allocationEndTime,
+        uint64 registrationStartTime,
+        uint64 registrationEndTime,
+        uint64 allocationStartTime,
+        uint64 allocationEndTime,
         address sender
     );
 
@@ -44,6 +44,16 @@ abstract contract QVBaseStrategy is BaseStrategy {
         Appealed
     }
 
+    struct InitializeParams {
+        bool registryGating;
+        bool metadataRequired;
+        uint256 reviewThreshold;
+        uint64 registrationStartTime;
+        uint64 registrationEndTime;
+        uint64 allocationStartTime;
+        uint64 allocationEndTime;
+    }
+
     struct Recipient {
         bool useRegistryAnchor;
         address recipientAddress;
@@ -60,10 +70,10 @@ abstract contract QVBaseStrategy is BaseStrategy {
 
     bool public registryGating;
     bool public metadataRequired;
-    uint256 public registrationStartTime;
-    uint256 public registrationEndTime;
-    uint256 public allocationStartTime;
-    uint256 public allocationEndTime;
+    uint64 public registrationStartTime;
+    uint64 public registrationEndTime;
+    uint64 public allocationStartTime;
+    uint64 public allocationEndTime;
 
     uint256 public totalRecipientVotes;
     uint256 public reviewThreshold;
@@ -120,45 +130,21 @@ abstract contract QVBaseStrategy is BaseStrategy {
 
     /// @dev Internal initialize function
     /// @param _poolId The pool id
-    /// @param _registryGating Whether or not to use registry gating
-    /// @param _metadataRequired Whether or not metadata is required
-    /// @param _registrationStartTime The registration start time
-    /// @param _registrationEndTime The registration end time
-    /// @param _allocationStartTime The allocation start time
-    /// @param _allocationEndTime The allocation end time
-    function __QVBaseStrategy_init(
-        uint256 _poolId,
-        bool _registryGating,
-        bool _metadataRequired,
-        uint256 _reviewThreshold,
-        uint256 _registrationStartTime,
-        uint256 _registrationEndTime,
-        uint256 _allocationStartTime,
-        uint256 _allocationEndTime
-    ) internal {
+    /// @param _params The initialize params
+    function __QVBaseStrategy_init(uint256 _poolId, InitializeParams memory _params) internal {
         __BaseStrategy_init(_poolId);
 
-        registryGating = _registryGating;
-        metadataRequired = _metadataRequired;
+        registryGating = _params.registryGating;
+        metadataRequired = _params.metadataRequired;
         _registry = allo.getRegistry();
 
-        if (
-            block.timestamp > _registrationStartTime || _registrationStartTime > _registrationEndTime
-                || _registrationStartTime > _allocationStartTime || _allocationStartTime > _allocationEndTime
-                || _registrationEndTime > _allocationEndTime
-        ) {
-            revert INVALID();
-        }
+        reviewThreshold = _params.reviewThreshold;
 
-        reviewThreshold = _reviewThreshold;
-
-        registrationStartTime = _registrationStartTime;
-        registrationEndTime = _registrationEndTime;
-        allocationStartTime = _allocationStartTime;
-        allocationEndTime = _allocationEndTime;
-
-        emit TimestampsUpdated(
-            registrationStartTime, registrationEndTime, allocationStartTime, allocationEndTime, msg.sender
+        _updatePoolTimestamps(
+            _params.registrationStartTime,
+            _params.registrationEndTime,
+            _params.allocationStartTime,
+            _params.allocationEndTime
         );
     }
 
@@ -242,11 +228,29 @@ abstract contract QVBaseStrategy is BaseStrategy {
     /// @param _allocationStartTime The start time for the allocation
     /// @param _allocationEndTime The end time for the allocation
     function updatePoolTimestamps(
-        uint256 _registrationStartTime,
-        uint256 _registrationEndTime,
-        uint256 _allocationStartTime,
-        uint256 _allocationEndTime
+        uint64 _registrationStartTime,
+        uint64 _registrationEndTime,
+        uint64 _allocationStartTime,
+        uint64 _allocationEndTime
     ) external onlyPoolManager(msg.sender) {
+        _updatePoolTimestamps(_registrationStartTime, _registrationEndTime, _allocationStartTime, _allocationEndTime);
+    }
+
+    /// ====================================
+    /// ============ Internal ==============
+    /// ====================================
+
+    /// @notice Set the start and end dates for the pool
+    /// @param _registrationStartTime The start time for the registration
+    /// @param _registrationEndTime The end time for the registration
+    /// @param _allocationStartTime The start time for the allocation
+    /// @param _allocationEndTime The end time for the allocation
+    function _updatePoolTimestamps(
+        uint64 _registrationStartTime,
+        uint64 _registrationEndTime,
+        uint64 _allocationStartTime,
+        uint64 _allocationEndTime
+    ) internal {
         if (
             block.timestamp > _registrationStartTime || _registrationStartTime > _registrationEndTime
                 || _registrationStartTime > _allocationStartTime || _allocationStartTime > _allocationEndTime
@@ -264,10 +268,6 @@ abstract contract QVBaseStrategy is BaseStrategy {
             registrationStartTime, registrationEndTime, allocationStartTime, allocationEndTime, msg.sender
         );
     }
-
-    /// ====================================
-    /// ============ Internal ==============
-    /// ====================================
 
     /// @notice Submit application to pool
     /// @param _data The data to be decoded

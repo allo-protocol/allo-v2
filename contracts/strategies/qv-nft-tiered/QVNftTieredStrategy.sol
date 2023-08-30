@@ -16,6 +16,12 @@ contract QVNftTieredStrategy is QVBaseStrategy {
     /// ======= Storage ======
     /// ======================
 
+    struct InitializeParamsNft {
+        ERC721[] nfts;
+        uint256[] maxVoiceCreditsPerNft;
+        InitializeParams params;
+    }
+
     // NFTs that can be used to allocate votes
     ERC721[] public nfts;
 
@@ -38,64 +44,23 @@ contract QVNftTieredStrategy is QVBaseStrategy {
     /// @param _poolId The pool id
     /// @param _data The data
     function initialize(uint256 _poolId, bytes memory _data) external override {
-        (
-            bool _registryGating,
-            bool _metadataRequired,
-            ERC721[] memory _nfts,
-            uint256[] memory _maxVoiceCreditsPerNft,
-            uint256 _reviewTreshold,
-            uint256 _registrationStartTime,
-            uint256 _registrationEndTime,
-            uint256 _allocationStartTime,
-            uint256 _allocationEndTime
-        ) = abi.decode(_data, (bool, bool, ERC721[], uint256[], uint256, uint256, uint256, uint256, uint256));
-        __QV_NFT_TieredStrategy_init(
-            _poolId,
-            _registryGating,
-            _metadataRequired,
-            _nfts,
-            _maxVoiceCreditsPerNft,
-            _reviewTreshold,
-            _registrationStartTime,
-            _registrationEndTime,
-            _allocationStartTime,
-            _allocationEndTime
-        );
+        (InitializeParamsNft memory initializeParamsNft) = abi.decode(_data, (InitializeParamsNft));
+        __QV_NFT_TieredStrategy_init(_poolId, initializeParamsNft);
     }
 
     /// @dev Internal initialize function that sets the poolId in the base strategy
-    function __QV_NFT_TieredStrategy_init(
-        uint256 _poolId,
-        bool _registryGating,
-        bool _metadataRequired,
-        ERC721[] memory _nfts,
-        uint256[] memory _maxVoiceCreditsPerNft,
-        uint256 _reviewThreshold,
-        uint256 _registrationStartTime,
-        uint256 _registrationEndTime,
-        uint256 _allocationStartTime,
-        uint256 _allocationEndTime
-    ) internal {
-        __QVBaseStrategy_init(
-            _poolId,
-            _registryGating,
-            _metadataRequired,
-            _reviewThreshold,
-            _registrationStartTime,
-            _registrationEndTime,
-            _allocationStartTime,
-            _allocationEndTime
-        );
+    function __QV_NFT_TieredStrategy_init(uint256 _poolId, InitializeParamsNft memory _initializeParamsNft) internal {
+        __QVBaseStrategy_init(_poolId, _initializeParamsNft.params);
 
-        uint256 nftsLength = _nfts.length;
-        if (nftsLength != _maxVoiceCreditsPerNft.length) {
+        uint256 nftsLength = _initializeParamsNft.nfts.length;
+        if (nftsLength != _initializeParamsNft.maxVoiceCreditsPerNft.length) {
             revert INVALID();
         }
 
         for (uint256 i = 0; i < nftsLength;) {
-            ERC721 nft = _nfts[i];
+            ERC721 nft = _initializeParamsNft.nfts[i];
             nfts.push(nft);
-            maxVoiceCreditsPerNft[nft] = _maxVoiceCreditsPerNft[i];
+            maxVoiceCreditsPerNft[nft] = _initializeParamsNft.maxVoiceCreditsPerNft[i];
             unchecked {
                 i++;
             }

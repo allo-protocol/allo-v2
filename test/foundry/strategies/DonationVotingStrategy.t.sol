@@ -545,7 +545,9 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
     function testRevert_updatePoolTimestamps_INVALID() public {
         vm.expectRevert(INVALID.selector);
         vm.prank(pool_admin());
-        strategy.updatePoolTimestamps(block.timestamp - 1, registrationEndTime, allocationStartTime, allocationEndTime);
+        strategy.updatePoolTimestamps(
+            uint64(block.timestamp - 1), registrationEndTime, allocationStartTime, allocationEndTime
+        );
     }
 
     function test_withdraw() public {

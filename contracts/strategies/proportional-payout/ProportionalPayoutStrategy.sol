@@ -51,6 +51,13 @@ contract ProportionalPayoutStrategy is BaseStrategy {
         uint256 totalVotesReceived;
     }
 
+    struct InitializeData {
+        address nft;
+        uint256 maxRecipientsAllowed;
+        uint64 allocationStartTime;
+        uint64 allocationEndTime;
+    }
+
     /// @notice recipientId => Recipient
     mapping(address => Recipient) public recipients;
     /// @notice nftId => has allocated
@@ -75,13 +82,6 @@ contract ProportionalPayoutStrategy is BaseStrategy {
     /// ===============================
     /// ========= Initialize ==========
     /// ===============================
-
-    struct InitializeData {
-        address nft;
-        uint256 maxRecipientsAllowed;
-        uint64 allocationStartTime;
-        uint64 allocationEndTime;
-    }
 
     function initialize(uint256 _poolId, bytes memory _data) external override onlyAllo {
         InitializeData memory initializeData = abi.decode(_data, (InitializeData));
