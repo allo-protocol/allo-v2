@@ -1,31 +1,14 @@
-# BaseStrategy
+# IStrategy
 
 *@thelostone-mc &lt;aditya@gitcoin.co&gt;, @KurtMerbeth &lt;kurt@gitcoin.co&gt;, @codenamejason &lt;jason@gitcoin.co&gt;*
 
-> BaseStrategy Contract
+> IStrategy Interface
 
-This contract is the base contract for all strategies
+BaseStrategy is the base contract that all strategies should inherit from and uses this interface.
 
-*This contract is implemented by all strategies.*
+
 
 ## Methods
-
-### NATIVE
-
-```solidity
-function NATIVE() external view returns (address)
-```
-
-Address of the native token
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
 
 ### allocate
 
@@ -33,9 +16,9 @@ Address of the native token
 function allocate(bytes _data, address _sender) external payable
 ```
 
-Allocates to a recipient.
+This will allocate to a recipient.
 
-*The encoded &#39;_data&#39; will be determined by the strategy implementation. Only &#39;Allo&#39; contract can      call this when it is initialized.*
+*The encoded &#39;_data&#39; will be dermined by the strategy implementation.*
 
 #### Parameters
 
@@ -50,17 +33,17 @@ Allocates to a recipient.
 function distribute(address[] _recipientIds, bytes _data, address _sender) external nonpayable
 ```
 
-Distributes funds (tokens) to recipients.
+This will distribute funds (tokens) to recipients.
 
-*The encoded &#39;_data&#39; will be determined by the strategy implementation. Only &#39;Allo&#39; contract can      call this when it is initialized.*
+*most strategies will track a TOTAL amount per recipient, and a PAID amount, and pay the difference this contract will need to track the amount paid already, so that it doesn&#39;t double pay.*
 
 #### Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| _recipientIds | address[] | The IDs of the recipients |
-| _data | bytes | The data to use to distribute to the recipients |
-| _sender | address | The address of the sender |
+| _recipientIds | address[] | undefined |
+| _data | bytes | undefined |
+| _sender | address | undefined |
 
 ### getAllo
 
@@ -68,7 +51,7 @@ Distributes funds (tokens) to recipients.
 function getAllo() external view returns (contract IAllo)
 ```
 
-Getter for the &#39;Allo&#39; contract.
+Getter for the address of the Allo contract.
 
 
 
@@ -77,7 +60,7 @@ Getter for the &#39;Allo&#39; contract.
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | contract IAllo | The Allo contract |
+| _0 | contract IAllo | The &#39;Allo&#39; contract |
 
 ### getPayouts
 
@@ -85,22 +68,22 @@ Getter for the &#39;Allo&#39; contract.
 function getPayouts(address[] _recipientIds, bytes[] _data) external view returns (struct IStrategy.PayoutSummary[])
 ```
 
-Gets the payout summary for recipients.
+Checks the amount allocated to a recipient for distribution.
 
-*The encoded &#39;_data&#39; will be determined by the strategy implementation.*
+*Input the values you would send to distribute(), get the amounts each recipient in the array would receive.      The encoded &#39;_data&#39; will be determined by the strategy, and will be used to determine the payout.*
 
 #### Parameters
 
 | Name | Type | Description |
 |---|---|---|
 | _recipientIds | address[] | The IDs of the recipients |
-| _data | bytes[] | The data to use to get the payout summary for the recipients |
+| _data | bytes[] | The encoded data |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | IStrategy.PayoutSummary[] | The payout summary for the recipients |
+| _0 | IStrategy.PayoutSummary[] | undefined |
 
 ### getPoolAmount
 
@@ -108,7 +91,7 @@ Gets the payout summary for recipients.
 function getPoolAmount() external view returns (uint256)
 ```
 
-Getter for the &#39;poolAmount&#39;.
+Checks the amount of tokens in the pool.
 
 
 
@@ -125,7 +108,7 @@ Getter for the &#39;poolAmount&#39;.
 function getPoolId() external view returns (uint256)
 ```
 
-Getter for the &#39;poolId&#39;.
+Getter for the &#39;poolId&#39; for this strategy.
 
 
 
@@ -142,7 +125,7 @@ Getter for the &#39;poolId&#39;.
 function getRecipientStatus(address _recipientId) external view returns (enum IStrategy.RecipientStatus)
 ```
 
-Getter for the status of a recipient.
+Checks the status of a recipient probably tracked in a mapping, but will depend on the implementation      for example, the OpenSelfRegistration only maps users to bool, and then assumes Accepted for those      since there is no need for Pending or Rejected.
 
 
 
@@ -164,7 +147,7 @@ Getter for the status of a recipient.
 function getStrategyId() external view returns (bytes32)
 ```
 
-Getter for the &#39;strategyId&#39;.
+Getter for the &#39;id&#39; of the strategy.
 
 
 
@@ -181,9 +164,9 @@ Getter for the &#39;strategyId&#39;.
 function increasePoolAmount(uint256 _amount) external nonpayable
 ```
 
-Increases the pool amount.
+Incrases the balance of the pool.
 
-*Increases the &#39;poolAmount&#39; by &#39;_amount&#39;. Only &#39;Allo&#39; contract can call this.*
+
 
 #### Parameters
 
@@ -211,10 +194,10 @@ function initialize(uint256 _poolId, bytes _data) external nonpayable
 ### isPoolActive
 
 ```solidity
-function isPoolActive() external view returns (bool)
+function isPoolActive() external nonpayable returns (bool)
 ```
 
-Getter for whether or not the pool is active.
+whether pool is active.
 
 
 
@@ -223,7 +206,7 @@ Getter for whether or not the pool is active.
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | bool | &#39;true&#39; if the pool is active, otherwise &#39;false&#39; |
+| _0 | bool | Whether the pool is active or not |
 
 ### isValidAllocator
 
@@ -231,21 +214,21 @@ Getter for whether or not the pool is active.
 function isValidAllocator(address _allocator) external view returns (bool)
 ```
 
-Checks if the &#39;_allocator&#39; is a valid allocator.
+Checks whether a allocator is valid or not, will usually be true for all strategies      and will depend on the strategy implementation.
 
-*How the allocator is determined is up to the strategy implementation.*
+
 
 #### Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| _allocator | address | The address to check if it is a valid allocator for the strategy. |
+| _allocator | address | The allocator to check |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | bool | undefined |
+| _0 | bool | Whether the allocator is valid or not |
 
 ### registerRecipient
 
@@ -253,9 +236,9 @@ Checks if the &#39;_allocator&#39; is a valid allocator.
 function registerRecipient(bytes _data, address _sender) external payable returns (address)
 ```
 
-Registers a recipient.
+This will register a recipient, set their status (and any other strategy specific values), and         return the ID of the recipient.
 
-*Registers a recipient and returns the ID of the recipient. The encoded &#39;_data&#39; will be determined by the      strategy implementation. Only &#39;Allo&#39; contract can call this when it is initialized.*
+*Able to change status all the way up to &#39;Accepted&#39;, or to &#39;Pending&#39; and if there are more steps, additional      functions should be added to allow the owner to check this. The owner could also check attestations directly      and then accept for instance. The &#39;_data&#39; will be determined by the strategy implementation.*
 
 #### Parameters
 
@@ -268,7 +251,7 @@ Registers a recipient.
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | address | recipientId |
+| _0 | address | The ID of the recipient |
 
 
 
@@ -368,17 +351,6 @@ Emitted when a recipient is registered.
 
 
 ## Errors
-
-### AMOUNT_MISMATCH
-
-```solidity
-error AMOUNT_MISMATCH()
-```
-
-
-
-
-
 
 ### BaseStrategy_ALREADY_INITIALIZED
 

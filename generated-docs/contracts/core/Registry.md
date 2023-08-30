@@ -1,12 +1,12 @@
 # Registry
 
-*allo-team*
+*@thelostone-mc &lt;aditya@gitcoin.co&gt;, @KurtMerbeth &lt;kurt@gitcoin.co&gt;, @codenamejason &lt;jason@gitcoin.co&gt;*
 
-> Registry
+> Registry Contract
 
 Registry contract for creating and managing profiles
 
-*This contract is used to create and manage profiles for the Allo protocol*
+*This contract is used to create and manage profiles for the Allo protocol      It is also used to deploy the anchor contract for each profile which acts as a proxy      for the profile and is used to receive funds and execute transactions on behalf of the profile      The Registry is also used to add and remove members from a profile and update the profile &#39;Metadata&#39;*
 
 ## Methods
 
@@ -75,7 +75,7 @@ Transfers the ownership of the profile to the pending owner Requirements: Must b
 
 | Name | Type | Description |
 |---|---|---|
-| _profileId | bytes32 | The profileId of the profile |
+| _profileId | bytes32 | The &#39;profileId&#39; of the profile |
 
 ### addMembers
 
@@ -91,7 +91,7 @@ Adds members to the profile Requirements: Must be the owner of the profile to ad
 
 | Name | Type | Description |
 |---|---|---|
-| _profileId | bytes32 | The profileId of the profile |
+| _profileId | bytes32 | The &#39;profileId&#39; of the profile |
 | _members | address[] | The members to add |
 
 ### anchorToProfileId
@@ -248,6 +248,22 @@ function hasRole(bytes32 role, address account) external view returns (bool)
 |---|---|---|
 | _0 | bool | undefined |
 
+### initialize
+
+```solidity
+function initialize(address _owner) external nonpayable
+```
+
+Initializes the contract after an upgrade
+
+*During upgrade -&gt; an higher version should be passed to reinitializerReverts if the &#39;_owner&#39; is the &#39;address(0)&#39;*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _owner | address | The owner of the contract |
+
 ### isMemberOfProfile
 
 ```solidity
@@ -262,7 +278,7 @@ Returns if the given address is an member of the profile
 
 | Name | Type | Description |
 |---|---|---|
-| _profileId | bytes32 | The profileId of the profile |
+| _profileId | bytes32 | The &#39;profileId&#39; of the profile |
 | _member | address | The address to check |
 
 #### Returns
@@ -285,7 +301,7 @@ Returns if the given address is an owner of the profile
 
 | Name | Type | Description |
 |---|---|---|
-| _profileId | bytes32 | The profileId of the profile |
+| _profileId | bytes32 | The &#39;profileId&#39; of the profile |
 | _owner | address | The address to check |
 
 #### Returns
@@ -308,7 +324,7 @@ Returns if the given address is an owner or member of the profile
 
 | Name | Type | Description |
 |---|---|---|
-| _profileId | bytes32 | The profileId of the profile |
+| _profileId | bytes32 | The &#39;profileId&#39; of the profile |
 | _account | address | The address to check |
 
 #### Returns
@@ -397,7 +413,7 @@ Removes members from the profile Requirements: Must be the owner of the profile 
 
 | Name | Type | Description |
 |---|---|---|
-| _profileId | bytes32 | The profileId of the profile |
+| _profileId | bytes32 | The &#39;profileId&#39; of the profile |
 | _members | address[] | The members to remove |
 
 ### renounceRole
@@ -479,7 +495,7 @@ function updateProfileMetadata(bytes32 _profileId, Metadata _metadata) external 
 function updateProfileName(bytes32 _profileId, string _name) external nonpayable returns (address)
 ```
 
-Updates the name of the profile and generates new anchor Requirements: Must be the owner of the profile Note: Use caution when updating your profile name as it will generate a new anchor address Note: You can always update the name back to the original name to get the original anchor address
+Updates the name of the profile and generates new anchor Requirements: &#39;msg.sender&#39; must be the owner of the profile Note: Use caution when updating your profile name as it will generate a new anchor address Note: You can always update the name back to the original name to get the original anchor address
 
 *Only owner can update the name*
 
@@ -502,20 +518,36 @@ Updates the name of the profile and generates new anchor Requirements: Must be t
 function updateProfilePendingOwner(bytes32 _profileId, address _pendingOwner) external nonpayable
 ```
 
-Updates the pending owner of the profile Requirements: Must be the owner of the profile to update the owner
+Updates the pending owner of the profile
 
-
+*This is used to transfer ownership of the profile to a new owner Requirements: Must be the owner of the profile to update the owner*
 
 #### Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| _profileId | bytes32 | The profileId of the profile |
+| _profileId | bytes32 | The &#39;profileId&#39; of the profile |
 | _pendingOwner | address | New pending owner |
 
 
 
 ## Events
+
+### Initialized
+
+```solidity
+event Initialized(uint8 version)
+```
+
+
+
+*Triggered when the contract has been initialized or reinitialized.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| version  | uint8 | undefined |
 
 ### ProfileCreated
 
@@ -525,7 +557,7 @@ event ProfileCreated(bytes32 indexed profileId, uint256 nonce, string name, Meta
 
 
 
-*Event emitted when a profile is created Note: This will return your anchor address*
+*Emitted when a profile is created. This will return your anchor address.*
 
 #### Parameters
 
@@ -546,7 +578,7 @@ event ProfileMetadataUpdated(bytes32 indexed profileId, Metadata metadata)
 
 
 
-*Event emitted when a profile&#39;s metadata is updated*
+*Emitted when a profile&#39;s metadata is updated.*
 
 #### Parameters
 
@@ -563,7 +595,7 @@ event ProfileNameUpdated(bytes32 indexed profileId, string name, address anchor)
 
 
 
-*Event emitted when a profile name is updated Note: This will update the anchor when the name is updated and return it*
+*Emitted when a profile name is updated. This will update the anchor when the name is updated and return it.*
 
 #### Parameters
 
@@ -581,7 +613,7 @@ event ProfileOwnerUpdated(bytes32 indexed profileId, address owner)
 
 
 
-*Event emitted when a profile owner is updated*
+*Emitted when a profile owner is updated.*
 
 #### Parameters
 
@@ -598,7 +630,7 @@ event ProfilePendingOwnerUpdated(bytes32 indexed profileId, address pendingOwner
 
 
 
-*Event emitted when a profile pending owner is updated*
+*Emitted when a profile pending owner is updated.*
 
 #### Parameters
 
@@ -676,6 +708,17 @@ error AMOUNT_MISMATCH()
 
 
 
+### ANCHOR_ERROR
+
+```solidity
+error ANCHOR_ERROR()
+```
+
+
+
+*Thrown if the anchor creation fails*
+
+
 ### NONCE_NOT_AVAILABLE
 
 ```solidity
@@ -684,7 +727,7 @@ error NONCE_NOT_AVAILABLE()
 
 
 
-*Returned when the nonce passed has been used or not available*
+*Thrown when the nonce passed has been used or not available*
 
 
 ### NOT_PENDING_OWNER
@@ -695,7 +738,7 @@ error NOT_PENDING_OWNER()
 
 
 
-*Returned when the &#39;msg.sender&#39; is not the pending owner on ownership transfer*
+*Thrown when the &#39;msg.sender&#39; is not the pending owner on ownership transfer*
 
 
 ### UNAUTHORIZED
@@ -706,7 +749,7 @@ error UNAUTHORIZED()
 
 
 
-*Returned when the &#39;msg.sender&#39; is not authorized*
+*Thrown when the &#39;msg.sender&#39; is not authorized*
 
 
 ### ZERO_ADDRESS
@@ -717,7 +760,7 @@ error ZERO_ADDRESS()
 
 
 
-*Returned if any address check is the zero address*
+*Thrown if any address check is the zero address*
 
 
 

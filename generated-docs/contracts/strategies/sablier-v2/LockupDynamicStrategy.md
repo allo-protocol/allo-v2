@@ -1,4 +1,4 @@
-# DonationVotingStrategy
+# LockupDynamicStrategy
 
 
 
@@ -44,10 +44,10 @@ Allocates to a recipient.
 | _data | bytes | The data to use to allocate to the recipient |
 | _sender | address | The address of the sender |
 
-### allocationEndTime
+### allocatedGrantAmount
 
 ```solidity
-function allocationEndTime() external view returns (uint256)
+function allocatedGrantAmount() external view returns (uint256)
 ```
 
 
@@ -61,13 +61,13 @@ function allocationEndTime() external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined |
 
-### allocationStartTime
+### broker
 
 ```solidity
-function allocationStartTime() external view returns (uint256)
+function broker() external view returns (address account, UD60x18 fee)
 ```
 
-
+See https://docs.sablier.com/concepts/protocol/fees#broker-fees
 
 
 
@@ -76,15 +76,16 @@ function allocationStartTime() external view returns (uint256)
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | uint256 | undefined |
+| account | address | undefined |
+| fee | UD60x18 | undefined |
 
-### allowedTokens
+### cancelStream
 
 ```solidity
-function allowedTokens(address) external view returns (bool)
+function cancelStream(address _recipientId, uint256 _streamId) external nonpayable
 ```
 
-token -&gt; bool
+Cancel the stream and adjust the contract amounts.
 
 
 
@@ -92,18 +93,13 @@ token -&gt; bool
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | address | undefined |
+| _recipientId | address | Id of the recipient |
+| _streamId | uint256 | The id of the stream |
 
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bool | undefined |
-
-### claim
+### changeRecipientSegments
 
 ```solidity
-function claim(DonationVotingStrategy.Claim[] _claims) external nonpayable
+function changeRecipientSegments(address _recipientId, LockupDynamic.SegmentWithDelta[] _segments) external nonpayable
 ```
 
 
@@ -114,30 +110,8 @@ function claim(DonationVotingStrategy.Claim[] _claims) external nonpayable
 
 | Name | Type | Description |
 |---|---|---|
-| _claims | DonationVotingStrategy.Claim[] | undefined |
-
-### claims
-
-```solidity
-function claims(address, address) external view returns (uint256)
-```
-
-recipientId -&gt; token -&gt; amount
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
-| _1 | address | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
+| _recipientId | address | undefined |
+| _segments | LockupDynamic.SegmentWithDelta[] | undefined |
 
 ### distribute
 
@@ -157,6 +131,28 @@ Distributes funds (tokens) to recipients.
 | _data | bytes | The data to use to distribute to the recipients |
 | _sender | address | The address of the sender |
 
+### getAllRecipientStreamIds
+
+```solidity
+function getAllRecipientStreamIds(address _recipientId) external view returns (uint256[])
+```
+
+Get the recipient&#39;s stream ids
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _recipientId | address | Id of the recipient |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256[] | undefined |
+
 ### getAllo
 
 ```solidity
@@ -174,10 +170,27 @@ Getter for the &#39;Allo&#39; contract.
 |---|---|---|
 | _0 | contract IAllo | The Allo contract |
 
+### getBroker
+
+```solidity
+function getBroker() external view returns (struct Broker)
+```
+
+Get the broker
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | Broker | undefined |
+
 ### getInternalRecipientStatus
 
 ```solidity
-function getInternalRecipientStatus(address _recipientId) external view returns (enum DonationVotingStrategy.InternalRecipientStatus)
+function getInternalRecipientStatus(address _recipientId) external view returns (enum LockupDynamicStrategy.InternalRecipientStatus)
 ```
 
 Get Internal recipient status
@@ -194,7 +207,7 @@ Get Internal recipient status
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | enum DonationVotingStrategy.InternalRecipientStatus | undefined |
+| _0 | enum LockupDynamicStrategy.InternalRecipientStatus | undefined |
 
 ### getPayouts
 
@@ -218,6 +231,29 @@ Gets the payout summary for recipients.
 | Name | Type | Description |
 |---|---|---|
 | _0 | IStrategy.PayoutSummary[] | The payout summary for the recipients |
+
+### getPayouts
+
+```solidity
+function getPayouts(address[] _recipientIds, bytes) external view returns (struct IStrategy.PayoutSummary[] payouts)
+```
+
+Returns the payout summary for the accepted recipient
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _recipientIds | address[] | undefined |
+| _1 | bytes | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| payouts | IStrategy.PayoutSummary[] | undefined |
 
 ### getPoolAmount
 
@@ -256,7 +292,7 @@ Getter for the &#39;poolId&#39;.
 ### getRecipient
 
 ```solidity
-function getRecipient(address _recipientId) external view returns (struct DonationVotingStrategy.Recipient)
+function getRecipient(address _recipientId) external view returns (struct LockupDynamicStrategy.Recipient)
 ```
 
 Get the recipient
@@ -267,13 +303,13 @@ Get the recipient
 
 | Name | Type | Description |
 |---|---|---|
-| _recipientId | address | Id of the recipient |
+| _recipientId | address | undefined |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | DonationVotingStrategy.Recipient | undefined |
+| _0 | LockupDynamicStrategy.Recipient | undefined |
 
 ### getRecipientStatus
 
@@ -297,6 +333,29 @@ Getter for the status of a recipient.
 |---|---|---|
 | _0 | enum IStrategy.RecipientStatus | The status of the recipient |
 
+### getRecipientStreamId
+
+```solidity
+function getRecipientStreamId(address _recipientId, uint256 streamIdIndex) external view returns (uint256)
+```
+
+Get the recipient&#39;s stream id at the given index
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _recipientId | address | Id of the recipient |
+| streamIdIndex | uint256 | Index of the stream id |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
 ### getStrategyId
 
 ```solidity
@@ -313,6 +372,23 @@ Getter for the &#39;strategyId&#39;.
 | Name | Type | Description |
 |---|---|---|
 | _0 | bytes32 | The ID of the strategy |
+
+### grantAmountRequired
+
+```solidity
+function grantAmountRequired() external view returns (bool)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
 
 ### increasePoolAmount
 
@@ -386,6 +462,23 @@ Checks if the &#39;_allocator&#39; is a valid allocator.
 |---|---|---|
 | _0 | bool | undefined |
 
+### lockupDynamic
+
+```solidity
+function lockupDynamic() external view returns (contract ISablierV2LockupDynamic)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | contract ISablierV2LockupDynamic | undefined |
+
 ### metadataRequired
 
 ```solidity
@@ -402,29 +495,6 @@ function metadataRequired() external view returns (bool)
 | Name | Type | Description |
 |---|---|---|
 | _0 | bool | undefined |
-
-### payoutSummaries
-
-```solidity
-function payoutSummaries(address) external view returns (address recipientAddress, uint256 amount)
-```
-
-recipientId -&gt; PayoutSummary
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| recipientAddress | address | undefined |
-| amount | uint256 | undefined |
 
 ### registerRecipient
 
@@ -449,117 +519,13 @@ Registers a recipient.
 |---|---|---|
 | _0 | address | recipientId |
 
-### registrationEndTime
+### registryGating
 
 ```solidity
-function registrationEndTime() external view returns (uint256)
+function registryGating() external view returns (bool)
 ```
 
 
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
-### registrationStartTime
-
-```solidity
-function registrationStartTime() external view returns (uint256)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
-### reviewRecipients
-
-```solidity
-function reviewRecipients(address[] _recipientIds, enum DonationVotingStrategy.InternalRecipientStatus[] _recipientStatuses) external nonpayable
-```
-
-Review recipient application
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _recipientIds | address[] | Ids of the recipients |
-| _recipientStatuses | enum DonationVotingStrategy.InternalRecipientStatus[] | Statuses of the recipients |
-
-### setPayout
-
-```solidity
-function setPayout(address[] _recipientIds, uint256[] _amounts) external nonpayable
-```
-
-Set payout for the recipients
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _recipientIds | address[] | Ids of the recipients |
-| _amounts | uint256[] | Amounts to be paid out |
-
-### totalPayoutAmount
-
-```solidity
-function totalPayoutAmount() external view returns (uint256)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
-### updatePoolTimestamps
-
-```solidity
-function updatePoolTimestamps(uint256 _registrationStartTime, uint256 _registrationEndTime, uint256 _allocationStartTime, uint256 _allocationEndTime) external nonpayable
-```
-
-Set the start and end dates for the pool
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _registrationStartTime | uint256 | The start time for the registration |
-| _registrationEndTime | uint256 | The end time for the registration |
-| _allocationStartTime | uint256 | The start time for the allocation |
-| _allocationEndTime | uint256 | The end time for the allocation |
-
-### useRegistryAnchor
-
-```solidity
-function useRegistryAnchor() external view returns (bool)
-```
-
-================================ ========== Storage ============= ================================
 
 
 
@@ -569,6 +535,38 @@ function useRegistryAnchor() external view returns (bool)
 | Name | Type | Description |
 |---|---|---|
 | _0 | bool | undefined |
+
+### setBroker
+
+```solidity
+function setBroker(Broker _broker) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _broker | Broker | undefined |
+
+### setInternalRecipientStatusToInReview
+
+```solidity
+function setInternalRecipientStatusToInReview(address[] _recipientIds) external nonpayable
+```
+
+Set the internal status of the recipient to InReview
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _recipientIds | address[] | Ids of the recipients |
 
 ### withdraw
 
@@ -609,13 +607,13 @@ Emitted when a recipient is allocated to.
 | token  | address | The token allocated |
 | sender  | address | undefined |
 
-### Claimed
+### BrokerSet
 
 ```solidity
-event Claimed(address indexed recipientId, address recipientAddress, uint256 amount, address token)
+event BrokerSet(Broker broker)
 ```
 
-
+=============================== ========== Events ============= ===============================
 
 
 
@@ -623,10 +621,7 @@ event Claimed(address indexed recipientId, address recipientAddress, uint256 amo
 
 | Name | Type | Description |
 |---|---|---|
-| recipientId `indexed` | address | undefined |
-| recipientAddress  | address | undefined |
-| amount  | uint256 | undefined |
-| token  | address | undefined |
+| broker  | Broker | undefined |
 
 ### Distributed
 
@@ -666,22 +661,6 @@ Emitted when strategy is initialized.
 | poolId  | uint256 | The ID of the pool |
 | data  | bytes | undefined |
 
-### PayoutSet
-
-```solidity
-event PayoutSet(bytes recipientIds)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| recipientIds  | bytes | undefined |
-
 ### PoolActive
 
 ```solidity
@@ -698,10 +677,10 @@ Emitted when pool is set to active status.
 |---|---|---|
 | active  | bool | The status of the pool |
 
-### RecipientStatusUpdated
+### RecipientSegmentsChanged
 
 ```solidity
-event RecipientStatusUpdated(address indexed recipientId, enum DonationVotingStrategy.InternalRecipientStatus recipientStatus, address sender)
+event RecipientSegmentsChanged(address recipientId, LockupDynamic.SegmentWithDelta[] segments)
 ```
 
 
@@ -712,9 +691,25 @@ event RecipientStatusUpdated(address indexed recipientId, enum DonationVotingStr
 
 | Name | Type | Description |
 |---|---|---|
-| recipientId `indexed` | address | undefined |
-| recipientStatus  | enum DonationVotingStrategy.InternalRecipientStatus | undefined |
-| sender  | address | undefined |
+| recipientId  | address | undefined |
+| segments  | LockupDynamic.SegmentWithDelta[] | undefined |
+
+### RecipientStatusChanged
+
+```solidity
+event RecipientStatusChanged(address recipientId, enum LockupDynamicStrategy.InternalRecipientStatus status)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| recipientId  | address | undefined |
+| status  | enum LockupDynamicStrategy.InternalRecipientStatus | undefined |
 
 ### Registered
 
@@ -734,64 +729,14 @@ Emitted when a recipient is registered.
 | data  | bytes | The data passed to the &#39;registerRecipient&#39; function |
 | sender  | address | The sender |
 
-### TimestampsUpdated
-
-```solidity
-event TimestampsUpdated(uint256 registrationStartTime, uint256 registrationEndTime, uint256 allocationStartTime, uint256 allocationEndTime, address sender)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| registrationStartTime  | uint256 | undefined |
-| registrationEndTime  | uint256 | undefined |
-| allocationStartTime  | uint256 | undefined |
-| allocationEndTime  | uint256 | undefined |
-| sender  | address | undefined |
-
-### UpdatedRegistration
-
-```solidity
-event UpdatedRegistration(address indexed recipientId, bytes data, address sender, enum DonationVotingStrategy.InternalRecipientStatus status)
-```
-
-Emitted when a recipient updates their registration
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| recipientId `indexed` | address | Id of the recipient |
-| data  | bytes | The encoded data - (address recipientId, address recipientAddress, Metadata metadata) |
-| sender  | address | The sender of the transaction |
-| status  | enum DonationVotingStrategy.InternalRecipientStatus | The updated status of the recipient |
-
 
 
 ## Errors
 
-### ALLOCATION_NOT_ACTIVE
+### ALLOCATION_EXCEEDS_POOL_AMOUNT
 
 ```solidity
-error ALLOCATION_NOT_ACTIVE()
-```
-
-
-
-
-
-
-### ALLOCATION_NOT_ENDED
-
-```solidity
-error ALLOCATION_NOT_ENDED()
+error ALLOCATION_EXCEEDS_POOL_AMOUNT()
 ```
 
 
@@ -898,17 +843,6 @@ Throws when calls to Base Strategy are unauthorized
 
 
 
-### INVALID
-
-```solidity
-error INVALID()
-```
-
-
-
-
-
-
 ### INVALID_METADATA
 
 ```solidity
@@ -920,10 +854,10 @@ error INVALID_METADATA()
 
 
 
-### NOT_ALLOWED
+### INVALID_REGISTRATION
 
 ```solidity
-error NOT_ALLOWED()
+error INVALID_REGISTRATION()
 ```
 
 
@@ -931,26 +865,32 @@ error NOT_ALLOWED()
 
 
 
-### RECIPIENT_ERROR
+### RECIPIENT_ALREADY_ACCEPTED
 
 ```solidity
-error RECIPIENT_ERROR(address recipientId)
+error RECIPIENT_ALREADY_ACCEPTED()
+```
+
+=============================== ========== Errors ============= ===============================
+
+
+
+
+### STATUS_NOT_ACCEPTED
+
+```solidity
+error STATUS_NOT_ACCEPTED()
 ```
 
 
 
 
 
-#### Parameters
 
-| Name | Type | Description |
-|---|---|---|
-| recipientId | address | undefined |
-
-### REGISTRATION_NOT_ACTIVE
+### STATUS_NOT_PENDING_OR_INREVIEW
 
 ```solidity
-error REGISTRATION_NOT_ACTIVE()
+error STATUS_NOT_PENDING_OR_INREVIEW()
 ```
 
 
@@ -964,7 +904,7 @@ error REGISTRATION_NOT_ACTIVE()
 error UNAUTHORIZED()
 ```
 
-=============================== ========== Errors ============= ===============================
+
 
 
 

@@ -3,12 +3,12 @@ import * as dotenv from "dotenv";
 import "@matterlabs/hardhat-zksync-deploy";
 import "@matterlabs/hardhat-zksync-solc";
 import "@matterlabs/hardhat-zksync-upgradable";
-import "@matterlabs/hardhat-zksync-verify";
+// import "@matterlabs/hardhat-zksync-verify";
 
 // import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-solhint";
-import "@nomiclabs/hardhat-waffle";
-import "@openzeppelin/hardhat-upgrades";
+// import "@nomiclabs/hardhat-waffle";
+// import "@openzeppelin/hardhat-upgrades";
 import "@primitivefi/hardhat-dodoc";
 import "@typechain/hardhat";
 import "hardhat-abi-exporter";
@@ -126,12 +126,13 @@ const config: HardhatUserConfig = {
   networks: {
     // Main Networks
     mainnet: { ...createMainnetConfig("mainnet"), zksync: false },
-    "optimism-mainnet": { ...createMainnetConfig("optimism-mainnet"), zksync: false },
+    "optimism-mainnet": {
+      ...createMainnetConfig("optimism-mainnet"),
+      zksync: false,
+    },
     "fantom-mainnet": {
-      ...createMainnetConfig(
-        "fantom-mainnet",
-        "https://rpc.ftm.tools"
-      ), zksync: false
+      ...createMainnetConfig("fantom-mainnet", "https://rpc.ftm.tools"),
+      zksync: false,
     },
     "pgn-mainnet": {
       accounts: [deployPrivateKey],
@@ -148,10 +149,8 @@ const config: HardhatUserConfig = {
       zksync: false,
     },
     "zksync-mainnet": {
-      accounts: [deployPrivateKey],
-      chainId: chainIds["zksync-mainnet"],
-      url: "https://mainnet.zksync.io",
-      ethNetwork: "mainnet", // or a Mainnet RPC endpoint from Infura/Alchemy/Chainstack etc.
+      ...createMainnetConfig("zksync-mainnet", "https://mainnet.zksync.io"),
+      ethNetwork: "mainnet",
       zksync: true,
     },
 
@@ -161,13 +160,15 @@ const config: HardhatUserConfig = {
       ...createTestnetConfig(
         "sepolia",
         "https://eth-sepolia.public.blastapi.io"
-      ), zksync: false
+      ),
+      zksync: false,
     },
     "fantom-testnet": {
       ...createTestnetConfig(
         "fantom-testnet",
         "https://rpc.testnet.fantom.network/"
-      ), zksync: false
+      ),
+      zksync: false,
     },
     "optimism-goerli": {
       accounts: [deployPrivateKey],
@@ -207,74 +208,71 @@ const config: HardhatUserConfig = {
     currency: "USD",
     excludeContracts: ["contracts/mocks", "contracts/dummy"],
   },
-  etherscan: {
-    apiKey: {
-      // @ts-ignore
-      mainnet: process.env.ETHERSCAN_API_KEY,
-      // @ts-ignore
-      goerli: process.env.ETHERSCAN_API_KEY,
-      // @ts-ignore
-      sepolia: process.env.ETHERSCAN_API_KEY,
-      // @ts-ignore
-      optimisticEthereum: process.env.OPTIMISTIC_ETHERSCAN_API_KEY,
-      // @ts-ignore
-      optimisticGoerli: process.env.OPTIMISTIC_ETHERSCAN_API_KEY,
-      // @ts-ignore
-      ftmTestnet: process.env.FTMSCAN_API_KEY,
-      // @ts-ignore
-      opera: process.env.FTMSCAN_API_KEY,
-      // @ts-ignore
-      "pgn-mainnet": process.env.PGNSCAN_API_KEY,
-      // @ts-ignore
-      "pgn-sepolia": process.env.PGNSCAN_API_KEY,
-      // @ts-ignore
-      "celo-mainnet": process.env.CELOSCAN_API_KEY,
-      // @ts-ignore
-      "celo-testnet": process.env.CELOSCAN_API_KEY,
-    },
-    customChains: [
-      {
-        network: "pgn-mainnet",
-        chainId: chainIds["pgn-mainnet"],
-        urls: {
-          apiURL: "https://explorer.publicgoods.network/api",
-          browserURL: "https://explorer.publicgoods.network",
-        },
-      },
-      {
-        network: "pgn-sepolia",
-        chainId: chainIds["pgn-sepolia"],
-        urls: {
-          apiURL: "https://explorer.sepolia.publicgoods.network/api",
-          browserURL: "https://explorer.sepolia.publicgoods.network",
-        },
-      },
-      {
-        network: "celo-mainnet",
-        chainId: chainIds["celo-mainnet"],
-        urls: {
-          apiURL: "https://celoscan.io/api",
-          browserURL: "https://celoscan.io",
-        },
-      },
-      {
-        network: "celo-testnet",
-        chainId: chainIds["celo-testnet"],
-        urls: {
-          apiURL: "https://api-alfajores.celoscan.io/api",
-          browserURL: "https://alfajores.celoscan.io",
-        },
-      },
-    ],
-  },
+  // etherscan: {
+  //   apiKey: {
+  //     // @ts-ignore
+  //     mainnet: process.env.ETHERSCAN_API_KEY,
+  //     // @ts-ignore
+  //     goerli: process.env.ETHERSCAN_API_KEY,
+  //     // @ts-ignore
+  //     sepolia: process.env.ETHERSCAN_API_KEY,
+  //     // @ts-ignore
+  //     optimisticEthereum: process.env.OPTIMISTIC_ETHERSCAN_API_KEY,
+  //     // @ts-ignore
+  //     optimisticGoerli: process.env.OPTIMISTIC_ETHERSCAN_API_KEY,
+  //     // @ts-ignore
+  //     ftmTestnet: process.env.FTMSCAN_API_KEY,
+  //     // @ts-ignore
+  //     opera: process.env.FTMSCAN_API_KEY,
+  //     // @ts-ignore
+  //     "pgn-mainnet": process.env.PGNSCAN_API_KEY,
+  //     // @ts-ignore
+  //     "pgn-sepolia": process.env.PGNSCAN_API_KEY,
+  //     // @ts-ignore
+  //     "celo-mainnet": process.env.CELOSCAN_API_KEY,
+  //     // @ts-ignore
+  //     "celo-testnet": process.env.CELOSCAN_API_KEY,
+  //   },
+  //   customChains: [
+  //     {
+  //       network: "pgn-mainnet",
+  //       chainId: chainIds["pgn-mainnet"],
+  //       urls: {
+  //         apiURL: "https://explorer.publicgoods.network/api",
+  //         browserURL: "https://explorer.publicgoods.network",
+  //       },
+  //     },
+  //     {
+  //       network: "pgn-sepolia",
+  //       chainId: chainIds["pgn-sepolia"],
+  //       urls: {
+  //         apiURL: "https://explorer.sepolia.publicgoods.network/api",
+  //         browserURL: "https://explorer.sepolia.publicgoods.network",
+  //       },
+  //     },
+  //     {
+  //       network: "celo-mainnet",
+  //       chainId: chainIds["celo-mainnet"],
+  //       urls: {
+  //         apiURL: "https://celoscan.io/api",
+  //         browserURL: "https://celoscan.io",
+  //       },
+  //     },
+  //     {
+  //       network: "celo-testnet",
+  //       chainId: chainIds["celo-testnet"],
+  //       urls: {
+  //         apiURL: "https://api-alfajores.celoscan.io/api",
+  //         browserURL: "https://alfajores.celoscan.io",
+  //       },
+  //     },
+  //   ],
+  // },
   abiExporter: abiExporter,
   dodoc: dodoc,
   zksolc: {
-    version: "1.3.13",
-    compilerSource: "binary",
-    settings: {
-      isSystem: true,
-    },
+    version: "latest",
+    settings: {},
   },
 };
 

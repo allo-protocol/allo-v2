@@ -1,12 +1,12 @@
 # Anchor
 
-
+*@thelostone-mc &lt;aditya@gitcoin.co&gt;, @KurtMerbeth &lt;kurt@gitcoin.co&gt;, @codenamejason &lt;jason@gitcoin.co&gt;*
 
 > Anchor contract
 
-This contract is used to execute calls to a target address
+Anchors are associated with profiles and are accessible exclusively by the profile owner. This contract ensures secure         and authorized interaction with external addresses, enhancing the capabilities of profiles and enabling controlled         execution of operations. The contract leverages the `Registry` contract for ownership verification and access control.
 
-*The Anhor is used as an primary entry point for the protocol and is an &#39;anchor&#39; to your profileit gives the protocol a way to send funds to a target address and not get stuck in a contract*
+
 
 ## Methods
 
@@ -79,9 +79,9 @@ The registry contract on any given network/chain
 error CALL_FAILED()
 ```
 
+Throws when the call to the target address fails
 
 
-*Error when the call to the target address fails*
 
 
 ### UNAUTHORIZED
@@ -90,9 +90,9 @@ error CALL_FAILED()
 error UNAUTHORIZED()
 ```
 
+Throws when the caller is not the owner of the profile
 
 
-*Error when the caller is not the owner of the profile*
 
 
 

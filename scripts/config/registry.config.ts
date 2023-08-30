@@ -76,4 +76,16 @@ export const registryConfig: DeployParams = {
     registryProxy: "0x0",
     owner: "0xBa0BBfB320486119f97Ea9C4671dE5e45441B2b7",
   },
+  // zkSync-testnet
+  280: {
+    registryImplementation: "0x0",
+    registryProxy: "0x0",
+    owner: "0xBa0BBfB320486119f97Ea9C4671dE5e45441B2b7",
+  },
+  // zkSync-mainnet
+  324: {
+    registryImplementation: "0x0",
+    registryProxy: "0x0",
+    owner: "0x0",
+  },
 };

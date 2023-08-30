@@ -1,12 +1,12 @@
 # IRegistry
 
-*allo-team*
+*@thelostone-mc &lt;aditya@gitcoin.co&gt;, @KurtMerbeth &lt;kurt@gitcoin.co&gt;, @codenamejason &lt;jason@gitcoin.co&gt;*
 
-> IRegistry Interface The Registry contract is used to store and manage all the profiles that are created within the Allo protocol
+> IRegistry Interface
 
-Interface for the Registry contract and exposes all functions needed to use the Registry         within the Allo protocol
+Interface for the Registry contract and exposes all functions needed to use the Registry         within the Allo protocol.
 
-
+*The Registry Interface is used to interact with the Allo protocol and create profiles      that can be used to interact with the Allo protocol. The Registry is the main contract      that all other contracts interact with to get the &#39;Profile&#39; information needed to      interact with the Allo protocol. The Registry is also used to create new profiles      and update existing profiles. The Registry is also used to add and remove members      from a profile. The Registry will not always be used in a strategy and will depend on      the strategy being used.*
 
 ## Methods
 
@@ -24,7 +24,7 @@ function acceptProfileOwnership(bytes32 _profileId) external nonpayable
 
 | Name | Type | Description |
 |---|---|---|
-| _profileId | bytes32 | undefined |
+| _profileId | bytes32 | The &#39;profileId&#39; to accept the ownership for |
 
 ### addMembers
 
@@ -40,13 +40,13 @@ function addMembers(bytes32 _profileId, address[] _members) external nonpayable
 
 | Name | Type | Description |
 |---|---|---|
-| _profileId | bytes32 | undefined |
-| _members | address[] | undefined |
+| _profileId | bytes32 | The &#39;profileId&#39; to add members to |
+| _members | address[] | The members to add to the &#39;_profileId&#39; passed in |
 
 ### createProfile
 
 ```solidity
-function createProfile(uint256 _nonce, string _name, Metadata _metadata, address _owner, address[] _members) external nonpayable returns (bytes32)
+function createProfile(uint256 _nonce, string _name, Metadata _metadata, address _owner, address[] _members) external nonpayable returns (bytes32 profileId)
 ```
 
 
@@ -67,12 +67,12 @@ function createProfile(uint256 _nonce, string _name, Metadata _metadata, address
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | bytes32 | undefined |
+| profileId | bytes32 | undefined |
 
 ### getProfileByAnchor
 
 ```solidity
-function getProfileByAnchor(address _anchor) external view returns (struct IRegistry.Profile)
+function getProfileByAnchor(address _anchor) external view returns (struct IRegistry.Profile profile)
 ```
 
 
@@ -83,18 +83,18 @@ function getProfileByAnchor(address _anchor) external view returns (struct IRegi
 
 | Name | Type | Description |
 |---|---|---|
-| _anchor | address | undefined |
+| _anchor | address | The &#39;anchor&#39; to return the &#39;Profile&#39; for |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | IRegistry.Profile | undefined |
+| profile | IRegistry.Profile | The &#39;Profile&#39; for the &#39;_anchor&#39; passed |
 
 ### getProfileById
 
 ```solidity
-function getProfileById(bytes32 _profileId) external view returns (struct IRegistry.Profile)
+function getProfileById(bytes32 _profileId) external view returns (struct IRegistry.Profile profile)
 ```
 
 
@@ -105,18 +105,18 @@ function getProfileById(bytes32 _profileId) external view returns (struct IRegis
 
 | Name | Type | Description |
 |---|---|---|
-| _profileId | bytes32 | undefined |
+| _profileId | bytes32 | The &#39;profileId&#39; to return the &#39;Profile&#39; for |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | IRegistry.Profile | undefined |
+| profile | IRegistry.Profile | The &#39;Profile&#39; for the &#39;_profileId&#39; passed |
 
 ### isMemberOfProfile
 
 ```solidity
-function isMemberOfProfile(bytes32 _profileId, address _member) external view returns (bool)
+function isMemberOfProfile(bytes32 _profileId, address _member) external view returns (bool isMemberOfProfile)
 ```
 
 
@@ -127,19 +127,19 @@ function isMemberOfProfile(bytes32 _profileId, address _member) external view re
 
 | Name | Type | Description |
 |---|---|---|
-| _profileId | bytes32 | undefined |
-| _member | address | undefined |
+| _profileId | bytes32 | The &#39;profileId&#39; to check if the &#39;_account&#39; is a member of |
+| _member | address | The &#39;member&#39; to check if they are a member of the &#39;_profileId&#39; passed in |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | bool | undefined |
+| isMemberOfProfile | bool | A boolean if the &#39;_account&#39; is a member of the &#39;_profileId&#39; passed in |
 
 ### isOwnerOfProfile
 
 ```solidity
-function isOwnerOfProfile(bytes32 _profileId, address _owner) external view returns (bool)
+function isOwnerOfProfile(bytes32 _profileId, address _owner) external view returns (bool isOwnerOfProfile)
 ```
 
 
@@ -150,19 +150,19 @@ function isOwnerOfProfile(bytes32 _profileId, address _owner) external view retu
 
 | Name | Type | Description |
 |---|---|---|
-| _profileId | bytes32 | undefined |
-| _owner | address | undefined |
+| _profileId | bytes32 | The &#39;profileId&#39; to check if the &#39;_account&#39; is an owner of |
+| _owner | address | The &#39;owner&#39; to check if they are an owner of the &#39;_profileId&#39; passed in |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | bool | undefined |
+| isOwnerOfProfile | bool | A boolean if the &#39;_account&#39; is an owner of the &#39;_profileId&#39; passed in |
 
 ### isOwnerOrMemberOfProfile
 
 ```solidity
-function isOwnerOrMemberOfProfile(bytes32 _profileId, address _account) external view returns (bool)
+function isOwnerOrMemberOfProfile(bytes32 _profileId, address _account) external view returns (bool isOwnerOrMemberOfProfile)
 ```
 
 
@@ -173,14 +173,14 @@ function isOwnerOrMemberOfProfile(bytes32 _profileId, address _account) external
 
 | Name | Type | Description |
 |---|---|---|
-| _profileId | bytes32 | undefined |
-| _account | address | undefined |
+| _profileId | bytes32 | The &#39;profileId&#39; to check if the &#39;_account&#39; is a member or owner of |
+| _account | address | The &#39;account&#39; to check if they are a member or owner of the &#39;_profileId&#39; passed in |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | bool | undefined |
+| isOwnerOrMemberOfProfile | bool | A boolean if the &#39;_account&#39; is a member or owner of the &#39;_profileId&#39; passed in |
 
 ### recoverFunds
 
@@ -196,8 +196,8 @@ function recoverFunds(address _token, address _recipient) external nonpayable
 
 | Name | Type | Description |
 |---|---|---|
-| _token | address | undefined |
-| _recipient | address | undefined |
+| _token | address | The token you want to use to recover funds |
+| _recipient | address | The recipient of the recovered funds |
 
 ### removeMembers
 
@@ -213,8 +213,8 @@ function removeMembers(bytes32 _profileId, address[] _members) external nonpayab
 
 | Name | Type | Description |
 |---|---|---|
-| _profileId | bytes32 | undefined |
-| _members | address[] | undefined |
+| _profileId | bytes32 | The &#39;profileId&#39; to remove members from |
+| _members | address[] | The members to remove from the &#39;_profileId&#39; passed in |
 
 ### updateProfileMetadata
 
@@ -236,7 +236,7 @@ function updateProfileMetadata(bytes32 _profileId, Metadata _metadata) external 
 ### updateProfileName
 
 ```solidity
-function updateProfileName(bytes32 _profileId, string _name) external nonpayable returns (address)
+function updateProfileName(bytes32 _profileId, string _name) external nonpayable returns (address anchor)
 ```
 
 
@@ -247,14 +247,14 @@ function updateProfileName(bytes32 _profileId, string _name) external nonpayable
 
 | Name | Type | Description |
 |---|---|---|
-| _profileId | bytes32 | undefined |
-| _name | string | undefined |
+| _profileId | bytes32 | The &#39;profileId&#39; to update the name for |
+| _name | string | The new &#39;name&#39; value |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | address | undefined |
+| anchor | address | The new &#39;anchor&#39; address |
 
 ### updateProfilePendingOwner
 
@@ -270,8 +270,8 @@ function updateProfilePendingOwner(bytes32 _profileId, address _pendingOwner) ex
 
 | Name | Type | Description |
 |---|---|---|
-| _profileId | bytes32 | undefined |
-| _pendingOwner | address | undefined |
+| _profileId | bytes32 | The &#39;profileId&#39; to update the pending owner for |
+| _pendingOwner | address | The new pending &#39;owner&#39; value |
 
 
 
@@ -285,7 +285,7 @@ event ProfileCreated(bytes32 indexed profileId, uint256 nonce, string name, Meta
 
 
 
-*Event emitted when a profile is created Note: This will return your anchor address*
+*Emitted when a profile is created. This will return your anchor address.*
 
 #### Parameters
 
@@ -306,7 +306,7 @@ event ProfileMetadataUpdated(bytes32 indexed profileId, Metadata metadata)
 
 
 
-*Event emitted when a profile&#39;s metadata is updated*
+*Emitted when a profile&#39;s metadata is updated.*
 
 #### Parameters
 
@@ -323,7 +323,7 @@ event ProfileNameUpdated(bytes32 indexed profileId, string name, address anchor)
 
 
 
-*Event emitted when a profile name is updated Note: This will update the anchor when the name is updated and return it*
+*Emitted when a profile name is updated. This will update the anchor when the name is updated and return it.*
 
 #### Parameters
 
@@ -341,7 +341,7 @@ event ProfileOwnerUpdated(bytes32 indexed profileId, address owner)
 
 
 
-*Event emitted when a profile owner is updated*
+*Emitted when a profile owner is updated.*
 
 #### Parameters
 
@@ -358,7 +358,7 @@ event ProfilePendingOwnerUpdated(bytes32 indexed profileId, address pendingOwner
 
 
 
-*Event emitted when a profile pending owner is updated*
+*Emitted when a profile pending owner is updated.*
 
 #### Parameters
 
@@ -371,6 +371,17 @@ event ProfilePendingOwnerUpdated(bytes32 indexed profileId, address pendingOwner
 
 ## Errors
 
+### ANCHOR_ERROR
+
+```solidity
+error ANCHOR_ERROR()
+```
+
+
+
+*Thrown if the anchor creation fails*
+
+
 ### NONCE_NOT_AVAILABLE
 
 ```solidity
@@ -379,7 +390,7 @@ error NONCE_NOT_AVAILABLE()
 
 
 
-*Returned when the nonce passed has been used or not available*
+*Thrown when the nonce passed has been used or not available*
 
 
 ### NOT_PENDING_OWNER
@@ -390,7 +401,7 @@ error NOT_PENDING_OWNER()
 
 
 
-*Returned when the &#39;msg.sender&#39; is not the pending owner on ownership transfer*
+*Thrown when the &#39;msg.sender&#39; is not the pending owner on ownership transfer*
 
 
 ### UNAUTHORIZED
@@ -401,7 +412,7 @@ error UNAUTHORIZED()
 
 
 
-*Returned when the &#39;msg.sender&#39; is not authorized*
+*Thrown when the &#39;msg.sender&#39; is not authorized*
 
 
 ### ZERO_ADDRESS
@@ -412,7 +423,7 @@ error ZERO_ADDRESS()
 
 
 
-*Returned if any address check is the zero address*
+*Thrown if any address check is the zero address*
 
 
 

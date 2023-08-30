@@ -1,10 +1,10 @@
-# DonationVotingStrategy
+# DonationVotingMerkleDistributionVaultStrategy
 
+*@thelostone-mc &lt;aditya@gitcoin.co&gt;, @KurtMerbeth &lt;kurt@gitcoin.co&gt;, @codenamejason &lt;jason@gitcoin.co&gt;*
 
+> Donation Voting Merkle Distribution Strategy
 
-
-
-
+Strategy for donation voting allocation with a merkle distribution
 
 
 
@@ -84,7 +84,7 @@ function allocationStartTime() external view returns (uint256)
 function allowedTokens(address) external view returns (bool)
 ```
 
-token -&gt; bool
+&#39;token&#39; address =&gt; boolean (allowed = true).
 
 
 
@@ -103,7 +103,7 @@ token -&gt; bool
 ### claim
 
 ```solidity
-function claim(DonationVotingStrategy.Claim[] _claims) external nonpayable
+function claim(DonationVotingMerkleDistributionVaultStrategy.Claim[] _claims) external nonpayable
 ```
 
 
@@ -114,7 +114,7 @@ function claim(DonationVotingStrategy.Claim[] _claims) external nonpayable
 
 | Name | Type | Description |
 |---|---|---|
-| _claims | DonationVotingStrategy.Claim[] | undefined |
+| _claims | DonationVotingMerkleDistributionVaultStrategy.Claim[] | undefined |
 
 ### claims
 
@@ -122,7 +122,7 @@ function claim(DonationVotingStrategy.Claim[] _claims) external nonpayable
 function claims(address, address) external view returns (uint256)
 ```
 
-recipientId -&gt; token -&gt; amount
+&#39;recipientId&#39; =&gt; &#39;token&#39; =&gt; &#39;amount&#39;.
 
 
 
@@ -157,6 +157,41 @@ Distributes funds (tokens) to recipients.
 | _data | bytes | The data to use to distribute to the recipients |
 | _sender | address | The address of the sender |
 
+### distributionMetadata
+
+```solidity
+function distributionMetadata() external view returns (uint256 protocol, string pointer)
+```
+
+Metadata containing the distribution data.
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| protocol | uint256 | undefined |
+| pointer | string | undefined |
+
+### distributionStarted
+
+```solidity
+function distributionStarted() external view returns (bool)
+```
+
+Flag to indicate whether the distribution has started or not.
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
 ### getAllo
 
 ```solidity
@@ -177,24 +212,24 @@ Getter for the &#39;Allo&#39; contract.
 ### getInternalRecipientStatus
 
 ```solidity
-function getInternalRecipientStatus(address _recipientId) external view returns (enum DonationVotingStrategy.InternalRecipientStatus)
+function getInternalRecipientStatus(address _recipientId) external view returns (enum DonationVotingMerkleDistributionBaseStrategy.InternalRecipientStatus)
 ```
 
 Get Internal recipient status
 
-
+*This will return the &#39;InternalRecipientStatus&#39; of the recipient, the &#39;InternalRecipientStatus&#39; is      used at the protocol level and is different from the &#39;RecipientStatus&#39; which is used at the strategy      level*
 
 #### Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| _recipientId | address | Id of the recipient |
+| _recipientId | address | ID of the recipient |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | enum DonationVotingStrategy.InternalRecipientStatus | undefined |
+| _0 | enum DonationVotingMerkleDistributionBaseStrategy.InternalRecipientStatus | Status of the recipient |
 
 ### getPayouts
 
@@ -256,10 +291,10 @@ Getter for the &#39;poolId&#39;.
 ### getRecipient
 
 ```solidity
-function getRecipient(address _recipientId) external view returns (struct DonationVotingStrategy.Recipient)
+function getRecipient(address _recipientId) external view returns (struct DonationVotingMerkleDistributionBaseStrategy.Recipient recipient)
 ```
 
-Get the recipient
+Get a recipient with a &#39;_recipientId&#39;
 
 
 
@@ -267,13 +302,13 @@ Get the recipient
 
 | Name | Type | Description |
 |---|---|---|
-| _recipientId | address | Id of the recipient |
+| _recipientId | address | ID of the recipient |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | DonationVotingStrategy.Recipient | undefined |
+| recipient | DonationVotingMerkleDistributionBaseStrategy.Recipient | Returns the recipient details |
 
 ### getRecipientStatus
 
@@ -314,6 +349,28 @@ Getter for the &#39;strategyId&#39;.
 |---|---|---|
 | _0 | bytes32 | The ID of the strategy |
 
+### hasBeenDistributed
+
+```solidity
+function hasBeenDistributed(uint256 _index) external view returns (bool)
+```
+
+Utility function to check if distribution is done.
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _index | uint256 | index of the distribution |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | Whether the distribution is completed or not |
+
 ### increasePoolAmount
 
 ```solidity
@@ -336,16 +393,33 @@ Increases the pool amount.
 function initialize(uint256 _poolId, bytes _data) external nonpayable
 ```
 
-=============================== ========= Initialize ========== ===============================
+Initializes the strategy
 
-
+*This will revert if the strategy is already initialized and &#39;msg.sender&#39; is not the &#39;Allo&#39; contract.*
 
 #### Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| _poolId | uint256 | undefined |
-| _data | bytes | undefined |
+| _poolId | uint256 | The &#39;poolId&#39; to initialize |
+| _data | bytes | The data to be decoded to initialize the strategy |
+
+### isDistributionSet
+
+```solidity
+function isDistributionSet() external view returns (bool)
+```
+
+Checks if distribution is set.
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | Whether the distribution is set or not |
 
 ### isPoolActive
 
@@ -386,13 +460,30 @@ Checks if the &#39;_allocator&#39; is a valid allocator.
 |---|---|---|
 | _0 | bool | undefined |
 
+### merkleRoot
+
+```solidity
+function merkleRoot() external view returns (bytes32)
+```
+
+The merkle root of the distribution will be set by the pool manager.
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bytes32 | undefined |
+
 ### metadataRequired
 
 ```solidity
 function metadataRequired() external view returns (bool)
 ```
 
-
+Flag to indicate whether metadata is required or not.
 
 
 
@@ -403,13 +494,35 @@ function metadataRequired() external view returns (bool)
 |---|---|---|
 | _0 | bool | undefined |
 
-### payoutSummaries
+### multicall
 
 ```solidity
-function payoutSummaries(address) external view returns (address recipientAddress, uint256 amount)
+function multicall(bytes[] data) external nonpayable returns (bytes[] results)
 ```
 
-recipientId -&gt; PayoutSummary
+
+
+*Receives and executes a batch of function calls on this contract.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| data | bytes[] | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| results | bytes[] | undefined |
+
+### recipientToStatusIndexes
+
+```solidity
+function recipientToStatusIndexes(address) external view returns (uint256)
+```
+
+&#39;recipientId&#39; =&gt; &#39;statusIndex&#39;
 
 
 
@@ -423,8 +536,24 @@ recipientId -&gt; PayoutSummary
 
 | Name | Type | Description |
 |---|---|---|
-| recipientAddress | address | undefined |
-| amount | uint256 | undefined |
+| _0 | uint256 | undefined |
+
+### recipientsCounter
+
+```solidity
+function recipientsCounter() external view returns (uint256)
+```
+
+The total number of recipients.
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
 
 ### registerRecipient
 
@@ -472,7 +601,7 @@ function registrationEndTime() external view returns (uint256)
 function registrationStartTime() external view returns (uint256)
 ```
 
-
+The timestamps in milliseconds for the start and end times.
 
 
 
@@ -486,10 +615,10 @@ function registrationStartTime() external view returns (uint256)
 ### reviewRecipients
 
 ```solidity
-function reviewRecipients(address[] _recipientIds, enum DonationVotingStrategy.InternalRecipientStatus[] _recipientStatuses) external nonpayable
+function reviewRecipients(DonationVotingMerkleDistributionBaseStrategy.ApplicationStatus[] statuses) external nonpayable
 ```
 
-Review recipient application
+
 
 
 
@@ -497,16 +626,15 @@ Review recipient application
 
 | Name | Type | Description |
 |---|---|---|
-| _recipientIds | address[] | Ids of the recipients |
-| _recipientStatuses | enum DonationVotingStrategy.InternalRecipientStatus[] | Statuses of the recipients |
+| statuses | DonationVotingMerkleDistributionBaseStrategy.ApplicationStatus[] | undefined |
 
-### setPayout
+### statusesBitMap
 
 ```solidity
-function setPayout(address[] _recipientIds, uint256[] _amounts) external nonpayable
+function statusesBitMap(uint256) external view returns (uint256)
 ```
 
-Set payout for the recipients
+This is a packed array of booleans, &#39;statuses[0]&#39; is the first row of the bitmap and allows to store 256 bits to describe the status of 256 projects. &#39;statuses[1]&#39; is the second row, and so on Instead of using 1 bit for each recipient status, we will use 4 bits for each status to allow 5 statuses: 0: none 1: pending 2: accepted 3: rejected 4: appealed Since it&#39;s a mapping the storage it&#39;s pre-allocated with zero values, so if we check the status of an existing recipient, the value is by default 0 (none). If we want to check the status of an recipient, we take its index from the `recipients` array and convert it to the 2-bits position in the bitmap.
 
 
 
@@ -514,8 +642,13 @@ Set payout for the recipients
 
 | Name | Type | Description |
 |---|---|---|
-| _recipientIds | address[] | Ids of the recipients |
-| _amounts | uint256[] | Amounts to be paid out |
+| _0 | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
 
 ### totalPayoutAmount
 
@@ -523,7 +656,7 @@ Set payout for the recipients
 function totalPayoutAmount() external view returns (uint256)
 ```
 
-
+The total amount of tokens allocated to the payout.
 
 
 
@@ -534,15 +667,32 @@ function totalPayoutAmount() external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined |
 
+### updateDistribution
+
+```solidity
+function updateDistribution(bytes32 _merkleRoot, Metadata _distributionMetadata) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _merkleRoot | bytes32 | undefined |
+| _distributionMetadata | Metadata | undefined |
+
 ### updatePoolTimestamps
 
 ```solidity
 function updatePoolTimestamps(uint256 _registrationStartTime, uint256 _registrationEndTime, uint256 _allocationStartTime, uint256 _allocationEndTime) external nonpayable
 ```
 
-Set the start and end dates for the pool
+Sets the start and end dates.
 
-
+*The timestamps are in milliseconds for the start and end times. The &#39;msg.sender&#39; must be a pool manager.*
 
 #### Parameters
 
@@ -559,7 +709,7 @@ Set the start and end dates for the pool
 function useRegistryAnchor() external view returns (bool)
 ```
 
-================================ ========== Storage ============= ================================
+Flag to indicate whether to use the registry anchor or not.
 
 
 
@@ -578,7 +728,7 @@ function withdraw(uint256 _amount) external nonpayable
 
 Withdraw funds from pool
 
-
+*This can only be called after the allocation has ended and 30 days have passed. If the      &#39;_amount&#39; is greater than the pool amount or if &#39;msg.sender&#39; is not a pool manager.*
 
 #### Parameters
 
@@ -609,13 +759,13 @@ Emitted when a recipient is allocated to.
 | token  | address | The token allocated |
 | sender  | address | undefined |
 
-### Claimed
+### BatchPayoutSuccessful
 
 ```solidity
-event Claimed(address indexed recipientId, address recipientAddress, uint256 amount, address token)
+event BatchPayoutSuccessful(address indexed sender)
 ```
 
-
+Emitted when a batch payout is successful
 
 
 
@@ -623,10 +773,26 @@ event Claimed(address indexed recipientId, address recipientAddress, uint256 amo
 
 | Name | Type | Description |
 |---|---|---|
-| recipientId `indexed` | address | undefined |
-| recipientAddress  | address | undefined |
-| amount  | uint256 | undefined |
-| token  | address | undefined |
+| sender `indexed` | address | The sender of the transaction |
+
+### Claimed
+
+```solidity
+event Claimed(address indexed recipientId, address recipientAddress, uint256 amount, address token)
+```
+
+Emitted when a recipient has claimed their allocated funds
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| recipientId `indexed` | address | Id of the recipient |
+| recipientAddress  | address | Address of the recipient |
+| amount  | uint256 | Amount of tokens claimed |
+| token  | address | Address of the token |
 
 ### Distributed
 
@@ -647,6 +813,42 @@ Emitted when tokens are distributed.
 | amount  | uint256 | The amount distributed |
 | sender  | address | The sender |
 
+### DistributionUpdated
+
+```solidity
+event DistributionUpdated(bytes32 merkleRoot, Metadata metadata)
+```
+
+Emitted when the distribution has been updated with a new merkle root or metadata
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| merkleRoot  | bytes32 | The merkle root of the distribution |
+| metadata  | Metadata | The metadata of the distribution |
+
+### FundsDistributed
+
+```solidity
+event FundsDistributed(uint256 amount, address grantee, address indexed token, address indexed recipientId)
+```
+
+Emitted when funds are distributed to a recipient
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| amount  | uint256 | The amount of tokens distributed |
+| grantee  | address | The address of the recipient |
+| token `indexed` | address | The address of the token |
+| recipientId `indexed` | address | The id of the recipient |
+
 ### Initialized
 
 ```solidity
@@ -665,22 +867,6 @@ Emitted when strategy is initialized.
 | profileId  | bytes32 | The ID of the profile |
 | poolId  | uint256 | The ID of the pool |
 | data  | bytes | undefined |
-
-### PayoutSet
-
-```solidity
-event PayoutSet(bytes recipientIds)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| recipientIds  | bytes | undefined |
 
 ### PoolActive
 
@@ -701,10 +887,10 @@ Emitted when pool is set to active status.
 ### RecipientStatusUpdated
 
 ```solidity
-event RecipientStatusUpdated(address indexed recipientId, enum DonationVotingStrategy.InternalRecipientStatus recipientStatus, address sender)
+event RecipientStatusUpdated(uint256 indexed rowIndex, uint256 fullRow, address sender)
 ```
 
-
+Emitted when a recipient is registered and the status is updated
 
 
 
@@ -712,9 +898,9 @@ event RecipientStatusUpdated(address indexed recipientId, enum DonationVotingStr
 
 | Name | Type | Description |
 |---|---|---|
-| recipientId `indexed` | address | undefined |
-| recipientStatus  | enum DonationVotingStrategy.InternalRecipientStatus | undefined |
-| sender  | address | undefined |
+| rowIndex `indexed` | uint256 | The index of the row in the bitmap |
+| fullRow  | uint256 | The value of the row |
+| sender  | address | The sender of the transaction |
 
 ### Registered
 
@@ -740,7 +926,7 @@ Emitted when a recipient is registered.
 event TimestampsUpdated(uint256 registrationStartTime, uint256 registrationEndTime, uint256 allocationStartTime, uint256 allocationEndTime, address sender)
 ```
 
-
+Emitted when the timestamps are updated
 
 
 
@@ -748,16 +934,16 @@ event TimestampsUpdated(uint256 registrationStartTime, uint256 registrationEndTi
 
 | Name | Type | Description |
 |---|---|---|
-| registrationStartTime  | uint256 | undefined |
-| registrationEndTime  | uint256 | undefined |
-| allocationStartTime  | uint256 | undefined |
-| allocationEndTime  | uint256 | undefined |
-| sender  | address | undefined |
+| registrationStartTime  | uint256 | The start time for the registration |
+| registrationEndTime  | uint256 | The end time for the registration |
+| allocationStartTime  | uint256 | The start time for the allocation |
+| allocationEndTime  | uint256 | The end time for the allocation |
+| sender  | address | The sender of the transaction |
 
 ### UpdatedRegistration
 
 ```solidity
-event UpdatedRegistration(address indexed recipientId, bytes data, address sender, enum DonationVotingStrategy.InternalRecipientStatus status)
+event UpdatedRegistration(address indexed recipientId, bytes data, address sender, uint8 status)
 ```
 
 Emitted when a recipient updates their registration
@@ -771,7 +957,7 @@ Emitted when a recipient updates their registration
 | recipientId `indexed` | address | Id of the recipient |
 | data  | bytes | The encoded data - (address recipientId, address recipientAddress, Metadata metadata) |
 | sender  | address | The sender of the transaction |
-| status  | enum DonationVotingStrategy.InternalRecipientStatus | The updated status of the recipient |
+| status  | uint8 | The updated status of the recipient |
 
 
 
@@ -783,7 +969,7 @@ Emitted when a recipient updates their registration
 error ALLOCATION_NOT_ACTIVE()
 ```
 
-
+Throws when allocation is not active.
 
 
 
@@ -794,7 +980,7 @@ error ALLOCATION_NOT_ACTIVE()
 error ALLOCATION_NOT_ENDED()
 ```
 
-
+Throws when allocation has not ended.
 
 
 
@@ -904,9 +1090,9 @@ Throws when calls to Base Strategy are unauthorized
 error INVALID()
 ```
 
+Throws when a genral error occurs.
 
-
-
+*Used as a general error message for this strategy. This can occur when a token is not      allowed or the amount is invalid and is specific to this strategy.*
 
 
 ### INVALID_METADATA
@@ -915,7 +1101,7 @@ error INVALID()
 error INVALID_METADATA()
 ```
 
-
+Throws when the metadata is invalid, protocol or pointer is not set.
 
 
 
@@ -926,7 +1112,7 @@ error INVALID_METADATA()
 error NOT_ALLOWED()
 ```
 
-
+Throws when 30 days have not passed since the end of the allocation or         the amount is greater than the pool amount.
 
 
 
@@ -937,7 +1123,7 @@ error NOT_ALLOWED()
 error RECIPIENT_ERROR(address recipientId)
 ```
 
-
+Throws when there is an error with the recipient. This can occur when the recipient      is not registered or the recipient is not accepted.
 
 
 
@@ -945,7 +1131,7 @@ error RECIPIENT_ERROR(address recipientId)
 
 | Name | Type | Description |
 |---|---|---|
-| recipientId | address | undefined |
+| recipientId | address | Id of the recipient |
 
 ### REGISTRATION_NOT_ACTIVE
 
@@ -953,7 +1139,7 @@ error RECIPIENT_ERROR(address recipientId)
 error REGISTRATION_NOT_ACTIVE()
 ```
 
-
+Throws when registration is not active.
 
 
 
@@ -964,7 +1150,7 @@ error REGISTRATION_NOT_ACTIVE()
 error UNAUTHORIZED()
 ```
 
-=============================== ========== Errors ============= ===============================
+Throws when the sender is not not a profile member.
 
 
 

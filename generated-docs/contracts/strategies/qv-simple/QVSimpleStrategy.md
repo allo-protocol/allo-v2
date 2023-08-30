@@ -49,16 +49,16 @@ Add allocator
 function allocate(bytes _data, address _sender) external payable
 ```
 
+Allocates to a recipient.
 
-
-*Only called via Allo.sol by users to allocate to a recipient      this will update some data in this contract to store votes, etc Requirements: This will be determined by the strategy*
+*The encoded &#39;_data&#39; will be determined by the strategy implementation. Only &#39;Allo&#39; contract can      call this when it is initialized.*
 
 #### Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| _data | bytes | undefined |
-| _sender | address | undefined |
+| _data | bytes | The data to use to allocate to the recipient |
+| _sender | address | The address of the sender |
 
 ### allocationEndTime
 
@@ -144,17 +144,17 @@ allocator =&gt; bool
 function distribute(address[] _recipientIds, bytes _data, address _sender) external nonpayable
 ```
 
+Distributes funds (tokens) to recipients.
 
-
-*This will distribute tokens to recipients NOTE: Most strategies will track a TOTAL amount per recipient, and a PAID amount, and pay the difference.       This contract will need to track the amount paid already, so that it doesn&#39;t double pay Requirements: This will be determined by the strategy*
+*The encoded &#39;_data&#39; will be determined by the strategy implementation. Only &#39;Allo&#39; contract can      call this when it is initialized.*
 
 #### Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| _recipientIds | address[] | undefined |
-| _data | bytes | undefined |
-| _sender | address | undefined |
+| _recipientIds | address[] | The IDs of the recipients |
+| _data | bytes | The data to use to distribute to the recipients |
+| _sender | address | The address of the sender |
 
 ### getAllo
 
@@ -162,7 +162,7 @@ function distribute(address[] _recipientIds, bytes _data, address _sender) exter
 function getAllo() external view returns (contract IAllo)
 ```
 
-================================ =========== Views ============== ================================
+Getter for the &#39;Allo&#39; contract.
 
 
 
@@ -171,7 +171,7 @@ function getAllo() external view returns (contract IAllo)
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | contract IAllo | undefined |
+| _0 | contract IAllo | The Allo contract |
 
 ### getInternalRecipientStatus
 
@@ -201,22 +201,22 @@ Get Internal recipient status
 function getPayouts(address[] _recipientIds, bytes[] _data) external view returns (struct IStrategy.PayoutSummary[])
 ```
 
+Gets the payout summary for recipients.
 
-
-
+*The encoded &#39;_data&#39; will be determined by the strategy implementation.*
 
 #### Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| _recipientIds | address[] | undefined |
-| _data | bytes[] | undefined |
+| _recipientIds | address[] | The IDs of the recipients |
+| _data | bytes[] | The data to use to get the payout summary for the recipients |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | IStrategy.PayoutSummary[] | Input the values you would send to distribute(), get the amounts each recipient in the array would receive |
+| _0 | IStrategy.PayoutSummary[] | The payout summary for the recipients |
 
 ### getPoolAmount
 
@@ -224,16 +224,16 @@ function getPayouts(address[] _recipientIds, bytes[] _data) external view return
 function getPoolAmount() external view returns (uint256)
 ```
 
+Getter for the &#39;poolAmount&#39;.
 
 
-*returns the amount of tokens in the pool*
 
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | uint256 | undefined |
+| _0 | uint256 | The balance of the pool |
 
 ### getPoolId
 
@@ -241,16 +241,16 @@ function getPoolAmount() external view returns (uint256)
 function getPoolId() external view returns (uint256)
 ```
 
+Getter for the &#39;poolId&#39;.
 
 
-*Getter for the &#39;poolId&#39; for this strategy*
 
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | uint256 | undefined |
+| _0 | uint256 | The ID of the pool |
 
 ### getRecipient
 
@@ -280,21 +280,21 @@ Get the recipient
 function getRecipientStatus(address _recipientId) external view returns (enum IStrategy.RecipientStatus)
 ```
 
+Getter for the status of a recipient.
 
 
-*Returns the status of a recipient probably tracked in a mapping, but will depend on the implementation      for example, the OpenSelfRegistration only maps users to bool, and then assumes Accepted for those      since there is no need for Pending or Rejected*
 
 #### Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| _recipientId | address | undefined |
+| _recipientId | address | The ID of the recipient |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | enum IStrategy.RecipientStatus | undefined |
+| _0 | enum IStrategy.RecipientStatus | The status of the recipient |
 
 ### getStrategyId
 
@@ -302,16 +302,16 @@ function getRecipientStatus(address _recipientId) external view returns (enum IS
 function getStrategyId() external view returns (bytes32)
 ```
 
+Getter for the &#39;strategyId&#39;.
 
 
-*Getter for the &#39;id&#39; of the strategy*
 
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | bytes32 | undefined |
+| _0 | bytes32 | The ID of the strategy |
 
 ### increasePoolAmount
 
@@ -319,15 +319,15 @@ function getStrategyId() external view returns (bytes32)
 function increasePoolAmount(uint256 _amount) external nonpayable
 ```
 
-incrases the poolAmount which is set on invoking Allo.fundPool
+Increases the pool amount.
 
-
+*Increases the &#39;poolAmount&#39; by &#39;_amount&#39;. Only &#39;Allo&#39; contract can call this.*
 
 #### Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| _amount | uint256 | undefined |
+| _amount | uint256 | The amount to increase the pool by |
 
 ### initialize
 
@@ -352,16 +352,16 @@ Initialize the strategy
 function isPoolActive() external view returns (bool)
 ```
 
+Getter for whether or not the pool is active.
 
 
-*whether pool is active*
 
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | bool | undefined |
+| _0 | bool | &#39;true&#39; if the pool is active, otherwise &#39;false&#39; |
 
 ### isValidAllocator
 
@@ -369,15 +369,15 @@ function isPoolActive() external view returns (bool)
 function isValidAllocator(address _allocator) external view returns (bool)
 ```
 
+Checks if the &#39;_allocator&#39; is a valid allocator.
 
-
-*Returns whether a allocator is valid or not, will usually be true for all      and will depend on the strategy implementation*
+*How the allocator is determined is up to the strategy implementation.*
 
 #### Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| _allocator | address | undefined |
+| _allocator | address | The address to check if it is a valid allocator for the strategy. |
 
 #### Returns
 
@@ -473,22 +473,22 @@ recipientId =&gt; Recipient
 function registerRecipient(bytes _data, address _sender) external payable returns (address)
 ```
 
+Registers a recipient.
 
-
-*This is called via Allo.sol to register recipients      it can change their status all the way to Accepted, or to Pending if there are more steps      if there are more steps, additional functions should be added to allow the owner to check      this could also check attestations directly and then Accept Requirements: This will be determined by the strategy*
+*Registers a recipient and returns the ID of the recipient. The encoded &#39;_data&#39; will be determined by the      strategy implementation. Only &#39;Allo&#39; contract can call this when it is initialized.*
 
 #### Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| _data | bytes | undefined |
-| _sender | address | undefined |
+| _data | bytes | The data to use to register the recipient |
+| _sender | address | The address of the sender |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | address | undefined |
+| _0 | address | recipientId |
 
 ### registrationEndTime
 
@@ -660,7 +660,7 @@ Set the start and end dates for the pool
 event Allocated(address indexed recipientId, uint256 amount, address token, address sender)
 ```
 
-Event emitted when a recipient is allocated to
+Emitted when a recipient is allocated to.
 
 
 
@@ -668,9 +668,9 @@ Event emitted when a recipient is allocated to
 
 | Name | Type | Description |
 |---|---|---|
-| recipientId `indexed` | address | undefined |
-| amount  | uint256 | undefined |
-| token  | address | undefined |
+| recipientId `indexed` | address | The ID of the recipient |
+| amount  | uint256 | The amount allocated |
+| token  | address | The token allocated |
 | sender  | address | undefined |
 
 ### AllocatorAdded
@@ -707,31 +707,13 @@ event AllocatorRemoved(address indexed allocator, address sender)
 | allocator `indexed` | address | undefined |
 | sender  | address | undefined |
 
-### Appealed
-
-```solidity
-event Appealed(address indexed recipientId, bytes data, address sender)
-```
-
-====================== ======= Events ======= ======================
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| recipientId `indexed` | address | undefined |
-| data  | bytes | undefined |
-| sender  | address | undefined |
-
 ### Distributed
 
 ```solidity
 event Distributed(address indexed recipientId, address recipientAddress, uint256 amount, address sender)
 ```
 
-Event emitted when tokens are distributed
+Emitted when tokens are distributed.
 
 
 
@@ -739,10 +721,10 @@ Event emitted when tokens are distributed
 
 | Name | Type | Description |
 |---|---|---|
-| recipientId `indexed` | address | undefined |
-| recipientAddress  | address | undefined |
-| amount  | uint256 | undefined |
-| sender  | address | undefined |
+| recipientId `indexed` | address | The ID of the recipient |
+| recipientAddress  | address | The recipient |
+| amount  | uint256 | The amount distributed |
+| sender  | address | The sender |
 
 ### Initialized
 
@@ -750,7 +732,7 @@ Event emitted when tokens are distributed
 event Initialized(address allo, bytes32 profileId, uint256 poolId, bytes data)
 ```
 
-Event emitted when strategy is initialized
+Emitted when strategy is initialized.
 
 
 
@@ -758,9 +740,9 @@ Event emitted when strategy is initialized
 
 | Name | Type | Description |
 |---|---|---|
-| allo  | address | undefined |
-| profileId  | bytes32 | undefined |
-| poolId  | uint256 | undefined |
+| allo  | address | The Allo contract |
+| profileId  | bytes32 | The ID of the profile |
+| poolId  | uint256 | The ID of the pool |
 | data  | bytes | undefined |
 
 ### PoolActive
@@ -769,7 +751,7 @@ Event emitted when strategy is initialized
 event PoolActive(bool active)
 ```
 
-Event emitted when pool is set to active status
+Emitted when pool is set to active status.
 
 
 
@@ -777,7 +759,7 @@ Event emitted when pool is set to active status
 
 | Name | Type | Description |
 |---|---|---|
-| active  | bool | undefined |
+| active  | bool | The status of the pool |
 
 ### RecipientStatusUpdated
 
@@ -803,7 +785,7 @@ event RecipientStatusUpdated(address indexed recipientId, enum QVBaseStrategy.In
 event Registered(address indexed recipientId, bytes data, address sender)
 ```
 
-Event emitted when a recipient is registered
+Emitted when a recipient is registered.
 
 
 
@@ -811,9 +793,9 @@ Event emitted when a recipient is registered
 
 | Name | Type | Description |
 |---|---|---|
-| recipientId `indexed` | address | undefined |
-| data  | bytes | undefined |
-| sender  | address | undefined |
+| recipientId `indexed` | address | The ID of the recipient |
+| data  | bytes | The data passed to the &#39;registerRecipient&#39; function |
+| sender  | address | The sender |
 
 ### Reviewed
 
@@ -852,6 +834,25 @@ event TimestampsUpdated(uint256 registrationStartTime, uint256 registrationEndTi
 | allocationStartTime  | uint256 | undefined |
 | allocationEndTime  | uint256 | undefined |
 | sender  | address | undefined |
+
+### UpdatedRegistration
+
+```solidity
+event UpdatedRegistration(address indexed recipientId, bytes data, address sender, enum QVBaseStrategy.InternalRecipientStatus status)
+```
+
+Emitted when a recipient updates their registration
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| recipientId `indexed` | address | Id of the recipient |
+| data  | bytes | The encoded data - (address recipientId, address recipientAddress, Metadata metadata) |
+| sender  | address | The sender of the transaction |
+| status  | enum QVBaseStrategy.InternalRecipientStatus | The updated status of the recipient |
 
 
 
@@ -896,9 +897,9 @@ error AMOUNT_MISMATCH()
 error BaseStrategy_ALREADY_INITIALIZED()
 ```
 
+Throws when Base Strategy is already initialized
 
 
-*Returns when Base Strategy is already initialized*
 
 
 ### BaseStrategy_ARRAY_MISMATCH
@@ -907,9 +908,9 @@ error BaseStrategy_ALREADY_INITIALIZED()
 error BaseStrategy_ARRAY_MISMATCH()
 ```
 
+Throws when two arrays length are not equal
 
 
-*Returns when two arrays length are not equal*
 
 
 ### BaseStrategy_INVALID
@@ -918,9 +919,9 @@ error BaseStrategy_ARRAY_MISMATCH()
 error BaseStrategy_INVALID()
 ```
 
+Throws as a general error when either a recipient address or an amount is invalid
 
 
-*Returns as a general error when either a recipient address or an amount is invalid*
 
 
 ### BaseStrategy_INVALID_ADDRESS
@@ -929,9 +930,9 @@ error BaseStrategy_INVALID()
 error BaseStrategy_INVALID_ADDRESS()
 ```
 
+Throws when an invalid address is used
 
 
-*Returns when an invalid address is used*
 
 
 ### BaseStrategy_NOT_INITIALIZED
@@ -940,9 +941,9 @@ error BaseStrategy_INVALID_ADDRESS()
 error BaseStrategy_NOT_INITIALIZED()
 ```
 
+Throws when Base Strategy is not initialized
 
 
-*Returns when Base Strategy is not initialized*
 
 
 ### BaseStrategy_POOL_ACTIVE
@@ -951,9 +952,9 @@ error BaseStrategy_NOT_INITIALIZED()
 error BaseStrategy_POOL_ACTIVE()
 ```
 
+Throws when a pool is already active
 
 
-*Returns when a pool is already active*
 
 
 ### BaseStrategy_POOL_INACTIVE
@@ -962,9 +963,9 @@ error BaseStrategy_POOL_ACTIVE()
 error BaseStrategy_POOL_INACTIVE()
 ```
 
+Throws when a pool is inactive
 
 
-*Returns when a pool is inactive*
 
 
 ### BaseStrategy_UNAUTHORIZED
@@ -973,9 +974,9 @@ error BaseStrategy_POOL_INACTIVE()
 error BaseStrategy_UNAUTHORIZED()
 ```
 
+Throws when calls to Base Strategy are unauthorized
 
 
-*Returns when calls to Base Strategy are unauthorized*
 
 
 ### INVALID

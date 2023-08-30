@@ -1,0 +1,5511 @@
+{
+  "_format": "hh-sol-cache-2",
+  "files": {
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/core/Allo.sol": {
+      "lastModificationDate": 1693361145175,
+      "contentHash": "b3f69eac940f98f0785813682e679679",
+      "sourceName": "contracts/core/Allo.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "solady/src/auth/Ownable.sol",
+        "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol",
+        "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol",
+        "@openzeppelin/contracts/access/AccessControl.sol",
+        "@openzeppelin/contracts/security/ReentrancyGuard.sol",
+        "./interfaces/IAllo.sol",
+        "./libraries/Clone.sol",
+        "./libraries/Native.sol",
+        "./libraries/Transfer.sol"
+      ],
+      "versionPragmas": [
+        "0.8.19"
+      ],
+      "artifacts": [
+        "Allo"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/core/interfaces/IAllo.sol": {
+      "lastModificationDate": 1693361145169,
+      "contentHash": "4f62b2eb8fc1617e41cffd051f4ae596",
+      "sourceName": "contracts/core/interfaces/IAllo.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "./IRegistry.sol",
+        "./IStrategy.sol",
+        "../libraries/Metadata.sol"
+      ],
+      "versionPragmas": [
+        "0.8.19"
+      ],
+      "artifacts": [
+        "IAllo"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/core/libraries/Native.sol": {
+      "lastModificationDate": 1693361145178,
+      "contentHash": "83c8b8af084e0d12585dcd13adf7a535",
+      "sourceName": "contracts/core/libraries/Native.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "0.8.19"
+      ],
+      "artifacts": [
+        "Native"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/core/libraries/Clone.sol": {
+      "lastModificationDate": 1693361145175,
+      "contentHash": "013d1a7bd7a2b003df35e4758bb0f967",
+      "sourceName": "contracts/core/libraries/Clone.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts-upgradeable/proxy/ClonesUpgradeable.sol"
+      ],
+      "versionPragmas": [
+        "0.8.19"
+      ],
+      "artifacts": [
+        "Clone"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/core/libraries/Transfer.sol": {
+      "lastModificationDate": 1693361145176,
+      "contentHash": "8c2fa7057081e4521966339d1874d189",
+      "sourceName": "contracts/core/libraries/Transfer.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "solady/src/utils/SafeTransferLib.sol",
+        "./Native.sol"
+      ],
+      "versionPragmas": [
+        "0.8.19"
+      ],
+      "artifacts": [
+        "Transfer"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/solady/src/auth/Ownable.sol": {
+      "lastModificationDate": 1693279567554,
+      "contentHash": "3d54428bac6018778c311266c731869d",
+      "sourceName": "solady/src/auth/Ownable.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.4"
+      ],
+      "artifacts": [
+        "Ownable"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/contracts/access/AccessControl.sol": {
+      "lastModificationDate": 1693279565023,
+      "contentHash": "a2b1ec38a8dad325a596f926890772b8",
+      "sourceName": "@openzeppelin/contracts/access/AccessControl.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "./IAccessControl.sol",
+        "../utils/Context.sol",
+        "../utils/Strings.sol",
+        "../utils/introspection/ERC165.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "AccessControl"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/contracts/security/ReentrancyGuard.sol": {
+      "lastModificationDate": 1693279565025,
+      "contentHash": "1535f8c0c68463f8c1b5239f7584e71f",
+      "sourceName": "@openzeppelin/contracts/security/ReentrancyGuard.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "ReentrancyGuard"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol": {
+      "lastModificationDate": 1693279566725,
+      "contentHash": "b0970a564d121abf9adfff8d1a01eb16",
+      "sourceName": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "../../utils/AddressUpgradeable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.2"
+      ],
+      "artifacts": [
+        "Initializable"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol": {
+      "lastModificationDate": 1693279566726,
+      "contentHash": "9a9398a7dbda9d014f04d5eb0fb581fd",
+      "sourceName": "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IERC20Upgradeable"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/core/interfaces/IStrategy.sol": {
+      "lastModificationDate": 1693361145163,
+      "contentHash": "b79c96e819cc018bb233870a1f8eae31",
+      "sourceName": "contracts/core/interfaces/IStrategy.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "./IAllo.sol"
+      ],
+      "versionPragmas": [
+        "0.8.19"
+      ],
+      "artifacts": [
+        "IStrategy"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/core/libraries/Metadata.sol": {
+      "lastModificationDate": 1693361145175,
+      "contentHash": "ab87d4d09d2af16e966ceb3c05b1100c",
+      "sourceName": "contracts/core/libraries/Metadata.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/core/interfaces/IRegistry.sol": {
+      "lastModificationDate": 1693361145167,
+      "contentHash": "c97ccb1189dbc1c1aecbcdfc96141461",
+      "sourceName": "contracts/core/interfaces/IRegistry.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "../libraries/Metadata.sol"
+      ],
+      "versionPragmas": [
+        "0.8.19"
+      ],
+      "artifacts": [
+        "IRegistry"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/contracts-upgradeable/proxy/ClonesUpgradeable.sol": {
+      "lastModificationDate": 1693279565033,
+      "contentHash": "8719111692ab7741b980a762b23d0151",
+      "sourceName": "@openzeppelin/contracts-upgradeable/proxy/ClonesUpgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "ClonesUpgradeable"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/solady/src/utils/SafeTransferLib.sol": {
+      "lastModificationDate": 1693279567558,
+      "contentHash": "13fbdcd4b922faa55d3d6f8d764f5cc6",
+      "sourceName": "solady/src/utils/SafeTransferLib.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.4"
+      ],
+      "artifacts": [
+        "SafeTransferLib"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/contracts/utils/Strings.sol": {
+      "lastModificationDate": 1693279565031,
+      "contentHash": "48686fc32a22a3754b8e63321857dd2a",
+      "sourceName": "@openzeppelin/contracts/utils/Strings.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "./math/Math.sol",
+        "./math/SignedMath.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "Strings"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/contracts/access/IAccessControl.sol": {
+      "lastModificationDate": 1693279565023,
+      "contentHash": "57c84298234411cea19c7c284d86be8b",
+      "sourceName": "@openzeppelin/contracts/access/IAccessControl.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IAccessControl"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/contracts/utils/Context.sol": {
+      "lastModificationDate": 1693279565028,
+      "contentHash": "5f2c5c4b6af2dd4551027144797bc8be",
+      "sourceName": "@openzeppelin/contracts/utils/Context.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "Context"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/contracts/utils/introspection/ERC165.sol": {
+      "lastModificationDate": 1693279566703,
+      "contentHash": "0e7db055ce108f9da7bb6686a00287c0",
+      "sourceName": "@openzeppelin/contracts/utils/introspection/ERC165.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "./IERC165.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "ERC165"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/contracts/utils/math/Math.sol": {
+      "lastModificationDate": 1693279566702,
+      "contentHash": "fe63409d8a06818b926cf89e0ea88b1b",
+      "sourceName": "@openzeppelin/contracts/utils/math/Math.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "Math"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/contracts/utils/math/SignedMath.sol": {
+      "lastModificationDate": 1693279566702,
+      "contentHash": "9488ebd4daacfee8ad04811600d7d061",
+      "sourceName": "@openzeppelin/contracts/utils/math/SignedMath.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "SignedMath"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/contracts/utils/introspection/IERC165.sol": {
+      "lastModificationDate": 1693279566703,
+      "contentHash": "03e6768535ac4da0e9756f1d8a4a018a",
+      "sourceName": "@openzeppelin/contracts/utils/introspection/IERC165.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IERC165"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol": {
+      "lastModificationDate": 1693279565035,
+      "contentHash": "c30c805386fda8a42ff515da963d3a95",
+      "sourceName": "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.1"
+      ],
+      "artifacts": [
+        "AddressUpgradeable"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/core/Registry.sol": {
+      "lastModificationDate": 1693361145185,
+      "contentHash": "050951f856e90dbcf1f998c3a348420f",
+      "sourceName": "contracts/core/Registry.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/access/AccessControl.sol",
+        "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol",
+        "solady/src/utils/CREATE3.sol",
+        "solady/src/tokens/ERC20.sol",
+        "./interfaces/IRegistry.sol",
+        "./Anchor.sol",
+        "./libraries/Metadata.sol",
+        "./libraries/Native.sol",
+        "./libraries/Transfer.sol"
+      ],
+      "versionPragmas": [
+        "0.8.19"
+      ],
+      "artifacts": [
+        "Registry"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/core/Anchor.sol": {
+      "lastModificationDate": 1693361145176,
+      "contentHash": "8dede529287f7e644a62ff54b0831542",
+      "sourceName": "contracts/core/Anchor.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "./Registry.sol"
+      ],
+      "versionPragmas": [
+        "0.8.19"
+      ],
+      "artifacts": [
+        "Anchor"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/solady/src/tokens/ERC20.sol": {
+      "lastModificationDate": 1693279567554,
+      "contentHash": "134b5fcef47789eb8d4e74e22d760dbd",
+      "sourceName": "solady/src/tokens/ERC20.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.4"
+      ],
+      "artifacts": [
+        "ERC20"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/solady/src/utils/CREATE3.sol": {
+      "lastModificationDate": 1693279567555,
+      "contentHash": "af77373aff6820b923a9edf65182b599",
+      "sourceName": "solady/src/utils/CREATE3.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.4"
+      ],
+      "artifacts": [
+        "CREATE3"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/contracts/token/ERC721/IERC721.sol": {
+      "lastModificationDate": 1693279566702,
+      "contentHash": "48de4c9a3a4ae5ef66a2aa620843413f",
+      "sourceName": "@openzeppelin/contracts/token/ERC721/IERC721.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "../../utils/introspection/IERC165.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IERC721"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol": {
+      "lastModificationDate": 1693279567854,
+      "contentHash": "efbc0d15b80a74e34dbe8da0f3e879bb",
+      "sourceName": "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "../IERC721.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IERC721Metadata"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@sablier/v2-core/src/interfaces/ISablierV2NFTDescriptor.sol": {
+      "lastModificationDate": 1693362302464,
+      "contentHash": "66f0d216e5b3b193937b19d250c43c5c",
+      "sourceName": "@sablier/v2-core/src/interfaces/ISablierV2NFTDescriptor.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": [
+        "ISablierV2NFTDescriptor"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@sablier/v2-core/src/interfaces/ISablierV2Lockup.sol": {
+      "lastModificationDate": 1693362302464,
+      "contentHash": "aff4717c1e439061ed7cc0209b9b271e",
+      "sourceName": "@sablier/v2-core/src/interfaces/ISablierV2Lockup.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol",
+        "../types/DataTypes.sol",
+        "./ISablierV2Base.sol",
+        "./ISablierV2NFTDescriptor.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": [
+        "ISablierV2Lockup"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol": {
+      "lastModificationDate": 1693279566701,
+      "contentHash": "df36f7051335cd1e748b1b6463b7fdd3",
+      "sourceName": "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IERC20"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@sablier/v2-core/src/types/DataTypes.sol": {
+      "lastModificationDate": 1693362302464,
+      "contentHash": "ab5488be55988f1868bfa0f1e430a566",
+      "sourceName": "@sablier/v2-core/src/types/DataTypes.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "@prb/math/src/UD2x18.sol",
+        "@prb/math/src/UD60x18.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": [
+        "Lockup",
+        "LockupDynamic",
+        "LockupLinear"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@sablier/v2-core/src/interfaces/ISablierV2Base.sol": {
+      "lastModificationDate": 1693362302464,
+      "contentHash": "9ddfd517a1e7eaf9741d76c947bd1ee8",
+      "sourceName": "@sablier/v2-core/src/interfaces/ISablierV2Base.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "@prb/math/src/UD60x18.sol",
+        "./IAdminable.sol",
+        "./ISablierV2Comptroller.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": [
+        "ISablierV2Base"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@prb/math/src/UD2x18.sol": {
+      "lastModificationDate": 1693362302453,
+      "contentHash": "71feb4e30bbc21e5e85fe3109fbd5917",
+      "sourceName": "@prb/math/src/UD2x18.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "./ud2x18/Casting.sol",
+        "./ud2x18/Constants.sol",
+        "./ud2x18/Errors.sol",
+        "./ud2x18/ValueType.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@prb/math/src/UD60x18.sol": {
+      "lastModificationDate": 1693362302453,
+      "contentHash": "55aeee8a1cf7cf9fd8a0176bd06b739f",
+      "sourceName": "@prb/math/src/UD60x18.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "./ud60x18/Casting.sol",
+        "./ud60x18/Constants.sol",
+        "./ud60x18/Conversions.sol",
+        "./ud60x18/Errors.sol",
+        "./ud60x18/Helpers.sol",
+        "./ud60x18/Math.sol",
+        "./ud60x18/ValueType.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@prb/math/src/ud2x18/Casting.sol": {
+      "lastModificationDate": 1693362302464,
+      "contentHash": "5b5adfd1cd28d449eccc56ed83738365",
+      "sourceName": "@prb/math/src/ud2x18/Casting.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "../Common.sol",
+        "./Errors.sol",
+        "../sd1x18/Constants.sol",
+        "../sd1x18/ValueType.sol",
+        "../sd59x18/ValueType.sol",
+        "../ud2x18/ValueType.sol",
+        "../ud60x18/ValueType.sol",
+        "./ValueType.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@prb/math/src/ud2x18/Constants.sol": {
+      "lastModificationDate": 1693362302464,
+      "contentHash": "93bafe3a5bfec3c48c72e3b6dff0b5ac",
+      "sourceName": "@prb/math/src/ud2x18/Constants.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "./ValueType.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@prb/math/src/ud2x18/Errors.sol": {
+      "lastModificationDate": 1693362302464,
+      "contentHash": "b114bc752027098a098fe200d9600fa4",
+      "sourceName": "@prb/math/src/ud2x18/Errors.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "./ValueType.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@prb/math/src/ud2x18/ValueType.sol": {
+      "lastModificationDate": 1693362302464,
+      "contentHash": "4bf392abdd32a2c1d83ad65c640ac7bd",
+      "sourceName": "@prb/math/src/ud2x18/ValueType.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "./Casting.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@prb/math/src/ud60x18/ValueType.sol": {
+      "lastModificationDate": 1693362302464,
+      "contentHash": "2cdd6d9529412185283eb7d955e95cbe",
+      "sourceName": "@prb/math/src/ud60x18/ValueType.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "./Casting.sol",
+        "./Helpers.sol",
+        "./Math.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@prb/math/src/Common.sol": {
+      "lastModificationDate": 1693362302453,
+      "contentHash": "d77a476e938b130819f9bb3bd2932e57",
+      "sourceName": "@prb/math/src/Common.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@prb/math/src/sd1x18/Constants.sol": {
+      "lastModificationDate": 1693362302453,
+      "contentHash": "3a00d7986d0f1f5fd47ac9f2dc1475ce",
+      "sourceName": "@prb/math/src/sd1x18/Constants.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "./ValueType.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@prb/math/src/sd1x18/ValueType.sol": {
+      "lastModificationDate": 1693362302453,
+      "contentHash": "f0d7fec0238b9623cd5432462fba5c7f",
+      "sourceName": "@prb/math/src/sd1x18/ValueType.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "./Casting.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@prb/math/src/sd59x18/ValueType.sol": {
+      "lastModificationDate": 1693362302453,
+      "contentHash": "a8cbdd366dbe50e8199a8d59109c94ab",
+      "sourceName": "@prb/math/src/sd59x18/ValueType.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "./Casting.sol",
+        "./Helpers.sol",
+        "./Math.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@prb/math/src/ud60x18/Casting.sol": {
+      "lastModificationDate": 1693362302464,
+      "contentHash": "210f9ed8d979a7449cdb5b7adb003808",
+      "sourceName": "@prb/math/src/ud60x18/Casting.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "./Errors.sol",
+        "../Common.sol",
+        "../sd1x18/Constants.sol",
+        "../sd1x18/ValueType.sol",
+        "../sd59x18/Constants.sol",
+        "../sd59x18/ValueType.sol",
+        "../ud2x18/Constants.sol",
+        "../ud2x18/ValueType.sol",
+        "./ValueType.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@prb/math/src/ud60x18/Helpers.sol": {
+      "lastModificationDate": 1693362302464,
+      "contentHash": "f17f113af284236759bc9217ed544728",
+      "sourceName": "@prb/math/src/ud60x18/Helpers.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "./Casting.sol",
+        "./ValueType.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@prb/math/src/ud60x18/Math.sol": {
+      "lastModificationDate": 1693362302464,
+      "contentHash": "925bb9fcc75f579cf3e9dd58fa10a90c",
+      "sourceName": "@prb/math/src/ud60x18/Math.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "../Common.sol",
+        "./Errors.sol",
+        "./Casting.sol",
+        "./Constants.sol",
+        "./ValueType.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@prb/math/src/ud60x18/Errors.sol": {
+      "lastModificationDate": 1693362302464,
+      "contentHash": "63cbb9480bb14e0824736d5c109aa7ce",
+      "sourceName": "@prb/math/src/ud60x18/Errors.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "./ValueType.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@prb/math/src/sd59x18/Constants.sol": {
+      "lastModificationDate": 1693362302453,
+      "contentHash": "7fc7d96c638cf5317dbba7ae8c07300d",
+      "sourceName": "@prb/math/src/sd59x18/Constants.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "./ValueType.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@prb/math/src/sd1x18/Casting.sol": {
+      "lastModificationDate": 1693362302453,
+      "contentHash": "fdf620cd0842991c797eef17265b5138",
+      "sourceName": "@prb/math/src/sd1x18/Casting.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "../Common.sol",
+        "./Errors.sol",
+        "../sd59x18/ValueType.sol",
+        "../ud2x18/ValueType.sol",
+        "../ud60x18/ValueType.sol",
+        "./ValueType.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@prb/math/src/sd1x18/Errors.sol": {
+      "lastModificationDate": 1693362302453,
+      "contentHash": "01ce16eb254b596aa49047e21d548541",
+      "sourceName": "@prb/math/src/sd1x18/Errors.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "./ValueType.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@prb/math/src/sd59x18/Helpers.sol": {
+      "lastModificationDate": 1693362302453,
+      "contentHash": "7d1863a86f1dd22889ee2c28737b3456",
+      "sourceName": "@prb/math/src/sd59x18/Helpers.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "./Casting.sol",
+        "./ValueType.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@prb/math/src/sd59x18/Casting.sol": {
+      "lastModificationDate": 1693362302453,
+      "contentHash": "cad7d3fe4dba2c04d2c7c481e6e0e210",
+      "sourceName": "@prb/math/src/sd59x18/Casting.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "./Errors.sol",
+        "../Common.sol",
+        "../sd1x18/Constants.sol",
+        "../sd1x18/ValueType.sol",
+        "../ud2x18/Constants.sol",
+        "../ud2x18/ValueType.sol",
+        "../ud60x18/ValueType.sol",
+        "./ValueType.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@prb/math/src/sd59x18/Math.sol": {
+      "lastModificationDate": 1693362302453,
+      "contentHash": "9ba39059764f9bac4b29f829c0dec4db",
+      "sourceName": "@prb/math/src/sd59x18/Math.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "../Common.sol",
+        "./Errors.sol",
+        "./Constants.sol",
+        "./Helpers.sol",
+        "./ValueType.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@prb/math/src/sd59x18/Errors.sol": {
+      "lastModificationDate": 1693362302453,
+      "contentHash": "a7e94006142e69ba7db582ef8ea8a777",
+      "sourceName": "@prb/math/src/sd59x18/Errors.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "./ValueType.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@prb/math/src/ud60x18/Constants.sol": {
+      "lastModificationDate": 1693362302464,
+      "contentHash": "282d93a05c3ed412d5a3b74a4ad05d6d",
+      "sourceName": "@prb/math/src/ud60x18/Constants.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "./ValueType.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@prb/math/src/ud60x18/Conversions.sol": {
+      "lastModificationDate": 1693362302464,
+      "contentHash": "7d6126ed4b68e5c939cf0af5cd237b66",
+      "sourceName": "@prb/math/src/ud60x18/Conversions.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "./Constants.sol",
+        "./Errors.sol",
+        "./ValueType.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@sablier/v2-core/src/interfaces/IAdminable.sol": {
+      "lastModificationDate": 1693362302464,
+      "contentHash": "8de4cbc58cecc1633e07b8e0dd532d04",
+      "sourceName": "@sablier/v2-core/src/interfaces/IAdminable.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": [
+        "IAdminable"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@sablier/v2-core/src/interfaces/ISablierV2Comptroller.sol": {
+      "lastModificationDate": 1693362302464,
+      "contentHash": "1e91d3443f1ea021cd43d1fa5b5bda63",
+      "sourceName": "@sablier/v2-core/src/interfaces/ISablierV2Comptroller.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "@prb/math/src/UD60x18.sol",
+        "./IAdminable.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": [
+        "ISablierV2Comptroller"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@sablier/v2-core/src/interfaces/ISablierV2LockupLinear.sol": {
+      "lastModificationDate": 1693362302464,
+      "contentHash": "4295acd1e770465e9e84af41df2ecfef",
+      "sourceName": "@sablier/v2-core/src/interfaces/ISablierV2LockupLinear.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "../types/DataTypes.sol",
+        "./ISablierV2Lockup.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": [
+        "ISablierV2LockupLinear"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol": {
+      "lastModificationDate": 1693279567853,
+      "contentHash": "1b5d667d3740d866eca0352758e59827",
+      "sourceName": "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "../IERC20.sol",
+        "../extensions/IERC20Permit.sol",
+        "../../../utils/Address.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "SafeERC20"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/contracts/utils/Address.sol": {
+      "lastModificationDate": 1693279565028,
+      "contentHash": "211ffd288c1588ba8c10eae668ca3c66",
+      "sourceName": "@openzeppelin/contracts/utils/Address.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.1"
+      ],
+      "artifacts": [
+        "Address"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol": {
+      "lastModificationDate": 1693279567853,
+      "contentHash": "aa849939a4ae83a4dcb2dca9b3e9e707",
+      "sourceName": "@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IERC20Permit"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/contracts/proxy/ERC1967/ERC1967Upgrade.sol": {
+      "lastModificationDate": 1693279566682,
+      "contentHash": "a127706394bead18392601a20d44867a",
+      "sourceName": "@openzeppelin/contracts/proxy/ERC1967/ERC1967Upgrade.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "../beacon/IBeacon.sol",
+        "../../interfaces/IERC1967.sol",
+        "../../interfaces/draft-IERC1822.sol",
+        "../../utils/Address.sol",
+        "../../utils/StorageSlot.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.2"
+      ],
+      "artifacts": [
+        "ERC1967Upgrade"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/contracts/proxy/beacon/IBeacon.sol": {
+      "lastModificationDate": 1693279566687,
+      "contentHash": "b6bd23bf19e90b771337037706470933",
+      "sourceName": "@openzeppelin/contracts/proxy/beacon/IBeacon.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IBeacon"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/contracts/interfaces/draft-IERC1822.sol": {
+      "lastModificationDate": 1693279565029,
+      "contentHash": "2858d98e74e67987ec81b39605230b74",
+      "sourceName": "@openzeppelin/contracts/interfaces/draft-IERC1822.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IERC1822Proxiable"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/contracts/interfaces/IERC1967.sol": {
+      "lastModificationDate": 1693279565026,
+      "contentHash": "d0d060231a45da7a1eecbb5cd286fa40",
+      "sourceName": "@openzeppelin/contracts/interfaces/IERC1967.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IERC1967"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/contracts/utils/StorageSlot.sol": {
+      "lastModificationDate": 1693279565029,
+      "contentHash": "682f7dd1f2e1147c8390e7575deceb2d",
+      "sourceName": "@openzeppelin/contracts/utils/StorageSlot.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "StorageSlot"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol": {
+      "lastModificationDate": 1693279566687,
+      "contentHash": "8ffefb755605824cf730ce4092b2f581",
+      "sourceName": "@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "./IBeacon.sol",
+        "../../access/Ownable.sol",
+        "../../utils/Address.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "UpgradeableBeacon"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/contracts/access/Ownable.sol": {
+      "lastModificationDate": 1693279565023,
+      "contentHash": "5a20b2cad87ddb61c7a3a6af21289e28",
+      "sourceName": "@openzeppelin/contracts/access/Ownable.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "../utils/Context.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "Ownable"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol": {
+      "lastModificationDate": 1693279566684,
+      "contentHash": "9891986e27d357222a8ac8c0c13abe31",
+      "sourceName": "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "./TransparentUpgradeableProxy.sol",
+        "../../access/Ownable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "ProxyAdmin"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol": {
+      "lastModificationDate": 1693279566684,
+      "contentHash": "1286aa8d056c7120d1a2da252e310d2f",
+      "sourceName": "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "../ERC1967/ERC1967Proxy.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "ITransparentUpgradeableProxy",
+        "TransparentUpgradeableProxy"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol": {
+      "lastModificationDate": 1693279566681,
+      "contentHash": "3fc3c7c0a2956f36e766691bb9473b06",
+      "sourceName": "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "../Proxy.sol",
+        "./ERC1967Upgrade.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "ERC1967Proxy"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/contracts/proxy/Proxy.sol": {
+      "lastModificationDate": 1693279565024,
+      "contentHash": "40b3d81a836d50ff47e03893dcaaf204",
+      "sourceName": "@openzeppelin/contracts/proxy/Proxy.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "Proxy"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/contracts/proxy/beacon/BeaconProxy.sol": {
+      "lastModificationDate": 1693279566687,
+      "contentHash": "dc9dcb6e542154d9cfbfaece646c1092",
+      "sourceName": "@openzeppelin/contracts/proxy/beacon/BeaconProxy.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "./IBeacon.sol",
+        "../Proxy.sol",
+        "../ERC1967/ERC1967Upgrade.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "BeaconProxy"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/contracts/utils/Multicall.sol": {
+      "lastModificationDate": 1693279565028,
+      "contentHash": "5851a44847823be35212ccba46a7ec9e",
+      "sourceName": "@openzeppelin/contracts/utils/Multicall.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "./Address.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "Multicall"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/strategies/donation-voting-merkle-base/DonationVotingMerkleDistributionBaseStrategy.sol": {
+      "lastModificationDate": 1693361145194,
+      "contentHash": "6193b7bb5f898f66ca9ae232b2f42950",
+      "sourceName": "contracts/strategies/donation-voting-merkle-base/DonationVotingMerkleDistributionBaseStrategy.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol",
+        "@openzeppelin/contracts/utils/Multicall.sol",
+        "../../core/interfaces/IAllo.sol",
+        "../../core/interfaces/IRegistry.sol",
+        "../BaseStrategy.sol",
+        "../../core/libraries/Metadata.sol",
+        "../../core/libraries/Native.sol"
+      ],
+      "versionPragmas": [
+        "0.8.19"
+      ],
+      "artifacts": [
+        "DonationVotingMerkleDistributionBaseStrategy"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/strategies/BaseStrategy.sol": {
+      "lastModificationDate": 1693361145166,
+      "contentHash": "6c58a22ed3c3497f27661e57900ce84a",
+      "sourceName": "contracts/strategies/BaseStrategy.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "../core/interfaces/IStrategy.sol",
+        "../core/libraries/Transfer.sol"
+      ],
+      "versionPragmas": [
+        "0.8.19"
+      ],
+      "artifacts": [
+        "BaseStrategy"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/contracts/utils/cryptography/MerkleProof.sol": {
+      "lastModificationDate": 1693279566703,
+      "contentHash": "1ccd3348ad628f1330ce36eb6a30618d",
+      "sourceName": "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "MerkleProof"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/strategies/donation-voting-merkle-distribution-vault/DonationVotingMerkleDistributionVaultStrategy.sol": {
+      "lastModificationDate": 1693361145178,
+      "contentHash": "580fdbbd843a2290cd349ca9e798697c",
+      "sourceName": "contracts/strategies/donation-voting-merkle-distribution-vault/DonationVotingMerkleDistributionVaultStrategy.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "../donation-voting-merkle-base/DonationVotingMerkleDistributionBaseStrategy.sol",
+        "@openzeppelin/contracts/security/ReentrancyGuard.sol"
+      ],
+      "versionPragmas": [
+        "0.8.19"
+      ],
+      "artifacts": [
+        "DonationVotingMerkleDistributionVaultStrategy"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/strategies/wrapped-voting-nftmint/WrappedVotingNftMintStrategy.sol": {
+      "lastModificationDate": 1693361145167,
+      "contentHash": "d93938ce278711a344dbfbfa173d6b86",
+      "sourceName": "contracts/strategies/wrapped-voting-nftmint/WrappedVotingNftMintStrategy.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/security/ReentrancyGuard.sol",
+        "../../core/interfaces/IAllo.sol",
+        "../BaseStrategy.sol",
+        "../../core/libraries/Native.sol",
+        "./NFT.sol",
+        "./NFTFactory.sol"
+      ],
+      "versionPragmas": [
+        "0.8.19"
+      ],
+      "artifacts": [
+        "WrappedVotingNftMintStrategy"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/strategies/wrapped-voting-nftmint/NFT.sol": {
+      "lastModificationDate": 1693361145163,
+      "contentHash": "4fd243363a2e72452cf2d9071a9308de",
+      "sourceName": "contracts/strategies/wrapped-voting-nftmint/NFT.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "solady/src/tokens/ERC721.sol",
+        "@openzeppelin/contracts/utils/Strings.sol",
+        "solady/src/auth/Ownable.sol"
+      ],
+      "versionPragmas": [
+        "0.8.19"
+      ],
+      "artifacts": [
+        "NFT"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/strategies/wrapped-voting-nftmint/NFTFactory.sol": {
+      "lastModificationDate": 1693361145176,
+      "contentHash": "b114417dea443ed252131bf2f42dd4a8",
+      "sourceName": "contracts/strategies/wrapped-voting-nftmint/NFTFactory.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "./NFT.sol"
+      ],
+      "versionPragmas": [
+        "0.8.19"
+      ],
+      "artifacts": [
+        "NFTFactory"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/solady/src/tokens/ERC721.sol": {
+      "lastModificationDate": 1693279567555,
+      "contentHash": "195591e5e31e8a2363d95b206656a46f",
+      "sourceName": "solady/src/tokens/ERC721.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.4"
+      ],
+      "artifacts": [
+        "ERC721"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/strategies/qv-nft-tiered/QVNftTieredStrategy.sol": {
+      "lastModificationDate": 1693361145179,
+      "contentHash": "0ef416ad580588b89b7beb7c32d0eaee",
+      "sourceName": "contracts/strategies/qv-nft-tiered/QVNftTieredStrategy.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "solady/src/tokens/ERC721.sol",
+        "../qv-base/QVBaseStrategy.sol"
+      ],
+      "versionPragmas": [
+        "0.8.19"
+      ],
+      "artifacts": [
+        "QVNftTieredStrategy"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/strategies/qv-base/QVBaseStrategy.sol": {
+      "lastModificationDate": 1693361145176,
+      "contentHash": "2140c5ea0ee0c12ec1bbcf4de683bb0c",
+      "sourceName": "contracts/strategies/qv-base/QVBaseStrategy.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "../../core/interfaces/IAllo.sol",
+        "../../core/interfaces/IRegistry.sol",
+        "../BaseStrategy.sol",
+        "../../core/libraries/Metadata.sol"
+      ],
+      "versionPragmas": [
+        "0.8.19"
+      ],
+      "artifacts": [
+        "QVBaseStrategy"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/strategies/qv-simple/QVSimpleStrategy.sol": {
+      "lastModificationDate": 1693361145165,
+      "contentHash": "1807ce8432810d009886e808d792a511",
+      "sourceName": "contracts/strategies/qv-simple/QVSimpleStrategy.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "../qv-base/QVBaseStrategy.sol"
+      ],
+      "versionPragmas": [
+        "0.8.19"
+      ],
+      "artifacts": [
+        "QVSimpleStrategy"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/strategies/qv-hackathon/HackathonQVStrategy.sol": {
+      "lastModificationDate": 1693361145177,
+      "contentHash": "962251eaf702e04674dc54861a025d8e",
+      "sourceName": "contracts/strategies/qv-hackathon/HackathonQVStrategy.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "solady/src/tokens/ERC721.sol",
+        "@ethereum-attestation-service/eas-contracts/contracts/IEAS.sol",
+        "@ethereum-attestation-service/eas-contracts/contracts/ISchemaRegistry.sol",
+        "./SchemaResolver.sol",
+        "../qv-base/QVBaseStrategy.sol"
+      ],
+      "versionPragmas": [
+        "0.8.19"
+      ],
+      "artifacts": [
+        "HackathonQVStrategy"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/strategies/qv-hackathon/SchemaResolver.sol": {
+      "lastModificationDate": 1691177028503,
+      "contentHash": "9bfb4ea6f589fb554e55d9dbd8e742c3",
+      "sourceName": "contracts/strategies/qv-hackathon/SchemaResolver.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "@ethereum-attestation-service/eas-contracts/contracts/IEAS.sol",
+        "@ethereum-attestation-service/eas-contracts/contracts/Common.sol",
+        "@ethereum-attestation-service/eas-contracts/contracts/resolver/ISchemaResolver.sol"
+      ],
+      "versionPragmas": [
+        "0.8.19"
+      ],
+      "artifacts": [
+        "SchemaResolver"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@ethereum-attestation-service/eas-contracts/contracts/ISchemaRegistry.sol": {
+      "lastModificationDate": 1693279564474,
+      "contentHash": "dccff70a50a8f1e2e80831985a0aa5eb",
+      "sourceName": "@ethereum-attestation-service/eas-contracts/contracts/ISchemaRegistry.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "./resolver/ISchemaResolver.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "ISchemaRegistry"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@ethereum-attestation-service/eas-contracts/contracts/IEAS.sol": {
+      "lastModificationDate": 1693279564474,
+      "contentHash": "a3d654ad1e6ade57433c6ffd4ab534dc",
+      "sourceName": "@ethereum-attestation-service/eas-contracts/contracts/IEAS.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "./ISchemaRegistry.sol",
+        "./Common.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IEAS"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@ethereum-attestation-service/eas-contracts/contracts/Common.sol": {
+      "lastModificationDate": 1693279564474,
+      "contentHash": "2df2071e22b320a83a17d4c896a4d257",
+      "sourceName": "@ethereum-attestation-service/eas-contracts/contracts/Common.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": []
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@ethereum-attestation-service/eas-contracts/contracts/resolver/ISchemaResolver.sol": {
+      "lastModificationDate": 1693279566182,
+      "contentHash": "59a7215ea914bef56c3f9c64d82525b8",
+      "sourceName": "@ethereum-attestation-service/eas-contracts/contracts/resolver/ISchemaResolver.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "../Common.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "ISchemaResolver"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/strategies/qv-governance/QVGovernanceERC20Votes.sol": {
+      "lastModificationDate": 1693361145164,
+      "contentHash": "3e4d45889e971111091195b7c1b16aa1",
+      "sourceName": "contracts/strategies/qv-governance/QVGovernanceERC20Votes.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/governance/utils/IVotes.sol",
+        "../qv-base/QVBaseStrategy.sol"
+      ],
+      "versionPragmas": [
+        "0.8.19"
+      ],
+      "artifacts": [
+        "QVGovernanceERC20Votes"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/contracts/governance/utils/IVotes.sol": {
+      "lastModificationDate": 1693279566684,
+      "contentHash": "e2ea5c24dc3967534a8ac4df343668c2",
+      "sourceName": "@openzeppelin/contracts/governance/utils/IVotes.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IVotes"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/strategies/sablier-v2/LockupLinearStrategy.sol": {
+      "lastModificationDate": 1693361145174,
+      "contentHash": "b8ac9f51a32ebb05f295772e603e1e7f",
+      "sourceName": "contracts/strategies/sablier-v2/LockupLinearStrategy.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/security/ReentrancyGuard.sol",
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
+        "@sablier/v2-core/src/interfaces/ISablierV2LockupLinear.sol",
+        "@sablier/v2-core/src/types/DataTypes.sol",
+        "@sablier/v2-core/src/types/Tokens.sol",
+        "../../core/interfaces/IAllo.sol",
+        "../../core/interfaces/IRegistry.sol",
+        "../../core/libraries/Metadata.sol",
+        "../BaseStrategy.sol"
+      ],
+      "versionPragmas": [
+        "0.8.19"
+      ],
+      "artifacts": [
+        "LockupLinearStrategy"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@sablier/v2-core/src/types/Tokens.sol": {
+      "lastModificationDate": 1693362302464,
+      "contentHash": "39946b11b7b0cd42e04ec8ffd2f79915",
+      "sourceName": "@sablier/v2-core/src/types/Tokens.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC721/IERC721.sol",
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/strategies/sablier-v2/LockupDynamicStrategy.sol": {
+      "lastModificationDate": 1693361145168,
+      "contentHash": "8d16fb4c965bc86d7b8196b9fbbb81de",
+      "sourceName": "contracts/strategies/sablier-v2/LockupDynamicStrategy.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/security/ReentrancyGuard.sol",
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
+        "@sablier/v2-core/src/interfaces/ISablierV2LockupDynamic.sol",
+        "@sablier/v2-core/src/types/DataTypes.sol",
+        "@sablier/v2-core/src/types/Tokens.sol",
+        "../../core/interfaces/IAllo.sol",
+        "../../core/interfaces/IRegistry.sol",
+        "../../core/libraries/Metadata.sol",
+        "../BaseStrategy.sol"
+      ],
+      "versionPragmas": [
+        "0.8.19"
+      ],
+      "artifacts": [
+        "LockupDynamicStrategy"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@sablier/v2-core/src/interfaces/ISablierV2LockupDynamic.sol": {
+      "lastModificationDate": 1693362302464,
+      "contentHash": "cc27b558cd789ff0321bb511d7af839e",
+      "sourceName": "@sablier/v2-core/src/interfaces/ISablierV2LockupDynamic.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "../types/DataTypes.sol",
+        "./ISablierV2Lockup.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": [
+        "ISablierV2LockupDynamic"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/strategies/rfp-simple/RFPSimpleStrategy.sol": {
+      "lastModificationDate": 1693361145167,
+      "contentHash": "7ff6c41c90bfdf5075496781c4260650",
+      "sourceName": "contracts/strategies/rfp-simple/RFPSimpleStrategy.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/security/ReentrancyGuard.sol",
+        "../../core/interfaces/IAllo.sol",
+        "../../core/interfaces/IRegistry.sol",
+        "../BaseStrategy.sol",
+        "../../core/libraries/Metadata.sol"
+      ],
+      "versionPragmas": [
+        "0.8.19"
+      ],
+      "artifacts": [
+        "RFPSimpleStrategy"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/strategies/donation-voting/DonationVotingStrategy.sol": {
+      "lastModificationDate": 1693361145181,
+      "contentHash": "446c9fa52835a235bae26de440ca9e02",
+      "sourceName": "contracts/strategies/donation-voting/DonationVotingStrategy.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/security/ReentrancyGuard.sol",
+        "../../core/interfaces/IAllo.sol",
+        "../../core/interfaces/IRegistry.sol",
+        "../BaseStrategy.sol",
+        "../../core/libraries/Metadata.sol",
+        "../../core/libraries/Native.sol"
+      ],
+      "versionPragmas": [
+        "0.8.19"
+      ],
+      "artifacts": [
+        "DonationVotingStrategy"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/strategies/donation-voting-custom-registry/DonationVotingCustomRegistryStrategy.sol": {
+      "lastModificationDate": 1693361145177,
+      "contentHash": "896d4755edee3ed429c485a308b06fc9",
+      "sourceName": "contracts/strategies/donation-voting-custom-registry/DonationVotingCustomRegistryStrategy.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "../donation-voting/DonationVotingStrategy.sol",
+        "./SimpleProjectRegistry.sol"
+      ],
+      "versionPragmas": [
+        "0.8.19"
+      ],
+      "artifacts": [
+        "DonationVotingCustomRegistryStrategy"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/strategies/donation-voting-custom-registry/SimpleProjectRegistry.sol": {
+      "lastModificationDate": 1693361145179,
+      "contentHash": "330f27be05a366af729ea2c446a0b94e",
+      "sourceName": "contracts/strategies/donation-voting-custom-registry/SimpleProjectRegistry.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "solady/src/auth/Ownable.sol"
+      ],
+      "versionPragmas": [
+        "0.8.19"
+      ],
+      "artifacts": [
+        "SimpleProjectRegistry"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/strategies/proportional-payout/ProportionalPayoutStrategy.sol": {
+      "lastModificationDate": 1693361145170,
+      "contentHash": "6879d7d7d03f3ba46d0bdc32bd90ad0b",
+      "sourceName": "contracts/strategies/proportional-payout/ProportionalPayoutStrategy.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "solady/src/tokens/ERC721.sol",
+        "../../core/interfaces/IAllo.sol",
+        "./../BaseStrategy.sol",
+        "../../core/libraries/Metadata.sol"
+      ],
+      "versionPragmas": [
+        "0.8.19"
+      ],
+      "artifacts": [
+        "ProportionalPayoutStrategy"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/strategies/direct-grants-simple/DirectGrantsSimpleStrategy.sol": {
+      "lastModificationDate": 1693361145182,
+      "contentHash": "af0c8ed19a3cafe416356f27b56658cf",
+      "sourceName": "contracts/strategies/direct-grants-simple/DirectGrantsSimpleStrategy.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/security/ReentrancyGuard.sol",
+        "../../core/interfaces/IAllo.sol",
+        "../../core/interfaces/IRegistry.sol",
+        "../BaseStrategy.sol",
+        "../../core/libraries/Metadata.sol"
+      ],
+      "versionPragmas": [
+        "0.8.19"
+      ],
+      "artifacts": [
+        "DirectGrantsSimpleStrategy"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/strategies/rfp-committee/RFPCommitteeStrategy.sol": {
+      "lastModificationDate": 1693361145178,
+      "contentHash": "6e4d2573fe5196614e9ffd7bac7f2367",
+      "sourceName": "contracts/strategies/rfp-committee/RFPCommitteeStrategy.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "../rfp-simple/RFPSimpleStrategy.sol"
+      ],
+      "versionPragmas": [
+        "0.8.19"
+      ],
+      "artifacts": [
+        "RFPCommitteeStrategy"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/strategies/donation-voting-merkle-distribution-direct-transfer/DonationVotingMerkleDistributionDirectTransferStrategy.sol": {
+      "lastModificationDate": 1693361145174,
+      "contentHash": "fdc8f37c5e63e452cb5788051a257b61",
+      "sourceName": "contracts/strategies/donation-voting-merkle-distribution-direct-transfer/DonationVotingMerkleDistributionDirectTransferStrategy.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "../donation-voting-merkle-base/DonationVotingMerkleDistributionBaseStrategy.sol"
+      ],
+      "versionPragmas": [
+        "0.8.19"
+      ],
+      "artifacts": [
+        "DonationVotingMerkleDistributionDirectTransferStrategy"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/factory/ContractFactory.sol": {
+      "lastModificationDate": 1693361145163,
+      "contentHash": "02896c1bcbdd3eb8c137920f5f4ea4bf",
+      "sourceName": "contracts/factory/ContractFactory.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "mode": "3"
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        },
+        "zksolc": {
+          "version": "1.3.13",
+          "compilerSource": "binary",
+          "settings": {
+            "optimizer": {
+              "enabled": true,
+              "mode": "3"
+            },
+            "compilerPath": "/Users/jaxcoder/Library/Caches/hardhat-nodejs/compilers-v2/zksolc/zksolc-v1.3.13",
+            "experimental": {}
+          }
+        }
+      },
+      "imports": [
+        "solady/src/utils/CREATE3.sol"
+      ],
+      "versionPragmas": [
+        "0.8.19"
+      ],
+      "artifacts": [
+        "ContractFactory"
+      ]
+    }
+  }
+}

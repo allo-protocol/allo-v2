@@ -1,12 +1,12 @@
 # Allo
 
-*allo-team*
+*@thelostone-mc &lt;aditya@gitcoin.co&gt;, @KurtMerbeth &lt;kurt@gitcoin.co&gt;, @codenamejason &lt;jason@gitcoin.co&gt;*
 
-> ___            ___        ___        ___         /\  \          /\__\      /\__\      /\  \        /::\  \        /:/  /     /:/  /     /::\  \       /:/\:\  \      /:/  /     /:/  /     /:/\:\  \      /::\~\:\  \    /:/  /     /:/  /     /:/  \:\  \     /:/\:\ \:\__\  /:/__/     /:/__/     /:/__/ \:\__\     \/__\:\/:/  /  \:\  \     \:\  \     \:\  \ /:/  /          \::/  /    \:\  \     \:\  \     \:\  /:/  /          /:/  /      \:\  \     \:\  \     \:\/:/  /         /:/  /        \:\__\     \:\__\     \::/  /         \/__/          \/__/      \/__/      \/__/
+> Allo
 
-The Allo core contract
+This contract is used to create &amp; manage pools as well as manage the protocol.
 
-*This contract is used to create &amp; manage pools as well as manage the protocol. It      is the core of all things Allo. Requirements: The contract must be initialized with the &#39;initialize()&#39; function*
+*The contract must be initialized with the &#39;initialize()&#39; function.*
 
 ## Methods
 
@@ -52,13 +52,13 @@ function addPoolManager(uint256 _poolId, address _manager) external nonpayable
 
 Add a pool manager
 
-*emits &#39;RoleGranted()&#39; event Requirements: The caller must be a pool admin*
+*Emits &#39;RoleGranted()&#39; event. &#39;msg.sender&#39; must be a pool admin.*
 
 #### Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| _poolId | uint256 | The pool id |
+| _poolId | uint256 | ID of the pool |
 | _manager | address | The address to add |
 
 ### addToCloneableStrategies
@@ -67,9 +67,9 @@ Add a pool manager
 function addToCloneableStrategies(address _strategy) external nonpayable
 ```
 
-Add a strategy to the allowlist
+Add a strategy to the allowlist.
 
-*Only callable by the owner, emits the &#39;StrategyApproved()&#39; event Requirements: The caller must be allo owner*
+*Only callable by Allo owner, emits the &#39;StrategyApproved()&#39; event. &#39;msg.sender&#39; must be Allo owner.*
 
 #### Parameters
 
@@ -83,16 +83,16 @@ Add a strategy to the allowlist
 function allocate(uint256 _poolId, bytes _data) external payable
 ```
 
-passes _data &amp; msg.sender through to the strategy for that pool
+Allocate to a recipient or multiple recipients.
 
-*Calls the internal _allocate() function Requirements: This will be determined by the strategy*
+*Calls the &#39;strategy.allocate()&#39; function with encoded &#39;_data&#39; defined by the strategy.*
 
 #### Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| _poolId | uint256 | id of the pool |
-| _data | bytes | encoded data unique to the strategy for that pool |
+| _poolId | uint256 | ID of the pool |
+| _data | bytes | Encoded data unique to the strategy for that pool |
 
 ### batchAllocate
 
@@ -100,15 +100,15 @@ passes _data &amp; msg.sender through to the strategy for that pool
 function batchAllocate(uint256[] _poolIds, bytes[] _datas) external nonpayable
 ```
 
-vote to multiple pools Requirements: This will be determined by the strategy
+Allocate to multiple pools
 
-
+*The encoded data will be specific to a given strategy requirements, reference the strategy      implementation of allocate(). Please note that this is not a &#39;payable&#39; function, so if you      want to send funds to the strategy, you must send the funds using &#39;fundPool()&#39;.*
 
 #### Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| _poolIds | uint256[] | ids of the pools |
+| _poolIds | uint256[] | IDs of the pools |
 | _datas | bytes[] | encoded data unique to the strategy for that pool |
 
 ### batchRegisterRecipient
@@ -117,16 +117,16 @@ vote to multiple pools Requirements: This will be determined by the strategy
 function batchRegisterRecipient(uint256[] _poolIds, bytes[] _data) external nonpayable returns (address[] recipientIds)
 ```
 
-Register multiple recipients to multiple pools
+Register multiple recipients to multiple pools.
 
-*Returns the recipientIds from the strategy that have been registered from calling this funciton Requirements: Encoded &#39;_data&#39; length must match _poolIds length or this will revert with MISMATCH()               Other requirements will be determined by the strategy*
+*Returns the &#39;recipientIds&#39; from the strategy that have been registered from calling this function.      Encoded data unique to a strategy that registerRecipient() requires. Encoded &#39;_data&#39; length must match      &#39;_poolIds&#39; length or this will revert with MISMATCH(). Other requirements will be determined by the strategy.*
 
 #### Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| _poolIds | uint256[] | Id of the pools |
-| _data | bytes[] | Encoded data unique to a strategy that registerRecipient() requires |
+| _poolIds | uint256[] | ID&#39;s of the pools |
+| _data | bytes[] | An array of encoded data unique to a strategy that registerRecipient() requires. |
 
 #### Returns
 
@@ -223,17 +223,17 @@ function createPoolWithCustomStrategy(bytes32 _profileId, address _strategy, byt
 function distribute(uint256 _poolId, address[] _recipientIds, bytes _data) external nonpayable
 ```
 
-passes _data &amp; msg.sender through to the disribution strategy for that pool Requirements: This will be determined by the strategy
+Distribute to a recipient or multiple recipients.
 
-
+*The encoded data will be specific to a given strategy requirements, reference the strategy      implementation of &#39;strategy.distribute()&#39;.*
 
 #### Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| _poolId | uint256 | id of the pool |
+| _poolId | uint256 | ID of the pool |
 | _recipientIds | address[] | undefined |
-| _data | bytes | encoded data unique to the strategy for that pool |
+| _data | bytes | Encoded data unique to the strategy |
 
 ### fundPool
 
@@ -241,16 +241,16 @@ passes _data &amp; msg.sender through to the disribution strategy for that pool 
 function fundPool(uint256 _poolId, uint256 _amount) external payable
 ```
 
-Fund a pool
+Fund a pool.
 
-*Calls the internal _fundPool() function Requirements: None, anyone can fund a pool*
+*Anyone can fund a pool and call this function.*
 
 #### Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| _poolId | uint256 | id of the pool |
-| _amount | uint256 | extra amount of the token to be deposited into the pool |
+| _poolId | uint256 | ID of the pool |
+| _amount | uint256 | amount to be deposited into the pool |
 
 ### getBaseFee
 
@@ -258,7 +258,7 @@ Fund a pool
 function getBaseFee() external view returns (uint256)
 ```
 
-Getter for base fee
+Getter for base fee.
 
 
 
@@ -267,7 +267,7 @@ Getter for base fee
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | uint256 | undefined |
+| _0 | uint256 | The base fee |
 
 ### getFeeDenominator
 
@@ -284,7 +284,7 @@ Getter for the fee denominator
 
 | Name | Type | Description |
 |---|---|---|
-| FEE_DENOMINATOR | uint256 | The fee denominator (1e18) which represents 100% |
+| FEE_DENOMINATOR | uint256 | The fee denominator is (1e18) which represents 100% |
 
 ### getPercentFee
 
@@ -292,7 +292,7 @@ Getter for the fee denominator
 function getPercentFee() external view returns (uint256)
 ```
 
-Getter for fee percentage
+Getter for fee percentage.
 
 
 
@@ -301,7 +301,7 @@ Getter for fee percentage
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | uint256 | undefined |
+| _0 | uint256 | The fee percentage |
 
 ### getPool
 
@@ -309,7 +309,7 @@ Getter for fee percentage
 function getPool(uint256 _poolId) external view returns (struct IAllo.Pool)
 ```
 
-Getter for the &#39;Pool&#39;
+Getter for the &#39;Pool&#39;.
 
 
 
@@ -317,13 +317,13 @@ Getter for the &#39;Pool&#39;
 
 | Name | Type | Description |
 |---|---|---|
-| _poolId | uint256 | undefined |
+| _poolId | uint256 | The ID of the pool |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | IAllo.Pool | undefined |
+| _0 | IAllo.Pool | The &#39;Pool&#39; struct |
 
 ### getRegistry
 
@@ -331,7 +331,7 @@ Getter for the &#39;Pool&#39;
 function getRegistry() external view returns (contract IRegistry)
 ```
 
-Getter for registry
+Getter for registry.
 
 
 
@@ -340,7 +340,7 @@ Getter for registry
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | contract IRegistry | undefined |
+| _0 | contract IRegistry | The registry address |
 
 ### getRoleAdmin
 
@@ -370,7 +370,7 @@ function getRoleAdmin(bytes32 role) external view returns (bytes32)
 function getStrategy(uint256 _poolId) external view returns (address)
 ```
 
-Return the strategy for a pool
+Getter for the strategy.
 
 
 
@@ -378,13 +378,13 @@ Return the strategy for a pool
 
 | Name | Type | Description |
 |---|---|---|
-| _poolId | uint256 | The pool id |
+| _poolId | uint256 | The ID of the pool |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | address | address |
+| _0 | address | The address of the strategy |
 
 ### getTreasury
 
@@ -392,7 +392,7 @@ Return the strategy for a pool
 function getTreasury() external view returns (address payable)
 ```
 
-Getter for treasury address
+Getter for treasury address.
 
 
 
@@ -401,7 +401,7 @@ Getter for treasury address
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | address payable | undefined |
+| _0 | address payable | The treasury address |
 
 ### grantRole
 
@@ -468,7 +468,7 @@ Initializes the contract after an upgrade
 function isCloneableStrategy(address _strategy) external view returns (bool)
 ```
 
-Getter for if strategy is cloneable
+Getter for if strategy is cloneable.
 
 
 
@@ -476,13 +476,13 @@ Getter for if strategy is cloneable
 
 | Name | Type | Description |
 |---|---|---|
-| _strategy | address | undefined |
+| _strategy | address | The address of the strategy |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | bool | undefined |
+| _0 | bool | Ttrue&#39; if the strategy is cloneable, otherwise &#39;false&#39; |
 
 ### isPoolAdmin
 
@@ -490,7 +490,7 @@ Getter for if strategy is cloneable
 function isPoolAdmin(uint256 _poolId, address _address) external view returns (bool)
 ```
 
-Checks if the address is a pool admin
+Checks if the address is a pool admin.
 
 
 
@@ -498,14 +498,14 @@ Checks if the address is a pool admin
 
 | Name | Type | Description |
 |---|---|---|
-| _poolId | uint256 | The pool id |
+| _poolId | uint256 | The ID of the pool |
 | _address | address | The address to check |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | bool | bool |
+| _0 | bool | &#39;true&#39; if the address is a pool admin, otherwise &#39;false&#39; |
 
 ### isPoolManager
 
@@ -521,14 +521,14 @@ Checks if the address is a pool manager
 
 | Name | Type | Description |
 |---|---|---|
-| _poolId | uint256 | The pool id |
+| _poolId | uint256 | The ID of the pool |
 | _address | address | The address to check |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | bool | bool |
+| _0 | bool | &#39;true&#39; if the address is a pool manager, otherwise &#39;false&#39; |
 
 ### owner
 
@@ -575,7 +575,7 @@ function ownershipHandoverExpiresAt(address pendingOwner) external view returns 
 function recoverFunds(address _token, address _recipient) external nonpayable
 ```
 
-Transfer thefunds recovered  to the recipient Requirements: The caller must be a pool owner
+Transfer thefunds recovered  to the recipient Requirements: &#39;msg.sender&#39; must be Allo owner
 
 
 
@@ -592,15 +592,15 @@ Transfer thefunds recovered  to the recipient Requirements: The caller must be a
 function registerRecipient(uint256 _poolId, bytes _data) external payable returns (address)
 ```
 
-Passes _data through to the strategy for that pool Requirements: This will be determined by the strategy
+Passes _data through to the strategy for that pool.
 
-
+*The encoded data will be specific to a given strategy requirements, reference the strategy      implementation of registerRecipient().*
 
 #### Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| _poolId | uint256 | Id of the pool |
+| _poolId | uint256 | ID of the pool |
 | _data | bytes | Encoded data unique to a strategy that registerRecipient() requires |
 
 #### Returns
@@ -617,7 +617,7 @@ function removeFromCloneableStrategies(address _strategy) external nonpayable
 
 Remove a strategy from the allowlist
 
-*Only callable by the owner, emits &#39;StrategyRemoved()&#39; event Requirements: The caller must be allo owner*
+*Only callable by Allo owner, emits &#39;StrategyRemoved()&#39; event. &#39;msg.sender must be Allo owner.*
 
 #### Parameters
 
@@ -633,13 +633,13 @@ function removePoolManager(uint256 _poolId, address _manager) external nonpayabl
 
 Remove a pool manager
 
-*emits &#39;RoleRevoked()&#39; event Requirements: The caller must be a pool admin*
+*Emits &#39;RoleRevoked()&#39; event. &#39;msg.sender&#39; must be a pool admin.*
 
 #### Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| _poolId | uint256 | The pool id |
+| _poolId | uint256 | ID of the pool |
 | _manager | address | The address remove |
 
 ### renounceOwnership
@@ -742,9 +742,9 @@ function transferOwnership(address newOwner) external payable
 function updateBaseFee(uint256 _baseFee) external nonpayable
 ```
 
-Updates the base fee
+Updates the base fee.
 
-*Use this to update the base fee Requirements: The caller must be allo owner*
+*Use this to update the base fee. &#39;msg.sender&#39; must be Allo owner.*
 
 #### Parameters
 
@@ -758,9 +758,9 @@ Updates the base fee
 function updatePercentFee(uint256 _percentFee) external nonpayable
 ```
 
-Updates the fee percentage
+Updates the fee percentage.
 
-*Use this to update the fee percentage Requirements: The caller must be allo owner*
+*Use this to update the fee percentage. &#39;msg.sender&#39; must be Allo owner.*
 
 #### Parameters
 
@@ -791,9 +791,9 @@ function updatePoolMetadata(uint256 _poolId, Metadata _metadata) external nonpay
 function updateRegistry(address _registry) external nonpayable
 ```
 
-Updates the registry address
+Updates the registry address.
 
-*Use this to update the registry address Requirements: The caller must be allo owner*
+*Use this to update the registry address. &#39;msg.sender&#39; must be Allo owner.*
 
 #### Parameters
 
@@ -807,9 +807,9 @@ Updates the registry address
 function updateTreasury(address payable _treasury) external nonpayable
 ```
 
-Updates the treasury address
+Updates the treasury address.
 
-*Use this to update the treasury address Requirements: The caller must be allo owner*
+*Use this to update the treasury address. &#39;msg.sender&#39; must be Allo owner.*
 
 #### Parameters
 
@@ -827,7 +827,7 @@ Updates the treasury address
 event BaseFeePaid(uint256 indexed poolId, uint256 amount)
 ```
 
-
+Emitted when the base fee is paid
 
 
 
@@ -835,8 +835,8 @@ event BaseFeePaid(uint256 indexed poolId, uint256 amount)
 
 | Name | Type | Description |
 |---|---|---|
-| poolId `indexed` | uint256 | undefined |
-| amount  | uint256 | undefined |
+| poolId `indexed` | uint256 | ID of the pool the base fee was paid for |
+| amount  | uint256 | Amount of the base fee paid |
 
 ### BaseFeeUpdated
 
@@ -844,7 +844,7 @@ event BaseFeePaid(uint256 indexed poolId, uint256 amount)
 event BaseFeeUpdated(uint256 baseFee)
 ```
 
-
+Emitted when the base fee is updated
 
 
 
@@ -852,7 +852,7 @@ event BaseFeeUpdated(uint256 baseFee)
 
 | Name | Type | Description |
 |---|---|---|
-| baseFee  | uint256 | undefined |
+| baseFee  | uint256 | New base fee amount |
 
 ### Initialized
 
@@ -925,7 +925,7 @@ event OwnershipTransferred(address indexed oldOwner, address indexed newOwner)
 event PercentFeeUpdated(uint256 percentFee)
 ```
 
-
+Emitted when the percent fee is updated
 
 
 
@@ -933,7 +933,7 @@ event PercentFeeUpdated(uint256 percentFee)
 
 | Name | Type | Description |
 |---|---|---|
-| percentFee  | uint256 | undefined |
+| percentFee  | uint256 | New percentage for the fee |
 
 ### PoolCreated
 
@@ -941,7 +941,7 @@ event PercentFeeUpdated(uint256 percentFee)
 event PoolCreated(uint256 indexed poolId, bytes32 indexed profileId, contract IStrategy strategy, address token, uint256 amount, Metadata metadata)
 ```
 
-====================== ======= Events ======= ======================
+Event emitted when a new pool is created
 
 
 
@@ -949,12 +949,12 @@ event PoolCreated(uint256 indexed poolId, bytes32 indexed profileId, contract IS
 
 | Name | Type | Description |
 |---|---|---|
-| poolId `indexed` | uint256 | undefined |
-| profileId `indexed` | bytes32 | undefined |
-| strategy  | contract IStrategy | undefined |
-| token  | address | undefined |
-| amount  | uint256 | undefined |
-| metadata  | Metadata | undefined |
+| poolId `indexed` | uint256 | ID of the pool created |
+| profileId `indexed` | bytes32 | ID of the profile the pool is associated with |
+| strategy  | contract IStrategy | Address of the strategy contract |
+| token  | address | Address of the token pool was funded with when created |
+| amount  | uint256 | Amount pool was funded with when created |
+| metadata  | Metadata | Pool metadata |
 
 ### PoolFunded
 
@@ -962,7 +962,7 @@ event PoolCreated(uint256 indexed poolId, bytes32 indexed profileId, contract IS
 event PoolFunded(uint256 indexed poolId, uint256 amount, uint256 fee)
 ```
 
-
+Emitted when a pool is funded
 
 
 
@@ -970,9 +970,9 @@ event PoolFunded(uint256 indexed poolId, uint256 amount, uint256 fee)
 
 | Name | Type | Description |
 |---|---|---|
-| poolId `indexed` | uint256 | undefined |
-| amount  | uint256 | undefined |
-| fee  | uint256 | undefined |
+| poolId `indexed` | uint256 | ID of the pool funded |
+| amount  | uint256 | Amount funded to the pool |
+| fee  | uint256 | Amount of the fee paid to the treasury |
 
 ### PoolMetadataUpdated
 
@@ -980,7 +980,7 @@ event PoolFunded(uint256 indexed poolId, uint256 amount, uint256 fee)
 event PoolMetadataUpdated(uint256 indexed poolId, Metadata metadata)
 ```
 
-
+Emitted when a pools metadata is updated
 
 
 
@@ -988,8 +988,8 @@ event PoolMetadataUpdated(uint256 indexed poolId, Metadata metadata)
 
 | Name | Type | Description |
 |---|---|---|
-| poolId `indexed` | uint256 | undefined |
-| metadata  | Metadata | undefined |
+| poolId `indexed` | uint256 | ID of the pool updated |
+| metadata  | Metadata | Pool metadata that was updated |
 
 ### RegistryUpdated
 
@@ -997,7 +997,7 @@ event PoolMetadataUpdated(uint256 indexed poolId, Metadata metadata)
 event RegistryUpdated(address registry)
 ```
 
-
+Emitted when the registry address is updated
 
 
 
@@ -1005,7 +1005,7 @@ event RegistryUpdated(address registry)
 
 | Name | Type | Description |
 |---|---|---|
-| registry  | address | undefined |
+| registry  | address | Address of the new registry |
 
 ### RoleAdminChanged
 
@@ -1067,7 +1067,7 @@ event RoleRevoked(bytes32 indexed role, address indexed account, address indexed
 event StrategyApproved(address strategy)
 ```
 
-
+Emitted when a strategy is approved and added to the cloneable strategies
 
 
 
@@ -1075,7 +1075,7 @@ event StrategyApproved(address strategy)
 
 | Name | Type | Description |
 |---|---|---|
-| strategy  | address | undefined |
+| strategy  | address | Address of the strategy approved |
 
 ### StrategyRemoved
 
@@ -1083,7 +1083,7 @@ event StrategyApproved(address strategy)
 event StrategyRemoved(address strategy)
 ```
 
-
+Emitted when a strategy is removed from the cloneable strategies
 
 
 
@@ -1091,7 +1091,7 @@ event StrategyRemoved(address strategy)
 
 | Name | Type | Description |
 |---|---|---|
-| strategy  | address | undefined |
+| strategy  | address | Address of the strategy removed |
 
 ### TreasuryUpdated
 
@@ -1099,7 +1099,7 @@ event StrategyRemoved(address strategy)
 event TreasuryUpdated(address treasury)
 ```
 
-
+Emitted when the treasury address is updated
 
 
 
@@ -1107,7 +1107,7 @@ event TreasuryUpdated(address treasury)
 
 | Name | Type | Description |
 |---|---|---|
-| treasury  | address | undefined |
+| treasury  | address | Address of the new treasury |
 
 
 
@@ -1130,7 +1130,7 @@ error AMOUNT_MISMATCH()
 error INVALID_FEE()
 ```
 
-
+Thrown when the fee is below 1e18 which is the fee percentage denominator
 
 
 
@@ -1141,7 +1141,7 @@ error INVALID_FEE()
 error IS_APPROVED_STRATEGY()
 ```
 
-
+Thrown when the strategy is approved and should be cloned
 
 
 
@@ -1152,7 +1152,7 @@ error IS_APPROVED_STRATEGY()
 error MISMATCH()
 ```
 
-
+Thrown when Encoded &#39;_data&#39; length does not match _poolIds length
 
 
 
@@ -1163,7 +1163,7 @@ error MISMATCH()
 error NOT_APPROVED_STRATEGY()
 ```
 
-
+Thrown when the strategy is not approved
 
 
 
@@ -1174,7 +1174,7 @@ error NOT_APPROVED_STRATEGY()
 error NOT_ENOUGH_FUNDS()
 ```
 
-
+Thrown when the &#39;msg.sender&#39; has not sent enough funds
 
 
 
@@ -1207,7 +1207,7 @@ error NoHandoverRequest()
 error UNAUTHORIZED()
 ```
 
-====================== ======= Errors ======= ======================
+Thrown when access is not authorized
 
 
 
@@ -1229,7 +1229,7 @@ error Unauthorized()
 error ZERO_ADDRESS()
 ```
 
-
+Thrown when any address is the zero address
 
 
 

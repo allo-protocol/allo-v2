@@ -1,8 +1,8 @@
 # ContractFactory
 
-*allo-team*
+*@thelostone-mc &lt;aditya@gitcoin.co&gt;, @KurtMerbeth &lt;kurt@gitcoin.co&gt;, @codenamejason &lt;jason@gitcoin.co&gt;*
 
-> ContractFactory Contract
+> ContractFactory
 
 
 
@@ -16,9 +16,9 @@
 function deploy(string _contractName, string _version, bytes creationCode) external payable returns (address deployedContract)
 ```
 
-Deploys a contract using CREATE3
+Deploys a contract using CREATE3.
 
-
+*Used for our deployments.*
 
 #### Parameters
 
@@ -40,9 +40,9 @@ Deploys a contract using CREATE3
 function isDeployer(address) external view returns (bool)
 ```
 
+Collection of authorized deployers.
 
 
-*Collection of authorized deployers*
 
 #### Parameters
 
@@ -62,9 +62,9 @@ function isDeployer(address) external view returns (bool)
 function setDeployer(address _deployer, bool _allowedToDeploy) external nonpayable
 ```
 
-Set the allowed deployer
+Set the allowed deployer.
 
-*Sets the &#39;_deployer&#39; to &#39;_allowedToDeploy&#39;*
+*&#39;msg.sender&#39; must be a deployer.*
 
 #### Parameters
 
@@ -79,9 +79,9 @@ Set the allowed deployer
 function usedSalts(bytes32) external view returns (bool)
 ```
 
+Collection of used salts.
 
 
-*Collection of used salts*
 
 #### Parameters
 
@@ -105,9 +105,9 @@ function usedSalts(bytes32) external view returns (bool)
 event Deployed(address indexed deployed, bytes32 indexed salt)
 ```
 
+Emitted when a contract is deployed.
 
 
-*Emitted when a contract is deployed*
 
 #### Parameters
 
@@ -126,7 +126,7 @@ event Deployed(address indexed deployed, bytes32 indexed salt)
 error SALT_USED()
 ```
 
-Returns when the requested salt has already been used
+Thrown when the requested salt has already been used.
 
 
 
@@ -137,7 +137,7 @@ Returns when the requested salt has already been used
 error UNAUTHORIZED()
 ```
 
-Returns when the caller is not authorized to deploy
+Thrown when the caller is not authorized to deploy.
 
 
 
