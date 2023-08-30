@@ -1,6 +1,11 @@
 import * as dotenv from "dotenv";
 
-import "@nomiclabs/hardhat-etherscan";
+import "@matterlabs/hardhat-zksync-deploy";
+import "@matterlabs/hardhat-zksync-solc";
+import "@matterlabs/hardhat-zksync-upgradable";
+import "@matterlabs/hardhat-zksync-verify";
+
+// import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-solhint";
 import "@nomiclabs/hardhat-waffle";
 import "@openzeppelin/hardhat-upgrades";
@@ -26,6 +31,7 @@ const chainIds = {
   "fantom-testnet": 4002,
   "pgn-sepolia": 58008,
   "celo-testnet": 44787,
+  "zksync-testnet": 280,
 
   // mainnet
   mainnet: 1,
@@ -33,6 +39,7 @@ const chainIds = {
   "pgn-mainnet": 424,
   "fantom-mainnet": 250,
   "celo-mainnet": 42220,
+  "zksync-mainnet": 324,
 };
 
 let deployPrivateKey = process.env.DEPLOYER_PRIVATE_KEY as string;
@@ -118,52 +125,77 @@ const config: HardhatUserConfig = {
   },
   networks: {
     // Main Networks
-    mainnet: createMainnetConfig("mainnet"),
-    "optimism-mainnet": createMainnetConfig("optimism-mainnet"),
-    "fantom-mainnet": createMainnetConfig(
-      "fantom-mainnet",
-      "https://rpc.ftm.tools"
-    ),
+    mainnet: { ...createMainnetConfig("mainnet"), zksync: false },
+    "optimism-mainnet": { ...createMainnetConfig("optimism-mainnet"), zksync: false },
+    "fantom-mainnet": {
+      ...createMainnetConfig(
+        "fantom-mainnet",
+        "https://rpc.ftm.tools"
+      ), zksync: false
+    },
     "pgn-mainnet": {
       accounts: [deployPrivateKey],
       chainId: chainIds["pgn-mainnet"],
       url: "https://rpc.publicgoods.network",
       gasPrice: 20000000000,
+      zksync: false,
     },
     "celo-mainnet": {
       accounts: [deployPrivateKey],
       chainId: chainIds["celo-mainnet"],
       url: "https://forno.celo.org",
       gasPrice: 20000000000,
+      zksync: false,
+    },
+    "zksync-mainnet": {
+      accounts: [deployPrivateKey],
+      chainId: chainIds["zksync-mainnet"],
+      url: "https://mainnet.zksync.io",
+      ethNetwork: "mainnet", // or a Mainnet RPC endpoint from Infura/Alchemy/Chainstack etc.
+      zksync: true,
     },
 
     // Test Networks
-    goerli: createTestnetConfig("goerli"),
-    sepolia: createTestnetConfig(
-      "sepolia",
-      "https://eth-sepolia.public.blastapi.io"
-    ),
-    "fantom-testnet": createTestnetConfig(
-      "fantom-testnet",
-      "https://rpc.testnet.fantom.network/"
-    ),
+    goerli: { ...createTestnetConfig("goerli"), zksync: false },
+    sepolia: {
+      ...createTestnetConfig(
+        "sepolia",
+        "https://eth-sepolia.public.blastapi.io"
+      ), zksync: false
+    },
+    "fantom-testnet": {
+      ...createTestnetConfig(
+        "fantom-testnet",
+        "https://rpc.testnet.fantom.network/"
+      ), zksync: false
+    },
     "optimism-goerli": {
       accounts: [deployPrivateKey],
       chainId: chainIds["optimism-goerli"],
       url: "https://optimism-goerli.publicnode.com",
       gasPrice: 20000000000,
+      zksync: false,
     },
     "pgn-sepolia": {
       accounts: [deployPrivateKey],
       chainId: chainIds["pgn-sepolia"],
       url: "https://sepolia.publicgoods.network",
       gasPrice: 20000000000,
+      zksync: false,
     },
     "celo-testnet": {
       accounts: [deployPrivateKey],
       chainId: chainIds["celo-testnet"],
       url: "https://alfajores-forno.celo-testnet.org",
       gasPrice: 20000000000,
+      zksync: false,
+    },
+    "zksync-testnet": {
+      accounts: [deployPrivateKey],
+      chainId: chainIds["zksync-testnet"],
+      url: "https://testnet.era.zksync.dev",
+      ethNetwork: "goerli", // or a Goerli RPC endpoint from Infura/Alchemy/Chainstack etc.
+      zksync: true,
     },
 
     // Local Networks
@@ -237,6 +269,13 @@ const config: HardhatUserConfig = {
   },
   abiExporter: abiExporter,
   dodoc: dodoc,
+  zksolc: {
+    version: "1.3.13",
+    compilerSource: "binary",
+    settings: {
+      isSystem: true,
+    },
+  },
 };
 
 export default config;
