@@ -398,7 +398,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Withdraw funds from pool.
     /// @dev 'msg.sender' must be a pool manager to withdraw funds.
     /// @param _amount The amount to be withdrawn
-    function withdraw(uint256 _amount) external onlyPoolManager(msg.sender) {
+    function withdraw(uint256 _amount) external onlyPoolManager(msg.sender) onlyInactivePool {
         // Decrement the pool amount
         poolAmount -= _amount;
 
@@ -541,7 +541,6 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Distribute the upcoming milestone to recipients.
     /// @dev '_sender' must be a pool manager to distribute.
     /// @param _recipientIds The recipient ids of the distribution
-    /// @param _sender The sender of the distribution
     /// @param _sender The sender of the distribution
     function _distribute(address[] memory _recipientIds, bytes memory, address _sender)
         internal
