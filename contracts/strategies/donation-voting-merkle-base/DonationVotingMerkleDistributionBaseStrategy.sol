@@ -313,7 +313,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
 
     /// @notice Get a recipient with a '_recipientId'
     /// @param _recipientId ID of the recipient
-    /// @return The recipient details
+    /// @return recipient The recipient details
     function getRecipient(address _recipientId) external view returns (Recipient memory recipient) {
         return _getRecipient(_recipientId);
     }
@@ -810,7 +810,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
 
     /// @notice Get recipient status
     /// @param _recipientId ID of the recipient
-    /// @return The status of the recipient
+    /// @return status The status of the recipient
     function _getUintRecipientStatus(address _recipientId) internal view returns (uint8 status) {
         // Get the column index and current row
         (, uint256 colIndex, uint256 currentRow) = _getStatusRowColumn(_recipientId);

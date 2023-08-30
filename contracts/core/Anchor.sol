@@ -47,7 +47,7 @@ contract Anchor {
     /// ==========================
 
     /// @notice Execute a call to a target address
-    /// @dev 'msg.sender' must be profile owner 
+    /// @dev 'msg.sender' must be profile owner
     /// @param _target The target address to call
     /// @param _value The amount of native token to send
     /// @param _data The data to send to the target address

@@ -499,9 +499,6 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
     /// @notice Fund a pool.
     /// @dev Deducts the fee and transfers the amount to the distribution strategy.
     ///      Emits a 'PoolFunded' event.
-    /// @param _amount 
-    /// @param _poolId 
-    /// @param _strategy 
     /// @param _amount The amount to transfer
     /// @param _poolId The 'poolId' for the pool you are funding
     /// @param _strategy The address of the strategy
@@ -526,7 +523,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
     }
 
     /// @notice Checks if the strategy is an approved cloneable strategy.
-    /// @dev Internal function used by createPoolwithCustomStrategy and createPool to 
+    /// @dev Internal function used by createPoolwithCustomStrategy and createPool to
     ///      determine if a strategy is in the cloneable strategy allow list.
     /// @param _strategy The address of the strategy
     /// @return This will return 'true' if the strategy is cloneable, otherwise 'false'
@@ -553,7 +550,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
     }
 
     /// @notice Updates the registry address
-    /// @dev Internal function used to update the registry address.  
+    /// @dev Internal function used to update the registry address.
     ///      Emits a RegistryUpdated event.
     /// @param _registry The new registry address
     function _updateRegistry(address _registry) internal {
@@ -565,7 +562,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
     }
 
     /// @notice Updates the treasury address
-    /// @dev Internal function used to update the treasury address.  
+    /// @dev Internal function used to update the treasury address.
     ///      Emits a TreasuryUpdated event.
     /// @param _treasury The new treasury address
     function _updateTreasury(address payable _treasury) internal {
@@ -577,7 +574,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
     }
 
     /// @notice Updates the fee percentage
-    /// @dev Internal function used to update the percentage fee.  
+    /// @dev Internal function used to update the percentage fee.
     ///      Emits a PercentFeeUpdated event.
     /// @param _percentFee The new fee
     function _updatePercentFee(uint256 _percentFee) internal {
@@ -590,7 +587,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
     }
 
     /// @notice Updates the base fee
-    /// @dev Internal function used to update the base fee.  
+    /// @dev Internal function used to update the base fee.
     ///      Emits a BaseFeeUpdated event.
     /// @param _baseFee The new base fee
     function _updateBaseFee(uint256 _baseFee) internal {
