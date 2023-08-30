@@ -3,15 +3,16 @@ pragma solidity 0.8.19;
 
 // External Libraries
 import "solady/src/auth/Ownable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
+import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
+import "openzeppelin-contracts/contracts/access/AccessControl.sol";
+import "openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
 // Interfaces
 import "./interfaces/IAllo.sol";
 
 // Internal Libraries
 import {Clone} from "./libraries/Clone.sol";
+import {Errors} from "./libraries/Errors.sol";
 import "./libraries/Native.sol";
 import {Transfer} from "./libraries/Transfer.sol";
 
@@ -28,10 +29,10 @@ import {Transfer} from "./libraries/Transfer.sol";
 //         \/__/          \/__/      \/__/      \/__/
 
 /// @title Allo
-/// @author @thelostone-mc <aditya@gitcoin.co>, @KurtMerbeth <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>
+/// @author @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>, @0xZakk <zakk@gitcoin.co>, @nfrgosselin <nate@gitcoin.co>
 /// @notice This contract is used to create & manage pools as well as manage the protocol.
 /// @dev The contract must be initialized with the 'initialize()' function.
-contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl, ReentrancyGuard {
+contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl, ReentrancyGuard, Errors {
     // ==========================
     // === Storage Variables ====
     // ==========================
@@ -448,7 +449,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
         _setRoleAdmin(POOL_MANAGER_ROLE, POOL_ADMIN_ROLE);
 
         // initialize strategies
-        // Initialization is expected to revert when invoked more than once with 'BaseStrategy_ALREADY_INITIALIZED()' error
+        // Initialization is expected to revert when invoked more than once with 'ALREADY_INITIALIZED()' error
         _strategy.initialize(poolId, _initStrategyData);
 
         if (_strategy.getPoolId() != poolId || address(_strategy.getAllo()) != address(this)) {

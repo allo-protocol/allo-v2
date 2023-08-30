@@ -5,7 +5,7 @@ pragma solidity 0.8.19;
 import {Metadata} from "../libraries/Metadata.sol";
 
 /// @title IRegistry Interface
-/// @author @thelostone-mc <aditya@gitcoin.co>, @KurtMerbeth <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>
+/// @author @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>, @0xZakk <zakk@gitcoin.co>, @nfrgosselin <nate@gitcoin.co>
 /// @notice Interface for the Registry contract and exposes all functions needed to use the Registry
 ///         within the Allo protocol.
 /// @dev The Registry Interface is used to interact with the Allo protocol and create profiles
@@ -29,25 +29,6 @@ interface IRegistry {
         address owner;
         address anchor;
     }
-
-    /// ======================
-    /// ======= Errors =======
-    /// ======================
-
-    /// @dev Thrown when the nonce passed has been used or not available
-    error NONCE_NOT_AVAILABLE();
-
-    /// @dev Thrown when the 'msg.sender' is not the pending owner on ownership transfer
-    error NOT_PENDING_OWNER();
-
-    /// @dev Thrown when the 'msg.sender' is not authorized
-    error UNAUTHORIZED();
-
-    /// @dev Thrown if any address check is the zero address
-    error ZERO_ADDRESS();
-
-    /// @dev Thrown if the anchor creation fails
-    error ANCHOR_ERROR();
 
     /// ======================
     /// ======= Events =======

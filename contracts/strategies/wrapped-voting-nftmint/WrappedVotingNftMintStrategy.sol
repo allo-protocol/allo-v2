@@ -2,7 +2,7 @@
 pragma solidity 0.8.19;
 
 // External Libraries
-import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import {ReentrancyGuard} from "openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
 // Interfaces
 import {IAllo} from "../../core/interfaces/IAllo.sol";
 // Core Contracts
@@ -18,16 +18,6 @@ contract WrappedVotingNftMintStrategy is Native, BaseStrategy, ReentrancyGuard {
         Accepted,
         Rejected
     }
-
-    /// ===============================
-    /// ========== Errors =============
-    /// ===============================
-
-    error REGISTRATION_NOT_ACTIVE();
-    error ALLOCATION_NOT_ACTIVE();
-    error ALLOCATION_NOT_ENDED();
-    error RECIPIENT_ERROR(address recipientId);
-    error INVALID();
 
     /// ===============================
     /// ========== Events =============

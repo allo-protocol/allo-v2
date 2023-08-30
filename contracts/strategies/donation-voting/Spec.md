@@ -16,7 +16,7 @@ In this strategy, recipients must submit an application and be approved by pool 
 - **Recipient information**
     - prospective recipients must provide an address where they can receive funds
     - prospective recipients must provide an address as `recipientId`, which serves as the unique identifier for their registration
-        - if the Allo registry is required, the `anchorId` is used is used as `recipientId`
+        - if the Allo registry is required, the `anchorId` is used as `recipientId`
         - if the Allo registry is not required, the recipient has the option of using their `anchorId` or `msg.sender`
 - **Recipient eligibility**
     - Pool manager has the option to enable two separate eligibility requirements on this contract:
@@ -25,7 +25,7 @@ In this strategy, recipients must submit an application and be approved by pool 
             - This metadata may include information for the front end on required / optional questions, but the contract only needs to check for whether metadata has been submitted
             - The pool manager should have a function that enables them to edit the pool metadata, which is callable at any point
 - **Registering recipients**
-    - `registerRecipient` can be called be anyone, and is used by prospective recipients to submit an application
+    - `registerRecipient` can be called by anyone, and is used by prospective recipients to submit an application
         - if the recipient's application is eligible (by criteria set above), the recipient status (global and local) is set to `Pending`. If the recipient is ineligible, the transaction should revert with an error message that the application is ineligible. 
         - pool managers must set an application start and end date on the strategy. `registerRecipient` can only be called in that window, otherwise it will revert. 
     - Pool managers need a function to manually accept applications into the round. 
@@ -45,7 +45,7 @@ In this strategy, allocators are able to express their preferences by donating t
     - allocators can donate regardless of their eligibility status
     - pool manager can create an allowlist of tokens that will be accepted for donations
         - If an allocator tries to submit unapproved tokens the transaction should revert
-    - if an allocator tries to donate to a recipient that is not listed as accepted, then the transaction should revert
+    - if an allocator tries to donate to a recipient who is not listed as accepted, then the transaction should revert
     - pool manager must set an allocation start and end date on the strategy. 
         - `allocate` can only be called in the allocation window, otherwise it reverts
     - when a donation is made via `allocate`, the contract must store or emit:

@@ -2,7 +2,7 @@
 pragma solidity 0.8.19;
 
 import {ERC721} from "solady/src/tokens/ERC721.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
+import "openzeppelin-contracts/contracts/utils/Strings.sol";
 import "solady/src/auth/Ownable.sol";
 
 contract NFT is ERC721, Ownable {

@@ -20,11 +20,7 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
     /// ========== Errors =============
     /// ===============================
 
-    error RECIPIENT_ALREADY_ACCEPTED();
-    error UNAUTHORIZED();
-    error INVALID_REGISTRATION();
     error ALLOCATION_EXCEEDS_POOL_AMOUNT();
-    error INVALID_METADATA();
     error STATUS_NOT_ACCEPTED();
     error STATUS_NOT_PENDING_OR_INREVIEW();
 

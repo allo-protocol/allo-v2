@@ -6,7 +6,7 @@ import {IStrategy} from "../../../contracts/core/interfaces/IStrategy.sol";
 import {QVBaseStrategy} from "../../../contracts/strategies/qv-base/QVBaseStrategy.sol";
 
 // External Libraries
-import "@openzeppelin/contracts/governance/utils/IVotes.sol";
+import "openzeppelin-contracts/contracts/governance/utils/IVotes.sol";
 
 // Test libraries
 import {QVBaseStrategyTest} from "./QVBaseStrategy.t.sol";
@@ -67,7 +67,7 @@ contract QVGovernanceERC20VotesTest is QVBaseStrategyTest {
     }
 
     function testRevert_initialize_ALREADY_INITIALIZED() public override {
-        vm.expectRevert(IStrategy.BaseStrategy_ALREADY_INITIALIZED.selector);
+        vm.expectRevert(ALREADY_INITIALIZED.selector);
 
         vm.startPrank(address(allo()));
         QVGovernanceERC20Votes(_strategy).initialize(
@@ -118,7 +118,7 @@ contract QVGovernanceERC20VotesTest is QVBaseStrategyTest {
         QVGovernanceERC20Votes strategy = new QVGovernanceERC20Votes(address(allo()), "MockStrategy");
 
         // when registrationStartTime is in the past
-        vm.expectRevert(QVBaseStrategy.INVALID.selector);
+        vm.expectRevert(INVALID.selector);
         vm.startPrank(address(allo()));
         strategy.initialize(
             poolId,
@@ -136,7 +136,7 @@ contract QVGovernanceERC20VotesTest is QVBaseStrategyTest {
         );
 
         // when registrationStartTime > registrationEndTime
-        vm.expectRevert(QVBaseStrategy.INVALID.selector);
+        vm.expectRevert(INVALID.selector);
         vm.startPrank(address(allo()));
         strategy.initialize(
             poolId,
@@ -154,7 +154,7 @@ contract QVGovernanceERC20VotesTest is QVBaseStrategyTest {
         );
 
         // when allocationStartTime > allocationEndTime
-        vm.expectRevert(QVBaseStrategy.INVALID.selector);
+        vm.expectRevert(INVALID.selector);
         vm.stopPrank();
         vm.startPrank(address(allo()));
         strategy.initialize(
@@ -173,7 +173,7 @@ contract QVGovernanceERC20VotesTest is QVBaseStrategyTest {
         );
 
         // when  registrationEndTime > allocationEndTime
-        vm.expectRevert(QVBaseStrategy.INVALID.selector);
+        vm.expectRevert(INVALID.selector);
         vm.startPrank(address(allo()));
         strategy.initialize(
             poolId,
@@ -195,7 +195,7 @@ contract QVGovernanceERC20VotesTest is QVBaseStrategyTest {
         address recipientId = __register_reject_recipient();
         address allocator = randomAddress();
 
-        vm.expectRevert(abi.encodeWithSelector(QVBaseStrategy.RECIPIENT_ERROR.selector, recipientId));
+        vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, recipientId));
         vm.warp(allocationStartTime + 10);
 
         bytes memory allocateData = __generateAllocation(recipientId, 4);
@@ -207,7 +207,7 @@ contract QVGovernanceERC20VotesTest is QVBaseStrategyTest {
         address recipientId = __register_accept_recipient();
         address allocator = randomAddress();
 
-        vm.expectRevert(abi.encodeWithSelector(QVBaseStrategy.INVALID.selector));
+        vm.expectRevert(abi.encodeWithSelector(INVALID.selector));
         vm.warp(allocationStartTime + 10);
 
         bytes memory allocateData = __generateAllocation(recipientId, 4000);
@@ -223,7 +223,7 @@ contract QVGovernanceERC20VotesTest is QVBaseStrategyTest {
         address allocator = randomAddress();
         bytes memory allocateData = __generateAllocation(recipientId, 0);
 
-        vm.expectRevert(QVBaseStrategy.INVALID.selector);
+        vm.expectRevert(INVALID.selector);
         vm.startPrank(address(allo()));
         qvGovStrategy().allocate(allocateData, allocator);
     }

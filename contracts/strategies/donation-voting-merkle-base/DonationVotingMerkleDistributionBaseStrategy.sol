@@ -2,8 +2,8 @@
 pragma solidity 0.8.19;
 
 // External Libraries
-import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
-import {Multicall} from "@openzeppelin/contracts/utils/Multicall.sol";
+import {MerkleProof} from "openzeppelin-contracts/contracts/utils/cryptography/MerkleProof.sol";
+import {Multicall} from "openzeppelin-contracts/contracts/utils/Multicall.sol";
 // Interfaces
 import {IAllo} from "../../core/interfaces/IAllo.sol";
 import {IRegistry} from "../../core/interfaces/IRegistry.sol";
@@ -14,7 +14,7 @@ import {Metadata} from "../../core/libraries/Metadata.sol";
 import {Native} from "../../core/libraries/Native.sol";
 
 /// @title Donation Voting Merkle Distribution Strategy
-/// @author @thelostone-mc <aditya@gitcoin.co>, @KurtMerbeth <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>
+/// @author @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>, @0xZakk <zakk@gitcoin.co>, @nfrgosselin <nate@gitcoin.co>
 /// @notice Strategy for donation voting allocation with a merkle distribution
 abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseStrategy, Multicall {
     /// ================================
@@ -65,39 +65,6 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
         uint256 amount;
         bytes32[] merkleProof;
     }
-
-    /// ===============================
-    /// ========== Errors =============
-    /// ===============================
-
-    /// @notice Throws when the sender is not not a profile member.
-    error UNAUTHORIZED();
-
-    /// @notice Throws when registration is not active.
-    error REGISTRATION_NOT_ACTIVE();
-
-    /// @notice Throws when allocation is not active.
-    error ALLOCATION_NOT_ACTIVE();
-
-    /// @notice Throws when allocation has not ended.
-    error ALLOCATION_NOT_ENDED();
-
-    /// @notice Throws when there is an error with the recipient. This can occur when the recipient
-    ///      is not registered or the recipient is not accepted.
-    /// @param recipientId Id of the recipient
-    error RECIPIENT_ERROR(address recipientId);
-
-    /// @notice Throws when a genral error occurs.
-    /// @dev Used as a general error message for this strategy. This can occur when a token is not
-    ///      allowed or the amount is invalid and is specific to this strategy.
-    error INVALID();
-
-    /// @notice Throws when 30 days have not passed since the end of the allocation or
-    ///         the amount is greater than the pool amount.
-    error NOT_ALLOWED();
-
-    /// @notice Throws when the metadata is invalid, protocol or pointer is not set.
-    error INVALID_METADATA();
 
     /// ===============================
     /// ========== Events =============
@@ -448,13 +415,13 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     /// @param _amount The amount to be withdrawn
     function withdraw(uint256 _amount) external onlyPoolManager(msg.sender) {
         if (block.timestamp <= allocationEndTime + 30 days) {
-            revert NOT_ALLOWED();
+            revert INVALID();
         }
 
         IAllo.Pool memory pool = allo.getPool(poolId);
 
         if (_amount > poolAmount) {
-            revert NOT_ALLOWED();
+            revert INVALID();
         }
 
         poolAmount -= _amount;
@@ -507,7 +474,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     /// ============ Internal ==============
     /// ====================================
 
-    /// @notice Checks if address is elgible allocator.
+    /// @notice Checks if address is eligible allocator.
     /// @return Always returns true for this strategy
     function _isValidAllocator(address) internal pure override returns (bool) {
         return true;

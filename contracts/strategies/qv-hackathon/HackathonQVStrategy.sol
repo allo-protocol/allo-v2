@@ -4,17 +4,9 @@ pragma solidity 0.8.19;
 // External Libraries
 import {ERC721} from "solady/src/tokens/ERC721.sol";
 import {
-    Attestation,
-    AttestationRequest,
-    AttestationRequestData,
-    IEAS,
-    RevocationRequest
-} from "@ethereum-attestation-service/eas-contracts/contracts/IEAS.sol";
-import {
-    ISchemaRegistry,
-    ISchemaResolver,
-    SchemaRecord
-} from "@ethereum-attestation-service/eas-contracts/contracts/ISchemaRegistry.sol";
+    Attestation, AttestationRequest, AttestationRequestData, IEAS, RevocationRequest
+} from "eas-contracts/IEAS.sol";
+import {ISchemaRegistry, ISchemaResolver, SchemaRecord} from "eas-contracts/ISchemaRegistry.sol";
 // Core Contracts
 import {SchemaResolver} from "./SchemaResolver.sol";
 import {QVBaseStrategy} from "../qv-base/QVBaseStrategy.sol";
@@ -46,7 +38,6 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
     error ALREADY_ADDED();
     error OUT_OF_BOUNDS();
     error INVALID_SCHEMA();
-    error ALLOCATION_STARTED();
 
     /// ======================
     /// ====== Storage =======
@@ -177,7 +168,7 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
     /// @param _payoutPercentages The payoutPercentages to set
     function setPayoutPercentages(uint256[] memory _payoutPercentages) external onlyPoolManager(msg.sender) {
         if (block.timestamp > allocationStartTime || payoutPercentages.length != 0) {
-            revert ALLOCATION_STARTED();
+            revert ALLOCATION_ACTIVE();
         }
 
         uint256 percentageLength = _payoutPercentages.length;

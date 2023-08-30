@@ -2,7 +2,7 @@
 pragma solidity 0.8.19;
 
 // External Libraries
-import "@openzeppelin/contracts/governance/utils/IVotes.sol";
+import "openzeppelin-contracts/contracts/governance/utils/IVotes.sol";
 // Core Contracts
 import {QVBaseStrategy} from "../qv-base/QVBaseStrategy.sol";
 

@@ -8,7 +8,7 @@ import {IStrategy} from "./IStrategy.sol";
 import {Metadata} from "../libraries/Metadata.sol";
 
 /// @title Allo Interface
-/// @author @thelostone-mc <aditya@gitcoin.co>, @KurtMerbeth <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>
+/// @author @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>, @0xZakk <zakk@gitcoin.co>, @nfrgosselin <nate@gitcoin.co>
 /// @notice Interface for the Allo contract. It exposes all functions needed to use the Allo protocol.
 interface IAllo {
     /// ======================
@@ -24,31 +24,6 @@ interface IAllo {
         bytes32 managerRole;
         bytes32 adminRole;
     }
-
-    /// ======================
-    /// ======= Errors =======
-    /// ======================
-
-    /// @notice Thrown when access is not authorized
-    error UNAUTHORIZED();
-
-    /// @notice Thrown when the 'msg.sender' has not sent enough funds
-    error NOT_ENOUGH_FUNDS();
-
-    /// @notice Thrown when the strategy is not approved
-    error NOT_APPROVED_STRATEGY();
-
-    /// @notice Thrown when the strategy is approved and should be cloned
-    error IS_APPROVED_STRATEGY();
-
-    /// @notice Thrown when Encoded '_data' length does not match _poolIds length
-    error MISMATCH();
-
-    /// @notice Thrown when any address is the zero address
-    error ZERO_ADDRESS();
-
-    /// @notice Thrown when the fee is below 1e18 which is the fee percentage denominator
-    error INVALID_FEE();
 
     /// ======================
     /// ======= Events =======

@@ -9,6 +9,7 @@ import {QVSimpleStrategy} from "../../../contracts/strategies/qv-simple/QVSimple
 import {QVBaseStrategy} from "../../../contracts/strategies/qv-base/QVBaseStrategy.sol";
 
 // Internal Libraries
+import {Errors} from "../../../contracts/core/libraries/Errors.sol";
 import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
 
 // Test Helpers
@@ -17,9 +18,7 @@ import {RegistrySetupFull} from "../shared/RegistrySetup.sol";
 import {StrategySetup} from "../shared/StrategySetup.sol";
 import {AlloSetup} from "../shared/AlloSetup.sol";
 
-contract QVSimpleStrategyTest is Accounts, StrategySetup, RegistrySetupFull, AlloSetup {
-    error ALLOCATION_NOT_ACTIVE();
-
+contract QVSimpleStrategyTest is Accounts, StrategySetup, RegistrySetupFull, AlloSetup, Errors {
     struct Recipient {
         bool useRegistryAnchor;
         address recipientAddress;

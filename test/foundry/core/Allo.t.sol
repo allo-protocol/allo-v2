@@ -10,17 +10,17 @@ import {IStrategy} from "../../../contracts/core/interfaces/IStrategy.sol";
 import {Allo} from "../../../contracts/core/Allo.sol";
 import {Registry} from "../../../contracts/core/Registry.sol";
 // Internal Libraries
+import {Errors} from "../../../contracts/core/libraries/Errors.sol";
 import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
 import {Native} from "../../../contracts/core/libraries/Native.sol";
 // Test libraries
 import {AlloSetup} from "../shared/AlloSetup.sol";
 import {RegistrySetupFull} from "../shared/RegistrySetup.sol";
-import {TestUtilities} from "../../utils/TestUtilities.sol";
 import {TestStrategy} from "../../utils/TestStrategy.sol";
 import {MockStrategy} from "../../utils/MockStrategy.sol";
 import {MockERC20} from "../../utils/MockERC20.sol";
 
-contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
+contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors {
     event PoolCreated(
         uint256 indexed poolId,
         bytes32 indexed profileId,
@@ -126,26 +126,26 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
     }
 
     function testRevert_createPool_NOT_APPROVED_STRATEGY() public {
-        vm.expectRevert(IAllo.NOT_APPROVED_STRATEGY.selector);
+        vm.expectRevert(NOT_APPROVED_STRATEGY.selector);
         vm.prank(pool_admin());
         allo().createPool(poolProfile_id(), strategy, "0x", NATIVE, 0, metadata, pool_managers());
     }
 
     function testRevert_createPoolWithCustomStrategy_ZERO_ADDRESS() public {
-        vm.expectRevert(IAllo.ZERO_ADDRESS.selector);
+        vm.expectRevert(ZERO_ADDRESS.selector);
         vm.prank(pool_admin());
         allo().createPoolWithCustomStrategy(poolProfile_id(), address(0), "0x", NATIVE, 0, metadata, pool_managers());
     }
 
     function testRevert_createPoolWithCustomStrategy_IS_APPROVED_STRATEGY() public {
         allo().addToCloneableStrategies(strategy);
-        vm.expectRevert(IAllo.IS_APPROVED_STRATEGY.selector);
+        vm.expectRevert(IS_APPROVED_STRATEGY.selector);
         vm.prank(pool_admin());
         allo().createPoolWithCustomStrategy(poolProfile_id(), strategy, "0x", NATIVE, 0, metadata, pool_managers());
     }
 
     function testRevert_createPool_UNAUTHORIZED() public {
-        vm.expectRevert(IAllo.UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
         allo().createPoolWithCustomStrategy(poolProfile_id(), strategy, "0x", NATIVE, 0, metadata, pool_managers());
     }
 
@@ -153,7 +153,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
         TestStrategy testStrategy = new TestStrategy(makeAddr("allo"), "TestStrategy");
         testStrategy.setPoolId(0);
 
-        vm.expectRevert(IAllo.MISMATCH.selector);
+        vm.expectRevert(MISMATCH.selector);
         vm.prank(pool_admin());
         allo().createPoolWithCustomStrategy(
             poolProfile_id(), address(testStrategy), "0x", NATIVE, 0, metadata, pool_managers()
@@ -164,7 +164,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
         TestStrategy testStrategy = new TestStrategy(makeAddr("allo"), "TestStrategy");
         testStrategy.setAllo(address(0));
 
-        vm.expectRevert(IAllo.MISMATCH.selector);
+        vm.expectRevert(MISMATCH.selector);
         vm.prank(pool_admin());
         allo().createPoolWithCustomStrategy(
             poolProfile_id(), address(testStrategy), "0x", NATIVE, 0, metadata, pool_managers()
@@ -174,7 +174,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
     function testRevert_createPool_ZERO_ADDRESS() public {
         address[] memory poolManagers = new address[](1);
         poolManagers[0] = address(0);
-        vm.expectRevert(IAllo.ZERO_ADDRESS.selector);
+        vm.expectRevert(ZERO_ADDRESS.selector);
         vm.prank(pool_admin());
         allo().createPoolWithCustomStrategy(poolProfile_id(), strategy, "0x", NATIVE, 0, metadata, poolManagers);
     }
@@ -199,7 +199,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
         uint256 baseFee = 1e17;
         allo().updateBaseFee(baseFee);
 
-        vm.expectRevert(IAllo.NOT_ENOUGH_FUNDS.selector);
+        vm.expectRevert(NOT_ENOUGH_FUNDS.selector);
         _utilCreatePool(0);
     }
 
@@ -237,7 +237,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
 
     function testRevert_updatePoolMetadata_UNAUTHORIZED() public {
         uint256 poolId = _utilCreatePool(0);
-        vm.expectRevert(IAllo.UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
 
         vm.prank(makeAddr("not owner"));
         allo().updatePoolMetadata(poolId, metadata);
@@ -263,7 +263,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
     }
 
     function testRevert_updateRegistry_ZERO_ADDRESS() public {
-        vm.expectRevert(IAllo.ZERO_ADDRESS.selector);
+        vm.expectRevert(ZERO_ADDRESS.selector);
         allo().updateRegistry(address(0));
     }
 
@@ -278,7 +278,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
     }
 
     function testRevert_updateTreasury_ZERO_ADDRESS() public {
-        vm.expectRevert(IAllo.ZERO_ADDRESS.selector);
+        vm.expectRevert(ZERO_ADDRESS.selector);
         allo().updateTreasury(payable(address(0)));
     }
 
@@ -304,7 +304,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
     }
 
     function test_updatePercentFee_INVALID_FEE() public {
-        vm.expectRevert(IAllo.INVALID_FEE.selector);
+        vm.expectRevert(INVALID_FEE.selector);
         allo().updatePercentFee(2 * 1e18);
     }
 
@@ -341,7 +341,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
     }
 
     function testRevert_addToCloneableStrategies_ZERO_ADDRESS() public {
-        vm.expectRevert(IAllo.ZERO_ADDRESS.selector);
+        vm.expectRevert(ZERO_ADDRESS.selector);
         allo().addToCloneableStrategies(address(0));
     }
 
@@ -378,13 +378,13 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
 
     function testRevert_addPoolManager_UNAUTHORIZED() public {
         uint256 poolId = _utilCreatePool(0);
-        vm.expectRevert(IAllo.UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
         allo().addPoolManager(poolId, makeAddr("add manager"));
     }
 
     function testRevert_addPoolManager_ZERO_ADDRESS() public {
         uint256 poolId = _utilCreatePool(0);
-        vm.expectRevert(IAllo.ZERO_ADDRESS.selector);
+        vm.expectRevert(ZERO_ADDRESS.selector);
         vm.prank(pool_admin());
         allo().addPoolManager(poolId, address(0));
     }
@@ -400,7 +400,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
 
     function testRevert_removePoolManager_UNAUTHORIZED() public {
         uint256 poolId = _utilCreatePool(0);
-        vm.expectRevert(IAllo.UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
         allo().removePoolManager(poolId, makeAddr("add manager"));
     }
 
@@ -476,7 +476,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
         bytes[] memory datas = new bytes[](1);
         datas[0] = bytes("data1");
 
-        vm.expectRevert(IAllo.MISMATCH.selector);
+        vm.expectRevert(MISMATCH.selector);
 
         allo().batchRegisterRecipient(poolIds, datas);
     }
@@ -494,7 +494,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
         uint256 poolId = _utilCreatePool(0);
 
         vm.prank(makeAddr("broke chad"));
-        vm.expectRevert(IAllo.NOT_ENOUGH_FUNDS.selector);
+        vm.expectRevert(NOT_ENOUGH_FUNDS.selector);
 
         allo().fundPool(poolId, 0);
     }
@@ -537,7 +537,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native {
         bytes[] memory datas = new bytes[](1);
         datas[0] = bytes("data1");
 
-        vm.expectRevert(IAllo.MISMATCH.selector);
+        vm.expectRevert(MISMATCH.selector);
 
         allo().batchAllocate(poolIds, datas);
     }

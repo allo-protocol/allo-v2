@@ -1229,10 +1229,10 @@ error AccessDenied()
 
 
 
-### BaseStrategy_ALREADY_INITIALIZED
+### ALREADY_INITIALIZED
 
 ```solidity
-error BaseStrategy_ALREADY_INITIALIZED()
+error ALREADY_INITIALIZED()
 ```
 
 
@@ -1240,10 +1240,10 @@ error BaseStrategy_ALREADY_INITIALIZED()
 *Returns when Base Strategy is already initialized*
 
 
-### BaseStrategy_ARRAY_MISMATCH
+### ARRAY_MISMATCH
 
 ```solidity
-error BaseStrategy_ARRAY_MISMATCH()
+error ARRAY_MISMATCH()
 ```
 
 
@@ -1251,10 +1251,10 @@ error BaseStrategy_ARRAY_MISMATCH()
 *Returns when two arrays length are not equal*
 
 
-### BaseStrategy_INVALID
+### INVALID
 
 ```solidity
-error BaseStrategy_INVALID()
+error INVALID()
 ```
 
 
@@ -1262,10 +1262,10 @@ error BaseStrategy_INVALID()
 *Returns as a general error when either a recipient address or an amount is invalid*
 
 
-### BaseStrategy_INVALID_ADDRESS
+### INVALID_ADDRESS
 
 ```solidity
-error BaseStrategy_INVALID_ADDRESS()
+error INVALID_ADDRESS()
 ```
 
 
@@ -1273,10 +1273,10 @@ error BaseStrategy_INVALID_ADDRESS()
 *Returns when an invalid address is used*
 
 
-### BaseStrategy_NOT_INITIALIZED
+### NOT_INITIALIZED
 
 ```solidity
-error BaseStrategy_NOT_INITIALIZED()
+error NOT_INITIALIZED()
 ```
 
 
@@ -1284,10 +1284,10 @@ error BaseStrategy_NOT_INITIALIZED()
 *Returns when Base Strategy is not initialized*
 
 
-### BaseStrategy_POOL_ACTIVE
+### POOL_ACTIVE
 
 ```solidity
-error BaseStrategy_POOL_ACTIVE()
+error POOL_ACTIVE()
 ```
 
 
@@ -1295,10 +1295,10 @@ error BaseStrategy_POOL_ACTIVE()
 *Returns when a pool is already active*
 
 
-### BaseStrategy_POOL_INACTIVE
+### POOL_INACTIVE
 
 ```solidity
-error BaseStrategy_POOL_INACTIVE()
+error POOL_INACTIVE()
 ```
 
 
@@ -1306,10 +1306,10 @@ error BaseStrategy_POOL_INACTIVE()
 *Returns when a pool is inactive*
 
 
-### BaseStrategy_UNAUTHORIZED
+### UNAUTHORIZED
 
 ```solidity
-error BaseStrategy_UNAUTHORIZED()
+error UNAUTHORIZED()
 ```
 
 

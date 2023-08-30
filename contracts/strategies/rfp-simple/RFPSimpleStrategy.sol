@@ -2,7 +2,7 @@
 pragma solidity 0.8.19;
 
 // External Libraries
-import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import {ReentrancyGuard} from "openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
 // Interfaces
 import {IAllo} from "../../core/interfaces/IAllo.sol";
 import {IRegistry} from "../../core/interfaces/IRegistry.sol";
@@ -35,16 +35,11 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// ========== Errors =============
     /// ===============================
 
-    error RECIPIENT_ALREADY_ACCEPTED();
-    error INVALID_RECIPIENT();
-    error UNAUTHORIZED();
     error INVALID_MILESTONE();
     error MILESTONE_ALREADY_ACCEPTED();
     error EXCEEDING_MAX_BID();
     error MILESTONES_ALREADY_SET();
-    error INVALID_METADATA();
     error AMOUNT_TOO_LOW();
-    error NOT_ENOUGH_FUNDS();
 
     /// ===============================
     /// ========== Events =============
@@ -287,7 +282,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         Recipient storage recipient = _recipients[acceptedRecipientId];
 
         if (acceptedRecipientId == address(0) || recipient.recipientStatus != RecipientStatus.Pending) {
-            revert INVALID_RECIPIENT();
+            revert RECIPIENT_ERROR(acceptedRecipientId);
         }
 
         recipient.recipientStatus = RecipientStatus.Accepted;

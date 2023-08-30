@@ -6,12 +6,13 @@ import "../core/interfaces/IStrategy.sol";
 
 // Libraries
 import {Transfer} from "../core/libraries/Transfer.sol";
+import {Errors} from "../core/libraries/Errors.sol";
 
 /// @title BaseStrategy Contract
-/// @author @thelostone-mc <aditya@gitcoin.co>, @KurtMerbeth <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>
+/// @author @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>, @0xZakk <zakk@gitcoin.co>, @nfrgosselin <nate@gitcoin.co>
 /// @notice This contract is the base contract for all strategies
 /// @dev This contract is implemented by all strategies.
-abstract contract BaseStrategy is IStrategy, Transfer {
+abstract contract BaseStrategy is IStrategy, Transfer, Errors {
     /// ==========================
     /// === Storage Variables ====
     /// ==========================
@@ -42,7 +43,7 @@ abstract contract BaseStrategy is IStrategy, Transfer {
     /// @dev Reverts if the 'msg.sender' is not the Allo contract.
     modifier onlyAllo() {
         if (msg.sender != address(allo)) {
-            revert BaseStrategy_UNAUTHORIZED();
+            revert UNAUTHORIZED();
         }
         _;
     }
@@ -52,7 +53,7 @@ abstract contract BaseStrategy is IStrategy, Transfer {
     /// @param _sender The address to check if they are a pool manager
     modifier onlyPoolManager(address _sender) {
         if (!allo.isPoolManager(poolId, _sender)) {
-            revert BaseStrategy_UNAUTHORIZED();
+            revert UNAUTHORIZED();
         }
         _;
     }
@@ -61,7 +62,7 @@ abstract contract BaseStrategy is IStrategy, Transfer {
     /// @dev Reverts if the pool is not active.
     modifier onlyActivePool() {
         if (!poolActive) {
-            revert BaseStrategy_POOL_INACTIVE();
+            revert POOL_INACTIVE();
         }
         _;
     }
@@ -70,7 +71,7 @@ abstract contract BaseStrategy is IStrategy, Transfer {
     /// @dev Reverts if the pool is active.
     modifier onlyInactivePool() {
         if (poolActive) {
-            revert BaseStrategy_POOL_ACTIVE();
+            revert POOL_ACTIVE();
         }
         _;
     }
@@ -79,7 +80,7 @@ abstract contract BaseStrategy is IStrategy, Transfer {
     /// @dev Reverts if the pool is not initialized.
     modifier onlyInitialized() {
         if (poolId == 0) {
-            revert BaseStrategy_NOT_INITIALIZED();
+            revert NOT_INITIALIZED();
         }
         _;
     }
@@ -134,10 +135,10 @@ abstract contract BaseStrategy is IStrategy, Transfer {
     /// @param _poolId ID of the pool
     function __BaseStrategy_init(uint256 _poolId) internal virtual onlyAllo {
         if (poolId != 0) {
-            revert BaseStrategy_ALREADY_INITIALIZED();
+            revert ALREADY_INITIALIZED();
         }
         if (_poolId == 0) {
-            revert BaseStrategy_INVALID();
+            revert INVALID();
         }
         poolId = _poolId;
     }
@@ -212,7 +213,7 @@ abstract contract BaseStrategy is IStrategy, Transfer {
     {
         uint256 length = _recipientIds.length;
         if (length != _data.length) {
-            revert BaseStrategy_ARRAY_MISMATCH();
+            revert ARRAY_MISMATCH();
         }
         PayoutSummary[] memory payouts = new PayoutSummary[](length);
         for (uint256 i = 0; i < length;) {

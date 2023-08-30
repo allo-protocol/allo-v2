@@ -2,7 +2,7 @@
 pragma solidity 0.8.19;
 
 // External Libraries
-import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import {ReentrancyGuard} from "openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
 // Intefaces
 import {IAllo} from "../../core/interfaces/IAllo.sol";
 import {IRegistry} from "../../core/interfaces/IRegistry.sol";
@@ -12,7 +12,7 @@ import {BaseStrategy} from "../BaseStrategy.sol";
 import {Metadata} from "../../core/libraries/Metadata.sol";
 
 /// @title Direct Grants Simple Strategy.
-/// @author @thelostone-mc <aditya@gitcoin.co>, @KurtMerbeth <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>
+/// @author @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>, @0xZakk <zakk@gitcoin.co>, @nfrgosselin <nate@gitcoin.co>
 /// @notice Strategy used to allocate & distribute funds to recipients with milestone payouts. The milestones
 ///         are set by the recipient and the pool manager can accept or reject the milestone. The pool manager
 ///         can also reject the recipient.
@@ -53,35 +53,17 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// ========== Errors =============
     /// ===============================
 
-    /// @notice Throws when recipient is already accepted.
-    error RECIPIENT_ALREADY_ACCEPTED();
-
-    /// @notice Throws when the user address is not authorized.
-    error UNAUTHORIZED();
-
     /// @notice Throws when the milestone is invalid.
     error INVALID_MILESTONE();
 
     /// @notice Throws when the milestone is already accepted.
     error MILESTONE_ALREADY_ACCEPTED();
 
-    /// @notice Throws when the milestone is already rejected.
-    //error MILESTONE_ALREADY_REJECTED();
-
     /// @notice Throws when the milestones are already set.
     error MILESTONES_ALREADY_SET();
 
-    /// @notice Throws when the registration is invalid.
-    error INVALID_REGISTRATION();
-
     /// @notice Throws when the allocation exceeds the pool amount.
     error ALLOCATION_EXCEEDS_POOL_AMOUNT();
-
-    /// @notice Throws when the metadata is invalid.
-    error INVALID_METADATA();
-
-    /// @notice Throws when the recipient is not accepted.
-    error RECIPIENT_NOT_ACCEPTED();
 
     /// ===============================
     /// ========== Events =============
@@ -113,11 +95,11 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Flag to check if grant amount is required.
     bool public grantAmountRequired;
 
-    /// @notice The total amount allocated to grant/recipient.
-    uint256 public allocatedGrantAmount;
-
     /// @notice The 'Registry' contract interface.
     IRegistry private _registry;
+
+    /// @notice The total amount allocated to grant/recipient.
+    uint256 public allocatedGrantAmount;
 
     /// @notice Internal collection of accepted recipients able to submit milestones
     address[] private _acceptedRecipientIds;
@@ -217,7 +199,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         }
     }
 
-    /// @notice Checks if address is elgible allocator.
+    /// @notice Checks if address is eligible allocator.
     /// @dev This is used to check if the allocator is a pool manager and able to allocate funds from the pool
     /// @param _allocator Address of the allocator
     /// @return 'true' if the allocator is a pool manager, otherwise false
@@ -446,7 +428,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
             (recipientAddress, registryAnchor, grantAmount, metadata) =
                 abi.decode(_data, (address, address, uint256, Metadata));
 
-            // Check if the registry anchor is valid so we know to use it or not
+            // Check if the registry anchor is valid so we know whether to use it or not
             isUsingRegistryAnchor = registryAnchor != address(0);
 
             // Ternerary to set the recipient id based on whether or not we are using the 'registryAnchor' or '_sender'

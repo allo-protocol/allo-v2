@@ -5,8 +5,9 @@ pragma solidity 0.8.19;
 import {IAllo} from "./IAllo.sol";
 
 /// @title IStrategy Interface
-/// @author @thelostone-mc <aditya@gitcoin.co>, @KurtMerbeth <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>
+/// @author @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>, @0xZakk <zakk@gitcoin.co>, @nfrgosselin <nate@gitcoin.co> @0xZakk <zakk@gitcoin.co>, @nfrgosselin <nate@gitcoin.co>
 /// @notice BaseStrategy is the base contract that all strategies should inherit from and uses this interface.
+
 interface IStrategy {
     /// ======================
     /// ======= Storage ======
@@ -25,34 +26,6 @@ interface IStrategy {
         address recipientAddress;
         uint256 amount;
     }
-
-    /// ======================
-    /// ======= Errors =======
-    /// ======================
-
-    /// @notice Throws when calls to Base Strategy are unauthorized
-    error BaseStrategy_UNAUTHORIZED();
-
-    /// @notice Throws when Base Strategy is already initialized
-    error BaseStrategy_ALREADY_INITIALIZED();
-
-    /// @notice Throws when Base Strategy is not initialized
-    error BaseStrategy_NOT_INITIALIZED();
-
-    /// @notice Throws when an invalid address is used
-    error BaseStrategy_INVALID_ADDRESS();
-
-    /// @notice Throws when a pool is inactive
-    error BaseStrategy_POOL_INACTIVE();
-
-    /// @notice Throws when a pool is already active
-    error BaseStrategy_POOL_ACTIVE();
-
-    /// @notice Throws when two arrays length are not equal
-    error BaseStrategy_ARRAY_MISMATCH();
-
-    /// @notice Throws as a general error when either a recipient address or an amount is invalid
-    error BaseStrategy_INVALID();
 
     /// ======================
     /// ======= Events =======

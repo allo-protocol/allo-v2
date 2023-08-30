@@ -11,18 +11,6 @@ import {Metadata} from "../../core/libraries/Metadata.sol";
 
 abstract contract QVBaseStrategy is BaseStrategy {
     /// ======================
-    /// ======= Errors ======
-    /// ======================
-
-    error ALLOCATION_NOT_ACTIVE();
-    error ALLOCATION_NOT_ENDED();
-    error INVALID();
-    error INVALID_METADATA();
-    error RECIPIENT_ERROR(address recipientId);
-    error REGISTRATION_NOT_ACTIVE();
-    error UNAUTHORIZED();
-
-    /// ======================
     /// ======= Events =======
     /// ======================
 

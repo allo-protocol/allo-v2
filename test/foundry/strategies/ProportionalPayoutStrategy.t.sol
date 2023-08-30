@@ -9,6 +9,7 @@ import {IStrategy} from "../../../contracts/core/interfaces/IStrategy.sol";
 import {ProportionalPayoutStrategy} from
     "../../../contracts/strategies/proportional-payout/ProportionalPayoutStrategy.sol";
 // Internal Libraries
+import {Errors} from "../../../contracts/core/libraries/Errors.sol";
 import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
 // Test Libraries
 import {Accounts} from "../shared/Accounts.sol";
@@ -18,13 +19,7 @@ import {EventSetup} from "../shared/EventSetup.sol";
 // Mocks
 import {MockERC721} from "../../utils/MockERC721.sol";
 
-contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, AlloSetup, EventSetup {
-    error RECIPIENT_ERROR(address recipientId);
-    error MAX_REACHED();
-    error ALLOCATION_NOT_ACTIVE();
-    error ALLOCATION_NOT_ENDED();
-    error INVALID();
-
+contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, AlloSetup, EventSetup, Errors {
     event AllocationTimeSet(uint256 startTime, uint256 endTime);
 
     /// @notice The maximum number of recipients allowed
@@ -117,13 +112,13 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
         vm.startPrank(address(allo()));
         testStrategy.initialize(1337, abi.encode(address(nft), 2, startTime, endTime));
 
-        vm.expectRevert(IStrategy.BaseStrategy_ALREADY_INITIALIZED.selector);
+        vm.expectRevert(ALREADY_INITIALIZED.selector);
         testStrategy.initialize(1337, abi.encode(address(nft), 2, startTime, endTime));
     }
 
     function testRevert_initialize_UNAUTHORIZED() public {
         ProportionalPayoutStrategy testStrategy = __createTestStrategy();
-        vm.expectRevert(IStrategy.BaseStrategy_UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
 
         testStrategy.initialize(1337, abi.encode(address(nft), 2, startTime, endTime));
     }
@@ -131,7 +126,7 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
     function testRevert_initialize_INVALID() public {
         ProportionalPayoutStrategy testStrategy = __createTestStrategy();
 
-        vm.expectRevert(abi.encodeWithSelector(ProportionalPayoutStrategy.INVALID.selector));
+        vm.expectRevert(abi.encodeWithSelector(INVALID.selector));
 
         vm.prank(address(allo()));
         testStrategy.initialize(1337, abi.encode(address(nft), 2, endTime, startTime));
@@ -171,7 +166,7 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
         uint256 _startTime = block.timestamp + 100;
         uint256 _endTime = block.timestamp + 600;
 
-        vm.expectRevert(abi.encodeWithSelector(IStrategy.BaseStrategy_UNAUTHORIZED.selector));
+        vm.expectRevert(abi.encodeWithSelector(UNAUTHORIZED.selector));
         emit AllocationTimeSet(_startTime, _endTime);
 
         vm.prank(pool_notAManager());
@@ -182,11 +177,11 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
         uint256 _startTime = block.timestamp - 1;
         uint256 _endTime = block.timestamp + 600;
 
-        vm.expectRevert(ProportionalPayoutStrategy.INVALID.selector);
+        vm.expectRevert(INVALID.selector);
         vm.prank(pool_manager1());
         strategy.setAllocationTime(_startTime, _endTime);
 
-        vm.expectRevert(ProportionalPayoutStrategy.INVALID.selector);
+        vm.expectRevert(INVALID.selector);
         vm.prank(pool_manager1());
         strategy.setAllocationTime(_endTime + 10, _endTime);
     }
@@ -227,7 +222,7 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
         Metadata memory metadata = Metadata({protocol: 1, pointer: "Test Metadata"});
         bytes memory data = abi.encode(address(0), recipient1(), IStrategy.RecipientStatus.Accepted, metadata);
 
-        vm.expectRevert(abi.encodeWithSelector(ProportionalPayoutStrategy.RECIPIENT_ERROR.selector, address(0)));
+        vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, address(0)));
 
         vm.prank(pool_manager1());
         allo().registerRecipient(poolId, data);
@@ -237,7 +232,7 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
         Metadata memory metadata = Metadata({protocol: 1, pointer: "Test Metadata"});
         bytes memory data = abi.encode(recipient1(), address(0), IStrategy.RecipientStatus.Accepted, metadata);
 
-        vm.expectRevert(abi.encodeWithSelector(ProportionalPayoutStrategy.RECIPIENT_ERROR.selector, recipient1()));
+        vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, recipient1()));
 
         vm.prank(pool_manager1());
         allo().registerRecipient(poolId, data);
@@ -247,7 +242,7 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
         Metadata memory metadata = Metadata({protocol: 1, pointer: "Test Metadata"});
         bytes memory data = abi.encode(recipient1(), recipient1(), IStrategy.RecipientStatus.Pending, metadata);
 
-        vm.expectRevert(abi.encodeWithSelector(ProportionalPayoutStrategy.RECIPIENT_ERROR.selector, recipient1()));
+        vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, recipient1()));
 
         vm.prank(pool_manager1());
         allo().registerRecipient(poolId, data);
@@ -276,7 +271,7 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
         Metadata memory metadata = Metadata({protocol: 1, pointer: "Test Metadata"});
         bytes memory data = abi.encode(recipient1(), recipient1(), IStrategy.RecipientStatus.Accepted, metadata);
 
-        vm.expectRevert(abi.encodeWithSelector(IStrategy.BaseStrategy_UNAUTHORIZED.selector));
+        vm.expectRevert(abi.encodeWithSelector(UNAUTHORIZED.selector));
 
         vm.prank(pool_notAManager());
         allo().registerRecipient(poolId, data);
@@ -298,7 +293,7 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
         address[] memory recipientIds = new address[](1);
         recipientIds[0] = recipientId;
 
-        vm.expectRevert(IStrategy.BaseStrategy_ARRAY_MISMATCH.selector);
+        vm.expectRevert(ARRAY_MISMATCH.selector);
 
         strategy.getPayouts(recipientIds, new bytes[](0));
     }
@@ -313,7 +308,7 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
         address[] memory recipientIds = new address[](1);
         recipientIds[0] = recipientId;
 
-        vm.expectRevert(abi.encodeWithSelector(ProportionalPayoutStrategy.RECIPIENT_ERROR.selector, recipientId));
+        vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, recipientId));
 
         vm.prank(address(allo()));
         strategy.distribute(recipientIds, "", pool_admin());
@@ -326,7 +321,7 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
 
         vm.warp(endTime + 10);
 
-        vm.expectRevert(abi.encodeWithSelector(ProportionalPayoutStrategy.RECIPIENT_ERROR.selector, recipientId));
+        vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, recipientId));
 
         vm.prank(address(allo()));
         strategy.distribute(recipientIds, "", pool_admin());
@@ -340,7 +335,7 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
 
         vm.warp(endTime + 10);
 
-        vm.expectRevert(abi.encodeWithSelector(ProportionalPayoutStrategy.RECIPIENT_ERROR.selector, recipientId));
+        vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, recipientId));
 
         vm.prank(address(allo()));
         strategy.distribute(recipientIds, "", pool_admin());
@@ -374,7 +369,7 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
         address recipientId = makeAddr("recipient");
         bytes memory data = abi.encode(recipientId, 1);
 
-        vm.expectRevert(ProportionalPayoutStrategy.ALLOCATION_NOT_ACTIVE.selector);
+        vm.expectRevert(ALLOCATION_NOT_ACTIVE.selector);
 
         vm.prank(address(allo()));
         allo().allocate(poolId, data);
@@ -387,7 +382,7 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
         nft.mint(recipient1(), 1);
 
         vm.warp(startTime + 1);
-        vm.expectRevert(ProportionalPayoutStrategy.UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
 
         vm.prank(address(allo()));
         allo().allocate(poolId, data);
@@ -407,7 +402,7 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
         nft.mint(makeAddr("nftOwner"), 1);
         vm.warp(startTime + 1);
 
-        vm.expectRevert(abi.encodeWithSelector(ProportionalPayoutStrategy.RECIPIENT_ERROR.selector, recipientId));
+        vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, recipientId));
         vm.prank(makeAddr("nftOwner"));
         allo().allocate(poolId, abi.encode(recipientId, 1));
     }
