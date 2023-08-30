@@ -16,10 +16,14 @@ abis
 # Foundry files
 out
 broadcast
+cache_forge/
 cache_forge/*.json
 cache/validations.json
 .gitignore
 cache/solidity-files-cache.json
 
 # vscode files
-.vscode/
+.vscode/settings.json
+
+# ZKSync files
+artifacts-zk/
