@@ -3,8 +3,6 @@ pragma solidity 0.8.19;
 
 import "forge-std/Test.sol";
 
-// Core Strategy Interfaces
-import {IStrategy} from "../../../contracts/core/interfaces/IStrategy.sol";
 // Strategy Contracts
 import {DonationVotingStrategy} from "../../../contracts/strategies/donation-voting/DonationVotingStrategy.sol";
 import {DonationVotingCustomRegistryStrategy} from
@@ -26,10 +24,10 @@ contract DonationVotingCustomRegistryStrategyTest is Test, DonationVotingStrateg
         customRegistry = new SimpleProjectRegistry(local());
         customRegistry.addProject(recipient());
 
-        registrationStartTime = block.timestamp + 10;
-        registrationEndTime = block.timestamp + 300;
-        allocationStartTime = block.timestamp + 301;
-        allocationEndTime = block.timestamp + 600;
+        registrationStartTime = uint64(block.timestamp + 10);
+        registrationEndTime = uint64(block.timestamp + 300);
+        allocationStartTime = uint64(block.timestamp + 301);
+        allocationEndTime = uint64(block.timestamp + 600);
 
         useRegistryAnchor = true;
         metadataRequired = true;
@@ -54,13 +52,18 @@ contract DonationVotingCustomRegistryStrategyTest is Test, DonationVotingStrateg
             poolProfile_id(),
             address(_strategy),
             abi.encode(
-                address(customRegistry),
-                metadataRequired,
-                registrationStartTime,
-                registrationEndTime,
-                allocationStartTime,
-                allocationEndTime,
-                allowedTokens
+                DonationVotingCustomRegistryStrategy.InitializeDataWithRegistry(
+                    address(customRegistry),
+                    DonationVotingStrategy.InitializeData(
+                        true,
+                        metadataRequired,
+                        registrationStartTime,
+                        registrationEndTime,
+                        allocationStartTime,
+                        allocationEndTime,
+                        allowedTokens
+                    )
+                )
             ),
             NATIVE,
             0,
@@ -76,6 +79,53 @@ contract DonationVotingCustomRegistryStrategyTest is Test, DonationVotingStrateg
         );
     }
 
+    function testRevert_initialize_ALREADY_INITIALIZED() public override {
+        vm.expectRevert(ALREADY_INITIALIZED.selector);
+
+        vm.prank(address(allo()));
+        strategy.initialize(
+            poolId,
+            abi.encode(
+                DonationVotingCustomRegistryStrategy.InitializeDataWithRegistry(
+                    address(customRegistry),
+                    DonationVotingStrategy.InitializeData(
+                        true,
+                        metadataRequired,
+                        registrationStartTime,
+                        registrationEndTime,
+                        allocationStartTime,
+                        allocationEndTime,
+                        allowedTokens
+                    )
+                )
+            )
+        );
+    }
+
+    function testRevert_initialize_withNoAllowedToken() public override {
+        strategy = new DonationVotingCustomRegistryStrategy(address(allo()), "DonationVotingStrategy");
+        // when _registrationStartTime is in past
+        vm.prank(address(allo()));
+        strategy.initialize(
+            poolId,
+            abi.encode(
+                DonationVotingCustomRegistryStrategy.InitializeDataWithRegistry(
+                    address(customRegistry),
+                    DonationVotingStrategy.InitializeData(
+                        true,
+                        metadataRequired,
+                        registrationStartTime,
+                        registrationEndTime,
+                        allocationStartTime,
+                        allocationEndTime,
+                        new address[](0)
+                    )
+                )
+            )
+        );
+        assertTrue(strategy.allowedTokens(address(0)));
+    }
+
     /// @notice Tests that the strategy can be initialized only once
     function test_initialize_custom_registry_ALREADY_INITIALIZED() public {
         DonationVotingStrategy testStrategy =
@@ -87,13 +137,18 @@ contract DonationVotingCustomRegistryStrategyTest is Test, DonationVotingStrateg
             poolProfile_id(),
             address(testStrategy),
             abi.encode(
-                address(testStrategy),
-                metadataRequired,
-                registrationStartTime,
-                registrationEndTime,
-                allocationStartTime,
-                allocationEndTime,
-                allowedTokens
+                DonationVotingCustomRegistryStrategy.InitializeDataWithRegistry(
+                    address(customRegistry),
+                    DonationVotingStrategy.InitializeData(
+                        true,
+                        metadataRequired,
+                        registrationStartTime,
+                        registrationEndTime,
+                        allocationStartTime,
+                        allocationEndTime,
+                        allowedTokens
+                    )
+                )
             ),
             NATIVE,
             0,
@@ -106,19 +161,24 @@ contract DonationVotingCustomRegistryStrategyTest is Test, DonationVotingStrateg
         testStrategy.initialize(
             777,
             abi.encode(
-                address(testStrategy),
-                metadataRequired,
-                registrationStartTime,
-                registrationEndTime,
-                allocationStartTime,
-                allocationEndTime,
-                allowedTokens
+                DonationVotingCustomRegistryStrategy.InitializeDataWithRegistry(
+                    address(customRegistry),
+                    DonationVotingStrategy.InitializeData(
+                        true,
+                        metadataRequired,
+                        registrationStartTime,
+                        registrationEndTime,
+                        allocationStartTime,
+                        allocationEndTime,
+                        allowedTokens
+                    )
+                )
             )
         );
     }
 
     /// @notice Tests that the strategy cannot be initailized with an invalid strategy address
-    function test_initialize_custom_registry_INVALID_ADDRESS() public {
+    function testRevert_initialize_INVALID() public override {
         DonationVotingStrategy testStrategy =
             new DonationVotingCustomRegistryStrategy(address(allo()), "testing registry");
 
@@ -128,13 +188,18 @@ contract DonationVotingCustomRegistryStrategyTest is Test, DonationVotingStrateg
             poolProfile_id(),
             address(testStrategy),
             abi.encode(
-                address(0),
-                metadataRequired,
-                registrationStartTime,
-                registrationEndTime,
-                allocationStartTime,
-                allocationEndTime,
-                allowedTokens
+                DonationVotingCustomRegistryStrategy.InitializeDataWithRegistry(
+                    address(0),
+                    DonationVotingStrategy.InitializeData(
+                        true,
+                        metadataRequired,
+                        registrationStartTime,
+                        registrationEndTime,
+                        allocationStartTime,
+                        allocationEndTime,
+                        allowedTokens
+                    )
+                )
             ),
             NATIVE,
             0,
@@ -162,13 +227,18 @@ contract DonationVotingCustomRegistryStrategyTest is Test, DonationVotingStrateg
         strategy.initialize(
             poolId,
             abi.encode(
-                address(customRegistry),
-                metadataRequired,
-                registrationStartTime,
-                registrationEndTime,
-                allocationStartTime,
-                allocationEndTime,
-                allowedTokens
+                DonationVotingCustomRegistryStrategy.InitializeDataWithRegistry(
+                    address(customRegistry),
+                    DonationVotingStrategy.InitializeData(
+                        true,
+                        metadataRequired,
+                        registrationStartTime,
+                        registrationEndTime,
+                        allocationStartTime,
+                        allocationEndTime,
+                        allowedTokens
+                    )
+                )
             )
         );
 

@@ -21,25 +21,8 @@ contract QVBaseStrategyTestMock is QVBaseStrategy {
     }
 
     function initialize(uint256 _poolId, bytes memory _data) public virtual override onlyAllo {
-        (
-            bool _registryGating,
-            bool _metadataRequired,
-            uint256 _reviewThreshold,
-            uint256 _registrationStartTime,
-            uint256 _registrationEndTime,
-            uint256 _allocationStartTime,
-            uint256 _allocationEndTime
-        ) = abi.decode(_data, (bool, bool, uint256, uint256, uint256, uint256, uint256));
-        __QVBaseStrategy_init(
-            _poolId,
-            _registryGating,
-            _metadataRequired,
-            _reviewThreshold,
-            _registrationStartTime,
-            _registrationEndTime,
-            _allocationStartTime,
-            _allocationEndTime
-        );
+        (QVBaseStrategy.InitializeParams memory initializeParams) = abi.decode(_data, (QVBaseStrategy.InitializeParams));
+        __QVBaseStrategy_init(_poolId, initializeParams);
     }
 
     function _allocate(bytes memory _data, address _sender) internal virtual override {

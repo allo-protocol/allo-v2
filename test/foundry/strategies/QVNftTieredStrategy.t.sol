@@ -50,15 +50,19 @@ contract QVNftTieredStrategyTest is QVBaseStrategyTest {
             poolProfile_id(),
             address(_strategy),
             abi.encode(
-                registryGating,
-                metadataRequired,
-                nfts,
-                maxVoiceCreditsPerNft,
-                2,
-                registrationStartTime,
-                registrationEndTime,
-                allocationStartTime,
-                allocationEndTime
+                QVNftTieredStrategy.InitializeParamsNft(
+                    nfts,
+                    maxVoiceCreditsPerNft,
+                    QVBaseStrategy.InitializeParams(
+                        registryGating,
+                        metadataRequired,
+                        2,
+                        registrationStartTime,
+                        registrationEndTime,
+                        allocationStartTime,
+                        allocationEndTime
+                    )
+                )
             ),
             address(token),
             0 ether, // TODO: setup tests for failed transfers when a value is passed here.
@@ -79,15 +83,19 @@ contract QVNftTieredStrategyTest is QVBaseStrategyTest {
         strategy.initialize(
             poolId,
             abi.encode(
-                registryGating,
-                metadataRequired,
-                nfts,
-                maxVoiceCreditsPerNft,
-                2,
-                registrationStartTime,
-                registrationEndTime,
-                allocationStartTime,
-                allocationEndTime
+                QVNftTieredStrategy.InitializeParamsNft(
+                    nfts,
+                    maxVoiceCreditsPerNft,
+                    QVBaseStrategy.InitializeParams(
+                        registryGating,
+                        metadataRequired,
+                        2,
+                        registrationStartTime,
+                        registrationEndTime,
+                        allocationStartTime,
+                        allocationEndTime
+                    )
+                )
             )
         );
 
@@ -106,15 +114,19 @@ contract QVNftTieredStrategyTest is QVBaseStrategyTest {
         strategy.initialize(
             poolId,
             abi.encode(
-                registryGating,
-                metadataRequired,
-                nfts,
-                maxVoiceCreditsPerNft,
-                2,
-                registrationStartTime,
-                registrationEndTime,
-                allocationStartTime,
-                allocationEndTime
+                QVNftTieredStrategy.InitializeParamsNft(
+                    nfts,
+                    maxVoiceCreditsPerNft,
+                    QVBaseStrategy.InitializeParams(
+                        registryGating,
+                        metadataRequired,
+                        2,
+                        registrationStartTime,
+                        registrationEndTime,
+                        allocationStartTime,
+                        allocationEndTime
+                    )
+                )
             )
         );
     }
@@ -135,15 +147,19 @@ contract QVNftTieredStrategyTest is QVBaseStrategyTest {
         strategy.initialize(
             poolId,
             abi.encode(
-                registryGating,
-                metadataRequired,
-                nfts,
-                wrongMaxVoiceCreditsPerNftLength,
-                2,
-                registrationStartTime,
-                registrationEndTime,
-                allocationStartTime,
-                allocationEndTime
+                QVNftTieredStrategy.InitializeParamsNft(
+                    nfts,
+                    wrongMaxVoiceCreditsPerNftLength,
+                    QVBaseStrategy.InitializeParams(
+                        registryGating,
+                        metadataRequired,
+                        2,
+                        registrationStartTime,
+                        registrationEndTime,
+                        allocationStartTime,
+                        allocationEndTime
+                    )
+                )
             )
         );
 
@@ -161,15 +177,19 @@ contract QVNftTieredStrategyTest is QVBaseStrategyTest {
         strategy.initialize(
             poolId,
             abi.encode(
-                registryGating,
-                metadataRequired,
-                wrongNftsLength,
-                maxVoiceCreditsPerNft,
-                2,
-                registrationStartTime,
-                registrationEndTime,
-                allocationStartTime,
-                allocationEndTime
+                QVNftTieredStrategy.InitializeParamsNft(
+                    wrongNftsLength,
+                    maxVoiceCreditsPerNft,
+                    QVBaseStrategy.InitializeParams(
+                        registryGating,
+                        metadataRequired,
+                        2,
+                        registrationStartTime,
+                        registrationEndTime,
+                        allocationStartTime,
+                        allocationEndTime
+                    )
+                )
             )
         );
     }
@@ -181,15 +201,19 @@ contract QVNftTieredStrategyTest is QVBaseStrategyTest {
         QVNftTieredStrategy(_strategy).initialize(
             poolId,
             abi.encode(
-                registryGating,
-                metadataRequired,
-                nfts,
-                maxVoiceCreditsPerNft,
-                2,
-                registrationStartTime,
-                registrationEndTime,
-                allocationStartTime,
-                allocationEndTime
+                QVNftTieredStrategy.InitializeParamsNft(
+                    nfts,
+                    maxVoiceCreditsPerNft,
+                    QVBaseStrategy.InitializeParams(
+                        registryGating,
+                        metadataRequired,
+                        2,
+                        registrationStartTime,
+                        registrationEndTime,
+                        allocationStartTime,
+                        allocationEndTime
+                    )
+                )
             )
         );
     }
@@ -203,15 +227,19 @@ contract QVNftTieredStrategyTest is QVBaseStrategyTest {
         strategy.initialize(
             poolId,
             abi.encode(
-                registryGating,
-                metadataRequired,
-                nfts,
-                maxVoiceCreditsPerNft,
-                2,
-                today() - 1,
-                registrationEndTime,
-                allocationStartTime,
-                allocationEndTime
+                QVNftTieredStrategy.InitializeParamsNft(
+                    nfts,
+                    maxVoiceCreditsPerNft,
+                    QVBaseStrategy.InitializeParams(
+                        registryGating,
+                        metadataRequired,
+                        2,
+                        uint64(today() - 1),
+                        registrationEndTime,
+                        allocationStartTime,
+                        allocationEndTime
+                    )
+                )
             )
         );
 
@@ -221,15 +249,19 @@ contract QVNftTieredStrategyTest is QVBaseStrategyTest {
         strategy.initialize(
             poolId,
             abi.encode(
-                registryGating,
-                metadataRequired,
-                nfts,
-                maxVoiceCreditsPerNft,
-                2,
-                weekAfterNext(),
-                registrationEndTime,
-                allocationStartTime,
-                allocationEndTime
+                QVNftTieredStrategy.InitializeParamsNft(
+                    nfts,
+                    maxVoiceCreditsPerNft,
+                    QVBaseStrategy.InitializeParams(
+                        registryGating,
+                        metadataRequired,
+                        2,
+                        uint64(weekAfterNext()),
+                        registrationEndTime,
+                        allocationStartTime,
+                        allocationEndTime
+                    )
+                )
             )
         );
 
@@ -239,15 +271,19 @@ contract QVNftTieredStrategyTest is QVBaseStrategyTest {
         strategy.initialize(
             poolId,
             abi.encode(
-                registryGating,
-                metadataRequired,
-                nfts,
-                maxVoiceCreditsPerNft,
-                2,
-                registrationStartTime,
-                registrationEndTime,
-                oneMonthFromNow() + today(),
-                allocationEndTime
+                QVNftTieredStrategy.InitializeParamsNft(
+                    nfts,
+                    maxVoiceCreditsPerNft,
+                    QVBaseStrategy.InitializeParams(
+                        registryGating,
+                        metadataRequired,
+                        2,
+                        registrationStartTime,
+                        registrationEndTime,
+                        uint64(oneMonthFromNow() + today()),
+                        allocationEndTime
+                    )
+                )
             )
         );
 
@@ -257,15 +293,19 @@ contract QVNftTieredStrategyTest is QVBaseStrategyTest {
         strategy.initialize(
             poolId,
             abi.encode(
-                registryGating,
-                metadataRequired,
-                nfts,
-                maxVoiceCreditsPerNft,
-                2,
-                registrationStartTime,
-                oneMonthFromNow() + today(),
-                allocationStartTime,
-                allocationEndTime
+                QVNftTieredStrategy.InitializeParamsNft(
+                    nfts,
+                    maxVoiceCreditsPerNft,
+                    QVBaseStrategy.InitializeParams(
+                        registryGating,
+                        metadataRequired,
+                        2,
+                        registrationStartTime,
+                        uint64(oneMonthFromNow() + today()),
+                        allocationStartTime,
+                        allocationEndTime
+                    )
+                )
             )
         );
     }

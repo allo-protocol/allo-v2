@@ -67,6 +67,13 @@ contract ProportionalPayoutStrategy is BaseStrategy {
         uint256 totalVotesReceived;
     }
 
+    struct InitializeData {
+        address nft;
+        uint256 maxRecipientsAllowed;
+        uint64 allocationStartTime;
+        uint64 allocationEndTime;
+    }
+
     /// @notice recipientId => Recipient
     mapping(address => Recipient) public recipients;
     /// @notice nftId => has allocated
@@ -78,9 +85,9 @@ contract ProportionalPayoutStrategy is BaseStrategy {
 
     uint256 public maxRecipientsAllowed;
     uint256 public recipientsCounter;
-    uint256 public allocationStartTime;
-    uint256 public allocationEndTime;
     uint256 public totalAllocations;
+    uint64 public allocationStartTime;
+    uint64 public allocationEndTime;
 
     // ===================
     // === Constructor ===
@@ -93,30 +100,22 @@ contract ProportionalPayoutStrategy is BaseStrategy {
     /// ===============================
 
     function initialize(uint256 _poolId, bytes memory _data) external override onlyAllo {
-        (address _nft, uint256 _maxRecipientsAllowed, uint256 _allocationStartTime, uint256 _allocationEndTime) =
-            abi.decode(_data, (address, uint256, uint256, uint256));
-
-        __ProtportionalPayoutStrategy_init(
-            _poolId, ERC721(_nft), _allocationStartTime, _allocationEndTime, _maxRecipientsAllowed
-        );
+        InitializeData memory initializeData = abi.decode(_data, (InitializeData));
+        __ProtportionalPayoutStrategy_init(_poolId, initializeData);
     }
 
-    function __ProtportionalPayoutStrategy_init(
-        uint256 _poolId,
-        ERC721 _nft,
-        uint256 _startTime,
-        uint256 _endTime,
-        uint256 _maxRecipients
-    ) internal {
-        if (_startTime >= _endTime || _endTime < block.timestamp) {
-            revert INVALID();
-        }
+    function __ProtportionalPayoutStrategy_init(uint256 _poolId, InitializeData memory _initializeData) internal {
         __BaseStrategy_init(_poolId);
 
-        nft = ERC721(_nft);
-        maxRecipientsAllowed = _maxRecipients;
+        nft = ERC721(_initializeData.nft);
+        maxRecipientsAllowed = _initializeData.maxRecipientsAllowed;
 
-        _setAllocationTime(_startTime, _endTime);
+        _setAllocationTime(_initializeData.allocationStartTime, _initializeData.allocationEndTime);
+
+        if (allocationStartTime >= allocationEndTime || allocationEndTime < block.timestamp) {
+            revert INVALID();
+        }
+
         _setPoolActive(true);
     }
 
@@ -143,7 +142,7 @@ contract ProportionalPayoutStrategy is BaseStrategy {
     /// @notice Set the allocation start and end timestamps
     /// @param _allocationStartTime The allocation start timestamp
     /// @param _allocationEndTime The allocation end timestamp
-    function setAllocationTime(uint256 _allocationStartTime, uint256 _allocationEndTime)
+    function setAllocationTime(uint64 _allocationStartTime, uint64 _allocationEndTime)
         external
         onlyPoolManager(msg.sender)
     {
@@ -276,7 +275,7 @@ contract ProportionalPayoutStrategy is BaseStrategy {
     /// @notice Set the allocation start and end timestamps
     /// @param _allocationStartTime The allocation start timestamp
     /// @param _allocationEndTime The allocation end timestamp
-    function _setAllocationTime(uint256 _allocationStartTime, uint256 _allocationEndTime) internal {
+    function _setAllocationTime(uint64 _allocationStartTime, uint64 _allocationEndTime) internal {
         // time stamps must be in future and end time after start time.
         if (_allocationStartTime < block.timestamp || _allocationEndTime < _allocationStartTime) {
             revert INVALID();

@@ -2,7 +2,6 @@
 pragma solidity 0.8.19;
 
 // Interfaces
-import {IStrategy} from "../../../contracts/core/interfaces/IStrategy.sol";
 import {QVBaseStrategy} from "../../../contracts/strategies/qv-base/QVBaseStrategy.sol";
 
 // Test libraries
@@ -37,14 +36,18 @@ contract QVSimpleStrategyTest is QVBaseStrategyTest {
             poolProfile_id(),
             address(_strategy),
             abi.encode(
-                registryGating,
-                metadataRequired,
-                2,
-                maxVoiceCreditsPerAllocator,
-                registrationStartTime,
-                registrationEndTime,
-                allocationStartTime,
-                allocationEndTime
+                QVSimpleStrategy.InitializeParamsSimple(
+                    maxVoiceCreditsPerAllocator,
+                    QVBaseStrategy.InitializeParams(
+                        registryGating,
+                        metadataRequired,
+                        2,
+                        registrationStartTime,
+                        registrationEndTime,
+                        allocationStartTime,
+                        allocationEndTime
+                    )
+                )
             ),
             address(token),
             0 ether, // TODO: setup tests for failed transfers when a value is passed here.
@@ -68,14 +71,18 @@ contract QVSimpleStrategyTest is QVBaseStrategyTest {
         strategy.initialize(
             poolId,
             abi.encode(
-                registryGating,
-                metadataRequired,
-                2,
-                maxVoiceCreditsPerAllocator,
-                registrationStartTime,
-                registrationEndTime,
-                allocationStartTime,
-                allocationEndTime
+                QVSimpleStrategy.InitializeParamsSimple(
+                    maxVoiceCreditsPerAllocator,
+                    QVBaseStrategy.InitializeParams(
+                        registryGating,
+                        metadataRequired,
+                        2,
+                        registrationStartTime,
+                        registrationEndTime,
+                        allocationStartTime,
+                        allocationEndTime
+                    )
+                )
             )
         );
     }
@@ -87,14 +94,18 @@ contract QVSimpleStrategyTest is QVBaseStrategyTest {
         QVSimpleStrategy(_strategy).initialize(
             poolId,
             abi.encode(
-                registryGating,
-                metadataRequired,
-                2,
-                maxVoiceCreditsPerAllocator,
-                registrationStartTime,
-                registrationEndTime,
-                allocationStartTime,
-                allocationEndTime
+                QVSimpleStrategy.InitializeParamsSimple(
+                    maxVoiceCreditsPerAllocator,
+                    QVBaseStrategy.InitializeParams(
+                        registryGating,
+                        metadataRequired,
+                        2,
+                        registrationStartTime,
+                        registrationEndTime,
+                        allocationStartTime,
+                        allocationEndTime
+                    )
+                )
             )
         );
     }
@@ -108,14 +119,18 @@ contract QVSimpleStrategyTest is QVBaseStrategyTest {
         strategy.initialize(
             poolId,
             abi.encode(
-                registryGating,
-                metadataRequired,
-                2,
-                maxVoiceCreditsPerAllocator,
-                today() - 1,
-                registrationEndTime,
-                allocationStartTime,
-                allocationEndTime
+                QVSimpleStrategy.InitializeParamsSimple(
+                    maxVoiceCreditsPerAllocator,
+                    QVBaseStrategy.InitializeParams(
+                        registryGating,
+                        metadataRequired,
+                        2,
+                        uint64(today() - 1),
+                        registrationEndTime,
+                        allocationStartTime,
+                        allocationEndTime
+                    )
+                )
             )
         );
 
@@ -125,14 +140,18 @@ contract QVSimpleStrategyTest is QVBaseStrategyTest {
         strategy.initialize(
             poolId,
             abi.encode(
-                registryGating,
-                metadataRequired,
-                2,
-                maxVoiceCreditsPerAllocator,
-                weekAfterNext(),
-                registrationEndTime,
-                allocationStartTime,
-                allocationEndTime
+                QVSimpleStrategy.InitializeParamsSimple(
+                    maxVoiceCreditsPerAllocator,
+                    QVBaseStrategy.InitializeParams(
+                        registryGating,
+                        metadataRequired,
+                        2,
+                        uint64(weekAfterNext()),
+                        registrationEndTime,
+                        allocationStartTime,
+                        allocationEndTime
+                    )
+                )
             )
         );
 
@@ -142,14 +161,18 @@ contract QVSimpleStrategyTest is QVBaseStrategyTest {
         strategy.initialize(
             poolId,
             abi.encode(
-                registryGating,
-                metadataRequired,
-                2,
-                maxVoiceCreditsPerAllocator,
-                registrationStartTime,
-                registrationEndTime,
-                oneMonthFromNow() + today(),
-                allocationEndTime
+                QVSimpleStrategy.InitializeParamsSimple(
+                    maxVoiceCreditsPerAllocator,
+                    QVBaseStrategy.InitializeParams(
+                        registryGating,
+                        metadataRequired,
+                        2,
+                        registrationStartTime,
+                        registrationEndTime,
+                        uint64(oneMonthFromNow() + today()),
+                        allocationEndTime
+                    )
+                )
             )
         );
 
@@ -159,14 +182,18 @@ contract QVSimpleStrategyTest is QVBaseStrategyTest {
         strategy.initialize(
             poolId,
             abi.encode(
-                registryGating,
-                metadataRequired,
-                2,
-                maxVoiceCreditsPerAllocator,
-                registrationStartTime,
-                oneMonthFromNow() + today(),
-                allocationStartTime,
-                allocationEndTime
+                QVSimpleStrategy.InitializeParamsSimple(
+                    maxVoiceCreditsPerAllocator,
+                    QVBaseStrategy.InitializeParams(
+                        registryGating,
+                        metadataRequired,
+                        2,
+                        registrationStartTime,
+                        uint64(oneMonthFromNow() + today()),
+                        allocationStartTime,
+                        allocationEndTime
+                    )
+                )
             )
         );
     }

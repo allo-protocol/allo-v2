@@ -42,7 +42,7 @@ contract WrappedVotingNftMintStrategy is Native, BaseStrategy, ReentrancyGuard {
     event UpdatedRegistration(address indexed recipientId, bytes data, address sender, InternalRecipientStatus status);
     event RecipientStatusUpdated(address indexed recipientId, InternalRecipientStatus recipientStatus, address sender);
     event Claimed(address indexed recipientId, address recipientAddress, uint256 amount, address token);
-    event TimestampsUpdated(uint256 allocationStartTime, uint256 allocationEndTime, address sender);
+    event TimestampsUpdated(uint64 allocationStartTime, uint64 allocationEndTime, address sender);
 
     /// ================================
     /// ========== Modifier ============
@@ -66,10 +66,16 @@ contract WrappedVotingNftMintStrategy is Native, BaseStrategy, ReentrancyGuard {
     /// ========== Storage =============
     /// ================================
 
+    struct InitializeParams {
+        address nftFactory;
+        uint64 allocationStartTime;
+        uint64 allocationEndTime;
+    }
+
     NFTFactory public nftFactory;
 
-    uint256 public allocationStartTime;
-    uint256 public allocationEndTime;
+    uint64 public allocationStartTime;
+    uint64 public allocationEndTime;
 
     // The current winner of the pool balance
     address public currentWinner;
@@ -94,16 +100,15 @@ contract WrappedVotingNftMintStrategy is Native, BaseStrategy, ReentrancyGuard {
     /// @param _poolId The ID of the pool
     /// @param _data The data containing the NFTFactory address, allocation start time, and allocation end time
     function initialize(uint256 _poolId, bytes memory _data) external override {
-        (address nftFactoryAddress, uint256 _allocationStartTime, uint256 _allocationEndTime) =
-            abi.decode(_data, (address, uint256, uint256));
-        __WrappedVotingStrategy_init(_poolId, nftFactoryAddress, _allocationStartTime, _allocationEndTime);
+        (InitializeParams memory initializeParams) = abi.decode(_data, (InitializeParams));
+        __WrappedVotingStrategy_init(_poolId, initializeParams);
     }
 
     /// ====================
     /// ===== External =====
     /// ====================
 
-    function setAllocationTimes(uint256 _allocationStartTime, uint256 _allocationEndTime)
+    function setAllocationTimes(uint64 _allocationStartTime, uint64 _allocationEndTime)
         external
         onlyPoolManager(msg.sender)
     {
@@ -114,7 +119,7 @@ contract WrappedVotingNftMintStrategy is Native, BaseStrategy, ReentrancyGuard {
     /// ===== Internal =====
     /// ====================
 
-    function _setAllocationTimes(uint256 _allocationStartTime, uint256 _allocationEndTime) internal {
+    function _setAllocationTimes(uint64 _allocationStartTime, uint64 _allocationEndTime) internal {
         _isPoolTimestampValid(_allocationStartTime, _allocationEndTime);
 
         allocationStartTime = _allocationStartTime;
@@ -125,27 +130,20 @@ contract WrappedVotingNftMintStrategy is Native, BaseStrategy, ReentrancyGuard {
 
     /// @notice Internal function to initialize the WrappedVotingStrategy
     /// @param _poolId The ID of the pool
-    /// @param _nftFactory The address of the NFTFactory contract
-    /// @param _allocationStartTime The start time of the allocation period
-    /// @param _allocationEndTime The end time of the allocation period
-    function __WrappedVotingStrategy_init(
-        uint256 _poolId,
-        address _nftFactory,
-        uint256 _allocationStartTime,
-        uint256 _allocationEndTime
-    ) internal {
+    /// @param _initializeParams The data containing the NFTFactory address, allocation start time, and allocation end time
+    function __WrappedVotingStrategy_init(uint256 _poolId, InitializeParams memory _initializeParams) internal {
         __BaseStrategy_init(_poolId);
 
-        if (_nftFactory == address(0)) {
+        nftFactory = NFTFactory(_initializeParams.nftFactory);
+
+        if (address(nftFactory) == address(0)) {
             revert INVALID();
         }
 
-        nftFactory = NFTFactory(_nftFactory);
+        allocationStartTime = _initializeParams.allocationStartTime;
+        allocationEndTime = _initializeParams.allocationEndTime;
 
-        _isPoolTimestampValid(_allocationStartTime, _allocationEndTime);
-
-        allocationStartTime = _allocationStartTime;
-        allocationEndTime = _allocationEndTime;
+        _isPoolTimestampValid(allocationStartTime, allocationEndTime);
 
         emit TimestampsUpdated(allocationStartTime, allocationEndTime, msg.sender);
     }
@@ -215,7 +213,7 @@ contract WrappedVotingNftMintStrategy is Native, BaseStrategy, ReentrancyGuard {
     /// @notice Internal function to check if the pool timestamp is valid
     /// @param _allocationStartTime The start time of the allocation period
     /// @param _allocationEndTime The end time of the allocation period
-    function _isPoolTimestampValid(uint256 _allocationStartTime, uint256 _allocationEndTime) internal view {
+    function _isPoolTimestampValid(uint64 _allocationStartTime, uint64 _allocationEndTime) internal view {
         if (block.timestamp > _allocationStartTime || _allocationStartTime > _allocationEndTime) {
             revert INVALID();
         }

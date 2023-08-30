@@ -82,15 +82,19 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
             poolProfile_id(),
             address(_strategy),
             abi.encode(
-                easInfo,
-                address(nft),
-                abi.encode(
-                    metadataRequired,
+                HackathonQVStrategy.InitializeParamsHack(
+                    easInfo,
+                    address(nft),
                     maxVoiceCreditsPerAllocator,
-                    registrationStartTime,
-                    registrationEndTime,
-                    allocationStartTime,
-                    allocationEndTime
+                    QVBaseStrategy.InitializeParams(
+                        true,
+                        metadataRequired,
+                        0,
+                        registrationStartTime,
+                        registrationEndTime,
+                        allocationStartTime,
+                        allocationEndTime
+                    )
                 )
             ),
             NATIVE,
@@ -117,15 +121,19 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
         newStrategy.initialize(
             poolId,
             abi.encode(
-                easInfo,
-                address(nft),
-                abi.encode(
-                    metadataRequired,
+                HackathonQVStrategy.InitializeParamsHack(
+                    easInfo,
+                    address(nft),
                     maxVoiceCreditsPerAllocator,
-                    registrationStartTime,
-                    registrationEndTime,
-                    allocationStartTime,
-                    allocationEndTime
+                    QVBaseStrategy.InitializeParams(
+                        true,
+                        metadataRequired,
+                        0,
+                        registrationStartTime,
+                        registrationEndTime,
+                        allocationStartTime,
+                        allocationEndTime
+                    )
                 )
             )
         );
@@ -148,15 +156,19 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
         qvStrategy().initialize(
             poolId,
             abi.encode(
-                easInfo,
-                address(nft),
-                abi.encode(
-                    metadataRequired,
+                HackathonQVStrategy.InitializeParamsHack(
+                    easInfo,
+                    address(nft),
                     maxVoiceCreditsPerAllocator,
-                    registrationStartTime,
-                    registrationEndTime,
-                    allocationStartTime,
-                    allocationEndTime
+                    QVBaseStrategy.InitializeParams(
+                        true,
+                        metadataRequired,
+                        0,
+                        registrationStartTime,
+                        registrationEndTime,
+                        allocationStartTime,
+                        allocationEndTime
+                    )
                 )
             )
         );
@@ -179,15 +191,19 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
         hStrategy.initialize(
             poolId,
             abi.encode(
-                easInfoFalse,
-                address(nft),
-                abi.encode(
-                    metadataRequired,
+                HackathonQVStrategy.InitializeParamsHack(
+                    easInfoFalse,
+                    address(nft),
                     maxVoiceCreditsPerAllocator,
-                    registrationStartTime,
-                    registrationEndTime,
-                    allocationStartTime,
-                    allocationEndTime
+                    QVBaseStrategy.InitializeParams(
+                        true,
+                        metadataRequired,
+                        0,
+                        registrationStartTime,
+                        registrationEndTime,
+                        allocationStartTime,
+                        allocationEndTime
+                    )
                 )
             )
         );
@@ -199,15 +215,19 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
         hStrategy.initialize(
             poolId,
             abi.encode(
-                easInfoFalse,
-                address(nft),
-                abi.encode(
-                    metadataRequired,
+                HackathonQVStrategy.InitializeParamsHack(
+                    easInfoFalse,
+                    address(nft),
                     maxVoiceCreditsPerAllocator,
-                    registrationStartTime,
-                    registrationEndTime,
-                    allocationStartTime,
-                    allocationEndTime
+                    QVBaseStrategy.InitializeParams(
+                        true,
+                        metadataRequired,
+                        0,
+                        registrationStartTime,
+                        registrationEndTime,
+                        allocationStartTime,
+                        allocationEndTime
+                    )
                 )
             )
         );
@@ -393,15 +413,19 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
             poolProfile_id(),
             address(new HackathonQVStrategy(address(allo()), "MockStrategy")),
             abi.encode(
-                easInfo,
-                address(nft),
-                abi.encode(
-                    metadataRequired,
+                HackathonQVStrategy.InitializeParamsHack(
+                    easInfo,
+                    address(nft),
                     maxVoiceCreditsPerAllocator,
-                    registrationStartTime,
-                    registrationEndTime,
-                    allocationStartTime,
-                    allocationEndTime
+                    QVBaseStrategy.InitializeParams(
+                        true,
+                        metadataRequired,
+                        0,
+                        registrationStartTime,
+                        registrationEndTime,
+                        allocationStartTime,
+                        allocationEndTime
+                    )
                 )
             ),
             NATIVE,

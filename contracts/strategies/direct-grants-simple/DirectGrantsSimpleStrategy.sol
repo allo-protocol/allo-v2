@@ -65,6 +65,13 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         RecipientStatus milestoneStatus;
     }
 
+    // @notice Struct to hold the init params for the strategy
+    struct InitializeData {
+        bool registryGating;
+        bool metadataRequired;
+        bool grantAmountRequired;
+    }
+
     /// ===============================
     /// ========== Errors =============
     /// ===============================
@@ -150,31 +157,23 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _data The data to be decoded
     /// @custom:data (bool registryGating, bool metadataRequired, bool grantAmountRequired)
     function initialize(uint256 _poolId, bytes memory _data) external virtual override {
-        (bool _registryGating, bool _metadataRequired, bool _grantAmountRequired) =
-            abi.decode(_data, (bool, bool, bool));
-        __DirectGrantsSimpleStrategy_init(_poolId, _registryGating, _metadataRequired, _grantAmountRequired);
+        (InitializeData memory initData) = abi.decode(_data, (InitializeData));
+        __DirectGrantsSimpleStrategy_init(_poolId, initData);
     }
 
     /// @notice This initializes the BaseStrategy
     /// @dev You only need to pass the 'poolId' to initialize the BaseStrategy and the rest is specific to the strategy
     /// @param _poolId ID of the pool - required to initialize the BaseStrategy
-    /// @param _registryGating Flag to check if registry gating is enabled
-    /// @param _metadataRequired Flag to check if metadata is required
-    /// @param _grantAmountRequired Flag to check if grant amount is required
-    function __DirectGrantsSimpleStrategy_init(
-        uint256 _poolId,
-        bool _registryGating,
-        bool _metadataRequired,
-        bool _grantAmountRequired
-    ) internal {
+    /// @param _initData The init params for the strategy (bool registryGating, bool metadataRequired, bool grantAmountRequired)
+    function __DirectGrantsSimpleStrategy_init(uint256 _poolId, InitializeData memory _initData) internal {
         // Initialize the BaseStrategy
         __BaseStrategy_init(_poolId);
 
         // Set the strategy specific variables
-        registryGating = _registryGating;
-        metadataRequired = _metadataRequired;
+        registryGating = _initData.registryGating;
+        metadataRequired = _initData.metadataRequired;
+        grantAmountRequired = _initData.grantAmountRequired;
         _registry = allo.getRegistry();
-        grantAmountRequired = _grantAmountRequired;
 
         // Set the pool to active - this is required for the strategy to work and distribute funds
         // NOTE: There may be some cases where you may want to not set this here, but will be strategy specific
@@ -627,7 +626,6 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     function _setMilestones(address _recipientId, Milestone[] memory _milestones) internal {
         uint256 totalAmountPercentage;
 
-        // TODO: check if delete resets index to 0
         // Clear out the milestones and reset the index to 0
         if (milestones[_recipientId].length > 0) {
             delete milestones[_recipientId];

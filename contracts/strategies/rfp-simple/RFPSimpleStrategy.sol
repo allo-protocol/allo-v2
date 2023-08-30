@@ -47,6 +47,12 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         RecipientStatus milestoneStatus;
     }
 
+    struct InitializeParams {
+        uint256 maxBid;
+        bool useRegistryAnchor;
+        bool metadataRequired;
+    }
+
     /// ===============================
     /// ========== Errors =============
     /// ===============================
@@ -94,18 +100,16 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// ===============================
 
     function initialize(uint256 _poolId, bytes memory _data) external virtual override {
-        (uint256 _maxBid, bool _useRegistryAnchor, bool _metadataRequired) = abi.decode(_data, (uint256, bool, bool));
-        __RFPSimpleStrategy_init(_poolId, _maxBid, _useRegistryAnchor, _metadataRequired);
+        (InitializeParams memory initializeParams) = abi.decode(_data, (InitializeParams));
+        __RFPSimpleStrategy_init(_poolId, initializeParams);
     }
 
-    function __RFPSimpleStrategy_init(uint256 _poolId, uint256 _maxBid, bool _useRegistryAnchor, bool _metadataRequired)
-        internal
-    {
+    function __RFPSimpleStrategy_init(uint256 _poolId, InitializeParams memory _initializeParams) internal {
         __BaseStrategy_init(_poolId);
-        useRegistryAnchor = _useRegistryAnchor;
-        metadataRequired = _metadataRequired;
+        useRegistryAnchor = _initializeParams.useRegistryAnchor;
+        metadataRequired = _initializeParams.metadataRequired;
         _setPoolActive(true);
-        _increaseMaxBid(_maxBid);
+        _increaseMaxBid(_initializeParams.maxBid);
         _registry = allo.getRegistry();
     }
 

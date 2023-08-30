@@ -12,14 +12,14 @@ contract EventSetup {
         bytes32 indexed newAdminRole, address indexed recipientId, address indexed previousAdminRole
     );
     event TimestampsUpdated(
-        uint256 registrationStartTime,
-        uint256 registrationEndTime,
-        uint256 allocationStartTime,
-        uint256 allocationEndTime,
+        uint64 registrationStartTime,
+        uint64 registrationEndTime,
+        uint64 allocationStartTime,
+        uint64 allocationEndTime,
         address sender
     );
     event PayoutSet(bytes recipientIds);
     event Claimed(address indexed recipientId, address recipientAddress, uint256 amount, address token);
-    event TimestampsUpdated(uint256 allocationStartTime, uint256 allocationEndTime, address sender);
+    event TimestampsUpdated(uint64 allocationStartTime, uint64 allocationEndTime, address sender);
     event NFTContractCreated(address nftContractAddress);
 }

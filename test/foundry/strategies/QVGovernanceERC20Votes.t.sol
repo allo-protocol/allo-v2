@@ -44,15 +44,19 @@ contract QVGovernanceERC20VotesTest is QVBaseStrategyTest {
             poolProfile_id(),
             address(_strategy),
             abi.encode(
-                address(govToken),
-                timestamp,
-                2,
-                registryGating,
-                metadataRequired,
-                registrationStartTime,
-                registrationEndTime,
-                allocationStartTime,
-                allocationEndTime
+                QVGovernanceERC20Votes.InitializeParamsGov(
+                    address(govToken),
+                    timestamp,
+                    QVBaseStrategy.InitializeParams(
+                        registryGating,
+                        metadataRequired,
+                        2,
+                        registrationStartTime,
+                        registrationEndTime,
+                        allocationStartTime,
+                        allocationEndTime
+                    )
+                )
             ),
             address(token),
             0 ether, // TODO: setup tests for failed transfers when a value is passed here.
@@ -73,15 +77,19 @@ contract QVGovernanceERC20VotesTest is QVBaseStrategyTest {
         QVGovernanceERC20Votes(_strategy).initialize(
             poolId,
             abi.encode(
-                address(govToken),
-                timestamp,
-                2,
-                registryGating,
-                metadataRequired,
-                registrationStartTime,
-                registrationEndTime,
-                allocationStartTime,
-                allocationEndTime
+                QVGovernanceERC20Votes.InitializeParamsGov(
+                    address(govToken),
+                    timestamp,
+                    QVBaseStrategy.InitializeParams(
+                        registryGating,
+                        metadataRequired,
+                        2,
+                        registrationStartTime,
+                        registrationEndTime,
+                        allocationStartTime,
+                        allocationEndTime
+                    )
+                )
             )
         );
     }
@@ -101,15 +109,19 @@ contract QVGovernanceERC20VotesTest is QVBaseStrategyTest {
         strategy.initialize(
             poolId,
             abi.encode(
-                address(noGovToken),
-                timestamp,
-                2,
-                registryGating,
-                metadataRequired,
-                registrationStartTime,
-                registrationEndTime,
-                allocationStartTime,
-                allocationEndTime
+                QVGovernanceERC20Votes.InitializeParamsGov(
+                    address(noGovToken),
+                    timestamp,
+                    QVBaseStrategy.InitializeParams(
+                        registryGating,
+                        metadataRequired,
+                        2,
+                        registrationStartTime,
+                        registrationEndTime,
+                        allocationStartTime,
+                        allocationEndTime
+                    )
+                )
             )
         );
     }
@@ -123,15 +135,19 @@ contract QVGovernanceERC20VotesTest is QVBaseStrategyTest {
         strategy.initialize(
             poolId,
             abi.encode(
-                address(govToken),
-                timestamp,
-                2,
-                registryGating,
-                metadataRequired,
-                today() - 1,
-                registrationEndTime,
-                allocationStartTime,
-                allocationEndTime
+                QVGovernanceERC20Votes.InitializeParamsGov(
+                    address(govToken),
+                    timestamp,
+                    QVBaseStrategy.InitializeParams(
+                        registryGating,
+                        metadataRequired,
+                        2,
+                        uint64(today() - 1),
+                        registrationEndTime,
+                        allocationStartTime,
+                        allocationEndTime
+                    )
+                )
             )
         );
 
@@ -141,15 +157,19 @@ contract QVGovernanceERC20VotesTest is QVBaseStrategyTest {
         strategy.initialize(
             poolId,
             abi.encode(
-                address(govToken),
-                timestamp,
-                2,
-                registryGating,
-                metadataRequired,
-                weekAfterNext(),
-                registrationEndTime,
-                allocationStartTime,
-                allocationEndTime
+                QVGovernanceERC20Votes.InitializeParamsGov(
+                    address(govToken),
+                    timestamp,
+                    QVBaseStrategy.InitializeParams(
+                        registryGating,
+                        metadataRequired,
+                        2,
+                        uint64(weekAfterNext()),
+                        registrationEndTime,
+                        allocationStartTime,
+                        allocationEndTime
+                    )
+                )
             )
         );
 
@@ -160,15 +180,19 @@ contract QVGovernanceERC20VotesTest is QVBaseStrategyTest {
         strategy.initialize(
             poolId,
             abi.encode(
-                address(govToken),
-                timestamp,
-                2,
-                registryGating,
-                metadataRequired,
-                registrationStartTime,
-                registrationEndTime,
-                oneMonthFromNow() + today(),
-                allocationEndTime
+                QVGovernanceERC20Votes.InitializeParamsGov(
+                    address(govToken),
+                    timestamp,
+                    QVBaseStrategy.InitializeParams(
+                        registryGating,
+                        metadataRequired,
+                        2,
+                        registrationStartTime,
+                        registrationEndTime,
+                        uint64(oneMonthFromNow() + today()),
+                        allocationEndTime
+                    )
+                )
             )
         );
 
@@ -178,15 +202,19 @@ contract QVGovernanceERC20VotesTest is QVBaseStrategyTest {
         strategy.initialize(
             poolId,
             abi.encode(
-                address(govToken),
-                timestamp,
-                2,
-                registryGating,
-                metadataRequired,
-                registrationStartTime,
-                oneMonthFromNow() + today(),
-                allocationStartTime,
-                allocationEndTime
+                QVGovernanceERC20Votes.InitializeParamsGov(
+                    address(govToken),
+                    timestamp,
+                    QVBaseStrategy.InitializeParams(
+                        registryGating,
+                        metadataRequired,
+                        2,
+                        registrationStartTime,
+                        uint64(oneMonthFromNow() + today()),
+                        allocationStartTime,
+                        allocationEndTime
+                    )
+                )
             )
         );
     }

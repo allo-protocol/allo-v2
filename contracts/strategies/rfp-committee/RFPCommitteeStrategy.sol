@@ -30,6 +30,11 @@ contract RFPCommitteeStrategy is RFPSimpleStrategy {
     /// ========== Storage =============
     /// ================================
 
+    struct InitializeParamsCommittee {
+        uint256 voteThreshold;
+        InitializeParams params;
+    }
+
     uint256 public voteThreshold;
     // committee member address => recipient
     mapping(address => address) public votedFor;
@@ -46,20 +51,15 @@ contract RFPCommitteeStrategy is RFPSimpleStrategy {
     /// ===============================
 
     function initialize(uint256 _poolId, bytes memory _data) external override {
-        (uint256 _maxBid, bool _registryGating, bool _metadataRequired, uint256 _voteThreshold) =
-            abi.decode(_data, (uint256, bool, bool, uint256));
-        __RPFCommiteeStrategy_init(_poolId, _maxBid, _registryGating, _metadataRequired, _voteThreshold);
+        (InitializeParamsCommittee memory initializeParamsCommittee) = abi.decode(_data, (InitializeParamsCommittee));
+        __RPFCommiteeStrategy_init(_poolId, initializeParamsCommittee);
     }
 
-    function __RPFCommiteeStrategy_init(
-        uint256 _poolId,
-        uint256 _maxBid,
-        bool _registryGating,
-        bool _metadataRequired,
-        uint256 _voteThreshold
-    ) internal {
-        __RFPSimpleStrategy_init(_poolId, _maxBid, _registryGating, _metadataRequired);
-        voteThreshold = _voteThreshold;
+    function __RPFCommiteeStrategy_init(uint256 _poolId, InitializeParamsCommittee memory _initializeParamsCommittee)
+        internal
+    {
+        __RFPSimpleStrategy_init(_poolId, _initializeParamsCommittee.params);
+        voteThreshold = _initializeParamsCommittee.voteThreshold;
     }
 
     /// ====================================

@@ -47,6 +47,13 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
         uint256 foundRecipientAtIndex;
     }
 
+    struct InitializeParamsHack {
+        EASInfo easInfo;
+        address nft;
+        uint256 maxVoiceCreditsPerAllocator;
+        InitializeParams params;
+    }
+
     /// ======================
     /// ==== Custom Error ====
     /// ======================
@@ -90,62 +97,45 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
     /// @param _poolId The pool ID for this strategy
     /// @param _data The data to initialize the strategy with
     function initialize(uint256 _poolId, bytes memory _data) external override onlyAllo {
-        (EASInfo memory _easInfo, address _nft, bytes memory _qvSimpleInitData) =
-            abi.decode(_data, (EASInfo, address, bytes));
+        (InitializeParamsHack memory initializeParamsHack) = abi.decode(_data, (InitializeParamsHack));
 
-        __HackathonQVStrategy_init(_poolId, _easInfo, _nft, _qvSimpleInitData);
+        __HackathonQVStrategy_init(_poolId, initializeParamsHack);
     }
 
     /// @dev Initializes the strategy.
     // @solhint disable-next-line func-name-mixedcase
-    function __HackathonQVStrategy_init(uint256 _poolId, EASInfo memory _easInfo, address _nft, bytes memory _data)
-        internal
-    {
-        (
-            bool _metadataRequired,
-            uint256 _maxVoiceCreditsPerAllocator,
-            uint256 _registrationStartTime,
-            uint256 _registrationEndTime,
-            uint256 _allocationStartTime,
-            uint256 _allocationEndTime
-        ) = abi.decode(_data, (bool, uint256, uint256, uint256, uint256, uint256));
+    function __HackathonQVStrategy_init(uint256 _poolId, InitializeParamsHack memory _initializeParamsHack) internal {
+        // overwrite the review threshold and registry gating
+        _initializeParamsHack.params.reviewThreshold = 0;
+        _initializeParamsHack.params.registryGating = true;
 
-        __QVBaseStrategy_init(
-            _poolId,
-            true, // _registryGating
-            _metadataRequired,
-            0, // reviewThreshold
-            _registrationStartTime,
-            _registrationEndTime,
-            _allocationStartTime,
-            _allocationEndTime
-        );
+        __QVBaseStrategy_init(_poolId, _initializeParamsHack.params);
 
-        maxVoiceCreditsPerAllocator = _maxVoiceCreditsPerAllocator;
+        maxVoiceCreditsPerAllocator = _initializeParamsHack.maxVoiceCreditsPerAllocator;
 
-        __SchemaResolver_init(_easInfo.eas);
+        __SchemaResolver_init(_initializeParamsHack.easInfo.eas);
 
         easInfo = EASInfo({
-            eas: _easInfo.eas,
-            schemaRegistry: _easInfo.schemaRegistry,
-            schema: _easInfo.schema,
-            schemaUID: _easInfo.schemaUID,
-            revocable: _easInfo.revocable
+            eas: _initializeParamsHack.easInfo.eas,
+            schemaRegistry: _initializeParamsHack.easInfo.schemaRegistry,
+            schema: _initializeParamsHack.easInfo.schema,
+            schemaUID: _initializeParamsHack.easInfo.schemaUID,
+            revocable: _initializeParamsHack.easInfo.revocable
         });
 
-        nft = ERC721(_nft);
+        nft = ERC721(_initializeParamsHack.nft);
 
         // register / validate SchemaRecord
-        if (bytes(_easInfo.schema).length > 0) {
+        if (bytes(easInfo.schema).length > 0) {
             // if the schema is present, then register schema and update uid
             easInfo.schemaUID =
-                easInfo.schemaRegistry.register(_easInfo.schema, ISchemaResolver(address(this)), _easInfo.revocable);
+                easInfo.schemaRegistry.register(easInfo.schema, ISchemaResolver(address(this)), easInfo.revocable);
         } else {
             // compare SchemaRecord to data passed in
-            SchemaRecord memory record = easInfo.schemaRegistry.getSchema(_easInfo.schemaUID);
+            SchemaRecord memory record = easInfo.schemaRegistry.getSchema(easInfo.schemaUID);
             if (
-                record.uid != _easInfo.schemaUID || record.revocable != _easInfo.revocable
-                    || keccak256(abi.encode(record.schema)) != keccak256(abi.encode(_easInfo.schema))
+                record.uid != easInfo.schemaUID || record.revocable != easInfo.revocable
+                    || keccak256(abi.encode(record.schema)) != keccak256(abi.encode(easInfo.schema))
             ) {
                 revert INVALID_SCHEMA();
             }

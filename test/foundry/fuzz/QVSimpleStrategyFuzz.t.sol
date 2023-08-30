@@ -41,10 +41,10 @@ contract QVSimpleStrategyTest is Accounts, StrategySetup, RegistrySetupFull, All
     uint256 public maxVoiceCreditsPerAllocator;
     uint256 public poolId;
 
-    uint256 public registrationStartTime;
-    uint256 public registrationEndTime;
-    uint256 public allocationStartTime;
-    uint256 public allocationEndTime;
+    uint64 public registrationStartTime;
+    uint64 public registrationEndTime;
+    uint64 public allocationStartTime;
+    uint64 public allocationEndTime;
 
     address[] public allowedTokens;
     address public token;
@@ -59,10 +59,10 @@ contract QVSimpleStrategyTest is Accounts, StrategySetup, RegistrySetupFull, All
     );
     event TimestampsUpdated(
         address indexed recipientId,
-        uint256 registrationStartTime,
-        uint256 registrationEndTime,
-        uint256 allocationStartTime,
-        uint256 allocationEndTime
+        uint64 registrationStartTime,
+        uint64 registrationEndTime,
+        uint64 allocationStartTime,
+        uint64 allocationEndTime
     );
     event RecipientStatusUpdated(
         address indexed recipientId, QVBaseStrategy.InternalRecipientStatus status, address sender
@@ -82,10 +82,10 @@ contract QVSimpleStrategyTest is Accounts, StrategySetup, RegistrySetupFull, All
 
         poolId = 1337;
 
-        registrationStartTime = today();
-        registrationEndTime = nextWeek();
-        allocationStartTime = weekAfterNext();
-        allocationEndTime = oneMonthFromNow();
+        registrationStartTime = uint64(today());
+        registrationEndTime = uint64(nextWeek());
+        allocationStartTime = uint64(weekAfterNext());
+        allocationEndTime = uint64(oneMonthFromNow());
 
         registryGating = false;
         metadataRequired = false;
@@ -111,24 +111,28 @@ contract QVSimpleStrategyTest is Accounts, StrategySetup, RegistrySetupFull, All
         testStrategy.initialize(
             poolId,
             abi.encode(
-                registryGating,
-                metadataRequired,
-                1,
-                maxVoiceCreditsPerAllocator,
-                registrationStartTime,
-                registrationEndTime,
-                allocationStartTime,
-                allocationEndTime
+                QVSimpleStrategy.InitializeParamsSimple(
+                    maxVoiceCreditsPerAllocator,
+                    QVBaseStrategy.InitializeParams(
+                        registryGating,
+                        metadataRequired,
+                        1,
+                        registrationStartTime,
+                        registrationEndTime,
+                        allocationStartTime,
+                        allocationEndTime
+                    )
+                )
             )
         );
     }
 
     // Fuzz test the timestamp initialization conditions
     function testFuzz_initialize_timestamps(
-        uint256 _registrationStartTime,
-        uint256 _registrationEndTime,
-        uint256 _allocationStartTime,
-        uint256 _allocationEndTime
+        uint64 _registrationStartTime,
+        uint64 _registrationEndTime,
+        uint64 _allocationStartTime,
+        uint64 _allocationEndTime
     ) public {
         vm.assume(_registrationStartTime > block.timestamp);
         vm.assume(_registrationStartTime < _registrationEndTime);
@@ -139,67 +143,19 @@ contract QVSimpleStrategyTest is Accounts, StrategySetup, RegistrySetupFull, All
         strategy.initialize(
             poolId,
             abi.encode(
-                registryGating,
-                metadataRequired,
-                1,
-                maxVoiceCreditsPerAllocator,
-                _registrationStartTime,
-                _registrationEndTime,
-                _allocationStartTime,
-                _allocationEndTime
+                QVSimpleStrategy.InitializeParamsSimple(
+                    maxVoiceCreditsPerAllocator,
+                    QVBaseStrategy.InitializeParams(
+                        registryGating,
+                        metadataRequired,
+                        1,
+                        registrationStartTime,
+                        registrationEndTime,
+                        allocationStartTime,
+                        allocationEndTime
+                    )
+                )
             )
         );
     }
-
-    // FIXME: Fuzz test the timestamp update conditions
-    // function testFuzz_updatePoolTimestamps(
-    //     uint256 _registrationStartTime,
-    //     uint256 _registrationEndTime,
-    //     uint256 _allocationStartTime,
-    //     uint256 _allocationEndTime
-    // ) public {
-    //     vm.assume(_registrationStartTime > block.timestamp);
-    //     vm.assume(_registrationStartTime < _registrationEndTime);
-    //     vm.assume(_registrationEndTime < _allocationStartTime);
-    //     vm.assume(_allocationStartTime < _allocationEndTime && _allocationStartTime < _allocationEndTime);
-
-    //     vm.prank(address(allo()));
-    //     strategy.initialize(
-    //         poolId,
-    //         abi.encode(
-    //             registryGating,
-    //             metadataRequired,
-    //             maxVoiceCreditsPerAllocator,
-    //             _registrationStartTime,
-    //             _registrationEndTime,
-    //             _allocationStartTime,
-    //             _allocationEndTime
-    //         )
-    //     );
-
-    //     vm.startPrank(pool_manager1());
-    //     poolId = allo().createPoolWithCustomStrategy(
-    //         poolProfile_id(),
-    //         address(strategy),
-    //         abi.encode(
-    //             registryGating,
-    //             metadataRequired,
-    //             maxVoiceCreditsPerAllocator,
-    //             registrationStartTime,
-    //             registrationEndTime,
-    //             allocationStartTime,
-    //             allocationEndTime
-    //         ),
-    //         address(token),
-    //         0,
-    //         poolMetadata,
-    //         pool_managers()
-    //     );
-
-    //     vm.warp(1000);
-
-    //     strategy.updatePoolTimestamps(
-    //         _registrationStartTime, _registrationEndTime, _allocationStartTime, _allocationEndTime
-    //     );
-    // }
 }

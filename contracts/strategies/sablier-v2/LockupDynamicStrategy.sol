@@ -77,6 +77,12 @@ contract LockupDynamicStrategy is BaseStrategy, ReentrancyGuard {
         LockupDynamic.SegmentWithDelta[] segments;
     }
 
+    struct InitializeParams {
+        bool registryGating;
+        bool metadataRequired;
+        bool grantAmountRequired;
+    }
+
     /// ===============================
     /// ======== Constructor ==========
     /// ===============================
@@ -92,21 +98,15 @@ contract LockupDynamicStrategy is BaseStrategy, ReentrancyGuard {
     /// ===============================
 
     function initialize(uint256 _poolId, bytes memory _data) public virtual override {
-        (bool _registryGating, bool _metadataRequired, bool _grantAmountRequired) =
-            abi.decode(_data, (bool, bool, bool));
-        __LockupDynamicStrategy_init(_poolId, _registryGating, _metadataRequired, _grantAmountRequired);
+        (InitializeParams memory initializeParams) = abi.decode(_data, (InitializeParams));
+        __LockupDynamicStrategy_init(_poolId, initializeParams);
     }
 
-    function __LockupDynamicStrategy_init(
-        uint256 _poolId,
-        bool _registryGating,
-        bool _metadataRequired,
-        bool _grantAmountRequired
-    ) internal {
+    function __LockupDynamicStrategy_init(uint256 _poolId, InitializeParams memory _initializeParams) internal {
         __BaseStrategy_init(_poolId);
-        registryGating = _registryGating;
-        metadataRequired = _metadataRequired;
-        grantAmountRequired = _grantAmountRequired;
+        registryGating = _initializeParams.registryGating;
+        metadataRequired = _initializeParams.metadataRequired;
+        grantAmountRequired = _initializeParams.grantAmountRequired;
         _setPoolActive(true);
     }
 

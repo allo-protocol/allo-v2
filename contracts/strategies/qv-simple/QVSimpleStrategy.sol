@@ -23,6 +23,11 @@ contract QVSimpleStrategy is QVBaseStrategy {
     event AllocatorAdded(address indexed allocator, address sender);
     event AllocatorRemoved(address indexed allocator, address sender);
 
+    struct InitializeParamsSimple {
+        uint256 maxVoiceCreditsPerAllocator;
+        InitializeParams params;
+    }
+
     uint256 public maxVoiceCreditsPerAllocator;
 
     /// @notice allocator => bool
@@ -38,33 +43,11 @@ contract QVSimpleStrategy is QVBaseStrategy {
     /// @param _poolId The pool id
     /// @param _data The data
     function initialize(uint256 _poolId, bytes memory _data) external virtual override onlyAllo {
-        (
-            bool _registryGating,
-            bool _metadataRequired,
-            uint256 _reviewThreshold,
-            uint256 _maxVoiceCreditsPerAllocator,
-            uint256 _registrationStartTime,
-            uint256 _registrationEndTime,
-            uint256 _allocationStartTime,
-            uint256 _allocationEndTime
-        ) = abi.decode(_data, (bool, bool, uint256, uint256, uint256, uint256, uint256, uint256));
-        __QVBaseStrategy_init(
-            _poolId,
-            _registryGating,
-            _metadataRequired,
-            _reviewThreshold,
-            _registrationStartTime,
-            _registrationEndTime,
-            _allocationStartTime,
-            _allocationEndTime
-        );
+        (InitializeParamsSimple memory initializeParamsSimple) = abi.decode(_data, (InitializeParamsSimple));
+        __QVBaseStrategy_init(_poolId, initializeParamsSimple.params);
 
-        maxVoiceCreditsPerAllocator = _maxVoiceCreditsPerAllocator;
+        maxVoiceCreditsPerAllocator = initializeParamsSimple.maxVoiceCreditsPerAllocator;
     }
-
-    /// =========================
-    /// ==== View Functions =====
-    /// =========================
 
     /// ====================================
     /// ==== External/Public Functions =====

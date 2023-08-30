@@ -55,6 +55,16 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
         address token;
     }
 
+    struct InitializeData {
+        bool useRegistryAnchor;
+        bool metadataRequired;
+        uint64 registrationStartTime;
+        uint64 registrationEndTime;
+        uint64 allocationStartTime;
+        uint64 allocationEndTime;
+        address[] allowedTokens;
+    }
+
     /// ===============================
     /// ========== Events =============
     /// ===============================
@@ -68,10 +78,10 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     event RecipientStatusUpdated(address indexed recipientId, InternalRecipientStatus recipientStatus, address sender);
     event Claimed(address indexed recipientId, address recipientAddress, uint256 amount, address token);
     event TimestampsUpdated(
-        uint256 registrationStartTime,
-        uint256 registrationEndTime,
-        uint256 allocationStartTime,
-        uint256 allocationEndTime,
+        uint64 registrationStartTime,
+        uint64 registrationEndTime,
+        uint64 allocationStartTime,
+        uint64 allocationEndTime,
         address sender
     );
     event PayoutSet(bytes recipientIds);
@@ -83,11 +93,11 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     bool public useRegistryAnchor;
     bool public metadataRequired;
     IRegistry private _registry;
-    uint256 public registrationStartTime;
-    uint256 public registrationEndTime;
-    uint256 public allocationStartTime;
-    uint256 public allocationEndTime;
     uint256 public totalPayoutAmount;
+    uint64 public registrationStartTime;
+    uint64 public registrationEndTime;
+    uint64 public allocationStartTime;
+    uint64 public allocationEndTime;
 
     /// @notice token -> bool
     mapping(address => bool) public allowedTokens;
@@ -134,54 +144,33 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     /// ===============================
 
     function initialize(uint256 _poolId, bytes memory _data) external virtual override onlyAllo {
-        (
-            bool _useRegistryAnchor,
-            bool _metadataRequired,
-            uint256 _registrationStartTime,
-            uint256 _registrationEndTime,
-            uint256 _allocationStartTime,
-            uint256 _allocationEndTime,
-            address[] memory _allowedTokens
-        ) = abi.decode(_data, (bool, bool, uint256, uint256, uint256, uint256, address[]));
-        __DonationVotingStrategy_init(
-            _poolId,
-            _useRegistryAnchor,
-            _metadataRequired,
-            _registrationStartTime,
-            _registrationEndTime,
-            _allocationStartTime,
-            _allocationEndTime,
-            _allowedTokens
-        );
+        (InitializeData memory initializeData) = abi.decode(_data, (InitializeData));
+        __DonationVotingStrategy_init(_poolId, initializeData);
     }
 
-    function __DonationVotingStrategy_init(
-        uint256 _poolId,
-        bool _useRegistryAnchor,
-        bool _metadataRequired,
-        uint256 _registrationStartTime,
-        uint256 _registrationEndTime,
-        uint256 _allocationStartTime,
-        uint256 _allocationEndTime,
-        address[] memory _allowedTokens
-    ) internal {
+    function __DonationVotingStrategy_init(uint256 _poolId, InitializeData memory _initializeData) internal {
         __BaseStrategy_init(_poolId);
-        useRegistryAnchor = _useRegistryAnchor;
-        metadataRequired = _metadataRequired;
+        useRegistryAnchor = _initializeData.useRegistryAnchor;
+        metadataRequired = _initializeData.metadataRequired;
         _registry = allo.getRegistry();
 
-        _isPoolTimestampValid(_registrationStartTime, _registrationEndTime, _allocationStartTime, _allocationEndTime);
+        _isPoolTimestampValid(
+            _initializeData.registrationStartTime,
+            _initializeData.registrationEndTime,
+            _initializeData.allocationStartTime,
+            _initializeData.allocationEndTime
+        );
 
-        registrationStartTime = _registrationStartTime;
-        registrationEndTime = _registrationEndTime;
-        allocationStartTime = _allocationStartTime;
-        allocationEndTime = _allocationEndTime;
+        registrationStartTime = _initializeData.registrationStartTime;
+        registrationEndTime = _initializeData.registrationEndTime;
+        allocationStartTime = _initializeData.allocationStartTime;
+        allocationEndTime = _initializeData.allocationEndTime;
 
         emit TimestampsUpdated(
             registrationStartTime, registrationEndTime, allocationStartTime, allocationEndTime, msg.sender
         );
 
-        uint256 allowedTokensLength = _allowedTokens.length;
+        uint256 allowedTokensLength = _initializeData.allowedTokens.length;
 
         if (allowedTokensLength == 0) {
             // all tokens
@@ -189,7 +178,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
         }
 
         for (uint256 i = 0; i < allowedTokensLength; i++) {
-            allowedTokens[_allowedTokens[i]] = true;
+            allowedTokens[_initializeData.allowedTokens[i]] = true;
         }
     }
 
@@ -336,10 +325,10 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _allocationStartTime The start time for the allocation
     /// @param _allocationEndTime The end time for the allocation
     function updatePoolTimestamps(
-        uint256 _registrationStartTime,
-        uint256 _registrationEndTime,
-        uint256 _allocationStartTime,
-        uint256 _allocationEndTime
+        uint64 _registrationStartTime,
+        uint64 _registrationEndTime,
+        uint64 _allocationStartTime,
+        uint64 _allocationEndTime
     ) external onlyPoolManager(msg.sender) {
         _isPoolTimestampValid(_registrationStartTime, _registrationEndTime, _allocationStartTime, _allocationEndTime);
 
@@ -374,10 +363,10 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     /// ====================================
 
     function _isPoolTimestampValid(
-        uint256 _registrationStartTime,
-        uint256 _registrationEndTime,
-        uint256 _allocationStartTime,
-        uint256 _allocationEndTime
+        uint64 _registrationStartTime,
+        uint64 _registrationEndTime,
+        uint64 _allocationStartTime,
+        uint64 _allocationEndTime
     ) internal view {
         if (
             block.timestamp > _registrationStartTime || _registrationStartTime > _registrationEndTime
