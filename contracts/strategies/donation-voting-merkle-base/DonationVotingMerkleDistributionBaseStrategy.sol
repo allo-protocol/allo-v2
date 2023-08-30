@@ -249,7 +249,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     }
 
     /// @notice Initializes this strategy as well as the BaseStrategy.
-    /// @dev This will revert if the strategy is already initialized.
+    /// @dev This will revert if the strategy is already initialized. Emits a 'TimestampsUpdated()' event.
     /// @param _poolId The 'poolId' to initialize
     /// @param _useRegistryAnchor If 'true', the 'recipientAddress' is the anchor of the profile
     /// @param _metadataRequired If 'true', the metadata is required
@@ -313,7 +313,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
 
     /// @notice Get a recipient with a '_recipientId'
     /// @param _recipientId ID of the recipient
-    /// @return recipient Returns the recipient details
+    /// @return The recipient details
     function getRecipient(address _recipientId) external view returns (Recipient memory recipient) {
         return _getRecipient(_recipientId);
     }
@@ -358,6 +358,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     /// - 2: accepted
     /// - 3: rejected
     /// - 4: appealed
+    /// Emits the RecipientStatusUpdated() event.
     /// @param statuses new statuses
     function reviewRecipients(ApplicationStatus[] memory statuses)
         external
@@ -382,6 +383,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
 
     /// @notice Sets the start and end dates.
     /// @dev The timestamps are in milliseconds for the start and end times. The 'msg.sender' must be a pool manager.
+    ///      Emits a 'TimestampsUpdated()' event.
     /// @param _registrationStartTime The start time for the registration
     /// @param _registrationEndTime The end time for the registration
     /// @param _allocationStartTime The start time for the allocation
@@ -434,6 +436,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
 
     /// @notice Invoked by round operator to update the merkle root and distribution Metadata.
     /// @dev This can only be called after the allocation has ended and 'msg.sender' must be a pool manager and allocation must have ended.
+    ///      Emits a 'DistributionUpdated()' event.
     /// @param _merkleRoot The merkle root of the distribution
     /// @param _distributionMetadata The metadata of the distribution
     function updateDistribution(bytes32 _merkleRoot, Metadata memory _distributionMetadata)
@@ -455,14 +458,14 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     }
 
     /// @notice Checks if distribution is set.
-    /// @return Whether the distribution is set or not
+    /// @return 'true' if distribution is set, otherwise 'false'
     function isDistributionSet() external view returns (bool) {
         return merkleRoot != "";
     }
 
     /// @notice Utility function to check if distribution is done.
     /// @param _index index of the distribution
-    /// @return Whether the distribution is completed or not
+    /// @return 'true' if distribution is completed, otherwise 'false'
     function hasBeenDistributed(uint256 _index) external view returns (bool) {
         return _hasBeenDistributed(_index);
     }
@@ -506,7 +509,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     /// @notice Checks whether a pool is active or not.
     /// @dev This will return true if the current 'block timestamp' is greater than or equal to the
     /// 'registrationStartTime' and less than or equal to the 'registrationEndTime'.
-    /// @return Whether the pool is active or not
+    /// @return 'true' if pool is active, otherwise 'false'
     function _isPoolActive() internal view override returns (bool) {
         if (registrationStartTime <= block.timestamp && block.timestamp <= registrationEndTime) {
             return true;
@@ -597,6 +600,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
 
     /// @notice Distribute funds to recipients.
     /// @dev 'distributionStarted' will be set to 'true' when called. Only the pool manager can call.
+    ///      Emits a 'BatchPayoutSuccessful()' event.
     /// @param _data The data to be decoded
     /// @custom:data '(Distribution[] distributions)'
     /// @param _sender The sender of the transaction
@@ -627,7 +631,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     }
 
     /// @notice Allocate tokens to recipient.
-    /// @dev This can only be called during the allocation period.
+    /// @dev This can only be called during the allocation period. Emts an 'Allocated()' event.
     /// @param _data The data to be decoded
     /// @custom:data (address recipientId, uint256 amount, address token)
     /// @param _sender The sender of the transaction
@@ -657,7 +661,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     /// @notice Check if sender is profile owner or member.
     /// @param _anchor Anchor of the profile
     /// @param _sender The sender of the transaction
-    /// @return Whether the '_sender' is a profile member or not
+    /// @return 'true' if the '_sender' is a profile member, otherwise 'false'
     function _isProfileMember(address _anchor, address _sender) internal view virtual returns (bool) {
         IRegistry.Profile memory profile = _registry.getProfileByAnchor(_anchor);
         return _registry.isOwnerOrMemberOfProfile(profile.id, _sender);
@@ -701,7 +705,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     /// @param _recipientAddress Address of the recipient
     /// @param _amount Amount of tokens to be distributed
     /// @param _merkleProof Merkle proof of the distribution
-    /// @return Whether the distribution is valid or not
+    /// @return 'true' if the distribution is valid, otherwise 'false'
     function _validateDistribution(
         uint256 _index,
         address _recipientId,
@@ -728,7 +732,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
 
     /// @notice Check if the distribution has been distributed.
     /// @param _index index of the distribution
-    /// @return Whether the distribution has been distributed or not
+    /// @return 'true' if the distribution has been distributed, otherwise 'false'
     function _hasBeenDistributed(uint256 _index) internal view returns (bool) {
         // Get the word index by dividing the '_index' by 256
         uint256 distributedWordIndex = _index / 256;
@@ -760,6 +764,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     }
 
     /// @notice Distribute funds to recipient.
+    /// @dev Emits a 'FundsDistributed()' event
     /// @param _distribution Distribution to be distributed
     function _distributeSingle(Distribution memory _distribution) private {
         uint256 index = _distribution.index;
@@ -805,7 +810,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
 
     /// @notice Get recipient status
     /// @param _recipientId ID of the recipient
-    /// @return status status of the recipient
+    /// @return The status of the recipient
     function _getUintRecipientStatus(address _recipientId) internal view returns (uint8 status) {
         // Get the column index and current row
         (, uint256 colIndex, uint256 currentRow) = _getStatusRowColumn(_recipientId);
