@@ -174,28 +174,6 @@ function getAllo() external view returns (contract IAllo)
 |---|---|---|
 | _0 | contract IAllo | undefined |
 
-### getInternalRecipientStatus
-
-```solidity
-function getInternalRecipientStatus(address _recipientId) external view returns (enum DonationVotingStrategy.InternalRecipientStatus)
-```
-
-Get Internal recipient status
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _recipientId | address | Id of the recipient |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | enum DonationVotingStrategy.InternalRecipientStatus | undefined |
-
 ### getPayouts
 
 ```solidity
@@ -278,7 +256,7 @@ Get the recipient
 ### getRecipientStatus
 
 ```solidity
-function getRecipientStatus(address _recipientId) external view returns (enum IStrategy.RecipientStatus)
+function getRecipientStatus(address _recipientId) external view returns (enum IStrategy.Status)
 ```
 
 
@@ -295,7 +273,7 @@ function getRecipientStatus(address _recipientId) external view returns (enum IS
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | enum IStrategy.RecipientStatus | undefined |
+| _0 | enum IStrategy.Status | undefined |
 
 ### getStrategyId
 
@@ -486,7 +464,7 @@ function registrationStartTime() external view returns (uint256)
 ### reviewRecipients
 
 ```solidity
-function reviewRecipients(address[] _recipientIds, enum DonationVotingStrategy.InternalRecipientStatus[] _recipientStatuses) external nonpayable
+function reviewRecipients(address[] _recipientIds, enum IStretegy.Status[] _recipientStatuses) external nonpayable
 ```
 
 Review recipient application
@@ -498,7 +476,7 @@ Review recipient application
 | Name | Type | Description |
 |---|---|---|
 | _recipientIds | address[] | Ids of the recipients |
-| _recipientStatuses | enum DonationVotingStrategy.InternalRecipientStatus[] | Statuses of the recipients |
+| _recipientStatuses | enum IStretegy.Status[] | Statuses of the recipients |
 
 ### setPayout
 
@@ -719,7 +697,7 @@ Event emitted when pool is set to active status
 ### RecipientStatusUpdated
 
 ```solidity
-event RecipientStatusUpdated(address indexed recipientId, enum DonationVotingStrategy.InternalRecipientStatus recipientStatus, address sender)
+event RecipientStatusUpdated(address indexed recipientId, enum IStretegy.Status recipientStatus, address sender)
 ```
 
 
@@ -731,7 +709,7 @@ event RecipientStatusUpdated(address indexed recipientId, enum DonationVotingStr
 | Name | Type | Description |
 |---|---|---|
 | recipientId `indexed` | address | undefined |
-| recipientStatus  | enum DonationVotingStrategy.InternalRecipientStatus | undefined |
+| recipientStatus  | enum IStretegy.Status | undefined |
 | sender  | address | undefined |
 
 ### Registered

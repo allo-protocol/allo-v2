@@ -217,27 +217,6 @@ function getAttestation(bytes32 uid) external view returns (struct Attestation)
 |---|---|---|
 | _0 | Attestation | undefined |
 
-### getInternalRecipientStatus
-
-```solidity
-function getInternalRecipientStatus(address _recipientId) external view returns (enum QVBaseStrategy.InternalRecipientStatus)
-```
-
-Get Internal recipient status
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _recipientId | address | Id of the recipient |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | enum QVBaseStrategy.InternalRecipientStatus | undefined |
 
 ### getPayouts
 
@@ -321,7 +300,7 @@ Get the recipient
 ### getRecipientStatus
 
 ```solidity
-function getRecipientStatus(address _recipientId) external view returns (enum IStrategy.RecipientStatus)
+function getRecipientStatus(address _recipientId) external view returns (enum IStrategy.Status)
 ```
 
 
@@ -338,7 +317,7 @@ function getRecipientStatus(address _recipientId) external view returns (enum IS
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | enum IStrategy.RecipientStatus | undefined |
+| _0 | enum IStrategy.Status | undefined |
 
 ### getSchema
 
@@ -700,7 +679,7 @@ function recipientIdToUID(address) external view returns (bytes32)
 ### recipients
 
 ```solidity
-function recipients(address) external view returns (bool useRegistryAnchor, address recipientAddress, struct Metadata metadata, enum QVBaseStrategy.InternalRecipientStatus recipientStatus, uint256 totalVotesReceived)
+function recipients(address) external view returns (bool useRegistryAnchor, address recipientAddress, struct Metadata metadata, enum IStretegy.Status recipientStatus, uint256 totalVotesReceived)
 ```
 
 recipientId =&gt; Recipient
@@ -720,7 +699,7 @@ recipientId =&gt; Recipient
 | useRegistryAnchor | bool | undefined |
 | recipientAddress | address | undefined |
 | metadata | Metadata | undefined |
-| recipientStatus | enum QVBaseStrategy.InternalRecipientStatus | undefined |
+| recipientStatus | enum IStretegy.Status | undefined |
 | totalVotesReceived | uint256 | undefined |
 
 ### registerRecipient
@@ -800,7 +779,7 @@ function registryGating() external view returns (bool)
 ### reviewRecipients
 
 ```solidity
-function reviewRecipients(address[] _recipientIds, enum QVBaseStrategy.InternalRecipientStatus[] _recipientStatuses) external nonpayable
+function reviewRecipients(address[] _recipientIds, enum IStretegy.Status[] _recipientStatuses) external nonpayable
 ```
 
 Review recipient application
@@ -812,7 +791,7 @@ Review recipient application
 | Name | Type | Description |
 |---|---|---|
 | _recipientIds | address[] | Ids of the recipients |
-| _recipientStatuses | enum QVBaseStrategy.InternalRecipientStatus[] | Statuses of the recipients |
+| _recipientStatuses | enum IStretegy.Status[] | Statuses of the recipients |
 
 ### reviewThreshold
 
@@ -834,7 +813,7 @@ function reviewThreshold() external view returns (uint256)
 ### reviewsByStatus
 
 ```solidity
-function reviewsByStatus(address, enum QVBaseStrategy.InternalRecipientStatus) external view returns (uint256)
+function reviewsByStatus(address, enum IStretegy.Status) external view returns (uint256)
 ```
 
 
@@ -846,7 +825,7 @@ function reviewsByStatus(address, enum QVBaseStrategy.InternalRecipientStatus) e
 | Name | Type | Description |
 |---|---|---|
 | _0 | address | undefined |
-| _1 | enum QVBaseStrategy.InternalRecipientStatus | undefined |
+| _1 | enum IStretegy.Status | undefined |
 
 #### Returns
 
@@ -1088,7 +1067,7 @@ Event emitted when pool is set to active status
 ### RecipientStatusUpdated
 
 ```solidity
-event RecipientStatusUpdated(address indexed recipientId, enum QVBaseStrategy.InternalRecipientStatus status, address sender)
+event RecipientStatusUpdated(address indexed recipientId, enum IStretegy.Status status, address sender)
 ```
 
 
@@ -1100,7 +1079,7 @@ event RecipientStatusUpdated(address indexed recipientId, enum QVBaseStrategy.In
 | Name | Type | Description |
 |---|---|---|
 | recipientId `indexed` | address | undefined |
-| status  | enum QVBaseStrategy.InternalRecipientStatus | undefined |
+| status  | enum IStretegy.Status | undefined |
 | sender  | address | undefined |
 
 ### Registered
@@ -1124,7 +1103,7 @@ Event emitted when a recipient is registered
 ### Reviewed
 
 ```solidity
-event Reviewed(address indexed recipientId, enum QVBaseStrategy.InternalRecipientStatus status, address sender)
+event Reviewed(address indexed recipientId, enum IStretegy.Status status, address sender)
 ```
 
 
@@ -1136,7 +1115,7 @@ event Reviewed(address indexed recipientId, enum QVBaseStrategy.InternalRecipien
 | Name | Type | Description |
 |---|---|---|
 | recipientId `indexed` | address | undefined |
-| status  | enum QVBaseStrategy.InternalRecipientStatus | undefined |
+| status  | enum IStretegy.Status | undefined |
 | sender  | address | undefined |
 
 ### TimestampsUpdated

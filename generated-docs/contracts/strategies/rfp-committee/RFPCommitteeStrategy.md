@@ -121,7 +121,7 @@ Get the milestone
 ### getMilestoneStatus
 
 ```solidity
-function getMilestoneStatus(uint256 _milestoneId) external view returns (enum IStrategy.RecipientStatus)
+function getMilestoneStatus(uint256 _milestoneId) external view returns (enum IStrategy.Status)
 ```
 
 Get the status of the milestone
@@ -138,7 +138,7 @@ Get the status of the milestone
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | enum IStrategy.RecipientStatus | undefined |
+| _0 | enum IStrategy.Status | undefined |
 
 ### getPayouts
 
@@ -222,7 +222,7 @@ Get the recipient
 ### getRecipientStatus
 
 ```solidity
-function getRecipientStatus(address _recipientId) external view returns (enum IStrategy.RecipientStatus)
+function getRecipientStatus(address _recipientId) external view returns (enum IStrategy.Status)
 ```
 
 
@@ -239,7 +239,7 @@ function getRecipientStatus(address _recipientId) external view returns (enum IS
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | enum IStrategy.RecipientStatus | undefined |
+| _0 | enum IStrategy.Status | undefined |
 
 ### getStrategyId
 
@@ -383,7 +383,7 @@ function metadataRequired() external view returns (bool)
 ### milestones
 
 ```solidity
-function milestones(uint256) external view returns (uint256 amountPercentage, struct Metadata metadata, enum IStrategy.RecipientStatus milestoneStatus)
+function milestones(uint256) external view returns (uint256 amountPercentage, struct Metadata metadata, enum IStrategy.Status milestoneStatus)
 ```
 
 
@@ -402,7 +402,7 @@ function milestones(uint256) external view returns (uint256 amountPercentage, st
 |---|---|---|
 | amountPercentage | uint256 | undefined |
 | metadata | Metadata | undefined |
-| milestoneStatus | enum IStrategy.RecipientStatus | undefined |
+| milestoneStatus | enum IStrategy.Status | undefined |
 
 ### registerRecipient
 

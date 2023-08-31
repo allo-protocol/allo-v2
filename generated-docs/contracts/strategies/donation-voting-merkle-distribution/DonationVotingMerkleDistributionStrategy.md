@@ -212,7 +212,7 @@ function getAllo() external view returns (contract IAllo)
 ### getInternalRecipientStatus
 
 ```solidity
-function getInternalRecipientStatus(address _recipientId) external view returns (enum DonationVotingMerkleDistributionStrategy.InternalRecipientStatus)
+function getInternalRecipientStatus(address _recipientId) external view returns (enum IStretegy.Status)
 ```
 
 Get Internal recipient status
@@ -229,7 +229,7 @@ Get Internal recipient status
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | enum DonationVotingMerkleDistributionStrategy.InternalRecipientStatus | undefined |
+| _0 | enum IStretegy.Status | undefined |
 
 ### getPayouts
 
@@ -313,7 +313,7 @@ Get the recipient
 ### getRecipientStatus
 
 ```solidity
-function getRecipientStatus(address _recipientId) external view returns (enum IStrategy.RecipientStatus)
+function getRecipientStatus(address _recipientId) external view returns (enum IStrategy.Status)
 ```
 
 
@@ -330,7 +330,7 @@ function getRecipientStatus(address _recipientId) external view returns (enum IS
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | enum IStrategy.RecipientStatus | undefined |
+| _0 | enum IStrategy.Status | undefined |
 
 ### getStrategyId
 

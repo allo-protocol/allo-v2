@@ -68,7 +68,7 @@ The constructor initializes the strategy by accepting the address of the `IAllo`
 5. `_allocate`: Allocates tokens to recipients based on provided data.
 6. `_distribute`: Distributes tokens to recipients based on provided data.
 7. `_getPayout`: Retrieves the payout summary for a recipient and data pair.
-8. `_getRecipientStatus`: Retrieves the status of a recipient. The strategy can choose to have it's status as long it returns IStrategy.RecipientStatus
+8. `_getRecipientStatus`: Retrieves the status of a recipient. The strategy can choose to have it's status as long it returns IStrategy.Status
 
 In essence, the `BaseStrategy` contract establishes a standardized blueprint for various allocation strategies within the Allo ecosystem. It integrates critical functions, modifiers, and data structures, promoting consistency and coherence across different strategies.
 

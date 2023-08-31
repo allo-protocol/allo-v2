@@ -67,10 +67,6 @@ sequenceDiagram
 - **Interfaces:** Inherits from the `BaseStrategy` contract, extending its functionalities for direct grant allocation strategies.
 - **Internal Libraries:** Imports the `Metadata` library from the Allo core for metadata management.
 
-### Enums
-
-1. `InternalRecipientStatus`: An internal enumeration representing the status of a recipient within the strategy. Possible values include None, Pending, Accepted, Rejected, and InReview.
-
 ### Structs
 
 1. `Recipient`: Contains recipient-related data, such as the recipient's address, grant amount, metadata, and status.

@@ -69,4 +69,4 @@ When a stream is created and set to be cancelable, the pool manager has the opti
 - The recipient grant amount will be decreased
 - The allocated grant amount will also be decreased
 
-Also, the `InternalRecipientStatus` will be updated to `Canceled` for the recipient.
+Also, the `Status` will be updated to `Canceled` for the recipient.

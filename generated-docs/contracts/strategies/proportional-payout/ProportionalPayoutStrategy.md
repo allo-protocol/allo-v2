@@ -195,7 +195,7 @@ Get the recipient
 ### getRecipientStatus
 
 ```solidity
-function getRecipientStatus(address _recipientId) external view returns (enum IStrategy.RecipientStatus)
+function getRecipientStatus(address _recipientId) external view returns (enum IStrategy.Status)
 ```
 
 
@@ -212,7 +212,7 @@ function getRecipientStatus(address _recipientId) external view returns (enum IS
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | enum IStrategy.RecipientStatus | undefined |
+| _0 | enum IStrategy.Status | undefined |
 
 ### getStrategyId
 
@@ -384,7 +384,7 @@ recipientId =&gt; paid out
 ### recipients
 
 ```solidity
-function recipients(address) external view returns (address recipientAddress, struct Metadata metadata, enum IStrategy.RecipientStatus recipientStatus, uint256 totalVotesReceived)
+function recipients(address) external view returns (address recipientAddress, struct Metadata metadata, enum IStrategy.Status recipientStatus, uint256 totalVotesReceived)
 ```
 
 recipientId =&gt; Recipient
@@ -403,7 +403,7 @@ recipientId =&gt; Recipient
 |---|---|---|
 | recipientAddress | address | undefined |
 | metadata | Metadata | undefined |
-| recipientStatus | enum IStrategy.RecipientStatus | undefined |
+| recipientStatus | enum IStrategy.Status | undefined |
 | totalVotesReceived | uint256 | undefined |
 
 ### recipientsCounter

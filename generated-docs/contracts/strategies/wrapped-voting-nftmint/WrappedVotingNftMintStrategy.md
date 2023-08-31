@@ -212,7 +212,7 @@ function getPoolId() external view returns (uint256)
 ### getRecipientStatus
 
 ```solidity
-function getRecipientStatus(address _recipientId) external view returns (enum IStrategy.RecipientStatus)
+function getRecipientStatus(address _recipientId) external view returns (enum IStrategy.Status)
 ```
 
 
@@ -229,7 +229,7 @@ function getRecipientStatus(address _recipientId) external view returns (enum IS
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | enum IStrategy.RecipientStatus | undefined |
+| _0 | enum IStrategy.Status | undefined |
 
 ### getStrategyId
 
@@ -494,7 +494,7 @@ Event emitted when pool is set to active status
 ### RecipientStatusUpdated
 
 ```solidity
-event RecipientStatusUpdated(address indexed recipientId, enum WrappedVotingNftMintStrategy.InternalRecipientStatus recipientStatus, address sender)
+event RecipientStatusUpdated(address indexed recipientId, enum IStretegy.Status recipientStatus, address sender)
 ```
 
 
@@ -506,7 +506,7 @@ event RecipientStatusUpdated(address indexed recipientId, enum WrappedVotingNftM
 | Name | Type | Description |
 |---|---|---|
 | recipientId `indexed` | address | undefined |
-| recipientStatus  | enum WrappedVotingNftMintStrategy.InternalRecipientStatus | undefined |
+| recipientStatus  | enum IStretegy.Status | undefined |
 | sender  | address | undefined |
 
 ### Registered

@@ -66,11 +66,10 @@ sequenceDiagram
 
 ### Structs and Enums
 
-1. `InternalRecipientStatus`: Enumerates the internal status of recipients, indicating pending, accepted, rejected, appealed, or no status.
-2. `ApplicationStatus`: Contains the recipient application's index and status row.
-3. `Recipient`: Captures recipient-specific attributes, such as using a registry anchor, recipient address, and metadata.
-4. `Claim`: Describes a claim for allocated tokens.
-5. `Distribution`: Represents fund distribution, encompassing an index, recipient ID, allocation amount, and Merkle proof.
+1. `ApplicationStatus`: Contains the recipient application's index and status row.
+2. `Recipient`: Captures recipient-specific attributes, such as using a registry anchor, recipient address, and metadata.
+3. `Claim`: Describes a claim for allocated tokens.
+4. `Distribution`: Represents fund distribution, encompassing an index, recipient ID, allocation amount, and Merkle proof.
 
 ### Modifiers
 

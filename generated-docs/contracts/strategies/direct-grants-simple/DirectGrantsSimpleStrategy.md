@@ -96,13 +96,13 @@ function getAllo() external view returns (contract IAllo)
 |---|---|---|
 | _0 | contract IAllo | undefined |
 
-### getInternalRecipientStatus
+### getRecipientStatus
 
 ```solidity
-function getInternalRecipientStatus(address _recipientId) external view returns (enum DirectGrantsSimpleStrategy.InternalRecipientStatus)
+function getRecipientStatus(address _recipientId) external view returns (enum IStrategy.Status)
 ```
 
-Get Internal recipient status
+Get recipient status
 
 *This status is specific to this strategy and is used to track the status of the recipient*
 
@@ -110,18 +110,18 @@ Get Internal recipient status
 
 | Name | Type | Description |
 |---|---|---|
-| _recipientId | address | Id of the recipient |
+| _recipientId | address | ID of the recipient |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | enum DirectGrantsSimpleStrategy.InternalRecipientStatus | InternalRecipientStatus Returns the internal recipient status specific to this strategy |
+| _0 | enum IStrategy.Status | Returns the recipient status specific to this strategy |
 
 ### getMilestoneStatus
 
 ```solidity
-function getMilestoneStatus(address _recipientId, uint256 _milestoneId) external view returns (enum IStrategy.RecipientStatus)
+function getMilestoneStatus(address _recipientId, uint256 _milestoneId) external view returns (enum IStrategy.Status)
 ```
 
 Get the status of the milestone of an recipient
@@ -132,14 +132,14 @@ Get the status of the milestone of an recipient
 
 | Name | Type | Description |
 |---|---|---|
-| _recipientId | address | Id of the recipient |
-| _milestoneId | uint256 | Id of the milestone |
+| _recipientId | address | ID of the recipient |
+| _milestoneId | uint256 | ID of the milestone |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | enum IStrategy.RecipientStatus | RecipientStatus Returns the status of the milestone using the &#39;RecipientStatus&#39; enum |
+| _0 | enum IStrategy.Status | Returns the status of the milestone using the &#39;Status&#39; enum |
 
 ### getMilestones
 
@@ -155,7 +155,7 @@ Get the milestones
 
 | Name | Type | Description |
 |---|---|---|
-| _recipientId | address | Id of the recipient |
+| _recipientId | address | ID of the recipient |
 
 #### Returns
 
@@ -234,7 +234,7 @@ Get the recipient
 
 | Name | Type | Description |
 |---|---|---|
-| _recipientId | address | Id of the recipient |
+| _recipientId | address | ID of the recipient |
 
 #### Returns
 
@@ -245,12 +245,12 @@ Get the recipient
 ### getRecipientStatus
 
 ```solidity
-function getRecipientStatus(address _recipientId) external view returns (enum IStrategy.RecipientStatus)
+function getRecipientStatus(address _recipientId) external view returns (enum IStrategy.Status)
 ```
 
 
 
-*Returns the status of a recipient probably tracked in a mapping, but will depend on the implementation      for example, the OpenSelfRegistration only maps users to bool, and then assumes Accepted for those      since there is no need for Pending or Rejected*
+*Returns the status of a recipient probably tracked in a mapping, but will depend on the implementation. For example, the OpenSelfRegistration only maps users to bool, and then assumes Accepted for those since there is no need for Pending or Rejected.*
 
 #### Parameters
 
@@ -262,7 +262,7 @@ function getRecipientStatus(address _recipientId) external view returns (enum IS
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | enum IStrategy.RecipientStatus | undefined |
+| _0 | enum IStrategy.Status | undefined |
 
 ### getStrategyId
 
@@ -328,7 +328,7 @@ Initialize the strategy
 
 | Name | Type | Description |
 |---|---|---|
-| _poolId | uint256 | Id of the pool |
+| _poolId | uint256 | ID of the pool |
 | _data | bytes | The data to be decoded |
 
 ### isPoolActive
@@ -390,7 +390,7 @@ function metadataRequired() external view returns (bool)
 ### milestones
 
 ```solidity
-function milestones(address, uint256) external view returns (uint256 amountPercentage, struct Metadata metadata, enum IStrategy.RecipientStatus milestoneStatus)
+function milestones(address, uint256) external view returns (uint256 amountPercentage, struct Metadata metadata, enum IStrategy.Status milestoneStatus)
 ```
 
 This maps accepted recipients to their milestones
@@ -410,7 +410,7 @@ This maps accepted recipients to their milestones
 |---|---|---|
 | amountPercentage | uint256 | undefined |
 | metadata | Metadata | undefined |
-| milestoneStatus | enum IStrategy.RecipientStatus | undefined |
+| milestoneStatus | enum IStrategy.Status | undefined |
 
 ### registerRecipient
 
@@ -466,16 +466,16 @@ Reject pending milestone of the recipient Requirements: Only the pool manager ca
 
 | Name | Type | Description |
 |---|---|---|
-| _recipientId | address | Id of the recipient |
-| _milestoneId | uint256 | Id of the milestone |
+| _recipientId | address | ID of the recipient |
+| _milestoneId | uint256 | ID of the milestone |
 
-### setIntenalRecipientStatusToInReview
+### setRecipientStatusToInReview
 
 ```solidity
-function setIntenalRecipientStatusToInReview(address[] _recipientIds) external nonpayable
+function setRecipientStatusToInReview(address[] _recipientIds) external nonpayable
 ```
 
-Set the internal status of the recipient to InReview Requirements: Only the pool manager can set the status
+Set the status of the recipient to InReview Requirements: Only the pool manager can set the status
 
 
 
@@ -622,7 +622,7 @@ Event emitted when strategy is initialized
 ### MilestoneStatusChanged
 
 ```solidity
-event MilestoneStatusChanged(address recipientId, uint256 milestoneId, enum IStrategy.RecipientStatus status)
+event MilestoneStatusChanged(address recipientId, uint256 milestoneId, enum IStrategy.Status status)
 ```
 
 Event for the status change of a milestone
@@ -635,7 +635,7 @@ Event for the status change of a milestone
 |---|---|---|
 | recipientId  | address | undefined |
 | milestoneId  | uint256 | undefined |
-| status  | enum IStrategy.RecipientStatus | undefined |
+| status  | enum IStrategy.Status | undefined |
 
 ### MilestoneSubmitted
 
@@ -690,7 +690,7 @@ Event emitted when pool is set to active status
 ### RecipientStatusChanged
 
 ```solidity
-event RecipientStatusChanged(address recipientId, enum DirectGrantsSimpleStrategy.InternalRecipientStatus status)
+event RecipientStatusChanged(address recipientId, enum IStrategy.Status status)
 ```
 
 Event for the registration of a recipient and the status is updated
@@ -702,7 +702,7 @@ Event for the registration of a recipient and the status is updated
 | Name | Type | Description |
 |---|---|---|
 | recipientId  | address | undefined |
-| status  | enum DirectGrantsSimpleStrategy.InternalRecipientStatus | undefined |
+| status  | enum IStrategy.Status | undefined |
 
 ### Registered
 
