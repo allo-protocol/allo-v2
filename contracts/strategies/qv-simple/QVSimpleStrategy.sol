@@ -72,6 +72,7 @@ contract QVSimpleStrategy is QVBaseStrategy, Multicall {
     /// @notice Initialize the strategy
     /// @param _poolId The ID of the pool
     /// @param _data The initialization data for the strategy
+    /// @custom:data (InitializeParamsSimple)
     function initialize(uint256 _poolId, bytes memory _data) external virtual override onlyAllo {
         (InitializeParamsSimple memory initializeParamsSimple) = abi.decode(_data, (InitializeParamsSimple));
         __QVBaseStrategy_init(_poolId, initializeParamsSimple.params);
@@ -84,6 +85,7 @@ contract QVSimpleStrategy is QVBaseStrategy, Multicall {
     /// ====================================
 
     /// @notice Add allocator
+    /// @dev Only the pool manager(s) can call this function and emits an `AllocatorAdded` event
     /// @param _allocator The allocator address
     function addAllocator(address _allocator) external onlyPoolManager(msg.sender) {
         allowedAllocators[_allocator] = true;
@@ -92,6 +94,7 @@ contract QVSimpleStrategy is QVBaseStrategy, Multicall {
     }
 
     /// @notice Remove allocator
+    /// @dev Only the pool manager(s) can call this function and emits an `AllocatorRemoved` event
     /// @param _allocator The allocator address
     function removeAllocator(address _allocator) external onlyPoolManager(msg.sender) {
         allowedAllocators[_allocator] = false;
