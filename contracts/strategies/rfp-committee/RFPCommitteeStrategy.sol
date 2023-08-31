@@ -79,6 +79,7 @@ contract RFPCommitteeStrategy is RFPSimpleStrategy {
 
     /// @notice This initializes the RFPSimpleStrategy
     /// @dev You only need to pass the 'poolId' to initialize the RFPSimpleStrategy and the rest is specific to the strategy
+    /// @param _poolId The ID of the pool
     /// @param _initializeParamsCommittee The initialize params
     function __RPFCommiteeStrategy_init(uint256 _poolId, InitializeParamsCommittee memory _initializeParamsCommittee)
         internal
@@ -95,7 +96,8 @@ contract RFPCommitteeStrategy is RFPSimpleStrategy {
     /// ====================================
 
     /// @notice Select recipient for RFP allocation
-    /// @dev This is called by the pool manager. The recipient is accepted when the vote threshold is reached
+    /// @dev This is called by the pool manager. The recipient is accepted when the vote threshold is reached.
+    ///      Emits `Allocated` event and `Voted` event.
     /// @param _data The data to be decoded
     /// @param _sender The sender of the allocation
     function _allocate(bytes memory _data, address _sender) internal override onlyPoolManager(_sender) {
