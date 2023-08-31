@@ -106,7 +106,7 @@ interface IStrategy {
     /// @return The balance of the pool
     function getPoolAmount() external view returns (uint256);
 
-    /// @notice Incrases the balance of the pool.
+    /// @notice Increases the balance of the pool.
     /// @param _amount The amount to increase the pool by
     function increasePoolAmount(uint256 _amount) external;
 
@@ -132,7 +132,7 @@ interface IStrategy {
     /// ======================
 
     /// @notice
-    /// @dev The default BaseStrategy version will not use the data  if a strtegy wants to use it, they will overwrite it,
+    /// @dev The default BaseStrategy version will not use the data  if a strategy wants to use it, they will overwrite it,
     ///      use it, and then call super.initialize().
     /// @param _poolId The ID of the pool
     /// @param _data The encoded data
@@ -149,7 +149,7 @@ interface IStrategy {
     function registerRecipient(bytes memory _data, address _sender) external payable returns (address);
 
     /// @notice This will allocate to a recipient.
-    /// @dev The encoded '_data' will be dermined by the strategy implementation.
+    /// @dev The encoded '_data' will be determined by the strategy implementation.
     /// @param _data The data to use to allocate to the recipient
     /// @param _sender The address of the sender
     function allocate(bytes memory _data, address _sender) external payable;
