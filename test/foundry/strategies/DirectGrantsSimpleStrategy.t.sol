@@ -20,11 +20,11 @@ import {DirectGrantsSimpleStrategy} from
     "../../../contracts/strategies/direct-grants-simple/DirectGrantsSimpleStrategy.sol";
 
 contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, RegistrySetupFull, Native, Errors {
-    event RecipientStatusChanged(address recipientId, DirectGrantsSimpleStrategy.InternalRecipientStatus status);
+    event RecipientStatusChanged(address recipientId, DirectGrantsSimpleStrategy.Status status);
     event MilestoneSubmitted(address recipientId, uint256 milestoneId, Metadata metadata);
-    event MilestoneStatusChanged(address recipientId, uint256 milestoneId, IStrategy.RecipientStatus status);
+    event MilestoneStatusChanged(address recipientId, uint256 milestoneId, IStrategy.Status status);
     event MilestonesSet(address recipientId);
-    event MilestonesReviewed(address recipientId, IStrategy.RecipientStatus status);
+    event MilestonesReviewed(address recipientId, IStrategy.Status status);
 
     DirectGrantsSimpleStrategy strategyImplementation;
     DirectGrantsSimpleStrategy strategy;
@@ -82,12 +82,12 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
         assertTrue(recipient.grantAmount == 5e17);
         assertTrue(keccak256(abi.encode(recipient.metadata.pointer)) == keccak256(abi.encode("recipient-data")));
         assertTrue(recipient.metadata.protocol == 1);
-        assertTrue(recipient.recipientStatus == DirectGrantsSimpleStrategy.InternalRecipientStatus.Pending);
-        assertTrue(recipient.milestonesReviewStatus == IStrategy.RecipientStatus.Pending);
+        assertTrue(recipient.recipientStatus == IStrategy.Status.Pending);
+        assertTrue(recipient.milestonesReviewStatus == IStrategy.Status.Pending);
         assertTrue(recipient.useRegistryAnchor);
 
-        IStrategy.RecipientStatus status = strategy.getRecipientStatus(recipientId);
-        assertTrue(uint8(status) == uint8(IStrategy.RecipientStatus.Pending));
+        IStrategy.Status status = strategy.getRecipientStatus(recipientId);
+        assertTrue(uint8(status) == uint8(IStrategy.Status.Pending));
     }
 
     function testRevert_registerRecipient_UNAUTHORIZED() public {
@@ -127,7 +127,7 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
         assertTrue(recipient.grantAmount == 5e17);
         assertTrue(keccak256(abi.encode(recipient.metadata.pointer)) == keccak256(abi.encode("recipient-data")));
         assertTrue(recipient.metadata.protocol == 1);
-        assertTrue(recipient.recipientStatus == DirectGrantsSimpleStrategy.InternalRecipientStatus.Pending);
+        assertTrue(recipient.recipientStatus == IStrategy.Status.Pending);
         assertTrue(recipient.useRegistryAnchor);
     }
 
@@ -223,23 +223,20 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
         assertTrue(payouts[1].recipientAddress == address(0));
     }
 
-    function test_setIntenalRecipientStatusToInReview() public {
+    function test_setRecipientStatusToInReview() public {
         address recipientId = _register_recipient();
 
         address[] memory recipients = new address[](1);
         recipients[0] = recipientId;
 
         vm.expectEmit(false, false, false, true);
-        emit RecipientStatusChanged(recipientId, DirectGrantsSimpleStrategy.InternalRecipientStatus.InReview);
+        emit RecipientStatusChanged(recipientId, IStrategy.Status.InReview);
 
         vm.startPrank(pool_manager1());
-        strategy.setInternalRecipientStatusToInReview(recipients);
-        IStrategy.RecipientStatus status = strategy.getRecipientStatus(recipientId);
-        assertTrue(uint8(status) == uint8(IStrategy.RecipientStatus.Pending));
+        strategy.setRecipientStatusToInReview(recipients);
+        IStrategy.Status status = strategy.getRecipientStatus(recipientId);
 
-        DirectGrantsSimpleStrategy.InternalRecipientStatus internalStatus =
-            strategy.getInternalRecipientStatus(recipientId);
-        assertTrue(uint8(internalStatus) == uint8(DirectGrantsSimpleStrategy.InternalRecipientStatus.InReview));
+        assertTrue(uint8(status) == uint8(IStrategy.Status.InReview));
 
         vm.stopPrank();
     }
@@ -269,21 +266,20 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
         DirectGrantsSimpleStrategy.Recipient memory recipient = strategy.getRecipient(recipientId);
 
         assertTrue(recipient.grantAmount == 1e18);
-        assertTrue(recipient.recipientStatus == DirectGrantsSimpleStrategy.InternalRecipientStatus.Accepted);
+        assertTrue(recipient.recipientStatus == IStrategy.Status.Accepted);
     }
 
     function test_allocate_reject() public {
         address recipientId = _register_recipient_allocate_reject();
 
-        DirectGrantsSimpleStrategy.RecipientStatus recipientStatus = strategy.getRecipientStatus(recipientId);
+        DirectGrantsSimpleStrategy.Status recipientStatus = strategy.getRecipientStatus(recipientId);
 
-        assertEq(uint8(recipientStatus), uint8(IStrategy.RecipientStatus.Rejected));
+        assertEq(uint8(recipientStatus), uint8(IStrategy.Status.Rejected));
     }
 
     function testRevert_allocate_ALLOCATION_EXCEEDS_POOL_AMOUNT() public {
         address recipientId = _register_recipient();
-        DirectGrantsSimpleStrategy.InternalRecipientStatus recipientStatus =
-            DirectGrantsSimpleStrategy.InternalRecipientStatus.Accepted;
+        DirectGrantsSimpleStrategy.Status recipientStatus = IStrategy.Status.Accepted;
         uint256 grantAmount = 2e18; // 2 eth
 
         bytes memory data = abi.encode(recipientId, recipientStatus, grantAmount);
@@ -298,8 +294,7 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
     function testRevert_allocate_MILESTONES_ALREADY_SET() public {
         address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones_distribute();
 
-        DirectGrantsSimpleStrategy.InternalRecipientStatus recipientStatus =
-            DirectGrantsSimpleStrategy.InternalRecipientStatus.Accepted;
+        DirectGrantsSimpleStrategy.Status recipientStatus = IStrategy.Status.Accepted;
         uint256 grantAmount = 1e18; // 1 eth
 
         bytes memory data = abi.encode(recipientId, recipientStatus, grantAmount);
@@ -314,27 +309,27 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
     function test_setMilestonesByPoolManager() public {
         address recipientId = _register_recipient_allocate_accept_set_milestones_by_pool_manager();
 
-        IStrategy.RecipientStatus milestoneStatus1 = strategy.getMilestoneStatus(recipientId, 0);
-        IStrategy.RecipientStatus milestoneStatus2 = strategy.getMilestoneStatus(recipientId, 1);
+        IStrategy.Status milestoneStatus1 = strategy.getMilestoneStatus(recipientId, 0);
+        IStrategy.Status milestoneStatus2 = strategy.getMilestoneStatus(recipientId, 1);
 
-        assertEq(uint8(milestoneStatus1), uint8(IStrategy.RecipientStatus.None));
-        assertEq(uint8(milestoneStatus2), uint8(IStrategy.RecipientStatus.None));
+        assertEq(uint8(milestoneStatus1), uint8(IStrategy.Status.None));
+        assertEq(uint8(milestoneStatus2), uint8(IStrategy.Status.None));
 
         DirectGrantsSimpleStrategy.Recipient memory recipient = strategy.getRecipient(profile1_anchor());
-        assertEq(uint8(recipient.milestonesReviewStatus), uint8(IStrategy.RecipientStatus.Accepted));
+        assertEq(uint8(recipient.milestonesReviewStatus), uint8(IStrategy.Status.Accepted));
     }
 
     function test_setMilestonesByRecipient() public {
         address recipientId = _register_recipient_allocate_accept_set_milestones_by_recipient();
 
-        IStrategy.RecipientStatus milestoneStatus1 = strategy.getMilestoneStatus(recipientId, 0);
-        IStrategy.RecipientStatus milestoneStatus2 = strategy.getMilestoneStatus(recipientId, 1);
+        IStrategy.Status milestoneStatus1 = strategy.getMilestoneStatus(recipientId, 0);
+        IStrategy.Status milestoneStatus2 = strategy.getMilestoneStatus(recipientId, 1);
 
-        assertEq(uint8(milestoneStatus1), uint8(IStrategy.RecipientStatus.None));
-        assertEq(uint8(milestoneStatus2), uint8(IStrategy.RecipientStatus.None));
+        assertEq(uint8(milestoneStatus1), uint8(IStrategy.Status.None));
+        assertEq(uint8(milestoneStatus2), uint8(IStrategy.Status.None));
 
         DirectGrantsSimpleStrategy.Recipient memory recipient = strategy.getRecipient(profile1_anchor());
-        assertEq(uint8(recipient.milestonesReviewStatus), uint8(IStrategy.RecipientStatus.Pending));
+        assertEq(uint8(recipient.milestonesReviewStatus), uint8(IStrategy.Status.Pending));
     }
 
     function testRevert_setMilestones_UNAUTHORIZED() public {
@@ -343,13 +338,13 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
         milestones[0] = DirectGrantsSimpleStrategy.Milestone({
             amountPercentage: 0.3e18,
             metadata: Metadata(1, "milestone-1"),
-            milestoneStatus: IStrategy.RecipientStatus.None
+            milestoneStatus: IStrategy.Status.None
         });
 
         milestones[1] = DirectGrantsSimpleStrategy.Milestone({
             amountPercentage: 0.7e18,
             metadata: Metadata(1, "milestone-2"),
-            milestoneStatus: IStrategy.RecipientStatus.None
+            milestoneStatus: IStrategy.Status.None
         });
 
         vm.expectRevert(UNAUTHORIZED.selector);
@@ -362,28 +357,28 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
         address recipientId = _register_recipient_allocate_accept_set_milestones_by_recipient();
         DirectGrantsSimpleStrategy.Recipient memory recipient = strategy.getRecipient(profile1_anchor());
 
-        assertEq(uint8(recipient.milestonesReviewStatus), uint8(IStrategy.RecipientStatus.Pending));
+        assertEq(uint8(recipient.milestonesReviewStatus), uint8(IStrategy.Status.Pending));
 
         vm.expectEmit(false, false, false, true);
-        emit MilestonesReviewed(recipientId, IStrategy.RecipientStatus.Rejected);
+        emit MilestonesReviewed(recipientId, IStrategy.Status.Rejected);
 
         vm.startPrank(pool_manager1());
-        strategy.reviewSetMilestones(recipientId, IStrategy.RecipientStatus.Rejected);
+        strategy.reviewSetMilestones(recipientId, IStrategy.Status.Rejected);
         vm.stopPrank();
 
         recipient = strategy.getRecipient(profile1_anchor());
-        assertEq(uint8(recipient.milestonesReviewStatus), uint8(IStrategy.RecipientStatus.Rejected));
+        assertEq(uint8(recipient.milestonesReviewStatus), uint8(IStrategy.Status.Rejected));
 
         vm.startPrank(pool_manager1());
 
         vm.expectEmit(false, false, false, true);
-        emit MilestonesReviewed(recipientId, IStrategy.RecipientStatus.Accepted);
+        emit MilestonesReviewed(recipientId, IStrategy.Status.Accepted);
 
-        strategy.reviewSetMilestones(recipientId, IStrategy.RecipientStatus.Accepted);
+        strategy.reviewSetMilestones(recipientId, IStrategy.Status.Accepted);
         vm.stopPrank();
 
         recipient = strategy.getRecipient(profile1_anchor());
-        assertEq(uint8(recipient.milestonesReviewStatus), uint8(IStrategy.RecipientStatus.Accepted));
+        assertEq(uint8(recipient.milestonesReviewStatus), uint8(IStrategy.Status.Accepted));
     }
 
     function testRevert_reviewSetMilestones_UNAUTHORIZED() public {
@@ -391,7 +386,7 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
         vm.expectRevert(UNAUTHORIZED.selector);
 
         vm.startPrank(randomAddress());
-        strategy.reviewSetMilestones(recipientId, IStrategy.RecipientStatus.Rejected);
+        strategy.reviewSetMilestones(recipientId, IStrategy.Status.Rejected);
         vm.stopPrank();
     }
 
@@ -399,7 +394,7 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
         address recipientId = _register_recipient_allocate_accept_set_milestones_by_pool_manager();
         vm.expectRevert(DirectGrantsSimpleStrategy.MILESTONES_ALREADY_SET.selector);
         vm.startPrank(pool_manager1());
-        strategy.reviewSetMilestones(recipientId, IStrategy.RecipientStatus.Rejected);
+        strategy.reviewSetMilestones(recipientId, IStrategy.Status.Rejected);
         vm.stopPrank();
     }
 
@@ -407,7 +402,7 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
         address recipientId = _register_recipient_allocate_accept();
         vm.startPrank(pool_manager1());
         vm.expectRevert(DirectGrantsSimpleStrategy.INVALID_MILESTONE.selector);
-        strategy.reviewSetMilestones(recipientId, IStrategy.RecipientStatus.Rejected);
+        strategy.reviewSetMilestones(recipientId, IStrategy.Status.Rejected);
         vm.stopPrank();
     }
 
@@ -419,13 +414,13 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
         milestones[0] = DirectGrantsSimpleStrategy.Milestone({
             amountPercentage: 0.3e18,
             metadata: Metadata(1, "milestone-1"),
-            milestoneStatus: IStrategy.RecipientStatus.None
+            milestoneStatus: IStrategy.Status.None
         });
 
         milestones[1] = DirectGrantsSimpleStrategy.Milestone({
             amountPercentage: 0.7e18,
             metadata: Metadata(1, "milestone-2"),
-            milestoneStatus: IStrategy.RecipientStatus.None
+            milestoneStatus: IStrategy.Status.None
         });
 
         vm.expectRevert(DirectGrantsSimpleStrategy.MILESTONES_ALREADY_SET.selector);
@@ -441,13 +436,13 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
         milestones[0] = DirectGrantsSimpleStrategy.Milestone({
             amountPercentage: 0.3e18,
             metadata: Metadata(1, "milestone-1"),
-            milestoneStatus: IStrategy.RecipientStatus.None
+            milestoneStatus: IStrategy.Status.None
         });
 
         milestones[1] = DirectGrantsSimpleStrategy.Milestone({
             amountPercentage: 0.7e18,
             metadata: Metadata(1, "milestone-2"),
-            milestoneStatus: IStrategy.RecipientStatus.None
+            milestoneStatus: IStrategy.Status.None
         });
 
         vm.expectRevert(RECIPIENT_NOT_ACCEPTED.selector);
@@ -464,13 +459,13 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
         milestones[0] = DirectGrantsSimpleStrategy.Milestone({
             amountPercentage: 0.7e18, // > 100%
             metadata: Metadata(1, "milestone-1"),
-            milestoneStatus: IStrategy.RecipientStatus.None
+            milestoneStatus: IStrategy.Status.None
         });
 
         milestones[1] = DirectGrantsSimpleStrategy.Milestone({
             amountPercentage: 0.7e18, // > 100%
             metadata: Metadata(1, "milestone-2"),
-            milestoneStatus: IStrategy.RecipientStatus.None
+            milestoneStatus: IStrategy.Status.None
         });
 
         vm.expectRevert(DirectGrantsSimpleStrategy.INVALID_MILESTONE.selector);
@@ -487,19 +482,19 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
         milestones[0] = DirectGrantsSimpleStrategy.Milestone({
             amountPercentage: 0.3e18,
             metadata: Metadata(1, "milestone-1"),
-            milestoneStatus: IStrategy.RecipientStatus.None
+            milestoneStatus: IStrategy.Status.None
         });
 
         milestones[1] = DirectGrantsSimpleStrategy.Milestone({
             amountPercentage: 0.3e18,
             metadata: Metadata(1, "milestone-2"),
-            milestoneStatus: IStrategy.RecipientStatus.None
+            milestoneStatus: IStrategy.Status.None
         });
 
         milestones[2] = DirectGrantsSimpleStrategy.Milestone({
             amountPercentage: 0.4e18,
             metadata: Metadata(1, "milestone-3"),
-            milestoneStatus: IStrategy.RecipientStatus.None
+            milestoneStatus: IStrategy.Status.None
         });
 
         vm.startPrank(profile1_member1());
@@ -517,7 +512,7 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
         anotherMilestones[0] = DirectGrantsSimpleStrategy.Milestone({
             amountPercentage: 1e18,
             metadata: Metadata(1, "milestone-1"),
-            milestoneStatus: IStrategy.RecipientStatus.None
+            milestoneStatus: IStrategy.Status.None
         });
 
         // set to 100% again => should override older setting
@@ -545,13 +540,13 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
         milestones[0] = DirectGrantsSimpleStrategy.Milestone({
             amountPercentage: 0.3e18,
             metadata: Metadata(1, "milestone-1"),
-            milestoneStatus: IStrategy.RecipientStatus.None
+            milestoneStatus: IStrategy.Status.None
         });
 
         milestones[1] = DirectGrantsSimpleStrategy.Milestone({
             amountPercentage: 0.7e18,
             metadata: Metadata(1, "milestone-2"),
-            milestoneStatus: IStrategy.RecipientStatus.Accepted // wrong status
+            milestoneStatus: IStrategy.Status.Accepted // wrong status
         });
 
         vm.expectRevert(DirectGrantsSimpleStrategy.INVALID_MILESTONE.selector);
@@ -566,8 +561,8 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
 
         DirectGrantsSimpleStrategy.Milestone[] memory milestones = strategy.getMilestones(recipientId);
 
-        assertEq(uint8(milestones[0].milestoneStatus), uint8(IStrategy.RecipientStatus.Pending));
-        assertEq(uint8(milestones[1].milestoneStatus), uint8(IStrategy.RecipientStatus.Pending));
+        assertEq(uint8(milestones[0].milestoneStatus), uint8(IStrategy.Status.Pending));
+        assertEq(uint8(milestones[1].milestoneStatus), uint8(IStrategy.Status.Pending));
     }
 
     function testRever_submitMilestones_RECIPIENT_NOT_ACCEPTED() public {
@@ -626,8 +621,8 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
 
         DirectGrantsSimpleStrategy.Milestone[] memory milestones = strategy.getMilestones(recipientId);
 
-        assertEq(uint8(milestones[0].milestoneStatus), uint8(IStrategy.RecipientStatus.Rejected));
-        assertEq(uint8(milestones[1].milestoneStatus), uint8(IStrategy.RecipientStatus.Pending));
+        assertEq(uint8(milestones[0].milestoneStatus), uint8(IStrategy.Status.Rejected));
+        assertEq(uint8(milestones[1].milestoneStatus), uint8(IStrategy.Status.Pending));
     }
 
     function testRevert_rejectMilestone_MILESTONE_ALREADY_ACCEPTED() public {
@@ -653,8 +648,8 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
 
         DirectGrantsSimpleStrategy.Milestone[] memory milestones = strategy.getMilestones(recipientId);
 
-        assertEq(uint8(milestones[0].milestoneStatus), uint8(IStrategy.RecipientStatus.Accepted));
-        assertEq(uint8(milestones[1].milestoneStatus), uint8(IStrategy.RecipientStatus.Accepted));
+        assertEq(uint8(milestones[0].milestoneStatus), uint8(IStrategy.Status.Accepted));
+        assertEq(uint8(milestones[1].milestoneStatus), uint8(IStrategy.Status.Accepted));
 
         assertEq(recipient1().balance, 1e18);
         assertEq(address(strategy).balance, 0);
@@ -733,8 +728,7 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
 
     function _register_recipient_allocate_accept() internal returns (address recipientId) {
         recipientId = _register_recipient();
-        DirectGrantsSimpleStrategy.InternalRecipientStatus recipientStatus =
-            DirectGrantsSimpleStrategy.InternalRecipientStatus.Accepted;
+        DirectGrantsSimpleStrategy.Status recipientStatus = IStrategy.Status.Accepted;
         uint256 grantAmount = 1e18; // 1 eth
 
         bytes memory data = abi.encode(recipientId, recipientStatus, grantAmount);
@@ -751,8 +745,7 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
 
     function _register_recipient_allocate_reject() internal returns (address recipientId) {
         recipientId = _register_recipient();
-        DirectGrantsSimpleStrategy.InternalRecipientStatus recipientStatus =
-            DirectGrantsSimpleStrategy.InternalRecipientStatus.Rejected;
+        DirectGrantsSimpleStrategy.Status recipientStatus = IStrategy.Status.Rejected;
         uint256 grantAmount = 0;
 
         bytes memory data = abi.encode(recipientId, recipientStatus, grantAmount);
@@ -776,19 +769,19 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
         milestones[0] = DirectGrantsSimpleStrategy.Milestone({
             amountPercentage: 0.3e18,
             metadata: Metadata(1, "milestone-1"),
-            milestoneStatus: IStrategy.RecipientStatus.None
+            milestoneStatus: IStrategy.Status.None
         });
 
         milestones[1] = DirectGrantsSimpleStrategy.Milestone({
             amountPercentage: 0.7e18,
             metadata: Metadata(1, "milestone-2"),
-            milestoneStatus: IStrategy.RecipientStatus.None
+            milestoneStatus: IStrategy.Status.None
         });
 
         vm.expectEmit(false, false, false, true);
 
         emit MilestonesSet(recipientId);
-        emit MilestonesReviewed(recipientId, IStrategy.RecipientStatus.Accepted);
+        emit MilestonesReviewed(recipientId, IStrategy.Status.Accepted);
 
         vm.startPrank(pool_manager1());
         strategy.setMilestones(recipientId, milestones);
@@ -802,13 +795,13 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
         milestones[0] = DirectGrantsSimpleStrategy.Milestone({
             amountPercentage: 0.3e18,
             metadata: Metadata(1, "milestone-1"),
-            milestoneStatus: IStrategy.RecipientStatus.None
+            milestoneStatus: IStrategy.Status.None
         });
 
         milestones[1] = DirectGrantsSimpleStrategy.Milestone({
             amountPercentage: 0.7e18,
             metadata: Metadata(1, "milestone-2"),
-            milestoneStatus: IStrategy.RecipientStatus.None
+            milestoneStatus: IStrategy.Status.None
         });
 
         vm.expectEmit(false, false, false, true);
@@ -848,7 +841,7 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
 
         vm.expectEmit(false, false, true, true);
 
-        emit MilestoneStatusChanged(recipientId, 1, IStrategy.RecipientStatus.Accepted);
+        emit MilestoneStatusChanged(recipientId, 1, IStrategy.Status.Accepted);
         emit Distributed(recipientId, recipient1(), 0.7e18, pool_manager1());
 
         vm.startPrank(pool_manager1());

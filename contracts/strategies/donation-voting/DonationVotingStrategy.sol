@@ -33,20 +33,12 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     /// ========== Struct ==============
     /// ================================
 
-    enum InternalRecipientStatus {
-        None,
-        Pending,
-        Accepted,
-        Rejected,
-        Appealed
-    }
-
     /// @notice Struct to hold details of the recipients
     struct Recipient {
         bool useRegistryAnchor;
         address recipientAddress;
         Metadata metadata;
-        InternalRecipientStatus recipientStatus;
+        Status recipientStatus;
     }
 
     /// @notice Struct to hold details of the allocations to claim
@@ -74,8 +66,8 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     /// @param data The encoded data - (address recipientId, address recipientAddress, Metadata metadata)
     /// @param sender The sender of the transaction
     /// @param status The updated status of the recipient
-    event UpdatedRegistration(address indexed recipientId, bytes data, address sender, InternalRecipientStatus status);
-    event RecipientStatusUpdated(address indexed recipientId, InternalRecipientStatus recipientStatus, address sender);
+    event UpdatedRegistration(address indexed recipientId, bytes data, address sender, Status status);
+    event RecipientStatusUpdated(address indexed recipientId, Status recipientStatus, address sender);
     event Claimed(address indexed recipientId, address recipientAddress, uint256 amount, address token);
     event TimestampsUpdated(
         uint64 registrationStartTime,
@@ -192,20 +184,14 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
         return _getRecipient(_recipientId);
     }
 
-    /// @notice Get Internal recipient status
-    /// @param _recipientId Id of the recipient
-    function getInternalRecipientStatus(address _recipientId) external view returns (InternalRecipientStatus) {
-        return _getRecipient(_recipientId).recipientStatus;
-    }
-
     /// @notice Get recipient status
     /// @param _recipientId Id of the recipient
-    function _getRecipientStatus(address _recipientId) internal view override returns (RecipientStatus) {
-        InternalRecipientStatus internalStatus = _getRecipient(_recipientId).recipientStatus;
-        if (internalStatus == InternalRecipientStatus.Appealed) {
-            return RecipientStatus.Pending;
+    function _getRecipientStatus(address _recipientId) internal view override returns (Status) {
+        Status status = _getRecipient(_recipientId).recipientStatus;
+        if (status == Status.Appealed) {
+            return Status.Pending;
         } else {
-            return RecipientStatus(uint8(internalStatus));
+            return Status(uint8(status));
         }
     }
 
@@ -221,7 +207,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Review recipient application
     /// @param _recipientIds Ids of the recipients
     /// @param _recipientStatuses Statuses of the recipients
-    function reviewRecipients(address[] calldata _recipientIds, InternalRecipientStatus[] calldata _recipientStatuses)
+    function reviewRecipients(address[] calldata _recipientIds, Status[] calldata _recipientStatuses)
         external
         onlyPoolManager(msg.sender)
         onlyActiveRegistration
@@ -232,10 +218,9 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
         }
 
         for (uint256 i = 0; i < recipientLength;) {
-            InternalRecipientStatus recipientStatus = _recipientStatuses[i];
+            Status recipientStatus = _recipientStatuses[i];
             address recipientId = _recipientIds[i];
-            if (recipientStatus == InternalRecipientStatus.None || recipientStatus == InternalRecipientStatus.Appealed)
-            {
+            if (recipientStatus == Status.None || recipientStatus == Status.Appealed) {
                 revert RECIPIENT_ERROR(recipientId);
             }
 
@@ -266,7 +251,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
 
         for (uint256 i = 0; i < recipientLength;) {
             address recipientId = _recipientIds[i];
-            if (_recipients[recipientId].recipientStatus != InternalRecipientStatus.Accepted) {
+            if (_recipients[recipientId].recipientStatus != Status.Accepted) {
                 revert INVALID();
             }
 
@@ -430,19 +415,19 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
         recipient.metadata = metadata;
         recipient.useRegistryAnchor = useRegistryAnchor ? true : isUsingRegistryAnchor;
 
-        InternalRecipientStatus currentStatus = recipient.recipientStatus;
+        Status currentStatus = recipient.recipientStatus;
 
-        if (currentStatus == InternalRecipientStatus.None) {
+        if (currentStatus == Status.None) {
             // recipient registering new application
-            recipient.recipientStatus = InternalRecipientStatus.Pending;
+            recipient.recipientStatus = Status.Pending;
             emit Registered(recipientId, _data, _sender);
         } else {
-            if (currentStatus == InternalRecipientStatus.Accepted) {
+            if (currentStatus == Status.Accepted) {
                 // recipient updating accepted application
-                recipient.recipientStatus = InternalRecipientStatus.Pending;
-            } else if (currentStatus == InternalRecipientStatus.Rejected) {
+                recipient.recipientStatus = Status.Pending;
+            } else if (currentStatus == Status.Rejected) {
                 // recipient updating rejected application
-                recipient.recipientStatus = InternalRecipientStatus.Appealed;
+                recipient.recipientStatus = Status.Appealed;
             }
             emit UpdatedRegistration(recipientId, _data, _sender, recipient.recipientStatus);
         }
@@ -459,7 +444,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
 
         Recipient storage recipient = _recipients[recipientId];
 
-        if (recipient.recipientStatus != InternalRecipientStatus.Accepted) {
+        if (recipient.recipientStatus != Status.Accepted) {
             revert RECIPIENT_ERROR(recipientId);
         }
 
@@ -491,7 +476,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
 
             Recipient storage recipient = _recipients[recipientId];
 
-            if (recipient.recipientStatus != InternalRecipientStatus.Accepted) {
+            if (recipient.recipientStatus != Status.Accepted) {
                 revert RECIPIENT_ERROR(recipientId);
             }
 

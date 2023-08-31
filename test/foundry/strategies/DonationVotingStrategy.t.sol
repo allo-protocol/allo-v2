@@ -24,10 +24,10 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
     /// ===============================
 
     event UpdatedRegistration(
-        address indexed recipientId, bytes data, address sender, DonationVotingStrategy.InternalRecipientStatus status
+        address indexed recipientId, bytes data, address sender, DonationVotingStrategy.Status status
     );
     event RecipientStatusUpdated(
-        address indexed recipientId, DonationVotingStrategy.InternalRecipientStatus recipientStatus, address sender
+        address indexed recipientId, DonationVotingStrategy.Status recipientStatus, address sender
     );
 
     bool public useRegistryAnchor;
@@ -256,25 +256,14 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         assertEq(recipient.recipientAddress, recipientAddress);
     }
 
-    function test_getInternalRecipientStatus() public {
-        vm.warp(registrationStartTime + 10);
-        vm.prank(address(allo()));
-        address sender = recipient();
-        address recipientId = strategy.registerRecipient(__generateRecipientWithoutId(), sender);
-
-        DonationVotingStrategy.InternalRecipientStatus recipientStatus =
-            strategy.getInternalRecipientStatus(recipientId);
-        assertEq(uint8(DonationVotingStrategy.InternalRecipientStatus.Pending), uint8(recipientStatus));
-    }
-
     function test_getRecipientStatus() public {
         vm.warp(registrationStartTime + 10);
         vm.prank(address(allo()));
         address sender = recipient();
         address recipientId = strategy.registerRecipient(__generateRecipientWithoutId(), sender);
 
-        BaseStrategy.RecipientStatus recipientStatus = strategy.getRecipientStatus(recipientId);
-        assertEq(uint8(IStrategy.RecipientStatus.Pending), uint8(recipientStatus));
+        BaseStrategy.Status recipientStatus = strategy.getRecipientStatus(recipientId);
+        assertEq(uint8(IStrategy.Status.Pending), uint8(recipientStatus));
     }
 
     function test_getRecipientStatus_appeal() public {
@@ -288,8 +277,8 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         vm.prank(address(allo()));
         strategy.registerRecipient(data, sender);
 
-        BaseStrategy.RecipientStatus recipientStatus = strategy.getRecipientStatus(recipientId);
-        assertEq(uint8(IStrategy.RecipientStatus.Pending), uint8(recipientStatus));
+        BaseStrategy.Status recipientStatus = strategy.getRecipientStatus(recipientId);
+        assertEq(uint8(IStrategy.Status.Pending), uint8(recipientStatus));
     }
 
     function test_getPayouts() public {
@@ -315,31 +304,30 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
 
         address[] memory recipientIds = new address[](1);
         recipientIds[0] = recipientId;
-        DonationVotingStrategy.InternalRecipientStatus[] memory recipientStatuses =
-            new DonationVotingStrategy.InternalRecipientStatus[](1);
-        recipientStatuses[0] = DonationVotingStrategy.InternalRecipientStatus.Rejected;
+        DonationVotingStrategy.Status[] memory recipientStatuses = new DonationVotingStrategy.Status[](1);
+        recipientStatuses[0] = IStrategy.Status.Rejected;
 
         vm.expectEmit(true, false, false, true);
-        emit RecipientStatusUpdated(recipientId, DonationVotingStrategy.InternalRecipientStatus.Rejected, pool_admin());
+        emit RecipientStatusUpdated(recipientId, IStrategy.Status.Rejected, pool_admin());
 
         vm.prank(pool_admin());
         strategy.reviewRecipients(recipientIds, recipientStatuses);
 
         DonationVotingStrategy.Recipient memory recipient = strategy.getRecipient(recipientId);
-        assertEq(uint8(DonationVotingStrategy.InternalRecipientStatus.Rejected), uint8(recipient.recipientStatus));
+        assertEq(uint8(IStrategy.Status.Rejected), uint8(recipient.recipientStatus));
     }
 
     function testRevert_reviewRecipients_REGISTRATION_NOT_ACTIVE() public {
         vm.expectRevert(REGISTRATION_NOT_ACTIVE.selector);
         vm.prank(pool_admin());
-        strategy.reviewRecipients(new address[](1), new DonationVotingStrategy.InternalRecipientStatus[](1));
+        strategy.reviewRecipients(new address[](1), new IStrategy.Status[](1));
     }
 
     function testRevert_reviewRecipients_INVALID() public {
         vm.warp(registrationStartTime + 10);
         vm.expectRevert(INVALID.selector);
         vm.prank(pool_admin());
-        strategy.reviewRecipients(new address[](1), new DonationVotingStrategy.InternalRecipientStatus[](0));
+        strategy.reviewRecipients(new address[](1), new IStrategy.Status[](0));
     }
 
     function testRevert_reviewRecipients_withNoneStatus_RECIPIENT_ERROR() public {
@@ -348,9 +336,8 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         address[] memory recipients = new address[](1);
         recipients[0] = recipient();
 
-        DonationVotingStrategy.InternalRecipientStatus[] memory recipientStatuses =
-            new DonationVotingStrategy.InternalRecipientStatus[](1);
-        recipientStatuses[0] = DonationVotingStrategy.InternalRecipientStatus.None;
+        IStrategy.Status[] memory recipientStatuses = new IStrategy.Status[](1);
+        recipientStatuses[0] = IStrategy.Status.None;
 
         vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, recipients[0]));
         vm.prank(pool_admin());
@@ -364,9 +351,8 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         address[] memory recipients = new address[](1);
         recipients[0] = recipient();
 
-        DonationVotingStrategy.InternalRecipientStatus[] memory recipientStatuses =
-            new DonationVotingStrategy.InternalRecipientStatus[](1);
-        recipientStatuses[0] = DonationVotingStrategy.InternalRecipientStatus.Appealed;
+        IStrategy.Status[] memory recipientStatuses = new IStrategy.Status[](1);
+        recipientStatuses[0] = IStrategy.Status.Appealed;
 
         vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, recipients[0]));
         vm.prank(pool_admin());
@@ -378,7 +364,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         vm.warp(registrationStartTime + 10);
         vm.expectRevert(UNAUTHORIZED.selector);
         vm.prank(randomAddress());
-        strategy.reviewRecipients(new address[](1), new DonationVotingStrategy.InternalRecipientStatus[](1));
+        strategy.reviewRecipients(new address[](1), new IStrategy.Status[](1));
     }
 
     function test_setPayout() public {
@@ -597,7 +583,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         address recipientId = strategy.registerRecipient(data, sender);
 
         DonationVotingStrategy.Recipient memory _recipient = strategy.getRecipient(recipientId);
-        assertEq(uint8(_recipient.recipientStatus), uint8(DonationVotingStrategy.InternalRecipientStatus.Pending));
+        assertEq(uint8(_recipient.recipientStatus), uint8(IStrategy.Status.Pending));
     }
 
     function test_registerRecipient_new_withRegistryAnchor() public {
@@ -628,7 +614,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         address recipientId = strategy.registerRecipient(data, pool_admin());
 
         DonationVotingStrategy.Recipient memory recipient = strategy.getRecipient(recipientId);
-        assertEq(uint8(DonationVotingStrategy.InternalRecipientStatus.Pending), uint8(recipient.recipientStatus));
+        assertEq(uint8(IStrategy.Status.Pending), uint8(recipient.recipientStatus));
     }
 
     function test_registerRecipient_appeal() public {
@@ -642,9 +628,8 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         // reject
         address[] memory recipientIds = new address[](1);
         recipientIds[0] = recipientId;
-        DonationVotingStrategy.InternalRecipientStatus[] memory recipientStatuses =
-            new DonationVotingStrategy.InternalRecipientStatus[](1);
-        recipientStatuses[0] = DonationVotingStrategy.InternalRecipientStatus.Rejected;
+        IStrategy.Status[] memory recipientStatuses = new IStrategy.Status[](1);
+        recipientStatuses[0] = IStrategy.Status.Rejected;
 
         vm.prank(pool_admin());
         strategy.reviewRecipients(recipientIds, recipientStatuses);
@@ -652,7 +637,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         // appeal
         bytes memory data = __generateRecipientWithoutId();
         vm.expectEmit(true, false, false, true);
-        emit UpdatedRegistration(recipientId, data, sender, DonationVotingStrategy.InternalRecipientStatus.Appealed);
+        emit UpdatedRegistration(recipientId, data, sender, IStrategy.Status.Appealed);
 
         vm.prank(address(allo()));
         strategy.registerRecipient(data, sender);
@@ -897,9 +882,8 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         // accept
         address[] memory recipientIds = new address[](1);
         recipientIds[0] = recipientId;
-        DonationVotingStrategy.InternalRecipientStatus[] memory recipientStatuses =
-            new DonationVotingStrategy.InternalRecipientStatus[](1);
-        recipientStatuses[0] = DonationVotingStrategy.InternalRecipientStatus.Accepted;
+        IStrategy.Status[] memory recipientStatuses = new IStrategy.Status[](1);
+        recipientStatuses[0] = IStrategy.Status.Accepted;
         vm.prank(pool_admin());
         strategy.reviewRecipients(recipientIds, recipientStatuses);
 
@@ -917,9 +901,8 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         // accept
         address[] memory recipientIds = new address[](1);
         recipientIds[0] = recipientId;
-        DonationVotingStrategy.InternalRecipientStatus[] memory recipientStatuses =
-            new DonationVotingStrategy.InternalRecipientStatus[](1);
-        recipientStatuses[0] = DonationVotingStrategy.InternalRecipientStatus.Rejected;
+        IStrategy.Status[] memory recipientStatuses = new IStrategy.Status[](1);
+        recipientStatuses[0] = IStrategy.Status.Rejected;
         vm.prank(pool_admin());
         strategy.reviewRecipients(recipientIds, recipientStatuses);
 

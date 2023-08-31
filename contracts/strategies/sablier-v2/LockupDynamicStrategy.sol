@@ -158,12 +158,12 @@ contract LockupDynamicStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Get recipient status
     /// @param _recipientId Id of the recipient
-    function _getRecipientStatus(address _recipientId) internal view override returns (RecipientStatus) {
-        InternalRecipientStatus internalStatus = _getRecipient(_recipientId).recipientStatus;
-        if (internalStatus == InternalRecipientStatus.InReview) {
-            return RecipientStatus.Pending;
+    function _getRecipientStatus(address _recipientId) internal view override returns (Status) {
+        InternalRecipientStatus status = _getRecipient(_recipientId).recipientStatus;
+        if (status == InternalRecipientStatus.InReview) {
+            return Status.Pending;
         } else {
-            return RecipientStatus(uint8(internalStatus));
+            return Status(uint8(status));
         }
     }
 

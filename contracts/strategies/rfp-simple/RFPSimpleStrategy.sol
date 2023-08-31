@@ -37,14 +37,14 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         bool useRegistryAnchor;
         address recipientAddress;
         uint256 proposalBid;
-        RecipientStatus recipientStatus;
+        Status recipientStatus;
     }
 
     /// @notice Struct to hold milestone details
     struct Milestone {
         uint256 amountPercentage;
         Metadata metadata;
-        RecipientStatus milestoneStatus;
+        Status milestoneStatus;
     }
 
     struct InitializeParams {
@@ -125,7 +125,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Checks if msg.sender is eligible for RFP allocation
     /// @param _recipientId Id of the recipient
-    function _getRecipientStatus(address _recipientId) internal view override returns (RecipientStatus) {
+    function _getRecipientStatus(address _recipientId) internal view override returns (Status) {
         return _getRecipient(_recipientId).recipientStatus;
     }
 
@@ -145,7 +145,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Get the status of the milestone
     /// @param _milestoneId Id of the milestone
-    function getMilestoneStatus(uint256 _milestoneId) external view returns (RecipientStatus) {
+    function getMilestoneStatus(uint256 _milestoneId) external view returns (Status) {
         return milestones[_milestoneId].milestoneStatus;
     }
 
@@ -196,7 +196,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
         Milestone storage milestone = milestones[upcomingMilestone];
         milestone.metadata = _metadata;
-        milestone.milestoneStatus = RecipientStatus.Pending;
+        milestone.milestoneStatus = Status.Pending;
 
         emit MilstoneSubmitted(upcomingMilestone);
     }
@@ -210,11 +210,11 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Reject pending milestone
     /// @param _milestoneId Id of the milestone
     function rejectMilestone(uint256 _milestoneId) external onlyPoolManager(msg.sender) {
-        if (milestones[_milestoneId].milestoneStatus == RecipientStatus.Accepted) {
+        if (milestones[_milestoneId].milestoneStatus == Status.Accepted) {
             revert MILESTONE_ALREADY_ACCEPTED();
         }
 
-        milestones[_milestoneId].milestoneStatus = RecipientStatus.Rejected;
+        milestones[_milestoneId].milestoneStatus = Status.Rejected;
         emit MilestoneRejected(_milestoneId);
     }
 
@@ -276,7 +276,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
             recipientAddress: recipientAddress,
             useRegistryAnchor: useRegistryAnchor ? true : isUsingRegistryAnchor,
             proposalBid: proposalBid,
-            recipientStatus: RecipientStatus.Pending
+            recipientStatus: Status.Pending
         });
 
         _recipients[recipientId] = recipient;
@@ -301,11 +301,11 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         // update status of acceptedRecipientId to accepted
         Recipient storage recipient = _recipients[acceptedRecipientId];
 
-        if (acceptedRecipientId == address(0) || recipient.recipientStatus != RecipientStatus.Pending) {
+        if (acceptedRecipientId == address(0) || recipient.recipientStatus != Status.Pending) {
             revert RECIPIENT_ERROR(acceptedRecipientId);
         }
 
-        recipient.recipientStatus = RecipientStatus.Accepted;
+        recipient.recipientStatus = Status.Accepted;
         _setPoolActive(false);
 
         IAllo.Pool memory pool = allo.getPool(poolId);
@@ -339,7 +339,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         poolAmount -= amount;
         _transferAmount(pool.token, recipient.recipientAddress, amount);
 
-        milestone.milestoneStatus = RecipientStatus.Accepted;
+        milestone.milestoneStatus = Status.Accepted;
         upcomingMilestone++;
 
         emit Distributed(acceptedRecipientId, recipient.recipientAddress, amount, _sender);
@@ -359,8 +359,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         recipient = _recipients[_recipientId];
 
         if (acceptedRecipientId != address(0) && acceptedRecipientId != _recipientId) {
-            recipient.recipientStatus =
-                recipient.recipientStatus > RecipientStatus.None ? RecipientStatus.Rejected : RecipientStatus.None;
+            recipient.recipientStatus = recipient.recipientStatus > Status.None ? Status.Rejected : Status.None;
         }
     }
 

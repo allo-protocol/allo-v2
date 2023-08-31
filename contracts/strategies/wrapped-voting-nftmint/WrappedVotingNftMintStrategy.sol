@@ -150,9 +150,9 @@ contract WrappedVotingNftMintStrategy is Native, BaseStrategy, ReentrancyGuard {
 
     /// @notice Returns the status of the recipient based on whether it is an NFT contract created by the factory
     /// @param _recipientId The address of the recipient
-    /// @return The RecipientStatus of the recipient
-    function _getRecipientStatus(address _recipientId) internal view override returns (RecipientStatus) {
-        return nftFactory.isNFTContract(_recipientId) ? RecipientStatus.Accepted : RecipientStatus.None;
+    /// @return The Status of the recipient
+    function _getRecipientStatus(address _recipientId) internal view override returns (Status) {
+        return nftFactory.isNFTContract(_recipientId) ? Status.Accepted : Status.None;
     }
 
     /// @notice Internal function to register a recipient (reverts as it is not implemented)

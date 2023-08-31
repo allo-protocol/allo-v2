@@ -313,29 +313,19 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
         return _getRecipient(_recipientId);
     }
 
-    /// @notice Get Internal recipient status
-    /// @dev This will return the 'InternalRecipientStatus' of the recipient, the 'InternalRecipientStatus' is
-    ///      used at the protocol level and is different from the 'RecipientStatus' which is used at the strategy
-    ///      level
-    /// @param _recipientId ID of the recipient
-    /// @return Status of the recipient
-    function getInternalRecipientStatus(address _recipientId) external view returns (InternalRecipientStatus) {
-        return InternalRecipientStatus(_getUintRecipientStatus(_recipientId));
-    }
-
     /// @notice Get recipient status
-    /// @dev This will return the 'RecipientStatus' of the recipient, the 'RecipientStatus' is used at the strategy
+    /// @dev This will return the 'Status' of the recipient, the 'Status' is used at the strategy
     ///      level and is different from the 'InternalRecipientStatus' which is used at the protocol level
     /// @param _recipientId ID of the recipient
     /// @return Status of the recipient
-    function _getRecipientStatus(address _recipientId) internal view override returns (RecipientStatus) {
-        InternalRecipientStatus internalStatus = InternalRecipientStatus(_getUintRecipientStatus(_recipientId));
+    function _getRecipientStatus(address _recipientId) internal view override returns (Status) {
+        InternalRecipientStatus status = InternalRecipientStatus(_getUintRecipientStatus(_recipientId));
 
-        // If the 'internalStatus' is 'Appealed' we will return 'Pending' instead
-        if (internalStatus == InternalRecipientStatus.Appealed) {
-            return RecipientStatus.Pending;
+        // If the 'status' is 'Appealed' we will return 'Pending' instead
+        if (status == InternalRecipientStatus.Appealed) {
+            return Status.Pending;
         } else {
-            return RecipientStatus(uint8(internalStatus));
+            return Status(uint8(status));
         }
     }
 

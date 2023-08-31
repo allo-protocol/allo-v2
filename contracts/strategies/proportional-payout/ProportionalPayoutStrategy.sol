@@ -63,7 +63,7 @@ contract ProportionalPayoutStrategy is BaseStrategy {
     struct Recipient {
         address recipientAddress;
         Metadata metadata;
-        RecipientStatus recipientStatus;
+        Status recipientStatus;
         uint256 totalVotesReceived;
     }
 
@@ -131,7 +131,7 @@ contract ProportionalPayoutStrategy is BaseStrategy {
 
     /// @notice Checks if msg.sender is eligible for RFP allocation
     /// @param _recipientId Id of the recipient
-    function _getRecipientStatus(address _recipientId) internal view override returns (RecipientStatus) {
+    function _getRecipientStatus(address _recipientId) internal view override returns (Status) {
         return _getRecipient(_recipientId).recipientStatus;
     }
 
@@ -175,7 +175,7 @@ contract ProportionalPayoutStrategy is BaseStrategy {
 
         Recipient storage recipient = recipients[recipientId];
 
-        if (recipient.recipientStatus != RecipientStatus.Accepted) {
+        if (recipient.recipientStatus != Status.Accepted) {
             revert RECIPIENT_ERROR(recipientId);
         }
 
@@ -201,7 +201,7 @@ contract ProportionalPayoutStrategy is BaseStrategy {
             PayoutSummary memory payout = _getPayout(recipientId, "");
             uint256 amount = payout.amount;
 
-            if (paidOut[recipientId] || recipient.recipientStatus != RecipientStatus.Accepted || amount == 0) {
+            if (paidOut[recipientId] || recipient.recipientStatus != Status.Accepted || amount == 0) {
                 revert RECIPIENT_ERROR(recipientId);
             }
 
@@ -230,7 +230,7 @@ contract ProportionalPayoutStrategy is BaseStrategy {
     }
 
     /// @notice Submit application to pool
-    /// @param _data The data to be decoded: address recipientId, address recipientAddress, RecipientStatus status, Metadata memory metadata
+    /// @param _data The data to be decoded: address recipientId, address recipientAddress, Status status, Metadata memory metadata
     /// @param _sender The sender of the transaction
     function _registerRecipient(bytes memory _data, address _sender)
         internal
@@ -238,8 +238,8 @@ contract ProportionalPayoutStrategy is BaseStrategy {
         onlyPoolManager(_sender)
         returns (address)
     {
-        (address recipientId, address recipientAddress, RecipientStatus status, Metadata memory metadata) =
-            abi.decode(_data, (address, address, RecipientStatus, Metadata));
+        (address recipientId, address recipientAddress, Status status, Metadata memory metadata) =
+            abi.decode(_data, (address, address, Status, Metadata));
 
         // validate decoded id and address
         if (recipientId == address(0) || recipientAddress == address(0)) {
@@ -248,10 +248,10 @@ contract ProportionalPayoutStrategy is BaseStrategy {
 
         Recipient storage recipient = recipients[recipientId];
 
-        if (recipient.recipientStatus != RecipientStatus.Accepted && status == RecipientStatus.Accepted) {
+        if (recipient.recipientStatus != Status.Accepted && status == Status.Accepted) {
             // when a recipient is accepted, increment the counter
             recipientsCounter++;
-        } else if (recipient.recipientStatus == RecipientStatus.Accepted && status == RecipientStatus.Rejected) {
+        } else if (recipient.recipientStatus == Status.Accepted && status == Status.Rejected) {
             // when a recipient is rejected, increment the counter
             recipientsCounter--;
         } else {

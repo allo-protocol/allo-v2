@@ -90,7 +90,7 @@ contract RFPCommitteeStrategy is RFPSimpleStrategy {
             acceptedRecipientId = recipientId;
 
             Recipient storage recipient = _recipients[acceptedRecipientId];
-            recipient.recipientStatus = RecipientStatus.Accepted;
+            recipient.recipientStatus = Status.Accepted;
             _setPoolActive(false);
 
             emit Allocated(acceptedRecipientId, recipient.proposalBid, allo.getPool(poolId).token, address(0));

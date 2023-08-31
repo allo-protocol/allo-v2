@@ -15,7 +15,7 @@ contract TestStrategy is IStrategy {
     bytes32 private strategyId;
     bool private poolActive;
     uint256 private poolAmount;
-    mapping(address => RecipientStatus) private recipientStatus;
+    mapping(address => Status) private recipientStatus;
 
     constructor(address _allo, string memory _name) {
         allo = IAllo(_allo);
@@ -50,7 +50,7 @@ contract TestStrategy is IStrategy {
         return poolAmount;
     }
 
-    function getRecipientStatus(address _recipientId) external view override returns (RecipientStatus) {
+    function getRecipientStatus(address _recipientId) external view override returns (Status) {
         return recipientStatus[_recipientId];
     }
 

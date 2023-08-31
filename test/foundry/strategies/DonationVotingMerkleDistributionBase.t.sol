@@ -313,21 +313,11 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         assertEq(keccak256(abi.encode(recipient.metadata.pointer)), keccak256(abi.encode("metadata")));
     }
 
-    // Tests that the correct internal recipient status is returned
-    function test_getInternalRecipientStatus() public {
-        address recipientId = __register_recipient();
-        DonationVotingMerkleDistributionBaseStrategy.InternalRecipientStatus recipientStatus =
-            strategy.getInternalRecipientStatus(recipientId);
-        assertEq(
-            uint8(recipientStatus), uint8(DonationVotingMerkleDistributionBaseStrategy.InternalRecipientStatus.Pending)
-        );
-    }
-
     // Tests that the correct recipient status is returned
     function test_getRecipientStatus() public {
         address recipientId = __register_recipient();
-        IStrategy.RecipientStatus recipientStatus = strategy.getRecipientStatus(recipientId);
-        assertEq(uint8(recipientStatus), uint8(IStrategy.RecipientStatus.Pending));
+        IStrategy.Status recipientStatus = strategy.getRecipientStatus(recipientId);
+        assertEq(uint8(recipientStatus), uint8(IStrategy.Status.Pending));
     }
 
     //  Tests that the correct recipient status is returned for an appeal
@@ -341,15 +331,8 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         vm.prank(address(allo()));
         strategy.registerRecipient(data, profile1_member1());
 
-        DonationVotingMerkleDistributionBaseStrategy.InternalRecipientStatus recipientStatusInternal =
-            strategy.getInternalRecipientStatus(recipientId);
-        assertEq(
-            uint8(recipientStatusInternal),
-            uint8(DonationVotingMerkleDistributionBaseStrategy.InternalRecipientStatus.Appealed)
-        );
-
-        IStrategy.RecipientStatus recipientStatus = strategy.getRecipientStatus(recipientId);
-        assertEq(uint8(recipientStatus), uint8(IStrategy.RecipientStatus.Pending));
+        IStrategy.Status recipientStatus = strategy.getRecipientStatus(recipientId);
+        assertEq(uint8(recipientStatus), uint8(IStrategy.Status.Pending));
     }
 
     // Tests that the pool manager can update the recipient status
@@ -587,9 +570,9 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         vm.prank(address(allo()));
         address recipientId = _strategy.registerRecipient(data, profile1_member1());
 
-        DonationVotingMerkleDistributionBaseStrategy.InternalRecipientStatus status =
-            _strategy.getInternalRecipientStatus(recipientId);
-        assertEq(uint8(DonationVotingMerkleDistributionBaseStrategy.InternalRecipientStatus.Pending), uint8(status));
+        IStrategy.Status status = _strategy.getRecipientStatus(recipientId);
+
+        assertEq(uint8(IStrategy.Status.Pending), uint8(status));
     }
 
     function testRevert_registerRecipient_new_withRegistryAnchor_UNAUTHORIZED() public {

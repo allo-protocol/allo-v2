@@ -98,8 +98,8 @@ contract RFPCommitteeStrategyTest is Test, RegistrySetupFull, AlloSetup, Native,
 
     function test_allocate() public {
         address recipientId = __register_setMilestones_allocate();
-        IStrategy.RecipientStatus recipientStatus = strategy.getRecipientStatus(recipientId);
-        assertEq(uint8(recipientStatus), uint8(IStrategy.RecipientStatus.Accepted));
+        IStrategy.Status recipientStatus = strategy.getRecipientStatus(recipientId);
+        assertEq(uint8(recipientStatus), uint8(IStrategy.Status.Accepted));
     }
 
     function test_allocate_reallocating() public {
@@ -162,7 +162,7 @@ contract RFPCommitteeStrategyTest is Test, RegistrySetupFull, AlloSetup, Native,
         RFPCommitteeStrategy.Milestone memory milestone = RFPSimpleStrategy.Milestone({
             metadata: Metadata({protocol: 1, pointer: "metadata"}),
             amountPercentage: 1e18,
-            milestoneStatus: IStrategy.RecipientStatus.Pending
+            milestoneStatus: IStrategy.Status.Pending
         });
 
         milestones[0] = milestone;
