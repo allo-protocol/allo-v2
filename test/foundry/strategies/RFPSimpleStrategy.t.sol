@@ -20,8 +20,9 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
     // Events
     event MaxBidIncreased(uint256 maxBid);
     event MilstoneSubmitted(uint256 milestoneId);
-    event MilestoneRejected(uint256 milestoneId);
+    event MilestoneStatusChanged(uint256 milestoneId, IStrategy.RecipientStatus status);
     event MilestonesSet();
+    event UpdatedRegistration(address indexed recipientId, bytes data, address sender);
 
     bool public useRegistryAnchor;
     bool public metadataRequired;
@@ -244,7 +245,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
     function test_rejectMilestone() public {
         __register_setMilestones_allocate_submitUpcomingMilestone();
         vm.expectEmit();
-        emit MilestoneRejected(0);
+        emit MilestoneStatusChanged(0, IStrategy.RecipientStatus.Rejected);
         vm.prank(pool_admin());
         strategy.rejectMilestone(0);
         RFPSimpleStrategy.Milestone memory milestone = strategy.getMilestone(0);
@@ -314,6 +315,21 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         assertEq(_recipient.proposalBid, maxBid);
     }
 
+    function test_registerRecipient_UpdatedRegistration() public {
+        test_registerRecipient_zero_proposalBid();
+
+        address sender = recipient();
+        Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
+
+        bytes memory data = abi.encode(recipientAddress(), false, 0, metadata);
+
+        vm.expectEmit(true, false, false, true);
+        emit UpdatedRegistration(sender, data, sender);
+
+        vm.prank(address(allo()));
+        strategy.registerRecipient(data, sender);
+    }
+
     function test_registerRecipient_withOptionallyUsingRegistryAnchor() public {
         RFPSimpleStrategy testStrategy = new RFPSimpleStrategy(address(allo()), "RFPSimpleStrategy");
         vm.prank(address(allo()));
@@ -337,6 +353,18 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         __register_setMilestones_allocate();
         vm.expectRevert(POOL_INACTIVE.selector);
         __register_recipient();
+    }
+
+    function testRevert_registerRecipient_zero_recipientAddress() public {
+        address sender = recipient();
+        Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
+
+        bytes memory data = abi.encode(0, false, 1e18, metadata);
+
+        vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, sender));
+
+        vm.prank(address(allo()));
+        strategy.registerRecipient(data, sender);
     }
 
     function testRevert_registerRecipient_withUseRegistryAnchor_UNAUTHORIZED() public {
