@@ -94,6 +94,12 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Emitted when milestones are set.
     event MilestonesSet();
 
+    /// @notice Emitted when a recipient updates their registration
+    /// @param recipientId Id of the recipient
+    /// @param data The encoded data - (address recipientId, address recipientAddress, Metadata metadata)
+    /// @param sender The sender of the transaction
+    event UpdatedRegistration(address indexed recipientId, bytes data, address sender);
+
     /// ================================
     /// ========== Storage =============
     /// ================================
@@ -374,12 +380,15 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         // Get the recipient
         Recipient storage recipient = _recipients[recipientId];
 
-        // Ensure the recipient is not already registered
-        if (recipient.recipientStatus == RecipientStatus.None) {
-            _recipients[recipientId] = recipient; // TODO: VALIDATE
-        } else {
-            // Append only new recipients to the '_recipientIds' array
+        if (recipient.recipientStatus == RecipientStatus.Accepted) {
+            // If the recipient status is 'Accepted' this will revert
+            revert RECIPIENT_ALREADY_ACCEPTED();
+        } else if (recipient.recipientStatus == RecipientStatus.None) {
+            // If the recipient status is 'None' add the recipient to the '_recipientIds' array
             _recipientIds.push(recipientId);
+            emit Registered(recipientId, _data, _sender);
+        } else {
+            emit UpdatedRegistration(recipientId, _data, _sender);
         }
 
         // update the recipients data
@@ -387,9 +396,6 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         recipient.useRegistryAnchor = isUsingRegistryAnchor ? true : recipient.useRegistryAnchor;
         recipient.proposalBid = proposalBid;
         recipient.recipientStatus = RecipientStatus.Pending;
-
-        // TODO: VALIDATE
-        emit Registered(recipientId, _data, _sender);
     }
 
     /// @notice Select recipient for RFP allocation
