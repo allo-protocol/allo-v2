@@ -30,21 +30,11 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
 
     event BrokerSet(Broker broker);
     event RecipientDurationsChanged(address recipientId, LockupLinear.Durations durations);
-    event RecipientStatusChanged(address recipientId, InternalRecipientStatus status);
+    event RecipientStatusChanged(address recipientId, Status status);
 
     /// ================================
     /// ========== Storage =============
     /// ================================
-
-    /// @notice Enum for internal recipient status
-    enum InternalRecipientStatus {
-        None,
-        Pending,
-        Accepted,
-        Rejected,
-        InReview,
-        Canceled
-    }
 
     // slot 0
     bool public registryGating;
@@ -68,7 +58,7 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
         // slot 0
         bool useRegistryAnchor;
         bool cancelable;
-        InternalRecipientStatus recipientStatus;
+        Status recipientStatus;
         address recipientAddress;
         // slot 1
         uint256 grantAmount;
@@ -126,7 +116,7 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Get Internal recipient status
     /// @param _recipientId Id of the recipient
-    function getInternalRecipientStatus(address _recipientId) external view returns (InternalRecipientStatus) {
+    function getStatus(address _recipientId) external view returns (Status) {
         return _getRecipient(_recipientId).recipientStatus;
     }
 
@@ -158,8 +148,8 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Get recipient status
     /// @param _recipientId Id of the recipient
     function _getRecipientStatus(address _recipientId) internal view override returns (Status) {
-        InternalRecipientStatus status = _getRecipient(_recipientId).recipientStatus;
-        if (status == InternalRecipientStatus.InReview) {
+        Status status = _getRecipient(_recipientId).recipientStatus;
+        if (status == Status.InReview) {
             return Status.Pending;
         } else {
             return Status(uint8(status));
@@ -181,10 +171,10 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _recipientId Id of the recipient
     /// @param _streamId The id of the stream
     function cancelStream(address _recipientId, uint256 _streamId) external onlyPoolManager(msg.sender) {
-        if (_recipients[_recipientId].recipientStatus != InternalRecipientStatus.Accepted) {
+        if (_recipients[_recipientId].recipientStatus != Status.Accepted) {
             revert STATUS_NOT_ACCEPTED();
         }
-        _recipients[_recipientId].recipientStatus = InternalRecipientStatus.Canceled;
+        _recipients[_recipientId].recipientStatus = Status.Canceled;
 
         uint128 refundedAmount = lockupLinear.refundableAmountOf(_streamId);
         _recipients[_recipientId].grantAmount -= refundedAmount;
@@ -201,8 +191,8 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
         onlyPoolManager(msg.sender)
     {
         if (
-            _recipients[_recipientId].recipientStatus != InternalRecipientStatus.Pending
-                && _recipients[_recipientId].recipientStatus != InternalRecipientStatus.InReview
+            _recipients[_recipientId].recipientStatus != Status.Pending
+                && _recipients[_recipientId].recipientStatus != Status.InReview
         ) {
             revert STATUS_NOT_PENDING_OR_INREVIEW();
         }
@@ -221,13 +211,13 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Set the internal status of the recipient to InReview
     /// @param _recipientIds Ids of the recipients
-    function setInternalRecipientStatusToInReview(address[] calldata _recipientIds) external {
+    function setRecipientStatusToInReview(address[] calldata _recipientIds) external {
         uint256 recipientLength = _recipientIds.length;
         for (uint256 i = 0; i < recipientLength;) {
             address recipientId = _recipientIds[i];
-            _recipients[recipientId].recipientStatus = InternalRecipientStatus.InReview;
+            _recipients[recipientId].recipientStatus = Status.InReview;
 
-            emit RecipientStatusChanged(recipientId, InternalRecipientStatus.InReview);
+            emit RecipientStatusChanged(recipientId, Status.InReview);
 
             unchecked {
                 i++;
@@ -289,7 +279,7 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
             revert INVALID_REGISTRATION();
         }
 
-        if (_recipients[recipientId].recipientStatus == InternalRecipientStatus.Accepted) {
+        if (_recipients[recipientId].recipientStatus == Status.Accepted) {
             revert RECIPIENT_ALREADY_ACCEPTED();
         }
 
@@ -303,7 +293,7 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
             grantAmount: grantAmount,
             metadata: metadata,
             recipientAddress: recipientAddress,
-            recipientStatus: InternalRecipientStatus.Pending,
+            recipientStatus: Status.Pending,
             useRegistryAnchor: registryGating ? true : useRegistryAnchor
         });
 
@@ -322,14 +312,14 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
         nonReentrant
         onlyPoolManager(_sender)
     {
-        (address recipientId, InternalRecipientStatus recipientStatus, uint256 grantAmount) =
-            abi.decode(_data, (address, InternalRecipientStatus, uint256));
+        (address recipientId, Status recipientStatus, uint256 grantAmount) =
+            abi.decode(_data, (address, Status, uint256));
 
         Recipient storage recipient = _recipients[recipientId];
 
         if (
-            recipient.recipientStatus != InternalRecipientStatus.Accepted // no need to accept twice
-                && recipientStatus == InternalRecipientStatus.Accepted
+            recipient.recipientStatus != Status.Accepted // no need to accept twice
+                && recipientStatus == Status.Accepted
         ) {
             IAllo.Pool memory pool = allo.getPool(poolId);
             allocatedGrantAmount += grantAmount;
@@ -339,16 +329,16 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
             }
 
             recipient.grantAmount = grantAmount;
-            recipient.recipientStatus = InternalRecipientStatus.Accepted;
+            recipient.recipientStatus = Status.Accepted;
 
-            emit RecipientStatusChanged(recipientId, InternalRecipientStatus.Accepted);
+            emit RecipientStatusChanged(recipientId, Status.Accepted);
             emit Allocated(recipientId, recipient.grantAmount, pool.token, _sender);
         } else if (
-            recipient.recipientStatus != InternalRecipientStatus.Rejected // no need to reject twice
-                && recipientStatus == InternalRecipientStatus.Rejected
+            recipient.recipientStatus != Status.Rejected // no need to reject twice
+                && recipientStatus == Status.Rejected
         ) {
-            recipient.recipientStatus = InternalRecipientStatus.Rejected;
-            emit RecipientStatusChanged(recipientId, InternalRecipientStatus.Rejected);
+            recipient.recipientStatus = Status.Rejected;
+            emit RecipientStatusChanged(recipientId, Status.Rejected);
         }
     }
 

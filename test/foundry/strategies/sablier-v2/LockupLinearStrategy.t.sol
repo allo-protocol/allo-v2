@@ -97,7 +97,7 @@ contract LockupLinearStrategyTest is LockupBase_Test, Errors {
 
         assertEq(vars.recipientIds[0], pool_manager1());
 
-        strategy.setInternalRecipientStatusToInReview(vars.recipientIds);
+        strategy.setRecipientStatusToInReview(vars.recipientIds);
 
         LockupLinearStrategy.Recipient memory recipient = strategy.getRecipient(vars.recipientIds[0]);
         assertEq(recipient.cancelable, vars.cancelable, "recipient.cancelable");
@@ -107,14 +107,13 @@ contract LockupLinearStrategyTest is LockupBase_Test, Errors {
         assertEq(recipient.durations.cliff, params.durations.cliff, "recipient.durations.cliff");
         assertEq(recipient.durations.total, params.durations.total, "recipient.durations.total");
 
-        vars.allocateData =
-            abi.encode(vars.recipientIds[0], LockupLinearStrategy.InternalRecipientStatus.Accepted, vars.grantAmount);
+        vars.allocateData = abi.encode(vars.recipientIds[0], IStrategy.Status.Accepted, vars.grantAmount);
 
         vm.expectEmit({emitter: address(strategy)});
         emit Allocated(vars.recipientIds[0], vars.grantAmount, address(GTC), pool_manager1());
         allo().allocate(poolId, vars.allocateData);
 
-        assertEq(uint8(strategy.getInternalRecipientStatus(vars.recipientIds[0])), 2, "after allocate internal status"); // Accepted
+        assertEq(uint8(strategy.getRecipientStatus(vars.recipientIds[0])), 2, "after allocate internal status"); // Accepted
 
         vars.streamId = lockupLinear.nextStreamId();
 
@@ -144,7 +143,7 @@ contract LockupLinearStrategyTest is LockupBase_Test, Errors {
         vars.allocatedGrantAmountBeforeCancel = strategy.allocatedGrantAmount();
         vars.refundedAmount = lockupLinear.refundableAmountOf(vars.streamId);
         strategy.cancelStream(vars.recipientIds[0], vars.streamId);
-        assertEq(uint8(strategy.getInternalRecipientStatus(vars.recipientIds[0])), 5, "after cancel internal status"); // Canceled
+        assertEq(uint8(strategy.getRecipientStatus(vars.recipientIds[0])), 5, "after cancel internal status"); // Canceled
         assertEq(
             strategy.getPoolAmount(),
             vars.poolAmountBeforeCancel + vars.refundedAmount,
@@ -314,8 +313,7 @@ contract LockupLinearStrategyTest is LockupBase_Test, Errors {
         deal({token: address(GTC), to: pool_manager1(), give: grantAmount});
         GTC.approve(address(allo()), uint96(grantAmount));
         allo().fundPool(poolId, grantAmount);
-        bytes memory allocateData =
-            abi.encode(recipientIds[0], LockupLinearStrategy.InternalRecipientStatus.Accepted, grantAmount - 1e18);
+        bytes memory allocateData = abi.encode(recipientIds[0], IStrategy.Status.Accepted, grantAmount - 1e18);
         allo().allocate(poolId, allocateData);
 
         vm.expectRevert(RECIPIENT_ALREADY_ACCEPTED.selector);
@@ -351,8 +349,7 @@ contract LockupLinearStrategyTest is LockupBase_Test, Errors {
         deal({token: address(GTC), to: pool_manager1(), give: grantAmount});
         GTC.approve(address(allo()), uint96(grantAmount));
         allo().fundPool(poolId, grantAmount);
-        bytes memory allocateData =
-            abi.encode(recipientIds[0], LockupLinearStrategy.InternalRecipientStatus.Accepted, grantAmount);
+        bytes memory allocateData = abi.encode(recipientIds[0], IStrategy.Status.Accepted, grantAmount);
         vm.expectRevert(LockupLinearStrategy.ALLOCATION_EXCEEDS_POOL_AMOUNT.selector);
         allo().allocate(poolId, allocateData);
     }
@@ -367,8 +364,7 @@ contract LockupLinearStrategyTest is LockupBase_Test, Errors {
         address[] memory recipientIds = new address[](1);
         recipientIds[0] = allo().registerRecipient(poolId, registerRecipientData);
 
-        bytes memory allocateData =
-            abi.encode(recipientIds[0], LockupLinearStrategy.InternalRecipientStatus.Rejected, 0);
+        bytes memory allocateData = abi.encode(recipientIds[0], IStrategy.Status.Rejected, 0);
         allo().allocate(poolId, allocateData);
 
         assertEq(uint8(strategy.getRecipientStatus(recipientIds[0])), 3); // Rejected
@@ -390,8 +386,7 @@ contract LockupLinearStrategyTest is LockupBase_Test, Errors {
         GTC.approve(address(allo()), uint96(2 * grantAmount));
         allo().fundPool(poolId, 2 * grantAmount);
 
-        bytes memory allocateData =
-            abi.encode(recipientIds[0], LockupLinearStrategy.InternalRecipientStatus.Accepted, grantAmount);
+        bytes memory allocateData = abi.encode(recipientIds[0], IStrategy.Status.Accepted, grantAmount);
         allo().allocate(poolId, allocateData);
 
         allo().distribute(poolId, recipientIds, "");
@@ -431,7 +426,7 @@ contract LockupLinearStrategyTest is LockupBase_Test, Errors {
         assertEq(recipientIds[0], pool_manager1());
 
         // Set the recipient status to InReview
-        strategy.setInternalRecipientStatusToInReview(recipientIds);
+        strategy.setRecipientStatusToInReview(recipientIds);
         assertEq(uint8(strategy.getRecipientStatus(recipientIds[0])), 1); // Pending
     }
 

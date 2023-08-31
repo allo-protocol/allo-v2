@@ -579,10 +579,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         vm.expectEmit(true, false, false, true);
         emit Registered(sender, data, sender);
 
-        assertEq(
-            uint8(strategy.getRecipient(sender).recipientStatus),
-            uint8(DonationVotingStrategy.InternalRecipientStatus.None)
-        );
+        assertEq(uint8(strategy.getRecipient(sender).recipientStatus), uint8(IStrategy.Status.None));
 
         vm.prank(address(allo()));
         address recipientId = strategy.registerRecipient(data, sender);
@@ -625,19 +622,13 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
     function test_registerRecipient_accepted() public {
         address recipientId = __register_accept_recipient();
 
-        assertEq(
-            uint8(strategy.getRecipient(recipientId).recipientStatus),
-            uint8(DonationVotingStrategy.InternalRecipientStatus.Accepted)
-        );
+        assertEq(uint8(strategy.getRecipient(recipientId).recipientStatus), uint8(IStrategy.Status.Accepted));
 
         vm.prank(address(allo()));
         bytes memory data = __generateRecipientWithoutId();
         strategy.registerRecipient(data, recipient());
 
-        assertEq(
-            uint8(strategy.getRecipient(recipientId).recipientStatus),
-            uint8(DonationVotingStrategy.InternalRecipientStatus.Pending)
-        );
+        assertEq(uint8(strategy.getRecipient(recipientId).recipientStatus), uint8(IStrategy.Status.Pending));
     }
 
     function test_registerRecipient_appeal() public {
@@ -657,10 +648,7 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         vm.prank(pool_admin());
         strategy.reviewRecipients(recipientIds, recipientStatuses);
 
-        assertEq(
-            uint8(strategy.getRecipient(recipientId).recipientStatus),
-            uint8(DonationVotingStrategy.InternalRecipientStatus.Rejected)
-        );
+        assertEq(uint8(strategy.getRecipient(recipientId).recipientStatus), uint8(IStrategy.Status.Rejected));
 
         // appeal
         bytes memory data = __generateRecipientWithoutId();

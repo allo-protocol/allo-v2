@@ -36,7 +36,8 @@ interface IStrategy {
         Accepted,
         Rejected,
         Appealed,
-        InReview
+        InReview,
+        Canceled
     }
 
     /// @notice Payout summary struct to hold the payout data

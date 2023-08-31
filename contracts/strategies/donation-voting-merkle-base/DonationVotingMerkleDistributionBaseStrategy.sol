@@ -33,15 +33,6 @@ import {Native} from "../../core/libraries/Native.sol";
 /// @author @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>, @0xZakk <zakk@gitcoin.co>, @nfrgosselin <nate@gitcoin.co>
 /// @notice Strategy for donation voting allocation with a merkle distribution
 abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseStrategy, Multicall {
-    /// @notice Stores the internal status of a recipient for this strategy.
-    enum InternalRecipientStatus {
-        None,
-        Pending,
-        Accepted,
-        Rejected,
-        Appealed
-    }
-
     /// ================================
     /// ========== Struct ==============
     /// ================================
@@ -315,14 +306,14 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
 
     /// @notice Get recipient status
     /// @dev This will return the 'Status' of the recipient, the 'Status' is used at the strategy
-    ///      level and is different from the 'InternalRecipientStatus' which is used at the protocol level
+    ///      level and is different from the 'Status' which is used at the protocol level
     /// @param _recipientId ID of the recipient
     /// @return Status of the recipient
     function _getRecipientStatus(address _recipientId) internal view override returns (Status) {
-        InternalRecipientStatus status = InternalRecipientStatus(_getUintRecipientStatus(_recipientId));
+        Status status = Status(_getUintRecipientStatus(_recipientId));
 
         // If the 'status' is 'Appealed' we will return 'Pending' instead
-        if (status == InternalRecipientStatus.Appealed) {
+        if (status == Status.Appealed) {
             return Status.Pending;
         } else {
             return Status(uint8(status));
@@ -562,22 +553,22 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
 
         uint8 currentStatus = _getUintRecipientStatus(recipientId);
 
-        if (currentStatus == uint8(InternalRecipientStatus.None)) {
+        if (currentStatus == uint8(Status.None)) {
             // recipient registering new application
             recipientToStatusIndexes[recipientId] = recipientsCounter;
-            _setRecipientStatus(recipientId, uint8(InternalRecipientStatus.Pending));
+            _setRecipientStatus(recipientId, uint8(Status.Pending));
 
             bytes memory extendedData = abi.encode(_data, recipientsCounter);
             emit Registered(recipientId, extendedData, _sender);
 
             recipientsCounter++;
         } else {
-            if (currentStatus == uint8(InternalRecipientStatus.Accepted)) {
+            if (currentStatus == uint8(Status.Accepted)) {
                 // recipient updating accepted application
-                _setRecipientStatus(recipientId, uint8(InternalRecipientStatus.Pending));
-            } else if (currentStatus == uint8(InternalRecipientStatus.Rejected)) {
+                _setRecipientStatus(recipientId, uint8(Status.Pending));
+            } else if (currentStatus == uint8(Status.Rejected)) {
                 // recipient updating rejected application
-                _setRecipientStatus(recipientId, uint8(InternalRecipientStatus.Appealed));
+                _setRecipientStatus(recipientId, uint8(Status.Appealed));
             }
             emit UpdatedRegistration(recipientId, _data, _sender, _getUintRecipientStatus(recipientId));
         }
@@ -625,7 +616,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
         (address recipientId, uint256 amount, address token) = abi.decode(_data, (address, uint256, address));
 
         // If the recipient status is not 'Accepted' this will revert, the recipient must be accepted through registration
-        if (InternalRecipientStatus(_getUintRecipientStatus(recipientId)) != InternalRecipientStatus.Accepted) {
+        if (Status(_getUintRecipientStatus(recipientId)) != Status.Accepted) {
             revert RECIPIENT_ERROR(recipientId);
         }
 

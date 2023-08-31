@@ -267,7 +267,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         // Get the milestone and update the metadata and status
         Milestone storage milestone = milestones[upcomingMilestone];
         milestone.metadata = _metadata;
-       
+
         // Set the milestone status to 'Pending' to indicate that the milestone is submitted
         milestone.milestoneStatus = Status.Pending;
 
@@ -291,7 +291,8 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         }
 
         milestones[_milestoneId].milestoneStatus = Status.Rejected;
-        emit MilestoneRejected(_milestoneId);
+
+        emit MilestoneStatusChanged(_milestoneId, milestones[_milestoneId].milestoneStatus);
     }
 
     /// @notice Withdraw funds from pool.
@@ -485,7 +486,6 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Increase max bid for RFP pool
     /// @param _maxBid The new max bid to be set
-    /// @dev Emits a 'MilestoneRejected()' event.
     function _increaseMaxBid(uint256 _maxBid) internal {
         if (_maxBid < maxBid) {
             revert AMOUNT_TOO_LOW();

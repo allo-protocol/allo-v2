@@ -817,8 +817,7 @@ contract DonationVotingMerkleDistributionBaseMockTest is
 
         DonationVotingMerkleDistributionBaseStrategy.ApplicationStatus[] memory statuses =
             new DonationVotingMerkleDistributionBaseStrategy.ApplicationStatus[](1);
-        statuses[0] =
-            __buildStatusRow(0, uint8(DonationVotingMerkleDistributionBaseStrategy.InternalRecipientStatus.Accepted));
+        statuses[0] = __buildStatusRow(0, uint8(IStrategy.Status.Accepted));
 
         vm.prank(pool_admin());
         strategy.reviewRecipients(statuses);
@@ -832,8 +831,7 @@ contract DonationVotingMerkleDistributionBaseMockTest is
 
         DonationVotingMerkleDistributionBaseStrategy.ApplicationStatus[] memory statuses =
             new DonationVotingMerkleDistributionBaseStrategy.ApplicationStatus[](1);
-        statuses[0] =
-            __buildStatusRow(0, uint8(DonationVotingMerkleDistributionBaseStrategy.InternalRecipientStatus.Rejected));
+        statuses[0] = __buildStatusRow(0, uint8(IStrategy.Status.Rejected));
 
         vm.expectEmit(false, false, false, true);
         emit RecipientStatusUpdated(0, statuses[0].statusRow, pool_admin());

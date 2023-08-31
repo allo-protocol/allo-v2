@@ -21,9 +21,9 @@ import {EventSetup} from "../shared/EventSetup.sol";
 import {MockRevertingReceiver} from "../../utils/MockRevertingReceiver.sol";
 
 contract WrappedVotingNftMintStrategyTest is Test, AlloSetup, RegistrySetupFull, EventSetup, Native, Errors {
-    event RecipientStatusUpdated(address indexed recipientId, InternalRecipientStatus recipientStatus, address sender);
+    event RecipientStatusUpdated(address indexed recipientId, Status recipientStatus, address sender);
 
-    enum InternalRecipientStatus {
+    enum Status {
         Pending,
         Accepted,
         Rejected

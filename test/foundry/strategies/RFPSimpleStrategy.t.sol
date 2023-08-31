@@ -20,7 +20,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
     // Events
     event MaxBidIncreased(uint256 maxBid);
     event MilstoneSubmitted(uint256 milestoneId);
-    event MilestoneStatusChanged(uint256 milestoneId, IStrategy.RecipientStatus status);
+    event MilestoneStatusChanged(uint256 milestoneId, IStrategy.Status status);
     event MilestonesSet();
     event UpdatedRegistration(address indexed recipientId, bytes data, address sender);
 
@@ -245,7 +245,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
     function test_rejectMilestone() public {
         __register_setMilestones_allocate_submitUpcomingMilestone();
         vm.expectEmit();
-        emit MilestoneStatusChanged(0, IStrategy.RecipientStatus.Rejected);
+        emit MilestoneStatusChanged(0, IStrategy.Status.Rejected);
         vm.prank(pool_admin());
         strategy.rejectMilestone(0);
         RFPSimpleStrategy.Milestone memory milestone = strategy.getMilestone(0);

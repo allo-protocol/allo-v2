@@ -29,18 +29,12 @@ import {NFTFactory} from "./NFTFactory.sol";
 //                    allo.gitcoin.co
 
 contract WrappedVotingNftMintStrategy is Native, BaseStrategy, ReentrancyGuard {
-    enum InternalRecipientStatus {
-        Pending,
-        Accepted,
-        Rejected
-    }
-
     /// ===============================
     /// ========== Events =============
     /// ===============================
 
-    event UpdatedRegistration(address indexed recipientId, bytes data, address sender, InternalRecipientStatus status);
-    event RecipientStatusUpdated(address indexed recipientId, InternalRecipientStatus recipientStatus, address sender);
+    event UpdatedRegistration(address indexed recipientId, bytes data, address sender, Status status);
+    event RecipientStatusUpdated(address indexed recipientId, Status recipientStatus, address sender);
     event Claimed(address indexed recipientId, address recipientAddress, uint256 amount, address token);
     event TimestampsUpdated(uint64 allocationStartTime, uint64 allocationEndTime, address sender);
 
