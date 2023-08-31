@@ -387,7 +387,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         }
     }
 
-    /// @notice Closes the pool by setting the pool to inactive
+    /// @notice Toggle the status between active and inactive.
     /// @dev 'msg.sender' must be a pool manager to close the pool. Emits a 'PoolActive()' event.
     /// @param _flag The flag to set the pool to active or inactive
     function setPoolActive(bool _flag) external onlyPoolManager(msg.sender) {

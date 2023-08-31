@@ -27,7 +27,6 @@ import {Metadata} from "../../core/libraries/Metadata.sol";
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠉⠋⠋⠋⠋⠋⠛⠙⠋⠛⠙⠋⠁⠀⠀⠀⠀⠀⠀⠀⠀⠠⠿⠻⠟⠿⠃            ⠀     ⠟⠿⠟⠿⠆⠀⠸⠿⠿⠻⠗⠀⠀⠀⠸⠿⠿⠿⠏⠀⠀⠀⠀⠀⠀⠙⠛⠿⢿⢿⡿⡿⡿⠟⠏⠃⠀⠀⠀⠀⠀
 //                    allo.gitcoin.co
 
-
 /// @title RFP Simple Strategy
 /// @author @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>, @0xZakk <zakk@gitcoin.co>, @nfrgosselin <nate@gitcoin.co>
 /// @notice Strategy for Request for Proposal (RFP) allocation with milestone submission and management.
@@ -51,6 +50,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         RecipientStatus milestoneStatus;
     }
 
+    /// @notice Stores the details needed for initializing strategy
     struct InitializeParams {
         uint256 maxBid;
         bool useRegistryAnchor;
@@ -148,13 +148,10 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         __RFPSimpleStrategy_init(_poolId, initializeParams);
     }
 
-
     /// @notice This initializes the BaseStrategy
     /// @dev You only need to pass the 'poolId' to initialize the BaseStrategy and the rest is specific to the strategy
     /// @param _initializeParams The initialize params
-    function __RFPSimpleStrategy_init(uint256 _poolId, InitializeParams memory _initializeParams)
-        internal
-    {
+    function __RFPSimpleStrategy_init(uint256 _poolId, InitializeParams memory _initializeParams) internal {
         // Initialize the BaseStrategy
         __BaseStrategy_init(_poolId);
 
@@ -200,7 +197,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Get the milestone
     /// @param _milestoneId ID of the milestone
-    /// @return Milestone[] Returns the milestones
+    /// @return Milestone Returns the milestone
     function getMilestone(uint256 _milestoneId) external view returns (Milestone memory) {
         return milestones[_milestoneId];
     }
@@ -217,7 +214,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// ======= External/Custom =======
     /// ===============================
 
-    /// @notice Closes the pool by setting the pool to inactive
+    /// @notice Toggle the status between active and inactive.
     /// @dev 'msg.sender' must be a pool manager to close the pool. Emits a 'PoolActive()' event.
     /// @param _flag The flag to set the pool to active or inactive
     function setPoolActive(bool _flag) external {
@@ -226,7 +223,8 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     }
 
     /// @notice Set the milestones for the acceptedRecipientId.
-    /// @param _milestones The milestones to be set
+    /// @dev 'msg.sender' must be a pool manager to set milestones. Emits 'MilestonesSet' event
+    /// @param _milestones Milestone[] The milestones to be set
     function setMilestones(Milestone[] memory _milestones) external onlyPoolManager(msg.sender) {
         if (upcomingMilestone != 0) {
             revert MILESTONES_ALREADY_SET();
@@ -234,6 +232,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
         uint256 totalAmountPercentage;
 
+        // Loop through the milestones and add them to the milestones array
         uint256 milestonesLength = _milestones.length;
         for (uint256 i = 0; i < milestonesLength;) {
             totalAmountPercentage += _milestones[i].amountPercentage;
@@ -244,6 +243,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
             }
         }
 
+        // Check if the all milestone amount percentage totals to 1e18(100%)
         if (totalAmountPercentage != 1e18) {
             revert INVALID_MILESTONE();
         }
@@ -264,21 +264,25 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
             revert INVALID_MILESTONE();
         }
 
+        // Get the milestone and update the metadata and status
         Milestone storage milestone = milestones[upcomingMilestone];
         milestone.metadata = _metadata;
+        // Set the milestone status to 'Pending' to indicate that the milestone is submitted
         milestone.milestoneStatus = RecipientStatus.Pending;
 
+        // Emit event for the milestone
         emit MilstoneSubmitted(upcomingMilestone);
     }
 
     /// @notice Update max bid for RFP pool
+    /// @dev 'msg.sender' must be a pool manager to update the max bid.
     /// @param _maxBid The max bid to be set
     function increaseMaxBid(uint256 _maxBid) external onlyPoolManager(msg.sender) {
         _increaseMaxBid(_maxBid);
     }
 
     /// @notice Reject pending milestone submmited by the acceptedRecipientId.
-    /// @dev 'msg.sender' must be a pool manager to reject a milestone. Emits a 'MilestoneRejected()' event.
+    /// @dev 'msg.sender' must be a pool manager to reject a milestone. Emits a 'MilestoneStatusChanged()' event.
     /// @param _milestoneId ID of the milestone
     function rejectMilestone(uint256 _milestoneId) external onlyPoolManager(msg.sender) {
         if (milestones[_milestoneId].milestoneStatus == RecipientStatus.Accepted) {
@@ -293,7 +297,10 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @dev 'msg.sender' must be a pool manager to withdraw funds.
     /// @param _amount The amount to be withdrawn
     function withdraw(uint256 _amount) external onlyPoolManager(msg.sender) onlyInactivePool {
+        // Decrement the pool amount
         poolAmount -= _amount;
+
+        // Transfer the amount to the pool manager
         _transferAmount(allo.getPool(poolId).token, msg.sender, _amount);
     }
 
@@ -302,8 +309,12 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// ====================================
 
     /// @notice Submit a proposal to RFP pool
+    /// @dev Emits a 'Registered()' event
     /// @param _data The data to be decoded
+    /// @custom:data when 'useRegistryAnchor' is 'true' -> (address recipientId, uint256 proposalBid, Metadata metadata)
+    ///              when 'useRegistryAnchor' is 'false' -> (address recipientAddress, address registryAnchor, uint256 proposalBid, Metadata metadata)
     /// @param _sender The sender of the transaction
+    /// @return recipientId The id of the recipient
     function _registerRecipient(bytes memory _data, address _sender)
         internal
         override
@@ -316,8 +327,9 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         uint256 proposalBid;
         Metadata memory metadata;
 
-        // decode data custom to this strategy
+        // Decode '_data' depending on the 'useRegistryAnchor' flag
         if (useRegistryAnchor) {
+            /// @custom:data when 'true' -> (address recipientId, uint256 proposalBid, Metadata metadata)
             (recipientId, proposalBid, metadata) = abi.decode(_data, (address, uint256, Metadata));
 
             // If the sender is not a profile member this will revert
@@ -325,13 +337,14 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
                 revert UNAUTHORIZED();
             }
         } else {
+            //  @custom:data when 'false' -> (address recipientAddress, address registryAnchor, uint256 proposalBid, Metadata metadata)
             (recipientAddress, registryAnchor, proposalBid, metadata) =
                 abi.decode(_data, (address, address, uint256, Metadata));
 
-            // Set this to 'true' if the registry anchor is not the zero address
+            // Check if the registry anchor is valid so we know whether to use it or not
             isUsingRegistryAnchor = registryAnchor != address(0);
 
-            // If using the 'registryAnchor' we set the 'recipientId' to the 'registryAnchor', otherwise we set it to the 'msg.sender'
+            // Ternerary to set the recipient id based on whether or not we are using the 'registryAnchor' or '_sender'
             recipientId = isUsingRegistryAnchor ? registryAnchor : _sender;
 
             // Checks if the '_sender' is a member of the profile 'anchor' being used and reverts if not
@@ -340,7 +353,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
             }
         }
 
-        // If the metadata is required and the metadata is invalid this will revert
+        // Check if the metadata is required and if it is, check if it is valid, otherwise revert
         if (metadataRequired && (bytes(metadata.pointer).length == 0 || metadata.protocol == 0)) {
             revert INVALID_METADATA();
         }
@@ -363,7 +376,10 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
         // Ensure the recipient is not already registered
         if (recipient.recipientStatus == RecipientStatus.None) {
-            _recipients[recipientId] = recipient;
+            _recipients[recipientId] = recipient; // TODO: VALIDATE
+        } else {
+            // Append only new recipients to the '_recipientIds' array
+            _recipientIds.push(recipientId);
         }
 
         // update the recipients data
@@ -372,8 +388,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         recipient.proposalBid = proposalBid;
         recipient.recipientStatus = RecipientStatus.Pending;
 
-        _recipientIds.push(recipientId);
-
+        // TODO: VALIDATE
         emit Registered(recipientId, _data, _sender);
     }
 
@@ -388,20 +403,22 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         onlyActivePool
         onlyPoolManager(_sender)
     {
+        // Decode the '_data'
         acceptedRecipientId = abi.decode(_data, (address));
 
-        // update status of acceptedRecipientId to accepted
         Recipient storage recipient = _recipients[acceptedRecipientId];
 
         if (acceptedRecipientId == address(0) || recipient.recipientStatus != RecipientStatus.Pending) {
             revert RECIPIENT_ERROR(acceptedRecipientId);
         }
 
+        // Update status of acceptedRecipientId to accepted
         recipient.recipientStatus = RecipientStatus.Accepted;
         _setPoolActive(false);
 
         IAllo.Pool memory pool = allo.getPool(poolId);
 
+        // Emit event for the allocation
         emit Allocated(acceptedRecipientId, recipient.proposalBid, pool.token, _sender);
     }
 
