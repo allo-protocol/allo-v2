@@ -20,19 +20,46 @@ import {QVBaseStrategy} from "../qv-base/QVBaseStrategy.sol";
 //                    allo.gitcoin.co
 
 contract QVSimpleStrategy is QVBaseStrategy {
+    /// ======================
+    /// ======= Events =======
+    /// ======================
+
+    /// @notice Emitted when an allocator is added
+    /// @param allocator The allocator address
+    /// @param sender The sender of the transaction
     event AllocatorAdded(address indexed allocator, address sender);
+
+    /// @notice Emitted when an allocator is removed
+    /// @param allocator The allocator address
+    /// @param sender The sender of the transaction
     event AllocatorRemoved(address indexed allocator, address sender);
 
+    /// ======================
+    /// ======= Storage ======
+    /// ======================
+
+    /// @notice The maximum voice credits per allocator
+    uint256 public maxVoiceCreditsPerAllocator;
+
+    /// @notice The details of the allowed allocator
+    /// @dev allocator => bool
+    mapping(address => bool) public allowedAllocators;
+
+    /// ======================
+    /// ======= Struct =======
+    /// ======================
+
+    /// @notice The parameters used to initialize the strategy
     struct InitializeParamsSimple {
+        // slot 0
         uint256 maxVoiceCreditsPerAllocator;
+        // slot 1..n
         InitializeParams params;
     }
 
-    uint256 public maxVoiceCreditsPerAllocator;
-
-    /// @notice allocator => bool
-    mapping(address => bool) public allowedAllocators;
-
+    /// ====================================
+    /// ========== Constructor =============
+    /// ====================================
     constructor(address _allo, string memory _name) QVBaseStrategy(_allo, _name) {}
 
     /// ===============================
@@ -40,8 +67,8 @@ contract QVSimpleStrategy is QVBaseStrategy {
     /// ===============================
 
     /// @notice Initialize the strategy
-    /// @param _poolId The pool id
-    /// @param _data The data
+    /// @param _poolId The ID of the pool
+    /// @param _data The initialization data for the strategy
     function initialize(uint256 _poolId, bytes memory _data) external virtual override onlyAllo {
         (InitializeParamsSimple memory initializeParamsSimple) = abi.decode(_data, (InitializeParamsSimple));
         __QVBaseStrategy_init(_poolId, initializeParamsSimple.params);
