@@ -393,6 +393,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     }
 
     /// @notice Select recipient for RFP allocation
+    /// @dev '_sender' must be a pool manager to allocate.
     /// @param _data The data to be decoded
     /// @param _sender The sender of the allocation
     function _allocate(bytes memory _data, address _sender)
