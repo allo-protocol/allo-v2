@@ -679,6 +679,7 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
 
     function test_withdraw() public {
         vm.startPrank(pool_manager1());
+        strategy.setPoolActive(false);
         strategy.withdraw(1e18);
         vm.stopPrank();
 
