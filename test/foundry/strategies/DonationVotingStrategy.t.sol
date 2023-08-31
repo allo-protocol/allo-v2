@@ -593,6 +593,11 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         vm.expectEmit(true, false, false, true);
         emit Registered(sender, data, sender);
 
+        assertEq(
+            uint8(strategy.getRecipient(sender).recipientStatus),
+            uint8(DonationVotingStrategy.InternalRecipientStatus.None)
+        );
+
         vm.prank(address(allo()));
         address recipientId = strategy.registerRecipient(data, sender);
 
@@ -631,6 +636,24 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         assertEq(uint8(DonationVotingStrategy.InternalRecipientStatus.Pending), uint8(recipient.recipientStatus));
     }
 
+    function test_registerRecipient_accepted() public {
+        address recipientId = __register_accept_recipient();
+
+        assertEq(
+            uint8(strategy.getRecipient(recipientId).recipientStatus),
+            uint8(DonationVotingStrategy.InternalRecipientStatus.Accepted)
+        );
+
+        vm.prank(address(allo()));
+        bytes memory data = __generateRecipientWithoutId();
+        strategy.registerRecipient(data, recipient());
+
+        assertEq(
+            uint8(strategy.getRecipient(recipientId).recipientStatus),
+            uint8(DonationVotingStrategy.InternalRecipientStatus.Pending)
+        );
+    }
+
     function test_registerRecipient_appeal() public {
         vm.warp(registrationStartTime + 10);
 
@@ -648,6 +671,11 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
 
         vm.prank(pool_admin());
         strategy.reviewRecipients(recipientIds, recipientStatuses);
+
+        assertEq(
+            uint8(strategy.getRecipient(recipientId).recipientStatus),
+            uint8(DonationVotingStrategy.InternalRecipientStatus.Rejected)
+        );
 
         // appeal
         bytes memory data = __generateRecipientWithoutId();
