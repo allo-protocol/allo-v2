@@ -380,10 +380,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         // Get the recipient
         Recipient storage recipient = _recipients[recipientId];
 
-        if (recipient.recipientStatus == RecipientStatus.Accepted) {
-            // If the recipient status is 'Accepted' this will revert
-            revert RECIPIENT_ALREADY_ACCEPTED();
-        } else if (recipient.recipientStatus == RecipientStatus.None) {
+        if (recipient.recipientStatus == RecipientStatus.None) {
             // If the recipient status is 'None' add the recipient to the '_recipientIds' array
             _recipientIds.push(recipientId);
             emit Registered(recipientId, _data, _sender);
