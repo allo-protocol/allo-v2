@@ -30,6 +30,27 @@ The `QVBaseStrategy` is a base contract for quadratic voting strategies.  It ext
 
 ## Sequence Diagram
 
+```mermaid
+sequenceDiagram
+    participant Allocator
+    participant Alice
+    participant PoolManager
+    participant Allo
+    participant QVSimple
+
+    PoolManager->>Allo: createPool() with QVSimple
+    Allo-->>QVSimple: poolId
+    Alice->>+Allo: registerRecipient()
+    Allo-->>QVSimple: registerRecipient()
+    QVSimple-->>Allo: recipient1
+    Allo-->>-Alice: recipient1
+    PoolManager->>+Allo: reviewRecipients()
+    Allocator->>+Allo: allocate()
+    Allo-->>QVSimple: allocate() defined in contract inheriting QVBase
+    PoolManager->>+Allo: distribute()
+    Allo-->>-QVSimple: distribute()
+```
+
 ## Smart Contract Overview
 
 * **License:** The `QVBaseStrategy` contract adheres to the AGPL-3.0-only License, promoting open-source usage with specific terms.
