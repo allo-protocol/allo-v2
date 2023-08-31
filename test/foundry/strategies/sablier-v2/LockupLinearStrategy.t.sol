@@ -102,7 +102,7 @@ contract LockupLinearStrategyTest is LockupBase_Test, Errors {
         LockupLinearStrategy.Recipient memory recipient = strategy.getRecipient(vars.recipientIds[0]);
         assertEq(recipient.cancelable, vars.cancelable, "recipient.cancelable");
         assertEq(recipient.useRegistryAnchor, useRegistryAnchor, "recipient.useRegistryAnchor");
-        assertEq(uint8(recipient.recipientStatus), 4, "recipient.recipientStatus"); // InReview
+        assertEq(uint8(recipient.recipientStatus), 5, "recipient.recipientStatus"); // InReview
         assertEq(recipient.grantAmount, vars.grantAmount, "recipient.grantAmount");
         assertEq(recipient.durations.cliff, params.durations.cliff, "recipient.durations.cliff");
         assertEq(recipient.durations.total, params.durations.total, "recipient.durations.total");
@@ -143,7 +143,7 @@ contract LockupLinearStrategyTest is LockupBase_Test, Errors {
         vars.allocatedGrantAmountBeforeCancel = strategy.allocatedGrantAmount();
         vars.refundedAmount = lockupLinear.refundableAmountOf(vars.streamId);
         strategy.cancelStream(vars.recipientIds[0], vars.streamId);
-        assertEq(uint8(strategy.getRecipientStatus(vars.recipientIds[0])), 5, "after cancel internal status"); // Canceled
+        assertEq(uint8(strategy.getRecipientStatus(vars.recipientIds[0])), 6, "after cancel status"); // Canceled
         assertEq(
             strategy.getPoolAmount(),
             vars.poolAmountBeforeCancel + vars.refundedAmount,

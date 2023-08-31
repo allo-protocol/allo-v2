@@ -106,7 +106,7 @@ contract LockupDynamicStrategyTest is LockupBase_Test, Errors {
         vars.recipient = strategy.getRecipient(vars.recipientIds[0]);
         assertEq(vars.recipient.cancelable, vars.cancelable, "recipient.cancelable");
         assertEq(vars.recipient.useRegistryAnchor, useRegistryAnchor, "recipient.useRegistryAnchor");
-        assertEq(uint8(vars.recipient.recipientStatus), 4, "recipient.recipientStatus"); // InReview
+        assertEq(uint8(vars.recipient.recipientStatus), 5, "recipient.recipientStatus"); // InReview
         assertEq(vars.recipient.grantAmount, vars.grantAmount, "recipient.vars.grantAmount");
         assertEq(vars.recipient.segments, vars.segments, "recipient.segments");
 
@@ -152,7 +152,7 @@ contract LockupDynamicStrategyTest is LockupBase_Test, Errors {
         vars.allocatedGrantAmountBeforeCancel = strategy.getRecipient(vars.recipientIds[0]).grantAmount;
         vars.refundedAmount = lockupDynamic.refundableAmountOf(vars.streamId);
         strategy.cancelStream(vars.recipientIds[0], vars.streamId);
-        assertEq(uint8(strategy.getRecipientStatus(vars.recipientIds[0])), 5, "after cancel internal status"); // Canceled
+        assertEq(uint8(strategy.getRecipientStatus(vars.recipientIds[0])), 6, "after cancel internal status"); // Canceled
         assertEq(
             strategy.getPoolAmount(),
             vars.poolAmountBeforeCancel + vars.refundedAmount,
