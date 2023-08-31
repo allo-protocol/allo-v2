@@ -111,11 +111,6 @@ contract ProportionalPayoutStrategy is BaseStrategy {
         maxRecipientsAllowed = _initializeData.maxRecipientsAllowed;
 
         _setAllocationTime(_initializeData.allocationStartTime, _initializeData.allocationEndTime);
-
-        if (allocationStartTime >= allocationEndTime || allocationEndTime < block.timestamp) {
-            revert INVALID();
-        }
-
         _setPoolActive(true);
     }
 

@@ -33,10 +33,6 @@ import {Native} from "../../core/libraries/Native.sol";
 /// @author @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>, @0xZakk <zakk@gitcoin.co>, @nfrgosselin <nate@gitcoin.co>
 /// @notice Strategy for donation voting allocation with a merkle distribution
 abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseStrategy, Multicall {
-    /// ================================
-    /// ========== Struct ==============
-    /// ================================
-
     /// @notice Stores the internal status of a recipient for this strategy.
     enum InternalRecipientStatus {
         None,
@@ -45,6 +41,10 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
         Rejected,
         Appealed
     }
+
+    /// ================================
+    /// ========== Struct ==============
+    /// ================================
 
     /// @notice Struct to hold details of the application status
     /// @dev Application status is stored in a bitmap. Each 4 bits represents the status of a recipient,
@@ -514,9 +514,9 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
         onlyActiveRegistration
         returns (address recipientId)
     {
+        bool isUsingRegistryAnchor;
         address recipientAddress;
         address registryAnchor;
-        bool isUsingRegistryAnchor;
         Metadata memory metadata;
 
         // decode data custom to this strategy

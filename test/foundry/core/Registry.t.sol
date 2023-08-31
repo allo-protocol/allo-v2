@@ -4,10 +4,10 @@ pragma solidity 0.8.19;
 import "forge-std/Test.sol";
 import "../shared/RegistrySetup.sol";
 
-// Interfaces
-import {IRegistry} from "../../../contracts/core/interfaces/IRegistry.sol";
 // Core Contracts
 import {Registry} from "../../../contracts/core/Registry.sol";
+import {Anchor} from "../../../contracts/core/Anchor.sol";
+
 // Internal libraries
 import {Errors} from "../../../contracts/core/libraries/Errors.sol";
 import {Native} from "../../../contracts/core/libraries/Native.sol";
@@ -39,6 +39,20 @@ contract RegistryTest is Test, RegistrySetup, Native, Errors {
         nonce = 2;
 
         token = new MockERC20();
+    }
+
+    function test_initialize() public {
+        Registry newRegistry = new Registry();
+        newRegistry.initialize(registry_owner());
+
+        assertTrue(newRegistry.hasRole(newRegistry.ALLO_OWNER(), registry_owner()));
+    }
+
+    function testRevert_initialize_zeroAddress() public {
+        Registry newRegistry = new Registry();
+
+        vm.expectRevert(ZERO_ADDRESS.selector);
+        newRegistry.initialize(address(0));
     }
 
     function test_createProfile() public {
@@ -108,6 +122,20 @@ contract RegistryTest is Test, RegistrySetup, Native, Errors {
         // old and new anchor should be mapped to profileId
         assertEq(registry().anchorToProfileId(profile.anchor), bytes32(0), "old anchor");
         assertEq(registry().anchorToProfileId(newAnchor), newProfileId, "new anchor");
+    }
+
+    function testRevert_createProfile_existing_anchor_wrong_profile() public {
+        bytes32 newProfileId = registry().createProfile(nonce, name, metadata, profile1_owner(), profile1_members());
+        // getAnchor
+        Registry.Profile memory profile = registry().getProfileById(newProfileId);
+        Anchor anchor = Anchor(payable(profile.anchor));
+
+        bytes4 selector = bytes4(keccak256(bytes("profileId()")));
+        vm.mockCall(address(anchor), abi.encodeWithSelector(selector), abi.encode(bytes32("hello world")));
+        vm.expectRevert(ANCHOR_ERROR.selector);
+
+        vm.prank(profile1_owner());
+        registry().updateProfileName(newProfileId, name);
     }
 
     function test_updateProfileName_toTheNameBefore() public {
