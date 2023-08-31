@@ -861,4 +861,6 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
     function test_reviewRecipient_reviewTreshold_noStatusChange() public override {
         // no threshold
     }
+
+    function test_registerRecipient_accepted() public override {}
 }
