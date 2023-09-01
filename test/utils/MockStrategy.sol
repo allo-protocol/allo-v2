@@ -61,7 +61,7 @@ contract MockStrategy is BaseStrategy {
 
         PayoutSummary[] memory payouts = new PayoutSummary[](_recipientIds.length);
 
-        for (uint256 i = 0; i < _recipientIds.length; i++) {
+        for (uint256 i; i < _recipientIds.length; i++) {
             payouts[i] = abi.decode(_data[i], (PayoutSummary));
         }
 

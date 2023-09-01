@@ -141,7 +141,7 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
         payouts = new PayoutSummary[](recipientLength);
 
         address recipientId;
-        for (uint256 i = 0; i < recipientLength;) {
+        for (uint256 i; i < recipientLength;) {
             recipientId = _recipientIds[i];
             payouts[i] = _getPayout(recipientId, "");
             unchecked {
@@ -223,7 +223,7 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _recipientIds Ids of the recipients
     function setInternalRecipientStatusToInReview(address[] calldata _recipientIds) external {
         uint256 recipientLength = _recipientIds.length;
-        for (uint256 i = 0; i < recipientLength;) {
+        for (uint256 i; i < recipientLength;) {
             address recipientId = _recipientIds[i];
             _recipients[recipientId].recipientStatus = InternalRecipientStatus.InReview;
 
@@ -361,7 +361,7 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
         onlyPoolManager(_sender)
     {
         uint256 recipientLength = _recipientIds.length;
-        for (uint256 i = 0; i < recipientLength;) {
+        for (uint256 i; i < recipientLength;) {
             _distributeToLockupLinear(_recipientIds[i], _sender);
             unchecked {
                 i++;

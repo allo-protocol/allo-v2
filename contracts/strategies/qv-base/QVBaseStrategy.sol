@@ -283,7 +283,7 @@ abstract contract QVBaseStrategy is BaseStrategy {
             revert INVALID();
         }
 
-        for (uint256 i = 0; i < recipientLength;) {
+        for (uint256 i; i < recipientLength;) {
             InternalRecipientStatus recipientStatus = _recipientStatuses[i];
             address recipientId = _recipientIds[i];
             if (recipientStatus == InternalRecipientStatus.None || recipientStatus == InternalRecipientStatus.Appealed)
@@ -446,7 +446,7 @@ abstract contract QVBaseStrategy is BaseStrategy {
         onlyAfterAllocation
     {
         uint256 payoutLength = _recipientIds.length;
-        for (uint256 i = 0; i < payoutLength;) {
+        for (uint256 i; i < payoutLength;) {
             address recipientId = _recipientIds[i];
             Recipient storage recipient = recipients[recipientId];
 
@@ -574,9 +574,7 @@ abstract contract QVBaseStrategy is BaseStrategy {
 
         // Calculate the payout amount based on the percentage of total votes
         uint256 amount;
-        if (paidOut[_recipientId] || totalRecipientVotes == 0) {
-            amount = 0;
-        } else {
+        if (!paidOut[_recipientId] && totalRecipientVotes != 0) {
             amount = poolAmount * recipient.totalVotesReceived / totalRecipientVotes;
         }
         return PayoutSummary(recipient.recipientAddress, amount);

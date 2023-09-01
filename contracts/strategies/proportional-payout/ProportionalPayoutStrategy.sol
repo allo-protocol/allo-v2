@@ -189,7 +189,7 @@ contract ProportionalPayoutStrategy is BaseStrategy {
         onlyAfterAllocation
     {
         uint256 payoutLength = _recipientIds.length;
-        for (uint256 i = 0; i < payoutLength;) {
+        for (uint256 i; i < payoutLength;) {
             address recipientId = _recipientIds[i];
             Recipient storage recipient = recipients[recipientId];
 

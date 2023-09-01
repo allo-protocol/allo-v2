@@ -214,7 +214,7 @@ abstract contract BaseStrategy is IStrategy, Transfer, Errors {
             revert ARRAY_MISMATCH();
         }
         PayoutSummary[] memory payouts = new PayoutSummary[](length);
-        for (uint256 i = 0; i < length;) {
+        for (uint256 i; i < length;) {
             payouts[i] = _getPayout(_recipientIds[i], _data[i]);
             unchecked {
                 i++;

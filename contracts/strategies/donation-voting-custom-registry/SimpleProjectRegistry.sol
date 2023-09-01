@@ -72,7 +72,7 @@ contract SimpleProjectRegistry is Ownable {
     /// @notice Add an array projects to the registry
     /// @param _projects The projects to add
     function addProjects(address[] calldata _projects) external onlyOwner {
-        for (uint256 i = 0; i < _projects.length; i++) {
+        for (uint256 i; i < _projects.length; i++) {
             _addProject(_projects[i]);
         }
     }
@@ -86,7 +86,7 @@ contract SimpleProjectRegistry is Ownable {
     /// @notice Remove an array of projects from the registry
     /// @param _projects The projects to remove
     function removeProjects(address[] calldata _projects) external onlyOwner {
-        for (uint256 i = 0; i < _projects.length; i++) {
+        for (uint256 i; i < _projects.length; i++) {
             _removeProject(_projects[i]);
         }
     }

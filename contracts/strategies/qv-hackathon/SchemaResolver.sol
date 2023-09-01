@@ -87,7 +87,7 @@ abstract contract SchemaResolver is ISchemaResolver {
         // possible to send too much ETH anyway.
         uint256 remainingValue = msg.value;
 
-        for (uint256 i = 0; i < length; i = uncheckedInc(i)) {
+        for (uint256 i; i < length; i = uncheckedInc(i)) {
             // Ensure that the attester/revoker doesn't try to spend more than available.
             uint256 value = values[i];
             if (value > remainingValue) {
@@ -130,7 +130,7 @@ abstract contract SchemaResolver is ISchemaResolver {
         // possible to send too much ETH anyway.
         uint256 remainingValue = msg.value;
 
-        for (uint256 i = 0; i < length; i = uncheckedInc(i)) {
+        for (uint256 i; i < length; i = uncheckedInc(i)) {
             // Ensure that the attester/revoker doesn't try to spend more than available.
             uint256 value = values[i];
             if (value > remainingValue) {

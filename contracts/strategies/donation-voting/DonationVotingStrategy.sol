@@ -177,7 +177,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
             allowedTokens[address(0)] = true;
         }
 
-        for (uint256 i = 0; i < allowedTokensLength; i++) {
+        for (uint256 i; i < allowedTokensLength; i++) {
             allowedTokens[_initializeData.allowedTokens[i]] = true;
         }
     }
@@ -231,7 +231,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
             revert INVALID();
         }
 
-        for (uint256 i = 0; i < recipientLength;) {
+        for (uint256 i; i < recipientLength;) {
             InternalRecipientStatus recipientStatus = _recipientStatuses[i];
             address recipientId = _recipientIds[i];
             if (recipientStatus == InternalRecipientStatus.None || recipientStatus == InternalRecipientStatus.Appealed)
@@ -264,7 +264,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
             revert INVALID();
         }
 
-        for (uint256 i = 0; i < recipientLength;) {
+        for (uint256 i; i < recipientLength;) {
             address recipientId = _recipientIds[i];
             if (_recipients[recipientId].recipientStatus != InternalRecipientStatus.Accepted) {
                 revert INVALID();

@@ -294,7 +294,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
         }
 
         // Loop through the allowed tokens and set them to true
-        for (uint256 i = 0; i < allowedTokensLength;) {
+        for (uint256 i; i < allowedTokensLength;) {
             allowedTokens[_initializeData.allowedTokens[i]] = true;
             unchecked {
                 i++;
@@ -361,7 +361,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
         onlyPoolManager(msg.sender)
     {
         // Loop through the statuses and set the status
-        for (uint256 i = 0; i < statuses.length;) {
+        for (uint256 i; i < statuses.length;) {
             uint256 rowIndex = statuses[i].index;
             uint256 fullRow = statuses[i].statusRow;
 
@@ -614,7 +614,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
         uint256 length = distributions.length;
 
         // Loop through the distributions and distribute the funds
-        for (uint256 i = 0; i < length;) {
+        for (uint256 i; i < length;) {
             _distributeSingle(distributions[i]);
             unchecked {
                 i++;

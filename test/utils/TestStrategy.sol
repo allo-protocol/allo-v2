@@ -61,7 +61,7 @@ contract TestStrategy is IStrategy {
         returns (PayoutSummary[] memory)
     {
         PayoutSummary[] memory payouts = new PayoutSummary[](_recipientIds.length);
-        for (uint256 i = 0; i < _recipientIds.length; i++) {
+        for (uint256 i; i < _recipientIds.length; i++) {
             payouts[i] = PayoutSummary({recipientAddress: _recipientIds[i], amount: 0});
         }
         return payouts;

@@ -175,7 +175,7 @@ contract WrappedVotingNftMintStrategy is Native, BaseStrategy, ReentrancyGuard {
         uint256 amount = msg.value / mintPrice;
 
         // mint the NFT's to the sender
-        for (uint256 i = 0; i < amount;) {
+        for (uint256 i; i < amount;) {
             NFT(nft).mintTo{value: mintPrice}(_sender);
             unchecked {
                 i++;
