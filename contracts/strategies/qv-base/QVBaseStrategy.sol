@@ -38,14 +38,13 @@ abstract contract QVBaseStrategy is BaseStrategy {
     /// @param data The encoded data - (address recipientId, address recipientAddress, Metadata metadata)
     /// @param sender The sender of the transaction
     /// @param status The updated status of the recipient
-    event UpdatedRegistration(address indexed recipientId, bytes data, address sender, InternalRecipientStatus status);
+    event UpdatedRegistration(address indexed recipientId, bytes data, address sender, Status status);
 
     /// @notice Emitted when a recipient is registered
     /// @param recipientId ID of the recipient
     /// @param status The status of the recipient
     /// @param sender The sender of the transaction
-    event RecipientStatusUpdated(address indexed recipientId, InternalRecipientStatus status, address sender);
-
+    event RecipientStatusUpdated(address indexed recipientId, Status status, address sender);
     /// @notice Emitted when the pool timestamps are updated
     /// @param registrationStartTime The start time for the registration
     /// @param registrationEndTime The end time for the registration
@@ -70,7 +69,7 @@ abstract contract QVBaseStrategy is BaseStrategy {
     /// @param recipientId ID of the recipient
     /// @param status The status of the recipient
     /// @param sender The sender of the transaction
-    event Reviewed(address indexed recipientId, InternalRecipientStatus status, address sender);
+    event Reviewed(address indexed recipientId, Status status, address sender);
 
     /// ======================
     /// ======= Storage ======
@@ -134,10 +133,8 @@ abstract contract QVBaseStrategy is BaseStrategy {
         // slot 1
         bool useRegistryAnchor;
         address recipientAddress;
-        // slot 2
-        InternalRecipientStatus recipientStatus;
-        // slot [3...n]
         Metadata metadata;
+        Status recipientStatus;
     }
 
     /// @notice The details of the allocator
@@ -161,9 +158,8 @@ abstract contract QVBaseStrategy is BaseStrategy {
     /// @dev recipientId => paid out
     mapping(address => bool) public paidOut;
 
-    /// @notice Returns the count for each status for a recipient using their ID and status
-    /// @dev recipientId -> status -> count
-    mapping(address => mapping(InternalRecipientStatus => uint256)) public reviewsByStatus;
+    // recipientId -> status -> count
+    mapping(address => mapping(Status => uint256)) public reviewsByStatus;
 
     /// ================================
     /// ========== Modifier ============
@@ -236,23 +232,10 @@ abstract contract QVBaseStrategy is BaseStrategy {
         return _getRecipient(_recipientId);
     }
 
-    /// @notice Get Internal recipient status
-    /// @param _recipientId ID of the recipient
-    /// @return The internal recipient status specific to this strategy
-    function getInternalRecipientStatus(address _recipientId) external view returns (InternalRecipientStatus) {
-        return _getRecipient(_recipientId).recipientStatus;
-    }
-
     /// @notice Get recipient status
-    /// @param _recipientId ID of the recipient
-    /// @return The global recipient status
-    function _getRecipientStatus(address _recipientId) internal view virtual override returns (RecipientStatus) {
-        InternalRecipientStatus internalStatus = _getRecipient(_recipientId).recipientStatus;
-        if (internalStatus == InternalRecipientStatus.Appealed) {
-            return RecipientStatus.Pending;
-        } else {
-            return RecipientStatus(uint8(internalStatus));
-        }
+    /// @param _recipientId Id of the recipient
+    function _getRecipientStatus(address _recipientId) internal view virtual override returns (Status) {
+        return _getRecipient(_recipientId).recipientStatus;
     }
 
     /// @notice Checks if a pool is active or not
@@ -269,7 +252,7 @@ abstract contract QVBaseStrategy is BaseStrategy {
     ///      only during active registration.
     /// @param _recipientIds Ids of the recipients
     /// @param _recipientStatuses Statuses of the recipients
-    function reviewRecipients(address[] calldata _recipientIds, InternalRecipientStatus[] calldata _recipientStatuses)
+    function reviewRecipients(address[] calldata _recipientIds, Status[] calldata _recipientStatuses)
         external
         virtual
         onlyPoolManager(msg.sender)
@@ -281,10 +264,9 @@ abstract contract QVBaseStrategy is BaseStrategy {
         }
 
         for (uint256 i; i < recipientLength;) {
-            InternalRecipientStatus recipientStatus = _recipientStatuses[i];
+            Status recipientStatus = _recipientStatuses[i];
             address recipientId = _recipientIds[i];
-            if (recipientStatus == InternalRecipientStatus.None || recipientStatus == InternalRecipientStatus.Appealed)
-            {
+            if (recipientStatus == Status.None || recipientStatus == Status.Appealed) {
                 revert RECIPIENT_ERROR(recipientId);
             }
 
@@ -435,19 +417,19 @@ abstract contract QVBaseStrategy is BaseStrategy {
         recipient.metadata = metadata;
         recipient.useRegistryAnchor = registryGating ? true : isUsingRegistryAnchor;
 
-        InternalRecipientStatus currentStatus = recipient.recipientStatus;
+        Status currentStatus = recipient.recipientStatus;
 
-        if (currentStatus == InternalRecipientStatus.None) {
+        if (currentStatus == Status.None) {
             // recipient registering new application
-            recipient.recipientStatus = InternalRecipientStatus.Pending;
+            recipient.recipientStatus = Status.Pending;
             emit Registered(recipientId, _data, _sender);
         } else {
-            if (currentStatus == InternalRecipientStatus.Accepted) {
+            if (currentStatus == Status.Accepted) {
                 // recipient updating accepted application
-                recipient.recipientStatus = InternalRecipientStatus.Pending;
-            } else if (currentStatus == InternalRecipientStatus.Rejected) {
+                recipient.recipientStatus = Status.Pending;
+            } else if (currentStatus == Status.Rejected) {
                 // recipient updating rejected application
-                recipient.recipientStatus = InternalRecipientStatus.Appealed;
+                recipient.recipientStatus = Status.Appealed;
             }
 
             // emit the new status with the '_data' that was passed in

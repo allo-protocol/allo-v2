@@ -37,32 +37,21 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// ========== Storage =============
     /// ================================
 
-    /// @notice Enum to hold the internal status of the recipient.
-    /// @dev This status is specific to this strategy and is used to track the status of the recipient and milestones.
-    ///      This is not the same as the global 'RecipientStatus' enum
-    enum InternalRecipientStatus {
-        None,
-        Pending,
-        Accepted,
-        Rejected,
-        InReview
-    }
-
     /// @notice Struct to hold details of an recipient
     struct Recipient {
         bool useRegistryAnchor;
         address recipientAddress;
         uint256 grantAmount;
         Metadata metadata;
-        InternalRecipientStatus recipientStatus;
-        RecipientStatus milestonesReviewStatus;
+        Status recipientStatus;
+        Status milestonesReviewStatus;
     }
 
     /// @notice Struct to hold milestone details
     struct Milestone {
         uint256 amountPercentage;
         Metadata metadata;
-        RecipientStatus milestoneStatus;
+        Status milestoneStatus;
     }
 
     // @notice Struct to hold the init params for the strategy
@@ -93,17 +82,17 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// ===============================
 
     /// @notice Emitted for the registration of a recipient and the status is updated.
-    event RecipientStatusChanged(address recipientId, InternalRecipientStatus status);
+    event RecipientStatusChanged(address recipientId, Status status);
 
     /// @notice Emitted for the submission of a milestone.
     event MilestoneSubmitted(address recipientId, uint256 milestoneId, Metadata metadata);
 
     /// @notice Emitted for the status change of a milestone.
-    event MilestoneStatusChanged(address recipientId, uint256 milestoneId, RecipientStatus status);
+    event MilestoneStatusChanged(address recipientId, uint256 milestoneId, Status status);
 
     /// @notice Emitted for the milestones set.
     event MilestonesSet(address recipientId);
-    event MilestonesReviewed(address recipientId, RecipientStatus status);
+    event MilestonesReviewed(address recipientId, Status status);
 
     /// ================================
     /// ========== Storage =============
@@ -191,27 +180,13 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         return _getRecipient(_recipientId);
     }
 
-    /// @notice Get Internal recipient status
-    /// @dev This status is specific to this strategy and is used to track the status of the recipient
-    /// @param _recipientId ID of the recipient
-    /// @return InternalRecipientStatus Returns the internal recipient status specific to this strategy
-    function getInternalRecipientStatus(address _recipientId) external view returns (InternalRecipientStatus) {
-        return _getRecipient(_recipientId).recipientStatus;
-    }
-
     /// @notice Get recipient status
-    /// @dev The global 'RecipientStatus' is used at the protocol level and most strategies may want to
-    ///      add a additional InternalRecipientStatus to track the status of the recipient and map back to
-    ///      the global 'RecipientStatus'
+    /// @dev The global 'Status' is used at the protocol level and most strategies will use this.
+    ///      todo: finish this
     /// @param _recipientId ID of the recipient
-    /// @return RecipientStatus Returns the global recipient status
-    function _getRecipientStatus(address _recipientId) internal view override returns (RecipientStatus) {
-        InternalRecipientStatus internalStatus = _getRecipient(_recipientId).recipientStatus;
-        if (internalStatus == InternalRecipientStatus.InReview) {
-            return RecipientStatus.Pending;
-        } else {
-            return RecipientStatus(uint8(internalStatus));
-        }
+    /// @return Status Returns the global recipient status
+    function _getRecipientStatus(address _recipientId) internal view override returns (Status) {
+        return _getRecipient(_recipientId).recipientStatus;
     }
 
     /// @notice Checks if address is eligible allocator.
@@ -226,8 +201,8 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @dev This is used to check the status of the milestone of an recipient and is strategy specific
     /// @param _recipientId ID of the recipient
     /// @param _milestoneId ID of the milestone
-    /// @return RecipientStatus Returns the status of the milestone using the 'RecipientStatus' enum
-    function getMilestoneStatus(address _recipientId, uint256 _milestoneId) external view returns (RecipientStatus) {
+    /// @return Status Returns the status of the milestone using the 'Status' enum
+    function getMilestoneStatus(address _recipientId, uint256 _milestoneId) external view returns (Status) {
         return milestones[_recipientId][_milestoneId].milestoneStatus;
     }
 
@@ -256,19 +231,19 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         Recipient storage recipient = _recipients[_recipientId];
 
         // Check if the recipient is accepted, otherwise revert
-        if (recipient.recipientStatus != InternalRecipientStatus.Accepted) {
+        if (recipient.recipientStatus != Status.Accepted) {
             revert RECIPIENT_NOT_ACCEPTED();
         }
 
-        if (recipient.milestonesReviewStatus == RecipientStatus.Accepted) {
+        if (recipient.milestonesReviewStatus == Status.Accepted) {
             revert MILESTONES_ALREADY_SET();
         }
 
         _setMilestones(_recipientId, _milestones);
 
         if (isPoolManager) {
-            recipient.milestonesReviewStatus = RecipientStatus.Accepted;
-            emit MilestonesReviewed(_recipientId, RecipientStatus.Accepted);
+            recipient.milestonesReviewStatus = Status.Accepted;
+            emit MilestonesReviewed(_recipientId, Status.Accepted);
         }
     }
 
@@ -276,7 +251,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @dev Emits a 'MilestonesReviewed()' event
     /// @param _recipientId ID of the recipient
     /// @param _status The status of the milestone review
-    function reviewSetMilestones(address _recipientId, RecipientStatus _status) external onlyPoolManager(msg.sender) {
+    function reviewSetMilestones(address _recipientId, Status _status) external onlyPoolManager(msg.sender) {
         Recipient storage recipient = _recipients[_recipientId];
 
         // Check if the recipient has any milestones, otherwise revert
@@ -285,12 +260,12 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         }
 
         // Check if the recipient is 'Accepted', otherwise revert
-        if (recipient.milestonesReviewStatus == RecipientStatus.Accepted) {
+        if (recipient.milestonesReviewStatus == Status.Accepted) {
             revert MILESTONES_ALREADY_SET();
         }
 
         // Check if the status is 'Accepted' or 'Rejected', otherwise revert
-        if (_status == RecipientStatus.Accepted || _status == RecipientStatus.Rejected) {
+        if (_status == Status.Accepted || _status == Status.Rejected) {
             // Set the status of the milestone review
             recipient.milestonesReviewStatus = _status;
 
@@ -315,7 +290,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         Recipient memory recipient = _recipients[_recipientId];
 
         // Check if the recipient is 'Accepted', otherwise revert
-        if (recipient.recipientStatus != InternalRecipientStatus.Accepted) {
+        if (recipient.recipientStatus != Status.Accepted) {
             revert RECIPIENT_NOT_ACCEPTED();
         }
 
@@ -329,13 +304,13 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         Milestone storage milestone = recipientMilestones[_milestoneId];
 
         // Check if the milestone is accepted, otherwise revert
-        if (milestone.milestoneStatus == RecipientStatus.Accepted) {
+        if (milestone.milestoneStatus == Status.Accepted) {
             revert MILESTONE_ALREADY_ACCEPTED();
         }
 
         // Set the milestone metadata and status
         milestone.metadata = _metadata;
-        milestone.milestoneStatus = RecipientStatus.Pending;
+        milestone.milestoneStatus = Status.Pending;
 
         // Emit event for the milestone submission
         emit MilestoneSubmitted(_recipientId, _milestoneId, _metadata);
@@ -356,30 +331,27 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         Milestone storage milestone = recipientMilestones[_milestoneId];
 
         // Check if the milestone is NOT 'Accepted' already, and revert if it is
-        if (milestone.milestoneStatus == RecipientStatus.Accepted) {
+        if (milestone.milestoneStatus == Status.Accepted) {
             revert MILESTONE_ALREADY_ACCEPTED();
         }
 
         // Set the milestone status to 'Rejected'
-        milestone.milestoneStatus = RecipientStatus.Rejected;
+        milestone.milestoneStatus = Status.Rejected;
 
         // Emit event for the milestone rejection
-        emit MilestoneStatusChanged(_recipientId, _milestoneId, RecipientStatus.Rejected);
+        emit MilestoneStatusChanged(_recipientId, _milestoneId, Status.Rejected);
     }
 
-    /// @notice Set the internal status of the recipient to 'InReview'
+    /// @notice Set the status of the recipient to 'InReview'
     /// @dev Emits a 'RecipientStatusChanged()' event
     /// @param _recipientIds IDs of the recipients
-    function setInternalRecipientStatusToInReview(address[] calldata _recipientIds)
-        external
-        onlyPoolManager(msg.sender)
-    {
+    function setRecipientStatusToInReview(address[] calldata _recipientIds) external onlyPoolManager(msg.sender) {
         uint256 recipientLength = _recipientIds.length;
         for (uint256 i; i < recipientLength;) {
             address recipientId = _recipientIds[i];
-            _recipients[recipientId].recipientStatus = InternalRecipientStatus.InReview;
+            _recipients[recipientId].recipientStatus = Status.InReview;
 
-            emit RecipientStatusChanged(recipientId, InternalRecipientStatus.InReview);
+            emit RecipientStatusChanged(recipientId, Status.InReview);
 
             unchecked {
                 i++;
@@ -459,7 +431,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         }
 
         // Check if the recipient is not already accepted, otherwise revert
-        if (_recipients[recipientId].recipientStatus == InternalRecipientStatus.Accepted) {
+        if (_recipients[recipientId].recipientStatus == Status.Accepted) {
             revert RECIPIENT_ALREADY_ACCEPTED();
         }
 
@@ -474,8 +446,8 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
             useRegistryAnchor: registryGating ? true : isUsingRegistryAnchor,
             grantAmount: grantAmount,
             metadata: metadata,
-            recipientStatus: InternalRecipientStatus.Pending,
-            milestonesReviewStatus: RecipientStatus.Pending
+            recipientStatus: Status.Pending,
+            milestonesReviewStatus: Status.Pending
         });
 
         // Add the recipient to the accepted recipient ids mapping
@@ -488,7 +460,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Allocate amount to recipent for direct grants.
     /// @dev '_sender' must be a pool manager to allocate. Emits 'RecipientStatusChanged() and 'Allocated()' events.
     /// @param _data The data to be decoded
-    /// @custom:data (address recipientId, InternalRecipientStatus recipientStatus, uint256 grantAmount)
+    /// @custom:data (address recipientId, Status recipientStatus, uint256 grantAmount)
     /// @param _sender The sender of the allocation
     function _allocate(bytes memory _data, address _sender)
         internal
@@ -498,8 +470,8 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         onlyPoolManager(_sender)
     {
         // Decode the '_data'
-        (address recipientId, InternalRecipientStatus recipientStatus, uint256 grantAmount) =
-            abi.decode(_data, (address, InternalRecipientStatus, uint256));
+        (address recipientId, Status recipientStatus, uint256 grantAmount) =
+            abi.decode(_data, (address, Status, uint256));
 
         Recipient storage recipient = _recipients[recipientId];
 
@@ -507,10 +479,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
             revert MILESTONES_ALREADY_SET();
         }
 
-        if (
-            recipient.recipientStatus != InternalRecipientStatus.Accepted
-                && recipientStatus == InternalRecipientStatus.Accepted
-        ) {
+        if (recipient.recipientStatus != Status.Accepted && recipientStatus == Status.Accepted) {
             IAllo.Pool memory pool = allo.getPool(poolId);
             allocatedGrantAmount += grantAmount;
 
@@ -520,21 +489,21 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
             }
 
             recipient.grantAmount = grantAmount;
-            recipient.recipientStatus = InternalRecipientStatus.Accepted;
+            recipient.recipientStatus = Status.Accepted;
 
             // Emit event for the acceptance
-            emit RecipientStatusChanged(recipientId, InternalRecipientStatus.Accepted);
+            emit RecipientStatusChanged(recipientId, Status.Accepted);
 
             // Emit event for the allocation
             emit Allocated(recipientId, recipient.grantAmount, pool.token, _sender);
         } else if (
-            recipient.recipientStatus != InternalRecipientStatus.Rejected // no need to reject twice
-                && recipientStatus == InternalRecipientStatus.Rejected
+            recipient.recipientStatus != Status.Rejected // no need to reject twice
+                && recipientStatus == Status.Rejected
         ) {
-            recipient.recipientStatus = InternalRecipientStatus.Rejected;
+            recipient.recipientStatus = Status.Rejected;
 
             // Emit event for the rejection
-            emit RecipientStatusChanged(recipientId, InternalRecipientStatus.Rejected);
+            emit RecipientStatusChanged(recipientId, Status.Rejected);
         }
     }
 
@@ -569,10 +538,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         Milestone storage milestone = recipientMilestones[milestoneToBeDistributed];
 
         // check if milestone is not rejected or already paid out
-        if (
-            milestoneToBeDistributed > recipientMilestones.length
-                || milestone.milestoneStatus != RecipientStatus.Pending
-        ) {
+        if (milestoneToBeDistributed > recipientMilestones.length || milestone.milestoneStatus != Status.Pending) {
             revert INVALID_MILESTONE();
         }
 
@@ -586,13 +552,13 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         _transferAmount(pool.token, recipient.recipientAddress, amount);
 
         // Set the milestone status to 'Accepted'
-        milestone.milestoneStatus = RecipientStatus.Accepted;
+        milestone.milestoneStatus = Status.Accepted;
 
         // Increment the upcoming milestone
         upcomingMilestone[_recipientId]++;
 
         // Emit events for the milestone and the distribution
-        emit MilestoneStatusChanged(_recipientId, milestoneToBeDistributed, RecipientStatus.Accepted);
+        emit MilestoneStatusChanged(_recipientId, milestoneToBeDistributed, Status.Accepted);
         emit Distributed(_recipientId, recipient.recipientAddress, amount, _sender);
     }
 
@@ -637,7 +603,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
             Milestone memory milestone = _milestones[i];
 
             // Reverts if the milestone status is 'None'
-            if (milestone.milestoneStatus != RecipientStatus.None) {
+            if (milestone.milestoneStatus != Status.None) {
                 revert INVALID_MILESTONE();
             }
 

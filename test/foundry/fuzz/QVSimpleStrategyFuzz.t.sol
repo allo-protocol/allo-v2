@@ -23,7 +23,7 @@ contract QVSimpleStrategyTest is Accounts, StrategySetup, RegistrySetupFull, All
         bool useRegistryAnchor;
         address recipientAddress;
         Metadata metadata;
-        QVSimpleStrategy.InternalRecipientStatus recipientStatus;
+        QVSimpleStrategy.Status recipientStatus;
         uint256 totalVotes;
     }
 
@@ -52,7 +52,7 @@ contract QVSimpleStrategyTest is Accounts, StrategySetup, RegistrySetupFull, All
     QVSimpleStrategy public strategy;
     Metadata public poolMetadata;
 
-    event Reviewed(address indexed recipientId, QVBaseStrategy.InternalRecipientStatus status, address sender);
+    event Reviewed(address indexed recipientId, QVBaseStrategy.Status status, address sender);
     event RoleGranted(address indexed recipientId, address indexed account, bytes32 indexed role);
     event RoleAdminChanged(
         bytes32 indexed newAdminRole, address indexed recipientId, address indexed previousAdminRole
@@ -64,9 +64,7 @@ contract QVSimpleStrategyTest is Accounts, StrategySetup, RegistrySetupFull, All
         uint64 allocationStartTime,
         uint64 allocationEndTime
     );
-    event RecipientStatusUpdated(
-        address indexed recipientId, QVBaseStrategy.InternalRecipientStatus status, address sender
-    );
+    event RecipientStatusUpdated(address indexed recipientId, QVBaseStrategy.Status status, address sender);
     event PoolCreated(
         uint256 indexed poolId,
         bytes32 indexed profileId,

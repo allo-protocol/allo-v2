@@ -188,39 +188,39 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
 
     function test_registerRecipient_acceptApplication() public {
         Metadata memory metadata = Metadata({protocol: 1, pointer: "Test Metadata"});
-        bytes memory data = abi.encode(recipient1(), recipient1(), IStrategy.RecipientStatus.Accepted, metadata);
+        bytes memory data = abi.encode(recipient1(), recipient1(), IStrategy.Status.Accepted, metadata);
 
         vm.prank(pool_manager1());
         allo().registerRecipient(poolId, data);
 
-        IStrategy.RecipientStatus status = strategy.getRecipientStatus(recipient1());
-        assertEq(uint8(status), uint8(IStrategy.RecipientStatus.Accepted));
+        IStrategy.Status status = strategy.getRecipientStatus(recipient1());
+        assertEq(uint8(status), uint8(IStrategy.Status.Accepted));
     }
 
     function test_registerRecipient_rejectApprovedApplication() public {
         Metadata memory metadata = Metadata({protocol: 1, pointer: "Test Metadata"});
-        bytes memory data = abi.encode(recipient1(), recipient1(), IStrategy.RecipientStatus.Accepted, metadata);
+        bytes memory data = abi.encode(recipient1(), recipient1(), IStrategy.Status.Accepted, metadata);
 
         vm.prank(pool_manager1());
         allo().registerRecipient(poolId, data);
 
-        IStrategy.RecipientStatus status = strategy.getRecipientStatus(recipient1());
-        assertEq(uint8(status), uint8(IStrategy.RecipientStatus.Accepted));
+        IStrategy.Status status = strategy.getRecipientStatus(recipient1());
+        assertEq(uint8(status), uint8(IStrategy.Status.Accepted));
         assertEq(strategy.recipientsCounter(), 1);
 
-        data = abi.encode(recipient1(), recipient1(), IStrategy.RecipientStatus.Rejected, metadata);
+        data = abi.encode(recipient1(), recipient1(), IStrategy.Status.Rejected, metadata);
 
         vm.prank(pool_manager1());
         allo().registerRecipient(poolId, data);
 
         status = strategy.getRecipientStatus(recipient1());
-        assertEq(uint8(status), uint8(IStrategy.RecipientStatus.Rejected));
+        assertEq(uint8(status), uint8(IStrategy.Status.Rejected));
         assertEq(strategy.recipientsCounter(), 0);
     }
 
     function testRevert_registerRecipient_RECIPIENT_ERROR_zeroRecipientId() public {
         Metadata memory metadata = Metadata({protocol: 1, pointer: "Test Metadata"});
-        bytes memory data = abi.encode(address(0), recipient1(), IStrategy.RecipientStatus.Accepted, metadata);
+        bytes memory data = abi.encode(address(0), recipient1(), IStrategy.Status.Accepted, metadata);
 
         vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, address(0)));
 
@@ -230,7 +230,7 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
 
     function testRevert_registerRecipient_RECIPIENT_ERROR_zeroRecipientAddress() public {
         Metadata memory metadata = Metadata({protocol: 1, pointer: "Test Metadata"});
-        bytes memory data = abi.encode(recipient1(), address(0), IStrategy.RecipientStatus.Accepted, metadata);
+        bytes memory data = abi.encode(recipient1(), address(0), IStrategy.Status.Accepted, metadata);
 
         vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, recipient1()));
 
@@ -240,7 +240,7 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
 
     function testRevert_registerRecipient_RECIPIENT_ERROR_invalidStatus() public {
         Metadata memory metadata = Metadata({protocol: 1, pointer: "Test Metadata"});
-        bytes memory data = abi.encode(recipient1(), recipient1(), IStrategy.RecipientStatus.Pending, metadata);
+        bytes memory data = abi.encode(recipient1(), recipient1(), IStrategy.Status.Pending, metadata);
 
         vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, recipient1()));
 
@@ -251,17 +251,17 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
     function testRevert_registerRecipient_MAX_REACHED() public {
         Metadata memory metadata = Metadata({protocol: 1, pointer: "Test Metadata"});
         bytes memory data =
-            abi.encode(makeAddr("recipient1"), makeAddr("recipient1"), IStrategy.RecipientStatus.Accepted, metadata);
+            abi.encode(makeAddr("recipient1"), makeAddr("recipient1"), IStrategy.Status.Accepted, metadata);
 
         vm.prank(pool_manager1());
         allo().registerRecipient(poolId, data);
 
-        data = abi.encode(makeAddr("recipient2"), makeAddr("recipient2"), IStrategy.RecipientStatus.Accepted, metadata);
+        data = abi.encode(makeAddr("recipient2"), makeAddr("recipient2"), IStrategy.Status.Accepted, metadata);
         vm.prank(pool_manager1());
         allo().registerRecipient(poolId, data);
 
         vm.expectRevert(ProportionalPayoutStrategy.MAX_REACHED.selector);
-        data = abi.encode(makeAddr("recipient3"), makeAddr("recipient3"), IStrategy.RecipientStatus.Accepted, metadata);
+        data = abi.encode(makeAddr("recipient3"), makeAddr("recipient3"), IStrategy.Status.Accepted, metadata);
         vm.prank(pool_manager1());
 
         allo().registerRecipient(poolId, data);
@@ -269,7 +269,7 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
 
     function testRevert_registerRecipient_UNAUTHORIZED() public {
         Metadata memory metadata = Metadata({protocol: 1, pointer: "Test Metadata"});
-        bytes memory data = abi.encode(recipient1(), recipient1(), IStrategy.RecipientStatus.Accepted, metadata);
+        bytes memory data = abi.encode(recipient1(), recipient1(), IStrategy.Status.Accepted, metadata);
 
         vm.expectRevert(abi.encodeWithSelector(UNAUTHORIZED.selector));
 
@@ -390,13 +390,13 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
 
     function testRevert_allocate_RECIPIENT_ERROR_shit() public {
         Metadata memory metadata = Metadata({protocol: 1, pointer: "Test Metadata"});
-        bytes memory data = abi.encode(recipient1(), recipient1(), IStrategy.RecipientStatus.Accepted, metadata);
+        bytes memory data = abi.encode(recipient1(), recipient1(), IStrategy.Status.Accepted, metadata);
 
         vm.prank(pool_manager1());
         address recipientId = allo().registerRecipient(poolId, data);
 
         vm.prank(pool_manager1());
-        data = abi.encode(recipient1(), recipient1(), IStrategy.RecipientStatus.Rejected, metadata);
+        data = abi.encode(recipient1(), recipient1(), IStrategy.Status.Rejected, metadata);
         allo().registerRecipient(poolId, data);
 
         nft.mint(makeAddr("nftOwner"), 1);
@@ -413,7 +413,7 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
 
     function __register_recipient() internal returns (address recipientId) {
         Metadata memory metadata = Metadata({protocol: 1, pointer: "Test Metadata"});
-        bytes memory data = abi.encode(recipient1(), recipient1(), IStrategy.RecipientStatus.Accepted, metadata);
+        bytes memory data = abi.encode(recipient1(), recipient1(), IStrategy.Status.Accepted, metadata);
 
         vm.prank(pool_manager1());
         recipientId = allo().registerRecipient(poolId, data);

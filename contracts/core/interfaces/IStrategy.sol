@@ -29,12 +29,15 @@ interface IStrategy {
     /// ======= Storage ======
     /// ======================
 
-    /// @notice The RecipientStatus enum that all recipients are based from
-    enum RecipientStatus {
+    /// @notice The Status enum that all recipients are based from
+    enum Status {
         None,
         Pending,
         Accepted,
-        Rejected
+        Rejected,
+        Appealed,
+        InReview,
+        Canceled
     }
 
     /// @notice Payout summary struct to hold the payout data
@@ -115,7 +118,7 @@ interface IStrategy {
     ///      since there is no need for Pending or Rejected.
     /// @param _recipientId The ID of the recipient
     /// @return The status of the recipient
-    function getRecipientStatus(address _recipientId) external view returns (RecipientStatus);
+    function getRecipientStatus(address _recipientId) external view returns (Status);
 
     /// @notice Checks the amount allocated to a recipient for distribution.
     /// @dev Input the values you would send to distribute(), get the amounts each recipient in the array would receive.

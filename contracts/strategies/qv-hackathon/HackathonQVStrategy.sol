@@ -252,8 +252,8 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
         }
 
         Recipient storage recipient = recipients[recipientId];
-        if (recipient.recipientStatus == InternalRecipientStatus.Pending) {
-            recipient.recipientStatus = InternalRecipientStatus.Accepted;
+        if (recipient.recipientStatus == Status.Pending) {
+            recipient.recipientStatus = Status.Accepted;
         }
     }
 
@@ -421,7 +421,7 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
     }
 
     function _isAcceptedRecipient(address _recipientId) internal view override returns (bool) {
-        return recipients[_recipientId].recipientStatus == InternalRecipientStatus.Accepted;
+        return recipients[_recipientId].recipientStatus == Status.Accepted;
     }
 
     /// @notice Checks if the allocator is valid

@@ -40,14 +40,14 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         bool useRegistryAnchor;
         address recipientAddress;
         uint256 proposalBid;
-        RecipientStatus recipientStatus;
+        Status recipientStatus;
     }
 
     /// @notice Stores the details of the milestone
     struct Milestone {
         uint256 amountPercentage;
         Metadata metadata;
-        RecipientStatus milestoneStatus;
+        Status milestoneStatus;
     }
 
     /// @notice Stores the details needed for initializing strategy
@@ -89,7 +89,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     event MilstoneSubmitted(uint256 milestoneId);
 
     /// @notice Emitted for the status change of a milestone.
-    event MilestoneStatusChanged(uint256 milestoneId, RecipientStatus status);
+    event MilestoneStatusChanged(uint256 milestoneId, Status status);
 
     /// @notice Emitted when milestones are set.
     event MilestonesSet();
@@ -183,13 +183,9 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         return _getRecipient(_recipientId);
     }
 
-    /// @notice Get recipient status
-    /// @dev The global 'RecipientStatus' is used at the protocol level and most strategies may want to
-    ///      add a additional InternalRecipientStatus to track the status of the recipient and map back to
-    ///      the global 'RecipientStatus'
-    /// @param _recipientId ID of the recipient
-    /// @return RecipientStatus Returns the global recipient status
-    function _getRecipientStatus(address _recipientId) internal view override returns (RecipientStatus) {
+    /// @notice Checks if msg.sender is eligible for RFP allocation
+    /// @param _recipientId Id of the recipient
+    function _getRecipientStatus(address _recipientId) internal view override returns (Status) {
         return _getRecipient(_recipientId).recipientStatus;
     }
 
@@ -209,10 +205,8 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     }
 
     /// @notice Get the status of the milestone
-    /// @dev This is used to check the status of the milestone of an recipient and is strategy specific
-    /// @param _milestoneId ID of the milestone
-    /// @return RecipientStatus Returns the status of the milestone using the 'RecipientStatus' enum
-    function getMilestoneStatus(uint256 _milestoneId) external view returns (RecipientStatus) {
+    /// @param _milestoneId Id of the milestone
+    function getMilestoneStatus(uint256 _milestoneId) external view returns (Status) {
         return milestones[_milestoneId].milestoneStatus;
     }
 
@@ -273,8 +267,9 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         // Get the milestone and update the metadata and status
         Milestone storage milestone = milestones[upcomingMilestone];
         milestone.metadata = _metadata;
+
         // Set the milestone status to 'Pending' to indicate that the milestone is submitted
-        milestone.milestoneStatus = RecipientStatus.Pending;
+        milestone.milestoneStatus = Status.Pending;
 
         // Emit event for the milestone
         emit MilstoneSubmitted(upcomingMilestone);
@@ -291,12 +286,13 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @dev 'msg.sender' must be a pool manager to reject a milestone. Emits a 'MilestoneStatusChanged()' event.
     /// @param _milestoneId ID of the milestone
     function rejectMilestone(uint256 _milestoneId) external onlyPoolManager(msg.sender) {
-        if (milestones[_milestoneId].milestoneStatus == RecipientStatus.Accepted) {
+        if (milestones[_milestoneId].milestoneStatus == Status.Accepted) {
             revert MILESTONE_ALREADY_ACCEPTED();
         }
 
-        milestones[_milestoneId].milestoneStatus = RecipientStatus.Rejected;
-        emit MilestoneStatusChanged(_milestoneId, RecipientStatus.Rejected);
+        milestones[_milestoneId].milestoneStatus = Status.Rejected;
+
+        emit MilestoneStatusChanged(_milestoneId, milestones[_milestoneId].milestoneStatus);
     }
 
     /// @notice Withdraw funds from pool.
@@ -380,7 +376,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         // Get the recipient
         Recipient storage recipient = _recipients[recipientId];
 
-        if (recipient.recipientStatus == RecipientStatus.None) {
+        if (recipient.recipientStatus == Status.None) {
             // If the recipient status is 'None' add the recipient to the '_recipientIds' array
             _recipientIds.push(recipientId);
             emit Registered(recipientId, _data, _sender);
@@ -392,7 +388,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         recipient.recipientAddress = recipientAddress;
         recipient.useRegistryAnchor = isUsingRegistryAnchor ? true : recipient.useRegistryAnchor;
         recipient.proposalBid = proposalBid;
-        recipient.recipientStatus = RecipientStatus.Pending;
+        recipient.recipientStatus = Status.Pending;
     }
 
     /// @notice Select recipient for RFP allocation
@@ -412,12 +408,13 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
         Recipient storage recipient = _recipients[acceptedRecipientId];
 
-        if (acceptedRecipientId == address(0) || recipient.recipientStatus != RecipientStatus.Pending) {
+        if (acceptedRecipientId == address(0) || recipient.recipientStatus != Status.Pending) {
             revert RECIPIENT_ERROR(acceptedRecipientId);
         }
 
         // Update status of acceptedRecipientId to accepted
-        recipient.recipientStatus = RecipientStatus.Accepted;
+        recipient.recipientStatus = Status.Accepted;
+
         _setPoolActive(false);
 
         IAllo.Pool memory pool = allo.getPool(poolId);
@@ -457,13 +454,13 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         _transferAmount(pool.token, recipient.recipientAddress, amount);
 
         // Set the milestone status to 'Accepted'
-        milestone.milestoneStatus = RecipientStatus.Accepted;
+        milestone.milestoneStatus = Status.Accepted;
 
         // Increment the upcoming milestone
         upcomingMilestone++;
 
         // Emit events for the milestone and the distribution
-        emit MilestoneStatusChanged(upcomingMilestone, RecipientStatus.Accepted);
+        emit MilestoneStatusChanged(upcomingMilestone, Status.Accepted);
         emit Distributed(acceptedRecipientId, recipient.recipientAddress, amount, _sender);
     }
 
@@ -483,14 +480,12 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         recipient = _recipients[_recipientId];
 
         if (acceptedRecipientId != address(0) && acceptedRecipientId != _recipientId) {
-            recipient.recipientStatus =
-                recipient.recipientStatus > RecipientStatus.None ? RecipientStatus.Rejected : RecipientStatus.None;
+            recipient.recipientStatus = recipient.recipientStatus > Status.None ? Status.Rejected : Status.None;
         }
     }
 
     /// @notice Increase max bid for RFP pool
     /// @param _maxBid The new max bid to be set
-    /// @dev Emits a 'MilestoneRejected()' event.
     function _increaseMaxBid(uint256 _maxBid) internal {
         if (_maxBid < maxBid) {
             revert AMOUNT_TOO_LOW();

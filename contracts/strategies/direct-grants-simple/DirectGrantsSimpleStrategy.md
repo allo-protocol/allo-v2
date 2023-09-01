@@ -8,7 +8,6 @@ The `DirectGrantsSimpleStrategy` contract represents a smart contract governing 
   - [Table of Contents](#table-of-contents)
   - [Sequence Diagram](#sequence-diagram)
   - [Smart Contract Overview](#smart-contract-overview)
-    - [Enums](#enums)
     - [Structs](#structs)
     - [Events](#events)
     - [Storage Variables](#storage-variables)
@@ -27,7 +26,7 @@ The `DirectGrantsSimpleStrategy` contract represents a smart contract governing 
     - [Allocating Grant Amounts](#allocating-grant-amounts)
     - [Distributing Upcoming Milestone](#distributing-upcoming-milestone)
     - [Withdrawing Funds from Pool](#withdrawing-funds-from-pool)
-    - [Setting Internal Recipient Status to InReview](#setting-internal-recipient-status-to-inreview)
+    - [Setting Recipient Status to InReview](#setting-recipient-status-to-inreview)
     - [Receiving Ether (Fallback Function)](#receiving-ether-fallback-function)
 
 ## Sequence Diagram 
@@ -45,7 +44,7 @@ sequenceDiagram
     Allo->>DirectGrantsStrategy: registerRecipient()
     DirectGrantsStrategy-->>Allo: recipient1
     Allo-->>-Alice: recipientId1
-    PoolManager->>DirectGrantsStrategy: setInternalRecipientStatusToInReview()
+    PoolManager->>DirectGrantsStrategy: setRecipientStatusToInReview()
     PoolManager->>+Allo: allocate() (decide how much recipient gets)
     Allo-->>-DirectGrantsStrategy: allocate() (decide how much recipient gets)
     Alice->> DirectGrantsStrategy: setMilestones()
@@ -66,10 +65,6 @@ sequenceDiagram
 - **External Libraries:** Utilizes the `ReentrancyGuard` library from the OpenZeppelin contracts to prevent reentrant attacks.
 - **Interfaces:** Inherits from the `BaseStrategy` contract, extending its functionalities for direct grant allocation strategies.
 - **Internal Libraries:** Imports the `Metadata` library from the Allo core for metadata management.
-
-### Enums
-
-1. `InternalRecipientStatus`: An internal enumeration representing the status of a recipient within the strategy. Possible values include None, Pending, Accepted, Rejected, and InReview.
 
 ### Structs
 
@@ -108,7 +103,7 @@ The `initialize` function decodes and initializes parameters passed during strat
 ### Views and Queries
 
 1. `getRecipient`: Retrieves recipient details.
-2. `getInternalRecipientStatus`: Retrieves the internal recipient status.
+2. `getRecipientStatus`: Retrieves the recipient status.
 3. `getMilestoneStatus`: Retrieves the status of a milestone for a recipient.
 4. `getMilestones`: Retrieves all milestones for a recipient.
 
@@ -118,7 +113,7 @@ The `initialize` function decodes and initializes parameters passed during strat
 2. `reviewSetMilestones`: Reviews the set milestones of a recipient, only callable by a pool manager.
 3. `submitMilestone`: Allows recipients to submit a milestone.
 4. `rejectMilestone`: Allows pool managers to reject a pending milestone.
-5. `setInternalRecipientStatusToInReview`: Sets the internal status of recipients to "InReview", callable by a pool manager.
+5. `setRecipientStatusToInReview`: Sets the status of recipients to "InReview", callable by a pool manager.
 6. `withdraw`: Allows pool managers to withdraw funds from the pool.
 
 ### Internal Functions
@@ -197,7 +192,7 @@ In essence, the `DirectGrantsSimpleStrategy` contract extends the functionalitie
 ### Allocating Grant Amounts
 
 * Pool Manager initiates an allocation request.
-* Decodes recipient ID, internal recipient status, and grant amount from provided data.
+* Decodes recipient ID, recipient status, and grant amount from provided data.
 * Verifies if sender is a pool manager.
 * Checks if upcoming milestone is not already set for the recipient.
 * If recipient's status is "Accepted":
@@ -232,12 +227,12 @@ In essence, the `DirectGrantsSimpleStrategy` contract extends the functionalitie
 * Deducts specified amount from the pool balance.
 * Transfers the specified amount to the sender's address.
 
-### Setting Internal Recipient Status to InReview
+### Setting Recipient Status to InReview
 
 *  Pool Manager initiates a recipient status change request.
 *  Verifies if sender is a pool manager.
 *  Loops through provided recipient IDs: 
-   *  Sets recipient's internal status to "InReview." 
+   *  Sets recipient's status to "InReview." 
    *  Emits `RecipientStatusChanged` event.
 
 ### Receiving Ether (Fallback Function)

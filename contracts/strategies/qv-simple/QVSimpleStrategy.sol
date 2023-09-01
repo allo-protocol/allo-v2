@@ -133,7 +133,7 @@ contract QVSimpleStrategy is QVBaseStrategy, Multicall {
     /// @param _recipientId The recipient id
     /// @return true if the recipient is accepted
     function _isAcceptedRecipient(address _recipientId) internal view override returns (bool) {
-        return recipients[_recipientId].recipientStatus == InternalRecipientStatus.Accepted;
+        return recipients[_recipientId].recipientStatus == Status.Accepted;
     }
 
     /// @notice Checks if the allocator is valid

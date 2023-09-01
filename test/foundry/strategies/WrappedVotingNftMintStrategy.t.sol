@@ -21,9 +21,9 @@ import {EventSetup} from "../shared/EventSetup.sol";
 import {MockRevertingReceiver} from "../../utils/MockRevertingReceiver.sol";
 
 contract WrappedVotingNftMintStrategyTest is Test, AlloSetup, RegistrySetupFull, EventSetup, Native, Errors {
-    event RecipientStatusUpdated(address indexed recipientId, InternalRecipientStatus recipientStatus, address sender);
+    event RecipientStatusUpdated(address indexed recipientId, Status recipientStatus, address sender);
 
-    enum InternalRecipientStatus {
+    enum Status {
         Pending,
         Accepted,
         Rejected
@@ -163,10 +163,10 @@ contract WrappedVotingNftMintStrategyTest is Test, AlloSetup, RegistrySetupFull,
     function test_getRecipientStatus() public {
         address testNft = nftFactory.createNFTContract("NFT", "NFT", 1e16, randomAddress());
 
-        assertEq(uint8(strategy.getRecipientStatus(testNft)), uint8(IStrategy.RecipientStatus.Accepted));
+        assertEq(uint8(strategy.getRecipientStatus(testNft)), uint8(IStrategy.Status.Accepted));
 
         address noNft = makeAddr("no-nft");
-        assertEq(uint8(strategy.getRecipientStatus(noNft)), uint8(IStrategy.RecipientStatus.None));
+        assertEq(uint8(strategy.getRecipientStatus(noNft)), uint8(IStrategy.Status.None));
     }
 
     // Fuzz test the timestamps with some assumtions to avoid reversion

@@ -3,7 +3,7 @@ pragma solidity 0.8.19;
 
 import {DonationVotingMerkleDistributionBaseStrategy} from
     "../donation-voting-merkle-base/DonationVotingMerkleDistributionBaseStrategy.sol";
-import "openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
+import "openzeppelin-contracts-upgradeable/contracts/security/ReentrancyGuardUpgradeable.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀ ⠀⠀⠀⠀⢀⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⡀⣀⡀⡀⠀⠀⠀⢀⡀⣀⡀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣮⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -26,7 +26,7 @@ import "openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
 /// @notice Strategy for donation voting allocation with a merkle distribution
 contract DonationVotingMerkleDistributionVaultStrategy is
     DonationVotingMerkleDistributionBaseStrategy,
-    ReentrancyGuard
+    ReentrancyGuardUpgradeable
 {
     /// @notice Stores the details of the allocations to claim.
     struct Claim {

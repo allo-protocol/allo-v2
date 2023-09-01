@@ -38,7 +38,7 @@ In these strategies, pool managers are able to review, approve, and reject grant
 - `allocate` — function for pool managers (i.e. wallets marked as `eligible`) to either approve or reject a grant application
   - If approving, the pool manager needs to set the amount of the pool that the recipient will be streamed as part of the grant. When approving, this also updates both global and local status to `Approved`
   - If rejecting, this should update both global and local status to `Rejected`
-- `setInternalRecipientStatusToInReview` - function for pool managers to update the status of the recipient's application to signal that the application has been seen but no decision has been made. This action should keep the global status as `Pending` but set the local status to `In Review`
+- `setRecipientStatusToInReview` - function for pool managers to update the status of the recipient's application to signal that the application has been seen but no decision has been made. This action should keep the global status as `Pending` but set the local status to `In Review`
 
 ### Payout calculation logic
 
@@ -69,4 +69,4 @@ When a stream is created and set to be cancelable, the pool manager has the opti
 - The recipient grant amount will be decreased
 - The allocated grant amount will also be decreased
 
-Also, the `InternalRecipientStatus` will be updated to `Canceled` for the recipient.
+Also, the `Status` will be updated to `Canceled` for the recipient.

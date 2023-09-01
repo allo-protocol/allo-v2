@@ -237,7 +237,7 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
         address recipientId = __register_recipient();
         HackathonQVStrategy.Recipient memory recipient = hQvStrategy().getRecipient(recipientId);
 
-        assertEq(uint8(recipient.recipientStatus), uint8(QVBaseStrategy.InternalRecipientStatus.Accepted));
+        assertEq(uint8(recipient.recipientStatus), uint8(IStrategy.Status.Accepted));
     }
 
     function test_registerRecipient_appeal() public override {
@@ -251,9 +251,8 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
         // reject
         address[] memory recipientIds = new address[](1);
         recipientIds[0] = recipientId;
-        QVBaseStrategy.InternalRecipientStatus[] memory recipientStatuses =
-            new QVBaseStrategy.InternalRecipientStatus[](1);
-        recipientStatuses[0] = QVBaseStrategy.InternalRecipientStatus.Rejected;
+        IStrategy.Status[] memory recipientStatuses = new IStrategy.Status[](1);
+        recipientStatuses[0] = IStrategy.Status.Rejected;
         vm.prank(pool_admin());
         qvStrategy().reviewRecipients(recipientIds, recipientStatuses);
 
@@ -263,7 +262,7 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
 
         HackathonQVStrategy.Recipient memory recipient = hQvStrategy().getRecipient(recipientId);
 
-        assertEq(uint8(recipient.recipientStatus), uint8(QVBaseStrategy.InternalRecipientStatus.Appealed));
+        assertEq(uint8(recipient.recipientStatus), uint8(IStrategy.Status.Appealed));
     }
 
     function testRevert_registerRecipient_INVALID_METADATA() public override {
@@ -851,7 +850,7 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
     }
 
     function __afterRegistrationStatus() internal pure override returns (uint8) {
-        return uint8(IStrategy.RecipientStatus.Accepted);
+        return uint8(IStrategy.Status.Accepted);
     }
 
     function test_reviewRecipient_reviewTreshold() public override {

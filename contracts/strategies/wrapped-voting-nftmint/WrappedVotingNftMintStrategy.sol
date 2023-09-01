@@ -29,18 +29,12 @@ import {NFTFactory} from "./NFTFactory.sol";
 //                    allo.gitcoin.co
 
 contract WrappedVotingNftMintStrategy is Native, BaseStrategy, ReentrancyGuard {
-    enum InternalRecipientStatus {
-        Pending,
-        Accepted,
-        Rejected
-    }
-
     /// ===============================
     /// ========== Events =============
     /// ===============================
 
-    event UpdatedRegistration(address indexed recipientId, bytes data, address sender, InternalRecipientStatus status);
-    event RecipientStatusUpdated(address indexed recipientId, InternalRecipientStatus recipientStatus, address sender);
+    event UpdatedRegistration(address indexed recipientId, bytes data, address sender, Status status);
+    event RecipientStatusUpdated(address indexed recipientId, Status recipientStatus, address sender);
     event Claimed(address indexed recipientId, address recipientAddress, uint256 amount, address token);
     event TimestampsUpdated(uint64 allocationStartTime, uint64 allocationEndTime, address sender);
 
@@ -160,9 +154,9 @@ contract WrappedVotingNftMintStrategy is Native, BaseStrategy, ReentrancyGuard {
 
     /// @notice Returns the status of the recipient based on whether it is an NFT contract created by the factory
     /// @param _recipientId The address of the recipient
-    /// @return The RecipientStatus of the recipient
-    function _getRecipientStatus(address _recipientId) internal view override returns (RecipientStatus) {
-        return nftFactory.isNFTContract(_recipientId) ? RecipientStatus.Accepted : RecipientStatus.None;
+    /// @return The Status of the recipient
+    function _getRecipientStatus(address _recipientId) internal view override returns (Status) {
+        return nftFactory.isNFTContract(_recipientId) ? Status.Accepted : Status.None;
     }
 
     /// @notice Internal function to register a recipient (reverts as it is not implemented)

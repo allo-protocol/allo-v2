@@ -3,6 +3,7 @@ import * as dotenv from "dotenv";
 import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-solhint";
 import "@nomiclabs/hardhat-waffle";
+import "@nomicfoundation/hardhat-foundry";
 import "@openzeppelin/hardhat-upgrades";
 import "@primitivefi/hardhat-dodoc";
 import "@typechain/hardhat";
@@ -267,7 +268,7 @@ const config: HardhatUserConfig = {
     }),
   },
   paths: {
-    sources: "./src",
+    sources: "./contracts",
     cache: "./cache_hardhat",
   },
 };

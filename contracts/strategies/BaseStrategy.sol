@@ -112,7 +112,7 @@ abstract contract BaseStrategy is IStrategy, Transfer, Errors {
     /// @notice Getter for the status of a recipient.
     /// @param _recipientId The ID of the recipient
     /// @return The status of the recipient
-    function getRecipientStatus(address _recipientId) external view virtual returns (RecipientStatus) {
+    function getRecipientStatus(address _recipientId) external view virtual returns (Status) {
         return _getRecipientStatus(_recipientId);
     }
 
@@ -324,7 +324,7 @@ abstract contract BaseStrategy is IStrategy, Transfer, Errors {
     /// @notice This will get the status of a recipient.
     /// @param _recipientId The ID of the recipient
     /// @return The status of the recipient
-    function _getRecipientStatus(address _recipientId) internal view virtual returns (RecipientStatus);
+    function _getRecipientStatus(address _recipientId) internal view virtual returns (Status);
 
     /// ===================================
     /// ============== Hooks ==============

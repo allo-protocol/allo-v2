@@ -20,7 +20,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
     // Events
     event MaxBidIncreased(uint256 maxBid);
     event MilstoneSubmitted(uint256 milestoneId);
-    event MilestoneStatusChanged(uint256 milestoneId, IStrategy.RecipientStatus status);
+    event MilestoneStatusChanged(uint256 milestoneId, IStrategy.Status status);
     event MilestonesSet();
     event UpdatedRegistration(address indexed recipientId, bytes data, address sender);
 
@@ -99,7 +99,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         address recipientId = __register_recipient();
         RFPSimpleStrategy.Recipient memory _recipient = strategy.getRecipient(recipientId);
         assertEq(_recipient.useRegistryAnchor, useRegistryAnchor);
-        assertEq(uint8(_recipient.recipientStatus), uint8(IStrategy.RecipientStatus.Pending));
+        assertEq(uint8(_recipient.recipientStatus), uint8(IStrategy.Status.Pending));
         assertEq(_recipient.proposalBid, 1e18);
     }
 
@@ -117,7 +117,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         strategy.allocate(abi.encode(recipientId), address(pool_admin()));
 
         RFPSimpleStrategy.Recipient memory rejectedRecipient = strategy.getRecipient(rejectedAddress);
-        assertEq(uint8(rejectedRecipient.recipientStatus), uint8(IStrategy.RecipientStatus.Rejected));
+        assertEq(uint8(rejectedRecipient.recipientStatus), uint8(IStrategy.Status.Rejected));
         assertEq(rejectedRecipient.proposalBid, 1e18);
     }
 
@@ -128,14 +128,14 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         strategy.allocate(abi.encode(recipientId), address(pool_admin()));
 
         RFPSimpleStrategy.Recipient memory noRecipient = strategy.getRecipient(randomAddress());
-        assertEq(uint8(noRecipient.recipientStatus), uint8(IStrategy.RecipientStatus.None));
+        assertEq(uint8(noRecipient.recipientStatus), uint8(IStrategy.Status.None));
         assertEq(noRecipient.proposalBid, 0);
     }
 
     function test_getRecipientStatus() public {
         address recipientId = __register_recipient();
-        IStrategy.RecipientStatus recipientStatus = strategy.getRecipientStatus(recipientId);
-        assertEq(uint8(recipientStatus), uint8(IStrategy.RecipientStatus.Pending));
+        IStrategy.Status recipientStatus = strategy.getRecipientStatus(recipientId);
+        assertEq(uint8(recipientStatus), uint8(IStrategy.Status.Pending));
     }
 
     function test_getPayouts() public {
@@ -152,7 +152,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
 
     function test_getMilestoneStatus() public {
         __register_setMilestones_allocate_submitUpcomingMilestone();
-        assertEq(uint8(strategy.getMilestoneStatus(0)), uint8(IStrategy.RecipientStatus.Pending));
+        assertEq(uint8(strategy.getMilestoneStatus(0)), uint8(IStrategy.Status.Pending));
     }
 
     function test_setMilestone_getMilestone() public {
@@ -160,8 +160,8 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         RFPSimpleStrategy.Milestone memory milestones0 = strategy.getMilestone(0);
         RFPSimpleStrategy.Milestone memory milestones1 = strategy.getMilestone(1);
 
-        assertEq(uint8(milestones0.milestoneStatus), uint8(IStrategy.RecipientStatus.Pending));
-        assertEq(uint8(milestones1.milestoneStatus), uint8(IStrategy.RecipientStatus.Pending));
+        assertEq(uint8(milestones0.milestoneStatus), uint8(IStrategy.Status.Pending));
+        assertEq(uint8(milestones1.milestoneStatus), uint8(IStrategy.Status.Pending));
 
         assertEq(milestones0.amountPercentage, 7e17);
         assertEq(milestones1.amountPercentage, 3e17);
@@ -191,7 +191,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         RFPSimpleStrategy.Milestone memory milestone = RFPSimpleStrategy.Milestone({
             metadata: Metadata({protocol: 1, pointer: "metadata"}),
             amountPercentage: 7e17,
-            milestoneStatus: IStrategy.RecipientStatus.Pending
+            milestoneStatus: IStrategy.Status.Pending
         });
         milestones[0] = milestone;
         vm.prank(pool_admin());
@@ -201,7 +201,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
     function test_submitUpcomingMilestone() public {
         __register_setMilestones_allocate_submitUpcomingMilestone();
         RFPSimpleStrategy.Milestone memory milestone = strategy.getMilestone(0);
-        assertEq(uint8(milestone.milestoneStatus), uint8(IStrategy.RecipientStatus.Pending));
+        assertEq(uint8(milestone.milestoneStatus), uint8(IStrategy.Status.Pending));
     }
 
     function testRevert_submitUpcomingMilestone_UNAUTHORIZED() public {
@@ -245,11 +245,11 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
     function test_rejectMilestone() public {
         __register_setMilestones_allocate_submitUpcomingMilestone();
         vm.expectEmit();
-        emit MilestoneStatusChanged(0, IStrategy.RecipientStatus.Rejected);
+        emit MilestoneStatusChanged(0, IStrategy.Status.Rejected);
         vm.prank(pool_admin());
         strategy.rejectMilestone(0);
         RFPSimpleStrategy.Milestone memory milestone = strategy.getMilestone(0);
-        assertEq(uint8(milestone.milestoneStatus), uint8(IStrategy.RecipientStatus.Rejected));
+        assertEq(uint8(milestone.milestoneStatus), uint8(IStrategy.Status.Rejected));
     }
 
     function testRevert_rejectMilestone_UNAUTHORIZED() public {
@@ -296,7 +296,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         address recipientId = strategy.registerRecipient(data, sender);
 
         RFPSimpleStrategy.Recipient memory _recipient = strategy.getRecipient(recipientId);
-        assertEq(uint8(_recipient.recipientStatus), uint8(IStrategy.RecipientStatus.Pending));
+        assertEq(uint8(_recipient.recipientStatus), uint8(IStrategy.Status.Pending));
     }
 
     function test_registerRecipient_zero_proposalBid() public {
@@ -417,8 +417,8 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
 
     function test_allocate() public {
         address recipientId = __register_setMilestones_allocate();
-        IStrategy.RecipientStatus recipientStatus = strategy.getRecipientStatus(recipientId);
-        assertEq(uint8(recipientStatus), uint8(IStrategy.RecipientStatus.Accepted));
+        IStrategy.Status recipientStatus = strategy.getRecipientStatus(recipientId);
+        assertEq(uint8(recipientStatus), uint8(IStrategy.Status.Accepted));
     }
 
     function testRevert_allocate_UNAUTHORIZED() public {
@@ -443,7 +443,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
 
     function test_distribute() public {
         _register_allocate_submit_distribute();
-        assertEq(uint8(strategy.getMilestoneStatus(0)), uint8(IStrategy.RecipientStatus.Accepted));
+        assertEq(uint8(strategy.getMilestoneStatus(0)), uint8(IStrategy.Status.Accepted));
     }
 
     function testRevert_distribute_UNAUTHORIZED() public {
@@ -492,12 +492,12 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         RFPSimpleStrategy.Milestone memory milestone = RFPSimpleStrategy.Milestone({
             metadata: Metadata({protocol: 1, pointer: "metadata"}),
             amountPercentage: 7e17,
-            milestoneStatus: IStrategy.RecipientStatus.Pending
+            milestoneStatus: IStrategy.Status.Pending
         });
         RFPSimpleStrategy.Milestone memory milestone2 = RFPSimpleStrategy.Milestone({
             metadata: Metadata({protocol: 1, pointer: "metadata"}),
             amountPercentage: 3e17,
-            milestoneStatus: IStrategy.RecipientStatus.Pending
+            milestoneStatus: IStrategy.Status.Pending
         });
 
         milestones[0] = milestone;

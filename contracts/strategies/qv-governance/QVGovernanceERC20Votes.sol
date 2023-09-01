@@ -103,7 +103,7 @@ contract QVGovernanceERC20Votes is QVBaseStrategy {
     }
 
     function _isAcceptedRecipient(address _recipientId) internal view override returns (bool) {
-        return recipients[_recipientId].recipientStatus == InternalRecipientStatus.Accepted;
+        return recipients[_recipientId].recipientStatus == Status.Accepted;
     }
 
     function _hasVoiceCreditsLeft(uint256 _voiceCreditsToAllocate, uint256 _votePower)
