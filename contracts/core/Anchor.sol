@@ -68,20 +68,18 @@ contract Anchor {
     /// @param _data The data to send to the target address
     /// @return Data returned from the target address
     function execute(address _target, uint256 _value, bytes memory _data) external returns (bytes memory) {
-        // Check if the caller is the owner of the profile
-        if (!registry.isOwnerOfProfile(profileId, msg.sender)) {
-            revert UNAUTHORIZED();
-        }
+        // Check if the caller is the owner of the profile and revert if not
+        if (!registry.isOwnerOfProfile(profileId, msg.sender)) revert UNAUTHORIZED();
 
-        if (_target == address(0)) {
-            revert CALL_FAILED();
-        }
+        // Check if the target address is the zero address and revert if it is
+        if (_target == address(0)) revert CALL_FAILED();
 
         // Call the target address and return the data
         (bool success, bytes memory data) = _target.call{value: _value}(_data);
-        if (!success) {
-            revert CALL_FAILED();
-        }
+
+        // Check if the call was successful and revert if not
+        if (!success) revert CALL_FAILED();
+
         return data;
     }
 
