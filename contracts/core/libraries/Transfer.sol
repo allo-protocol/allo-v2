@@ -26,8 +26,10 @@ import "./Native.sol";
 /// @notice A helper contract to transfer tokens within Allo protocol
 /// @dev Handles the transfer of tokens to an address
 contract Transfer is Native {
+    /// @notice Thrown when the amount of tokens sent does not match the amount of tokens expected
     error AMOUNT_MISMATCH();
 
+    /// @notice This holds the details for a transfer
     struct TransferData {
         address from;
         address to;
@@ -37,6 +39,7 @@ contract Transfer is Native {
     /// @notice Transfer an amount of a token to an array of addresses
     /// @param _token The address of the token
     /// @param _transferData TransferData[]
+    /// @return Whether the transfer was successful or not
     function _transferAmountsFrom(address _token, TransferData[] memory _transferData) internal returns (bool) {
         uint256 msgValue = msg.value;
 
@@ -55,9 +58,7 @@ contract Transfer is Native {
             }
         }
 
-        if (msgValue != 0) {
-            revert AMOUNT_MISMATCH();
-        }
+        if (msgValue != 0) revert AMOUNT_MISMATCH();
 
         return true;
     }
@@ -65,13 +66,13 @@ contract Transfer is Native {
     /// @notice Transfer an amount of a token to an address
     /// @param _token The address of the token
     /// @param _transferData Individual TransferData
+    /// @return Whether the transfer was successful or not
     function _transferAmountFrom(address _token, TransferData memory _transferData) internal returns (bool) {
         uint256 amount = _transferData.amount;
         if (_token == NATIVE) {
             // Native Token
-            if (msg.value < amount) {
-                revert AMOUNT_MISMATCH();
-            }
+            if (msg.value < amount) revert AMOUNT_MISMATCH();
+
             SafeTransferLib.safeTransferETH(_transferData.to, amount);
         } else {
             SafeTransferLib.safeTransferFrom(_token, _transferData.from, _transferData.to, amount);
@@ -79,6 +80,10 @@ contract Transfer is Native {
         return true;
     }
 
+    /// @notice Transfer an amount of a token to an address
+    /// @param _token The token to transfer
+    /// @param _to The address to transfer to
+    /// @param _amount The amount to transfer
     function _transferAmount(address _token, address _to, uint256 _amount) internal {
         if (_token == NATIVE) {
             SafeTransferLib.safeTransferETH(_to, _amount);
