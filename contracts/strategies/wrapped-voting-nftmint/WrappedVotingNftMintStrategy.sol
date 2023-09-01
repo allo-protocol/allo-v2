@@ -49,16 +49,12 @@ contract WrappedVotingNftMintStrategy is Native, BaseStrategy, ReentrancyGuard {
     /// ================================
 
     modifier onlyActiveAllocation() {
-        if (allocationStartTime > block.timestamp || block.timestamp > allocationEndTime) {
-            revert ALLOCATION_NOT_ACTIVE();
-        }
+        _checkOnlyActiveAllocation();
         _;
     }
 
     modifier onlyAfterAllocation() {
-        if (block.timestamp < allocationEndTime) {
-            revert ALLOCATION_NOT_ENDED();
-        }
+        _checkOnlyAfterAllocation();
         _;
     }
 
@@ -118,6 +114,20 @@ contract WrappedVotingNftMintStrategy is Native, BaseStrategy, ReentrancyGuard {
     /// ====================
     /// ===== Internal =====
     /// ====================
+
+    /// @notice Internal function to check if the allocation is active
+    function _checkOnlyActiveAllocation() internal view {
+        if (allocationStartTime > block.timestamp || block.timestamp > allocationEndTime) {
+            revert ALLOCATION_NOT_ACTIVE();
+        }
+    }
+
+    /// @notice Internal function to check if the allocation has ended
+    function _checkOnlyAfterAllocation() internal view {
+        if (block.timestamp < allocationEndTime) {
+            revert ALLOCATION_NOT_ENDED();
+        }
+    }
 
     function _setAllocationTimes(uint64 _allocationStartTime, uint64 _allocationEndTime) internal {
         _isPoolTimestampValid(_allocationStartTime, _allocationEndTime);
