@@ -6,7 +6,7 @@ import "solady/src/auth/Ownable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 import "openzeppelin-contracts/contracts/access/AccessControl.sol";
-import "openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
+import "openzeppelin-contracts-upgradeable/contracts/security/ReentrancyGuardUpgradeable.sol";
 // Interfaces
 import "./interfaces/IAllo.sol";
 
@@ -36,7 +36,7 @@ import {Transfer} from "./libraries/Transfer.sol";
 /// @author @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>, @0xZakk <zakk@gitcoin.co>, @nfrgosselin <nate@gitcoin.co>
 /// @notice This contract is used to create & manage pools as well as manage the protocol.
 /// @dev The contract must be initialized with the 'initialize()' function.
-contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl, ReentrancyGuard, Errors {
+contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl, ReentrancyGuardUpgradeable, Errors {
     // ==========================
     // === Storage Variables ====
     // ==========================

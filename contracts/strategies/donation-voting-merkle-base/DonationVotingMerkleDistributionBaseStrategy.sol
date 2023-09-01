@@ -310,14 +310,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     /// @param _recipientId ID of the recipient
     /// @return Status of the recipient
     function _getRecipientStatus(address _recipientId) internal view override returns (Status) {
-        Status status = Status(_getUintRecipientStatus(_recipientId));
-
-        // If the 'status' is 'Appealed' we will return 'Pending' instead
-        if (status == Status.Appealed) {
-            return Status.Pending;
-        } else {
-            return Status(uint8(status));
-        }
+        return Status(_getUintRecipientStatus(_recipientId));
     }
 
     /// ===============================

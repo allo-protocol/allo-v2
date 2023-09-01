@@ -24,7 +24,6 @@ The `DonationVotingMerkleDistributionDirectTransferStrategy` contract presents a
     - [Distributing Funds](#distributing-funds)
     - [Checking Distribution Status](#checking-distribution-status)
     - [Checking Distribution Set Status](#checking-distribution-set-status)
-    - [Updating Recipient Registration](#updating-recipient-registration)
     - [Checking Recipient Status](#checking-recipient-status)
     - [Getting Recipient Details](#getting-recipient-details)
     - [Getting Payout Summary](#getting-payout-summary)
@@ -82,9 +81,8 @@ The constructor initializes the strategy with essential parameters and configura
 ### Views and Queries
 
 1. `getRecipient`: Retrieves recipient details using their ID.
-2. `getInternalRecipientStatus`: Fetches the internal status of a recipient.
-3. `isDistributionSet`: Checks if the distribution is configured.
-4. `hasBeenDistributed`: Verifies if a distribution has occurred.
+2. `isDistributionSet`: Checks if the distribution is configured.
+3. `hasBeenDistributed`: Verifies if a distribution has occurred.
 
 ### External/Custom Functions
 
@@ -94,7 +92,6 @@ The constructor initializes the strategy with essential parameters and configura
 4. `updateDistribution`: Enables pool managers to update distribution metadata and Merkle root.
 5. `isDistributionSet`: Checks if the distribution is configured.
 6. `getRecipient`: Retrieves recipient details using their ID.
-7. `getInternalRecipientStatus`: Fetches the internal status of a recipient.
 
 ### Internal Functions
 
@@ -150,7 +147,7 @@ In summary, the `DonationVotingMerkleDistributionDirectTransferStrategy` contrac
 * Pool Manager initiates a recipient status review request.
 * Verifies if sender is a pool manager.
 * Loops through provided application statuses and
-  * Updates recipient's internal status based on the application status. 
+  * Updates recipient's status based on the application status. 
   * Emits `RecipientStatusUpdated` event.
 
 ### Updating Pool Timestamps
@@ -196,18 +193,10 @@ In summary, the `DonationVotingMerkleDistributionDirectTransferStrategy` contrac
 * User initiates a distribution set status check request.
 * Checks if the merkle root for distribution has been set.
 
-### Updating Recipient Registration
-
-* Updates recipient metadata via `registerRecipient`
-* Checks if the recipient's internal status is "Rejected.", then update internal status to "Appealed."
-* Checks if the recipient's internal status is "Accepted.", then update internal status to "Pending."
-* Checks if the recipient's internal status is "Pending"/"Appealed", no change in status.
-* Emits `UpdatedRegistration` event.
-
 ### Checking Recipient Status
 
 * User initiates a recipient status check request.
-* Retrieves and returns the internal recipient status.
+* Retrieves and returns the recipient status.
 
 ### Getting Recipient Details
 

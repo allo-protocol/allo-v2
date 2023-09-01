@@ -116,7 +116,7 @@ contract LockupDynamicStrategyTest is LockupBase_Test, Errors {
         emit Allocated(vars.recipientIds[0], vars.grantAmount, address(GTC), pool_manager1());
         allo().allocate(poolId, vars.allocateData);
 
-        assertEq(uint8(strategy.getRecipientStatus(vars.recipientIds[0])), 2, "after allocate internal status"); // Accepted
+        assertEq(uint8(strategy.getRecipientStatus(vars.recipientIds[0])), 2, "after allocate status"); // Accepted
 
         vars.streamId = lockupDynamic.nextStreamId();
 
@@ -152,7 +152,7 @@ contract LockupDynamicStrategyTest is LockupBase_Test, Errors {
         vars.allocatedGrantAmountBeforeCancel = strategy.getRecipient(vars.recipientIds[0]).grantAmount;
         vars.refundedAmount = lockupDynamic.refundableAmountOf(vars.streamId);
         strategy.cancelStream(vars.recipientIds[0], vars.streamId);
-        assertEq(uint8(strategy.getRecipientStatus(vars.recipientIds[0])), 6, "after cancel internal status"); // Canceled
+        assertEq(uint8(strategy.getRecipientStatus(vars.recipientIds[0])), 6, "after cancel status"); // Canceled
         assertEq(
             strategy.getPoolAmount(),
             vars.poolAmountBeforeCancel + vars.refundedAmount,

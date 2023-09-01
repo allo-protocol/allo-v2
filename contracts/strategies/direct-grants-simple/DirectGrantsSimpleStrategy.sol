@@ -342,7 +342,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         emit MilestoneStatusChanged(_recipientId, _milestoneId, Status.Rejected);
     }
 
-    /// @notice Set the internal status of the recipient to 'InReview'
+    /// @notice Set the status of the recipient to 'InReview'
     /// @dev Emits a 'RecipientStatusChanged()' event
     /// @param _recipientIds IDs of the recipients
     function setRecipientStatusToInReview(address[] calldata _recipientIds) external onlyPoolManager(msg.sender) {

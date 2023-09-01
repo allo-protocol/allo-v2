@@ -84,9 +84,8 @@ The constructor initializes the strategy with essential parameters and configura
 ### Views and Queries
 
 1. `getRecipient`: Retrieves recipient details using their ID.
-2. `getInternalRecipientStatus`: Fetches the internal status of a recipient.
-3. `isDistributionSet`: Checks if the distribution is configured.
-4. `hasBeenDistributed`: Verifies if a distribution has occurred.
+2. `isDistributionSet`: Checks if the distribution is configured.
+3. `hasBeenDistributed`: Verifies if a distribution has occurred.
 
 ### External/Custom Functions
 
@@ -97,7 +96,6 @@ The constructor initializes the strategy with essential parameters and configura
 5. `updateDistribution`: Enables pool managers to update distribution metadata and Merkle root.
 6. `isDistributionSet`: Checks if the distribution is configured.
 7. `getRecipient`: Retrieves recipient details using their ID.
-8. `getInternalRecipientStatus`: Fetches the internal status of a recipient.
 
 ### Internal Functions
 
@@ -153,7 +151,7 @@ In summary, the `DonationVotingMerkleDistributionVaultStrategy` contract introdu
 * Pool Manager initiates a recipient status review request.
 * Verifies if sender is a pool manager.
 * Loops through provided application statuses and
-  * Updates recipient's internal status based on the application status. 
+  * Updates recipient's status based on the application status. 
   * Emits `RecipientStatusUpdated` event.
 
 ### Updating Pool Timestamps
@@ -209,15 +207,15 @@ In summary, the `DonationVotingMerkleDistributionVaultStrategy` contract introdu
 ### Updating Recipient Registration
 
 * Updates recipient metadata via `registerRecipient`
-* Checks if the recipient's internal status is "Rejected.", then update internal status to "Appealed."
-* Checks if the recipient's internal status is "Accepted.", then update internal status to "Pending."
-* Checks if the recipient's internal status is "Pending"/"Appealed", no change in status.
+* Checks if the recipient's status is "Rejected.", then update status to "Appealed."
+* Checks if the recipient's status is "Accepted.", then update status to "Pending."
+* Checks if the recipient's status is "Pending"/"Appealed", no change in status.
 * Emits `UpdatedRegistration` event.
 
 ### Checking Recipient Status
 
 * User initiates a recipient status check request.
-* Retrieves and returns the internal recipient status.
+* Retrieves and returns the recipient status.
 
 ### Getting Recipient Details
 

@@ -114,7 +114,7 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
         return broker;
     }
 
-    /// @notice Get Internal recipient status
+    /// @notice Get recipient status
     /// @param _recipientId Id of the recipient
     function getStatus(address _recipientId) external view returns (Status) {
         return _getRecipient(_recipientId).recipientStatus;
@@ -209,7 +209,7 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
         emit BrokerSet(broker);
     }
 
-    /// @notice Set the internal status of the recipient to InReview
+    /// @notice Set the status of the recipient to InReview
     /// @param _recipientIds Ids of the recipients
     function setRecipientStatusToInReview(address[] calldata _recipientIds) external {
         uint256 recipientLength = _recipientIds.length;

@@ -113,7 +113,7 @@ contract LockupLinearStrategyTest is LockupBase_Test, Errors {
         emit Allocated(vars.recipientIds[0], vars.grantAmount, address(GTC), pool_manager1());
         allo().allocate(poolId, vars.allocateData);
 
-        assertEq(uint8(strategy.getRecipientStatus(vars.recipientIds[0])), 2, "after allocate internal status"); // Accepted
+        assertEq(uint8(strategy.getRecipientStatus(vars.recipientIds[0])), 2, "after allocate status"); // Accepted
 
         vars.streamId = lockupLinear.nextStreamId();
 

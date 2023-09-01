@@ -41,7 +41,6 @@ graph LR;
     A -->|Storage| C[totalRecipientVotes, reviewThreshold, TimeStamps, ...]
     A -->|Modifiers| D[onlyActiveRegistration, onlyActiveAllocation, ...]
     A -->|Events| E[UpdatedRegistration, RecipientStatusUpdated, ...]
-    A -->|View Functions| F[getRecipient, getInternalRecipientStatus, ...]
     A -->|Internal Functions| G[reviewRecipients, _updatePoolTimestamps]
 ```
 
