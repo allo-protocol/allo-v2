@@ -28,7 +28,7 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
         bool useRegistryAnchor;
         address recipientAddress;
         Metadata metadata;
-        QVBaseStrategy.Status recipientStatus;
+        QVBaseStrategy.Status Status;
         uint256 totalVotes;
     }
 
@@ -58,7 +58,7 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
     uint256 public poolId;
 
     event Reviewed(address indexed recipientId, QVBaseStrategy.Status status, address sender);
-    event RecipientStatusUpdated(address indexed recipientId, QVBaseStrategy.Status status, address sender);
+    event RecipientStatusUpdated(address indexed recipientId, IStrategy.Status status, address sender);
     event PoolCreated(
         uint256 indexed poolId,
         bytes32 indexed profileId,
@@ -244,6 +244,8 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
 
     function test_registerRecipient_new() public {
         vm.warp(registrationStartTime + 10);
+        assertEq(uint8(qvStrategy().getRecipientStatus(recipient1())), uint8(IStrategy.Status.None));
+
         address recipientId = __register_recipient();
 
         QVBaseStrategy.Recipient memory receipt = qvStrategy().getRecipient(recipientId);
@@ -252,6 +254,17 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
         assertEq(receipt.recipientAddress, recipient1());
         assertEq(receipt.metadata.pointer, "metadata");
         assertEq(receipt.metadata.protocol, 1);
+        assertEq(uint8(receipt.recipientStatus), __afterRegistrationStatus());
+    }
+
+    function test_registerRecipient_accepted() public virtual {
+        address recipientId = __register_accept_recipient();
+        assertEq(uint8(qvStrategy().getRecipientStatus(recipient1())), uint8(IStrategy.Status.Accepted));
+
+        recipientId = __register_recipient();
+
+        QVBaseStrategy.Recipient memory receipt = qvStrategy().getRecipient(recipientId);
+
         assertEq(uint8(receipt.recipientStatus), __afterRegistrationStatus());
     }
 
@@ -320,7 +333,7 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
 
         // test status mapping. Internal: Appealed -> Global: Pending
         IStrategy.Status newStatus = qvStrategy().getRecipientStatus(recipientId);
-        assertEq(uint8(IStrategy.Status.Pending), uint8(newStatus));
+        assertEq(uint8(IStrategy.Status.Appealed), uint8(newStatus));
     }
 
     function testRevert_registerRecipient_REGISTRATION_NOT_ACTIVE() public {
@@ -491,17 +504,17 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
 
         address[] memory recipientIds = new address[](1);
         recipientIds[0] = recipientId;
-        IStrategy.Status[] memory recipientStatuses = new IStrategy.Status[](1);
-        recipientStatuses[0] = IStrategy.Status.Rejected;
+        IStrategy.Status[] memory Statuses = new IStrategy.Status[](1);
+        Statuses[0] = IStrategy.Status.Rejected;
 
         vm.startPrank(pool_manager1());
-        qvStrategy().reviewRecipients(recipientIds, recipientStatuses);
+        qvStrategy().reviewRecipients(recipientIds, Statuses);
 
         vm.expectEmit(true, false, false, false);
         emit RecipientStatusUpdated(recipientId, IStrategy.Status.Rejected, pool_admin());
 
         vm.startPrank(pool_manager2());
-        qvStrategy().reviewRecipients(recipientIds, recipientStatuses);
+        qvStrategy().reviewRecipients(recipientIds, Statuses);
 
         QVBaseStrategy.Recipient memory recipient = qvStrategy().getRecipient(recipientId);
         assertEq(uint8(IStrategy.Status.Rejected), uint8(recipient.recipientStatus));
@@ -513,14 +526,14 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
         // reject
         address[] memory recipientIds = new address[](1);
         recipientIds[0] = recipientId;
-        IStrategy.Status[] memory recipientStatuses = new IStrategy.Status[](1);
-        recipientStatuses[0] = IStrategy.Status.Rejected;
+        IStrategy.Status[] memory Statuses = new IStrategy.Status[](1);
+        Statuses[0] = IStrategy.Status.Rejected;
 
         vm.expectEmit(true, false, false, false);
         emit Reviewed(recipientId, IStrategy.Status.Rejected, pool_manager1());
 
         vm.startPrank(pool_manager1());
-        qvStrategy().reviewRecipients(recipientIds, recipientStatuses);
+        qvStrategy().reviewRecipients(recipientIds, Statuses);
 
         // still pending
         assertEq(uint8(qvStrategy().getRecipientStatus(recipientId)), uint8(IStrategy.Status.Pending));
@@ -531,7 +544,7 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
         emit Reviewed(recipientId, IStrategy.Status.Rejected, pool_manager2());
 
         vm.startPrank(pool_manager2());
-        qvStrategy().reviewRecipients(recipientIds, recipientStatuses);
+        qvStrategy().reviewRecipients(recipientIds, Statuses);
 
         // rejected
         assertEq(uint8(qvStrategy().getRecipientStatus(recipientId)), uint8(IStrategy.Status.Rejected));
@@ -541,7 +554,7 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
         emit Reviewed(recipientId, IStrategy.Status.Rejected, pool_admin());
 
         vm.startPrank(pool_admin());
-        qvStrategy().reviewRecipients(recipientIds, recipientStatuses);
+        qvStrategy().reviewRecipients(recipientIds, Statuses);
 
         // still rejected
         assertEq(uint8(qvStrategy().getRecipientStatus(recipientId)), uint8(IStrategy.Status.Rejected));
@@ -554,27 +567,27 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
         // reject
         address[] memory recipientIds = new address[](1);
         recipientIds[0] = recipientId;
-        IStrategy.Status[] memory recipientStatuses = new IStrategy.Status[](1);
-        recipientStatuses[0] = IStrategy.Status.Rejected;
+        IStrategy.Status[] memory Statuses = new IStrategy.Status[](1);
+        Statuses[0] = IStrategy.Status.Rejected;
 
         vm.startPrank(pool_manager1());
-        qvStrategy().reviewRecipients(recipientIds, recipientStatuses);
+        qvStrategy().reviewRecipients(recipientIds, Statuses);
 
         // still pending
         assertEq(uint8(qvStrategy().getRecipientStatus(recipientId)), uint8(IStrategy.Status.Pending));
         assertEq(qvStrategy().reviewsByStatus(recipientId, IStrategy.Status.Rejected), 1);
 
         vm.startPrank(pool_manager2());
-        qvStrategy().reviewRecipients(recipientIds, recipientStatuses);
+        qvStrategy().reviewRecipients(recipientIds, Statuses);
 
         // rejected
         assertEq(uint8(qvStrategy().getRecipientStatus(recipientId)), uint8(IStrategy.Status.Rejected));
         assertEq(qvStrategy().reviewsByStatus(recipientId, IStrategy.Status.Rejected), 2);
 
         // one accept after two rejects
-        recipientStatuses[0] = IStrategy.Status.Accepted;
+        Statuses[0] = IStrategy.Status.Accepted;
         vm.startPrank(pool_admin());
-        qvStrategy().reviewRecipients(recipientIds, recipientStatuses);
+        qvStrategy().reviewRecipients(recipientIds, Statuses);
 
         // still rejected
         assertEq(uint8(qvStrategy().getRecipientStatus(recipientId)), uint8(IStrategy.Status.Rejected));
@@ -602,28 +615,28 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
         address[] memory recipients = new address[](1);
         recipients[0] = makeAddr("recipient");
 
-        IStrategy.Status[] memory recipientStatuses = new IStrategy.Status[](1);
-        recipientStatuses[0] = IStrategy.Status.None;
+        IStrategy.Status[] memory Statuses = new IStrategy.Status[](1);
+        Statuses[0] = IStrategy.Status.None;
 
         vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, recipients[0]));
         vm.startPrank(pool_manager1());
 
-        qvStrategy().reviewRecipients(recipients, recipientStatuses);
+        qvStrategy().reviewRecipients(recipients, Statuses);
     }
 
     function testRevert_ReviewRecipients_UNAUTHORIZED() public {
         vm.expectRevert(UNAUTHORIZED.selector);
         address[] memory recipients = new address[](2);
-        IStrategy.Status[] memory recipientStatuses = new IStrategy.Status[](2);
+        IStrategy.Status[] memory Statuses = new IStrategy.Status[](2);
 
         recipients[0] = recipient1();
         recipients[1] = recipient2();
 
-        recipientStatuses[0] = IStrategy.Status.Accepted;
-        recipientStatuses[1] = IStrategy.Status.Rejected;
+        Statuses[0] = IStrategy.Status.Accepted;
+        Statuses[1] = IStrategy.Status.Rejected;
 
         vm.startPrank(pool_notAManager());
-        qvStrategy().reviewRecipients(recipients, recipientStatuses);
+        qvStrategy().reviewRecipients(recipients, Statuses);
     }
 
     function testRevert_reviewRecipients_withAppealedStatus_RECIPIENT_ERROR() public {
@@ -632,13 +645,13 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
         address[] memory recipients = new address[](1);
         recipients[0] = makeAddr("recipient");
 
-        IStrategy.Status[] memory recipientStatuses = new IStrategy.Status[](1);
-        recipientStatuses[0] = IStrategy.Status.Appealed;
+        IStrategy.Status[] memory Statuses = new IStrategy.Status[](1);
+        Statuses[0] = IStrategy.Status.Appealed;
 
         vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, recipients[0]));
         vm.startPrank(pool_manager1());
 
-        qvStrategy().reviewRecipients(recipients, recipientStatuses);
+        qvStrategy().reviewRecipients(recipients, Statuses);
     }
 
     function testRevert_reviewRecipients_UNAUTHORIZED() public {
@@ -773,13 +786,13 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
         // accept
         address[] memory recipientIds = new address[](1);
         recipientIds[0] = recipientId;
-        IStrategy.Status[] memory recipientStatuses = new IStrategy.Status[](1);
-        recipientStatuses[0] = IStrategy.Status.Accepted;
+        IStrategy.Status[] memory Statuses = new IStrategy.Status[](1);
+        Statuses[0] = IStrategy.Status.Accepted;
         vm.startPrank(pool_admin());
-        qvStrategy().reviewRecipients(recipientIds, recipientStatuses);
+        qvStrategy().reviewRecipients(recipientIds, Statuses);
         vm.stopPrank();
         vm.startPrank(pool_manager1());
-        qvStrategy().reviewRecipients(recipientIds, recipientStatuses);
+        qvStrategy().reviewRecipients(recipientIds, Statuses);
         vm.stopPrank();
         return recipientId;
     }
@@ -790,13 +803,13 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
         // reject
         address[] memory recipientIds = new address[](1);
         recipientIds[0] = recipientId;
-        IStrategy.Status[] memory recipientStatuses = new IStrategy.Status[](1);
-        recipientStatuses[0] = IStrategy.Status.Rejected;
+        IStrategy.Status[] memory Statuses = new IStrategy.Status[](1);
+        Statuses[0] = IStrategy.Status.Rejected;
         vm.prank(pool_admin());
-        qvStrategy().reviewRecipients(recipientIds, recipientStatuses);
+        qvStrategy().reviewRecipients(recipientIds, Statuses);
 
         vm.prank(pool_manager1());
-        qvStrategy().reviewRecipients(recipientIds, recipientStatuses);
+        qvStrategy().reviewRecipients(recipientIds, Statuses);
         return recipientId;
     }
 

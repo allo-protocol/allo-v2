@@ -62,9 +62,7 @@ contract Registry is IRegistry, Native, AccessControl, Transfer, Initializable, 
     /// @notice Reverts UNAUTHORIZED() if the caller is not the profile owner
     /// @param _profileId The profile id
     modifier onlyProfileOwner(bytes32 _profileId) {
-        if (!_isOwnerOfProfile(_profileId, msg.sender)) {
-            revert UNAUTHORIZED();
-        }
+        _checkOnlyProfileOwner(_profileId);
         _;
     }
 
@@ -153,7 +151,7 @@ contract Registry is IRegistry, Native, AccessControl, Transfer, Initializable, 
 
         // Assign roles for the profile members
         uint256 memberLength = _members.length;
-        for (uint256 i = 0; i < memberLength;) {
+        for (uint256 i; i < memberLength;) {
             address member = _members[i];
 
             // Will revert if any of the addresses are a zero address
@@ -229,7 +227,7 @@ contract Registry is IRegistry, Native, AccessControl, Transfer, Initializable, 
     /// @notice Checks if the address is an owner or member of the profile
     /// @param _profileId The 'profileId' of the profile
     /// @param _account The address to check
-    /// @return 'true' if the address is an owner or member of the profile, otherwise 'fasle'
+    /// @return 'true' if the address is an owner or member of the profile, otherwise 'false'
     function isOwnerOrMemberOfProfile(bytes32 _profileId, address _account) external view returns (bool) {
         return _isOwnerOfProfile(_profileId, _account) || _isMemberOfProfile(_profileId, _account);
     }
@@ -242,10 +240,10 @@ contract Registry is IRegistry, Native, AccessControl, Transfer, Initializable, 
         return _isOwnerOfProfile(_profileId, _owner);
     }
 
-    /// @notice Returns if the given address is an member of the profile
+    /// @notice Returns if the given address is a member of the profile
     /// @param _profileId The 'profileId' of the profile
     /// @param _member The address to check
-    /// @return 'true' if the address is an member of the profile, otherwise 'false'
+    /// @return 'true' if the address is a member of the profile, otherwise 'false'
     function isMemberOfProfile(bytes32 _profileId, address _member) external view returns (bool) {
         return _isMemberOfProfile(_profileId, _member);
     }
@@ -299,7 +297,7 @@ contract Registry is IRegistry, Native, AccessControl, Transfer, Initializable, 
         uint256 memberLength = _members.length;
 
         // Loop through the members and add them to the profile by granting the role
-        for (uint256 i = 0; i < memberLength;) {
+        for (uint256 i; i < memberLength;) {
             address member = _members[i];
 
             // Will revert if any of the addresses are a zero address
@@ -323,7 +321,7 @@ contract Registry is IRegistry, Native, AccessControl, Transfer, Initializable, 
         uint256 memberLength = _members.length;
 
         // Loop through the members and remove them from the profile by revoking the role
-        for (uint256 i = 0; i < memberLength;) {
+        for (uint256 i; i < memberLength;) {
             // Revoke the role from the member and emit the event for each member
             _revokeRole(_profileId, _members[i]);
             unchecked {
@@ -335,6 +333,13 @@ contract Registry is IRegistry, Native, AccessControl, Transfer, Initializable, 
     /// ====================================
     /// ======== Internal Functions ========
     /// ====================================
+
+    /// @dev Internal function used by modifier 'onlyProfileOwner'
+    function _checkOnlyProfileOwner(bytes32 _profileId) internal view {
+        if (!_isOwnerOfProfile(_profileId, msg.sender)) {
+            revert UNAUTHORIZED();
+        }
+    }
 
     /// @notice Generates and deploys the anchor for the given 'profileId' and name
     /// @dev Internal function used by 'createProfile()' and 'updateProfileName()' to create and anchor.
@@ -382,7 +387,7 @@ contract Registry is IRegistry, Native, AccessControl, Transfer, Initializable, 
     /// @dev Internal function used to determine if an address is a member of the profile
     /// @param _profileId The 'profileId' of the profile
     /// @param _member The address to check
-    /// @return 'true' if the address is an member of the profile, otherwise 'false'
+    /// @return 'true' if the address is a member of the profile, otherwise 'false'
     function _isMemberOfProfile(bytes32 _profileId, address _member) internal view returns (bool) {
         return hasRole(_profileId, _member);
     }

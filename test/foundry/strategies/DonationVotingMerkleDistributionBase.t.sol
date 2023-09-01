@@ -332,7 +332,7 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         strategy.registerRecipient(data, profile1_member1());
 
         IStrategy.Status recipientStatus = strategy.getRecipientStatus(recipientId);
-        assertEq(uint8(recipientStatus), uint8(IStrategy.Status.Pending));
+        assertEq(uint8(recipientStatus), uint8(IStrategy.Status.Appealed));
     }
 
     // Tests that the pool manager can update the recipient status

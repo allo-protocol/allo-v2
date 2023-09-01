@@ -25,18 +25,32 @@ import {Metadata} from "../../core/libraries/Metadata.sol";
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠉⠋⠋⠋⠋⠋⠛⠙⠋⠛⠙⠋⠁⠀⠀⠀⠀⠀⠀⠀⠀⠠⠿⠻⠟⠿⠃            ⠀     ⠟⠿⠟⠿⠆⠀⠸⠿⠿⠻⠗⠀⠀⠀⠸⠿⠿⠿⠏⠀⠀⠀⠀⠀⠀⠙⠛⠿⢿⢿⡿⡿⡿⠟⠏⠃⠀⠀⠀⠀⠀
 //                    allo.gitcoin.co
 
+/// @title QVBaseStrategy
+/// @notice Base strategy for quadratic voting strategies
+/// @author @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>, @0xZakk <zakk@gitcoin.co>, @nfrgosselin <nate@gitcoin.co>
 abstract contract QVBaseStrategy is BaseStrategy {
     /// ======================
     /// ======= Events =======
     /// ======================
 
     /// @notice Emitted when a recipient updates their registration
-    /// @param recipientId Id of the recipient
+    /// @param recipientId ID of the recipient
     /// @param data The encoded data - (address recipientId, address recipientAddress, Metadata metadata)
     /// @param sender The sender of the transaction
     /// @param status The updated status of the recipient
     event UpdatedRegistration(address indexed recipientId, bytes data, address sender, Status status);
+
+    /// @notice Emitted when a recipient is registered
+    /// @param recipientId ID of the recipient
+    /// @param status The status of the recipient
+    /// @param sender The sender of the transaction
     event RecipientStatusUpdated(address indexed recipientId, Status status, address sender);
+    /// @notice Emitted when the pool timestamps are updated
+    /// @param registrationStartTime The start time for the registration
+    /// @param registrationEndTime The end time for the registration
+    /// @param allocationStartTime The start time for the allocation
+    /// @param allocationEndTime The end time for the allocation
+    /// @param sender The sender of the transaction
     event TimestampsUpdated(
         uint64 registrationStartTime,
         uint64 registrationEndTime,
@@ -45,55 +59,103 @@ abstract contract QVBaseStrategy is BaseStrategy {
         address sender
     );
 
+    /// @notice Emitted when a recipient receives votes
+    /// @param recipientId ID of the recipient
+    /// @param votes The votes allocated to the recipient
+    /// @param allocator The allocator assigning the votes
     event Allocated(address indexed recipientId, uint256 votes, address allocator);
+
+    /// @notice Emitted when a recipient is reviewed
+    /// @param recipientId ID of the recipient
+    /// @param status The status of the recipient
+    /// @param sender The sender of the transaction
     event Reviewed(address indexed recipientId, Status status, address sender);
 
     /// ======================
     /// ======= Storage ======
     /// ======================
 
+    // slot 0
+    /// @notice The total number of votes cast for all recipients
+    uint256 public totalRecipientVotes;
+
+    // slot 1
+    /// @notice The number of votes required to review a recipient
+    uint256 public reviewThreshold;
+
+    // slot 2
+    /// @notice The start and end times for registrations and allocations
+    /// @dev The values will be in milliseconds since the epoch
+    uint64 public registrationStartTime;
+    uint64 public registrationEndTime;
+    uint64 public allocationStartTime;
+    uint64 public allocationEndTime;
+
+    // slot 3
+    /// @notice Whether or not the strategy is using registry gating
+    bool public registryGating;
+
+    /// @notice Whether or not the strategy requires metadata
+    bool public metadataRequired;
+
+    /// @notice The registry contract
+    IRegistry private _registry;
+
+    // slots [4...n]
+    /// @notice The status of the recipient for this strategy only
+    /// @dev There is a core `IStrategy.RecipientStatus` that this should map to
+    enum InternalRecipientStatus {
+        None,
+        Pending,
+        Accepted,
+        Rejected,
+        Appealed
+    }
+
+    /// @notice The parameters used to initialize the strategy
     struct InitializeParams {
+        // slot 0
         bool registryGating;
         bool metadataRequired;
+        // slot 1
         uint256 reviewThreshold;
+        // slot 2
         uint64 registrationStartTime;
         uint64 registrationEndTime;
         uint64 allocationStartTime;
         uint64 allocationEndTime;
     }
 
+    /// @notice The details of the recipient
     struct Recipient {
+        // slot 0
+        uint256 totalVotesReceived;
+        // slot 1
         bool useRegistryAnchor;
         address recipientAddress;
         Metadata metadata;
         Status recipientStatus;
-        uint256 totalVotesReceived;
     }
 
+    /// @notice The details of the allocator
     struct Allocator {
+        // slot 0
         uint256 voiceCredits;
+        // slots [1...n]
         mapping(address => uint256) voiceCreditsCastToRecipient;
         mapping(address => uint256) votesCastToRecipient;
     }
 
-    bool public registryGating;
-    bool public metadataRequired;
-    uint64 public registrationStartTime;
-    uint64 public registrationEndTime;
-    uint64 public allocationStartTime;
-    uint64 public allocationEndTime;
-
-    uint256 public totalRecipientVotes;
-    uint256 public reviewThreshold;
-
-    IRegistry private _registry;
-
-    /// @notice recipientId => Recipient
+    /// @notice The details of the recipient are returned using their ID
+    /// @dev recipientId => Recipient
     mapping(address => Recipient) public recipients;
-    /// @notice allocator address => Allocator
+
+    /// @notice The details of the allocator are returned using their address
+    /// @dev allocator address => Allocator
     mapping(address => Allocator) public allocators;
 
-    /// @notice recipientId => paid out
+    /// @notice Returns whether or not the recipient has been paid out using their ID
+    /// @dev recipientId => paid out
     mapping(address => bool) public paidOut;
 
     // recipientId -> status -> count
@@ -103,6 +165,7 @@ abstract contract QVBaseStrategy is BaseStrategy {
     /// ========== Modifier ============
     /// ================================
 
+    /// @notice Only allow during active registration
     modifier onlyActiveRegistration() {
         if (registrationStartTime > block.timestamp || block.timestamp > registrationEndTime) {
             revert REGISTRATION_NOT_ACTIVE();
@@ -110,6 +173,7 @@ abstract contract QVBaseStrategy is BaseStrategy {
         _;
     }
 
+    /// @notice Only allow during active allocation
     modifier onlyActiveAllocation() {
         if (allocationStartTime > block.timestamp || block.timestamp > allocationEndTime) {
             revert ALLOCATION_NOT_ACTIVE();
@@ -117,6 +181,7 @@ abstract contract QVBaseStrategy is BaseStrategy {
         _;
     }
 
+    /// @notice Only allow after allocation has occurred
     modifier onlyAfterAllocation() {
         if (block.timestamp < allocationEndTime) {
             revert ALLOCATION_NOT_ENDED();
@@ -134,11 +199,14 @@ abstract contract QVBaseStrategy is BaseStrategy {
     /// =========== Initialize =============
     /// ====================================
 
+    /// @notice Initialize the strategy
+    /// @param _poolId The ID of the pool
+    /// @param _data The initialization data for the strategy
     function initialize(uint256 _poolId, bytes memory _data) external virtual;
 
-    /// @dev Internal initialize function
-    /// @param _poolId The pool id
-    /// @param _params The initialize params
+    /// @notice Internal initialize function
+    /// @param _poolId The ID of the pool
+    /// @param _params The initialize params for the strategy
     function __QVBaseStrategy_init(uint256 _poolId, InitializeParams memory _params) internal {
         __BaseStrategy_init(_poolId);
 
@@ -161,7 +229,8 @@ abstract contract QVBaseStrategy is BaseStrategy {
     /// =========================
 
     /// @notice Get the recipient
-    /// @param _recipientId Id of the recipient
+    /// @param _recipientId ID of the recipient
+    /// @return The recipient
     function getRecipient(address _recipientId) external view returns (Recipient memory) {
         return _getRecipient(_recipientId);
     }
@@ -169,15 +238,11 @@ abstract contract QVBaseStrategy is BaseStrategy {
     /// @notice Get recipient status
     /// @param _recipientId Id of the recipient
     function _getRecipientStatus(address _recipientId) internal view virtual override returns (Status) {
-        Status status = _getRecipient(_recipientId).recipientStatus;
-        if (status == Status.Appealed) {
-            return Status.Pending;
-        } else {
-            return Status(uint8(status));
-        }
+        return _getRecipient(_recipientId).recipientStatus;
     }
 
-    /// @notice Returns status of the pool
+    /// @notice Checks if a pool is active or not
+    /// @return Whether the pool is active or not
     function _isPoolActive() internal view virtual override returns (bool) {
         if (registrationStartTime <= block.timestamp && block.timestamp <= registrationEndTime) {
             return true;
@@ -185,7 +250,9 @@ abstract contract QVBaseStrategy is BaseStrategy {
         return false;
     }
 
-    /// @notice Review recipient application
+    /// @notice Review recipient(s) application(s)
+    /// @dev You can review multiple recipients at once or just one. This can only be called by a pool manager and
+    ///      only during active registration.
     /// @param _recipientIds Ids of the recipients
     /// @param _recipientStatuses Statuses of the recipients
     function reviewRecipients(address[] calldata _recipientIds, Status[] calldata _recipientStatuses)
@@ -252,6 +319,7 @@ abstract contract QVBaseStrategy is BaseStrategy {
         uint64 _allocationStartTime,
         uint64 _allocationEndTime
     ) internal {
+        // validate the timestamps for this strategy
         if (
             block.timestamp > _registrationStartTime || _registrationStartTime > _registrationEndTime
                 || _registrationStartTime > _allocationStartTime || _allocationStartTime > _allocationEndTime
@@ -260,19 +328,25 @@ abstract contract QVBaseStrategy is BaseStrategy {
             revert INVALID();
         }
 
+        // Set the new values
         registrationStartTime = _registrationStartTime;
         registrationEndTime = _registrationEndTime;
         allocationStartTime = _allocationStartTime;
         allocationEndTime = _allocationEndTime;
 
+        // emit the event
         emit TimestampsUpdated(
             registrationStartTime, registrationEndTime, allocationStartTime, allocationEndTime, msg.sender
         );
     }
 
     /// @notice Submit application to pool
+    /// @dev The '_data' parameter is encoded as follows:
+    ///     - If registryGating is true, then the data is encoded as (address recipientId, address recipientAddress, Metadata metadata)
+    ///     - If registryGating is false, then the data is encoded as (address recipientAddress, address registryAnchor, Metadata metadata)
     /// @param _data The data to be decoded
     /// @param _sender The sender of the transaction
+    /// @return recipientId The ID of the recipient
     function _registerRecipient(bytes memory _data, address _sender)
         internal
         virtual
@@ -290,6 +364,7 @@ abstract contract QVBaseStrategy is BaseStrategy {
         if (registryGating) {
             (recipientId, recipientAddress, metadata) = abi.decode(_data, (address, address, Metadata));
 
+            // when registry gating is enabled, the recipientId must be a profile member
             if (!_isProfileMember(recipientId, _sender)) {
                 revert UNAUTHORIZED();
             }
@@ -297,15 +372,19 @@ abstract contract QVBaseStrategy is BaseStrategy {
             (recipientAddress, registryAnchor, metadata) = abi.decode(_data, (address, address, Metadata));
             isUsingRegistryAnchor = registryAnchor != address(0);
             recipientId = isUsingRegistryAnchor ? registryAnchor : _sender;
+
+            // when using registry anchor, the ID of the recipient must be a profile member
             if (isUsingRegistryAnchor && !_isProfileMember(recipientId, _sender)) {
                 revert UNAUTHORIZED();
             }
         }
 
+        // make sure that if metadata is required, it is provided
         if (metadataRequired && (bytes(metadata.pointer).length == 0 || metadata.protocol == 0)) {
             revert INVALID_METADATA();
         }
 
+        // make sure the recipient address is not the zero address
         if (recipientAddress == address(0)) {
             revert RECIPIENT_ERROR(recipientId);
         }
@@ -331,11 +410,14 @@ abstract contract QVBaseStrategy is BaseStrategy {
                 // recipient updating rejected application
                 recipient.recipientStatus = Status.Appealed;
             }
+
+            // emit the new status with the '_data' that was passed in
             emit UpdatedRegistration(recipientId, _data, _sender, recipient.recipientStatus);
         }
     }
 
     /// @notice Distribute the tokens to the recipients
+    /// @dev The '_sender' must be a pool manager and the allocation must have ended
     /// @param _recipientIds The recipient ids
     /// @param _sender The sender of the transaction
     function _distribute(address[] memory _recipientIds, bytes memory, address _sender)
@@ -369,16 +451,18 @@ abstract contract QVBaseStrategy is BaseStrategy {
         }
     }
 
-    /// @notice Check if sender is profile owner or member
+    /// @notice Check if sender is a profile member
     /// @param _anchor Anchor of the profile
     /// @param _sender The sender of the transaction
+    /// @return If the '_sender' is a profile member
     function _isProfileMember(address _anchor, address _sender) internal view returns (bool) {
         IRegistry.Profile memory profile = _registry.getProfileByAnchor(_anchor);
         return _registry.isOwnerOrMemberOfProfile(profile.id, _sender);
     }
 
-    /// @notice Get the recipient
-    /// @param _recipientId Id of the recipient
+    /// @notice Getter for a recipient using the ID
+    /// @param _recipientId ID of the recipient
+    /// @return The recipient
     function _getRecipient(address _recipientId) internal view returns (Recipient memory) {
         return recipients[_recipientId];
     }
@@ -399,6 +483,13 @@ abstract contract QVBaseStrategy is BaseStrategy {
         }
     }
 
+    /// @notice Allocate voice credits to a recipient
+    /// @dev This can only be called during active allocation period
+    /// @param _allocator The allocator details
+    /// @param _recipient The recipient details
+    /// @param _recipientId The ID of the recipient
+    /// @param _voiceCreditsToAllocate The voice credits to allocate to the recipient
+    /// @param _sender The sender of the transaction
     function _qv_allocate(
         Allocator storage _allocator,
         Recipient storage _recipient,
@@ -411,11 +502,15 @@ abstract contract QVBaseStrategy is BaseStrategy {
             revert INVALID();
         }
 
+        // get the previous values
         uint256 creditsCastToRecipient = _allocator.voiceCreditsCastToRecipient[_recipientId];
         uint256 votesCastToRecipient = _allocator.votesCastToRecipient[_recipientId];
 
+        // get the total credits and calculate the vote result
         uint256 totalCredits = _voiceCreditsToAllocate + creditsCastToRecipient;
         uint256 voteResult = _sqrt(totalCredits * 1e18);
+
+        // update the values
         voteResult -= votesCastToRecipient;
         totalRecipientVotes += voteResult;
         _recipient.totalVotesReceived += voteResult;
@@ -423,23 +518,24 @@ abstract contract QVBaseStrategy is BaseStrategy {
         _allocator.voiceCreditsCastToRecipient[_recipientId] += totalCredits;
         _allocator.votesCastToRecipient[_recipientId] += voteResult;
 
+        // emit the event with the vote results
         emit Allocated(_recipientId, voteResult, _sender);
     }
 
     /// @notice Returns if the recipient is accepted
     /// @param _recipientId The recipient id
-    /// @return true if the recipient is accepted
+    /// @return If the recipient is accepted
     function _isAcceptedRecipient(address _recipientId) internal view virtual returns (bool);
 
     /// @notice Checks if the allocator is valid
     /// @param _allocator The allocator address
-    /// @return true if the allocator is valid
+    /// @return If the allocator is valid
     function _isValidAllocator(address _allocator) internal view virtual override returns (bool);
 
     /// @notice Checks if the allocator has voice credits left
     /// @param _voiceCreditsToAllocate The voice credits to allocate
     /// @param _allocatedVoiceCredits The allocated voice credits
-    /// @return true if the allocator has voice credits left
+    /// @return If the allocator has voice credits left
     function _hasVoiceCreditsLeft(uint256 _voiceCreditsToAllocate, uint256 _allocatedVoiceCredits)
         internal
         view
@@ -447,8 +543,8 @@ abstract contract QVBaseStrategy is BaseStrategy {
         returns (bool);
 
     /// @notice Get the payout for a single recipient
-    /// @param _recipientId The recipient id
-    /// @return The payout as a PayoutSummary struct
+    /// @param _recipientId The ID of the recipient
+    /// @return The payout as a 'PayoutSummary' struct
     function _getPayout(address _recipientId, bytes memory)
         internal
         view

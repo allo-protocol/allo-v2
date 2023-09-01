@@ -331,7 +331,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
         }
 
         // Loop through the '_poolIds' & '_data' and call the 'strategy.registerRecipient()' function
-        for (uint256 i = 0; i < poolIdLength;) {
+        for (uint256 i; i < poolIdLength;) {
             recipientIds[i] = pools[_poolIds[i]].strategy.registerRecipient(_data[i], msg.sender);
             unchecked {
                 i++;
@@ -380,7 +380,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
         }
 
         // Loop through the _poolIds & _datas and call the internal _allocate() function
-        for (uint256 i = 0; i < numPools;) {
+        for (uint256 i; i < numPools;) {
             _allocate(_poolIds[i], _datas[i]);
             unchecked {
                 i++;
@@ -462,7 +462,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
 
         // grant pool managers roles
         uint256 managersLength = _managers.length;
-        for (uint256 i = 0; i < managersLength;) {
+        for (uint256 i; i < managersLength;) {
             address manager = _managers[i];
             if (manager == address(0)) {
                 revert ZERO_ADDRESS();
@@ -507,7 +507,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
     /// @param _poolId The 'poolId' for the pool you are funding
     /// @param _strategy The address of the strategy
     function _fundPool(uint256 _amount, uint256 _poolId, IStrategy _strategy) internal {
-        uint256 feeAmount = 0;
+        uint256 feeAmount;
         uint256 amountAfterFee = _amount;
 
         Pool storage pool = pools[_poolId];
