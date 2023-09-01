@@ -350,7 +350,7 @@ contract WrappedVotingNftMintStrategyTest is Test, AlloSetup, RegistrySetupFull,
         address minter = makeAddr("minter");
         vm.deal(minter, 1e18);
         vm.startPrank(minter);
-        for (uint256 i = 0; i < tmpNft.TOTAL_SUPPLY(); i++) {
+        for (uint256 i; i < tmpNft.TOTAL_SUPPLY(); i++) {
             tmpNft.mintTo{value: 1}(minter);
         }
 

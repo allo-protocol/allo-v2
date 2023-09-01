@@ -200,27 +200,24 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     /// ========== Modifier ============
     /// ================================
 
-    /// @notice Checks if the registration is active and reverts if not.
+    /// @notice Modifier to check if the registration is active
+    /// @dev This will revert if the registration has not started or if the registration has ended.
     modifier onlyActiveRegistration() {
-        if (registrationStartTime > block.timestamp || block.timestamp > registrationEndTime) {
-            revert REGISTRATION_NOT_ACTIVE();
-        }
+        _checkOnlyActiveRegistration();
         _;
     }
 
-    /// @notice Checks if the allocation is active and reverts if not.
+    /// @notice Modifier to check if the allocation is active
+    /// @dev This will revert if the allocation has not started or if the allocation has ended.
     modifier onlyActiveAllocation() {
-        if (allocationStartTime > block.timestamp || block.timestamp > allocationEndTime) {
-            revert ALLOCATION_NOT_ACTIVE();
-        }
+        _checkOnlyActiveAllocation();
         _;
     }
 
-    /// @notice Checks if the allocation has ended and reverts if not.
+    /// @notice Modifier to check if the allocation has ended
+    /// @dev This will revert if the allocation has not ended.
     modifier onlyAfterAllocation() {
-        if (block.timestamp < allocationEndTime) {
-            revert ALLOCATION_NOT_ENDED();
-        }
+        _checkOnlyAfterAllocation();
         _;
     }
 
@@ -285,7 +282,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
         }
 
         // Loop through the allowed tokens and set them to true
-        for (uint256 i = 0; i < allowedTokensLength;) {
+        for (uint256 i; i < allowedTokensLength;) {
             allowedTokens[_initializeData.allowedTokens[i]] = true;
             unchecked {
                 i++;
@@ -335,7 +332,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
         onlyPoolManager(msg.sender)
     {
         // Loop through the statuses and set the status
-        for (uint256 i = 0; i < statuses.length;) {
+        for (uint256 i; i < statuses.length;) {
             uint256 rowIndex = statuses[i].index;
             uint256 fullRow = statuses[i].statusRow;
 
@@ -442,6 +439,30 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     /// ====================================
     /// ============ Internal ==============
     /// ====================================
+
+    /// @notice Checks if the registration is active and reverts if not.
+    /// @dev This will revert if the registration has not started or if the registration has ended.
+    function _checkOnlyActiveRegistration() internal view {
+        if (registrationStartTime > block.timestamp || block.timestamp > registrationEndTime) {
+            revert REGISTRATION_NOT_ACTIVE();
+        }
+    }
+
+    /// @notice Checks if the allocation is active and reverts if not.
+    /// @dev This will revert if the allocation has not started or if the allocation has ended.
+    function _checkOnlyActiveAllocation() internal view {
+        if (allocationStartTime > block.timestamp || block.timestamp > allocationEndTime) {
+            revert ALLOCATION_NOT_ACTIVE();
+        }
+    }
+
+    /// @notice Checks if the allocation has ended and reverts if not.
+    /// @dev This will revert if the allocation has not ended.
+    function _checkOnlyAfterAllocation() internal view {
+        if (block.timestamp < allocationEndTime) {
+            revert ALLOCATION_NOT_ENDED();
+        }
+    }
 
     /// @notice Checks if address is eligible allocator.
     /// @return Always returns true for this strategy
@@ -588,7 +609,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
         uint256 length = distributions.length;
 
         // Loop through the distributions and distribute the funds
-        for (uint256 i = 0; i < length;) {
+        for (uint256 i; i < length;) {
             _distributeSingle(distributions[i]);
             unchecked {
                 i++;

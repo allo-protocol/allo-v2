@@ -66,7 +66,7 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
     /// ====== Storage =======
     /// ======================
 
-    bytes32 constant _NO_RELATED_ATTESTATION_UID = 0;
+    bytes32 public constant _NO_RELATED_ATTESTATION_UID = 0;
     uint256[] public payoutPercentages;
     uint256[] public votesByRank;
     EASInfo public easInfo;
@@ -156,7 +156,7 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
         onlyActiveRegistration
     {
         uint256 recipientLength = _recipientIds.length;
-        for (uint256 i = 0; i < recipientLength;) {
+        for (uint256 i; i < recipientLength;) {
             address recipientId = _recipientIds[i];
             if (recipientIdToUID[recipientId] != 0) {
                 revert ALREADY_ADDED();
@@ -185,7 +185,7 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
             revert INVALID();
         }
 
-        for (uint256 i = 0; i < percentageLength;) {
+        for (uint256 i; i < percentageLength;) {
             uint256 payoutPercentage = _payoutPercentages[i];
             payoutPercentages.push(payoutPercentage);
             votesByRank.push(0);
@@ -213,7 +213,7 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
 
         PayoutSummary[] memory payouts = new PayoutSummary[](recipientLength);
 
-        for (uint256 i = 0; i < recipientLength;) {
+        for (uint256 i; i < recipientLength;) {
             address recipientId = indexToRecipientId[i];
             payouts[i] = _getPayout(recipientId, "");
 
@@ -291,7 +291,7 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
         }
 
         if (recipient.totalVotesReceived > votesByRank[totalWinners - 1]) {
-            for (uint256 i = 0; i < totalWinners;) {
+            for (uint256 i; i < totalWinners;) {
                 // if a new winner was added, push the rest of the list by 1
                 if (tmp.foundRecipientAtIndex > 0 && tmp.recipientId != address(0)) {
                     // if the recipient was part of the list (duplicate after adding him again) and got overwritten, we do not need to push the rest of the list

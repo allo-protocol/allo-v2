@@ -57,9 +57,7 @@ contract ContractFactory {
 
     /// @notice Modifier to ensure the caller is authorized to deploy and returns if not.
     modifier onlyDeployer() {
-        if (!isDeployer[msg.sender]) {
-            revert UNAUTHORIZED();
-        }
+        _checkIsDeployer();
         _;
     }
 
@@ -72,9 +70,20 @@ contract ContractFactory {
         isDeployer[msg.sender] = true;
     }
 
-    /// ======================
-    /// ====== Functions =====
-    /// ======================
+    /// ===============================
+    /// ====== Internal Functions =====
+    /// ===============================
+
+    /// @notice Checks if the caller is authorized to deploy.
+    function _checkIsDeployer() internal view {
+        if (!isDeployer[msg.sender]) {
+            revert UNAUTHORIZED();
+        }
+    }
+
+    /// ===============================
+    /// ====== External Functions =====
+    /// ===============================
 
     /// @notice Deploys a contract using CREATE3.
     /// @dev Used for our deployments.

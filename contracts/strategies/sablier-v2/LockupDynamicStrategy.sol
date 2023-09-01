@@ -132,7 +132,7 @@ contract LockupDynamicStrategy is BaseStrategy, ReentrancyGuard {
         payouts = new PayoutSummary[](recipientLength);
         address recipientId;
 
-        for (uint256 i = 0; i < recipientLength;) {
+        for (uint256 i; i < recipientLength;) {
             recipientId = _recipientIds[i];
             payouts[i] = _getPayout(recipientId, "");
 
@@ -204,7 +204,7 @@ contract LockupDynamicStrategy is BaseStrategy, ReentrancyGuard {
         delete recipient.segments;
 
         uint256 segmentCount = _segments.length;
-        for (uint256 i = 0; i < segmentCount; ++i) {
+        for (uint256 i; i < segmentCount; ++i) {
             recipient.segments.push(_segments[i]);
         }
 
@@ -222,7 +222,7 @@ contract LockupDynamicStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _recipientIds Ids of the recipients
     function setRecipientStatusToInReview(address[] calldata _recipientIds) external {
         uint256 recipientLength = _recipientIds.length;
-        for (uint256 i = 0; i < recipientLength;) {
+        for (uint256 i; i < recipientLength;) {
             address recipientId = _recipientIds[i];
             _recipients[recipientId].recipientStatus = Status.InReview;
 
@@ -299,7 +299,7 @@ contract LockupDynamicStrategy is BaseStrategy, ReentrancyGuard {
         Recipient storage recipient = _recipients[recipientId];
 
         uint256 segmentCount = segments.length;
-        for (uint256 i = 0; i < segmentCount; ++i) {
+        for (uint256 i; i < segmentCount; ++i) {
             recipient.segments.push(segments[i]);
         }
 
@@ -362,7 +362,7 @@ contract LockupDynamicStrategy is BaseStrategy, ReentrancyGuard {
         onlyPoolManager(_sender)
     {
         uint256 recipientLength = _recipientIds.length;
-        for (uint256 i = 0; i < recipientLength;) {
+        for (uint256 i; i < recipientLength;) {
             _distributeToLockupDynamic(_recipientIds[i], _sender);
             unchecked {
                 i++;

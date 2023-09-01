@@ -73,7 +73,7 @@ contract QVNftTieredStrategy is QVBaseStrategy {
             revert INVALID();
         }
 
-        for (uint256 i = 0; i < nftsLength;) {
+        for (uint256 i; i < nftsLength;) {
             ERC721 nft = _initializeParamsNft.nfts[i];
             nfts.push(nft);
             maxVoiceCreditsPerNft[nft] = _initializeParamsNft.maxVoiceCreditsPerNft[i];
@@ -89,7 +89,7 @@ contract QVNftTieredStrategy is QVBaseStrategy {
 
     function _isValidAllocator(address _allocator) internal view override returns (bool) {
         uint256 nftsLength = nfts.length;
-        for (uint256 i = 0; i < nftsLength;) {
+        for (uint256 i; i < nftsLength;) {
             if (nfts[i].balanceOf(_allocator) > 0) {
                 return true;
             }

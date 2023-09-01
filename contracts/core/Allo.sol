@@ -111,18 +111,14 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
     /// @notice Reverts UNAUTHORIZED() if the caller is not a pool manager
     /// @param _poolId The pool id
     modifier onlyPoolManager(uint256 _poolId) {
-        if (!_isPoolManager(_poolId, msg.sender)) {
-            revert UNAUTHORIZED();
-        }
+        _checkOnlyPoolManager(_poolId);
         _;
     }
 
     /// @notice Reverts UNAUTHORIZED() if the caller is not a pool admin
     /// @param _poolId The pool id
     modifier onlyPoolAdmin(uint256 _poolId) {
-        if (!_isPoolAdmin(_poolId, msg.sender)) {
-            revert UNAUTHORIZED();
-        }
+        _checkOnlyPoolAdmin(_poolId);
         _;
     }
 
@@ -401,6 +397,22 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
     /// ====================================
     /// ======= Internal Functions =========
     /// ====================================
+
+    /// @notice Internal function to check is caller is pool manager
+    /// @param _poolId The pool id
+    function _checkOnlyPoolManager(uint256 _poolId) internal view {
+        if (!_isPoolManager(_poolId, msg.sender)) {
+            revert UNAUTHORIZED();
+        }
+    }
+
+    /// @notice Internal function to check is caller is pool admin
+    /// @param _poolId The pool id
+    function _checkOnlyPoolAdmin(uint256 _poolId) internal view {
+        if (!_isPoolAdmin(_poolId, msg.sender)) {
+            revert UNAUTHORIZED();
+        }
+    }
 
     /// @notice Creates a new pool.
     /// @dev This is an internal function that is called by the 'createPool()' & 'createPoolWithCustomStrategy()' functions

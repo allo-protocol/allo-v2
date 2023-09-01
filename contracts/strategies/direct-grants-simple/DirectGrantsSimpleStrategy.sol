@@ -347,7 +347,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _recipientIds IDs of the recipients
     function setRecipientStatusToInReview(address[] calldata _recipientIds) external onlyPoolManager(msg.sender) {
         uint256 recipientLength = _recipientIds.length;
-        for (uint256 i = 0; i < recipientLength;) {
+        for (uint256 i; i < recipientLength;) {
             address recipientId = _recipientIds[i];
             _recipients[recipientId].recipientStatus = Status.InReview;
 
@@ -518,7 +518,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         onlyPoolManager(_sender)
     {
         uint256 recipientLength = _recipientIds.length;
-        for (uint256 i = 0; i < recipientLength;) {
+        for (uint256 i; i < recipientLength;) {
             _distributeUpcomingMilestone(_recipientIds[i], _sender);
             unchecked {
                 i++;
@@ -599,7 +599,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         uint256 milestonesLength = _milestones.length;
 
         // Loop through the milestones and set them
-        for (uint256 i = 0; i < milestonesLength;) {
+        for (uint256 i; i < milestonesLength;) {
             Milestone memory milestone = _milestones[i];
 
             // Reverts if the milestone status is 'None'

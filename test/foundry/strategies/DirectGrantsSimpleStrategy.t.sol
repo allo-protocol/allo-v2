@@ -523,7 +523,7 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
 
         uint256 totalAllocated = 0;
 
-        for (uint256 i = 0; i < setMilestones.length; i++) {
+        for (uint256 i; i < setMilestones.length; i++) {
             totalAllocated += setMilestones[i].amountPercentage;
         }
 

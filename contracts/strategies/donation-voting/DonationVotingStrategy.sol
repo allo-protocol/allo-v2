@@ -104,24 +104,24 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     /// ========== Modifier ============
     /// ================================
 
+    /// @notice Modifier to check if registration is active
+    /// @dev Reverts if registration is not active
     modifier onlyActiveRegistration() {
-        if (registrationStartTime > block.timestamp || block.timestamp > registrationEndTime) {
-            revert REGISTRATION_NOT_ACTIVE();
-        }
+        _checkOnlyActiveRegistration();
         _;
     }
 
+    /// @notice Modifier to check if allocation is active
+    /// @dev Reverts if allocation is not active
     modifier onlyActiveAllocation() {
-        if (allocationStartTime > block.timestamp || block.timestamp > allocationEndTime) {
-            revert ALLOCATION_NOT_ACTIVE();
-        }
+        _checkOnlyActiveAllocation();
         _;
     }
 
+    /// @notice Modifier to check if allocation has ended
+    /// @dev Reverts if allocation has not ended
     modifier onlyAfterAllocation() {
-        if (block.timestamp < allocationEndTime) {
-            revert ALLOCATION_NOT_ENDED();
-        }
+        _checkOnlyAfterAllocation();
         _;
     }
 
@@ -169,7 +169,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
             allowedTokens[address(0)] = true;
         }
 
-        for (uint256 i = 0; i < allowedTokensLength; i++) {
+        for (uint256 i; i < allowedTokensLength; i++) {
             allowedTokens[_initializeData.allowedTokens[i]] = true;
         }
     }
@@ -217,7 +217,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
             revert INVALID();
         }
 
-        for (uint256 i = 0; i < recipientLength;) {
+        for (uint256 i; i < recipientLength;) {
             Status recipientStatus = _recipientStatuses[i];
             address recipientId = _recipientIds[i];
             if (recipientStatus == Status.None || recipientStatus == Status.Appealed) {
@@ -249,7 +249,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
             revert INVALID();
         }
 
-        for (uint256 i = 0; i < recipientLength;) {
+        for (uint256 i; i < recipientLength;) {
             address recipientId = _recipientIds[i];
             if (_recipients[recipientId].recipientStatus != Status.Accepted) {
                 revert INVALID();
@@ -346,6 +346,30 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     /// ====================================
     /// ============ Internal ==============
     /// ====================================
+
+    /// @notice Check if registration is active
+    /// @dev Reverts if registration is not active
+    function _checkOnlyActiveRegistration() internal view {
+        if (registrationStartTime > block.timestamp || block.timestamp > registrationEndTime) {
+            revert REGISTRATION_NOT_ACTIVE();
+        }
+    }
+
+    /// @notice Check if allocation is active
+    /// @dev Reverts if allocation is not active
+    function _checkOnlyActiveAllocation() internal view {
+        if (allocationStartTime > block.timestamp || block.timestamp > allocationEndTime) {
+            revert ALLOCATION_NOT_ACTIVE();
+        }
+    }
+
+    /// @notice Check if allocation has ended
+    /// @dev Reverts if allocation has not ended
+    function _checkOnlyAfterAllocation() internal view {
+        if (block.timestamp < allocationEndTime) {
+            revert ALLOCATION_NOT_ENDED();
+        }
+    }
 
     function _isPoolTimestampValid(
         uint64 _registrationStartTime,
