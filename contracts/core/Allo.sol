@@ -329,7 +329,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
         for (uint256 i; i < poolIdLength;) {
             recipientIds[i] = pools[_poolIds[i]].strategy.registerRecipient(_data[i], msg.sender);
             unchecked {
-                i++;
+                ++i;
             }
         }
 
@@ -378,7 +378,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
         for (uint256 i; i < numPools;) {
             _allocate(_poolIds[i], _datas[i]);
             unchecked {
-                i++;
+                ++i;
             }
         }
     }
@@ -480,7 +480,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
             }
             _grantRole(POOL_MANAGER_ROLE, manager);
             unchecked {
-                i++;
+                ++i;
             }
         }
 
