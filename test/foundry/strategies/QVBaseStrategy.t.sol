@@ -246,6 +246,8 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
 
     function test_registerRecipient_new() public {
         vm.warp(registrationStartTime + 10);
+        assertEq(uint8(qvStrategy().getRecipientStatus(recipient1())), uint8(IStrategy.RecipientStatus.None));
+
         address recipientId = __register_recipient();
 
         QVBaseStrategy.Recipient memory receipt = qvStrategy().getRecipient(recipientId);
@@ -254,6 +256,17 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
         assertEq(receipt.recipientAddress, recipient1());
         assertEq(receipt.metadata.pointer, "metadata");
         assertEq(receipt.metadata.protocol, 1);
+        assertEq(uint8(receipt.recipientStatus), __afterRegistrationStatus());
+    }
+
+    function test_registerRecipient_accepted() public virtual {
+        address recipientId = __register_accept_recipient();
+        assertEq(uint8(qvStrategy().getRecipientStatus(recipient1())), uint8(IStrategy.RecipientStatus.Accepted));
+
+        recipientId = __register_recipient();
+
+        QVBaseStrategy.Recipient memory receipt = qvStrategy().getRecipient(recipientId);
+
         assertEq(uint8(receipt.recipientStatus), __afterRegistrationStatus());
     }
 
