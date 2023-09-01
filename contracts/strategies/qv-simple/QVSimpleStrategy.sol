@@ -112,17 +112,13 @@ contract QVSimpleStrategy is QVBaseStrategy, Multicall {
         Allocator storage allocator = allocators[_sender];
 
         // check that the sender can allocate votes
-        if (!_isValidAllocator(_sender)) {
-            revert UNAUTHORIZED();
-        }
+        if (!_isValidAllocator(_sender)) revert UNAUTHORIZED();
 
-        if (!_isAcceptedRecipient(recipientId)) {
-            revert RECIPIENT_ERROR(recipientId);
-        }
+        // check that the recipient is accepted
+        if (!_isAcceptedRecipient(recipientId)) revert RECIPIENT_ERROR(recipientId);
 
-        if (!_hasVoiceCreditsLeft(voiceCreditsToAllocate, allocator.voiceCredits)) {
-            revert INVALID();
-        }
+        // check that the recipient has voice credits left to allocate
+        if (!_hasVoiceCreditsLeft(voiceCreditsToAllocate, allocator.voiceCredits)) revert INVALID();
 
         _qv_allocate(allocator, recipient, recipientId, voiceCreditsToAllocate, _sender);
     }

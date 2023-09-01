@@ -139,12 +139,11 @@ abstract contract BaseStrategy is IStrategy, Transfer, Errors {
     /// @dev Will revert if the poolId is invalid or already initialized
     /// @param _poolId ID of the pool
     function __BaseStrategy_init(uint256 _poolId) internal virtual onlyAllo {
-        if (poolId != 0) {
-            revert ALREADY_INITIALIZED();
-        }
-        if (_poolId == 0) {
-            revert INVALID();
-        }
+        // check if pool ID is not initialized already, if it is, revert
+        if (poolId != 0) revert ALREADY_INITIALIZED();
+
+        // check if pool ID is valid and not zero (0), if it is, revert
+        if (_poolId == 0) revert INVALID();
         poolId = _poolId;
     }
 
@@ -214,12 +213,11 @@ abstract contract BaseStrategy is IStrategy, Transfer, Errors {
         override
         returns (PayoutSummary[] memory)
     {
-        uint256 length = _recipientIds.length;
-        if (length != _data.length) {
-            revert ARRAY_MISMATCH();
-        }
-        PayoutSummary[] memory payouts = new PayoutSummary[](length);
-        for (uint256 i; i < length;) {
+        // check if the length of the recipient IDs and data arrays are equal, if they are not, revert
+        if (_recipientIds.length != _data.length) revert ARRAY_MISMATCH();
+
+        PayoutSummary[] memory payouts = new PayoutSummary[](_recipientIds.length);
+        for (uint256 i; i < _recipientIds.length;) {
             payouts[i] = _getPayout(_recipientIds[i], _data[i]);
             unchecked {
                 i++;
@@ -243,42 +241,32 @@ abstract contract BaseStrategy is IStrategy, Transfer, Errors {
     /// @notice Checks if the 'msg.sender' is the Allo contract.
     /// @dev Reverts if the 'msg.sender' is not the Allo contract.
     function _checkOnlyAllo() internal view {
-        if (msg.sender != address(allo)) {
-            revert UNAUTHORIZED();
-        }
+        if (msg.sender != address(allo)) revert UNAUTHORIZED();
     }
 
     /// @notice Checks if the '_sender' is a pool manager.
     /// @dev Reverts if the '_sender' is not a pool manager.
     /// @param _sender The address to check if they are a pool manager
     function _checkOnlyPoolManager(address _sender) internal view {
-        if (!allo.isPoolManager(poolId, _sender)) {
-            revert UNAUTHORIZED();
-        }
+        if (!allo.isPoolManager(poolId, _sender)) revert UNAUTHORIZED();
     }
 
     /// @notice Checks if the pool is active.
     /// @dev Reverts if the pool is not active.
     function _checkOnlyActivePool() internal view {
-        if (!poolActive) {
-            revert POOL_INACTIVE();
-        }
+        if (!poolActive) revert POOL_INACTIVE();
     }
 
     /// @notice Checks if the pool is inactive.
     /// @dev Reverts if the pool is active.
     function _checkInactivePool() internal view {
-        if (poolActive) {
-            revert POOL_ACTIVE();
-        }
+        if (poolActive) revert POOL_ACTIVE();
     }
 
     /// @notice Checks if the pool is initialized.
     /// @dev Reverts if the pool is not initialized.
     function _checkOnlyInitialized() internal view {
-        if (poolId == 0) {
-            revert NOT_INITIALIZED();
-        }
+        if (poolId == 0) revert NOT_INITIALIZED();
     }
 
     /// @notice Set the pool to active or inactive status.
