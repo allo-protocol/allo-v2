@@ -550,7 +550,7 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
         address[] memory hacker = new address[](10);
         address[] memory hackerAnchors = new address[](10);
 
-        for (uint256 i = 0; i < 10; i++) {
+        for (uint256 i; i < 10; i++) {
             string memory hackerName = string(abi.encode("Hacker ", i));
             hacker[i] = makeAddr(hackerName);
 
@@ -563,7 +563,7 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
 
         // create some allocators
         address[] memory allocators = new address[](10);
-        for (uint256 i = 0; i < 10; i++) {
+        for (uint256 i; i < 10; i++) {
             allocators[i] = makeAddr(string(abi.encode("Allocator ", i)));
             nft.mint(allocators[i], i + 2);
         }
@@ -595,7 +595,7 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
 
         bytes memory data_;
 
-        for (uint256 i = 0; i < 10; i++) {
+        for (uint256 i; i < 10; i++) {
             data_ = abi.encode(hackerAnchors[i], hacker[i], Metadata(1, string(abi.encode("Hacker ", i))));
             hQvStrategy().registerRecipient(data_, hacker[i]);
         }
@@ -604,7 +604,7 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
 
         vm.warp(allocationStartTime + 10);
 
-        for (uint256 i = 0; i < 10; i++) {
+        for (uint256 i; i < 10; i++) {
             data_ = abi.encode(
                 hackerAnchors[i],
                 i + 2, // nft id to vote with

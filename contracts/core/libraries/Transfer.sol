@@ -41,7 +41,7 @@ contract Transfer is Native {
     function _transferAmountsFrom(address _token, TransferData[] memory _transferData) internal returns (bool) {
         uint256 msgValue = msg.value;
 
-        for (uint256 i = 0; i < _transferData.length;) {
+        for (uint256 i; i < _transferData.length;) {
             TransferData memory transferData = _transferData[i];
 
             if (_token == NATIVE) {

@@ -42,17 +42,17 @@ contract ProportionalPayoutStrategy is BaseStrategy {
     /// ====== Modifier ======
     /// ======================
 
+    /// @notice Modifier to check if the allocation is active
+    /// @dev Reverts if the allocation is not active
     modifier onlyActiveAllocation() {
-        if (allocationStartTime > block.timestamp || block.timestamp > allocationEndTime) {
-            revert ALLOCATION_NOT_ACTIVE();
-        }
+        _checkOnlyActiveAllocation();
         _;
     }
 
+    /// @notice Modifier to check if the allocation has ended
+    /// @dev Reverts if the allocation has not ended
     modifier onlyAfterAllocation() {
-        if (block.timestamp < allocationEndTime) {
-            revert ALLOCATION_NOT_ENDED();
-        }
+        _checkOnlyAfterAllocation();
         _;
     }
 
@@ -148,6 +148,22 @@ contract ProportionalPayoutStrategy is BaseStrategy {
     // ==== Internal ====
     // ==================
 
+    /// @notice Checks if the allocation is active
+    /// @dev Reverts if the allocation is not active
+    function _checkOnlyActiveAllocation() internal view {
+        if (allocationStartTime > block.timestamp || block.timestamp > allocationEndTime) {
+            revert ALLOCATION_NOT_ACTIVE();
+        }
+    }
+
+    /// @notice Checks if the allocation has ended
+    /// @dev Reverts if the allocation has not ended
+    function _checkOnlyAfterAllocation() internal view {
+        if (block.timestamp < allocationEndTime) {
+            revert ALLOCATION_NOT_ENDED();
+        }
+    }
+
     /// @notice Checks if the allocator is valid
     /// @param _allocator The allocator address
     /// @return true if the allocator is valid
@@ -189,7 +205,7 @@ contract ProportionalPayoutStrategy is BaseStrategy {
         onlyAfterAllocation
     {
         uint256 payoutLength = _recipientIds.length;
-        for (uint256 i = 0; i < payoutLength;) {
+        for (uint256 i; i < payoutLength;) {
             address recipientId = _recipientIds[i];
             Recipient storage recipient = recipients[recipientId];
 
