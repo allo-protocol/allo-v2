@@ -161,7 +161,7 @@ contract Registry is IRegistry, Native, AccessControl, Transfer, Initializable, 
             // Grant the role to the member and emit the event for each member
             _grantRole(profileId, member);
             unchecked {
-                i++;
+                ++i;
             }
         }
 
@@ -307,7 +307,7 @@ contract Registry is IRegistry, Native, AccessControl, Transfer, Initializable, 
             // Grant the role to the member and emit the event for each member
             _grantRole(_profileId, member);
             unchecked {
-                i++;
+                ++i;
             }
         }
     }
@@ -324,7 +324,7 @@ contract Registry is IRegistry, Native, AccessControl, Transfer, Initializable, 
             // Revoke the role from the member and emit the event for each member
             _revokeRole(_profileId, _members[i]);
             unchecked {
-                i++;
+                ++i;
             }
         }
     }
