@@ -3,7 +3,7 @@ Spec: Proportional Payout
 
 ## Overview 
 
-One way that some communities choose to distribute funds is proportionally to
+One way that some communities choose to distribute funds is proportional to
 the number of votes that a project receives. In this strategy, project selection
 is important and the number of projects is usually limited. Then, if a project
 receives 10% of the votes, they'll receive 10% of the pool.
@@ -45,7 +45,7 @@ their service.
 
 - `allocate` — function for voters (i.e. wallet holding an SBT issued by Privy) to cast a vote for one of the projects
     - When called by an eligible voter, increments the number of votes a project has received, the total number of votes cast, and records who voted
-    - A wallet can only vote once and for for one project
+    - A wallet can only vote once and for one project
     - `allocate` must be called during the voting window
 
 ### Final allocation logic
