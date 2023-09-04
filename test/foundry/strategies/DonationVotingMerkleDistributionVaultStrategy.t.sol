@@ -16,7 +16,7 @@ contract DonationVotingMerkleDistributionVaultStrategyTest is DonationVotingMerk
     function _deployStrategy() internal override returns (address payable) {
         _strategy = new DonationVotingMerkleDistributionVaultStrategy(
             address(allo()),
-            "DonationVotingMerkleDistributionBaseMock"
+            "DonationVotingMerkleDistributionBaseMock", permit2
         );
         return payable(address(_strategy));
     }

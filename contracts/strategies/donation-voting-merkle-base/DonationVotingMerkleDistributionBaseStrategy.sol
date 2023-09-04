@@ -2,7 +2,7 @@
 pragma solidity 0.8.19;
 
 // External Libraries
-import {ISignatureTransfer} from "permit2/interfaces/ISignatureTransfer.sol";
+import {ISignatureTransfer} from "../../core/interfaces/uniswap/ISignatureTransfer.sol";
 import {MerkleProof} from "openzeppelin-contracts/contracts/utils/cryptography/MerkleProof.sol";
 import {Multicall} from "openzeppelin-contracts/contracts/utils/Multicall.sol";
 // Interfaces
@@ -82,6 +82,12 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
         uint64 allocationStartTime;
         uint64 allocationEndTime;
         address[] allowedTokens;
+    }
+
+    /// @notice Stores the permit2 data for the allocation
+    struct Permit2Data {
+        ISignatureTransfer.PermitTransferFrom permit;
+        bytes signature;
     }
 
     /// ===============================
@@ -232,7 +238,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     /// @param _allo The 'Allo' contract
     /// @param _name The name of the strategy
     constructor(address _allo, string memory _name, ISignatureTransfer _permit2) BaseStrategy(_allo, _name) {
-        if (address(_permit2) != address(0)) revert ZERO_ADDRESS();
+        if (address(_permit2) == address(0)) revert ZERO_ADDRESS();
         PERMIT2 = _permit2;
     }
 
@@ -633,7 +639,10 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     /// @param _sender The sender of the transaction
     function _allocate(bytes memory _data, address _sender) internal virtual override onlyActiveAllocation {
         // Decode the '_data' to get the recipientId, amount and token
-        (address recipientId, uint256 amount, address token) = abi.decode(_data, (address, uint256, address));
+        (address recipientId, Permit2Data memory p2Data) = abi.decode(_data, (address, Permit2Data));
+
+        uint256 amount = p2Data.permit.permitted.amount;
+        address token = p2Data.permit.permitted.token;
 
         // If the recipient status is not 'Accepted' this will revert, the recipient must be accepted through registration
         if (Status(_getUintRecipientStatus(recipientId)) != Status.Accepted) {

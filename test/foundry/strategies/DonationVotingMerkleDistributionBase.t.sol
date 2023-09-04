@@ -20,6 +20,9 @@ import {AlloSetup} from "../shared/AlloSetup.sol";
 import {RegistrySetupFull} from "../shared/RegistrySetup.sol";
 import {EventSetup} from "../shared/EventSetup.sol";
 
+import {ISignatureTransfer} from "../../../contracts/core/interfaces/uniswap/ISignatureTransfer.sol";
+import {Permit2} from "../../utils/Permit2Mock.sol";
+
 contract DonationVotingMerkleDistributionBaseMockTest is
     Test,
     AlloSetup,
@@ -49,6 +52,8 @@ contract DonationVotingMerkleDistributionBaseMockTest is
     address[] public allowedTokens;
     address public token;
 
+    ISignatureTransfer public permit2;
+
     DonationVotingMerkleDistributionBaseMock public strategy;
     Metadata public poolMetadata;
 
@@ -56,6 +61,8 @@ contract DonationVotingMerkleDistributionBaseMockTest is
     function setUp() public virtual {
         __RegistrySetupFull();
         __AlloSetup(address(registry()));
+
+        permit2 = ISignatureTransfer(address(new Permit2()));
 
         registrationStartTime = uint64(block.timestamp + 10);
         registrationEndTime = uint64(block.timestamp + 300);
@@ -103,7 +110,8 @@ contract DonationVotingMerkleDistributionBaseMockTest is
             address(
                 new DonationVotingMerkleDistributionBaseMock(
                 address(allo()),
-                "DonationVotingMerkleDistributionBaseMock"
+                "DonationVotingMerkleDistributionBaseMock", 
+                permit2
                 )
             )
         );
@@ -127,7 +135,7 @@ contract DonationVotingMerkleDistributionBaseMockTest is
 
     function testRevert_initialize_withNoAllowedToken() public {
         strategy =
-            new DonationVotingMerkleDistributionBaseMock(address(allo()), "DonationVotingMerkleDistributionBaseMock");
+        new DonationVotingMerkleDistributionBaseMock(address(allo()), "DonationVotingMerkleDistributionBaseMock", permit2);
         vm.prank(address(allo()));
         strategy.initialize(
             poolId,
@@ -148,7 +156,7 @@ contract DonationVotingMerkleDistributionBaseMockTest is
 
     function testRevert_initialize_withNotAllowedToken() public {
         DonationVotingMerkleDistributionBaseMock testSrategy =
-            new DonationVotingMerkleDistributionBaseMock(address(allo()), "DonationVotingMerkleDistributionBaseMock");
+        new DonationVotingMerkleDistributionBaseMock(address(allo()), "DonationVotingMerkleDistributionBaseMock", permit2);
         address[] memory tokensAllowed = new address[](1);
         tokensAllowed[0] = makeAddr("token");
         vm.prank(address(allo()));
@@ -211,7 +219,7 @@ contract DonationVotingMerkleDistributionBaseMockTest is
 
     function testRevert_initialize_INVALID() public {
         strategy =
-            new DonationVotingMerkleDistributionBaseMock(address(allo()), "DonationVotingMerkleDistributionBaseMock");
+        new DonationVotingMerkleDistributionBaseMock(address(allo()), "DonationVotingMerkleDistributionBaseMock", permit2);
         // when _registrationStartTime is in past
         vm.expectRevert(INVALID.selector);
         vm.prank(address(allo()));
@@ -543,7 +551,7 @@ contract DonationVotingMerkleDistributionBaseMockTest is
 
     function test_registerRecipient_new_withRegistryAnchor() public {
         DonationVotingMerkleDistributionBaseMock _strategy =
-            new DonationVotingMerkleDistributionBaseMock(address(allo()), "DonationVotingStrategy");
+            new DonationVotingMerkleDistributionBaseMock(address(allo()), "DonationVotingStrategy", permit2);
         vm.prank(address(allo()));
         _strategy.initialize(
             poolId,
@@ -577,7 +585,7 @@ contract DonationVotingMerkleDistributionBaseMockTest is
 
     function testRevert_registerRecipient_new_withRegistryAnchor_UNAUTHORIZED() public {
         DonationVotingMerkleDistributionBaseMock _strategy =
-            new DonationVotingMerkleDistributionBaseMock(address(allo()), "DonationVotingStrategy");
+            new DonationVotingMerkleDistributionBaseMock(address(allo()), "DonationVotingStrategy", permit2);
         vm.prank(address(allo()));
         _strategy.initialize(
             poolId,
@@ -659,31 +667,61 @@ contract DonationVotingMerkleDistributionBaseMockTest is
     function testRevert_allocate_RECIPIENT_ERROR() public {
         vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, randomAddress()));
 
+        DonationVotingMerkleDistributionBaseStrategy.Permit2Data memory permit2Data =
+        DonationVotingMerkleDistributionBaseStrategy.Permit2Data({
+            permit: ISignatureTransfer.PermitTransferFrom({
+                permitted: ISignatureTransfer.TokenPermissions({token: NATIVE, amount: 1e18}),
+                nonce: 0,
+                deadline: allocationStartTime + 10000
+            }),
+            signature: ""
+        });
+
         vm.warp(allocationStartTime + 1);
         vm.deal(pool_admin(), 1e20);
         vm.prank(pool_admin());
-        allo().allocate(poolId, abi.encode(randomAddress(), 1e18, address(123)));
+        allo().allocate(poolId, abi.encode(randomAddress(), permit2Data));
     }
 
     function testRevert_allocate_INVALID_invalidToken() public virtual {
         address recipientId = __register_accept_recipient();
+
+        DonationVotingMerkleDistributionBaseStrategy.Permit2Data memory permit2Data =
+        DonationVotingMerkleDistributionBaseStrategy.Permit2Data({
+            permit: ISignatureTransfer.PermitTransferFrom({
+                permitted: ISignatureTransfer.TokenPermissions({token: address(123), amount: 1e18}),
+                nonce: 0,
+                deadline: allocationStartTime + 10000
+            }),
+            signature: ""
+        });
 
         vm.expectRevert(INVALID.selector);
 
         vm.warp(allocationStartTime + 1);
         vm.deal(pool_admin(), 1e20);
         vm.prank(pool_admin());
-        allo().allocate(poolId, abi.encode(recipientId, 1e18, address(123)));
+        allo().allocate(poolId, abi.encode(recipientId, permit2Data));
     }
 
     function testRevert_allocate_INVALID_amountMismatch() public {
         address recipientId = __register_accept_recipient();
         vm.expectRevert(INVALID.selector);
 
+        DonationVotingMerkleDistributionBaseStrategy.Permit2Data memory permit2Data =
+        DonationVotingMerkleDistributionBaseStrategy.Permit2Data({
+            permit: ISignatureTransfer.PermitTransferFrom({
+                permitted: ISignatureTransfer.TokenPermissions({token: NATIVE, amount: 1e18}),
+                nonce: 0,
+                deadline: allocationStartTime + 10000
+            }),
+            signature: ""
+        });
+
         vm.warp(allocationStartTime + 1);
         vm.deal(pool_admin(), 1e20);
         vm.prank(pool_admin());
-        allo().allocate{value: 1e17}(poolId, abi.encode(recipientId, 1e18, NATIVE));
+        allo().allocate{value: 1e17}(poolId, abi.encode(recipientId, permit2Data));
     }
 
     function test_distribute() public {
@@ -843,6 +881,16 @@ contract DonationVotingMerkleDistributionBaseMockTest is
     function __register_accept_recipient_allocate() internal returns (address) {
         address recipientId = __register_accept_recipient();
 
+        DonationVotingMerkleDistributionBaseStrategy.Permit2Data memory permit2Data =
+        DonationVotingMerkleDistributionBaseStrategy.Permit2Data({
+            permit: ISignatureTransfer.PermitTransferFrom({
+                permitted: ISignatureTransfer.TokenPermissions({token: NATIVE, amount: 1e18}),
+                nonce: 0,
+                deadline: allocationStartTime + 10000
+            }),
+            signature: ""
+        });
+
         vm.warp(allocationStartTime + 1);
         vm.deal(randomAddress(), 1e18);
         vm.prank(randomAddress());
@@ -850,7 +898,7 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         vm.expectEmit(false, false, false, true);
         emit Allocated(recipientId, 1e18, NATIVE, randomAddress());
 
-        allo().allocate{value: 1e18}(poolId, abi.encode(recipientId, 1e18, NATIVE));
+        allo().allocate{value: 1e18}(poolId, abi.encode(recipientId, permit2Data));
 
         return recipientId;
     }
