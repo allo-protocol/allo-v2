@@ -2,6 +2,7 @@
 pragma solidity 0.8.19;
 
 // External Libraries
+import {ISignatureTransfer} from "permit2/interfaces/ISignatureTransfer.sol";
 import {MerkleProof} from "openzeppelin-contracts/contracts/utils/cryptography/MerkleProof.sol";
 import {Multicall} from "openzeppelin-contracts/contracts/utils/Multicall.sol";
 // Interfaces
@@ -161,6 +162,9 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     /// @notice The registry contract interface.
     IRegistry private _registry;
 
+    /// @notice the permit2 interface
+    ISignatureTransfer public immutable PERMIT2;
+
     /// @notice The merkle root of the distribution will be set by the pool manager.
     bytes32 public merkleRoot;
 
@@ -227,7 +231,10 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     /// @notice Constructor for the Donation Voting Merkle Distribution Strategy
     /// @param _allo The 'Allo' contract
     /// @param _name The name of the strategy
-    constructor(address _allo, string memory _name) BaseStrategy(_allo, _name) {}
+    constructor(address _allo, string memory _name, ISignatureTransfer _permit2) BaseStrategy(_allo, _name) {
+        if (address(_permit2) != address(0)) revert ZERO_ADDRESS();
+        PERMIT2 = _permit2;
+    }
 
     /// ===============================
     /// ========= Initialize ==========

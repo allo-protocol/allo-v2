@@ -29,7 +29,9 @@ contract DonationVotingMerkleDistributionDirectTransferStrategy is DonationVotin
     /// @notice Constructor for the Donation Voting Merkle Distribution Strategy
     /// @param _allo The 'Allo' contract
     /// @param _name The name of the strategy
-    constructor(address _allo, string memory _name) DonationVotingMerkleDistributionBaseStrategy(_allo, _name) {}
+    constructor(address _allo, string memory _name, ISignatureTransfer _permit2)
+        DonationVotingMerkleDistributionBaseStrategy(_allo, _name, _permit2)
+    {}
 
     /// ================================
     /// ============ Hooks =============
