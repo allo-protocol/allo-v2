@@ -5,7 +5,7 @@ import {Broker, LockupDynamic} from "@sablier/v2-core/src/types/DataTypes.sol";
 import {UD2x18} from "@sablier/v2-core/src/types/Math.sol";
 
 import {IStrategy} from "../../../../contracts/core/interfaces/IStrategy.sol";
-import {LockupDynamicStrategy} from "../../../../contracts/strategies/sablier-v2/LockupDynamicStrategy.sol";
+import {LockupDynamicStrategy} from "../../../../contracts/strategies/_poc/sablier-v2/LockupDynamicStrategy.sol";
 import {Errors} from "../../../../contracts/core/libraries/Errors.sol";
 import {Metadata} from "../../../../contracts/core/libraries/Metadata.sol";
 

@@ -17,7 +17,7 @@ import {EventSetup} from "../shared/EventSetup.sol";
 
 // Core Contracts
 import {DirectGrantsSimpleStrategy} from
-    "../../../contracts/strategies/direct-grants-simple/DirectGrantsSimpleStrategy.sol";
+    "../../../contracts/strategies/_poc/direct-grants-simple/DirectGrantsSimpleStrategy.sol";
 
 contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, RegistrySetupFull, Native, Errors {
     event RecipientStatusChanged(address recipientId, DirectGrantsSimpleStrategy.Status status);

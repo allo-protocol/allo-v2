@@ -5,7 +5,7 @@ import "forge-std/Test.sol";
 
 // Strategy Contracts
 import {SimpleProjectRegistry} from
-    "../../../contracts/strategies/donation-voting-custom-registry/SimpleProjectRegistry.sol";
+    "../../../contracts/strategies/_poc/donation-voting-custom-registry/SimpleProjectRegistry.sol";
 // Test Libraries
 import {Accounts} from "../shared/Accounts.sol";
 

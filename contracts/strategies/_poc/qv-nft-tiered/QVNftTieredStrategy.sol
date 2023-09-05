@@ -2,9 +2,9 @@
 pragma solidity 0.8.19;
 
 // External Libraries
-import "openzeppelin-contracts/contracts/governance/utils/IVotes.sol";
+import {ERC721} from "solady/src/tokens/ERC721.sol";
 // Core Contracts
-import {QVBaseStrategy} from "../qv-base/QVBaseStrategy.sol";
+import {QVBaseStrategy} from "../../qv-base/QVBaseStrategy.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⣿⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -21,23 +21,34 @@ import {QVBaseStrategy} from "../qv-base/QVBaseStrategy.sol";
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⠙⠋⠛⠙⠋⠛⠙⠋⠛⠙⠋⠃⠀⠀⠀⠀⠀⠀⠀⠀⠠⠿⠻⠟⠿⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⠟⠿⠟⠿⠆⠀⠸⠿⠿⠟⠯⠀⠀⠀⠸⠿⠿⠿⠏⠀⠀⠀⠀⠀⠈⠉⠻⠻⡿⣿⢿⡿⡿⠿⠛⠁⠀⠀⠀⠀⠀⠀
 //                    allo.gitcoin.co
 
-contract QVGovernanceERC20Votes is QVBaseStrategy {
+contract QVNftTieredStrategy is QVBaseStrategy {
+    /// ======================
+    /// ======= Events =======
+    /// ======================
+    event AllocatedWithNft(address indexed recipientId, uint256 votes, address nft, address allocator);
+
     /// ======================
     /// ======= Storage ======
     /// ======================
 
-    struct InitializeParamsGov {
-        address govToken;
-        uint256 timestamp;
+    struct InitializeParamsNft {
+        ERC721[] nfts;
+        uint256[] maxVoiceCreditsPerNft;
         InitializeParams params;
     }
 
-    IVotes public govToken;
-    uint256 public timestamp;
+    // NFTs that can be used to allocate votes
+    ERC721[] public nfts;
+
+    // NFT -> maxVoiceCredits
+    mapping(ERC721 => uint256) public maxVoiceCreditsPerNft;
+    // NFT -> nftId -> voiceCreditsUsed
+    mapping(ERC721 => mapping(uint256 => uint256)) public voiceCreditsUsedPerNftId;
 
     /// ===============================
     /// ======== Constructor ==========
     /// ===============================
+
     constructor(address _allo, string memory _name) QVBaseStrategy(_allo, _name) {}
 
     /// ===============================
@@ -48,69 +59,95 @@ contract QVGovernanceERC20Votes is QVBaseStrategy {
     /// @param _poolId The pool id
     /// @param _data The data
     function initialize(uint256 _poolId, bytes memory _data) external override {
-        (InitializeParamsGov memory initializeParamsGov) = abi.decode(_data, (InitializeParamsGov));
-        __QVGovernanceERC20Votes_init(_poolId, initializeParamsGov);
+        (InitializeParamsNft memory initializeParamsNft) = abi.decode(_data, (InitializeParamsNft));
+        __QV_NFT_TieredStrategy_init(_poolId, initializeParamsNft);
     }
 
-    function __QVGovernanceERC20Votes_init(uint256 _poolId, InitializeParamsGov memory _initializeParamsGov) internal {
-        __QVBaseStrategy_init(_poolId, _initializeParamsGov.params);
-        govToken = IVotes(_initializeParamsGov.govToken);
-        timestamp = _initializeParamsGov.timestamp;
+    /// @dev Internal initialize function that sets the poolId in the base strategy
+    function __QV_NFT_TieredStrategy_init(uint256 _poolId, InitializeParamsNft memory _initializeParamsNft) internal {
+        __QVBaseStrategy_init(_poolId, _initializeParamsNft.params);
 
-        // sanity check if token implements getPastVotes
-        // should revert if function is not available
-        govToken.getPastVotes(address(this), 0);
+        uint256 nftsLength = _initializeParamsNft.nfts.length;
+        if (nftsLength != _initializeParamsNft.maxVoiceCreditsPerNft.length) {
+            revert INVALID();
+        }
+
+        for (uint256 i; i < nftsLength;) {
+            ERC721 nft = _initializeParamsNft.nfts[i];
+            nfts.push(nft);
+            maxVoiceCreditsPerNft[nft] = _initializeParamsNft.maxVoiceCreditsPerNft[i];
+            unchecked {
+                i++;
+            }
+        }
     }
 
-    /// ====================================
-    /// ==== External/Public Functions =====
-    /// ====================================
+    /// =========================
+    /// ==== View Functions =====
+    /// =========================
 
-    /// @notice Checks if the allocator is valid
-    /// @param _allocator The allocator address
-    /// @return true if the allocator is valid
     function _isValidAllocator(address _allocator) internal view override returns (bool) {
-        return govToken.getPastVotes(_allocator, timestamp) > 0;
-    }
+        uint256 nftsLength = nfts.length;
+        for (uint256 i; i < nftsLength;) {
+            if (nfts[i].balanceOf(_allocator) > 0) {
+                return true;
+            }
 
-    /// ====================================
-    /// ============ Internal ==============
-    /// ====================================
+            unchecked {
+                i++;
+            }
+        }
+
+        return false;
+    }
 
     /// @notice Allocate votes to a recipient
     /// @param _data The data
     /// @param _sender The sender of the transaction
     /// @dev Only the pool manager(s) can call this function
-    function _allocate(bytes memory _data, address _sender) internal virtual override {
-        (address recipientId, uint256 voiceCreditsToAllocate) = abi.decode(_data, (address, uint256));
+    function _allocate(bytes memory _data, address _sender) internal override {
+        (address recipientId, ERC721 nft, uint256 nftId, uint256 voiceCreditsToAllocate) =
+            abi.decode(_data, (address, ERC721, uint256, uint256));
 
         // spin up the structs in storage for updating
         Recipient storage recipient = recipients[recipientId];
         Allocator storage allocator = allocators[_sender];
 
-        uint256 votePower = govToken.getPastVotes(_sender, timestamp);
-
-        if (!_hasVoiceCreditsLeft(voiceCreditsToAllocate + allocator.voiceCredits, votePower)) {
-            revert INVALID();
+        // check that the sender can allocate votes
+        if (nft.ownerOf(nftId) != _sender) {
+            revert UNAUTHORIZED();
         }
 
         if (!_isAcceptedRecipient(recipientId)) {
             revert RECIPIENT_ERROR(recipientId);
         }
 
+        if (
+            !_hasVoiceCreditsLeft(
+                voiceCreditsToAllocate + voiceCreditsUsedPerNftId[nft][nftId], maxVoiceCreditsPerNft[nft]
+            )
+        ) {
+            revert INVALID();
+        }
+
         _qv_allocate(allocator, recipient, recipientId, voiceCreditsToAllocate, _sender);
+
+        // update credits used by nftId
+        voiceCreditsUsedPerNftId[nft][nftId] += voiceCreditsToAllocate;
+
+        emit AllocatedWithNft(recipientId, voiceCreditsToAllocate, address(nft), _sender);
     }
 
     function _isAcceptedRecipient(address _recipientId) internal view override returns (bool) {
         return recipients[_recipientId].recipientStatus == Status.Accepted;
     }
 
-    function _hasVoiceCreditsLeft(uint256 _voiceCreditsToAllocate, uint256 _votePower)
+    function _hasVoiceCreditsLeft(uint256 _maxVoiceCredits, uint256 _maxVoiceCreditsPerNft)
         internal
         pure
         override
         returns (bool)
     {
-        return (_voiceCreditsToAllocate <= _votePower);
+        return _maxVoiceCredits <= _maxVoiceCreditsPerNft;
     }
 }

@@ -13,7 +13,7 @@ import {QVBaseStrategyTest} from "./QVBaseStrategy.t.sol";
 import {MockERC721} from "../../utils/MockERC721.sol";
 
 // Core contracts
-import {QVNftTieredStrategy} from "../../../contracts/strategies/qv-nft-tiered/QVNftTieredStrategy.sol";
+import {QVNftTieredStrategy} from "../../../contracts/strategies/_poc/qv-nft-tiered/QVNftTieredStrategy.sol";
 
 contract QVNftTieredStrategyTest is QVBaseStrategyTest {
     ERC721[] public nfts = new ERC721[](2);
