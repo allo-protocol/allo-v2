@@ -17,7 +17,7 @@ extra_output = ["storageLayout"]
 allow_paths = ['node_modules']
 
 [fmt]
-ignore = ['contracts/strategies/qv-hackathon/SchemaResolver.sol']
+ignore = ['contracts/strategies/_poc/qv-hackathon/SchemaResolver.sol']
 
 [rpc_endpoints]
   mainnet = "${MAINNET_RPC_URL}"

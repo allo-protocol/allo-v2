@@ -1,11 +1,11 @@
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
 import {ISablierV2LockupLinear} from "@sablier/v2-core/src/interfaces/ISablierV2LockupLinear.sol";
 import {Broker, LockupLinear} from "@sablier/v2-core/src/types/DataTypes.sol";
 import {UD60x18} from "@sablier/v2-core/src/types/Math.sol";
 
 import {IStrategy} from "../../../../contracts/core/interfaces/IStrategy.sol";
-import {LockupLinearStrategy} from "../../../../contracts/strategies/sablier-v2/LockupLinearStrategy.sol";
+import {LockupLinearStrategy} from "../../../../contracts/strategies/_poc/sablier-v2/LockupLinearStrategy.sol";
 import {Errors} from "../../../../contracts/core/libraries/Errors.sol";
 import {Metadata} from "../../../../contracts/core/libraries/Metadata.sol";
 

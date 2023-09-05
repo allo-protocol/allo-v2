@@ -4,11 +4,11 @@ pragma solidity 0.8.19;
 // External Libraries
 import {ReentrancyGuard} from "openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
 // Interfaces
-import {IAllo} from "../../core/interfaces/IAllo.sol";
+import {IAllo} from "../../../core/interfaces/IAllo.sol";
 // Core Contracts
-import {BaseStrategy} from "../BaseStrategy.sol";
+import {BaseStrategy} from "../../BaseStrategy.sol";
 // Internal Libraries
-import {Native} from "../../core/libraries/Native.sol";
+import {Native} from "../../../core/libraries/Native.sol";
 import {NFT} from "./NFT.sol";
 import {NFTFactory} from "./NFTFactory.sol";
 

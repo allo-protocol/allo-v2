@@ -1,4 +1,4 @@
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
 import "forge-std/Test.sol";
 
@@ -6,7 +6,7 @@ import "forge-std/Test.sol";
 import {IStrategy} from "../../../contracts/core/interfaces/IStrategy.sol";
 // Core contracts
 import {BaseStrategy} from "../../../contracts/strategies/BaseStrategy.sol";
-import {DonationVotingStrategy} from "../../../contracts/strategies/donation-voting/DonationVotingStrategy.sol";
+import {DonationVotingStrategy} from "../../../contracts/strategies/_poc/donation-voting/DonationVotingStrategy.sol";
 // Internal libraries
 import {Errors} from "../../../contracts/core/libraries/Errors.sol";
 import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";

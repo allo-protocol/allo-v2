@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
 import "forge-std/Test.sol";
 
@@ -7,7 +7,7 @@ import "forge-std/Test.sol";
 import {IStrategy} from "../../../contracts/core/interfaces/IStrategy.sol";
 // Strategies
 import {ProportionalPayoutStrategy} from
-    "../../../contracts/strategies/proportional-payout/ProportionalPayoutStrategy.sol";
+    "../../../contracts/strategies/_poc/proportional-payout/ProportionalPayoutStrategy.sol";
 // Internal Libraries
 import {Errors} from "../../../contracts/core/libraries/Errors.sol";
 import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";

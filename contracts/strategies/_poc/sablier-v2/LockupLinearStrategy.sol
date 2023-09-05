@@ -8,10 +8,10 @@ import {ISablierV2LockupLinear} from "@sablier/v2-core/src/interfaces/ISablierV2
 import {Broker, LockupLinear} from "@sablier/v2-core/src/types/DataTypes.sol";
 import {IERC20 as SablierIERC20} from "@sablier/v2-core/src/types/Tokens.sol";
 
-import {IAllo} from "../../core/interfaces/IAllo.sol";
-import {IRegistry} from "../../core/interfaces/IRegistry.sol";
-import {Metadata} from "../../core/libraries/Metadata.sol";
-import {BaseStrategy} from "../BaseStrategy.sol";
+import {IAllo} from "../../../core/interfaces/IAllo.sol";
+import {IRegistry} from "../../../core/interfaces/IRegistry.sol";
+import {Metadata} from "../../../core/libraries/Metadata.sol";
+import {BaseStrategy} from "../../BaseStrategy.sol";
 
 contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
     using SafeERC20 for IERC20;

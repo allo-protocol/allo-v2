@@ -1,5 +1,5 @@
 // SPDX-License Identifier: MIT
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
 // Interfaces
 import {IStrategy} from "../../../contracts/core/interfaces/IStrategy.sol";
@@ -14,7 +14,7 @@ import {MockERC20Vote} from "../../utils/MockERC20Vote.sol";
 import {MockERC20} from "../../utils/MockERC20.sol";
 
 // Core contracts
-import {QVGovernanceERC20Votes} from "../../../contracts/strategies/qv-governance/QVGovernanceERC20Votes.sol";
+import {QVGovernanceERC20Votes} from "../../../contracts/strategies/_poc/qv-governance/QVGovernanceERC20Votes.sol";
 
 contract QVGovernanceERC20VotesTest is QVBaseStrategyTest {
     IVotes public govToken;

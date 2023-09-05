@@ -1,4 +1,4 @@
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
 import "forge-std/Test.sol";
 
@@ -6,13 +6,13 @@ import "forge-std/Test.sol";
 import {IStrategy} from "../../../contracts/core/interfaces/IStrategy.sol";
 // Strategy contracts
 import {WrappedVotingNftMintStrategy} from
-    "../../../contracts/strategies/wrapped-voting-nftmint/WrappedVotingNftMintStrategy.sol";
+    "../../../contracts/strategies/_poc/wrapped-voting-nftmint/WrappedVotingNftMintStrategy.sol";
 // Internal libraries
 import {Errors} from "../../../contracts/core/libraries/Errors.sol";
 import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
 import {Native} from "../../../contracts/core/libraries/Native.sol";
-import {NFT} from "../../../contracts/strategies/wrapped-voting-nftmint/NFT.sol";
-import {NFTFactory} from "../../../contracts/strategies/wrapped-voting-nftmint/NFTFactory.sol";
+import {NFT} from "../../../contracts/strategies/_poc/wrapped-voting-nftmint/NFT.sol";
+import {NFTFactory} from "../../../contracts/strategies/_poc/wrapped-voting-nftmint/NFTFactory.sol";
 // Test libraries
 import {AlloSetup} from "../shared/AlloSetup.sol";
 import {RegistrySetupFull} from "../shared/RegistrySetup.sol";
