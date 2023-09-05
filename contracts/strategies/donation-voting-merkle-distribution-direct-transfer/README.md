@@ -1,9 +1,9 @@
-# DonationVotingMerkleDistributionVaultStrategy.sol
+# DonationVotingMerkleDistributionDirectTransferStrategy.sol
 
-The `DonationVotingMerkleDistributionVaultStrategy` contract presents an advanced fund distribution approach within the Allo ecosystem, combining Merkle trees, recipient statuses, and precise timestamps for secure and equitable allocation. This contract builds upon the `BaseStrategy` while integrating OpenZeppelin's `ReentrancyGuard` and `Multicall` libraries, ensuring heightened security, prevention of reentrancy attacks, and optimized batch operations.
+The `DonationVotingMerkleDistributionDirectTransferStrategy` contract presents an advanced fund distribution approach within the Allo ecosystem, combining Merkle trees, recipient statuses, and precise timestamps for secure and equitable allocation. This contract builds upon the `BaseStrategy` while integrating OpenZeppelin's `ReentrancyGuard` and `Multicall` libraries, ensuring heightened security, prevention of reentrancy attacks, and optimized batch operations.
 
 ## Table of Contents
-- [DonationVotingMerkleDistributionVaultStrategy.sol](#donationvotingmerkledistributionvaultstrategysol)
+- [DonationVotingMerkleDistributionDirectTransferStrategy.sol](#donationvotingmerkledistributiondirecttransferstrategysol)
   - [Table of Contents](#table-of-contents)
   - [Sequence Diagram](#sequence-diagram)
   - [Smart Contract Overview](#smart-contract-overview)
@@ -20,12 +20,10 @@ The `DonationVotingMerkleDistributionVaultStrategy` contract presents an advance
     - [Reviewing Recipients](#reviewing-recipients)
     - [Updating Pool Timestamps](#updating-pool-timestamps)
     - [Withdrawing Funds from Pool](#withdrawing-funds-from-pool)
-    - [Claiming Allocated Tokens](#claiming-allocated-tokens)
     - [Updating Distribution](#updating-distribution)
     - [Distributing Funds](#distributing-funds)
     - [Checking Distribution Status](#checking-distribution-status)
     - [Checking Distribution Set Status](#checking-distribution-set-status)
-    - [Updating Recipient Registration](#updating-recipient-registration)
     - [Checking Recipient Status](#checking-recipient-status)
     - [Getting Recipient Details](#getting-recipient-details)
     - [Getting Payout Summary](#getting-payout-summary)
@@ -40,6 +38,7 @@ sequenceDiagram
     participant PoolManager
     participant Allo
     participant DonationVotingMerkle
+    participant Permit2
 
     PoolManager->>Allo: createPool with DonationVotingMerkle
     Allo-->>PoolManager: poolId
@@ -48,19 +47,20 @@ sequenceDiagram
     DonationVotingMerkle-->>Allo: recipient1
     Allo-->>-Alice: recipientId 1
     PoolManager-->DonationVotingMerkle: reviewRecipients()
-    Bob-->>+Allo: allocate()
-    Allo-->>-DonationVotingMerkle: allocate() funds are stored in contract
+    Bob->>Allo: allocate()
+    Allo-->>DonationVotingMerkle: allocate()
+    DonationVotingMerkle-->>Permit2: permitTransferFrom()
+    Permit2-->>Alice: Funds transferred
     PoolManager->>DonationVotingMerkle: setPayouts() to upload root
     PoolManager->>+Allo: distribute()
     Allo-->>-DonationVotingMerkle: distribute()
-    Alice->>DonationVotingMerkle: claim() funds from allocation
 ```
 
 ## Smart Contract Overview
 
-* **License:** The `DonationVotingMerkleDistributionVaultStrategy` contract adheres to the AGPL-3.0-only License, promoting open-source usage with specific terms.
+* **License:** The `DonationVotingMerkleDistributionDirectTransferStrategy` contract adheres to the AGPL-3.0-only License, promoting open-source usage with specific terms.
 * **Solidity Version:** Developed using Solidity version 0.8.19, leveraging the latest Ethereum smart contract advancements.
-* **External Libraries:** Utilizes the `MerkleProof`, `ReentrancyGuard`, and `Multicall` libraries from OpenZeppelin for enhanced security, efficiency, and reentrancy protection.
+* **External Libraries:** Utilizes the `MerkleProof`, `ReentrancyGuard`, `Multicall` libraries from OpenZeppelin for enhanced security, efficiency, and reentrancy protection, `SafeTransferLib` from Solady and `ISignatureTransfer` from Uniswap permit2.
 * **Interfaces:** Interfaces with the `IAllo` and `IRegistry` components for external communication.
 * **Inheritance:** Inherits from the `BaseStrategy` contract, inheriting and expanding core strategy functionalities.
 
@@ -68,8 +68,8 @@ sequenceDiagram
 
 1. `ApplicationStatus`: Contains the recipient application's index and status row.
 2. `Recipient`: Captures recipient-specific attributes, such as using a registry anchor, recipient address, and metadata.
-3. `Claim`: Describes a claim for allocated tokens.
-4. `Distribution`: Represents fund distribution, encompassing an index, recipient ID, allocation amount, and Merkle proof.
+3. `Distribution`: Represents fund distribution, encompassing an index, recipient ID, allocation amount, and Merkle proof.
+4. `Permit2Data`: Represents the permit data and the signature.
 
 ### Modifiers
 
@@ -92,10 +92,9 @@ The constructor initializes the strategy with essential parameters and configura
 1. `reviewRecipients`: Enables pool managers to update recipient application statuses.
 2. `updatePoolTimestamps`: Allows pool managers to adjust pool phase timestamps.
 3. `withdraw`: Permits pool managers to withdraw funds post-allocation.
-4. `claim`: Enables recipients to claim their allocated tokens after allocation.
-5. `updateDistribution`: Enables pool managers to update distribution metadata and Merkle root.
-6. `isDistributionSet`: Checks if the distribution is configured.
-7. `getRecipient`: Retrieves recipient details using their ID.
+4. `updateDistribution`: Enables pool managers to update distribution metadata and Merkle root.
+5. `isDistributionSet`: Checks if the distribution is configured.
+6. `getRecipient`: Retrieves recipient details using their ID.
 
 ### Internal Functions
 
@@ -123,27 +122,27 @@ The contract employs a bitmap to efficiently store recipient statuses. Each bit 
 
 The contract implements a Merkle tree structure for fund distribution. The Merkle tree is stored in the `distributionMetadata` and the Merkle root is stored in `merkleRoot`. To distribute funds, a pool manager submits the proofs, and the contract verifies it against the Merkle root, ensuring the validity of distributions.
 
-In summary, the `DonationVotingMerkleDistributionVaultStrategy` contract introduces a sophisticated fund distribution mechanism within the Allo ecosystem. By integrating Merkle trees, precise timestamps, and recipient status management, the contract guarantees secure and fair fund allocation. With the integration of external libraries and meticulous contract design, the strategy fosters efficient and secure fund distribution.
+In summary, the `DonationVotingMerkleDistributionDirectTransferStrategy` contract introduces a sophisticated fund distribution mechanism within the Allo ecosystem. By integrating Merkle trees, precise timestamps, and recipient status management, the contract guarantees secure and fair fund allocation. With the integration of external libraries and meticulous contract design, the strategy fosters efficient and secure fund distribution.
 
 ## User Flows
 
 ### Registering a Recipient
 
 * Recipient initiates a registration request.
-* If `useRegistryAnchor` is enabled: 
-  *  Decodes recipient ID, recipient address, and metadata from provided data. 
-  * Verifies sender's authorization as a profile member. 
-  * Validates the provided data. 
-  * If recipient ID is not a profile member, reverts. 
-  * Registers recipient as "Pending" with provided details. 
+* If `useRegistryAnchor` is enabled:
+  *  Decodes recipient ID, recipient address, and metadata from provided data.
+  * Verifies sender's authorization as a profile member.
+  * Validates the provided data.
+  * If recipient ID is not a profile member, reverts.
+  * Registers recipient as "Pending" with provided details.
   * Emits `Registered` event.
-* If `useRegistryAnchor` is disabled: 
-  * Decodes recipient address, registry anchor (optional), and metadata from provided data. 
-  * Determines if registry anchor is being used. 
-  * Verifies sender's authorization as a profile member if using registry anchor. 
-  * Validates the provided data. 
-  * If registry anchor is used and recipient ID is not a profile member, reverts. 
-  * Registers recipient as "Pending" with provided details. 
+* If `useRegistryAnchor` is disabled:
+  * Decodes recipient address, registry anchor (optional), and metadata from provided data.
+  * Determines if registry anchor is being used.
+  * Verifies sender's authorization as a profile member if using registry anchor.
+  * Validates the provided data.
+  * If registry anchor is used and recipient ID is not a profile member, reverts.
+  * Registers recipient as "Pending" with provided details.
   * Emits `Registered` event.
 
 ### Reviewing Recipients
@@ -151,7 +150,7 @@ In summary, the `DonationVotingMerkleDistributionVaultStrategy` contract introdu
 * Pool Manager initiates a recipient status review request.
 * Verifies if sender is a pool manager.
 * Loops through provided application statuses and
-  * Updates recipient's status based on the application status. 
+  * Updates recipient's status based on the application status.
   * Emits `RecipientStatusUpdated` event.
 
 ### Updating Pool Timestamps
@@ -168,13 +167,6 @@ In summary, the `DonationVotingMerkleDistributionVaultStrategy` contract introdu
 * Deducts the specified amount from the pool amount.
 * Transfers the specified amount to the sender's address.
 
-### Claiming Allocated Tokens
-
-* Recipient initiates a claim request.
-* Verifies if claim amount is greater than zero.
-* Transfers the claim amount of tokens from the contract to the recipient's address.
-* Emits `Claimed` event.
-
 ### Updating Distribution
 
 * Pool Manager initiates a distribution update request.
@@ -189,9 +181,9 @@ In summary, the `DonationVotingMerkleDistributionVaultStrategy` contract introdu
 * Verifies if sender is a pool manager.
 * Checks if distribution has started.
 * Decodes distribution data and loops through distributions and
-  * Validates the distribution using merkle proof. 
-  * Deducts the distributed amount from the pool amount. 
-  * Transfers the distributed amount to the recipient's address. 
+  * Validates the distribution using merkle proof.
+  * Deducts the distributed amount from the pool amount.
+  * Transfers the distributed amount to the recipient's address.
   * Marks the distribution as done. e. Emits `FundsDistributed` event.
 
 ### Checking Distribution Status
@@ -203,14 +195,6 @@ In summary, the `DonationVotingMerkleDistributionVaultStrategy` contract introdu
 
 * User initiates a distribution set status check request.
 * Checks if the merkle root for distribution has been set.
-
-### Updating Recipient Registration
-
-* Updates recipient metadata via `registerRecipient`
-* Checks if the recipient's status is "Rejected.", then update status to "Appealed."
-* Checks if the recipient's status is "Accepted.", then update status to "Pending."
-* Checks if the recipient's status is "Pending"/"Appealed", no change in status.
-* Emits `UpdatedRegistration` event.
 
 ### Checking Recipient Status
 
