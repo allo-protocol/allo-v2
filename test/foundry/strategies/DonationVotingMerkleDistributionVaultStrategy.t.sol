@@ -78,7 +78,7 @@ contract DonationVotingMerkleDistributionVaultStrategyTest is
 
         uint256 fromPrivateKey = 0x12341234;
         // 0xa229781d40864011729c753eac24a772890ff527
-        address from = vm.addr(fromPrivateKey);
+        address from = 0x9CfBAb222f01a2c3c334f7eb2FeDea266615421f;
         mockERC20.mint(from, 1e18);
         mockERC20.approve(address(permit2), type(uint256).max);
 
