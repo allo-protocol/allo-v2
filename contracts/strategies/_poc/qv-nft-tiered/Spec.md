@@ -10,7 +10,7 @@ In this strategy, recipients must submit an application and be approved by pool 
 - **Recipient information**
     - prospective recipients must provide an address where they can receive funds
     - prospective recipients must provide an address as `recipientId`, which serves as the unique identifier for their registration
-        - if the Allo registry is required, the `anchorId` is used is used as `recipientId`
+        - if the Allo registry is required, the `anchorId` is used as `recipientId`
         - if the Allo registry is not required, the recipient has the option of using their `anchorId` or `msg.sender`
 - **Recipient eligibility**
     - Pool manager has the option to enable two separate eligibility requirements on this contract:

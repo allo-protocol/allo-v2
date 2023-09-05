@@ -9,7 +9,7 @@ import {
 import {ISchemaRegistry, ISchemaResolver, SchemaRecord} from "eas-contracts/ISchemaRegistry.sol";
 // Core Contracts
 import {SchemaResolver} from "./SchemaResolver.sol";
-import {QVBaseStrategy} from "../qv-base/QVBaseStrategy.sol";
+import {QVBaseStrategy} from "../../qv-base/QVBaseStrategy.sol";
 
 // Register the schema with the SchemaRegistry contract when required.
 // https://optimism-goerli.easscan.org/schema/create

@@ -282,7 +282,7 @@ abstract contract QVBaseStrategy is BaseStrategy {
             emit Reviewed(recipientId, recipientStatus, msg.sender);
 
             unchecked {
-                i++;
+                ++i;
             }
         }
     }
@@ -459,7 +459,7 @@ abstract contract QVBaseStrategy is BaseStrategy {
 
             emit Distributed(recipientId, recipient.recipientAddress, amount, _sender);
             unchecked {
-                i++;
+                ++i;
             }
         }
     }

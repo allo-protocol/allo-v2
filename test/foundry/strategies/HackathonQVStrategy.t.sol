@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
 import "forge-std/Test.sol";
 
 // Test libraries
 import {QVBaseStrategyTest} from "./QVBaseStrategy.t.sol";
-import {HackathonQVStrategy} from "../../../contracts/strategies/qv-hackathon/HackathonQVStrategy.sol";
+import {HackathonQVStrategy} from "../../../contracts/strategies/_poc/qv-hackathon/HackathonQVStrategy.sol";
 import {MockERC721} from "../../utils/MockERC721.sol";
 import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
 import {Native} from "../../../contracts/core/libraries/Native.sol";
