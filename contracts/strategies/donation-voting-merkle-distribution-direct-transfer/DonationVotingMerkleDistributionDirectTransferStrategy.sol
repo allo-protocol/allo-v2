@@ -4,6 +4,7 @@ pragma solidity 0.8.19;
 import {ISignatureTransfer} from "permit2/ISignatureTransfer.sol";
 import {DonationVotingMerkleDistributionBaseStrategy} from
     "../donation-voting-merkle-base/DonationVotingMerkleDistributionBaseStrategy.sol";
+import {SafeTransferLib} from "solady/src/utils/SafeTransferLib.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⣿⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -47,17 +48,13 @@ contract DonationVotingMerkleDistributionDirectTransferStrategy is DonationVotin
 
         // Get the token address
         address token = p2Data.permit.permitted.token;
+        uint256 amount = p2Data.permit.permitted.amount;
 
         if (token == NATIVE) {
-            // Transfer the amount to recipient
-            _transferAmountFrom(
-                token,
-                TransferData({
-                    from: _sender,
-                    to: _recipients[recipientId].recipientAddress,
-                    amount: p2Data.permit.permitted.amount
-                })
-            );
+            if (msg.value < amount) {
+                revert AMOUNT_MISMATCH();
+            }
+            SafeTransferLib.safeTransferETH(_recipients[recipientId].recipientAddress, amount);
         } else {
             PERMIT2.permitTransferFrom(
                 // The permit message.
@@ -65,7 +62,7 @@ contract DonationVotingMerkleDistributionDirectTransferStrategy is DonationVotin
                 // The transfer recipient and amount.
                 ISignatureTransfer.SignatureTransferDetails({
                     to: _recipients[recipientId].recipientAddress,
-                    requestedAmount: p2Data.permit.permitted.amount
+                    requestedAmount: amount
                 }),
                 // Owner of the tokens and signer of the message.
                 _sender,
