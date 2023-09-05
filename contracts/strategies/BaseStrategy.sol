@@ -213,11 +213,12 @@ abstract contract BaseStrategy is IStrategy, Transfer, Errors {
         override
         returns (PayoutSummary[] memory)
     {
+        uint256 recipientLength = _recipientIds.length;
         // check if the length of the recipient IDs and data arrays are equal, if they are not, revert
-        if (_recipientIds.length != _data.length) revert ARRAY_MISMATCH();
+        if (recipientLength != _data.length) revert ARRAY_MISMATCH();
 
-        PayoutSummary[] memory payouts = new PayoutSummary[](_recipientIds.length);
-        for (uint256 i; i < _recipientIds.length;) {
+        PayoutSummary[] memory payouts = new PayoutSummary[](recipientLength);
+        for (uint256 i; i < recipientLength;) {
             payouts[i] = _getPayout(_recipientIds[i], _data[i]);
             unchecked {
                 i++;

@@ -9,7 +9,6 @@ import "openzeppelin-contracts/contracts/access/AccessControl.sol";
 import "openzeppelin-contracts-upgradeable/contracts/security/ReentrancyGuardUpgradeable.sol";
 // Interfaces
 import "./interfaces/IAllo.sol";
-import "./interfaces/IRegistry.sol";
 
 // Internal Libraries
 import {Clone} from "./libraries/Clone.sol";
