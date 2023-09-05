@@ -258,9 +258,10 @@ abstract contract QVBaseStrategy is BaseStrategy {
         onlyActiveRegistration
     {
         // make sure the arrays are the same length
-        if (_recipientIds.length != _recipientStatuses.length) revert INVALID();
+        uint256 recipientLength = _recipientIds.length;
+        if (recipientLength != _recipientStatuses.length) revert INVALID();
 
-        for (uint256 i; i < _recipientIds.length;) {
+        for (uint256 i; i < recipientLength;) {
             Status recipientStatus = _recipientStatuses[i];
             address recipientId = _recipientIds[i];
 
