@@ -13,10 +13,7 @@ import {DonationVotingMerkleDistributionBaseStrategy} from
 import {ISignatureTransfer} from "permit2/ISignatureTransfer.sol";
 import {PermitSignature} from "lib/permit2/test/utils/PermitSignature.sol";
 
-contract DonationVotingMerkleDistributionVaultStrategyTest is
-    DonationVotingMerkleDistributionBaseMockTest,
-    PermitSignature
-{
+contract DonationVotingMerkleDistributionVaultStrategyTest is DonationVotingMerkleDistributionBaseMockTest {
     DonationVotingMerkleDistributionVaultStrategy _strategy;
 
     function _deployStrategy() internal override returns (address payable) {
@@ -77,15 +74,16 @@ contract DonationVotingMerkleDistributionVaultStrategyTest is
         vm.warp(allocationStartTime + 1);
 
         uint256 fromPrivateKey = 0x12341234;
-        // 0xa229781d40864011729c753eac24a772890ff527
-        address from = 0x9CfBAb222f01a2c3c334f7eb2FeDea266615421f;
+
+        address from = vm.addr(fromPrivateKey);
         mockERC20.mint(from, 1e18);
         mockERC20.approve(address(permit2), type(uint256).max);
 
         uint256 nonce = 0;
         ISignatureTransfer.PermitTransferFrom memory permit = defaultERC20PermitTransfer(address(mockERC20), nonce);
         permit.permitted.amount = 1e17;
-        bytes memory sig = getPermitTransferSignature(permit, fromPrivateKey, permit2.DOMAIN_SEPARATOR());
+        bytes memory sig =
+            __getPermitTransferSignature(permit, fromPrivateKey, permit2.DOMAIN_SEPARATOR(), address(_strategy));
 
         DonationVotingMerkleDistributionBaseStrategy.Permit2Data memory permit2Data =
             DonationVotingMerkleDistributionBaseStrategy.Permit2Data({permit: permit, signature: sig});
@@ -98,5 +96,100 @@ contract DonationVotingMerkleDistributionVaultStrategyTest is
         vm.stopPrank();
 
         assertEq(_strategy.claims(recipientId, address(mockERC20)), 1e17);
+    }
+
+    function testRevert_allocate_ERC20_InvalidSigner() public {
+        uint256 fromPrivateKey = 0x12341234;
+
+        address from = randomAddress(); // invalid signer
+        mockERC20.mint(from, 1e18);
+        mockERC20.approve(address(permit2), type(uint256).max);
+
+        address recipientId = __register_accept_recipient();
+        vm.warp(allocationStartTime + 1);
+
+        uint256 nonce = 0;
+        ISignatureTransfer.PermitTransferFrom memory permit = defaultERC20PermitTransfer(address(mockERC20), nonce);
+        permit.permitted.amount = 1e17;
+        bytes memory sig =
+            __getPermitTransferSignature(permit, fromPrivateKey, permit2.DOMAIN_SEPARATOR(), address(strategy));
+
+        DonationVotingMerkleDistributionBaseStrategy.Permit2Data memory permit2Data =
+            DonationVotingMerkleDistributionBaseStrategy.Permit2Data({permit: permit, signature: sig});
+
+        bytes memory data = abi.encode(recipientId, permit2Data);
+
+        vm.startPrank(from);
+
+        mockERC20.approve(address(permit2), type(uint256).max);
+
+        vm.expectRevert(InvalidSigner.selector);
+        allo().allocate(poolId, data);
+
+        vm.stopPrank();
+    }
+
+    function testRevert_allocate_ERC20_SignatureExpired() public {
+        uint256 fromPrivateKey = 0x12341234;
+
+        address from = vm.addr(fromPrivateKey);
+        mockERC20.mint(from, 1e18);
+        mockERC20.approve(address(permit2), type(uint256).max);
+
+        address recipientId = __register_accept_recipient();
+        vm.warp(allocationStartTime + 1);
+
+        uint256 nonce = 0;
+        ISignatureTransfer.PermitTransferFrom memory permit = defaultERC20PermitTransfer(address(mockERC20), nonce);
+        permit.permitted.amount = 1e17;
+        permit.deadline = 0; // expired
+
+        bytes memory sig =
+            __getPermitTransferSignature(permit, fromPrivateKey, permit2.DOMAIN_SEPARATOR(), address(strategy));
+
+        DonationVotingMerkleDistributionBaseStrategy.Permit2Data memory permit2Data =
+            DonationVotingMerkleDistributionBaseStrategy.Permit2Data({permit: permit, signature: sig});
+
+        bytes memory data = abi.encode(recipientId, permit2Data);
+
+        vm.startPrank(from);
+
+        mockERC20.approve(address(permit2), type(uint256).max);
+
+        vm.expectRevert(abi.encodePacked(SignatureExpired.selector, uint256(0)));
+        allo().allocate(poolId, data);
+
+        vm.stopPrank();
+    }
+
+    function testRevert_allocate_ERC20_InvalidSignature() public {
+        uint256 fromPrivateKey = 0x12341234;
+
+        address from = vm.addr(fromPrivateKey);
+        mockERC20.mint(from, 1e18);
+        mockERC20.approve(address(permit2), type(uint256).max);
+
+        address recipientId = __register_accept_recipient();
+        vm.warp(allocationStartTime + 1);
+
+        uint256 nonce = 0;
+        ISignatureTransfer.PermitTransferFrom memory permit = defaultERC20PermitTransfer(address(mockERC20), nonce);
+        permit.permitted.amount = 1e17;
+
+        bytes memory sig = "0x_Inavlid_Signature_Inavlid_Signature_Inavlid_Signature_Inavlid";
+
+        DonationVotingMerkleDistributionBaseStrategy.Permit2Data memory permit2Data =
+            DonationVotingMerkleDistributionBaseStrategy.Permit2Data({permit: permit, signature: sig});
+
+        bytes memory data = abi.encode(recipientId, permit2Data);
+
+        vm.startPrank(from);
+
+        mockERC20.approve(address(permit2), type(uint256).max);
+
+        vm.expectRevert(InvalidSignature.selector);
+        allo().allocate(poolId, data);
+
+        vm.stopPrank();
     }
 }
