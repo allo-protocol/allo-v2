@@ -22,7 +22,7 @@ import {EventSetup} from "../shared/EventSetup.sol";
 // import MockERC20
 import {MockERC20} from "../../utils/MockERC20.sol";
 
-import {ISignatureTransfer} from "../../../contracts/core/interfaces/uniswap/ISignatureTransfer.sol";
+import {ISignatureTransfer} from "permit2/ISignatureTransfer.sol";
 import {Permit2} from "../../utils/Permit2Mock.sol";
 
 contract DonationVotingMerkleDistributionBaseMockTest is

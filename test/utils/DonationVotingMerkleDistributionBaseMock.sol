@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import {ISignatureTransfer} from "../../contracts/core/interfaces/uniswap/ISignatureTransfer.sol";
+import {ISignatureTransfer} from "permit2/ISignatureTransfer.sol";
 import {DonationVotingMerkleDistributionBaseStrategy} from
     "../../contracts/strategies/donation-voting-merkle-base/DonationVotingMerkleDistributionBaseStrategy.sol";
 

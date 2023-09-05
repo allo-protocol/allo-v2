@@ -2,7 +2,7 @@
 pragma solidity 0.8.19;
 
 // External Libraries
-import {ISignatureTransfer} from "../../core/interfaces/uniswap/ISignatureTransfer.sol";
+import {ISignatureTransfer} from "permit2/ISignatureTransfer.sol";
 import {MerkleProof} from "openzeppelin-contracts/contracts/utils/cryptography/MerkleProof.sol";
 import {Multicall} from "openzeppelin-contracts/contracts/utils/Multicall.sol";
 // Interfaces

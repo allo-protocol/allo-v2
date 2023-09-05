@@ -10,7 +10,7 @@ import {DonationVotingMerkleDistributionVaultStrategy} from
 import {DonationVotingMerkleDistributionBaseStrategy} from
     "../../../contracts/strategies/donation-voting-merkle-base/DonationVotingMerkleDistributionBaseStrategy.sol";
 
-import {ISignatureTransfer} from "../../../contracts/core/interfaces/uniswap/ISignatureTransfer.sol";
+import {ISignatureTransfer} from "permit2/ISignatureTransfer.sol";
 
 contract DonationVotingMerkleDistributionVaultStrategyTest is DonationVotingMerkleDistributionBaseMockTest {
     DonationVotingMerkleDistributionVaultStrategy _strategy;
