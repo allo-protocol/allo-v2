@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
 // External
@@ -75,9 +75,7 @@ contract ContractFactory {
 
     /// @notice Checks if the caller is authorized to deploy.
     function _checkIsDeployer() internal view {
-        if (!isDeployer[msg.sender]) {
-            revert UNAUTHORIZED();
-        }
+        if (!isDeployer[msg.sender]) revert UNAUTHORIZED();
     }
 
     /// ===============================
@@ -100,9 +98,7 @@ contract ContractFactory {
         bytes32 salt = keccak256(abi.encodePacked(_contractName, _version));
 
         // ensure salt has not been used
-        if (usedSalts[salt]) {
-            revert SALT_USED();
-        }
+        if (usedSalts[salt]) revert SALT_USED();
 
         usedSalts[salt] = true;
 

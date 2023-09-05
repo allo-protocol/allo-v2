@@ -257,14 +257,15 @@ abstract contract QVBaseStrategy is BaseStrategy {
         onlyPoolManager(msg.sender)
         onlyActiveRegistration
     {
+        // make sure the arrays are the same length
         uint256 recipientLength = _recipientIds.length;
-        if (recipientLength != _recipientStatuses.length) {
-            revert INVALID();
-        }
+        if (recipientLength != _recipientStatuses.length) revert INVALID();
 
         for (uint256 i; i < recipientLength;) {
             Status recipientStatus = _recipientStatuses[i];
             address recipientId = _recipientIds[i];
+
+            // if the status is none or appealed then revert
             if (recipientStatus == Status.None || recipientStatus == Status.Appealed) {
                 revert RECIPIENT_ERROR(recipientId);
             }
@@ -323,9 +324,7 @@ abstract contract QVBaseStrategy is BaseStrategy {
     /// @notice Check if the allocation has ended
     /// @dev Reverts if the allocation has not ended
     function _checkOnlyAfterAllocation() internal view virtual {
-        if (block.timestamp < allocationEndTime) {
-            revert ALLOCATION_NOT_ENDED();
-        }
+        if (block.timestamp < allocationEndTime) revert ALLOCATION_NOT_ENDED();
     }
 
     /// @notice Set the start and end dates for the pool
@@ -385,18 +384,14 @@ abstract contract QVBaseStrategy is BaseStrategy {
             (recipientId, recipientAddress, metadata) = abi.decode(_data, (address, address, Metadata));
 
             // when registry gating is enabled, the recipientId must be a profile member
-            if (!_isProfileMember(recipientId, _sender)) {
-                revert UNAUTHORIZED();
-            }
+            if (!_isProfileMember(recipientId, _sender)) revert UNAUTHORIZED();
         } else {
             (recipientAddress, registryAnchor, metadata) = abi.decode(_data, (address, address, Metadata));
             isUsingRegistryAnchor = registryAnchor != address(0);
             recipientId = isUsingRegistryAnchor ? registryAnchor : _sender;
 
             // when using registry anchor, the ID of the recipient must be a profile member
-            if (isUsingRegistryAnchor && !_isProfileMember(recipientId, _sender)) {
-                revert UNAUTHORIZED();
-            }
+            if (isUsingRegistryAnchor && !_isProfileMember(recipientId, _sender)) revert UNAUTHORIZED();
         }
 
         // make sure that if metadata is required, it is provided
@@ -405,9 +400,7 @@ abstract contract QVBaseStrategy is BaseStrategy {
         }
 
         // make sure the recipient address is not the zero address
-        if (recipientAddress == address(0)) {
-            revert RECIPIENT_ERROR(recipientId);
-        }
+        if (recipientAddress == address(0)) revert RECIPIENT_ERROR(recipientId);
 
         Recipient storage recipient = recipients[recipientId];
 
@@ -517,10 +510,8 @@ abstract contract QVBaseStrategy is BaseStrategy {
         uint256 _voiceCreditsToAllocate,
         address _sender
     ) internal onlyActiveAllocation {
-        // check the voiceCreditsToAllocate is > 0
-        if (_voiceCreditsToAllocate == 0) {
-            revert INVALID();
-        }
+        // check the `_voiceCreditsToAllocate` is > 0
+        if (_voiceCreditsToAllocate == 0) revert INVALID();
 
         // get the previous values
         uint256 creditsCastToRecipient = _allocator.voiceCreditsCastToRecipient[_recipientId];

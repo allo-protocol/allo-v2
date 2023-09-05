@@ -62,13 +62,16 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
     /// @notice Registry contract
     IRegistry private registry;
 
-    /// @notice 'msg.sender' -> 'nonce' for cloning strategies
+    /// @notice Maps the `msg.sender` to a `nonce` to prevent duplicates
+    /// @dev 'msg.sender' -> 'nonce' for cloning strategies
     mapping(address => uint256) private _nonces;
 
-    /// @notice 'Pool.id' -> 'Pool'
+    /// @notice Maps the pool ID to the pool details
+    /// @dev 'Pool.id' -> 'Pool'
     mapping(uint256 => Pool) private pools;
 
-    /// @notice -Strategy -> bool
+    /// @notice Returns a bool for whether a strategy is cloneable or not using the strategy address as the key
+    /// @dev Strategy.address -> bool
     mapping(address => bool) private cloneableStrategies;
 
     // ====================================
@@ -148,15 +151,12 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
         address[] memory _managers
     ) external payable returns (uint256 poolId) {
         // Revert if the strategy address passed is the zero address with 'ZERO_ADDRESS()'
-        if (_strategy == address(0)) {
-            revert ZERO_ADDRESS();
-        }
-        // Revert if we already have this strategy in our cloneable mapping with 'IS_APPROVED_STRATEGY()' (only non-cloneable strategies can be used)
-        if (_isCloneableStrategy(_strategy)) {
-            revert IS_APPROVED_STRATEGY();
-        }
+        if (_strategy == address(0)) revert ZERO_ADDRESS();
 
-        // Call the internal '_createPool()' function and return the 'poolId'
+        // Revert if we already have this strategy in our cloneable mapping with 'IS_APPROVED_STRATEGY()' (only non-cloneable strategies can be used)
+        if (_isCloneableStrategy(_strategy)) revert IS_APPROVED_STRATEGY();
+
+        // Call the internal '_createPool()' function and return the pool ID
         return _createPool(_profileId, IStrategy(_strategy), _initStrategyData, _token, _amount, _metadata, _managers);
     }
 
@@ -184,7 +184,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
             revert NOT_APPROVED_STRATEGY();
         }
 
-        // Returns the created pool id
+        // Returns the created pool ID
         return _createPool(
             _profileId,
             IStrategy(Clone.createClone(_strategy, _nonces[msg.sender]++)),
@@ -197,9 +197,9 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
     }
 
     /// @notice Update pool metadata
-    /// @dev Only callable by the pool managers, emits 'PoolMetadataUpdated()' event. 'msg.sender' must be a pool manager.
+    /// @dev 'msg.sender' must be a pool manager. Emits 'PoolMetadataUpdated()' event.
     /// @param _poolId ID of the pool
-    /// @param _metadata new metadata of the pool
+    /// @param _metadata The new metadata of the pool
     function updatePoolMetadata(uint256 _poolId, Metadata memory _metadata) external onlyPoolManager(_poolId) {
         Pool storage pool = pools[_poolId];
         pool.metadata = _metadata;
@@ -239,9 +239,8 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
     /// @dev Emits the 'StrategyApproved()' event. 'msg.sender' must be Allo owner.
     /// @param _strategy The address of the strategy
     function addToCloneableStrategies(address _strategy) external onlyOwner {
-        if (_strategy == address(0)) {
-            revert ZERO_ADDRESS();
-        }
+        if (_strategy == address(0)) revert ZERO_ADDRESS();
+
         cloneableStrategies[_strategy] = true;
         emit StrategyApproved(_strategy);
     }
@@ -263,9 +262,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
     /// @param _manager The address to add
     function addPoolManager(uint256 _poolId, address _manager) external onlyPoolAdmin(_poolId) {
         // Reverts if the address is the zero address with 'ZERO_ADDRESS()'
-        if (_manager == address(0)) {
-            revert ZERO_ADDRESS();
-        }
+        if (_manager == address(0)) revert ZERO_ADDRESS();
 
         // Grants the pool manager role to the '_manager' address
         _grantRole(pools[_poolId].managerRole, _manager);
@@ -281,8 +278,8 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
 
     /// @notice Transfer the funds recovered  to the recipient
     /// @dev 'msg.sender' must be Allo owner
-    /// @param _token The address of the token to transfer
-    /// @param _recipient The address of the recipient
+    /// @param _token The token to transfer
+    /// @param _recipient The recipient
     function recoverFunds(address _token, address _recipient) external onlyOwner {
         // Get the amount of the token to transfer, which is always the entire balance of the contract address
         uint256 amount = _token == NATIVE ? address(this).balance : IERC20Upgradeable(_token).balanceOf(address(this));
@@ -300,7 +297,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
     ///      implementation of registerRecipient().
     /// @param _poolId ID of the pool
     /// @param _data Encoded data unique to a strategy that registerRecipient() requires
-    /// @return recipientId The recipientId that has been registered
+    /// @return recipientId The recipient ID that has been registered
     function registerRecipient(uint256 _poolId, bytes memory _data) external payable nonReentrant returns (address) {
         // Return the recipientId (address) from the strategy
         return pools[_poolId].strategy.registerRecipient(_data, msg.sender);
@@ -312,7 +309,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
     ///      '_poolIds' length or this will revert with MISMATCH(). Other requirements will be determined by the strategy.
     /// @param _poolIds ID's of the pools
     /// @param _data An array of encoded data unique to a strategy that registerRecipient() requires.
-    /// @return recipientIds The recipientIds that have been registered
+    /// @return recipientIds The recipient IDs that have been registered
     function batchRegisterRecipient(uint256[] memory _poolIds, bytes[] memory _data)
         external
         nonReentrant
@@ -321,9 +318,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
         uint256 poolIdLength = _poolIds.length;
         recipientIds = new address[](poolIdLength);
 
-        if (poolIdLength != _data.length) {
-            revert MISMATCH();
-        }
+        if (poolIdLength != _data.length) revert MISMATCH();
 
         // Loop through the '_poolIds' & '_data' and call the 'strategy.registerRecipient()' function
         for (uint256 i; i < poolIdLength;) {
@@ -340,12 +335,10 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
     /// @notice Fund a pool.
     /// @dev Anyone can fund a pool and call this function.
     /// @param _poolId ID of the pool
-    /// @param _amount amount to be deposited into the pool
+    /// @param _amount The amount to be deposited into the pool
     function fundPool(uint256 _poolId, uint256 _amount) external payable nonReentrant {
         // if amount is 0, revert with 'NOT_ENOUGH_FUNDS()' error
-        if (_amount == 0) {
-            revert NOT_ENOUGH_FUNDS();
-        }
+        if (_amount == 0) revert NOT_ENOUGH_FUNDS();
 
         // Call the internal fundPool() function
         _fundPool(_amount, _poolId, pools[_poolId].strategy);
@@ -370,9 +363,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
         uint256 numPools = _poolIds.length;
 
         // Reverts if the length of _poolIds does not match the length of _datas with 'MISMATCH()' error
-        if (numPools != _datas.length) {
-            revert MISMATCH();
-        }
+        if (numPools != _datas.length) revert MISMATCH();
 
         // Loop through the _poolIds & _datas and call the internal _allocate() function
         for (uint256 i; i < numPools;) {
@@ -400,17 +391,13 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
     /// @notice Internal function to check is caller is pool manager
     /// @param _poolId The pool id
     function _checkOnlyPoolManager(uint256 _poolId) internal view {
-        if (!_isPoolManager(_poolId, msg.sender)) {
-            revert UNAUTHORIZED();
-        }
+        if (!_isPoolManager(_poolId, msg.sender)) revert UNAUTHORIZED();
     }
 
     /// @notice Internal function to check is caller is pool admin
     /// @param _poolId The pool id
     function _checkOnlyPoolAdmin(uint256 _poolId) internal view {
-        if (!_isPoolAdmin(_poolId, msg.sender)) {
-            revert UNAUTHORIZED();
-        }
+        if (!_isPoolAdmin(_poolId, msg.sender)) revert UNAUTHORIZED();
     }
 
     /// @notice Creates a new pool.
@@ -434,9 +421,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
         Metadata memory _metadata,
         address[] memory _managers
     ) internal returns (uint256 poolId) {
-        if (!registry.isOwnerOrMemberOfProfile(_profileId, msg.sender)) {
-            revert UNAUTHORIZED();
-        }
+        if (!registry.isOwnerOrMemberOfProfile(_profileId, msg.sender)) revert UNAUTHORIZED();
 
         poolId = ++_poolIndex;
 
@@ -467,17 +452,14 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
         // Initialization is expected to revert when invoked more than once with 'ALREADY_INITIALIZED()' error
         _strategy.initialize(poolId, _initStrategyData);
 
-        if (_strategy.getPoolId() != poolId || address(_strategy.getAllo()) != address(this)) {
-            revert MISMATCH();
-        }
+        if (_strategy.getPoolId() != poolId || address(_strategy.getAllo()) != address(this)) revert MISMATCH();
 
         // grant pool managers roles
         uint256 managersLength = _managers.length;
         for (uint256 i; i < managersLength;) {
             address manager = _managers[i];
-            if (manager == address(0)) {
-                revert ZERO_ADDRESS();
-            }
+            if (manager == address(0)) revert ZERO_ADDRESS();
+
             _grantRole(POOL_MANAGER_ROLE, manager);
             unchecked {
                 ++i;
@@ -569,9 +551,8 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
     ///      Emits a RegistryUpdated event.
     /// @param _registry The new registry address
     function _updateRegistry(address _registry) internal {
-        if (_registry == address(0)) {
-            revert ZERO_ADDRESS();
-        }
+        if (_registry == address(0)) revert ZERO_ADDRESS();
+
         registry = IRegistry(_registry);
         emit RegistryUpdated(_registry);
     }
@@ -581,9 +562,8 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
     ///      Emits a TreasuryUpdated event.
     /// @param _treasury The new treasury address
     function _updateTreasury(address payable _treasury) internal {
-        if (_treasury == address(0)) {
-            revert ZERO_ADDRESS();
-        }
+        if (_treasury == address(0)) revert ZERO_ADDRESS();
+
         treasury = _treasury;
         emit TreasuryUpdated(treasury);
     }
@@ -593,9 +573,8 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
     ///      Emits a PercentFeeUpdated event.
     /// @param _percentFee The new fee
     function _updatePercentFee(uint256 _percentFee) internal {
-        if (_percentFee > 1e18) {
-            revert INVALID_FEE();
-        }
+        if (_percentFee > 1e18) revert INVALID_FEE();
+
         percentFee = _percentFee;
 
         emit PercentFeeUpdated(percentFee);
@@ -607,6 +586,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
     /// @param _baseFee The new base fee
     function _updateBaseFee(uint256 _baseFee) internal {
         baseFee = _baseFee;
+
         emit BaseFeeUpdated(baseFee);
     }
 
@@ -644,7 +624,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
     }
 
     /// @notice Getter for fee percentage.
-    /// @return The fee percentage
+    /// @return The fee percentage (1e18 = 100%)
     function getPercentFee() external view returns (uint256) {
         return percentFee;
     }
