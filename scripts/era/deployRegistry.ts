@@ -11,7 +11,7 @@ export async function deployRegistry() {
     const chainId = Number(network.chainId);
 
     const deployerAddress = new Wallet(process.env.DEPLOYER_PRIVATE_KEY);
-    const balance = await hre.ethers.provider.getBalance(wallet);
+    const balance = await hre.ethers.provider.getBalance(deployerAddress);
 
     console.log(`
         ////////////////////////////////////////////////////
