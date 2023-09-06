@@ -59,6 +59,14 @@ export const deployerContractAddress: DeployerConfig = {
   44787: {
     address: "0x737b811828B34838e2188c59cfF72BD1019A1070",
   },
+  // ZkSync Era Mainnet
+  324: {
+    address: "",
+  },
+  // ZkSync Era Testnet
+  280: {
+    address: "",
+  }
 };
 
 // NOTE: This will be the version address for each registy on each network.
@@ -151,4 +159,20 @@ export const nameConfig: DeployParams = {
       address: "",
     },
   },
+  // ZkSync Era Mainnet
+  324: {
+    "donation-voting": {
+      name: "",
+      version: "",
+      address: "",
+    },
+  },
+  // ZkSync Era Testnet
+  280: {
+    "donation-voting": {
+      name: "",
+      version: "",
+      address: "",
+    },
+  }
 };

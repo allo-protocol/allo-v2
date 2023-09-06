@@ -100,4 +100,20 @@ export const alloConfig: DeployParams = {
     percentFee: 0,
     baseFee: 0,
   },
+  // ZkSync Era Mainnet
+  324: {
+    alloImplementation: "0x0",
+    alloProxy: "0x0",
+    treasury: "0X0",
+    percentFee: 0,
+    baseFee: 0,
+  },
+  // ZkSync Era Testnet
+  280: {
+    alloImplementation: "0x0",
+    alloProxy: "0x0",
+    treasury: "0X0",
+    percentFee: 0,
+    baseFee: 0, 
+  }
 };

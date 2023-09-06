@@ -1,0 +1,71 @@
+import * as hre from "hardhat";
+import { Deployer } from "@matterlabs/hardhat-zksync-deploy";
+import { Wallet } from "zksync-web3";
+import { alloConfig } from "../config/allo.config";
+import { confirmContinue, prettyNum } from "../utils/scripts";
+import { registryConfig } from "../config/registry.config";
+
+export async function deployAllo(_registryAddress? : string) {
+    const network = await hre.ethers.provider.getNetwork();
+    const networkName = await hre.network.name;
+    const chainId = Number(network.chainId);
+
+    const deployerAddress = new Wallet(process.env.DEPLOYER_PRIVATE_KEY);
+    const balance = await hre.ethers.provider.getBalance(deployerAddress);
+
+    const registryAddress = _registryAddress ? _registryAddress : registryConfig[chainId].registryProxy;
+
+    console.log(`
+        ////////////////////////////////////////////////////
+                Deploys Allo.sol on ${networkName}
+        ////////////////////////////////////////////////////`
+    );
+
+    const alloParams = alloConfig[chainId];
+    if (!alloParams) {
+      throw new Error(`Allo params not found for chainId: ${chainId}`);
+    }
+
+    await confirmContinue({
+        contract: "Allo.sol",
+        chainId: chainId,
+        network: networkName,
+        registry: registryAddress,
+        treasury: alloParams.treasury,
+        percentFee: alloParams.percentFee,
+        baseFee: alloParams.baseFee,
+        deployerAddress: deployerAddress,
+        balance: prettyNum(balance.toString())
+    });
+
+    console.log("Deploying Allo...");
+
+    const deployer = new Deployer(hre, deployerAddress);
+    const Allo = await deployer.loadArtifact("Allo");
+    const instance = await hre.zkUpgrades.deployProxy(
+        deployer.zkWallet, Allo,
+        [alloConfig[chainId].owner],
+        { initializer: "initialize" }
+    );
+
+    console.log("Allo deployed to:", instance.target);
+
+    console.log("initializing...", instance.target);
+    await instance.initialize(
+        registryAddress,
+        alloParams.treasury,
+        alloParams.percentFee,
+        alloParams.baseFee,
+    );
+    console.log("Allo initializing!");
+  
+    return instance.target;
+}
+
+// deployAllo().catch((error) => {
+//     console.error(error);
+//     process.exitCode = 1;
+// });
+
+// Note: Deploy script to run in terminal:
+// npx hardhat run scripts/deployAllo.ts --network zksync-testnet --config era.hardhat.config.ts
