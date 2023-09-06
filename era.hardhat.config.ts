@@ -4,9 +4,12 @@ import "@matterlabs/hardhat-zksync-deploy";
 import "@matterlabs/hardhat-zksync-solc";
 import "@matterlabs/hardhat-zksync-upgradable";
 import "@matterlabs/hardhat-zksync-verify";
+import "@nomicfoundation/hardhat-foundry";
+import "hardhat-preprocessor";
 import "@typechain/hardhat";
 import { HardhatUserConfig, subtask } from "hardhat/config";
 import { NetworkUserConfig } from "hardhat/types";
+import fs from "fs";
 
 const { TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS } = require("hardhat/builtin-tasks/task-names");
 const path = require("path");
@@ -28,6 +31,18 @@ if (!deployPrivateKey) {
 }
 
 const infuraIdKey = process.env.INFURA_RPC_ID as string;
+
+/**
+ * Reads the remappings.txt file and returns an array of arrays.
+ * @returns {string[][]}
+ */
+function getRemappings() {
+  return fs
+    .readFileSync("remappings.txt", "utf8")
+    .split("\n")
+    .filter(Boolean) // remove empty lines
+    .map((line) => line.trim().split("="));
+}
 
 /**
  * Generates hardhat network configuration the test networks.
@@ -100,7 +115,7 @@ const config: HardhatUserConfig = {
     "zksync-mainnet": {
       ...createMainnetConfig(
         "zksync-mainnet",
-        "https://zksync2-mainnet.zksync.io"
+        "https://zksync2-mainnet.zksync.io",
       ),
       zksync: true,
       ethNetwork: "mainnet",
@@ -110,7 +125,7 @@ const config: HardhatUserConfig = {
     "zksync-testnet": {
       ...createTestnetConfig(
         "zksync-testnet",
-        "https://zksync2-testnet.zksync.dev"
+        "https://zksync2-testnet.zksync.dev",
       ),
       zksync: true,
       ethNetwork: "goerli",
@@ -126,7 +141,26 @@ const config: HardhatUserConfig = {
       mainnet: process.env.ETHERSCAN_API_KEY,
       // @ts-ignore
       goerli: process.env.ETHERSCAN_API_KEY,
-    }
+    },
+  },
+  preprocess: {
+    eachLine: (hre) => ({
+      transform: (line: string) => {
+        if (line.match(/^\s*import /i)) {
+          for (const [from, to] of getRemappings()) {
+            if (line.includes(from)) {
+              line = line.replace(from, to);
+              break;
+            }
+          }
+        }
+        return line;
+      },
+    }),
+  },
+  paths: {
+    sources: "./contracts",
+    cache: "./cache_hardhat",
   },
   zksolc: {
     version: "1.3.13",

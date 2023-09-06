@@ -1,4 +1,4 @@
-# WrappedVotingNftMintStrategy
+# DonationVotingStrategy
 
 
 
@@ -78,13 +78,13 @@ function allocationStartTime() external view returns (uint64)
 |---|---|---|
 | _0 | uint64 | undefined |
 
-### allocations
+### allowedTokens
 
 ```solidity
-function allocations(address) external view returns (uint256)
+function allowedTokens(address) external view returns (bool)
 ```
 
-
+token -&gt; bool
 
 
 
@@ -98,24 +98,46 @@ function allocations(address) external view returns (uint256)
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | uint256 | undefined |
+| _0 | bool | undefined |
 
-### currentWinner
+### claim
 
 ```solidity
-function currentWinner() external view returns (address)
+function claim(DonationVotingStrategy.Claim[] _claims) external nonpayable
 ```
 
 
 
 
 
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _claims | DonationVotingStrategy.Claim[] | undefined |
+
+### claims
+
+```solidity
+function claims(address, address) external view returns (uint256)
+```
+
+recipientId -&gt; token -&gt; amount
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+| _1 | address | undefined |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | address | undefined |
+| _0 | uint256 | undefined |
 
 ### distribute
 
@@ -209,6 +231,28 @@ Getter for the &#39;poolId&#39;.
 |---|---|---|
 | _0 | uint256 | The ID of the pool |
 
+### getRecipient
+
+```solidity
+function getRecipient(address _recipientId) external view returns (struct DonationVotingStrategy.Recipient)
+```
+
+Get the recipient
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _recipientId | address | Id of the recipient |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | DonationVotingStrategy.Recipient | undefined |
+
 ### getRecipientStatus
 
 ```solidity
@@ -270,7 +314,7 @@ Increases the pool amount.
 function initialize(uint256 _poolId, bytes _data) external nonpayable
 ```
 
-Initializes the WrappedVotingStrategy contract
+=============================== ========= Initialize ========== ===============================
 
 
 
@@ -278,8 +322,8 @@ Initializes the WrappedVotingStrategy contract
 
 | Name | Type | Description |
 |---|---|---|
-| _poolId | uint256 | The ID of the pool |
-| _data | bytes | The data containing the NFTFactory address, allocation start time, and allocation end time |
+| _poolId | uint256 | undefined |
+| _data | bytes | undefined |
 
 ### isPoolActive
 
@@ -320,10 +364,10 @@ Checks if the &#39;_allocator&#39; is a valid allocator.
 |---|---|---|
 | _0 | bool | &#39;true&#39; if the address is a valid allocator, &#39;false&#39; otherwise |
 
-### nftFactory
+### metadataRequired
 
 ```solidity
-function nftFactory() external view returns (contract NFTFactory)
+function metadataRequired() external view returns (bool)
 ```
 
 
@@ -335,7 +379,30 @@ function nftFactory() external view returns (contract NFTFactory)
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | contract NFTFactory | undefined |
+| _0 | bool | undefined |
+
+### payoutSummaries
+
+```solidity
+function payoutSummaries(address) external view returns (address recipientAddress, uint256 amount)
+```
+
+recipientId -&gt; PayoutSummary
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| recipientAddress | address | undefined |
+| amount | uint256 | undefined |
 
 ### registerRecipient
 
@@ -360,13 +427,47 @@ Registers a recipient.
 |---|---|---|
 | recipientId | address | The recipientId |
 
-### setAllocationTimes
+### registrationEndTime
 
 ```solidity
-function setAllocationTimes(uint64 _allocationStartTime, uint64 _allocationEndTime) external nonpayable
+function registrationEndTime() external view returns (uint64)
 ```
 
-==================== ===== External ===== ====================
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint64 | undefined |
+
+### registrationStartTime
+
+```solidity
+function registrationStartTime() external view returns (uint64)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint64 | undefined |
+
+### reviewRecipients
+
+```solidity
+function reviewRecipients(address[] _recipientIds, enum IStrategy.Status[] _recipientStatuses) external nonpayable
+```
+
+Review recipient application
 
 
 
@@ -374,8 +475,94 @@ function setAllocationTimes(uint64 _allocationStartTime, uint64 _allocationEndTi
 
 | Name | Type | Description |
 |---|---|---|
-| _allocationStartTime | uint64 | undefined |
-| _allocationEndTime | uint64 | undefined |
+| _recipientIds | address[] | Ids of the recipients |
+| _recipientStatuses | enum IStrategy.Status[] | Statuses of the recipients |
+
+### setPayout
+
+```solidity
+function setPayout(address[] _recipientIds, uint256[] _amounts) external nonpayable
+```
+
+Set payout for the recipients
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _recipientIds | address[] | Ids of the recipients |
+| _amounts | uint256[] | Amounts to be paid out |
+
+### totalPayoutAmount
+
+```solidity
+function totalPayoutAmount() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### updatePoolTimestamps
+
+```solidity
+function updatePoolTimestamps(uint64 _registrationStartTime, uint64 _registrationEndTime, uint64 _allocationStartTime, uint64 _allocationEndTime) external nonpayable
+```
+
+Set the start and end dates for the pool
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _registrationStartTime | uint64 | The start time for the registration |
+| _registrationEndTime | uint64 | The end time for the registration |
+| _allocationStartTime | uint64 | The start time for the allocation |
+| _allocationEndTime | uint64 | The end time for the allocation |
+
+### useRegistryAnchor
+
+```solidity
+function useRegistryAnchor() external view returns (bool)
+```
+
+================================ ========== Storage ============= ================================
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
+### withdraw
+
+```solidity
+function withdraw(uint256 _amount) external nonpayable
+```
+
+Withdraw funds from pool
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _amount | uint256 | The amount to be withdrawn |
 
 
 
@@ -457,6 +644,22 @@ Emitted when strategy is initialized.
 | poolId  | uint256 | The ID of the pool |
 | data  | bytes | undefined |
 
+### PayoutSet
+
+```solidity
+event PayoutSet(bytes recipientIds)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| recipientIds  | bytes | undefined |
+
 ### PoolActive
 
 ```solidity
@@ -512,7 +715,7 @@ Emitted when a recipient is registered.
 ### TimestampsUpdated
 
 ```solidity
-event TimestampsUpdated(uint64 allocationStartTime, uint64 allocationEndTime, address sender)
+event TimestampsUpdated(uint64 registrationStartTime, uint64 registrationEndTime, uint64 allocationStartTime, uint64 allocationEndTime, address sender)
 ```
 
 
@@ -523,6 +726,8 @@ event TimestampsUpdated(uint64 allocationStartTime, uint64 allocationEndTime, ad
 
 | Name | Type | Description |
 |---|---|---|
+| registrationStartTime  | uint64 | undefined |
+| registrationEndTime  | uint64 | undefined |
 | allocationStartTime  | uint64 | undefined |
 | allocationEndTime  | uint64 | undefined |
 | sender  | address | undefined |
@@ -533,7 +738,7 @@ event TimestampsUpdated(uint64 allocationStartTime, uint64 allocationEndTime, ad
 event UpdatedRegistration(address indexed recipientId, bytes data, address sender, enum IStrategy.Status status)
 ```
 
-=============================== ========== Events ============= ===============================
+Emitted when a recipient updates their registration
 
 
 
@@ -541,10 +746,10 @@ event UpdatedRegistration(address indexed recipientId, bytes data, address sende
 
 | Name | Type | Description |
 |---|---|---|
-| recipientId `indexed` | address | undefined |
-| data  | bytes | undefined |
-| sender  | address | undefined |
-| status  | enum IStrategy.Status | undefined |
+| recipientId `indexed` | address | Id of the recipient |
+| data  | bytes | The encoded data - (address recipientId, address recipientAddress, Metadata metadata) |
+| sender  | address | The sender of the transaction |
+| status  | enum IStrategy.Status | The updated status of the recipient |
 
 
 
@@ -600,7 +805,7 @@ Thrown when data is already intialized
 error AMOUNT_MISMATCH()
 ```
 
-
+Thrown when the amount of tokens sent does not match the amount of tokens expected
 
 
 

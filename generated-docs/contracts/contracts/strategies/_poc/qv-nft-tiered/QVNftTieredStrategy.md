@@ -1,4 +1,4 @@
-# QVGovernanceERC20Votes
+# QVNftTieredStrategy
 
 
 
@@ -84,7 +84,7 @@ function allocationStartTime() external view returns (uint64)
 function allocators(address) external view returns (uint256 voiceCredits)
 ```
 
-allocator address =&gt; Allocator
+The details of the allocator are returned using their address
 
 
 
@@ -206,13 +206,13 @@ Get the recipient
 
 | Name | Type | Description |
 |---|---|---|
-| _recipientId | address | Id of the recipient |
+| _recipientId | address | ID of the recipient |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | QVBaseStrategy.Recipient | undefined |
+| _0 | QVBaseStrategy.Recipient | The recipient |
 
 ### getRecipientStatus
 
@@ -252,23 +252,6 @@ Getter for the &#39;strategyId&#39;.
 | Name | Type | Description |
 |---|---|---|
 | _0 | bytes32 | The ID of the strategy |
-
-### govToken
-
-```solidity
-function govToken() external view returns (contract IVotes)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | contract IVotes | undefined |
 
 ### increasePoolAmount
 
@@ -342,13 +325,35 @@ Checks if the &#39;_allocator&#39; is a valid allocator.
 |---|---|---|
 | _0 | bool | &#39;true&#39; if the address is a valid allocator, &#39;false&#39; otherwise |
 
+### maxVoiceCreditsPerNft
+
+```solidity
+function maxVoiceCreditsPerNft(contract ERC721) external view returns (uint256)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | contract ERC721 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
 ### metadataRequired
 
 ```solidity
 function metadataRequired() external view returns (bool)
 ```
 
-
+Whether or not the strategy requires metadata
 
 
 
@@ -359,13 +364,35 @@ function metadataRequired() external view returns (bool)
 |---|---|---|
 | _0 | bool | undefined |
 
+### nfts
+
+```solidity
+function nfts(uint256) external view returns (contract ERC721)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | contract ERC721 | undefined |
+
 ### paidOut
 
 ```solidity
 function paidOut(address) external view returns (bool)
 ```
 
-recipientId =&gt; paid out
+Returns whether or not the recipient has been paid out using their ID
 
 
 
@@ -384,10 +411,10 @@ recipientId =&gt; paid out
 ### recipients
 
 ```solidity
-function recipients(address) external view returns (bool useRegistryAnchor, address recipientAddress, struct Metadata metadata, enum IStrategy.Status recipientStatus, uint256 totalVotesReceived)
+function recipients(address) external view returns (uint256 totalVotesReceived, bool useRegistryAnchor, address recipientAddress, struct Metadata metadata, enum IStrategy.Status recipientStatus)
 ```
 
-recipientId =&gt; Recipient
+The details of the recipient are returned using their ID
 
 
 
@@ -401,11 +428,11 @@ recipientId =&gt; Recipient
 
 | Name | Type | Description |
 |---|---|---|
+| totalVotesReceived | uint256 | undefined |
 | useRegistryAnchor | bool | undefined |
 | recipientAddress | address | undefined |
 | metadata | Metadata | undefined |
 | recipientStatus | enum IStrategy.Status | undefined |
-| totalVotesReceived | uint256 | undefined |
 
 ### registerRecipient
 
@@ -453,7 +480,7 @@ function registrationEndTime() external view returns (uint64)
 function registrationStartTime() external view returns (uint64)
 ```
 
-
+The start and end times for registrations and allocations
 
 
 
@@ -470,7 +497,7 @@ function registrationStartTime() external view returns (uint64)
 function registryGating() external view returns (bool)
 ```
 
-
+Whether or not the strategy is using registry gating
 
 
 
@@ -487,9 +514,9 @@ function registryGating() external view returns (bool)
 function reviewRecipients(address[] _recipientIds, enum IStrategy.Status[] _recipientStatuses) external nonpayable
 ```
 
-Review recipient application
+Review recipient(s) application(s)
 
-
+*You can review multiple recipients at once or just one. This can only be called by a pool manager and      only during active registration.*
 
 #### Parameters
 
@@ -504,7 +531,7 @@ Review recipient application
 function reviewThreshold() external view returns (uint256)
 ```
 
-
+The number of votes required to review a recipient
 
 
 
@@ -538,30 +565,13 @@ function reviewsByStatus(address, enum IStrategy.Status) external view returns (
 |---|---|---|
 | _0 | uint256 | undefined |
 
-### timestamp
-
-```solidity
-function timestamp() external view returns (uint256)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
 ### totalRecipientVotes
 
 ```solidity
 function totalRecipientVotes() external view returns (uint256)
 ```
 
-
+The total number of votes cast for all recipients
 
 
 
@@ -591,6 +601,29 @@ Set the start and end dates for the pool
 | _allocationStartTime | uint64 | The start time for the allocation |
 | _allocationEndTime | uint64 | The end time for the allocation |
 
+### voiceCreditsUsedPerNftId
+
+```solidity
+function voiceCreditsUsedPerNftId(contract ERC721, uint256) external view returns (uint256)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | contract ERC721 | undefined |
+| _1 | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
 
 
 ## Events
@@ -613,6 +646,25 @@ Emitted when a recipient is allocated to.
 | amount  | uint256 | The amount allocated |
 | token  | address | The token allocated |
 | sender  | address | undefined |
+
+### AllocatedWithNft
+
+```solidity
+event AllocatedWithNft(address indexed recipientId, uint256 votes, address nft, address allocator)
+```
+
+====================== ======= Events ======= ======================
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| recipientId `indexed` | address | undefined |
+| votes  | uint256 | undefined |
+| nft  | address | undefined |
+| allocator  | address | undefined |
 
 ### Distributed
 
@@ -674,7 +726,7 @@ Emitted when pool is set to active status.
 event RecipientStatusUpdated(address indexed recipientId, enum IStrategy.Status status, address sender)
 ```
 
-
+Emitted when a recipient is registered
 
 
 
@@ -682,9 +734,9 @@ event RecipientStatusUpdated(address indexed recipientId, enum IStrategy.Status 
 
 | Name | Type | Description |
 |---|---|---|
-| recipientId `indexed` | address | undefined |
-| status  | enum IStrategy.Status | undefined |
-| sender  | address | undefined |
+| recipientId `indexed` | address | ID of the recipient |
+| status  | enum IStrategy.Status | The status of the recipient |
+| sender  | address | The sender of the transaction |
 
 ### Registered
 
@@ -710,7 +762,7 @@ Emitted when a recipient is registered.
 event Reviewed(address indexed recipientId, enum IStrategy.Status status, address sender)
 ```
 
-
+Emitted when a recipient is reviewed
 
 
 
@@ -718,9 +770,9 @@ event Reviewed(address indexed recipientId, enum IStrategy.Status status, addres
 
 | Name | Type | Description |
 |---|---|---|
-| recipientId `indexed` | address | undefined |
-| status  | enum IStrategy.Status | undefined |
-| sender  | address | undefined |
+| recipientId `indexed` | address | ID of the recipient |
+| status  | enum IStrategy.Status | The status of the recipient |
+| sender  | address | The sender of the transaction |
 
 ### TimestampsUpdated
 
@@ -728,7 +780,7 @@ event Reviewed(address indexed recipientId, enum IStrategy.Status status, addres
 event TimestampsUpdated(uint64 registrationStartTime, uint64 registrationEndTime, uint64 allocationStartTime, uint64 allocationEndTime, address sender)
 ```
 
-
+Emitted when the pool timestamps are updated
 
 
 
@@ -736,11 +788,11 @@ event TimestampsUpdated(uint64 registrationStartTime, uint64 registrationEndTime
 
 | Name | Type | Description |
 |---|---|---|
-| registrationStartTime  | uint64 | undefined |
-| registrationEndTime  | uint64 | undefined |
-| allocationStartTime  | uint64 | undefined |
-| allocationEndTime  | uint64 | undefined |
-| sender  | address | undefined |
+| registrationStartTime  | uint64 | The start time for the registration |
+| registrationEndTime  | uint64 | The end time for the registration |
+| allocationStartTime  | uint64 | The start time for the allocation |
+| allocationEndTime  | uint64 | The end time for the allocation |
+| sender  | address | The sender of the transaction |
 
 ### UpdatedRegistration
 
@@ -756,7 +808,7 @@ Emitted when a recipient updates their registration
 
 | Name | Type | Description |
 |---|---|---|
-| recipientId `indexed` | address | Id of the recipient |
+| recipientId `indexed` | address | ID of the recipient |
 | data  | bytes | The encoded data - (address recipientId, address recipientAddress, Metadata metadata) |
 | sender  | address | The sender of the transaction |
 | status  | enum IStrategy.Status | The updated status of the recipient |
@@ -815,7 +867,7 @@ Thrown when data is already intialized
 error AMOUNT_MISMATCH()
 ```
 
-
+Thrown when the amount of tokens sent does not match the amount of tokens expected
 
 
 
