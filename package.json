@@ -20,7 +20,7 @@
     "coverage:html": "forge coverage --report lcov && lcov --remove ./lcov.info -o ./lcov.info.pruned 'test' 'contracts/core/libraries'  && genhtml lcov.info.pruned --branch-coverage --output-dir coverage",
     "/////// deploy-core ///////": "echo 'deploy allo-v2'",
     "deploy-core": "npx hardhat run scripts/core/_deployCore.ts --network",
-    "deploy-core:zksync": "npx hardhat run scripts/era/core/_deployCore.ts --config era.hardhat.config.ts --network",
+    "deploy-core:zksync": "npx hardhat run scripts/era/_deployCore.ts --config era.hardhat.config.ts --network",
     "deploy-allo": "npx hardhat run scripts/core/deployAllo.ts --network",
     "deploy-registry": "npx hardhat run scripts/core/deployRegistry.ts --network",
     "upgrade-allo": "npx hardhat run scripts/core/deployAllo.ts --network",

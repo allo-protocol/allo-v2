@@ -1,8 +1,11 @@
 import * as hre from "hardhat";
+import * as dotenv from "dotenv";
 import { Deployer } from "@matterlabs/hardhat-zksync-deploy";
 import { Wallet } from "zksync-web3";
 
-import { confirmContinue, prettyNum, verifyContract } from "../utils/scripts";
+import { confirmContinue, prettyNum } from "../utils/scripts";
+
+dotenv.config();
 
 export async function deployContractFactory() {
   const network = await hre.ethers.provider.getNetwork();
@@ -10,7 +13,6 @@ export async function deployContractFactory() {
   const chainId = Number(network.chainId);
 
   const deployerAddress = new Wallet(process.env.DEPLOYER_PRIVATE_KEY);
-  const balance = await hre.ethers.provider.getBalance(deployerAddress);
 
   console.log(`
     ////////////////////////////////////////////////////
@@ -23,7 +25,6 @@ export async function deployContractFactory() {
     chainId: chainId,
     network: networkName,
     deployerAddress: deployerAddress,
-    balance: prettyNum(balance.toString()),
   });
 
   console.log("Deploying ContractFactory.sol...");

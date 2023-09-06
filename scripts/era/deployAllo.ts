@@ -1,9 +1,12 @@
 import * as hre from "hardhat";
+import * as dotenv from "dotenv";
 import { Deployer } from "@matterlabs/hardhat-zksync-deploy";
 import { Wallet } from "zksync-web3";
 import { alloConfig } from "../config/allo.config";
 import { confirmContinue, prettyNum } from "../utils/scripts";
 import { registryConfig } from "../config/registry.config";
+
+dotenv.config();
 
 export async function deployAllo(_registryAddress? : string) {
     const network = await hre.ethers.provider.getNetwork();
@@ -11,7 +14,6 @@ export async function deployAllo(_registryAddress? : string) {
     const chainId = Number(network.chainId);
 
     const deployerAddress = new Wallet(process.env.DEPLOYER_PRIVATE_KEY);
-    const balance = await hre.ethers.provider.getBalance(deployerAddress);
 
     const registryAddress = _registryAddress ? _registryAddress : registryConfig[chainId].registryProxy;
 
@@ -35,7 +37,6 @@ export async function deployAllo(_registryAddress? : string) {
         percentFee: alloParams.percentFee,
         baseFee: alloParams.baseFee,
         deployerAddress: deployerAddress,
-        balance: prettyNum(balance.toString())
     });
 
     console.log("Deploying Allo...");
@@ -44,7 +45,12 @@ export async function deployAllo(_registryAddress? : string) {
     const Allo = await deployer.loadArtifact("Allo");
     const instance = await hre.zkUpgrades.deployProxy(
         deployer.zkWallet, Allo,
-        [alloConfig[chainId].owner],
+        [
+            registryAddress,
+            alloParams.treasury,
+            alloParams.percentFee,
+            alloParams.baseFee,
+        ],
         { initializer: "initialize" }
     );
 

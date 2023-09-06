@@ -1,7 +1,10 @@
 import hre from "hardhat";
+import * as dotenv from "dotenv";
 import { deployAllo } from "./deployAllo";
 import { deployRegistry } from "./deployRegistry";
 import { deployContractFactory } from "./deployContractFactory";
+
+dotenv.config();
 
 async function deployCore() {
   const networkName = await hre.network.name;
