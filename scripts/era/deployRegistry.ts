@@ -8,7 +8,7 @@ import { Wallet } from "zksync-web3";
 dotenv.config();
 
 export async function deployRegistry() {
-    const network = await hre.ethers.provider.getNetwork();
+    const network = await hre.network.config;
     const networkName = await hre.network.name;
     const chainId = Number(network.chainId);
 
@@ -24,7 +24,7 @@ export async function deployRegistry() {
         contract: "Registry.sol",
         chainId: chainId,
         network: networkName,
-        deployerAddress: deployerAddress,
+        deployerAddress: deployerAddress.address,
         registryOwner: registryConfig[chainId].owner,
     });
 
@@ -38,15 +38,9 @@ export async function deployRegistry() {
         { initializer: "initialize" }
     );
 
-    console.log("Registry deployed to:", instance.target);
+    console.log("Registry deployed to:", instance.address);
 
-    console.log("initializing...", instance.target);
-    await instance.initialize(
-        registryConfig[chainId].owner
-    );
-    console.log("Registry initializing!");
-  
-    return instance.target;
+    return instance.address;
 }
 
 // deployRegistry().catch((error) => {

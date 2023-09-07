@@ -8,9 +8,10 @@ import { confirmContinue, prettyNum } from "../utils/scripts";
 dotenv.config();
 
 export async function deployContractFactory() {
-  const network = await hre.ethers.provider.getNetwork();
-  const networkName = await hre.network.name;
-  const chainId = Number(network.chainId);
+
+    const network = await hre.network.config;
+    const networkName = await hre.network.name;
+    const chainId = Number(network.chainId);
 
   const deployerAddress = new Wallet(process.env.DEPLOYER_PRIVATE_KEY);
 
@@ -24,7 +25,7 @@ export async function deployContractFactory() {
     contract: "Deploy ContractFactory.sol",
     chainId: chainId,
     network: networkName,
-    deployerAddress: deployerAddress,
+    deployerAddress: deployerAddress.address,
   });
 
   console.log("Deploying ContractFactory.sol...");
@@ -38,11 +39,11 @@ export async function deployContractFactory() {
     ContractFactory,
     []
   );
-  console.log("ContractFactory deployed to:", instance.target);
+  console.log("ContractFactory deployed to:", instance.address);
 
   // await verifyContract(instance.target.toString());
 
-  return instance.target;
+  return instance.address;
 }
 
 // deployContractFactory().catch((error) => {

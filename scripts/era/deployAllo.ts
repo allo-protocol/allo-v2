@@ -9,7 +9,7 @@ import { registryConfig } from "../config/registry.config";
 dotenv.config();
 
 export async function deployAllo(_registryAddress? : string) {
-    const network = await hre.ethers.provider.getNetwork();
+    const network = await hre.network.config;
     const networkName = await hre.network.name;
     const chainId = Number(network.chainId);
 
@@ -36,7 +36,7 @@ export async function deployAllo(_registryAddress? : string) {
         treasury: alloParams.treasury,
         percentFee: alloParams.percentFee,
         baseFee: alloParams.baseFee,
-        deployerAddress: deployerAddress,
+        deployerAddress: deployerAddress.address,
     });
 
     console.log("Deploying Allo...");
@@ -54,18 +54,9 @@ export async function deployAllo(_registryAddress? : string) {
         { initializer: "initialize" }
     );
 
-    console.log("Allo deployed to:", instance.target);
+    console.log("Allo deployed to:", instance.address);
 
-    console.log("initializing...", instance.target);
-    await instance.initialize(
-        registryAddress,
-        alloParams.treasury,
-        alloParams.percentFee,
-        alloParams.baseFee,
-    );
-    console.log("Allo initializing!");
-  
-    return instance.target;
+    return instance.address;
 }
 
 // deployAllo().catch((error) => {

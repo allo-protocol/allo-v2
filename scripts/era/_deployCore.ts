@@ -7,8 +7,9 @@ import { deployContractFactory } from "./deployContractFactory";
 dotenv.config();
 
 async function deployCore() {
-  const networkName = await hre.network.name;
-
+        const network = await hre.network.config;
+        const networkName = await hre.network.name;
+    
   console.log(`
     ////////////////////////////////////////////////////
     Deploy core Allo V2 contracts to ${networkName}

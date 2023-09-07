@@ -112,8 +112,8 @@ export const alloConfig: DeployParams = {
   280: {
     alloImplementation: "0x0",
     alloProxy: "0x0",
-    treasury: "0X0",
+    treasury: "0xBa0BBfB320486119f97Ea9C4671dE5e45441B2b7",
     percentFee: 0,
-    baseFee: 0, 
-  }
+    baseFee: 0,
+  },
 };
