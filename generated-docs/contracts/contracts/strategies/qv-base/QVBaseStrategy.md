@@ -1,10 +1,10 @@
 # QVBaseStrategy
 
+*@thelostone-mc &lt;aditya@gitcoin.co&gt;, @0xKurt &lt;kurt@gitcoin.co&gt;, @codenamejason &lt;jason@gitcoin.co&gt;, @0xZakk &lt;zakk@gitcoin.co&gt;, @nfrgosselin &lt;nate@gitcoin.co&gt;*
 
+> QVBaseStrategy
 
-
-
-
+Base strategy for quadratic voting strategies
 
 
 
@@ -84,9 +84,9 @@ function allocationStartTime() external view returns (uint64)
 function allocators(address) external view returns (uint256 voiceCredits)
 ```
 
-allocator address =&gt; Allocator
+The details of the allocator are returned using their address
 
-
+*allocator address =&gt; Allocator*
 
 #### Parameters
 
@@ -206,13 +206,13 @@ Get the recipient
 
 | Name | Type | Description |
 |---|---|---|
-| _recipientId | address | Id of the recipient |
+| _recipientId | address | ID of the recipient |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | QVBaseStrategy.Recipient | undefined |
+| _0 | QVBaseStrategy.Recipient | The recipient |
 
 ### getRecipientStatus
 
@@ -275,7 +275,7 @@ Increases the pool amount.
 function initialize(uint256 _poolId, bytes _data) external nonpayable
 ```
 
-==================================== =========== Initialize ============= ====================================
+Initialize the strategy
 
 
 
@@ -283,8 +283,8 @@ function initialize(uint256 _poolId, bytes _data) external nonpayable
 
 | Name | Type | Description |
 |---|---|---|
-| _poolId | uint256 | undefined |
-| _data | bytes | undefined |
+| _poolId | uint256 | The ID of the pool |
+| _data | bytes | The initialization data for the strategy |
 
 ### isPoolActive
 
@@ -331,7 +331,7 @@ Checks if the &#39;_allocator&#39; is a valid allocator.
 function metadataRequired() external view returns (bool)
 ```
 
-
+Whether or not the strategy requires metadata
 
 
 
@@ -348,9 +348,9 @@ function metadataRequired() external view returns (bool)
 function paidOut(address) external view returns (bool)
 ```
 
-recipientId =&gt; paid out
+Returns whether or not the recipient has been paid out using their ID
 
-
+*recipientId =&gt; paid out*
 
 #### Parameters
 
@@ -367,12 +367,12 @@ recipientId =&gt; paid out
 ### recipients
 
 ```solidity
-function recipients(address) external view returns (bool useRegistryAnchor, address recipientAddress, struct Metadata metadata, enum IStrategy.Status recipientStatus, uint256 totalVotesReceived)
+function recipients(address) external view returns (uint256 totalVotesReceived, bool useRegistryAnchor, address recipientAddress, struct Metadata metadata, enum IStrategy.Status recipientStatus)
 ```
 
-recipientId =&gt; Recipient
+The details of the recipient are returned using their ID
 
-
+*recipientId =&gt; Recipient*
 
 #### Parameters
 
@@ -384,11 +384,11 @@ recipientId =&gt; Recipient
 
 | Name | Type | Description |
 |---|---|---|
+| totalVotesReceived | uint256 | undefined |
 | useRegistryAnchor | bool | undefined |
 | recipientAddress | address | undefined |
 | metadata | Metadata | undefined |
 | recipientStatus | enum IStrategy.Status | undefined |
-| totalVotesReceived | uint256 | undefined |
 
 ### registerRecipient
 
@@ -436,9 +436,9 @@ function registrationEndTime() external view returns (uint64)
 function registrationStartTime() external view returns (uint64)
 ```
 
+The start and end times for registrations and allocations
 
-
-
+*The values will be in milliseconds since the epoch*
 
 
 #### Returns
@@ -453,7 +453,7 @@ function registrationStartTime() external view returns (uint64)
 function registryGating() external view returns (bool)
 ```
 
-
+Whether or not the strategy is using registry gating
 
 
 
@@ -470,9 +470,9 @@ function registryGating() external view returns (bool)
 function reviewRecipients(address[] _recipientIds, enum IStrategy.Status[] _recipientStatuses) external nonpayable
 ```
 
-Review recipient application
+Review recipient(s) application(s)
 
-
+*You can review multiple recipients at once or just one. This can only be called by a pool manager and      only during active registration.*
 
 #### Parameters
 
@@ -487,7 +487,7 @@ Review recipient application
 function reviewThreshold() external view returns (uint256)
 ```
 
-
+The number of votes required to review a recipient
 
 
 
@@ -527,7 +527,7 @@ function reviewsByStatus(address, enum IStrategy.Status) external view returns (
 function totalRecipientVotes() external view returns (uint256)
 ```
 
-
+The total number of votes cast for all recipients
 
 
 
@@ -640,7 +640,7 @@ Emitted when pool is set to active status.
 event RecipientStatusUpdated(address indexed recipientId, enum IStrategy.Status status, address sender)
 ```
 
-
+Emitted when a recipient is registered
 
 
 
@@ -648,9 +648,9 @@ event RecipientStatusUpdated(address indexed recipientId, enum IStrategy.Status 
 
 | Name | Type | Description |
 |---|---|---|
-| recipientId `indexed` | address | undefined |
-| status  | enum IStrategy.Status | undefined |
-| sender  | address | undefined |
+| recipientId `indexed` | address | ID of the recipient |
+| status  | enum IStrategy.Status | The status of the recipient |
+| sender  | address | The sender of the transaction |
 
 ### Registered
 
@@ -676,7 +676,7 @@ Emitted when a recipient is registered.
 event Reviewed(address indexed recipientId, enum IStrategy.Status status, address sender)
 ```
 
-
+Emitted when a recipient is reviewed
 
 
 
@@ -684,9 +684,9 @@ event Reviewed(address indexed recipientId, enum IStrategy.Status status, addres
 
 | Name | Type | Description |
 |---|---|---|
-| recipientId `indexed` | address | undefined |
-| status  | enum IStrategy.Status | undefined |
-| sender  | address | undefined |
+| recipientId `indexed` | address | ID of the recipient |
+| status  | enum IStrategy.Status | The status of the recipient |
+| sender  | address | The sender of the transaction |
 
 ### TimestampsUpdated
 
@@ -694,7 +694,7 @@ event Reviewed(address indexed recipientId, enum IStrategy.Status status, addres
 event TimestampsUpdated(uint64 registrationStartTime, uint64 registrationEndTime, uint64 allocationStartTime, uint64 allocationEndTime, address sender)
 ```
 
-
+Emitted when the pool timestamps are updated
 
 
 
@@ -702,11 +702,11 @@ event TimestampsUpdated(uint64 registrationStartTime, uint64 registrationEndTime
 
 | Name | Type | Description |
 |---|---|---|
-| registrationStartTime  | uint64 | undefined |
-| registrationEndTime  | uint64 | undefined |
-| allocationStartTime  | uint64 | undefined |
-| allocationEndTime  | uint64 | undefined |
-| sender  | address | undefined |
+| registrationStartTime  | uint64 | The start time for the registration |
+| registrationEndTime  | uint64 | The end time for the registration |
+| allocationStartTime  | uint64 | The start time for the allocation |
+| allocationEndTime  | uint64 | The end time for the allocation |
+| sender  | address | The sender of the transaction |
 
 ### UpdatedRegistration
 
@@ -722,7 +722,7 @@ Emitted when a recipient updates their registration
 
 | Name | Type | Description |
 |---|---|---|
-| recipientId `indexed` | address | Id of the recipient |
+| recipientId `indexed` | address | ID of the recipient |
 | data  | bytes | The encoded data - (address recipientId, address recipientAddress, Metadata metadata) |
 | sender  | address | The sender of the transaction |
 | status  | enum IStrategy.Status | The updated status of the recipient |
@@ -781,7 +781,7 @@ Thrown when data is already intialized
 error AMOUNT_MISMATCH()
 ```
 
-
+Thrown when the amount of tokens sent does not match the amount of tokens expected
 
 
 

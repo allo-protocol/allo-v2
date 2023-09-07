@@ -3,9 +3,7 @@ pragma solidity 0.8.19;
 
 // External Libraries
 import {ERC721} from "solady/src/tokens/ERC721.sol";
-import {
-    Attestation, AttestationRequest, AttestationRequestData, IEAS, RevocationRequest
-} from "eas-contracts/IEAS.sol";
+import {IEAS, Attestation, AttestationRequest, AttestationRequestData} from "eas-contracts/IEAS.sol";
 import {ISchemaRegistry, ISchemaResolver, SchemaRecord} from "eas-contracts/ISchemaRegistry.sol";
 // Core Contracts
 import {SchemaResolver} from "./SchemaResolver.sol";

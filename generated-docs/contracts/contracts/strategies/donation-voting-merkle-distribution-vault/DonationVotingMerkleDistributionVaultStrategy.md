@@ -27,6 +27,23 @@ Address of the native token
 |---|---|---|
 | _0 | address | undefined |
 
+### PERMIT2
+
+```solidity
+function PERMIT2() external view returns (contract ISignatureTransfer)
+```
+
+the permit2 interface
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | contract ISignatureTransfer | undefined |
+
 ### allocate
 
 ```solidity
@@ -991,7 +1008,7 @@ Thrown when data is already intialized
 error AMOUNT_MISMATCH()
 ```
 
-
+Thrown when the amount of tokens sent does not match the amount of tokens expected
 
 
 

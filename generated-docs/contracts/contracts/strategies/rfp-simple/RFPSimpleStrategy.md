@@ -768,7 +768,7 @@ Thrown when data is already intialized
 error AMOUNT_MISMATCH()
 ```
 
-
+Thrown when the amount of tokens sent does not match the amount of tokens expected
 
 
 

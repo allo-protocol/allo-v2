@@ -67,15 +67,15 @@ Address of the native token
 function acceptProfileOwnership(bytes32 _profileId) external nonpayable
 ```
 
-Transfers the ownership of the profile to the pending owner         Emits a &#39;ProfileOwnerUdpated()&#39; event.
+Transfers the ownership of the profile to the pending owner and Emits a &#39;ProfileOwnerUdpated()&#39; event.
 
-*&#39;msg.sender&#39; must be the pending owner of the profile.       This is step two of two when transferring ownership.*
+*&#39;msg.sender&#39; must be the pending owner of the profile. [2]*This is step two of two when transferring ownership.*
 
 #### Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| _profileId | bytes32 | The &#39;profileId&#39; of the profile |
+| _profileId | bytes32 | The ID of the profile |
 
 ### addMembers
 
@@ -85,13 +85,13 @@ function addMembers(bytes32 _profileId, address[] _members) external nonpayable
 
 Adds members to the profile
 
-*&#39;msg.sender&#39; must be the pending owner of the profile.*
+*&#39;msg.sender&#39; must be the owner of the profile.*
 
 #### Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| _profileId | bytes32 | The &#39;profileId&#39; of the profile |
+| _profileId | bytes32 | The ID of the profile |
 | _members | address[] | The members to add |
 
 ### anchorToProfileId
@@ -100,9 +100,9 @@ Adds members to the profile
 function anchorToProfileId(address) external view returns (bytes32)
 ```
 
-anchor -&gt; Profile.id
+This maps the anchor address to the profile ID
 
-
+*anchor -&gt; Profile.id*
 
 #### Parameters
 
@@ -162,7 +162,7 @@ Retrieve profile by anchor
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | IRegistry.Profile | Profile for the anchor passed |
+| _0 | IRegistry.Profile | Profile details for the `_anchor` |
 
 ### getProfileById
 
@@ -178,13 +178,13 @@ Retrieve profile by profileId
 
 | Name | Type | Description |
 |---|---|---|
-| _profileId | bytes32 | The profileId of the profile |
+| _profileId | bytes32 | The ID of the profile |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | IRegistry.Profile | The Profile  for the profileId |
+| _0 | IRegistry.Profile | The Profile details for the `_profileId` |
 
 ### getRoleAdmin
 
@@ -256,7 +256,7 @@ function initialize(address _owner) external nonpayable
 
 Initializes the contract after an upgrade
 
-*During upgrade -&gt; a higher version should be passed to reinitializerReverts if the &#39;_owner&#39; is the &#39;address(0)&#39;*
+*During upgrade -&gt; a higher version should be passed to reinitializer. Reverts if the &#39;_owner&#39; is the &#39;address(0)&#39;*
 
 #### Parameters
 
@@ -270,7 +270,7 @@ Initializes the contract after an upgrade
 function isMemberOfProfile(bytes32 _profileId, address _member) external view returns (bool)
 ```
 
-Returns if the given address is an member of the profile
+Checks if the given address is a member of the profile
 
 
 
@@ -278,14 +278,14 @@ Returns if the given address is an member of the profile
 
 | Name | Type | Description |
 |---|---|---|
-| _profileId | bytes32 | The &#39;profileId&#39; of the profile |
+| _profileId | bytes32 | The ID of the profile |
 | _member | address | The address to check |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | bool | &#39;true&#39; if the address is an member of the profile, otherwise &#39;false&#39; |
+| _0 | bool | &#39;true&#39; if the address is a member of the profile, otherwise &#39;false&#39; |
 
 ### isOwnerOfProfile
 
@@ -301,7 +301,7 @@ Checks if the given address is an owner of the profile
 
 | Name | Type | Description |
 |---|---|---|
-| _profileId | bytes32 | The &#39;profileId&#39; of the profile |
+| _profileId | bytes32 | The ID of the profile |
 | _owner | address | The address to check |
 
 #### Returns
@@ -324,14 +324,14 @@ Checks if the address is an owner or member of the profile
 
 | Name | Type | Description |
 |---|---|---|
-| _profileId | bytes32 | The &#39;profileId&#39; of the profile |
+| _profileId | bytes32 | The ID of the profile |
 | _account | address | The address to check |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | bool | &#39;true&#39; if the address is an owner or member of the profile, otherwise &#39;fasle&#39; |
+| _0 | bool | &#39;true&#39; if the address is an owner or member of the profile, otherwise &#39;false&#39; |
 
 ### profileIdToPendingOwner
 
@@ -339,9 +339,9 @@ Checks if the address is an owner or member of the profile
 function profileIdToPendingOwner(bytes32) external view returns (address)
 ```
 
-Profile.id -&gt; pending owner
+This maps the profile ID to the pending owner
 
-
+*Profile.id -&gt; pending owner*
 
 #### Parameters
 
@@ -361,9 +361,9 @@ Profile.id -&gt; pending owner
 function profilesById(bytes32) external view returns (bytes32 id, uint256 nonce, string name, struct Metadata metadata, address owner, address anchor)
 ```
 
-Profile.id -&gt; Profile
+This maps the profile ID to the profile details
 
-
+*Profile.id -&gt; Profile*
 
 #### Parameters
 
@@ -413,7 +413,7 @@ Removes members from the profile
 
 | Name | Type | Description |
 |---|---|---|
-| _profileId | bytes32 | The &#39;profileId&#39; of the profile |
+| _profileId | bytes32 | The ID of the profile |
 | _members | address[] | The members to remove |
 
 ### renounceRole
@@ -492,12 +492,12 @@ function updateProfileMetadata(bytes32 _profileId, Metadata _metadata) external 
 ### updateProfileName
 
 ```solidity
-function updateProfileName(bytes32 _profileId, string _name) external nonpayable returns (address)
+function updateProfileName(bytes32 _profileId, string _name) external nonpayable returns (address anchor)
 ```
 
-Updates the name of the profile and generates new anchor.         Emits a &#39;ProfileNameUpdated()&#39; event. Note: Use caution when updating your profile name as it will generate a new anchor address Note: You can always update the name back to the original name to get the original anchor address
+Updates the name of the profile and generates new anchor.         Emits a &#39;ProfileNameUpdated()&#39; event.
 
-*&#39;msg.sender&#39; must be the owner of the profile*
+*Use caution when updating your profile name as it will generate a new anchor address. You can always update the name      back to the original name to get the original anchor address. &#39;msg.sender&#39; must be the owner of the profile.*
 
 #### Parameters
 
@@ -510,7 +510,7 @@ Updates the name of the profile and generates new anchor.         Emits a &#39;P
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | address | The new anchor |
+| anchor | address | The new anchor |
 
 ### updateProfilePendingOwner
 
@@ -520,14 +520,14 @@ function updateProfilePendingOwner(bytes32 _profileId, address _pendingOwner) ex
 
 Updates the pending owner of the profile. Emits a &#39;ProfilePendingOwnership()&#39; event.
 
-*&#39;msg.sender&#39; must be the owner of the profile.       This is step one of two when transferring ownership.*
+*&#39;msg.sender&#39; must be the owner of the profile. [1]*This is step one of two when transferring ownership.*
 
 #### Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| _profileId | bytes32 | The &#39;profileId&#39; of the profile |
-| _pendingOwner | address | New pending owner |
+| _profileId | bytes32 | The ID of the profile |
+| _pendingOwner | address | The new pending owner |
 
 
 
@@ -747,7 +747,7 @@ Thrown when data is already intialized
 error AMOUNT_MISMATCH()
 ```
 
-
+Thrown when the amount of tokens sent does not match the amount of tokens expected
 
 
 

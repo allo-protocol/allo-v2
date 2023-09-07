@@ -132,7 +132,7 @@ Register multiple recipients to multiple pools.
 
 | Name | Type | Description |
 |---|---|---|
-| recipientIds | address[] | The recipientIds that have been registered |
+| recipientIds | address[] | The recipient IDs that have been registered |
 
 ### cancelOwnershipHandover
 
@@ -250,7 +250,7 @@ Fund a pool.
 | Name | Type | Description |
 |---|---|---|
 | _poolId | uint256 | ID of the pool |
-| _amount | uint256 | amount to be deposited into the pool |
+| _amount | uint256 | The amount to be deposited into the pool |
 
 ### getBaseFee
 
@@ -301,7 +301,7 @@ Getter for fee percentage.
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | uint256 | The fee percentage |
+| _0 | uint256 | The fee percentage (1e18 = 100%) |
 
 ### getPool
 
@@ -583,8 +583,8 @@ Transfer the funds recovered  to the recipient
 
 | Name | Type | Description |
 |---|---|---|
-| _token | address | The address of the token to transfer |
-| _recipient | address | The address of the recipient |
+| _token | address | The token to transfer |
+| _recipient | address | The recipient |
 
 ### registerRecipient
 
@@ -607,7 +607,7 @@ Passes _data through to the strategy for that pool.
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | address | recipientId The recipientId that has been registered |
+| _0 | address | recipientId The recipient ID that has been registered |
 
 ### removeFromCloneableStrategies
 
@@ -1163,7 +1163,7 @@ Thrown when data is already intialized
 error AMOUNT_MISMATCH()
 ```
 
-
+Thrown when the amount of tokens sent does not match the amount of tokens expected
 
 
 

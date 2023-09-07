@@ -1,10 +1,10 @@
-# DonationVotingStrategy
+# ProportionalPayoutStrategy
 
+*allo-team*
 
+> Proportional Payout Strategy
 
-
-
-
+This strategy allows the allocator to allocate votes to recipients
 
 
 
@@ -77,67 +77,6 @@ function allocationStartTime() external view returns (uint64)
 | Name | Type | Description |
 |---|---|---|
 | _0 | uint64 | undefined |
-
-### allowedTokens
-
-```solidity
-function allowedTokens(address) external view returns (bool)
-```
-
-token -&gt; bool
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bool | undefined |
-
-### claim
-
-```solidity
-function claim(DonationVotingStrategy.Claim[] _claims) external nonpayable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _claims | DonationVotingStrategy.Claim[] | undefined |
-
-### claims
-
-```solidity
-function claims(address, address) external view returns (uint256)
-```
-
-recipientId -&gt; token -&gt; amount
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
-| _1 | address | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
 
 ### distribute
 
@@ -234,7 +173,7 @@ Getter for the &#39;poolId&#39;.
 ### getRecipient
 
 ```solidity
-function getRecipient(address _recipientId) external view returns (struct DonationVotingStrategy.Recipient)
+function getRecipient(address _recipientId) external view returns (struct ProportionalPayoutStrategy.Recipient)
 ```
 
 Get the recipient
@@ -251,7 +190,7 @@ Get the recipient
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | DonationVotingStrategy.Recipient | undefined |
+| _0 | ProportionalPayoutStrategy.Recipient | undefined |
 
 ### getRecipientStatus
 
@@ -291,6 +230,28 @@ Getter for the &#39;strategyId&#39;.
 | Name | Type | Description |
 |---|---|---|
 | _0 | bytes32 | The ID of the strategy |
+
+### hasAllocated
+
+```solidity
+function hasAllocated(uint256) external view returns (bool)
+```
+
+nftId =&gt; has allocated
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
 
 ### increasePoolAmount
 
@@ -364,10 +325,10 @@ Checks if the &#39;_allocator&#39; is a valid allocator.
 |---|---|---|
 | _0 | bool | &#39;true&#39; if the address is a valid allocator, &#39;false&#39; otherwise |
 
-### metadataRequired
+### maxRecipientsAllowed
 
 ```solidity
-function metadataRequired() external view returns (bool)
+function maxRecipientsAllowed() external view returns (uint256)
 ```
 
 
@@ -379,15 +340,54 @@ function metadataRequired() external view returns (bool)
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | bool | undefined |
+| _0 | uint256 | undefined |
 
-### payoutSummaries
+### nft
 
 ```solidity
-function payoutSummaries(address) external view returns (address recipientAddress, uint256 amount)
+function nft() external view returns (contract ERC721)
 ```
 
-recipientId -&gt; PayoutSummary
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | contract ERC721 | undefined |
+
+### paidOut
+
+```solidity
+function paidOut(address) external view returns (bool)
+```
+
+recipientId =&gt; paid out
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
+### recipients
+
+```solidity
+function recipients(address) external view returns (address recipientAddress, struct Metadata metadata, enum IStrategy.Status recipientStatus, uint256 totalVotesReceived)
+```
+
+recipientId =&gt; Recipient
 
 
 
@@ -402,7 +402,26 @@ recipientId -&gt; PayoutSummary
 | Name | Type | Description |
 |---|---|---|
 | recipientAddress | address | undefined |
-| amount | uint256 | undefined |
+| metadata | Metadata | undefined |
+| recipientStatus | enum IStrategy.Status | undefined |
+| totalVotesReceived | uint256 | undefined |
+
+### recipientsCounter
+
+```solidity
+function recipientsCounter() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
 
 ### registerRecipient
 
@@ -427,47 +446,13 @@ Registers a recipient.
 |---|---|---|
 | recipientId | address | The recipientId |
 
-### registrationEndTime
+### setAllocationTime
 
 ```solidity
-function registrationEndTime() external view returns (uint64)
+function setAllocationTime(uint64 _allocationStartTime, uint64 _allocationEndTime) external nonpayable
 ```
 
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint64 | undefined |
-
-### registrationStartTime
-
-```solidity
-function registrationStartTime() external view returns (uint64)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint64 | undefined |
-
-### reviewRecipients
-
-```solidity
-function reviewRecipients(address[] _recipientIds, enum IStrategy.Status[] _recipientStatuses) external nonpayable
-```
-
-Review recipient application
+Set the allocation start and end timestamps
 
 
 
@@ -475,30 +460,13 @@ Review recipient application
 
 | Name | Type | Description |
 |---|---|---|
-| _recipientIds | address[] | Ids of the recipients |
-| _recipientStatuses | enum IStrategy.Status[] | Statuses of the recipients |
+| _allocationStartTime | uint64 | The allocation start timestamp |
+| _allocationEndTime | uint64 | The allocation end timestamp |
 
-### setPayout
-
-```solidity
-function setPayout(address[] _recipientIds, uint256[] _amounts) external nonpayable
-```
-
-Set payout for the recipients
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _recipientIds | address[] | Ids of the recipients |
-| _amounts | uint256[] | Amounts to be paid out |
-
-### totalPayoutAmount
+### totalAllocations
 
 ```solidity
-function totalPayoutAmount() external view returns (uint256)
+function totalAllocations() external view returns (uint256)
 ```
 
 
@@ -511,58 +479,6 @@ function totalPayoutAmount() external view returns (uint256)
 | Name | Type | Description |
 |---|---|---|
 | _0 | uint256 | undefined |
-
-### updatePoolTimestamps
-
-```solidity
-function updatePoolTimestamps(uint64 _registrationStartTime, uint64 _registrationEndTime, uint64 _allocationStartTime, uint64 _allocationEndTime) external nonpayable
-```
-
-Set the start and end dates for the pool
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _registrationStartTime | uint64 | The start time for the registration |
-| _registrationEndTime | uint64 | The end time for the registration |
-| _allocationStartTime | uint64 | The start time for the allocation |
-| _allocationEndTime | uint64 | The end time for the allocation |
-
-### useRegistryAnchor
-
-```solidity
-function useRegistryAnchor() external view returns (bool)
-```
-
-================================ ========== Storage ============= ================================
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bool | undefined |
-
-### withdraw
-
-```solidity
-function withdraw(uint256 _amount) external nonpayable
-```
-
-Withdraw funds from pool
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _amount | uint256 | The amount to be withdrawn |
 
 
 
@@ -587,13 +503,13 @@ Emitted when a recipient is allocated to.
 | token  | address | The token allocated |
 | sender  | address | undefined |
 
-### Claimed
+### AllocationTimeSet
 
 ```solidity
-event Claimed(address indexed recipientId, address recipientAddress, uint256 amount, address token)
+event AllocationTimeSet(uint256 startTime, uint256 endTime)
 ```
 
-
+===================== ======= Events ====== =====================
 
 
 
@@ -601,10 +517,8 @@ event Claimed(address indexed recipientId, address recipientAddress, uint256 amo
 
 | Name | Type | Description |
 |---|---|---|
-| recipientId `indexed` | address | undefined |
-| recipientAddress  | address | undefined |
-| amount  | uint256 | undefined |
-| token  | address | undefined |
+| startTime  | uint256 | undefined |
+| endTime  | uint256 | undefined |
 
 ### Distributed
 
@@ -644,22 +558,6 @@ Emitted when strategy is initialized.
 | poolId  | uint256 | The ID of the pool |
 | data  | bytes | undefined |
 
-### PayoutSet
-
-```solidity
-event PayoutSet(bytes recipientIds)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| recipientIds  | bytes | undefined |
-
 ### PoolActive
 
 ```solidity
@@ -675,24 +573,6 @@ Emitted when pool is set to active status.
 | Name | Type | Description |
 |---|---|---|
 | active  | bool | The status of the pool |
-
-### RecipientStatusUpdated
-
-```solidity
-event RecipientStatusUpdated(address indexed recipientId, enum IStrategy.Status recipientStatus, address sender)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| recipientId `indexed` | address | undefined |
-| recipientStatus  | enum IStrategy.Status | undefined |
-| sender  | address | undefined |
 
 ### Registered
 
@@ -711,45 +591,6 @@ Emitted when a recipient is registered.
 | recipientId `indexed` | address | The ID of the recipient |
 | data  | bytes | The data passed to the &#39;registerRecipient&#39; function |
 | sender  | address | The sender |
-
-### TimestampsUpdated
-
-```solidity
-event TimestampsUpdated(uint64 registrationStartTime, uint64 registrationEndTime, uint64 allocationStartTime, uint64 allocationEndTime, address sender)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| registrationStartTime  | uint64 | undefined |
-| registrationEndTime  | uint64 | undefined |
-| allocationStartTime  | uint64 | undefined |
-| allocationEndTime  | uint64 | undefined |
-| sender  | address | undefined |
-
-### UpdatedRegistration
-
-```solidity
-event UpdatedRegistration(address indexed recipientId, bytes data, address sender, enum IStrategy.Status status)
-```
-
-Emitted when a recipient updates their registration
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| recipientId `indexed` | address | Id of the recipient |
-| data  | bytes | The encoded data - (address recipientId, address recipientAddress, Metadata metadata) |
-| sender  | address | The sender of the transaction |
-| status  | enum IStrategy.Status | The updated status of the recipient |
 
 
 
@@ -805,7 +646,7 @@ Thrown when data is already intialized
 error AMOUNT_MISMATCH()
 ```
 
-
+Thrown when the amount of tokens sent does not match the amount of tokens expected
 
 
 
@@ -894,6 +735,17 @@ error IS_APPROVED_STRATEGY()
 ```
 
 Thrown when the strategy is approved and should be cloned
+
+
+
+
+### MAX_REACHED
+
+```solidity
+error MAX_REACHED()
+```
+
+===================== ======= Errors ====== =====================
 
 
 

@@ -1,10 +1,10 @@
-# LockupDynamicStrategy
+# DirectGrantsSimpleStrategy
 
+*@thelostone-mc &lt;aditya@gitcoin.co&gt;, @0xKurt &lt;kurt@gitcoin.co&gt;, @codenamejason &lt;jason@gitcoin.co&gt;, @0xZakk &lt;zakk@gitcoin.co&gt;, @nfrgosselin &lt;nate@gitcoin.co&gt;*
 
+> Direct Grants Simple Strategy.
 
-
-
-
+Strategy used to allocate &amp; distribute funds to recipients with milestone payouts. The milestones         are set by the recipient and the pool manager can accept or reject the milestone. The pool manager         can also reject the recipient.
 
 
 
@@ -50,7 +50,7 @@ Allocates to a recipient.
 function allocatedGrantAmount() external view returns (uint256)
 ```
 
-
+The total amount allocated to grant/recipient.
 
 
 
@@ -60,58 +60,6 @@ function allocatedGrantAmount() external view returns (uint256)
 | Name | Type | Description |
 |---|---|---|
 | _0 | uint256 | undefined |
-
-### broker
-
-```solidity
-function broker() external view returns (address account, UD60x18 fee)
-```
-
-See https://docs.sablier.com/concepts/protocol/fees#broker-fees
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| account | address | undefined |
-| fee | UD60x18 | undefined |
-
-### cancelStream
-
-```solidity
-function cancelStream(address _recipientId, uint256 _streamId) external nonpayable
-```
-
-Cancel the stream and adjust the contract amounts.
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _recipientId | address | Id of the recipient |
-| _streamId | uint256 | The id of the stream |
-
-### changeRecipientSegments
-
-```solidity
-function changeRecipientSegments(address _recipientId, LockupDynamic.SegmentWithDelta[] _segments) external nonpayable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _recipientId | address | undefined |
-| _segments | LockupDynamic.SegmentWithDelta[] | undefined |
 
 ### distribute
 
@@ -131,28 +79,6 @@ Distributes funds (tokens) to recipients.
 | _data | bytes | The data to use to distribute to the recipients |
 | _sender | address | The address of the sender |
 
-### getAllRecipientStreamIds
-
-```solidity
-function getAllRecipientStreamIds(address _recipientId) external view returns (uint256[])
-```
-
-Get the recipient&#39;s stream ids
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _recipientId | address | Id of the recipient |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256[] | undefined |
-
 ### getAllo
 
 ```solidity
@@ -170,22 +96,50 @@ Getter for the &#39;Allo&#39; contract.
 |---|---|---|
 | _0 | contract IAllo | The Allo contract |
 
-### getBroker
+### getMilestoneStatus
 
 ```solidity
-function getBroker() external view returns (struct Broker)
+function getMilestoneStatus(address _recipientId, uint256 _milestoneId) external view returns (enum IStrategy.Status)
 ```
 
-Get the broker
+Get the status of the milestone of an recipient.
 
+*This is used to check the status of the milestone of an recipient and is strategy specific*
 
+#### Parameters
 
+| Name | Type | Description |
+|---|---|---|
+| _recipientId | address | ID of the recipient |
+| _milestoneId | uint256 | ID of the milestone |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | Broker | undefined |
+| _0 | enum IStrategy.Status | Status Returns the status of the milestone using the &#39;Status&#39; enum |
+
+### getMilestones
+
+```solidity
+function getMilestones(address _recipientId) external view returns (struct DirectGrantsSimpleStrategy.Milestone[])
+```
+
+Get the milestones.
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _recipientId | address | ID of the recipient |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | DirectGrantsSimpleStrategy.Milestone[] | Milestone[] Returns the milestones for a &#39;recipientId&#39; |
 
 ### getPayouts
 
@@ -209,29 +163,6 @@ Gets the payout summary for recipients.
 | Name | Type | Description |
 |---|---|---|
 | _0 | IStrategy.PayoutSummary[] | The payout summary for the recipients |
-
-### getPayouts
-
-```solidity
-function getPayouts(address[] _recipientIds, bytes) external view returns (struct IStrategy.PayoutSummary[] payouts)
-```
-
-Returns the payout summary for the accepted recipient
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _recipientIds | address[] | undefined |
-| _1 | bytes | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| payouts | IStrategy.PayoutSummary[] | undefined |
 
 ### getPoolAmount
 
@@ -270,7 +201,7 @@ Getter for the &#39;poolId&#39;.
 ### getRecipient
 
 ```solidity
-function getRecipient(address _recipientId) external view returns (struct LockupDynamicStrategy.Recipient)
+function getRecipient(address _recipientId) external view returns (struct DirectGrantsSimpleStrategy.Recipient)
 ```
 
 Get the recipient
@@ -281,13 +212,13 @@ Get the recipient
 
 | Name | Type | Description |
 |---|---|---|
-| _recipientId | address | undefined |
+| _recipientId | address | ID of the recipient |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | LockupDynamicStrategy.Recipient | undefined |
+| _0 | DirectGrantsSimpleStrategy.Recipient | Recipient Returns the recipient |
 
 ### getRecipientStatus
 
@@ -310,51 +241,6 @@ Getter for the status of a recipient.
 | Name | Type | Description |
 |---|---|---|
 | _0 | enum IStrategy.Status | The status of the recipient |
-
-### getRecipientStreamId
-
-```solidity
-function getRecipientStreamId(address _recipientId, uint256 streamIdIndex) external view returns (uint256)
-```
-
-Get the recipient&#39;s stream id at the given index
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _recipientId | address | Id of the recipient |
-| streamIdIndex | uint256 | Index of the stream id |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
-### getStatus
-
-```solidity
-function getStatus(address _recipientId) external view returns (enum IStrategy.Status)
-```
-
-Get recipient status
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _recipientId | address | Id of the recipient |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | enum IStrategy.Status | undefined |
 
 ### getStrategyId
 
@@ -379,7 +265,7 @@ Getter for the &#39;strategyId&#39;.
 function grantAmountRequired() external view returns (bool)
 ```
 
-
+Flag to check if grant amount is required.
 
 
 
@@ -412,7 +298,7 @@ Increases the pool amount.
 function initialize(uint256 _poolId, bytes _data) external nonpayable
 ```
 
-=============================== ========= Initialize ========== ===============================
+Initialize the strategy
 
 
 
@@ -420,8 +306,8 @@ function initialize(uint256 _poolId, bytes _data) external nonpayable
 
 | Name | Type | Description |
 |---|---|---|
-| _poolId | uint256 | undefined |
-| _data | bytes | undefined |
+| _poolId | uint256 | ID of the pool |
+| _data | bytes | The data to be decoded |
 
 ### isPoolActive
 
@@ -462,30 +348,13 @@ Checks if the &#39;_allocator&#39; is a valid allocator.
 |---|---|---|
 | _0 | bool | &#39;true&#39; if the address is a valid allocator, &#39;false&#39; otherwise |
 
-### lockupDynamic
-
-```solidity
-function lockupDynamic() external view returns (contract ISablierV2LockupDynamic)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | contract ISablierV2LockupDynamic | undefined |
-
 ### metadataRequired
 
 ```solidity
 function metadataRequired() external view returns (bool)
 ```
 
-
+Flag to check if metadata is required.
 
 
 
@@ -495,6 +364,31 @@ function metadataRequired() external view returns (bool)
 | Name | Type | Description |
 |---|---|---|
 | _0 | bool | undefined |
+
+### milestones
+
+```solidity
+function milestones(address, uint256) external view returns (uint256 amountPercentage, struct Metadata metadata, enum IStrategy.Status milestoneStatus)
+```
+
+This maps accepted recipients to their milestones
+
+*&#39;recipientId&#39; to &#39;Milestone&#39;*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+| _1 | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| amountPercentage | uint256 | undefined |
+| metadata | Metadata | undefined |
+| milestoneStatus | enum IStrategy.Status | undefined |
 
 ### registerRecipient
 
@@ -525,7 +419,7 @@ Registers a recipient.
 function registryGating() external view returns (bool)
 ```
 
-================================ ========== Storage ============= ================================
+Flag to check if registry gating is enabled.
 
 
 
@@ -536,10 +430,44 @@ function registryGating() external view returns (bool)
 |---|---|---|
 | _0 | bool | undefined |
 
-### setBroker
+### rejectMilestone
 
 ```solidity
-function setBroker(Broker _broker) external nonpayable
+function rejectMilestone(address _recipientId, uint256 _milestoneId) external nonpayable
+```
+
+Reject pending milestone of the recipient.
+
+*&#39;msg.sender&#39; must be a pool manager to reject a milestone. Emits a &#39;MilestonesStatusChanged()&#39; event.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _recipientId | address | ID of the recipient |
+| _milestoneId | uint256 | ID of the milestone |
+
+### reviewSetMilestones
+
+```solidity
+function reviewSetMilestones(address _recipientId, enum IStrategy.Status _status) external nonpayable
+```
+
+Set milestones of the recipient
+
+*Emits a &#39;MilestonesReviewed()&#39; event*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _recipientId | address | ID of the recipient |
+| _status | enum IStrategy.Status | The status of the milestone review |
+
+### setMilestones
+
+```solidity
+function setMilestones(address _recipientId, DirectGrantsSimpleStrategy.Milestone[] _milestones) external nonpayable
 ```
 
 
@@ -550,7 +478,24 @@ function setBroker(Broker _broker) external nonpayable
 
 | Name | Type | Description |
 |---|---|---|
-| _broker | Broker | undefined |
+| _recipientId | address | undefined |
+| _milestones | DirectGrantsSimpleStrategy.Milestone[] | undefined |
+
+### setPoolActive
+
+```solidity
+function setPoolActive(bool _flag) external nonpayable
+```
+
+Toggle the status between active and inactive.
+
+*&#39;msg.sender&#39; must be a pool manager to close the pool. Emits a &#39;PoolActive()&#39; event.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _flag | bool | The flag to set the pool to active or inactive |
 
 ### setRecipientStatusToInReview
 
@@ -558,7 +503,23 @@ function setBroker(Broker _broker) external nonpayable
 function setRecipientStatusToInReview(address[] _recipientIds) external nonpayable
 ```
 
-Set the status of the recipient to InReview
+Set the status of the recipient to &#39;InReview&#39;
+
+*Emits a &#39;RecipientStatusChanged()&#39; event*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _recipientIds | address[] | IDs of the recipients |
+
+### submitMilestone
+
+```solidity
+function submitMilestone(address _recipientId, uint256 _milestoneId, Metadata _metadata) external nonpayable
+```
+
+
 
 
 
@@ -566,7 +527,31 @@ Set the status of the recipient to InReview
 
 | Name | Type | Description |
 |---|---|---|
-| _recipientIds | address[] | Ids of the recipients |
+| _recipientId | address | undefined |
+| _milestoneId | uint256 | undefined |
+| _metadata | Metadata | undefined |
+
+### upcomingMilestone
+
+```solidity
+function upcomingMilestone(address) external view returns (uint256)
+```
+
+This maps accepted recipients to their upcoming milestone
+
+*&#39;recipientId&#39; to &#39;nextMilestone&#39;*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
 
 ### withdraw
 
@@ -574,9 +559,9 @@ Set the status of the recipient to InReview
 function withdraw(uint256 _amount) external nonpayable
 ```
 
-Withdraw funds from pool
+Withdraw funds from pool.
 
-
+*&#39;msg.sender&#39; must be a pool manager to withdraw funds.*
 
 #### Parameters
 
@@ -606,22 +591,6 @@ Emitted when a recipient is allocated to.
 | amount  | uint256 | The amount allocated |
 | token  | address | The token allocated |
 | sender  | address | undefined |
-
-### BrokerSet
-
-```solidity
-event BrokerSet(Broker broker)
-```
-
-=============================== ========== Events ============= ===============================
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| broker  | Broker | undefined |
 
 ### Distributed
 
@@ -661,6 +630,75 @@ Emitted when strategy is initialized.
 | poolId  | uint256 | The ID of the pool |
 | data  | bytes | undefined |
 
+### MilestoneStatusChanged
+
+```solidity
+event MilestoneStatusChanged(address recipientId, uint256 milestoneId, enum IStrategy.Status status)
+```
+
+Emitted for the status change of a milestone.
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| recipientId  | address | undefined |
+| milestoneId  | uint256 | undefined |
+| status  | enum IStrategy.Status | undefined |
+
+### MilestoneSubmitted
+
+```solidity
+event MilestoneSubmitted(address recipientId, uint256 milestoneId, Metadata metadata)
+```
+
+Emitted for the submission of a milestone.
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| recipientId  | address | undefined |
+| milestoneId  | uint256 | undefined |
+| metadata  | Metadata | undefined |
+
+### MilestonesReviewed
+
+```solidity
+event MilestonesReviewed(address recipientId, enum IStrategy.Status status)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| recipientId  | address | undefined |
+| status  | enum IStrategy.Status | undefined |
+
+### MilestonesSet
+
+```solidity
+event MilestonesSet(address recipientId)
+```
+
+Emitted for the milestones set.
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| recipientId  | address | undefined |
+
 ### PoolActive
 
 ```solidity
@@ -677,30 +715,13 @@ Emitted when pool is set to active status.
 |---|---|---|
 | active  | bool | The status of the pool |
 
-### RecipientSegmentsChanged
-
-```solidity
-event RecipientSegmentsChanged(address recipientId, LockupDynamic.SegmentWithDelta[] segments)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| recipientId  | address | undefined |
-| segments  | LockupDynamic.SegmentWithDelta[] | undefined |
-
 ### RecipientStatusChanged
 
 ```solidity
 event RecipientStatusChanged(address recipientId, enum IStrategy.Status status)
 ```
 
-
+Emitted for the registration of a recipient and the status is updated.
 
 
 
@@ -750,7 +771,7 @@ Thrown when the allocation is active.
 error ALLOCATION_EXCEEDS_POOL_AMOUNT()
 ```
 
-=============================== ========== Errors ============= ===============================
+Throws when the allocation exceeds the pool amount.
 
 
 
@@ -794,7 +815,7 @@ Thrown when data is already intialized
 error AMOUNT_MISMATCH()
 ```
 
-
+Thrown when the amount of tokens sent does not match the amount of tokens expected
 
 
 
@@ -865,6 +886,17 @@ Thrown when the metadata is invalid.
 
 
 
+### INVALID_MILESTONE
+
+```solidity
+error INVALID_MILESTONE()
+```
+
+Throws when the milestone is invalid.
+
+
+
+
 ### INVALID_REGISTRATION
 
 ```solidity
@@ -883,6 +915,28 @@ error IS_APPROVED_STRATEGY()
 ```
 
 Thrown when the strategy is approved and should be cloned
+
+
+
+
+### MILESTONES_ALREADY_SET
+
+```solidity
+error MILESTONES_ALREADY_SET()
+```
+
+Throws when the milestones are already set.
+
+
+
+
+### MILESTONE_ALREADY_ACCEPTED
+
+```solidity
+error MILESTONE_ALREADY_ACCEPTED()
+```
+
+Throws when the milestone is already accepted.
 
 
 
@@ -1020,28 +1074,6 @@ error REGISTRATION_NOT_ACTIVE()
 ```
 
 Thrown when registration is not active.
-
-
-
-
-### STATUS_NOT_ACCEPTED
-
-```solidity
-error STATUS_NOT_ACCEPTED()
-```
-
-
-
-
-
-
-### STATUS_NOT_PENDING_OR_INREVIEW
-
-```solidity
-error STATUS_NOT_PENDING_OR_INREVIEW()
-```
-
-
 
 
 

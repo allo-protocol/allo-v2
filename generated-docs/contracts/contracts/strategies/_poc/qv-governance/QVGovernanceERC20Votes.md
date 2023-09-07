@@ -1,4 +1,4 @@
-# HackathonQVStrategy
+# QVGovernanceERC20Votes
 
 
 
@@ -26,23 +26,6 @@ Address of the native token
 | Name | Type | Description |
 |---|---|---|
 | _0 | address | undefined |
-
-### VERSION
-
-```solidity
-function VERSION() external view returns (string)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | string | undefined |
 
 ### allocate
 
@@ -101,7 +84,7 @@ function allocationStartTime() external view returns (uint64)
 function allocators(address) external view returns (uint256 voiceCredits)
 ```
 
-allocator address =&gt; Allocator
+The details of the allocator are returned using their address
 
 
 
@@ -116,28 +99,6 @@ allocator address =&gt; Allocator
 | Name | Type | Description |
 |---|---|---|
 | voiceCredits | uint256 | undefined |
-
-### attest
-
-```solidity
-function attest(Attestation attestation) external payable returns (bool)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| attestation | Attestation | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bool | undefined |
 
 ### distribute
 
@@ -157,27 +118,6 @@ Distributes funds (tokens) to recipients.
 | _data | bytes | The data to use to distribute to the recipients |
 | _sender | address | The address of the sender |
 
-### easInfo
-
-```solidity
-function easInfo() external view returns (contract IEAS eas, contract ISchemaRegistry schemaRegistry, bytes32 schemaUID, string schema, bool revocable)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| eas | contract IEAS | undefined |
-| schemaRegistry | contract ISchemaRegistry | undefined |
-| schemaUID | bytes32 | undefined |
-| schema | string | undefined |
-| revocable | bool | undefined |
-
 ### getAllo
 
 ```solidity
@@ -195,50 +135,28 @@ Getter for the &#39;Allo&#39; contract.
 |---|---|---|
 | _0 | contract IAllo | The Allo contract |
 
-### getAttestation
-
-```solidity
-function getAttestation(bytes32 uid) external view returns (struct Attestation)
-```
-
-
-
-*Gets an attestation from the EAS contract using the UID*
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| uid | bytes32 | The UUID of the attestation to get. |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | Attestation | undefined |
-
 ### getPayouts
 
 ```solidity
-function getPayouts(address[], bytes[]) external view returns (struct IStrategy.PayoutSummary[])
+function getPayouts(address[] _recipientIds, bytes[] _data) external view returns (struct IStrategy.PayoutSummary[])
 ```
 
-Get the payouts for the recipients
+Gets the payout summary for recipients.
 
-
+*The encoded &#39;_data&#39; will be determined by the strategy implementation.*
 
 #### Parameters
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | address[] | undefined |
-| _1 | bytes[] | undefined |
+| _recipientIds | address[] | The IDs of the recipients |
+| _data | bytes[] | The data to use to get the payout summary for the recipients |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | IStrategy.PayoutSummary[] | The payouts as an array of PayoutSummary structs |
+| _0 | IStrategy.PayoutSummary[] | The payout summary for the recipients |
 
 ### getPoolAmount
 
@@ -288,13 +206,13 @@ Get the recipient
 
 | Name | Type | Description |
 |---|---|---|
-| _recipientId | address | Id of the recipient |
+| _recipientId | address | ID of the recipient |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | QVBaseStrategy.Recipient | undefined |
+| _0 | QVBaseStrategy.Recipient | The recipient |
 
 ### getRecipientStatus
 
@@ -318,28 +236,6 @@ Getter for the status of a recipient.
 |---|---|---|
 | _0 | enum IStrategy.Status | The status of the recipient |
 
-### getSchema
-
-```solidity
-function getSchema(bytes32 uid) external view returns (struct SchemaRecord)
-```
-
-
-
-*Gets a schema from the SchemaRegistry contract using the UID*
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| uid | bytes32 | The UID of the schema to get. |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | SchemaRecord | undefined |
-
 ### getStrategyId
 
 ```solidity
@@ -357,6 +253,23 @@ Getter for the &#39;strategyId&#39;.
 |---|---|---|
 | _0 | bytes32 | The ID of the strategy |
 
+### govToken
+
+```solidity
+function govToken() external view returns (contract IVotes)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | contract IVotes | undefined |
+
 ### increasePoolAmount
 
 ```solidity
@@ -373,52 +286,13 @@ Increases the pool amount.
 |---|---|---|
 | _amount | uint256 | The amount to increase the pool by |
 
-### indexToRecipientId
-
-```solidity
-function indexToRecipientId(uint256) external view returns (address)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
-
 ### initialize
 
 ```solidity
 function initialize(uint256 _poolId, bytes _data) external nonpayable
 ```
 
-
-
-*Initializes the strategy*
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _poolId | uint256 | The pool ID for this strategy |
-| _data | bytes | The data to initialize the strategy with |
-
-### isAttestationExpired
-
-```solidity
-function isAttestationExpired(address _recipientId) external view returns (bool)
-```
-
-Returns if the attestation is expired or not
+Initialize the strategy
 
 
 
@@ -426,30 +300,8 @@ Returns if the attestation is expired or not
 
 | Name | Type | Description |
 |---|---|---|
-| _recipientId | address | The recipient ID to check |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bool | undefined |
-
-### isPayable
-
-```solidity
-function isPayable() external pure returns (bool)
-```
-
-Returns if this contract is payable or not
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bool | True if the attestation is payable, false otherwise |
+| _poolId | uint256 | The pool id |
+| _data | bytes | The data |
 
 ### isPoolActive
 
@@ -490,30 +342,13 @@ Checks if the &#39;_allocator&#39; is a valid allocator.
 |---|---|---|
 | _0 | bool | &#39;true&#39; if the address is a valid allocator, &#39;false&#39; otherwise |
 
-### maxVoiceCreditsPerAllocator
-
-```solidity
-function maxVoiceCreditsPerAllocator() external view returns (uint256)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
 ### metadataRequired
 
 ```solidity
 function metadataRequired() external view returns (bool)
 ```
 
-
+Whether or not the strategy requires metadata
 
 
 
@@ -523,69 +358,6 @@ function metadataRequired() external view returns (bool)
 | Name | Type | Description |
 |---|---|---|
 | _0 | bool | undefined |
-
-### multiAttest
-
-```solidity
-function multiAttest(Attestation[] attestations, uint256[] values) external payable returns (bool)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| attestations | Attestation[] | undefined |
-| values | uint256[] | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bool | undefined |
-
-### multiRevoke
-
-```solidity
-function multiRevoke(Attestation[] attestations, uint256[] values) external payable returns (bool)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| attestations | Attestation[] | undefined |
-| values | uint256[] | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bool | undefined |
-
-### nft
-
-```solidity
-function nft() external view returns (contract ERC721)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | contract ERC721 | undefined |
 
 ### paidOut
 
@@ -593,7 +365,7 @@ function nft() external view returns (contract ERC721)
 function paidOut(address) external view returns (bool)
 ```
 
-recipientId =&gt; paid out
+Returns whether or not the recipient has been paid out using their ID
 
 
 
@@ -609,79 +381,13 @@ recipientId =&gt; paid out
 |---|---|---|
 | _0 | bool | undefined |
 
-### payoutPercentages
-
-```solidity
-function payoutPercentages(uint256) external view returns (uint256)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
-### recipientIdToIndex
-
-```solidity
-function recipientIdToIndex(address) external view returns (uint256)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
-### recipientIdToUID
-
-```solidity
-function recipientIdToUID(address) external view returns (bytes32)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | bytes32 | undefined |
-
 ### recipients
 
 ```solidity
-function recipients(address) external view returns (bool useRegistryAnchor, address recipientAddress, struct Metadata metadata, enum IStrategy.Status recipientStatus, uint256 totalVotesReceived)
+function recipients(address) external view returns (uint256 totalVotesReceived, bool useRegistryAnchor, address recipientAddress, struct Metadata metadata, enum IStrategy.Status recipientStatus)
 ```
 
-recipientId =&gt; Recipient
+The details of the recipient are returned using their ID
 
 
 
@@ -695,11 +401,11 @@ recipientId =&gt; Recipient
 
 | Name | Type | Description |
 |---|---|---|
+| totalVotesReceived | uint256 | undefined |
 | useRegistryAnchor | bool | undefined |
 | recipientAddress | address | undefined |
 | metadata | Metadata | undefined |
 | recipientStatus | enum IStrategy.Status | undefined |
-| totalVotesReceived | uint256 | undefined |
 
 ### registerRecipient
 
@@ -747,7 +453,7 @@ function registrationEndTime() external view returns (uint64)
 function registrationStartTime() external view returns (uint64)
 ```
 
-
+The start and end times for registrations and allocations
 
 
 
@@ -764,7 +470,7 @@ function registrationStartTime() external view returns (uint64)
 function registryGating() external view returns (bool)
 ```
 
-
+Whether or not the strategy is using registry gating
 
 
 
@@ -781,9 +487,9 @@ function registryGating() external view returns (bool)
 function reviewRecipients(address[] _recipientIds, enum IStrategy.Status[] _recipientStatuses) external nonpayable
 ```
 
-Review recipient application
+Review recipient(s) application(s)
 
-
+*You can review multiple recipients at once or just one. This can only be called by a pool manager and      only during active registration.*
 
 #### Parameters
 
@@ -798,7 +504,7 @@ Review recipient application
 function reviewThreshold() external view returns (uint256)
 ```
 
-
+The number of votes required to review a recipient
 
 
 
@@ -832,61 +538,22 @@ function reviewsByStatus(address, enum IStrategy.Status) external view returns (
 |---|---|---|
 | _0 | uint256 | undefined |
 
-### revoke
+### timestamp
 
 ```solidity
-function revoke(Attestation attestation) external payable returns (bool)
+function timestamp() external view returns (uint256)
 ```
 
 
 
 
 
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| attestation | Attestation | undefined |
 
 #### Returns
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | bool | undefined |
-
-### setAllowedRecipientIds
-
-```solidity
-function setAllowedRecipientIds(address[] _recipientIds, uint64 _expirationTime, bytes _data) external nonpayable
-```
-
-Set the allowed recipient IDs
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _recipientIds | address[] | The recipient IDs to allow |
-| _expirationTime | uint64 | The expiration time of the attestation |
-| _data | bytes | The data to include in the attestation |
-
-### setPayoutPercentages
-
-```solidity
-function setPayoutPercentages(uint256[] _payoutPercentages) external nonpayable
-```
-
-Set the winner payoutPercentages per rank
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _payoutPercentages | uint256[] | The payoutPercentages to set |
+| _0 | uint256 | undefined |
 
 ### totalRecipientVotes
 
@@ -894,7 +561,7 @@ Set the winner payoutPercentages per rank
 function totalRecipientVotes() external view returns (uint256)
 ```
 
-
+The total number of votes cast for all recipients
 
 
 
@@ -923,50 +590,6 @@ Set the start and end dates for the pool
 | _registrationEndTime | uint64 | The end time for the registration |
 | _allocationStartTime | uint64 | The start time for the allocation |
 | _allocationEndTime | uint64 | The end time for the allocation |
-
-### voiceCreditsUsedPerNftId
-
-```solidity
-function voiceCreditsUsedPerNftId(uint256) external view returns (uint256)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
-### votesByRank
-
-```solidity
-function votesByRank(uint256) external view returns (uint256)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
 
 
 
@@ -1051,7 +674,7 @@ Emitted when pool is set to active status.
 event RecipientStatusUpdated(address indexed recipientId, enum IStrategy.Status status, address sender)
 ```
 
-
+Emitted when a recipient is registered
 
 
 
@@ -1059,9 +682,9 @@ event RecipientStatusUpdated(address indexed recipientId, enum IStrategy.Status 
 
 | Name | Type | Description |
 |---|---|---|
-| recipientId `indexed` | address | undefined |
-| status  | enum IStrategy.Status | undefined |
-| sender  | address | undefined |
+| recipientId `indexed` | address | ID of the recipient |
+| status  | enum IStrategy.Status | The status of the recipient |
+| sender  | address | The sender of the transaction |
 
 ### Registered
 
@@ -1087,7 +710,7 @@ Emitted when a recipient is registered.
 event Reviewed(address indexed recipientId, enum IStrategy.Status status, address sender)
 ```
 
-
+Emitted when a recipient is reviewed
 
 
 
@@ -1095,9 +718,9 @@ event Reviewed(address indexed recipientId, enum IStrategy.Status status, addres
 
 | Name | Type | Description |
 |---|---|---|
-| recipientId `indexed` | address | undefined |
-| status  | enum IStrategy.Status | undefined |
-| sender  | address | undefined |
+| recipientId `indexed` | address | ID of the recipient |
+| status  | enum IStrategy.Status | The status of the recipient |
+| sender  | address | The sender of the transaction |
 
 ### TimestampsUpdated
 
@@ -1105,7 +728,7 @@ event Reviewed(address indexed recipientId, enum IStrategy.Status status, addres
 event TimestampsUpdated(uint64 registrationStartTime, uint64 registrationEndTime, uint64 allocationStartTime, uint64 allocationEndTime, address sender)
 ```
 
-
+Emitted when the pool timestamps are updated
 
 
 
@@ -1113,11 +736,11 @@ event TimestampsUpdated(uint64 registrationStartTime, uint64 registrationEndTime
 
 | Name | Type | Description |
 |---|---|---|
-| registrationStartTime  | uint64 | undefined |
-| registrationEndTime  | uint64 | undefined |
-| allocationStartTime  | uint64 | undefined |
-| allocationEndTime  | uint64 | undefined |
-| sender  | address | undefined |
+| registrationStartTime  | uint64 | The start time for the registration |
+| registrationEndTime  | uint64 | The end time for the registration |
+| allocationStartTime  | uint64 | The start time for the allocation |
+| allocationEndTime  | uint64 | The end time for the allocation |
+| sender  | address | The sender of the transaction |
 
 ### UpdatedRegistration
 
@@ -1133,7 +756,7 @@ Emitted when a recipient updates their registration
 
 | Name | Type | Description |
 |---|---|---|
-| recipientId `indexed` | address | Id of the recipient |
+| recipientId `indexed` | address | ID of the recipient |
 | data  | bytes | The encoded data - (address recipientId, address recipientAddress, Metadata metadata) |
 | sender  | address | The sender of the transaction |
 | status  | enum IStrategy.Status | The updated status of the recipient |
@@ -1175,17 +798,6 @@ Thrown when the allocation is not ended.
 
 
 
-### ALREADY_ADDED
-
-```solidity
-error ALREADY_ADDED()
-```
-
-====================== ==== Custom Error ==== ======================
-
-
-
-
 ### ALREADY_INITIALIZED
 
 ```solidity
@@ -1203,7 +815,7 @@ Thrown when data is already intialized
 error AMOUNT_MISMATCH()
 ```
 
-
+Thrown when the amount of tokens sent does not match the amount of tokens expected
 
 
 
@@ -1226,17 +838,6 @@ error ARRAY_MISMATCH()
 ```
 
 Thrown when two arrays length are not equal
-
-
-
-
-### AccessDenied
-
-```solidity
-error AccessDenied()
-```
-
-
 
 
 
@@ -1296,17 +897,6 @@ Thrown when the registration is invalid.
 
 
 
-### INVALID_SCHEMA
-
-```solidity
-error INVALID_SCHEMA()
-```
-
-
-
-
-
-
 ### IS_APPROVED_STRATEGY
 
 ```solidity
@@ -1314,28 +904,6 @@ error IS_APPROVED_STRATEGY()
 ```
 
 Thrown when the strategy is approved and should be cloned
-
-
-
-
-### InsufficientValue
-
-```solidity
-error InsufficientValue()
-```
-
-
-
-
-
-
-### InvalidEAS
-
-```solidity
-error InvalidEAS()
-```
-
-
 
 
 
@@ -1404,28 +972,6 @@ error NOT_PENDING_OWNER()
 
 
 *Thrown when the &#39;msg.sender&#39; is not the pending owner on ownership transfer*
-
-
-### NotPayable
-
-```solidity
-error NotPayable()
-```
-
-
-
-
-
-
-### OUT_OF_BOUNDS
-
-```solidity
-error OUT_OF_BOUNDS()
-```
-
-
-
-
 
 
 ### POOL_ACTIVE
