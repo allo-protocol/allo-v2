@@ -71,7 +71,7 @@ contract RFPCommitteeStrategy is RFPSimpleStrategy {
     /// @param _poolId ID of the pool
     /// @param _data The data to be decoded
     /// @custom:data (uint256 voteThreshold, InitializeParams params)
-    function initialize(uint256 _poolId, bytes memory _data) external override {
+    function initialize(uint256 _poolId, bytes memory _data) external virtual override {
         (InitializeParamsCommittee memory initializeParamsCommittee) = abi.decode(_data, (InitializeParamsCommittee));
         __RPFCommiteeStrategy_init(_poolId, initializeParamsCommittee);
     }

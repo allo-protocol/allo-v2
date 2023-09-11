@@ -40,7 +40,7 @@ contract Transfer is Native {
     /// @param _token The address of the token
     /// @param _transferData TransferData[]
     /// @return Whether the transfer was successful or not
-    function _transferAmountsFrom(address _token, TransferData[] memory _transferData) internal returns (bool) {
+    function _transferAmountsFrom(address _token, TransferData[] memory _transferData) virtual internal returns (bool) {
         uint256 msgValue = msg.value;
 
         for (uint256 i; i < _transferData.length;) {
@@ -67,7 +67,7 @@ contract Transfer is Native {
     /// @param _token The address of the token
     /// @param _transferData Individual TransferData
     /// @return Whether the transfer was successful or not
-    function _transferAmountFrom(address _token, TransferData memory _transferData) internal returns (bool) {
+    function _transferAmountFrom(address _token, TransferData memory _transferData) virtual internal returns (bool) {
         uint256 amount = _transferData.amount;
         if (_token == NATIVE) {
             // Native Token
@@ -84,7 +84,7 @@ contract Transfer is Native {
     /// @param _token The token to transfer
     /// @param _to The address to transfer to
     /// @param _amount The amount to transfer
-    function _transferAmount(address _token, address _to, uint256 _amount) internal {
+    function _transferAmount(address _token, address _to, uint256 _amount) virtual internal {
         if (_token == NATIVE) {
             SafeTransferLib.safeTransferETH(_to, _amount);
         } else {
