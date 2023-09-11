@@ -42,13 +42,6 @@ contract HedgeyRFPCommitteeStrategy is RFPCommitteeStrategy {
     address public adminAddress;
 
     /// ===============================
-    /// ========== Errors =============
-    /// ===============================
-
-    /// @notice Thrown when the lockup term is invalid/missing
-    error INVALID_LOCKUP_TERM();
-
-    /// ===============================
     /// ======== Constructor ==========
     /// ===============================
 
