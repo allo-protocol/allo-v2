@@ -19,7 +19,7 @@ contract CreateTestData is Script, Native {
     address payable strategyAddress = payable(address(0xC88612a4541A28c221F3d03b6Cf326dCFC557C4E));
 
     // Initialize the Allo Interface
-    Allo allo = Allo(0x8dDe1922d5f772890f169714FACeEF9551791CaF);
+    Allo allo = Allo(0x79536CC062EE8FAFA7A19a5fa07783BD7F792206);
 
     // Initialize Registry Interface
     IRegistry registry = IRegistry(0xAEc621EC8D9dE4B524f4864791171045d6BBBe27);
@@ -29,12 +29,12 @@ contract CreateTestData is Script, Native {
         DonationVotingMerkleDistributionBaseStrategy(strategyAddress);
 
     // adding a nonce for reusability
-    uint256 nonce = 1;
+    uint256 nonce = block.timestamp;
 
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("DEPLOYER_PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);
-
+        address owner = vm.addr(deployerPrivateKey);
         // Create a profile
         address[] memory members = new address[](2);
         members[0] = address(0x1fD06f088c720bA3b7a3634a8F021Fdd485DcA42);
@@ -44,7 +44,7 @@ contract CreateTestData is Script, Native {
             nonce++,
             "Test Profile",
             Metadata({protocol: 1, pointer: "TestProfile"}),
-            address(0x1fD06f088c720bA3b7a3634a8F021Fdd485DcA42),
+            owner,
             members
         );
 
@@ -52,29 +52,38 @@ contract CreateTestData is Script, Native {
         address[] memory allowedTokens = new address[](1);
         allowedTokens[0] = address(NATIVE);
 
-        DonationVotingMerkleDistributionBaseStrategy.InitializeData memory strategyData =
-        DonationVotingMerkleDistributionBaseStrategy.InitializeData({
-            useRegistryAnchor: true,
-            metadataRequired: true,
-            registrationStartTime: uint64(block.timestamp),
-            registrationEndTime: uint64(block.timestamp) + 10000,
-            allocationStartTime: uint64(block.timestamp) + 20000,
-            allocationEndTime: uint64(block.timestamp) + 30000,
-            allowedTokens: allowedTokens
-        });
-        bytes memory encodedStrategyData = abi.encode(strategyData);
+        // DonationVotingMerkleDistributionBaseStrategy.InitializeData memory strategyData =
+        // DonationVotingMerkleDistributionBaseStrategy.InitializeData({
+        //     useRegistryAnchor: true,
+        //     metadataRequired: true,
+        //     registrationStartTime: uint64(block.timestamp),
+        //     registrationEndTime: uint64(block.timestamp) + 10000,
+        //     allocationStartTime: uint64(block.timestamp) + 20000,
+        //     allocationEndTime: uint64(block.timestamp) + 30000,
+        //     allowedTokens: allowedTokens
+        // });
+        bytes memory encodedStrategyData = abi.encode(
+            true,
+            true,
+            block.timestamp,
+            block.timestamp + 10000,
+            block.timestamp + 20000,
+            block.timestamp + 30000,
+            allowedTokens
+        );
 
         Metadata memory metadata = Metadata({protocol: 1, pointer: "TestPoolMetadataPointer"});
         address[] memory managers = new address[](2);
         managers[0] = address(0x1fD06f088c720bA3b7a3634a8F021Fdd485DcA42);
-        managers[1] = address(0x1fD06f088c720bA3b7a3634a8F021Fdd485DcA42);
+        managers[1] = address(123);
 
         uint256 poolId = allo.createPool(profileId, strategyAddress, encodedStrategyData, NATIVE, 0, metadata, managers);
 
         // Fund the Pool
-        allo.fundPool(poolId, 1e16);
+        allo.fundPool{value: 1e16}(poolId, 1e16);
 
         // Register 2 recipients
+        // todo: data should be encoded: recipientId, recipientAddress, metadata
         bytes memory recipientData1 = abi.encode("recipient1");
         bytes memory recipientData2 = abi.encode("recipient2");
         address recipientId1 = allo.registerRecipient(poolId, recipientData1);
