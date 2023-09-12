@@ -37,8 +37,8 @@ contract CreateTestData is Script, Native {
 
         // Create a profile
         address[] memory members = new address[](2);
-        members[0] = address(makeAddr("MEMBER1"));
-        members[1] = address(makeAddr("MEMBER2"));
+        members[0] = address(0x1fD06f088c720bA3b7a3634a8F021Fdd485DcA42);
+        members[1] = address(0x1fD06f088c720bA3b7a3634a8F021Fdd485DcA42);
 
         bytes32 profileId = registry.createProfile(
             nonce++,
@@ -64,10 +64,10 @@ contract CreateTestData is Script, Native {
         });
         bytes memory encodedStrategyData = abi.encode(strategyData);
 
-        Metadata memory metadata = Metadata({protocol: 1, pointer: "TestPool"});
+        Metadata memory metadata = Metadata({protocol: 1, pointer: "TestPoolMetadataPointer"});
         address[] memory managers = new address[](2);
-        managers[0] = address(makeAddr("MANAGER1"));
-        managers[1] = address(makeAddr("MANAGER2"));
+        managers[0] = address(0x1fD06f088c720bA3b7a3634a8F021Fdd485DcA42);
+        managers[1] = address(0x1fD06f088c720bA3b7a3634a8F021Fdd485DcA42);
 
         uint256 poolId = allo.createPool(profileId, strategyAddress, encodedStrategyData, NATIVE, 0, metadata, managers);
 
