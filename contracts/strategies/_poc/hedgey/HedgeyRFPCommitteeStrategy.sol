@@ -52,13 +52,15 @@ contract HedgeyRFPCommitteeStrategy is RFPCommitteeStrategy {
     /// ===============================
 
     function initialize(uint256 _poolId, bytes memory _data) external override {
-        (HedgeyInitializeParamsCommittee memory hedgeyInitializeParamsCommittee) = abi.decode(_data, (HedgeyInitializeParamsCommittee));
+        (HedgeyInitializeParamsCommittee memory hedgeyInitializeParamsCommittee) =
+            abi.decode(_data, (HedgeyInitializeParamsCommittee));
         __HedgeyRPFCommiteeStrategy_init(_poolId, hedgeyInitializeParamsCommittee);
     }
 
-    function __HedgeyRPFCommiteeStrategy_init(uint256 _poolId, HedgeyInitializeParamsCommittee memory _hedgeyInitializeParamsCommittee)
-        internal
-    {
+    function __HedgeyRPFCommiteeStrategy_init(
+        uint256 _poolId,
+        HedgeyInitializeParamsCommittee memory _hedgeyInitializeParamsCommittee
+    ) internal {
         // Initialize the RPFCommiteeStrategy
         __RPFCommiteeStrategy_init(_poolId, _hedgeyInitializeParamsCommittee.params);
 
@@ -118,9 +120,9 @@ contract HedgeyRFPCommitteeStrategy is RFPCommitteeStrategy {
         address recipientAddress;
 
         if (useRegistryAnchor) {
-            (recipientAddress, , , lockupTerm) = abi.decode(_data, (address, uint256, Metadata, uint256));
+            (recipientAddress,,, lockupTerm) = abi.decode(_data, (address, uint256, Metadata, uint256));
         } else {
-            (recipientAddress, , , , lockupTerm) = abi.decode(_data, (address, address, uint256, Metadata, uint256));
+            (recipientAddress,,,, lockupTerm) = abi.decode(_data, (address, address, uint256, Metadata, uint256));
         }
 
         _recipientLockupTerm[recipientAddress] = lockupTerm;

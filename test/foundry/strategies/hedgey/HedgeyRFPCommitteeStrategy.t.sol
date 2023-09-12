@@ -17,7 +17,6 @@ import {EventSetup} from "../../shared/EventSetup.sol";
 import {HedgeySetup} from "./HedgeySetup.sol";
 import {MockERC20} from "../../../utils/MockERC20.sol";
 
-
 contract HedgeyRFPCommitteeStrategyTest is Test, RegistrySetupFull, AlloSetup, HedgeySetup, EventSetup, Errors {
     // Events
     event Voted(address indexed recipientId, address voter);
@@ -60,13 +59,15 @@ contract HedgeyRFPCommitteeStrategyTest is Test, RegistrySetupFull, AlloSetup, H
     address public hedgeyContract;
     address public adminAddress;
 
-    uint256 constant public ONE_MONTH_SECONDS = 2628000;
-        struct TestStruct {
-            uint256 a;
-            uint256 b;
-            uint256 c;
-            bool d;
-        }
+    uint256 public constant ONE_MONTH_SECONDS = 2628000;
+
+    struct TestStruct {
+        uint256 a;
+        uint256 b;
+        uint256 c;
+        bool d;
+    }
+
     function setUp() public {
         __RegistrySetupFull();
         __AlloSetup(address(registry()));
@@ -100,7 +101,15 @@ contract HedgeyRFPCommitteeStrategyTest is Test, RegistrySetupFull, AlloSetup, H
         poolId = allo().createPoolWithCustomStrategy(
             poolProfile_id(),
             address(strategy),
-            abi.encode(adminTransferOBO, hedgeyContract, adminAddress, voteThreshold, maxBid, useRegistryAnchor, metadataRequired),
+            abi.encode(
+                adminTransferOBO,
+                hedgeyContract,
+                adminAddress,
+                voteThreshold,
+                maxBid,
+                useRegistryAnchor,
+                metadataRequired
+            ),
             address(token),
             0,
             poolMetadata,
@@ -109,15 +118,28 @@ contract HedgeyRFPCommitteeStrategyTest is Test, RegistrySetupFull, AlloSetup, H
     }
 
     function test_deployment() public {
-        HedgeyRFPCommitteeStrategy testStrategy = new HedgeyRFPCommitteeStrategy(address(allo()), "HedgeyRFPCommitteeStrategy");
+        HedgeyRFPCommitteeStrategy testStrategy =
+            new HedgeyRFPCommitteeStrategy(address(allo()), "HedgeyRFPCommitteeStrategy");
         assertEq(address(testStrategy.getAllo()), address(allo()));
         assertEq(testStrategy.getStrategyId(), keccak256(abi.encode("HedgeyRFPCommitteeStrategy")));
     }
 
     function test_initialize() public {
-        HedgeyRFPCommitteeStrategy testStrategy = new HedgeyRFPCommitteeStrategy(address(allo()), "HedgeyRFPCommitteeStrategy");
+        HedgeyRFPCommitteeStrategy testStrategy =
+            new HedgeyRFPCommitteeStrategy(address(allo()), "HedgeyRFPCommitteeStrategy");
         vm.prank(address(allo()));
-        testStrategy.initialize(1337, abi.encode(adminTransferOBO, hedgeyContract, adminAddress, voteThreshold, maxBid, useRegistryAnchor, metadataRequired));
+        testStrategy.initialize(
+            1337,
+            abi.encode(
+                adminTransferOBO,
+                hedgeyContract,
+                adminAddress,
+                voteThreshold,
+                maxBid,
+                useRegistryAnchor,
+                metadataRequired
+            )
+        );
         assertEq(testStrategy.getPoolId(), 1337);
         assertEq(testStrategy.useRegistryAnchor(), useRegistryAnchor);
         assertEq(testStrategy.metadataRequired(), metadataRequired);
@@ -130,18 +152,53 @@ contract HedgeyRFPCommitteeStrategyTest is Test, RegistrySetupFull, AlloSetup, H
     }
 
     function testRevert_initialize_ALREADY_INITIALIZED() public {
-        HedgeyRFPCommitteeStrategy testStrategy = new HedgeyRFPCommitteeStrategy(address(allo()), "HedgeyRFPCommitteeStrategy");
+        HedgeyRFPCommitteeStrategy testStrategy =
+            new HedgeyRFPCommitteeStrategy(address(allo()), "HedgeyRFPCommitteeStrategy");
         vm.startPrank(address(allo()));
-        testStrategy.initialize(1337, abi.encode(adminTransferOBO, hedgeyContract, adminAddress, voteThreshold, maxBid, useRegistryAnchor, metadataRequired));
+        testStrategy.initialize(
+            1337,
+            abi.encode(
+                adminTransferOBO,
+                hedgeyContract,
+                adminAddress,
+                voteThreshold,
+                maxBid,
+                useRegistryAnchor,
+                metadataRequired
+            )
+        );
 
         vm.expectRevert(ALREADY_INITIALIZED.selector);
-        testStrategy.initialize(1337, abi.encode(adminTransferOBO, hedgeyContract, adminAddress, voteThreshold, maxBid, useRegistryAnchor, metadataRequired));
+        testStrategy.initialize(
+            1337,
+            abi.encode(
+                adminTransferOBO,
+                hedgeyContract,
+                adminAddress,
+                voteThreshold,
+                maxBid,
+                useRegistryAnchor,
+                metadataRequired
+            )
+        );
     }
 
     function testRevert_initialize_UNAUTHORIZED() public {
-        HedgeyRFPCommitteeStrategy testStrategy = new HedgeyRFPCommitteeStrategy(address(allo()), "HedgeyRFPCommitteeStrategy");
+        HedgeyRFPCommitteeStrategy testStrategy =
+            new HedgeyRFPCommitteeStrategy(address(allo()), "HedgeyRFPCommitteeStrategy");
         vm.expectRevert(UNAUTHORIZED.selector);
-        testStrategy.initialize(1337, abi.encode(adminTransferOBO, hedgeyContract, adminAddress, voteThreshold, maxBid, useRegistryAnchor, metadataRequired));
+        testStrategy.initialize(
+            1337,
+            abi.encode(
+                adminTransferOBO,
+                hedgeyContract,
+                adminAddress,
+                voteThreshold,
+                maxBid,
+                useRegistryAnchor,
+                metadataRequired
+            )
+        );
     }
 
     function test_allocate() public {
@@ -276,7 +333,19 @@ contract HedgeyRFPCommitteeStrategyTest is Test, RegistrySetupFull, AlloSetup, H
         allo().fundPool(poolId, 10 * 10e18);
 
         vm.expectEmit(true, true, true, false);
-        emit PlanCreated(1, recipientAddress(), address(token), 1e18, block.timestamp, 0, block.timestamp + ONE_MONTH_SECONDS + 1, 1, 1e18 / ONE_MONTH_SECONDS, address(pool_admin()), adminTransferOBO);
+        emit PlanCreated(
+            1,
+            recipientAddress(),
+            address(token),
+            1e18,
+            block.timestamp,
+            0,
+            block.timestamp + ONE_MONTH_SECONDS + 1,
+            1,
+            1e18 / ONE_MONTH_SECONDS,
+            address(pool_admin()),
+            adminTransferOBO
+        );
 
         vm.expectEmit(true, false, false, true);
         emit Distributed(recipientId, recipientAddress(), 1e18, pool_admin());

@@ -4,8 +4,8 @@ pragma solidity ^0.8.19;
 import "forge-std/Test.sol";
 
 // Core contracts
-import {TokenVestingPlans} from 'hedgey-vesting/VestingPlans/TokenVestingPlans.sol';
-import {BatchPlanner} from 'hedgey-vesting/Periphery/BatchPlanner.sol';
+import {TokenVestingPlans} from "hedgey-vesting/VestingPlans/TokenVestingPlans.sol";
+import {BatchPlanner} from "hedgey-vesting/Periphery/BatchPlanner.sol";
 import {Accounts} from "../../shared/Accounts.sol";
 
 contract HedgeySetup is Test, Accounts {
@@ -29,4 +29,3 @@ contract HedgeySetup is Test, Accounts {
         return _batchPlanner_;
     }
 }
-
