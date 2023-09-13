@@ -6,27 +6,31 @@ import "forge-std/Script.sol";
 import {IRegistry} from "../contracts/core/interfaces/IRegistry.sol";
 
 import {Metadata} from "../contracts/core/libraries/Metadata.sol";
+import {Config} from "./Config.sol";
 
-contract CreateProfileData is Script {
-    // adding a nonce for reusability
+/// @notice This script is used to create profile test data for the Allo V2 contracts
+/// @dev Use this to run
+///      'source .env' if you are using a .env file for your rpc-url
+///      'forge script script/CreateProfileData.s.sol:CreateProfileData --rpc-url $GOERLI_RPC_URL --broadcast  -vvvv'
+contract CreateProfileData is Script, Config {
+    // Adding a nonce for reusability
     uint256 nonce = block.timestamp;
 
     // Initialize Registry Interface
-    IRegistry registry = IRegistry(0xAEc621EC8D9dE4B524f4864791171045d6BBBe27);
+    IRegistry registry = IRegistry(REGISTRY);
 
-    function createProfile() external returns (bytes32) {
+    function run() external {
+        // NOTE: this key matches the owner in `Config.sol`
         uint256 deployerPrivateKey = vm.envUint("DEPLOYER_PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);
-        address owner = vm.addr(deployerPrivateKey);
+
+        // Prepare the members array
+        address[] memory members = new address[](1);
+        members[0] = address(OWNER);
 
         // Create a profile
-        address[] memory members = new address[](1);
-        members[0] = address(0x1fD06f088c720bA3b7a3634a8F021Fdd485DcA42);
-
-        bytes32 profileId = registry.createProfile(
-            nonce++, "Test Profile", Metadata({protocol: 1, pointer: "TestProfileMetadata"}), owner, members
+        registry.createProfile(
+            nonce++, "Test Profile", Metadata({protocol: 1, pointer: "TestProfileMetadata"}), OWNER, members
         );
-
-        return profileId;
     }
 }
