@@ -11,8 +11,8 @@ import {Config} from "./Config.sol";
 /// @notice This script is used to create profile test data for the Allo V2 contracts
 /// @dev Use this to run
 ///      'source .env' if you are using a .env file for your rpc-url
-///      'forge script script/CreateProfileData.s.sol:CreateProfileData --rpc-url $GOERLI_RPC_URL --broadcast  -vvvv'
-contract CreateProfileData is Script, Config {
+///      'forge script script/CreateProfile.s.sol:CreateProfile --rpc-url $GOERLI_RPC_URL --broadcast  -vvvv'
+contract CreateProfile is Script, Config {
     // Adding a nonce for reusability
     uint256 nonce = block.timestamp;
 
@@ -30,7 +30,7 @@ contract CreateProfileData is Script, Config {
 
         // Create a profile
         registry.createProfile(
-            nonce++, "Test Profile", Metadata({protocol: 1, pointer: "TestProfileMetadata"}), OWNER, members
+            nonce++, "Test Profile", Metadata({protocol: 1, pointer: "Test Profile Metadata"}), OWNER, members
         );
     }
 }
