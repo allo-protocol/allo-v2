@@ -2,7 +2,6 @@
 
 ## Core Contracts
 
-
 <table>
 <thead>
   <tr>
@@ -45,7 +44,6 @@
   </tr>
 </tbody>
 </table>
-
 
 ## Strategies
 
