@@ -264,6 +264,11 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         strategy.rejectMilestone(0);
     }
 
+    function test_getMilestoneCount() public {
+        _register_allocate_submit_distribute();
+        assertEq(strategy.getMilestoneCount(), 2);
+    }
+
     function test_withdraw() public {
         allo().fundPool{value: 1e18}(poolId, 1e18);
         vm.startPrank(pool_admin());

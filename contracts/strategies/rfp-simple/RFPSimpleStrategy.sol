@@ -289,6 +289,12 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         emit MilestoneStatusChanged(_milestoneId, milestones[_milestoneId].milestoneStatus);
     }
 
+    /// @notice Get the length of milestones
+    /// @return Returns the length of milestones
+    function getMilestoneCount() external view returns (uint256) {
+        return milestones.length;
+    }
+
     /// @notice Withdraw funds from pool.
     /// @dev 'msg.sender' must be a pool manager to withdraw funds.
     /// @param _amount The amount to be withdrawn
