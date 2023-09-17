@@ -97,6 +97,7 @@ contract HackathonQVStrategy is QVBaseStrategy, SchemaResolver {
         (InitializeParamsHack memory initializeParamsHack) = abi.decode(_data, (InitializeParamsHack));
 
         __HackathonQVStrategy_init(_poolId, initializeParamsHack);
+        emit Initialized(_poolId, _data);
     }
 
     /// @dev Initializes the strategy.

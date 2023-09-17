@@ -151,6 +151,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     function initialize(uint256 _poolId, bytes memory _data) external virtual override {
         (InitializeParams memory initializeParams) = abi.decode(_data, (InitializeParams));
         __RFPSimpleStrategy_init(_poolId, initializeParams);
+        emit Initialized(_poolId, _data);
     }
 
     /// @notice This initializes the BaseStrategy

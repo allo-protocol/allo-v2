@@ -91,6 +91,7 @@ contract WrappedVotingNftMintStrategy is Native, BaseStrategy, ReentrancyGuard {
     function initialize(uint256 _poolId, bytes memory _data) external override {
         (InitializeParams memory initializeParams) = abi.decode(_data, (InitializeParams));
         __WrappedVotingStrategy_init(_poolId, initializeParams);
+        emit Initialized(_poolId, _data);
     }
 
     /// ====================

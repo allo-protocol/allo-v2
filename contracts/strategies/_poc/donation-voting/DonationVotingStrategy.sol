@@ -137,6 +137,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     function initialize(uint256 _poolId, bytes memory _data) external virtual override onlyAllo {
         (InitializeData memory initializeData) = abi.decode(_data, (InitializeData));
         __DonationVotingStrategy_init(_poolId, initializeData);
+        emit Initialized(_poolId, _data);
     }
 
     function __DonationVotingStrategy_init(uint256 _poolId, InitializeData memory _initializeData) internal {

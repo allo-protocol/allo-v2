@@ -23,6 +23,7 @@ contract QVBaseStrategyTestMock is QVBaseStrategy {
     function initialize(uint256 _poolId, bytes memory _data) public virtual override onlyAllo {
         (QVBaseStrategy.InitializeParams memory initializeParams) = abi.decode(_data, (QVBaseStrategy.InitializeParams));
         __QVBaseStrategy_init(_poolId, initializeParams);
+        emit Initialized(_poolId, _data);
     }
 
     function _allocate(bytes memory _data, address _sender) internal virtual override {

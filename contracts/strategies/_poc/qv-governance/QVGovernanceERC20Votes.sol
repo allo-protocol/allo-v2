@@ -50,6 +50,7 @@ contract QVGovernanceERC20Votes is QVBaseStrategy {
     function initialize(uint256 _poolId, bytes memory _data) external override {
         (InitializeParamsGov memory initializeParamsGov) = abi.decode(_data, (InitializeParamsGov));
         __QVGovernanceERC20Votes_init(_poolId, initializeParamsGov);
+        emit Initialized(_poolId, _data);
     }
 
     function __QVGovernanceERC20Votes_init(uint256 _poolId, InitializeParamsGov memory _initializeParamsGov) internal {

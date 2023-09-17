@@ -147,6 +147,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     function initialize(uint256 _poolId, bytes memory _data) external virtual override {
         (InitializeData memory initData) = abi.decode(_data, (InitializeData));
         __DirectGrantsSimpleStrategy_init(_poolId, initData);
+        emit Initialized(_poolId, _data);
     }
 
     /// @notice This initializes the BaseStrategy
