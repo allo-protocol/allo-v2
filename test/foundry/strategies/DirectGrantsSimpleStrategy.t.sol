@@ -23,7 +23,7 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
     event RecipientStatusChanged(address recipientId, DirectGrantsSimpleStrategy.Status status);
     event MilestoneSubmitted(address recipientId, uint256 milestoneId, Metadata metadata);
     event MilestoneStatusChanged(address recipientId, uint256 milestoneId, IStrategy.Status status);
-    event MilestonesSet(address recipientId);
+    event MilestonesSet(address recipientId, uint256 milestonesLength);
     event MilestonesReviewed(address recipientId, IStrategy.Status status);
 
     DirectGrantsSimpleStrategy strategyImplementation;
@@ -781,7 +781,7 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
 
         vm.expectEmit(false, false, false, true);
 
-        emit MilestonesSet(recipientId);
+        emit MilestonesSet(recipientId, milestones.length);
         emit MilestonesReviewed(recipientId, IStrategy.Status.Accepted);
 
         vm.startPrank(pool_manager1());
@@ -807,7 +807,7 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
 
         vm.expectEmit(false, false, false, true);
 
-        emit MilestonesSet(recipientId);
+        emit MilestonesSet(recipientId, milestones.length);
 
         vm.startPrank(profile1_member1());
         strategy.setMilestones(recipientId, milestones);

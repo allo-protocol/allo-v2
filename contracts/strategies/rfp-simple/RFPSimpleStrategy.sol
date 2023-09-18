@@ -88,10 +88,13 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     event MilstoneSubmitted(uint256 milestoneId);
 
     /// @notice Emitted for the status change of a milestone.
+    /// @param milestoneId Id of the milestone
+    /// @param status Status of the milestone
     event MilestoneStatusChanged(uint256 milestoneId, Status status);
 
     /// @notice Emitted when milestones are set.
-    event MilestonesSet();
+    /// @param milestonesLength Count of milestones
+    event MilestonesSet(uint256 milestonesLength);
 
     /// @notice Emitted when a recipient updates their registration
     /// @param recipientId Id of the recipient
@@ -244,7 +247,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         // Check if the all milestone amount percentage totals to 1e18(100%)
         if (totalAmountPercentage != 1e18) revert INVALID_MILESTONE();
 
-        emit MilestonesSet();
+        emit MilestonesSet(milestonesLength);
     }
 
     /// @notice Submit milestone by the acceptedRecipientId.
@@ -288,12 +291,6 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         milestones[_milestoneId].milestoneStatus = Status.Rejected;
 
         emit MilestoneStatusChanged(_milestoneId, milestones[_milestoneId].milestoneStatus);
-    }
-
-    /// @notice Get the length of milestones
-    /// @return Returns the length of milestones
-    function getMilestoneCount() external view returns (uint256) {
-        return milestones.length;
     }
 
     /// @notice Withdraw funds from pool.

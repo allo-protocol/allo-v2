@@ -21,7 +21,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
     event MaxBidIncreased(uint256 maxBid);
     event MilstoneSubmitted(uint256 milestoneId);
     event MilestoneStatusChanged(uint256 milestoneId, IStrategy.Status status);
-    event MilestonesSet();
+    event MilestonesSet(uint256 milestonesLength);
     event UpdatedRegistration(address indexed recipientId, bytes data, address sender);
 
     bool public useRegistryAnchor;
@@ -262,11 +262,6 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         vm.expectRevert(RFPSimpleStrategy.MILESTONE_ALREADY_ACCEPTED.selector);
         vm.prank(pool_admin());
         strategy.rejectMilestone(0);
-    }
-
-    function test_getMilestoneCount() public {
-        _register_allocate_submit_distribute();
-        assertEq(strategy.getMilestoneCount(), 2);
     }
 
     function test_withdraw() public {
@@ -510,7 +505,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
 
         vm.prank(address(pool_admin()));
         vm.expectEmit();
-        emit MilestonesSet();
+        emit MilestonesSet(milestones.length);
         strategy.setMilestones(milestones);
     }
 
