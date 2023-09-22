@@ -114,7 +114,7 @@ contract Registry is IRegistry, Native, AccessControl, Transfer, Initializable, 
     /// @param _name The name of the profile
     /// @param _metadata The metadata of the profile
     /// @param _owner The owner of the profile
-    /// @param _members The members of the profile
+    /// @param _members The members of the profile (can be set only if msg.sender == _owner)
     /// @return The ID for the created profile
     function createProfile(
         uint256 _nonce,
@@ -124,7 +124,7 @@ contract Registry is IRegistry, Native, AccessControl, Transfer, Initializable, 
         address[] memory _members
     ) external returns (bytes32) {
         // Generate a profile ID using a nonce and the msg.sender
-        bytes32 profileId = _generateProfileId(_nonce);
+        bytes32 profileId = _generateProfileId(_nonce, _owner);
 
         // Make sure the nonce is available
         if (profilesById[profileId].anchor != address(0)) revert NONCE_NOT_AVAILABLE();
@@ -147,6 +147,12 @@ contract Registry is IRegistry, Native, AccessControl, Transfer, Initializable, 
 
         // Assign roles for the profile members
         uint256 memberLength = _members.length;
+
+        // Only profile owner can add members
+        if (memberLength > 0 && _owner != msg.sender) {
+            revert UNAUTHORIZED();
+        }
+
         for (uint256 i; i < memberLength;) {
             address member = _members[i];
 
@@ -354,9 +360,10 @@ contract Registry is IRegistry, Native, AccessControl, Transfer, Initializable, 
     /// @notice Generates the 'profileId' based on msg.sender and nonce
     /// @dev Internal function used by 'createProfile()' to generate profileId.
     /// @param _nonce Nonce provided by the caller to generate 'profileId'
+    /// @param _owner The owner of the profile
     /// @return 'profileId' The ID of the profile
-    function _generateProfileId(uint256 _nonce) internal view returns (bytes32) {
-        return keccak256(abi.encodePacked(_nonce, msg.sender));
+    function _generateProfileId(uint256 _nonce, address _owner) internal pure returns (bytes32) {
+        return keccak256(abi.encodePacked(_nonce, _owner));
     }
 
     /// @notice Checks if an address is the owner of the profile
