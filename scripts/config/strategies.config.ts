@@ -78,12 +78,22 @@ export const nameConfig: DeployParams = {
       version: "",
       address: "",
     },
+    "rfp-simple": {
+      name: "",
+      version: "",
+      address: "",
+    },
   },
   // Goerli
   5: {
     "donation-voting": {
       name: "DonationVotingStrategy",
       version: "v1",
+      address: "",
+    },
+    "rfp-simple": {
+      name: "",
+      version: "",
       address: "",
     },
   },
@@ -94,10 +104,20 @@ export const nameConfig: DeployParams = {
       version: "v1",
       address: "",
     },
+    "rfp-simple": {
+      name: "",
+      version: "",
+      address: "",
+    },
   },
   // PGN
   424: {
     "donation-voting": {
+      name: "",
+      version: "",
+      address: "",
+    },
+    "rfp-simple": {
       name: "",
       version: "",
       address: "",
@@ -108,6 +128,11 @@ export const nameConfig: DeployParams = {
     "donation-voting": {
       name: "DonationVotingStrategy",
       version: "v1",
+      address: "",
+    },
+    "rfp-simple": {
+      name: "",
+      version: "",
       address: "",
     },
   },
@@ -126,10 +151,20 @@ export const nameConfig: DeployParams = {
       version: "v1",
       address: "",
     },
+    "rfp-simple": {
+      name: "",
+      version: "",
+      address: "",
+    },
   },
   // Fantom
   250: {
     "donation-voting": {
+      name: "",
+      version: "",
+      address: "",
+    },
+    "rfp-simple": {
       name: "",
       version: "",
       address: "",
@@ -142,10 +177,20 @@ export const nameConfig: DeployParams = {
       version: "",
       address: "",
     },
+    "rfp-simple": {
+      name: "",
+      version: "",
+      address: "",
+    },
   },
   // Celo Mainnet
   42220: {
     "donation-voting": {
+      name: "",
+      version: "",
+      address: "",
+    },
+    "rfp-simple": {
       name: "",
       version: "",
       address: "",
@@ -166,10 +211,20 @@ export const nameConfig: DeployParams = {
       version: "",
       address: "",
     },
+    "rfp-simple": {
+      name: "",
+      version: "",
+      address: "",
+    },
   },
   // ZkSync Era Testnet
   280: {
     "donation-voting": {
+      name: "",
+      version: "",
+      address: "",
+    },
+    "rfp-simple": {
       name: "",
       version: "",
       address: "",

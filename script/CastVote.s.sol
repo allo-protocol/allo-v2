@@ -43,7 +43,6 @@ contract CastVote is Script, Native, Config {
         bytes memory allocateData1 = abi.encode(TEST_RECIPIENT_ID_1, permit2Data);
         bytes memory allocateData2 = abi.encode(TEST_RECIPIENT_ID_2, permit2Data);
 
-        // TODO: Somehow need to wait for a block to mine to be able to allocate in the allocation period
         allo.allocate(TEST_POOL_1, allocateData1);
         allo.allocate(TEST_POOL_1, allocateData2);
 

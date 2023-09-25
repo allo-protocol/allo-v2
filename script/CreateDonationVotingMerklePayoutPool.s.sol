@@ -12,8 +12,8 @@ import {Config} from "./Config.sol";
 /// @notice This script is used to create pool test data for the Allo V2 contracts
 /// @dev Use this to run
 ///      'source .env' if you are using a .env file for your rpc-url
-///      'forge script script/CreatePool.s.sol:CreatePool --rpc-url $GOERLI_RPC_URL --broadcast  -vvvv'
-contract CreatePool is Script, Native, Config {
+///      'forge script script/CreateDonationVotingMerklePayoutPool.s.sol:CreateDonationVotingMerklePayoutPool --rpc-url $GOERLI_RPC_URL --broadcast  -vvvv'
+contract CreateDonationVotingMerklePayoutPool is Script, Native, Config {
     // Initialize the Allo Interface
     Allo allo = Allo(ALLO);
 
