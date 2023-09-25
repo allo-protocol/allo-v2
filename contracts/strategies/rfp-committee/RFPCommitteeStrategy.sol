@@ -74,6 +74,7 @@ contract RFPCommitteeStrategy is RFPSimpleStrategy {
     function initialize(uint256 _poolId, bytes memory _data) external override {
         (InitializeParamsCommittee memory initializeParamsCommittee) = abi.decode(_data, (InitializeParamsCommittee));
         __RPFCommiteeStrategy_init(_poolId, initializeParamsCommittee);
+        emit Initialized(_poolId, _data);
     }
 
     /// @notice This initializes the RFPSimpleStrategy

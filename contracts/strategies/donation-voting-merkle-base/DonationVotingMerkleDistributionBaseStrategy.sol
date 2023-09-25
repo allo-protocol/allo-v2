@@ -256,6 +256,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     function initialize(uint256 _poolId, bytes memory _data) external virtual override onlyAllo {
         (InitializeData memory initializeData) = abi.decode(_data, (InitializeData));
         __DonationVotingStrategy_init(_poolId, initializeData);
+        emit Initialized(_poolId, _data);
     }
 
     /// @notice Initializes this strategy as well as the BaseStrategy.

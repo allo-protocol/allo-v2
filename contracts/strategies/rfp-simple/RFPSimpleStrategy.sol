@@ -88,10 +88,13 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     event MilstoneSubmitted(uint256 milestoneId);
 
     /// @notice Emitted for the status change of a milestone.
+    /// @param milestoneId Id of the milestone
+    /// @param status Status of the milestone
     event MilestoneStatusChanged(uint256 milestoneId, Status status);
 
     /// @notice Emitted when milestones are set.
-    event MilestonesSet();
+    /// @param milestonesLength Count of milestones
+    event MilestonesSet(uint256 milestonesLength);
 
     /// @notice Emitted when a recipient updates their registration
     /// @param recipientId Id of the recipient
@@ -151,6 +154,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     function initialize(uint256 _poolId, bytes memory _data) external virtual override {
         (InitializeParams memory initializeParams) = abi.decode(_data, (InitializeParams));
         __RFPSimpleStrategy_init(_poolId, initializeParams);
+        emit Initialized(_poolId, _data);
     }
 
     /// @notice This initializes the BaseStrategy
@@ -243,7 +247,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         // Check if the all milestone amount percentage totals to 1e18(100%)
         if (totalAmountPercentage != 1e18) revert INVALID_MILESTONE();
 
-        emit MilestonesSet();
+        emit MilestonesSet(milestonesLength);
     }
 
     /// @notice Submit milestone by the acceptedRecipientId.

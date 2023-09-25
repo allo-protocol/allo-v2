@@ -42,6 +42,7 @@ contract DonationVotingCustomRegistryStrategy is DonationVotingStrategy {
         }
 
         registry = SimpleProjectRegistry(initializeDataWithRegistry.customRegistry);
+        emit Initialized(_poolId, _data);
     }
 
     function _isProfileMember(address _anchor, address) internal view override returns (bool) {

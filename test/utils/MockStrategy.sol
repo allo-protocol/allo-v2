@@ -11,6 +11,7 @@ contract MockStrategy is BaseStrategy {
     function initialize(uint256 _poolId, bytes memory _data) external {
         __BaseStrategy_init(_poolId);
         _data;
+        emit Initialized(_poolId, _data);
     }
 
     // this is called via allo.sol to register recipients

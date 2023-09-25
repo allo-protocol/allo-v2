@@ -76,6 +76,7 @@ contract QVSimpleStrategy is QVBaseStrategy, Multicall {
         __QVBaseStrategy_init(_poolId, initializeParamsSimple.params);
 
         maxVoiceCreditsPerAllocator = initializeParamsSimple.maxVoiceCreditsPerAllocator;
+        emit Initialized(_poolId, _data);
     }
 
     /// ====================================

@@ -50,10 +50,9 @@ interface IStrategy {
     /// ======================
 
     /// @notice Emitted when strategy is initialized.
-    /// @param allo The Allo contract
-    /// @param profileId The ID of the profile
     /// @param poolId The ID of the pool
-    event Initialized(address allo, bytes32 profileId, uint256 poolId, bytes data);
+    /// @param data The data passed to the 'initialize' function
+    event Initialized(uint256 poolId, bytes data);
 
     /// @notice Emitted when a recipient is registered.
     /// @param recipientId The ID of the recipient

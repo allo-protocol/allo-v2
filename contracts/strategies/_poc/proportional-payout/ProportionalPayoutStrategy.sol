@@ -101,6 +101,7 @@ contract ProportionalPayoutStrategy is BaseStrategy {
     function initialize(uint256 _poolId, bytes memory _data) external override onlyAllo {
         InitializeData memory initializeData = abi.decode(_data, (InitializeData));
         __ProtportionalPayoutStrategy_init(_poolId, initializeData);
+        emit Initialized(_poolId, _data);
     }
 
     function __ProtportionalPayoutStrategy_init(uint256 _poolId, InitializeData memory _initializeData) internal {
