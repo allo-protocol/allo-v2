@@ -1,7 +1,7 @@
 import hre, { ethers, upgrades } from "hardhat";
 import { alloConfig } from "../config/allo.config";
 import { registryConfig } from "../config/registry.config";
-import { confirmContinue, prettyNum, verifyContract } from "../utils/scripts";
+import { confirmContinue, prettyNum } from "../utils/scripts";
 
 export async function deployAllo(_registryAddress? : string) {
   const network = await ethers.provider.getNetwork();
@@ -15,8 +15,8 @@ export async function deployAllo(_registryAddress? : string) {
   console.log(`
     ////////////////////////////////////////////////////
             Deploys Allo.sol on ${networkName}
-    ////////////////////////////////////////////////////`
-  );
+    ////////////////////////////////////////////////////
+  `);
 
   const alloParams = alloConfig[chainId];
   if (!alloParams) {
@@ -52,15 +52,6 @@ export async function deployAllo(_registryAddress? : string) {
   // await verifyContract(instance.target.toString());
 
   console.log("Allo.sol deployed to:", instance.target);
-
-  console.log("Initializing...", instance.target);
-  await instance.initialize(
-    registryAddress,
-    alloParams.treasury,
-    alloParams.percentFee,
-    alloParams.baseFee,
-  );
-  console.log("Registry initialized!");
 
   return instance.target;
 }

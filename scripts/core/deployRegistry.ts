@@ -1,6 +1,6 @@
 import hre, { ethers, upgrades } from "hardhat";
 import { registryConfig } from "../config/registry.config";
-import { confirmContinue, prettyNum, verifyContract } from "../utils/scripts";
+import { confirmContinue, prettyNum } from "../utils/scripts";
 
 export async function deployRegistry() {
     const network = await ethers.provider.getNetwork();
@@ -16,8 +16,8 @@ export async function deployRegistry() {
     console.log(`
         ////////////////////////////////////////////////////
                 Deploys Registry.sol on ${networkName}
-        ////////////////////////////////////////////////////`
-    );
+        ////////////////////////////////////////////////////
+    `);
 
     await confirmContinue({
         contract: "Registry.sol",
@@ -40,12 +40,6 @@ export async function deployRegistry() {
     // await verifyContract(instance.target.toString(), [registryConfig[chainId].owner]);
 
     console.log("Registry deployed to:", instance.target);
-
-    console.log("initializing...", instance.target);
-    await instance.initialize(
-        registryConfig[chainId].owner
-    );
-    console.log("Registry initializing!");
   
     return instance.target;
 }

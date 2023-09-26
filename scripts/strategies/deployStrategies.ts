@@ -10,13 +10,14 @@ export async function deployStrategies(strategyName: string, version: string) {
   const chainId = Number(network.chainId);
   const account = (await ethers.getSigners())[0];
   const deployerAddress = await account.getAddress();
-  const blocksToWait = networkName === "localhost" ? 0 : 5;
+  // const blocksToWait = networkName === "localhost" ? 0 : 5;
   const balance = await ethers.provider.getBalance(deployerAddress);
 
   console.log(`
     ////////////////////////////////////////////////////
       Deploys ${strategyName}.sol on ${networkName}
-    ////////////////////////////////////////////////////`);
+    ////////////////////////////////////////////////////
+  `);
 
   await confirmContinue({
     contract: `${strategyName}.sol`,

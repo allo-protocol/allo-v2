@@ -847,7 +847,7 @@ Emitted when funds are distributed to a recipient
 ### Initialized
 
 ```solidity
-event Initialized(address allo, bytes32 profileId, uint256 poolId, bytes data)
+event Initialized(uint256 poolId, bytes data)
 ```
 
 Emitted when strategy is initialized.
@@ -858,10 +858,8 @@ Emitted when strategy is initialized.
 
 | Name | Type | Description |
 |---|---|---|
-| allo  | address | The Allo contract |
-| profileId  | bytes32 | The ID of the profile |
 | poolId  | uint256 | The ID of the pool |
-| data  | bytes | undefined |
+| data  | bytes | The data passed to the &#39;initialize&#39; function |
 
 ### PoolActive
 

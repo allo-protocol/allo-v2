@@ -1,20 +1,20 @@
 import * as dotenv from "dotenv";
 
+import "@nomicfoundation/hardhat-foundry";
 import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-solhint";
 import "@nomiclabs/hardhat-waffle";
-import "@nomicfoundation/hardhat-foundry";
 import "@openzeppelin/hardhat-upgrades";
 import "@primitivefi/hardhat-dodoc";
 import "@typechain/hardhat";
+import fs from "fs";
 import "hardhat-abi-exporter";
 import "hardhat-contract-sizer";
 import "hardhat-gas-reporter";
+import "hardhat-preprocessor";
 import { HardhatUserConfig } from "hardhat/config";
 import { NetworkUserConfig } from "hardhat/types";
 import "solidity-coverage";
-import "hardhat-preprocessor";
-import fs from "fs";
 
 dotenv.config();
 
@@ -50,7 +50,7 @@ const infuraIdKey = process.env.INFURA_RPC_ID as string;
  * Reads the remappings.txt file and returns an array of arrays.
  * @returns {string[][]}
  */
-function getRemappings() {
+function getRemappings(): string[][] {
   return fs
     .readFileSync("remappings.txt", "utf8")
     .split("\n")
@@ -120,6 +120,10 @@ const dodoc = {
   exclude: ["lib", "test"],
 };
 
+/** 
+ * Generates hardhat network configuration
+ * @type import('hardhat/config').HardhatUserConfig
+ */
 const config: HardhatUserConfig = {
   solidity: {
     version: "0.8.19",

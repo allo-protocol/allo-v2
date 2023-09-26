@@ -11,6 +11,8 @@ lcov.info.pruned
 # Hardhat files
 artifacts
 cache
+cache_hardhat
+cache_hardhat_zk
 abis
 
 # Foundry files
@@ -27,3 +29,5 @@ cache/solidity-files-cache.json
 
 # ZKSync files
 artifacts-zk/
+
+generated-docs

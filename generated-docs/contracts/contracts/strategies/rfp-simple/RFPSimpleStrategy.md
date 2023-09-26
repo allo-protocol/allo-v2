@@ -586,7 +586,7 @@ Emitted when tokens are distributed.
 ### Initialized
 
 ```solidity
-event Initialized(address allo, bytes32 profileId, uint256 poolId, bytes data)
+event Initialized(uint256 poolId, bytes data)
 ```
 
 Emitted when strategy is initialized.
@@ -597,10 +597,8 @@ Emitted when strategy is initialized.
 
 | Name | Type | Description |
 |---|---|---|
-| allo  | address | The Allo contract |
-| profileId  | bytes32 | The ID of the profile |
 | poolId  | uint256 | The ID of the pool |
-| data  | bytes | undefined |
+| data  | bytes | The data passed to the &#39;initialize&#39; function |
 
 ### MaxBidIncreased
 
@@ -632,19 +630,24 @@ Emitted for the status change of a milestone.
 
 | Name | Type | Description |
 |---|---|---|
-| milestoneId  | uint256 | undefined |
-| status  | enum IStrategy.Status | undefined |
+| milestoneId  | uint256 | Id of the milestone |
+| status  | enum IStrategy.Status | Status of the milestone |
 
 ### MilestonesSet
 
 ```solidity
-event MilestonesSet()
+event MilestonesSet(uint256 milestonesLength)
 ```
 
 Emitted when milestones are set.
 
 
 
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| milestonesLength  | uint256 | Count of milestones |
 
 ### MilstoneSubmitted
 

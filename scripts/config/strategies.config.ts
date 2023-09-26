@@ -21,11 +21,11 @@ export const deployerContractAddress: DeployerConfig = {
   },
   // Goerli
   5: {
-    address: "0x737b811828B34838e2188c59cfF72BD1019A1070",
+    address: "",
   },
   // Sepolia
   11155111: {
-    address: "0x737b811828B34838e2188c59cfF72BD1019A1070",
+    address: "0xa5791f9461A4385029e6d0E7aeF5ebD8DC6429e5",
   },
   // PGN
   424: {
@@ -33,7 +33,7 @@ export const deployerContractAddress: DeployerConfig = {
   },
   // PGN Sepolia
   58008: {
-    address: "0x737b811828B34838e2188c59cfF72BD1019A1070",
+    address: "0xa5791f9461A4385029e6d0E7aeF5ebD8DC6429e5",
   },
   // Optimism
   10: {
@@ -41,7 +41,7 @@ export const deployerContractAddress: DeployerConfig = {
   },
   // Optimism Goerli
   420: {
-    address: "0x737b811828B34838e2188c59cfF72BD1019A1070",
+    address: "0xa5791f9461A4385029e6d0E7aeF5ebD8DC6429e5",
   },
   // Fantom
   250: {
@@ -49,7 +49,7 @@ export const deployerContractAddress: DeployerConfig = {
   },
   // Fantom Testnet
   4002: {
-    address: "",
+    address: "0xa5791f9461A4385029e6d0E7aeF5ebD8DC6429e5",
   },
   // Celo Mainnet
   42220: {
@@ -57,7 +57,7 @@ export const deployerContractAddress: DeployerConfig = {
   },
   // Celo Alfajores
   44787: {
-    address: "0x737b811828B34838e2188c59cfF72BD1019A1070",
+    address: "0xa5791f9461A4385029e6d0E7aeF5ebD8DC6429e5",
   },
   // ZkSync Era Mainnet
   324: {
@@ -99,14 +99,19 @@ export const nameConfig: DeployParams = {
   },
   // Sepolia
   11155111: {
+    "direct-grants-simple": {
+      name: "DirectGrantsSimpleStrategy",
+      version: "v1.1",
+      address: "",
+    },
     "donation-voting": {
       name: "DonationVotingStrategy",
-      version: "v1",
+      version: "v1.2",
       address: "",
     },
     "rfp-simple": {
-      name: "",
-      version: "",
+      name: "RFPSimpleStrategy",
+      version: "v1",
       address: "",
     },
   },
