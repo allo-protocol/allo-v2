@@ -3,7 +3,7 @@
 import { deployStrategies } from "./deployStrategies";
 
 const deployDonationVoting = async () => {
-  deployStrategies("DonationVotingMerkleDistributionDirectTransferStrategy", "v1");
+  deployStrategies("DonationVotingMerkleDistributionDirectTransferStrategy", "v1.1");
 };
 
 deployDonationVoting().catch((error) => {

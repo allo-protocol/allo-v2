@@ -192,27 +192,32 @@ export const nameConfig: DeployParams = {
   58008: {
     "donation-voting": {
       name: "DonationVotingStrategy",
-      version: "v1",
-      address: "",
+      version: "v1.2",
+      address: "0xBE24d316223162E71B1CdBbE959B48f5395EDa33",
     },
     "direct-grants-simple": {
       name: "DirectGrantsSimpleStrategy",
-      version: "v1",
-      address: "",
+      version: "v1.1",
+      address: "0xdf14232C92af3dC378E112DD3F4a57c9eebcDBdE",
     },
     "donation-voting-direct": {
       name: "DonationVotingMerkleDistributionDirectTransferStrategy",
-      version: "v1",
-      address: "",
+      version: "v1.1",
+      address: "0x1FF19ec3eF402fb7Fb12349c686126e21E52EacA",
     },
     "donation-voting-vault": {
       name: "DonationVotingMerkleDistributionVaultStrategy",
-      version: "",
+      version: "v1.1",
       address: "",
     },
     "rfp-simple": {
-      name: "",
-      version: "",
+      name: "RFPSimpleStrategy",
+      version: "v1",
+      address: "",
+    },
+    "rfp-committee": {
+      name: "RFPCommitteeStrategy",
+      version: "v1",
       address: "",
     },
   },
@@ -248,17 +253,17 @@ export const nameConfig: DeployParams = {
   420: {
     "donation-voting": {
       name: "DonationVotingStrategy",
-      version: "v1",
-      address: "",
+      version: "v1.2",
+      address: "0xBE24d316223162E71B1CdBbE959B48f5395EDa33",
     },
     "direct-grants-simple": {
       name: "DirectGrantsSimpleStrategy",
-      version: "v1",
+      version: "v1.1",
       address: "",
     },
     "donation-voting-direct": {
       name: "DonationVotingMerkleDistributionDirectTransferStrategy",
-      version: "v1",
+      version: "v1.1",
       address: "",
     },
     "donation-voting-vault": {
@@ -269,6 +274,11 @@ export const nameConfig: DeployParams = {
     "rfp-simple": {
       name: "",
       version: "",
+      address: "",
+    },
+    "rfp-committee": {
+      name: "RFPCommitteeStrategy",
+      version: "v1",
       address: "",
     },
   },
@@ -304,17 +314,17 @@ export const nameConfig: DeployParams = {
   4002: {
     "donation-voting": {
       name: "DonationVotingStrategy",
-      version: "v1",
+      version: "v1.2",
       address: "",
     },
     "direct-grants-simple": {
       name: "DirectGrantsSimpleStrategy",
-      version: "v1",
+      version: "v1.1",
       address: "",
     },
     "donation-voting-direct": {
       name: "DonationVotingMerkleDistributionDirectTransferStrategy",
-      version: "v1",
+      version: "v1.1",
       address: "",
     },
     "donation-voting-vault": {
@@ -370,7 +380,7 @@ export const nameConfig: DeployParams = {
     },
     "donation-voting-direct": {
       name: "DonationVotingMerkleDistributionDirectTransferStrategy",
-      version: "v1",
+      version: "v1.1",
       address: "",
     },
     "donation-voting-vault": {
@@ -416,17 +426,17 @@ export const nameConfig: DeployParams = {
   280: {
     "donation-voting": {
       name: "DonationVotingStrategy",
-      version: "v1",
+      version: "v1.2",
       address: "",
     },
     "direct-grants-simple": {
       name: "DirectGrantsSimpleStrategy",
-      version: "v1",
+      version: "v1.1",
       address: "",
     },
     "donation-voting-direct": {
       name: "DonationVotingMerkleDistributionDirectTransferStrategy",
-      version: "v1",
+      version: "v1.1",
       address: "",
     },
     "donation-voting-vault": {
