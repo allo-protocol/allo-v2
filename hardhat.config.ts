@@ -23,7 +23,7 @@ const chainIds = {
   localhost: 31337,
 
   // testnet
-  goerli: 5,
+  "goerli": 5,
   sepolia: 11155111,
   "optimism-goerli": 420,
   "fantom-testnet": 4002,
@@ -76,7 +76,7 @@ function createTestnetConfig(
     chainId: chainIds[network],
     allowUnlimitedContractSize: true,
     url,
-    gasPrice: 20000000000,
+    gasPrice: 30000000000,
   };
 }
 
@@ -141,7 +141,7 @@ const config: HardhatUserConfig = {
     "optimism-mainnet": createMainnetConfig("optimism-mainnet"),
     "fantom-mainnet": createMainnetConfig(
       "fantom-mainnet",
-      "https://rpc.ftm.tools"
+      "https://rpc.ftm.tools",
     ),
     "pgn-mainnet": {
       accounts: [deployPrivateKey],
@@ -157,14 +157,16 @@ const config: HardhatUserConfig = {
     },
 
     // Test Networks
-    goerli: createTestnetConfig("goerli"),
+    goerli: createTestnetConfig(
+      "goerli",
+    ),
     sepolia: createTestnetConfig(
       "sepolia",
-      "https://eth-sepolia.public.blastapi.io"
+      "https://eth-sepolia.public.blastapi.io",
     ),
     "fantom-testnet": createTestnetConfig(
       "fantom-testnet",
-      "https://rpc.testnet.fantom.network/"
+      "https://rpc.testnet.fantom.network/",
     ),
     "optimism-goerli": {
       accounts: [deployPrivateKey],

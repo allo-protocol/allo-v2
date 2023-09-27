@@ -17,7 +17,7 @@ async function deployCore() {
   `);
 
   // ContractFactory
-  deployContractFactory().then(deployedContract => {
+ // deployContractFactory().then(deployedContract => {
     // Registry
     deployRegistry().then(registryAddress => {
       // Allo
@@ -27,14 +27,14 @@ async function deployCore() {
             ////////////////////////////////////////////////////
             Core Allo V2 deployed to:
             ======================================
-            ContractFactory: ${deployedContract}
+            ContractFactory: ${"0xa5791f9461A4385029e6d0E7aeF5ebD8DC6429e5"}
             Registry: ${registryAddress}
             Allo: ${alloAddress}
             ////////////////////////////////////////////////////
           `);
       });
     });
-  })
+ // })
 
 }
 
