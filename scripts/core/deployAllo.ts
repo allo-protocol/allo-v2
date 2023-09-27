@@ -52,13 +52,13 @@ export async function deployAllo(_registryAddress? : string) {
 
   console.log("Allo.sol deployed to:", instance.target);
 
-  return instance.target;
+  // return instance.target;
 }
 
-// deployAllo().catch((error) => {
-//   console.error(error);
-//   process.exitCode = 1;
-// });
+deployAllo().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});
 
 // Note: Deploy script to run in terminal:
 // npx hardhat run scripts/deployAllo.ts --network sepolia

@@ -45,6 +45,7 @@ if (!deployPrivateKey) {
 }
 
 const infuraIdKey = process.env.INFURA_RPC_ID as string;
+const alchemyIdKey = process.env.ALCHEMY_RPC_ID as string;
 
 /**
  * Reads the remappings.txt file and returns an array of arrays.
@@ -159,6 +160,7 @@ const config: HardhatUserConfig = {
     // Test Networks
     goerli: createTestnetConfig(
       "goerli",
+      `https://eth-goerli.g.alchemy.com/v2/${alchemyIdKey}`
     ),
     sepolia: createTestnetConfig(
       "sepolia",

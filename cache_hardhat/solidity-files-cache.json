@@ -31,7 +31,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -105,7 +105,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -170,7 +170,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -233,7 +233,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -270,69 +270,6 @@
         "IAllo"
       ]
     },
-    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/core/libraries/Native.sol": {
-      "lastModificationDate": 1695673454079,
-      "contentHash": "1bfef428a1d411d92cc51b5a8a464d1c",
-      "sourceName": "contracts/core/libraries/Native.sol",
-      "solcConfig": {
-        "version": "0.8.19",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 400
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "storageLayout",
-                "devdoc",
-                "userdoc"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          },
-          "libraries": {
-            "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
-            }
-          },
-          "remappings": [
-            "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
-            "@sablier/v2-core/=lib/v2-core/",
-            "ds-test/=lib/forge-std/lib/ds-test/src/",
-            "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
-            "forge-std/=lib/forge-std/src/",
-            "permit2/=lib/permit2/src/interfaces/",
-            "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
-            "openzeppelin-contracts/=lib/openzeppelin-contracts/",
-            "@prb/math/=lib/v2-core/lib/prb-math/",
-            "eas-contracts/=lib/eas-contracts/contracts/",
-            "@prb/test/=lib/v2-core/lib/prb-test/src/",
-            "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
-            "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
-            "prb-math/=lib/v2-core/lib/prb-math/src/",
-            "prb-test/=lib/v2-core/lib/prb-test/src/",
-            "solarray/=lib/v2-core/lib/solarray/src/",
-            "solmate/=lib/permit2/lib/solmate/",
-            "v2-core/=lib/v2-core/"
-          ]
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "0.8.19"
-      ],
-      "artifacts": [
-        "Native"
-      ]
-    },
     "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/core/libraries/Transfer.sol": {
       "lastModificationDate": 1695673454078,
       "contentHash": "b38950a0e2d65c028336f10e935425d6",
@@ -363,7 +300,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -399,10 +336,10 @@
         "Transfer"
       ]
     },
-    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/openzeppelin-contracts-upgradeable/contracts/security/ReentrancyGuardUpgradeable.sol": {
-      "lastModificationDate": 1695835283592,
-      "contentHash": "efeffcf5034292d7ea635de588c95995",
-      "sourceName": "lib/openzeppelin-contracts-upgradeable/contracts/security/ReentrancyGuardUpgradeable.sol",
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/core/libraries/Native.sol": {
+      "lastModificationDate": 1695673454079,
+      "contentHash": "1bfef428a1d411d92cc51b5a8a464d1c",
+      "sourceName": "contracts/core/libraries/Native.sol",
       "solcConfig": {
         "version": "0.8.19",
         "settings": {
@@ -429,7 +366,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -454,14 +391,12 @@
           ]
         }
       },
-      "imports": [
-        "../proxy/utils/Initializable.sol"
-      ],
+      "imports": [],
       "versionPragmas": [
-        "^0.8.0"
+        "0.8.19"
       ],
       "artifacts": [
-        "ReentrancyGuardUpgradeable"
+        "Native"
       ]
     },
     "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/openzeppelin-contracts/contracts/access/AccessControl.sol": {
@@ -494,7 +429,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -532,6 +467,71 @@
         "AccessControl"
       ]
     },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/openzeppelin-contracts-upgradeable/contracts/security/ReentrancyGuardUpgradeable.sol": {
+      "lastModificationDate": 1695835283592,
+      "contentHash": "efeffcf5034292d7ea635de588c95995",
+      "sourceName": "lib/openzeppelin-contracts-upgradeable/contracts/security/ReentrancyGuardUpgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 400
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
+            }
+          },
+          "remappings": [
+            "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+            "@sablier/v2-core/=lib/v2-core/",
+            "ds-test/=lib/forge-std/lib/ds-test/src/",
+            "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
+            "forge-std/=lib/forge-std/src/",
+            "permit2/=lib/permit2/src/interfaces/",
+            "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+            "openzeppelin-contracts/=lib/openzeppelin-contracts/",
+            "@prb/math/=lib/v2-core/lib/prb-math/",
+            "eas-contracts/=lib/eas-contracts/contracts/",
+            "@prb/test/=lib/v2-core/lib/prb-test/src/",
+            "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
+            "prb-math/=lib/v2-core/lib/prb-math/src/",
+            "prb-test/=lib/v2-core/lib/prb-test/src/",
+            "solarray/=lib/v2-core/lib/solarray/src/",
+            "solmate/=lib/permit2/lib/solmate/",
+            "v2-core/=lib/v2-core/"
+          ]
+        }
+      },
+      "imports": [
+        "../proxy/utils/Initializable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "ReentrancyGuardUpgradeable"
+      ]
+    },
     "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol": {
       "lastModificationDate": 1695835283591,
       "contentHash": "b0970a564d121abf9adfff8d1a01eb16",
@@ -562,7 +562,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -627,7 +627,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -690,7 +690,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -753,7 +753,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -786,132 +786,6 @@
         "ClonesUpgradeable"
       ]
     },
-    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/core/libraries/Metadata.sol": {
-      "lastModificationDate": 1695673454078,
-      "contentHash": "cda0d9f7b8dc1791c80fbbbefc2cad79",
-      "sourceName": "contracts/core/libraries/Metadata.sol",
-      "solcConfig": {
-        "version": "0.8.19",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 400
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "storageLayout",
-                "devdoc",
-                "userdoc"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          },
-          "libraries": {
-            "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
-            }
-          },
-          "remappings": [
-            "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
-            "@sablier/v2-core/=lib/v2-core/",
-            "ds-test/=lib/forge-std/lib/ds-test/src/",
-            "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
-            "forge-std/=lib/forge-std/src/",
-            "permit2/=lib/permit2/src/interfaces/",
-            "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
-            "openzeppelin-contracts/=lib/openzeppelin-contracts/",
-            "@prb/math/=lib/v2-core/lib/prb-math/",
-            "eas-contracts/=lib/eas-contracts/contracts/",
-            "@prb/test/=lib/v2-core/lib/prb-test/src/",
-            "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
-            "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
-            "prb-math/=lib/v2-core/lib/prb-math/src/",
-            "prb-test/=lib/v2-core/lib/prb-test/src/",
-            "solarray/=lib/v2-core/lib/solarray/src/",
-            "solmate/=lib/permit2/lib/solmate/",
-            "v2-core/=lib/v2-core/"
-          ]
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "0.8.19"
-      ],
-      "artifacts": []
-    },
-    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/core/interfaces/IRegistry.sol": {
-      "lastModificationDate": 1695673454079,
-      "contentHash": "e3ed57dbadc594270a2f89af1db779a3",
-      "sourceName": "contracts/core/interfaces/IRegistry.sol",
-      "solcConfig": {
-        "version": "0.8.19",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 400
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "storageLayout",
-                "devdoc",
-                "userdoc"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          },
-          "libraries": {
-            "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
-            }
-          },
-          "remappings": [
-            "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
-            "@sablier/v2-core/=lib/v2-core/",
-            "ds-test/=lib/forge-std/lib/ds-test/src/",
-            "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
-            "forge-std/=lib/forge-std/src/",
-            "permit2/=lib/permit2/src/interfaces/",
-            "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
-            "openzeppelin-contracts/=lib/openzeppelin-contracts/",
-            "@prb/math/=lib/v2-core/lib/prb-math/",
-            "eas-contracts/=lib/eas-contracts/contracts/",
-            "@prb/test/=lib/v2-core/lib/prb-test/src/",
-            "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
-            "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
-            "prb-math/=lib/v2-core/lib/prb-math/src/",
-            "prb-test/=lib/v2-core/lib/prb-test/src/",
-            "solarray/=lib/v2-core/lib/solarray/src/",
-            "solmate/=lib/permit2/lib/solmate/",
-            "v2-core/=lib/v2-core/"
-          ]
-        }
-      },
-      "imports": [
-        "../libraries/Metadata.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.19"
-      ],
-      "artifacts": [
-        "IRegistry"
-      ]
-    },
     "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/core/interfaces/IStrategy.sol": {
       "lastModificationDate": 1695673454078,
       "contentHash": "b5b2b959f210df3bed456fdde3a35611",
@@ -942,7 +816,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -977,6 +851,132 @@
         "IStrategy"
       ]
     },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/core/interfaces/IRegistry.sol": {
+      "lastModificationDate": 1695673454079,
+      "contentHash": "e3ed57dbadc594270a2f89af1db779a3",
+      "sourceName": "contracts/core/interfaces/IRegistry.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 400
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
+            }
+          },
+          "remappings": [
+            "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+            "@sablier/v2-core/=lib/v2-core/",
+            "ds-test/=lib/forge-std/lib/ds-test/src/",
+            "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
+            "forge-std/=lib/forge-std/src/",
+            "permit2/=lib/permit2/src/interfaces/",
+            "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+            "openzeppelin-contracts/=lib/openzeppelin-contracts/",
+            "@prb/math/=lib/v2-core/lib/prb-math/",
+            "eas-contracts/=lib/eas-contracts/contracts/",
+            "@prb/test/=lib/v2-core/lib/prb-test/src/",
+            "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
+            "prb-math/=lib/v2-core/lib/prb-math/src/",
+            "prb-test/=lib/v2-core/lib/prb-test/src/",
+            "solarray/=lib/v2-core/lib/solarray/src/",
+            "solmate/=lib/permit2/lib/solmate/",
+            "v2-core/=lib/v2-core/"
+          ]
+        }
+      },
+      "imports": [
+        "../libraries/Metadata.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.19"
+      ],
+      "artifacts": [
+        "IRegistry"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/core/libraries/Metadata.sol": {
+      "lastModificationDate": 1695673454078,
+      "contentHash": "cda0d9f7b8dc1791c80fbbbefc2cad79",
+      "sourceName": "contracts/core/libraries/Metadata.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 400
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
+            }
+          },
+          "remappings": [
+            "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+            "@sablier/v2-core/=lib/v2-core/",
+            "ds-test/=lib/forge-std/lib/ds-test/src/",
+            "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
+            "forge-std/=lib/forge-std/src/",
+            "permit2/=lib/permit2/src/interfaces/",
+            "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+            "openzeppelin-contracts/=lib/openzeppelin-contracts/",
+            "@prb/math/=lib/v2-core/lib/prb-math/",
+            "eas-contracts/=lib/eas-contracts/contracts/",
+            "@prb/test/=lib/v2-core/lib/prb-test/src/",
+            "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
+            "prb-math/=lib/v2-core/lib/prb-math/src/",
+            "prb-test/=lib/v2-core/lib/prb-test/src/",
+            "solarray/=lib/v2-core/lib/solarray/src/",
+            "solmate/=lib/permit2/lib/solmate/",
+            "v2-core/=lib/v2-core/"
+          ]
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "0.8.19"
+      ],
+      "artifacts": []
+    },
     "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/solady/src/utils/SafeTransferLib.sol": {
       "lastModificationDate": 1695836959032,
       "contentHash": "13fbdcd4b922faa55d3d6f8d764f5cc6",
@@ -1007,7 +1007,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -1040,69 +1040,6 @@
         "SafeTransferLib"
       ]
     },
-    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/openzeppelin-contracts-upgradeable/contracts/utils/AddressUpgradeable.sol": {
-      "lastModificationDate": 1695835283597,
-      "contentHash": "c30c805386fda8a42ff515da963d3a95",
-      "sourceName": "lib/openzeppelin-contracts-upgradeable/contracts/utils/AddressUpgradeable.sol",
-      "solcConfig": {
-        "version": "0.8.19",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 400
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "storageLayout",
-                "devdoc",
-                "userdoc"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          },
-          "libraries": {
-            "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
-            }
-          },
-          "remappings": [
-            "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
-            "@sablier/v2-core/=lib/v2-core/",
-            "ds-test/=lib/forge-std/lib/ds-test/src/",
-            "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
-            "forge-std/=lib/forge-std/src/",
-            "permit2/=lib/permit2/src/interfaces/",
-            "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
-            "openzeppelin-contracts/=lib/openzeppelin-contracts/",
-            "@prb/math/=lib/v2-core/lib/prb-math/",
-            "eas-contracts/=lib/eas-contracts/contracts/",
-            "@prb/test/=lib/v2-core/lib/prb-test/src/",
-            "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
-            "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
-            "prb-math/=lib/v2-core/lib/prb-math/src/",
-            "prb-test/=lib/v2-core/lib/prb-test/src/",
-            "solarray/=lib/v2-core/lib/solarray/src/",
-            "solmate/=lib/permit2/lib/solmate/",
-            "v2-core/=lib/v2-core/"
-          ]
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.1"
-      ],
-      "artifacts": [
-        "AddressUpgradeable"
-      ]
-    },
     "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/openzeppelin-contracts/contracts/utils/Strings.sol": {
       "lastModificationDate": 1695835283380,
       "contentHash": "48686fc32a22a3754b8e63321857dd2a",
@@ -1133,7 +1070,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -1199,7 +1136,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -1262,7 +1199,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -1325,7 +1262,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -1390,7 +1327,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -1453,7 +1390,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -1516,7 +1453,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -1549,6 +1486,69 @@
         "IERC165"
       ]
     },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/openzeppelin-contracts-upgradeable/contracts/utils/AddressUpgradeable.sol": {
+      "lastModificationDate": 1695835283597,
+      "contentHash": "c30c805386fda8a42ff515da963d3a95",
+      "sourceName": "lib/openzeppelin-contracts-upgradeable/contracts/utils/AddressUpgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 400
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
+            }
+          },
+          "remappings": [
+            "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+            "@sablier/v2-core/=lib/v2-core/",
+            "ds-test/=lib/forge-std/lib/ds-test/src/",
+            "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
+            "forge-std/=lib/forge-std/src/",
+            "permit2/=lib/permit2/src/interfaces/",
+            "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+            "openzeppelin-contracts/=lib/openzeppelin-contracts/",
+            "@prb/math/=lib/v2-core/lib/prb-math/",
+            "eas-contracts/=lib/eas-contracts/contracts/",
+            "@prb/test/=lib/v2-core/lib/prb-test/src/",
+            "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
+            "prb-math/=lib/v2-core/lib/prb-math/src/",
+            "prb-test/=lib/v2-core/lib/prb-test/src/",
+            "solarray/=lib/v2-core/lib/solarray/src/",
+            "solmate/=lib/permit2/lib/solmate/",
+            "v2-core/=lib/v2-core/"
+          ]
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.1"
+      ],
+      "artifacts": [
+        "AddressUpgradeable"
+      ]
+    },
     "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/strategies/_poc/wrapped-voting-nftmint/NFT.sol": {
       "lastModificationDate": 1695673454091,
       "contentHash": "6fbe0f8e667377409bde64e1ff81379c",
@@ -1579,7 +1579,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -1646,7 +1646,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -1709,7 +1709,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -1779,7 +1779,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -1846,7 +1846,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -1911,7 +1911,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -1974,7 +1974,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -2043,7 +2043,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -2111,7 +2111,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -2177,7 +2177,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -2242,7 +2242,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -2305,7 +2305,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -2372,7 +2372,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -2435,7 +2435,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -2498,7 +2498,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -2565,7 +2565,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -2634,7 +2634,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -2697,7 +2697,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -2768,7 +2768,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -2833,70 +2833,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
-            }
-          },
-          "remappings": [
-            "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
-            "@sablier/v2-core/=lib/v2-core/",
-            "ds-test/=lib/forge-std/lib/ds-test/src/",
-            "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
-            "forge-std/=lib/forge-std/src/",
-            "permit2/=lib/permit2/src/interfaces/",
-            "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
-            "openzeppelin-contracts/=lib/openzeppelin-contracts/",
-            "@prb/math/=lib/v2-core/lib/prb-math/",
-            "eas-contracts/=lib/eas-contracts/contracts/",
-            "@prb/test/=lib/v2-core/lib/prb-test/src/",
-            "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
-            "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
-            "prb-math/=lib/v2-core/lib/prb-math/src/",
-            "prb-test/=lib/v2-core/lib/prb-test/src/",
-            "solarray/=lib/v2-core/lib/solarray/src/",
-            "solmate/=lib/permit2/lib/solmate/",
-            "v2-core/=lib/v2-core/"
-          ]
-        }
-      },
-      "imports": [
-        "./ValueType.sol"
-      ],
-      "versionPragmas": [
-        ">=0.8.19"
-      ],
-      "artifacts": []
-    },
-    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/v2-core/lib/prb-math/src/ud60x18/Errors.sol": {
-      "lastModificationDate": 1695835285016,
-      "contentHash": "63cbb9480bb14e0824736d5c109aa7ce",
-      "sourceName": "lib/v2-core/lib/prb-math/src/ud60x18/Errors.sol",
-      "solcConfig": {
-        "version": "0.8.19",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 400
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "storageLayout",
-                "devdoc",
-                "userdoc"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          },
-          "libraries": {
-            "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -2959,7 +2896,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -2993,10 +2930,10 @@
       ],
       "artifacts": []
     },
-    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/v2-core/lib/prb-math/src/ud60x18/Math.sol": {
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/v2-core/lib/prb-math/src/ud60x18/Errors.sol": {
       "lastModificationDate": 1695835285016,
-      "contentHash": "925bb9fcc75f579cf3e9dd58fa10a90c",
-      "sourceName": "lib/v2-core/lib/prb-math/src/ud60x18/Math.sol",
+      "contentHash": "63cbb9480bb14e0824736d5c109aa7ce",
+      "sourceName": "lib/v2-core/lib/prb-math/src/ud60x18/Errors.sol",
       "solcConfig": {
         "version": "0.8.19",
         "settings": {
@@ -3023,7 +2960,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -3049,10 +2986,6 @@
         }
       },
       "imports": [
-        "../Common.sol",
-        "./Errors.sol",
-        "./Casting.sol",
-        "./Constants.sol",
         "./ValueType.sol"
       ],
       "versionPragmas": [
@@ -3090,7 +3023,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -3119,6 +3052,73 @@
         "./Casting.sol",
         "./Helpers.sol",
         "./Math.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/v2-core/lib/prb-math/src/ud60x18/Math.sol": {
+      "lastModificationDate": 1695835285016,
+      "contentHash": "925bb9fcc75f579cf3e9dd58fa10a90c",
+      "sourceName": "lib/v2-core/lib/prb-math/src/ud60x18/Math.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 400
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
+            }
+          },
+          "remappings": [
+            "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+            "@sablier/v2-core/=lib/v2-core/",
+            "ds-test/=lib/forge-std/lib/ds-test/src/",
+            "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
+            "forge-std/=lib/forge-std/src/",
+            "permit2/=lib/permit2/src/interfaces/",
+            "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+            "openzeppelin-contracts/=lib/openzeppelin-contracts/",
+            "@prb/math/=lib/v2-core/lib/prb-math/",
+            "eas-contracts/=lib/eas-contracts/contracts/",
+            "@prb/test/=lib/v2-core/lib/prb-test/src/",
+            "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
+            "prb-math/=lib/v2-core/lib/prb-math/src/",
+            "prb-test/=lib/v2-core/lib/prb-test/src/",
+            "solarray/=lib/v2-core/lib/solarray/src/",
+            "solmate/=lib/permit2/lib/solmate/",
+            "v2-core/=lib/v2-core/"
+          ]
+        }
+      },
+      "imports": [
+        "../Common.sol",
+        "./Errors.sol",
+        "./Casting.sol",
+        "./Constants.sol",
+        "./ValueType.sol"
       ],
       "versionPragmas": [
         ">=0.8.19"
@@ -3155,7 +3155,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -3218,70 +3218,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
-            }
-          },
-          "remappings": [
-            "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
-            "@sablier/v2-core/=lib/v2-core/",
-            "ds-test/=lib/forge-std/lib/ds-test/src/",
-            "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
-            "forge-std/=lib/forge-std/src/",
-            "permit2/=lib/permit2/src/interfaces/",
-            "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
-            "openzeppelin-contracts/=lib/openzeppelin-contracts/",
-            "@prb/math/=lib/v2-core/lib/prb-math/",
-            "eas-contracts/=lib/eas-contracts/contracts/",
-            "@prb/test/=lib/v2-core/lib/prb-test/src/",
-            "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
-            "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
-            "prb-math/=lib/v2-core/lib/prb-math/src/",
-            "prb-test/=lib/v2-core/lib/prb-test/src/",
-            "solarray/=lib/v2-core/lib/solarray/src/",
-            "solmate/=lib/permit2/lib/solmate/",
-            "v2-core/=lib/v2-core/"
-          ]
-        }
-      },
-      "imports": [
-        "./Casting.sol"
-      ],
-      "versionPragmas": [
-        ">=0.8.19"
-      ],
-      "artifacts": []
-    },
-    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/v2-core/lib/prb-math/src/sd1x18/ValueType.sol": {
-      "lastModificationDate": 1695835285010,
-      "contentHash": "f0d7fec0238b9623cd5432462fba5c7f",
-      "sourceName": "lib/v2-core/lib/prb-math/src/sd1x18/ValueType.sol",
-      "solcConfig": {
-        "version": "0.8.19",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 400
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "storageLayout",
-                "devdoc",
-                "userdoc"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          },
-          "libraries": {
-            "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -3344,7 +3281,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -3370,69 +3307,6 @@
         }
       },
       "imports": [],
-      "versionPragmas": [
-        ">=0.8.19"
-      ],
-      "artifacts": []
-    },
-    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/v2-core/lib/prb-math/src/sd59x18/Constants.sol": {
-      "lastModificationDate": 1695835285010,
-      "contentHash": "7fc7d96c638cf5317dbba7ae8c07300d",
-      "sourceName": "lib/v2-core/lib/prb-math/src/sd59x18/Constants.sol",
-      "solcConfig": {
-        "version": "0.8.19",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 400
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "storageLayout",
-                "devdoc",
-                "userdoc"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          },
-          "libraries": {
-            "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
-            }
-          },
-          "remappings": [
-            "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
-            "@sablier/v2-core/=lib/v2-core/",
-            "ds-test/=lib/forge-std/lib/ds-test/src/",
-            "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
-            "forge-std/=lib/forge-std/src/",
-            "permit2/=lib/permit2/src/interfaces/",
-            "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
-            "openzeppelin-contracts/=lib/openzeppelin-contracts/",
-            "@prb/math/=lib/v2-core/lib/prb-math/",
-            "eas-contracts/=lib/eas-contracts/contracts/",
-            "@prb/test/=lib/v2-core/lib/prb-test/src/",
-            "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
-            "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
-            "prb-math/=lib/v2-core/lib/prb-math/src/",
-            "prb-test/=lib/v2-core/lib/prb-test/src/",
-            "solarray/=lib/v2-core/lib/solarray/src/",
-            "solmate/=lib/permit2/lib/solmate/",
-            "v2-core/=lib/v2-core/"
-          ]
-        }
-      },
-      "imports": [
-        "./ValueType.sol"
-      ],
       "versionPragmas": [
         ">=0.8.19"
       ],
@@ -3468,7 +3342,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -3531,7 +3405,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -3560,6 +3434,132 @@
         "./Casting.sol",
         "./Helpers.sol",
         "./Math.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/v2-core/lib/prb-math/src/sd1x18/ValueType.sol": {
+      "lastModificationDate": 1695835285010,
+      "contentHash": "f0d7fec0238b9623cd5432462fba5c7f",
+      "sourceName": "lib/v2-core/lib/prb-math/src/sd1x18/ValueType.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 400
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
+            }
+          },
+          "remappings": [
+            "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+            "@sablier/v2-core/=lib/v2-core/",
+            "ds-test/=lib/forge-std/lib/ds-test/src/",
+            "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
+            "forge-std/=lib/forge-std/src/",
+            "permit2/=lib/permit2/src/interfaces/",
+            "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+            "openzeppelin-contracts/=lib/openzeppelin-contracts/",
+            "@prb/math/=lib/v2-core/lib/prb-math/",
+            "eas-contracts/=lib/eas-contracts/contracts/",
+            "@prb/test/=lib/v2-core/lib/prb-test/src/",
+            "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
+            "prb-math/=lib/v2-core/lib/prb-math/src/",
+            "prb-test/=lib/v2-core/lib/prb-test/src/",
+            "solarray/=lib/v2-core/lib/solarray/src/",
+            "solmate/=lib/permit2/lib/solmate/",
+            "v2-core/=lib/v2-core/"
+          ]
+        }
+      },
+      "imports": [
+        "./Casting.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/v2-core/lib/prb-math/src/sd59x18/Constants.sol": {
+      "lastModificationDate": 1695835285010,
+      "contentHash": "7fc7d96c638cf5317dbba7ae8c07300d",
+      "sourceName": "lib/v2-core/lib/prb-math/src/sd59x18/Constants.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 400
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
+            }
+          },
+          "remappings": [
+            "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+            "@sablier/v2-core/=lib/v2-core/",
+            "ds-test/=lib/forge-std/lib/ds-test/src/",
+            "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
+            "forge-std/=lib/forge-std/src/",
+            "permit2/=lib/permit2/src/interfaces/",
+            "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+            "openzeppelin-contracts/=lib/openzeppelin-contracts/",
+            "@prb/math/=lib/v2-core/lib/prb-math/",
+            "eas-contracts/=lib/eas-contracts/contracts/",
+            "@prb/test/=lib/v2-core/lib/prb-test/src/",
+            "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
+            "prb-math/=lib/v2-core/lib/prb-math/src/",
+            "prb-test/=lib/v2-core/lib/prb-test/src/",
+            "solarray/=lib/v2-core/lib/solarray/src/",
+            "solmate/=lib/permit2/lib/solmate/",
+            "v2-core/=lib/v2-core/"
+          ]
+        }
+      },
+      "imports": [
+        "./ValueType.sol"
       ],
       "versionPragmas": [
         ">=0.8.19"
@@ -3596,7 +3596,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -3666,7 +3666,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -3729,7 +3729,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -3797,7 +3797,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -3860,7 +3860,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -3930,7 +3930,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -3994,7 +3994,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -4061,7 +4061,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -4124,7 +4124,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -4192,7 +4192,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -4258,7 +4258,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -4327,7 +4327,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -4396,7 +4396,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -4461,7 +4461,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -4526,7 +4526,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -4591,7 +4591,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -4665,7 +4665,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -4730,7 +4730,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -4793,7 +4793,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -4856,7 +4856,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -4921,7 +4921,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -4989,7 +4989,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -5061,7 +5061,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -5126,7 +5126,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -5189,7 +5189,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -5252,7 +5252,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -5319,7 +5319,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -5389,7 +5389,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -5455,7 +5455,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -5520,7 +5520,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -5594,7 +5594,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -5661,7 +5661,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -5725,7 +5725,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -5799,7 +5799,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -5866,7 +5866,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -5934,7 +5934,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -6000,7 +6000,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -6069,7 +6069,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -6136,7 +6136,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -6202,7 +6202,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -6267,7 +6267,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -6328,7 +6328,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -6393,7 +6393,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -6462,7 +6462,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -6528,7 +6528,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [
@@ -6591,7 +6591,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363935383430363334313035"
+              "__CACHE_BREAKER__": "0x0000000000000031363935383434313435383834"
             }
           },
           "remappings": [

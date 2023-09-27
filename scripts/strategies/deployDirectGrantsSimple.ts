@@ -1,7 +1,7 @@
 import { deployStrategies } from "./deployStrategies";
 
 const deployDonationVoting = async () => {
-  deployStrategies("DirectGrantsSimpleStrategy", "v1.1");
+  deployStrategies("DirectGrantsSimpleStrategy", "v1");
 };
 
 deployDonationVoting().catch((error) => {

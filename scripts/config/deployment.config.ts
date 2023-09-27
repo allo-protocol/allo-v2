@@ -11,7 +11,7 @@ export const deployerContractAddress: DeployerConfig = {
   },
   // Goerli
   5: {
-    address: "",
+    address: "0xd9edcb4A0BA1d87ccaabFbD3775651CC46d4CAFb",
   },
   // Sepolia
   11155111: {

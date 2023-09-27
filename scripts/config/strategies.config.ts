@@ -45,44 +45,44 @@ export const nameConfig: DeployParams = {
     "donation-voting": {
       name: "DonationVotingStrategy",
       version: "v1",
-      address: "",
+      address: "0x81Abcb682cc61c463Cdbe1Ef1804CbEfC1d54d7f",
     },
     "direct-grants-simple": {
       name: "DirectGrantsSimpleStrategy",
       version: "v1",
-      address: "",
+      address: "0x4a41F242cA053DB83F7D45C92a3757fb94bD65A8",
     },
     "donation-voting-direct": {
       name: "DonationVotingMerkleDistributionDirectTransferStrategy",
       version: "v1",
-      address: "",
+      address: "0x8253782db9cA148A07c19ca36A4fA0D02f45A2ca",
     },
     "donation-voting-vault": {
       name: "DonationVotingMerkleDistributionVaultStrategy",
-      version: "",
-      address: "",
+      version: "v1",
+      address: "0xB42C26e4029e932CDd53981f7CbefF89e74F03c2",
     },
     "rfp-simple": {
       name: "RFPSimpleStrategy",
-      version: "",
-      address: "",
+      version: "v1",
+      address: "0x03FA47235fAF670c72dD765A4eE55Bd332308029",
     },
     "rfp-committee": {
       name: "RFPCommitteeStrategy",
       version: "v1",
-      address: "",
+      address: "0x9DB5B54a4f63124428e293b37A81D4e3bcC2F222",
     },
   },
   // Sepolia
   11155111: {
     "donation-voting": {
       name: "DonationVotingStrategy",
-      version: "v1.2",
+      version: "v1",
       address: "",
     },
     "direct-grants-simple": {
       name: "DirectGrantsSimpleStrategy",
-      version: "v1.1",
+      version: "v1",
       address: "",
     },
     "donation-voting-direct": {
@@ -138,22 +138,22 @@ export const nameConfig: DeployParams = {
   58008: {
     "donation-voting": {
       name: "DonationVotingStrategy",
-      version: "v1.2",
+      version: "v1",
       address: "",
     },
     "direct-grants-simple": {
       name: "DirectGrantsSimpleStrategy",
-      version: "v1.1",
+      version: "v1",
       address: "",
     },
     "donation-voting-direct": {
       name: "DonationVotingMerkleDistributionDirectTransferStrategy",
-      version: "v1.1",
+      version: "v1",
       address: "",
     },
     "donation-voting-vault": {
       name: "DonationVotingMerkleDistributionVaultStrategy",
-      version: "v1.1",
+      version: "v1",
       address: "",
     },
     "rfp-simple": {
@@ -199,17 +199,17 @@ export const nameConfig: DeployParams = {
   420: {
     "donation-voting": {
       name: "DonationVotingStrategy",
-      version: "v1.2",
+      version: "v1",
       address: "",
     },
     "direct-grants-simple": {
       name: "DirectGrantsSimpleStrategy",
-      version: "v1.1",
+      version: "v1",
       address: "",
     },
     "donation-voting-direct": {
       name: "DonationVotingMerkleDistributionDirectTransferStrategy",
-      version: "v1.1",
+      version: "v1",
       address: "",
     },
     "donation-voting-vault": {
@@ -260,17 +260,17 @@ export const nameConfig: DeployParams = {
   4002: {
     "donation-voting": {
       name: "DonationVotingStrategy",
-      version: "v1.2",
+      version: "v1",
       address: "",
     },
     "direct-grants-simple": {
       name: "DirectGrantsSimpleStrategy",
-      version: "v1.1",
+      version: "v1",
       address: "",
     },
     "donation-voting-direct": {
       name: "DonationVotingMerkleDistributionDirectTransferStrategy",
-      version: "v1.1",
+      version: "v1",
       address: "",
     },
     "donation-voting-vault": {
@@ -326,7 +326,7 @@ export const nameConfig: DeployParams = {
     },
     "donation-voting-direct": {
       name: "DonationVotingMerkleDistributionDirectTransferStrategy",
-      version: "v1.1",
+      version: "v1",
       address: "",
     },
     "donation-voting-vault": {
@@ -372,17 +372,17 @@ export const nameConfig: DeployParams = {
   280: {
     "donation-voting": {
       name: "DonationVotingStrategy",
-      version: "v1.2",
+      version: "v1",
       address: "",
     },
     "direct-grants-simple": {
       name: "DirectGrantsSimpleStrategy",
-      version: "v1.1",
+      version: "v1",
       address: "",
     },
     "donation-voting-direct": {
       name: "DonationVotingMerkleDistributionDirectTransferStrategy",
-      version: "v1.1",
+      version: "v1",
       address: "",
     },
     "donation-voting-vault": {

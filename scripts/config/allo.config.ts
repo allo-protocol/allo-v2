@@ -22,9 +22,9 @@ export const alloConfig: DeployParams = {
   },
   // Goerli
   5: {
-    alloImplementation: "",
-    alloProxy: "",
-    treasury: "",
+    alloImplementation: "0x9c6455ccdbe69e0a9352f9cef9d2204c46bec977",
+    alloProxy: "0xbb6B237a98D907b04682D8567F4a8d0b4b611a3b",
+    treasury: "0x1fD06f088c720bA3b7a3634a8F021Fdd485DcA42",
     percentFee: 0,
     baseFee: 0,
   },
