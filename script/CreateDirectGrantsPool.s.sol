@@ -3,6 +3,8 @@ pragma solidity 0.8.19;
 import "forge-std/Script.sol";
 
 import {Allo} from "../contracts/core/Allo.sol";
+import {DirectGrantsSimpleStrategy} from
+    "../contracts/strategies/_poc/direct-grants-simple/DirectGrantsSimpleStrategy.sol";
 
 import {Metadata} from "../contracts/core/libraries/Metadata.sol";
 import {Native} from "../contracts/core/libraries/Native.sol";
@@ -11,8 +13,8 @@ import {GoerliConfig} from "./GoerliConfig.sol";
 /// @notice This script is used to create pool test data for the Allo V2 contracts
 /// @dev Use this to run
 ///      'source .env' if you are using a .env file for your rpc-url
-///      'forge script script/CreateRFPSimplePool.s.sol:CreateRFPSimplePool --rpc-url $GOERLI_RPC_URL --broadcast  -vvvv'
-contract CreateRFPSimplePool is Script, Native, GoerliConfig {
+///      'forge script script/CreateDirectGrantsPool.s.sol:CreateDirectGrantsPool --rpc-url $GOERLI_RPC_URL --broadcast  -vvvv'
+contract CreateDirectGrantsPool is Script, Native, GoerliConfig {
     // Initialize the Allo Interface
     Allo allo = Allo(ALLO);
 
@@ -29,18 +31,16 @@ contract CreateRFPSimplePool is Script, Native, GoerliConfig {
         managers[0] = address(OWNER);
 
         // Initialize prams
-        bytes memory initParams = abi.encode(10, true, true);
+        bytes memory initParams = abi.encode(DirectGrantsSimpleStrategy.InitializeData(true, true, true));
 
-        allo.createPool{value: 1e16}(
-            TEST_PROFILE_2, RFPSIMPLESTRATEGYFORCLONE, initParams, NATIVE, 1e16, metadata, managers
-        );
+        allo.createPool(TEST_PROFILE_2, DIRECTGRANTSSIMPLETESTRATEGYFORCLONE, initParams, NATIVE, 0, metadata, managers);
 
         vm.stopBroadcast();
     }
 }
 
-// struct InitializeParams {
-//         uint256 maxBid;
-//         bool useRegistryAnchor;
-//         bool metadataRequired;
-//     }
+// struct InitializeData {
+//     bool registryGating;
+//     bool metadataRequired;
+//     bool grantAmountRequired;
+// }

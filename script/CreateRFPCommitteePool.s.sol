@@ -11,8 +11,8 @@ import {GoerliConfig} from "./GoerliConfig.sol";
 /// @notice This script is used to create pool test data for the Allo V2 contracts
 /// @dev Use this to run
 ///      'source .env' if you are using a .env file for your rpc-url
-///      'forge script script/CreateRFPSimplePool.s.sol:CreateRFPSimplePool --rpc-url $GOERLI_RPC_URL --broadcast  -vvvv'
-contract CreateRFPSimplePool is Script, Native, GoerliConfig {
+///      'forge script script/CreateRFPCommitteePool.s.sol:CreateRFPCommitteePool --rpc-url $GOERLI_RPC_URL --broadcast  -vvvv'
+contract CreateRFPCommitteePool is Script, Native, GoerliConfig {
     // Initialize the Allo Interface
     Allo allo = Allo(ALLO);
 
@@ -29,10 +29,10 @@ contract CreateRFPSimplePool is Script, Native, GoerliConfig {
         managers[0] = address(OWNER);
 
         // Initialize prams
-        bytes memory initParams = abi.encode(10, true, true);
+        bytes memory initParams = abi.encode(6, 10, true, true);
 
         allo.createPool{value: 1e16}(
-            TEST_PROFILE_2, RFPSIMPLESTRATEGYFORCLONE, initParams, NATIVE, 1e16, metadata, managers
+            TEST_PROFILE_2, RFPCOMMITTEESTRATEGYFORCLONE, initParams, NATIVE, 1e16, metadata, managers
         );
 
         vm.stopBroadcast();
@@ -43,4 +43,9 @@ contract CreateRFPSimplePool is Script, Native, GoerliConfig {
 //         uint256 maxBid;
 //         bool useRegistryAnchor;
 //         bool metadataRequired;
+//     }
+
+// struct InitializeParamsCommittee {
+//         uint256 voteThreshold;
+//         InitializeParams params;
 //     }

@@ -12,7 +12,7 @@ import {DonationVotingMerkleDistributionBaseStrategy} from
 
 import {Metadata} from "../contracts/core/libraries/Metadata.sol";
 import {Native} from "../contracts/core/libraries/Native.sol";
-import {Config} from "./Config.sol";
+import {GoerliConfig} from "./GoerliConfig.sol";
 
 import {ISignatureTransfer} from "permit2/ISignatureTransfer.sol";
 
@@ -20,7 +20,7 @@ import {ISignatureTransfer} from "permit2/ISignatureTransfer.sol";
 /// @dev Use this to run
 ///      'source .env' if you are using a .env file for your rpc-url
 ///      'forge script script/CastVote.s.sol:CastVote --rpc-url $GOERLI_RPC_URL --broadcast  -vvvv'
-contract CastVote is Script, Native, Config {
+contract CastVote is Script, Native, GoerliConfig {
     // Initialize the Allo Interface
     Allo allo = Allo(ALLO);
 

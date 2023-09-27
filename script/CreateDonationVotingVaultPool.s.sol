@@ -4,16 +4,18 @@ pragma solidity 0.8.19;
 import "forge-std/Script.sol";
 
 import {Allo} from "../contracts/core/Allo.sol";
+import {DonationVotingMerkleDistributionBaseStrategy} from
+    "../contracts/strategies/donation-voting-merkle-base/DonationVotingMerkleDistributionBaseStrategy.sol";
 
 import {Metadata} from "../contracts/core/libraries/Metadata.sol";
 import {Native} from "../contracts/core/libraries/Native.sol";
-import {Config} from "./Config.sol";
+import {GoerliConfig} from "./GoerliConfig.sol";
 
 /// @notice This script is used to create pool test data for the Allo V2 contracts
 /// @dev Use this to run
 ///      'source .env' if you are using a .env file for your rpc-url
-///      'forge script script/CreateDonationVotingMerklePayoutPool.s.sol:CreateDonationVotingMerklePayoutPool --rpc-url $GOERLI_RPC_URL --broadcast  -vvvv'
-contract CreateDonationVotingMerklePayoutPool is Script, Native, Config {
+///      'forge script script/CreateDonationVotingVaultPool.s.sol:CreateDonationVotingVaultPool --rpc-url $GOERLI_RPC_URL --broadcast  -vvvv'
+contract CreateDonationVotingVaultPool is Script, Native, GoerliConfig {
     // Initialize the Allo Interface
     Allo allo = Allo(ALLO);
 
@@ -28,10 +30,10 @@ contract CreateDonationVotingMerklePayoutPool is Script, Native, Config {
         bytes memory encodedStrategyData = abi.encode(
             true,
             true,
-            block.timestamp + 500,
-            block.timestamp + 10000,
-            block.timestamp + 20000,
-            block.timestamp + 30000,
+            uint64(block.timestamp + 500),
+            uint64(block.timestamp + 10000),
+            uint64(block.timestamp + 20000),
+            uint64(block.timestamp + 30000),
             allowedTokens
         );
 
@@ -40,8 +42,8 @@ contract CreateDonationVotingMerklePayoutPool is Script, Native, Config {
         managers[0] = address(OWNER);
 
         allo.createPool{value: 1e16}(
-            TEST_PROFILE_1,
-            DONATIONVOTINGMERKLEPAYOUTSTRATEGYFORCLONE,
+            TEST_PROFILE_2,
+            address(DONATIONVOTINGVAULTSTRATEGYFORCLONE),
             encodedStrategyData,
             NATIVE,
             1e16,
@@ -52,3 +54,13 @@ contract CreateDonationVotingMerklePayoutPool is Script, Native, Config {
         vm.stopBroadcast();
     }
 }
+
+// struct InitializeData {
+//     bool useRegistryAnchor;
+//     bool metadataRequired;
+//     uint64 registrationStartTime;
+//     uint64 registrationEndTime;
+//     uint64 allocationStartTime;
+//     uint64 allocationEndTime;
+//     address[] allowedTokens;
+// }
