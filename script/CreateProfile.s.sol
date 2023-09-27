@@ -30,7 +30,7 @@ contract CreateProfile is Script, Config {
 
         // Create a profile
         registry.createProfile(
-            nonce++, "Test Profile", Metadata({protocol: 1, pointer: "Test Profile Metadata"}), OWNER, members
+            nonce++, "Test Profile", Metadata({protocol: 1, pointer: TEST_METADATA_POINTER_1}), OWNER, members
         );
     }
 }

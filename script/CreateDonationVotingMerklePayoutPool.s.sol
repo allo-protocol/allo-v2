@@ -35,7 +35,7 @@ contract CreateDonationVotingMerklePayoutPool is Script, Native, Config {
             allowedTokens
         );
 
-        Metadata memory metadata = Metadata({protocol: 1, pointer: "TestPoolMetadataPointer"});
+        Metadata memory metadata = Metadata({protocol: 1, pointer: TEST_METADATA_POINTER_1});
         address[] memory managers = new address[](1);
         managers[0] = address(OWNER);
 
