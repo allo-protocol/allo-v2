@@ -1,7 +1,5 @@
 import hre, { ethers } from "hardhat";
-import { deployAllo } from "./deployAllo";
-import { deployContractFactory } from "./deployContractFactory";
-import { deployRegistry } from "./deployRegistry";
+import { deployerContractAddress } from "../config/deployment.config";
 import {
   DeployProxyOptions,
   deployProxyUsingFactory,
@@ -9,6 +7,7 @@ import {
 
 async function deployCore() {
   const networkName = await hre.network.name;
+  const networkId = hre.network.config.chainId
   const account = (await ethers.getSigners())[0];
   const deployerAddress = await account.getAddress();
 
@@ -25,7 +24,7 @@ async function deployCore() {
   // ContractFactory
   //deployContractFactory().then((deployedContract) => {
   // Registry
-  const deployedContract = "0x44c537e8892A3FF2Ac9643C347b49953faB36708";
+  const deployedContract = deployerContractAddress[networkId!].address;
   const registryOptions: DeployProxyOptions = {
     contractName: "Registry",
     version: "v2.0.9",

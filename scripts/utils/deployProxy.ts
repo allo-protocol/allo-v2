@@ -1,9 +1,10 @@
-import hre, { ethers, upgrades } from "hardhat";
 import { AbiCoder, Addressable, concat, hexlify } from "ethers";
+import hre, { ethers, upgrades } from "hardhat";
 
+import { Manifest } from "@openzeppelin/upgrades-core";
 import ProxyAdmin from "@openzeppelin/upgrades-core/artifacts/@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol/ProxyAdmin.json";
 import TransparentUpgradeableProxy from "@openzeppelin/upgrades-core/artifacts/@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol/TransparentUpgradeableProxy.json";
-import { Manifest } from "@openzeppelin/upgrades-core";
+import { deployerContractAddress } from "../config/deployment.config";
 
 export type Args = {
   types: Array<string>;
@@ -27,6 +28,8 @@ export const deployProxyUsingFactory = async (
   deployProxyOptions: DeployProxyOptions,
 ): Promise<ProxyAddresses> => {
   const networkName = hre.network.name;
+  const account = (await ethers.getSigners())[0];
+  const deployerAddress = await account.getAddress();
 
   const contractName = deployProxyOptions.contractName;
   const version = deployProxyOptions.version;
@@ -39,17 +42,21 @@ export const deployProxyUsingFactory = async (
   if (await manifest.getAdmin()) {
     proxyAdmin = (await manifest.getAdmin())!.address;
   } else {
-    proxyAdmin = await deployContractUsingFactory(
+    proxyAdmin = await deployContractUsingFactoryWithBytecode(
       contractFactoryAddress,
       ProxyAdmin.bytecode,
       "ProxyAdmin",
-      version,
+      "0.0.3",
+      {
+        types: ["address"],
+        values: [deployerAddress],
+      }
     );
   }
 
   const ImplementationFactory = await ethers.getContractFactory(contractName);
   const implementationCreationCode = ImplementationFactory.bytecode;
-  const implementationAddress = await deployContractUsingFactory(
+  const implementationAddress = await deployContractUsingFactoryWithBytecode(
     contractFactoryAddress,
     implementationCreationCode,
     "Implementation " + contractName,
@@ -59,7 +66,7 @@ export const deployProxyUsingFactory = async (
 
   const fragment = ImplementationFactory.interface.getFunction("initialize");
 
-  const transparentProxyAddress: string = await deployContractUsingFactory(
+  const transparentProxyAddress: string = await deployContractUsingFactoryWithBytecode(
     contractFactoryAddress,
     TransparentUpgradeableProxy.bytecode,
     "TransparentUpgradeableProxy " + contractName,
@@ -71,9 +78,9 @@ export const deployProxyUsingFactory = async (
         proxyAdmin,
         deployProxyOptions.initializerArgs && fragment
           ? ImplementationFactory.interface.encodeFunctionData(
-              fragment,
-              deployProxyOptions.initializerArgs.values,
-            )
+            fragment,
+            deployProxyOptions.initializerArgs.values,
+          )
           : "0x",
       ],
     },
@@ -89,7 +96,7 @@ export const deployProxyUsingFactory = async (
   };
 };
 
-const deployContractUsingFactory = async (
+export const deployContractUsingFactoryWithBytecode = async (
   contractFactoryAddress: string | Addressable,
   bytecode: string,
   contractName: string,
@@ -145,6 +152,26 @@ const deployContractUsingFactory = async (
 
   return contractAddress;
 };
+
+export const deployContractUsingFactory = async (
+  contractName: string,
+  version: string,
+  constructorArgs?: Args,
+): Promise<string | Addressable> => {
+  const network = await ethers.provider.getNetwork();
+  const chainId = Number(network.chainId);
+  const ImplementationFactory = await ethers.getContractFactory(contractName);
+  const implementationCreationCode = ImplementationFactory.bytecode;
+  const implementationAddress = await deployContractUsingFactoryWithBytecode(
+    deployerContractAddress[chainId].address,
+    implementationCreationCode,
+    contractName,
+    version,
+    constructorArgs,
+  );
+
+  return implementationAddress;
+}
 
 function logPink(text: string) {
   console.log("\x1b[35m%s\x1b[0m", text);

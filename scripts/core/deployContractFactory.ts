@@ -36,10 +36,10 @@ export async function deployContractFactory() {
   return instance.target;
 }
 
-// deployContractFactory().catch((error) => {
-//   console.error(error);
-//   process.exitCode = 1;
-// });
+deployContractFactory().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});
 
 // Note: Deploy script to run in terminal:
 // npx hardhat run scripts/deployContractFactory.ts --network sepolia
