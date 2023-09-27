@@ -44,7 +44,7 @@ contract RegisterRecipientDonationVoting is Script, GoerliConfig {
         bytes memory recipientData1 = abi.encode(profile.anchor, OWNER, recipientMetadata1);
         bytes memory recipientData2 = abi.encode(profile.anchor, OWNER, recipientMetadata2);
 
-        // FIXME: failing here 🚨 
+        // FIXME: failing here 🚨
         allo.registerRecipient(TEST_POOL_1, recipientData1);
         allo.registerRecipient(TEST_POOL_1, recipientData2);
 
