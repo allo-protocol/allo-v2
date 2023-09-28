@@ -5,7 +5,6 @@ import "forge-std/Test.sol";
 // Interfaces
 import {IStrategy} from "../../../contracts/core/interfaces/IStrategy.sol";
 // Core contracts
-import {BaseStrategy} from "../../../contracts/strategies/BaseStrategy.sol";
 import {QVImpactStreamStrategy} from "../../../contracts/strategies/_poc/qv-impact-stream/QVImpactStreamStrategy.sol";
 
 // Internal libraries
@@ -19,6 +18,8 @@ import {AlloSetup} from "../shared/AlloSetup.sol";
 import {RegistrySetupFull} from "../shared/RegistrySetup.sol";
 import {StrategySetup} from "../shared/StrategySetup.sol";
 import {EventSetup} from "../shared/EventSetup.sol";
+
+import {MockERC20} from "../../utils/MockERC20.sol";
 
 /// @title QVImpactStreamStrategyTest
 /// @notice Test suite for QVImpactStreamStrategy
@@ -57,13 +58,10 @@ contract QVImpactStreamStrategyTest is Test, AlloSetup, RegistrySetupFull, Strat
             "QVImpactStreamStrategy"
         );
 
-        vm.prank(allo_owner());
-        allo().addToCloneableStrategies(address(strategyImplementation));
-
         vm.deal(pool_admin(), 100 * 1e18);
         vm.startPrank(pool_admin());
 
-        poolId = allo().createPool{value: 100 * 1e18}(
+        poolId = allo().createPoolWithCustomStrategy{value: 100 * 1e18}(
             poolProfile_id(),
             address(strategyImplementation),
             _createInitData(allocationStartTime, allocationEndTime, maxVoiceCreditsPerAllocator),
@@ -569,6 +567,32 @@ contract QVImpactStreamStrategyTest is Test, AlloSetup, RegistrySetupFull, Strat
 
         vm.prank(pool_manager1());
         allo().distribute(poolId, recipients, "");
+    }
+
+    function test_recoverFunds_native() public {
+        vm.deal(address(strategy), 100 * 1e18);
+        vm.startPrank(pool_manager1());
+
+        strategy.recoverFunds(NATIVE, address(0x123456789));
+
+        assertEq(address(strategy).balance, 0);
+        assertEq(address(0x123456789).balance, 100 * 1e18);
+    }
+
+    function test_recoverFunds_ERC20() public {
+        MockERC20 token = new MockERC20();
+        token.mint(address(strategy), 100 * 1e18);
+        vm.startPrank(pool_manager1());
+
+        strategy.recoverFunds(address(token), address(0x123456789));
+
+        assertEq(token.balanceOf(address(strategy)), 0);
+        assertEq(token.balanceOf(address(0x123456789)), 100 * 1e18);
+    }
+
+    function test_Revert_recoverFunds_UNAUTHORIZED() public {
+        vm.expectRevert(UNAUTHORIZED.selector);
+        strategy.recoverFunds(NATIVE, address(0x123456789));
     }
 
     function _createMetadata(string memory _pointer) internal pure returns (Metadata memory) {

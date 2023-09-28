@@ -3,6 +3,7 @@ pragma solidity 0.8.19;
 
 // External Libraries
 import {Multicall} from "openzeppelin-contracts/contracts/utils/Multicall.sol";
+import {IERC20Upgradeable} from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 
 // Interfaces
 import {IAllo} from "../../../core/interfaces/IAllo.sol";
@@ -161,7 +162,7 @@ contract QVImpactStreamStrategy is BaseStrategy, Multicall {
     /// @param _poolId The ID of the pool
     /// @param _data The initialization data for the strategy
     /// @custom:data (InitializeParams)
-    function initialize(uint256 _poolId, bytes memory _data) external virtual override onlyAllo {
+    function initialize(uint256 _poolId, bytes memory _data) external virtual override {
         (InitializeParams memory initializeParams) = abi.decode(_data, (InitializeParams));
 
         maxVoiceCreditsPerAllocator = initializeParams.maxVoiceCreditsPerAllocator;
@@ -538,6 +539,18 @@ contract QVImpactStreamStrategy is BaseStrategy, Multicall {
         Recipient memory recipient = recipients[_recipientId];
         uint256 amount = payouts[_recipientId];
         return PayoutSummary(recipient.recipientAddress, amount);
+    }
+
+    /// @notice Transfer the funds recovered  to the recipient
+    /// @dev 'msg.sender' must be pool manager
+    /// @param _token The token to transfer
+    /// @param _recipient The recipient
+    function recoverFunds(address _token, address _recipient) external onlyPoolManager(msg.sender) {
+        // Get the amount of the token to transfer, which is always the entire balance of the contract address
+        uint256 amount = _token == NATIVE ? address(this).balance : IERC20Upgradeable(_token).balanceOf(address(this));
+
+        // Transfer the amount to the recipient (pool owner)
+        _transferAmount(_token, _recipient, amount);
     }
 
     receive() external payable {}
