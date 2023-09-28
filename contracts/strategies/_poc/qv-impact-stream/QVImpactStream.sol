@@ -5,13 +5,12 @@ pragma solidity 0.8.19;
 import {Multicall} from "openzeppelin-contracts/contracts/utils/Multicall.sol";
 
 // Interfaces
-import {IAllo} from "../../core/interfaces/IAllo.sol";
-import {IRegistry} from "../../core/interfaces/IRegistry.sol";
+import {IAllo} from "../../../core/interfaces/IAllo.sol";
+import {IRegistry} from "../../../core/interfaces/IRegistry.sol";
 // Core Contracts
-import {BaseStrategy} from "../BaseStrategy.sol";
+import {BaseStrategy} from "../../BaseStrategy.sol";
 // Internal Libraries
-import {Metadata} from "../../core/libraries/Metadata.sol";
-
+import {Metadata} from "../../../core/libraries/Metadata.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⣿⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -63,7 +62,7 @@ contract QVImpactStream is BaseStrategy, Multicall {
     /// @notice Emitted when the payouts are set
     /// @param payouts The payouts to distribute
     /// @param sender The sender of the transaction
-    event PayoutSet(PayoutSummary[] memory payouts, address sender);
+    event PayoutSet(Payout[] payouts, address sender);
 
     /// ======================
     /// ======= Storage ======
@@ -125,6 +124,12 @@ contract QVImpactStream is BaseStrategy, Multicall {
         mapping(address => uint256) votesCastToRecipient;
     }
 
+    /// @notice The details of the payout set by the pool managers
+    struct Payout {
+        address recipientId;
+        uint256 amount;
+    }
+
     /// ================================
     /// ========== Modifier ============
     /// ================================
@@ -165,7 +170,7 @@ contract QVImpactStream is BaseStrategy, Multicall {
         _registry = allo.getRegistry();
 
         _updatePoolTimestamps(initializeParams.allocationStartTime, initializeParams.allocationEndTime);
-         
+
         emit Initialized(_poolId, _data);
     }
 
@@ -174,8 +179,6 @@ contract QVImpactStream is BaseStrategy, Multicall {
     /// ====================================
 
     /// @notice Set the start and end dates for the pool
-    /// @param _registrationStartTime The start time for the registration
-    /// @param _registrationEndTime The end time for the registration
     /// @param _allocationStartTime The start time for the allocation
     /// @param _allocationEndTime The end time for the allocation
     function updatePoolTimestamps(uint64 _allocationStartTime, uint64 _allocationEndTime)
@@ -192,7 +195,7 @@ contract QVImpactStream is BaseStrategy, Multicall {
         uint256 length = _allocators.length;
         for (uint256 i = 0; i < length;) {
             _addAllocator(_allocators[i]);
-            
+
             unchecked {
                 ++i;
             }
@@ -210,10 +213,10 @@ contract QVImpactStream is BaseStrategy, Multicall {
     /// @dev Only the pool manager(s) can call this function and emits an `AllocatorRemoved` event
     /// @param _allocators The allocators address array
     function batchRemoveAllocator(address[] memory _allocators) external onlyPoolManager(msg.sender) {
-         uint256 length = _allocators.length;
+        uint256 length = _allocators.length;
         for (uint256 i = 0; i < length;) {
             _removeAllocator(_allocators[i]);
-            
+
             unchecked {
                 ++i;
             }
@@ -230,16 +233,19 @@ contract QVImpactStream is BaseStrategy, Multicall {
     /// @notice Set the payouts to distribute
     /// @dev Only the pool manager(s) can call this function
     /// @param _payouts The payouts to distribute
-    function setPayouts(PayoutSummary[] memory _payouts) external onlyPoolManager(msg.sender) onlyAfterAllocation {
-        if(payoutSet) revert INVALID();
+    function setPayouts(Payout[] memory _payouts) external onlyPoolManager(msg.sender) onlyAfterAllocation {
+        if (payoutSet) revert INVALID();
         payoutSet = true;
 
         uint256 totalAmount;
 
         uint256 length = _payouts.length;
         for (uint256 i = 0; i < length;) {
+            Payout memory payout = _payouts[i];
             uint256 amount = payout.amount;
-            PayoutSummary memory payout = _payouts[i];
+
+            if (amount == 0) revert RECIPIENT_ERROR(payout.recipientId);
+
             toPay[payout.recipientId] = amount;
             totalAmount += amount;
             unchecked {
@@ -247,14 +253,28 @@ contract QVImpactStream is BaseStrategy, Multicall {
             }
         }
 
-        if(totalAmount > poolAmount) revert INVALID();
+        if (totalAmount > poolAmount) revert INVALID();
 
         emit PayoutSet(_payouts, msg.sender);
     }
-    
+
     /// =============================
     /// ==== Internal Functions =====
     /// =============================
+
+    /// @notice Check if the allocation is active
+    /// @dev Reverts if the allocation is not active
+    function _checkOnlyActiveAllocation() internal view virtual {
+        if (allocationStartTime > block.timestamp || block.timestamp > allocationEndTime) {
+            revert ALLOCATION_NOT_ACTIVE();
+        }
+    }
+
+    /// @notice Check if the allocation has ended
+    /// @dev Reverts if the allocation has not ended
+    function _checkOnlyAfterAllocation() internal view virtual {
+        if (block.timestamp < allocationEndTime) revert ALLOCATION_NOT_ENDED();
+    }
 
     function _distribute(address[] memory _recipientIds, bytes memory, address _sender)
         internal
@@ -263,7 +283,6 @@ contract QVImpactStream is BaseStrategy, Multicall {
         onlyPoolManager(_sender)
         onlyAfterAllocation
     {
-
         IAllo.Pool memory pool = allo.getPool(poolId);
         address poolToken = pool.token;
 
@@ -275,11 +294,11 @@ contract QVImpactStream is BaseStrategy, Multicall {
             if (recipient.recipientStatus != Status.Accepted) {
                 revert RECIPIENT_ERROR(recipientId);
             }
-             uint256 amount = toPay[recipientId];
+            uint256 amount = toPay[recipientId];
 
-             if(amount == 0) revert RECIPIENT_ERROR(recipientId);
+            if (amount == 0) revert RECIPIENT_ERROR(recipientId);
 
-             delete toPay[recipientId]; 
+            delete toPay[recipientId];
 
             _transferAmount(poolToken, recipientAddress, amount);
 
@@ -290,8 +309,8 @@ contract QVImpactStream is BaseStrategy, Multicall {
             }
         }
     }
-  
-    /// @notice Add allocator   
+
+    /// @notice Add allocator
     /// @dev Only the pool manager(s) can call this function and emits an `AllocatorAdded` event
     /// @param _allocator The allocator address
     function _addAllocator(address _allocator) internal {
@@ -346,32 +365,32 @@ contract QVImpactStream is BaseStrategy, Multicall {
         // check that the recipient has voice credits left to allocate
         if (!_hasVoiceCreditsLeft(voiceCreditsToAllocate, allocator.voiceCredits)) revert INVALID();
 
-        if (_voiceCreditsToAllocate == 0) revert INVALID();
+        if (voiceCreditsToAllocate == 0) revert INVALID();
 
-        allocator.voiceCredits -= _voiceCreditsToAllocate;
-   
+        allocator.voiceCredits -= voiceCreditsToAllocate;
+
         // creditsCastToRecipient is the voice credits used to cast a vote to the recipient
         // votesCastToRecipient is the actual votes cast to the recipient
-        uint256 creditsCastToRecipient = _allocator.voiceCreditsCastToRecipient[_recipientId];
-        uint256 votesCastToRecipient = _allocator.votesCastToRecipient[_recipientId];
+        uint256 creditsCastToRecipient = allocator.voiceCreditsCastToRecipient[recipientId];
+        uint256 votesCastToRecipient = allocator.votesCastToRecipient[recipientId];
 
         // get total voice credits used
-        uint256 totalCredits = _voiceCreditsToAllocate + creditsCastToRecipient;
+        uint256 totalCredits = voiceCreditsToAllocate + creditsCastToRecipient;
         // determine actual votes cast
         uint256 voteResult = _sqrt(totalCredits * 1e18);
- 
+
         // update the values
         voteResult -= votesCastToRecipient;
-        _recipient.totalVotesReceived += voteResult;
+        recipient.totalVotesReceived += voteResult;
 
-        _allocator.voiceCreditsCastToRecipient[_recipientId] += _voiceCreditsToAllocate;
-        _allocator.votesCastToRecipient[_recipientId] += voteResult;
+        allocator.voiceCreditsCastToRecipient[recipientId] += voiceCreditsToAllocate;
+        allocator.votesCastToRecipient[recipientId] += voteResult;
 
         // emit the event with the vote results
-        emit Allocated(_recipientId, voteResult, _sender);
+        emit Allocated(recipientId, voteResult, _sender);
     }
 
-        /// @notice Submit application to pool
+    /// @notice Submit application to pool
     /// @dev The '_data' parameter is encoded as follows:
     ///     - If registryGating is true, then the data is encoded as (address recipientId, address recipientAddress, Metadata metadata)
     ///     - If registryGating is false, then the data is encoded as (address recipientAddress, address registryAnchor, Metadata metadata)
@@ -382,7 +401,7 @@ contract QVImpactStream is BaseStrategy, Multicall {
         internal
         virtual
         override
-        onlyPoolManager(_sender);
+        onlyPoolManager(_sender)
         returns (address recipientId)
     {
         address recipientAddress;
@@ -390,16 +409,17 @@ contract QVImpactStream is BaseStrategy, Multicall {
         Metadata memory metadata;
 
         // decode data custom to this strategy
-        (recipientId, recipientAddress, requestedAmount, metadata) = abi.decode(_data, (address, address, uint256, Metadata));
+        (recipientId, recipientAddress, requestedAmount, metadata) =
+            abi.decode(_data, (address, address, uint256, Metadata));
 
         IRegistry.Profile memory profile = _registry.getProfileByAnchor(recipientId);
-        if(profile.id == bytes32(0) || recipientAddress == address(0)) 
+        if (profile.id == bytes32(0) || recipientAddress == address(0)) {
             revert RECIPIENT_ERROR(recipientId);
+        }
 
         Recipient storage recipient = recipients[recipientId];
 
-
-        if(recipient.recipientAddress == address(0)) {
+        if (recipient.recipientAddress == address(0)) {
             emit Registered(recipientId, _data, _sender);
         } else {
             emit UpdatedRegistration(recipientId, _data, _sender);
@@ -411,11 +431,10 @@ contract QVImpactStream is BaseStrategy, Multicall {
         recipient.requestedAmount = requestedAmount;
     }
 
-
     /// @notice Returns if the recipient is accepted
     /// @param _recipientId The recipient id
     /// @return true if the recipient is accepted
-    function _isAcceptedRecipient(address _recipientId) internal view override returns (bool) {
+    function _isAcceptedRecipient(address _recipientId) internal view returns (bool) {
         return recipients[_recipientId].recipientStatus == Status.Accepted;
     }
 
@@ -433,10 +452,9 @@ contract QVImpactStream is BaseStrategy, Multicall {
     function _hasVoiceCreditsLeft(uint256 _voiceCreditsToAllocate, uint256 _allocatedVoiceCredits)
         internal
         view
-        override
         returns (bool)
     {
-        return _voiceCreditsToAllocate + _allocatedVoiceCredits <= maxVoiceCreditsPerAllocator;
+        return (_voiceCreditsToAllocate + _allocatedVoiceCredits) <= maxVoiceCreditsPerAllocator;
     }
 
     /// =========================
@@ -448,6 +466,13 @@ contract QVImpactStream is BaseStrategy, Multicall {
     /// @return The recipient
     function getRecipient(address _recipientId) external view returns (Recipient memory) {
         return _getRecipient(_recipientId);
+    }
+
+    /// @notice Getter for a recipient using the ID
+    /// @param _recipientId ID of the recipient
+    /// @return The recipient
+    function _getRecipient(address _recipientId) internal view returns (Recipient memory) {
+        return recipients[_recipientId];
     }
 
     /// @notice Get recipient status
@@ -463,6 +488,33 @@ contract QVImpactStream is BaseStrategy, Multicall {
             return true;
         }
         return false;
+    }
+
+    /// @notice Calculate the square root of a number (Babylonian method)
+    /// @param x The number
+    /// @return y The square root
+    function _sqrt(uint256 x) internal pure returns (uint256 y) {
+        uint256 z = (x + 1) / 2;
+        y = x;
+        while (z < y) {
+            y = z;
+            z = (x / z + z) / 2;
+        }
+    }
+
+    /// @notice Get the payout for a single recipient
+    /// @param _recipientId The ID of the recipient
+    /// @return The payout as a 'PayoutSummary' struct
+    function _getPayout(address _recipientId, bytes memory)
+        internal
+        view
+        virtual
+        override
+        returns (PayoutSummary memory)
+    {
+        Recipient memory recipient = recipients[_recipientId];
+        uint256 amount = toPay[_recipientId];
+        return PayoutSummary(recipient.recipientAddress, amount);
     }
 
     receive() external payable {}
