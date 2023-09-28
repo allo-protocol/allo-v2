@@ -289,7 +289,9 @@ contract QVImpactStream is BaseStrategy, Multicall {
                 ++i;
             }
         }
-        /// @notice Add allocator
+    }
+  
+    /// @notice Add allocator   
     /// @dev Only the pool manager(s) can call this function and emits an `AllocatorAdded` event
     /// @param _allocator The allocator address
     function _addAllocator(address _allocator) internal {
