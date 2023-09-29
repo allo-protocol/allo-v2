@@ -3,7 +3,6 @@ pragma solidity 0.8.19;
 
 // Core Contracts
 import {RFPCommitteeStrategy} from "../../rfp-committee/RFPCommitteeStrategy.sol";
-import {RFPCommitteeStrategy} from "../../rfp-committee/RFPCommitteeStrategy.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 // Internal Libraries
@@ -95,8 +94,21 @@ contract HedgeyRFPCommitteeStrategy is RFPCommitteeStrategy {
         emit AdminTransferOBOUpdated(_adminTransferOBO, msg.sender);
     }
 
+    /// @notice Get the lockup term for a recipient
+    /// @param _recipient The recipient to get the lockup term for
     function getRecipientLockupTerm(address _recipient) external view returns (uint256) {
         return _recipientLockupTerm[_recipient];
+    }
+
+    /// @notice Withdraw funds from pool.
+    /// @dev 'msg.sender' must be a pool manager to withdraw funds.
+    /// @param _amount The amount to be withdrawn
+    function withdraw(uint256 _amount) external override onlyPoolManager(msg.sender) onlyInactivePool {
+        // Decrement the pool amount
+        poolAmount -= _amount;
+
+        // Transfer the amount to the pool manager
+        super._transferAmount(allo.getPool(poolId).token, msg.sender, _amount);
     }
 
     /// ====================================
@@ -124,7 +136,7 @@ contract HedgeyRFPCommitteeStrategy is RFPCommitteeStrategy {
     /// ============== Hooks ===============
     /// ====================================
 
-    function _afterRegisterRecipient(bytes memory _data, address _sender) internal override {
+    function _afterRegisterRecipient(bytes memory _data, address) internal override {
         uint256 lockupTerm;
         address recipientAddress;
 

@@ -269,6 +269,18 @@ contract HedgeyRFPCommitteeStrategyTest is Test, RegistrySetupFull, AlloSetup, H
         assertEq(strategy.adminTransferOBO(), false);
     }
 
+    function test_withdraw() public {
+        allo().fundPool(poolId, 1e18);
+
+        vm.startPrank(address(pool_admin()));
+        strategy.setPoolActive(false);
+
+        uint256 balanceBefore = token.balanceOf(address(pool_admin()));
+        strategy.withdraw(1e17);
+
+        assertEq(token.balanceOf(address(pool_admin())), balanceBefore + 1e17);
+    }
+
     function __register_recipient() internal returns (address recipientId) {
         address sender = recipient();
         Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
