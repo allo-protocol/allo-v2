@@ -35,6 +35,8 @@ contract HedgeyRFPCommitteeStrategyTest is Test, RegistrySetupFull, AlloSetup, H
         address vestingAdmin,
         bool adminTransferOBO
     );
+    event AdminAddressUpdated(address adminAddress, address sender);
+    event AdminTransferOBOUpdated(bool adminTransferOBO, address sender);
 
     bool public useRegistryAnchor;
     bool public metadataRequired;
@@ -251,12 +253,18 @@ contract HedgeyRFPCommitteeStrategyTest is Test, RegistrySetupFull, AlloSetup, H
 
     function test_change_admin_address() public {
         vm.prank(address(pool_admin()));
+        vm.expectEmit(true, true, false, false);
+        emit AdminAddressUpdated(address(pool_manager1()), address(pool_admin()));
+
         strategy.setAdminAddress(address(pool_manager1()));
         assertEq(strategy.adminAddress(), address(pool_manager1()));
     }
 
     function test_change_admin_transfer_obo() public {
         vm.prank(address(pool_admin()));
+        vm.expectEmit(true, true, false, false);
+        emit AdminTransferOBOUpdated(false, address(pool_admin()));
+
         strategy.setAdminTransferOBO(false);
         assertEq(strategy.adminTransferOBO(), false);
     }
