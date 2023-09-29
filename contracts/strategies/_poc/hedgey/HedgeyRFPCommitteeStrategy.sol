@@ -42,6 +42,13 @@ contract HedgeyRFPCommitteeStrategy is RFPCommitteeStrategy {
     address public adminAddress;
 
     /// ===============================
+    /// ========== Events =============
+    /// ===============================
+
+    event AdminAddressUpdated(address adminAddress, address sender);
+    event AdminTransferOBOUpdated(bool adminTransferOBO, address sender);
+
+    /// ===============================
     /// ======== Constructor ==========
     /// ===============================
 
@@ -78,12 +85,14 @@ contract HedgeyRFPCommitteeStrategy is RFPCommitteeStrategy {
     /// @param _adminAddress The admin wallet to use
     function setAdminAddress(address _adminAddress) external onlyPoolManager(msg.sender) {
         adminAddress = _adminAddress;
+        emit AdminAddressUpdated(_adminAddress, msg.sender);
     }
 
     /// @notice Update the default Admin wallet used when creating Hedgey plans
     /// @param _adminTransferOBO Set if the admin is allowed to transfer on behalf of the recipient
     function setAdminTransferOBO(bool _adminTransferOBO) external onlyPoolManager(msg.sender) {
         adminTransferOBO = _adminTransferOBO;
+        emit AdminTransferOBOUpdated(_adminTransferOBO, msg.sender);
     }
 
     function getRecipientLockupTerm(address _recipient) external view returns (uint256) {
