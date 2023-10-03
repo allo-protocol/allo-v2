@@ -16,6 +16,7 @@ contract GoerliConfig {
     address public constant DIRECTGRANTSSIMPLETESTRATEGYFORCLONE = 0x4a41F242cA053DB83F7D45C92a3757fb94bD65A8;
     address public constant DONATIONVOTINGDIRECTPAYOUTSTRATEGYFORCLONE = 0x8253782db9cA148A07c19ca36A4fA0D02f45A2ca;
     address public constant DONATIONVOTINGVAULTSTRATEGYFORCLONE = 0xB42C26e4029e932CDd53981f7CbefF89e74F03c2;
+    address public constant IMPACTSTREAMFORCLONE = 0x7Bb23D29BA83D92EACD99e17B32a2794A1A10cdd;
 
     address public constant OWNER = 0x1fD06f088c720bA3b7a3634a8F021Fdd485DcA42;
 
@@ -23,6 +24,7 @@ contract GoerliConfig {
     address public constant DONATIONVOTISTRATEGY = 0xDecE8A9aEc94106CDfe652685243E6eB48fd50A1;
     address public constant DONATIONVOTINGMERKLEPAYOUTSTRATEGY = 0x4De257724d3896Ef3a5E60E41B2Ad602E1D43736;
     address public constant RFPSIMPLESTRATEGY = 0x221cfd45Fa6e658c2a6F83b7eBaf8237F4c29F37;
+    address public constant IMPACTSTREAM = 0xeD43bb94803B60Eb93226701b143e9Dc017af199;
     // address public constant RFPCOMMITTEESTRATEGY = ;
     // address public constant DIRECTGRANTSSIMPLETESTRATEGY = ;
     // address public constant DONATIONVOTINGDIRECTPAYOUTSTRATEGY = ;
@@ -38,7 +40,8 @@ contract GoerliConfig {
     // 9 = RFPSimpleStrategy (10e18, true, true)
     // 12 = DonationVotingStrategy
     // 13 = RFPSimpleStrategy (10e18, false, false)
-    uint256 public constant TEST_POOL_1 = 13;
+    // 14 = ImpactStreamStrategy
+    uint256 public constant TEST_POOL_1 = 14;
 
     /// @notice This is a test recipient ID
     address public constant TEST_RECIPIENT_ID_1 = 0x1fD06f088c720bA3b7a3634a8F021Fdd485DcA42;

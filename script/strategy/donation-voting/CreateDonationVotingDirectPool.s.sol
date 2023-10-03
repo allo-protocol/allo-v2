@@ -14,7 +14,7 @@ import {GoerliConfig} from "./../../GoerliConfig.sol";
 /// @notice This script is used to create pool test data for the Allo V2 contracts
 /// @dev Use this to run
 ///      'source .env' if you are using a .env file for your rpc-url
-///      'forge script script/strategy/donation-voting/strategy/donation-voting/CreateDonationVotingDirectPool.s.sol:CreateDonationVotingDirectPool --rpc-url $GOERLI_RPC_URL --broadcast  -vvvv'
+///      'forge script script/strategy/donation-voting/CreateDonationVotingDirectPool.s.sol:CreateDonationVotingDirectPool --rpc-url $GOERLI_RPC_URL --broadcast  -vvvv'
 contract CreateDonationVotingDirectPool is Script, Native, GoerliConfig {
     // Initialize the Allo Interface
     Allo allo = Allo(ALLO);
