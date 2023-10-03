@@ -3,7 +3,7 @@
 import { deployStrategies } from "./deployStrategies";
 
 const deployDonationVoting = async () => {
-  deployStrategies("DonationVotingStrategy", "v1");
+  deployStrategies("DonationVotingStrategy", "v1.1");
 };
 
 deployDonationVoting().catch((error) => {

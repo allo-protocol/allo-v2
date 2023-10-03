@@ -9,6 +9,7 @@ contract GoerliConfig {
 
     address public constant REGISTRY = 0xBC23124Ed2655A1579291f7ADDE581fF18327D41;
 
+    address public constant DONATIONVOTINGSTRATEGY = 0x81Abcb682cc61c463Cdbe1Ef1804CbEfC1d54d7f;
     address public constant DONATIONVOTINGMERKLEPAYOUTSTRATEGYFORCLONE = 0x81Abcb682cc61c463Cdbe1Ef1804CbEfC1d54d7f;
     address public constant RFPSIMPLESTRATEGYFORCLONE = 0x03FA47235fAF670c72dD765A4eE55Bd332308029;
     address public constant RFPCOMMITTEESTRATEGYFORCLONE = 0x9DB5B54a4f63124428e293b37A81D4e3bcC2F222;
@@ -19,8 +20,9 @@ contract GoerliConfig {
     address public constant OWNER = 0x1fD06f088c720bA3b7a3634a8F021Fdd485DcA42;
 
     // TODO: update this when we deploy new strategy/strategies
+    address public constant DONATIONVOTISTRATEGY = 0xDecE8A9aEc94106CDfe652685243E6eB48fd50A1;
     address public constant DONATIONVOTINGMERKLEPAYOUTSTRATEGY = 0x4De257724d3896Ef3a5E60E41B2Ad602E1D43736;
-    address public constant RFPSIMPLESTRATEGY = 0x99A8006096D151c030A9FC7576E168B41092099E;
+    address public constant RFPSIMPLESTRATEGY = 0x221cfd45Fa6e658c2a6F83b7eBaf8237F4c29F37;
     // address public constant RFPCOMMITTEESTRATEGY = ;
     // address public constant DIRECTGRANTSSIMPLETESTRATEGY = ;
     // address public constant DONATIONVOTINGDIRECTPAYOUTSTRATEGY = ;
@@ -31,11 +33,16 @@ contract GoerliConfig {
     bytes32 public constant TEST_PROFILE_2 = 0x5F8F7EF300B0E8FE0417371A068B217C49BB7235E87CCE1E53F55717F3933BD3;
 
     /// @notice This is a test pool ID
-    uint256 public constant TEST_POOL_1 = 1;
+    // 1 = DonationVotingStrategy
+    // 6 = DirectGrantsSimpleStrategy
+    // 9 = RFPSimpleStrategy (10e18, true, true)
+    // 12 = DonationVotingStrategy
+    // 13 = RFPSimpleStrategy (10e18, false, false)
+    uint256 public constant TEST_POOL_1 = 13;
 
     /// @notice This is a test recipient ID
-    address public constant TEST_RECIPIENT_ID_1 = 0xa671616e3580D3611139834Cd34D7838e82A04cD;
-    address public constant TEST_RECIPIENT_ID_2 = 0xa671616e3580D3611139834Cd34D7838e82A04cD;
+    address public constant TEST_RECIPIENT_ID_1 = 0x1fD06f088c720bA3b7a3634a8F021Fdd485DcA42;
+    address public constant TEST_RECIPIENT_ID_2 = 0x017259e809a74A8c81aD4db516D040bB85d7C358;
 
     /// @notice This is a test metadata pointer for protocol 1
     string public constant TEST_METADATA_POINTER_1 = "bafybeif43xtcb7zfd6lx7rfq42wjvpkbqgoo7qxrczbj4j4iwfl5aaqv2q";
