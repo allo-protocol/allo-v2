@@ -16,8 +16,7 @@ import {GoerliConfig} from "./../../GoerliConfig.sol";
 ///      'forge script script/strategy/donation-voting/UpdateTimestamps.s.sol:UpdateTimestamps --rpc-url $GOERLI_RPC_URL --broadcast  -vvvv'
 contract UpdateTimestamps is Script, GoerliConfig {
     // Initialize Strategy
-    DonationVotingStrategy strategy =
-        DonationVotingStrategy(payable(address(DONATIONVOTINGSTRATEGY)));
+    DonationVotingStrategy strategy = DonationVotingStrategy(payable(address(DONATIONVOTINGSTRATEGY)));
 
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("DEPLOYER_PRIVATE_KEY");

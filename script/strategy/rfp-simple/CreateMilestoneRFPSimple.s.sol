@@ -47,7 +47,7 @@ contract CreateMilestoneRFPSimple is Script, GoerliConfig {
         milestones[0] = milestone1;
         milestones[1] = milestone2;
 
-        strategy.setMilestones(milestones);        
+        strategy.setMilestones(milestones);
 
         vm.stopBroadcast();
     }
