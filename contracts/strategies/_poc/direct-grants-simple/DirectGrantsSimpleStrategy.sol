@@ -276,7 +276,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Submit milestone by the recipient.
     /// @dev 'msg.sender' must be the 'recipientId' (this depends on whether your using registry gating) and must be a member
-    ///      of a 'Profile' to sumbit a milestone and '_recipientId'.
+    ///      of a 'Profile' to submit a milestone and '_recipientId'.
     ///      must NOT be the same as 'msg.sender'. Emits a 'MilestonesSubmitted()' event.
     /// @param _recipientId ID of the recipient
     /// @param _metadata The proof of work
