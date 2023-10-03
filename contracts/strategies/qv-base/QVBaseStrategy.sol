@@ -513,6 +513,9 @@ abstract contract QVBaseStrategy is BaseStrategy {
         // check the `_voiceCreditsToAllocate` is > 0
         if (_voiceCreditsToAllocate == 0) revert INVALID();
 
+        // update the allocator voice credits
+        _allocator.voiceCredits += _voiceCreditsToAllocate;
+
         // get the previous values
         uint256 creditsCastToRecipient = _allocator.voiceCreditsCastToRecipient[_recipientId];
         uint256 votesCastToRecipient = _allocator.votesCastToRecipient[_recipientId];
