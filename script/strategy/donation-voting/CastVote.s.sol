@@ -3,16 +3,16 @@ pragma solidity 0.8.19;
 
 import "forge-std/Script.sol";
 
-import {Allo} from "../contracts/core/Allo.sol";
-import {IRegistry} from "../contracts/core/interfaces/IRegistry.sol";
-import {IStrategy} from "../contracts/core/interfaces/IStrategy.sol";
+import {Allo} from "../../../contracts/core/Allo.sol";
+import {IRegistry} from "../../../contracts/core/interfaces/IRegistry.sol";
+import {IStrategy} from "../../../contracts/core/interfaces/IStrategy.sol";
 
 import {DonationVotingMerkleDistributionBaseStrategy} from
-    "../contracts/strategies/donation-voting-merkle-base/DonationVotingMerkleDistributionBaseStrategy.sol";
+    "../../../contracts/strategies/donation-voting-merkle-base/DonationVotingMerkleDistributionBaseStrategy.sol";
 
-import {Metadata} from "../contracts/core/libraries/Metadata.sol";
-import {Native} from "../contracts/core/libraries/Native.sol";
-import {GoerliConfig} from "./GoerliConfig.sol";
+import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
+import {Native} from "../../../contracts/core/libraries/Native.sol";
+import {GoerliConfig} from "./../../GoerliConfig.sol";
 
 import {ISignatureTransfer} from "permit2/ISignatureTransfer.sol";
 

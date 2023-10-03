@@ -3,13 +3,13 @@ pragma solidity 0.8.19;
 
 import "forge-std/Script.sol";
 
-import {Allo} from "../contracts/core/Allo.sol";
-import {IRegistry} from "../contracts/core/interfaces/IRegistry.sol";
+import {Allo} from "../../../contracts/core/Allo.sol";
+import {IRegistry} from "../../../contracts/core/interfaces/IRegistry.sol";
 
-import {DonationVotingStrategy} from "../contracts/strategies/_poc/donation-voting/DonationVotingStrategy.sol";
+import {DonationVotingStrategy} from "../../../contracts/strategies/_poc/donation-voting/DonationVotingStrategy.sol";
 
-import {Metadata} from "../contracts/core/libraries/Metadata.sol";
-import {GoerliConfig} from "./GoerliConfig.sol";
+import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
+import {GoerliConfig} from "./../../GoerliConfig.sol";
 
 /// @notice This script is used to create test data for the Allo V2 contracts
 /// @dev Register recipients and set their status ~
@@ -32,7 +32,7 @@ contract RegisterRecipientDonationVoting is Script, GoerliConfig {
         uint256 deployerPrivateKey = vm.envUint("DEPLOYER_PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);
 
-        IRegistry.Profile memory profile = registry.getProfileById(profileId);
+        // IRegistry.Profile memory profile = registry.getProfileById(profileId);
 
         // Register 2 recipients
         Metadata memory recipientMetadata1 = Metadata({protocol: 1, pointer: TEST_METADATA_POINTER_1});

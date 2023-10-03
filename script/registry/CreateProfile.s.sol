@@ -3,10 +3,10 @@ pragma solidity 0.8.19;
 
 import "forge-std/Script.sol";
 
-import {IRegistry} from "../contracts/core/interfaces/IRegistry.sol";
+import {IRegistry} from "../../contracts/core/interfaces/IRegistry.sol";
 
-import {Metadata} from "../contracts/core/libraries/Metadata.sol";
-import {GoerliConfig} from "./GoerliConfig.sol";
+import {Metadata} from "../../contracts/core/libraries/Metadata.sol";
+import {GoerliConfig} from "./../GoerliConfig.sol";
 
 /// @notice This script is used to create profile test data for the Allo V2 contracts
 /// @dev Use this to run

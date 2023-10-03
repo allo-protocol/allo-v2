@@ -2,10 +2,10 @@ pragma solidity 0.8.19;
 
 import "forge-std/Script.sol";
 
-import {Allo} from "../contracts/core/Allo.sol";
+import {Allo} from "../../contracts/core/Allo.sol";
 
-import {Native} from "../contracts/core/libraries/Native.sol";
-import {GoerliConfig} from "./GoerliConfig.sol";
+import {Native} from "../../contracts/core/libraries/Native.sol";
+import {GoerliConfig} from "./../GoerliConfig.sol";
 
 contract AddToCloneableStrategy is Script, Native, GoerliConfig {
     // Initialize the Allo Interface

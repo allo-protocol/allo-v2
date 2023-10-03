@@ -5,8 +5,8 @@ import "forge-std/Script.sol";
 
 // import {DonationVotingMerkleDistributionBaseStrategy} from
 //     "../contracts/strategies/donation-voting-merkle-base/DonationVotingMerkleDistributionBaseStrategy.sol";
-import {DonationVotingStrategy} from "../contracts/strategies/_poc/donation-voting/DonationVotingStrategy.sol";
-import {GoerliConfig} from "./GoerliConfig.sol";
+import {DonationVotingStrategy} from "../../../contracts/strategies/_poc/donation-voting/DonationVotingStrategy.sol";
+import {GoerliConfig} from "./../../GoerliConfig.sol";
 
 /// @notice This script is used to update the timestamps test data for the Allo V2 contracts
 /// @dev The issue witht he timestamp update is the deployed contract is using uint256 and the script is using uint64
