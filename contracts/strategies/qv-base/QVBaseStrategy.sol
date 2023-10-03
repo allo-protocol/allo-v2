@@ -516,12 +516,14 @@ abstract contract QVBaseStrategy is BaseStrategy {
         // update the allocator voice credits
         _allocator.voiceCredits += _voiceCreditsToAllocate;
 
-        // get the previous values
+        // creditsCastToRecipient is the voice credits used to cast a vote to the recipient
+        // votesCastToRecipient is the actual votes cast to the recipient
         uint256 creditsCastToRecipient = _allocator.voiceCreditsCastToRecipient[_recipientId];
         uint256 votesCastToRecipient = _allocator.votesCastToRecipient[_recipientId];
 
         // get the total credits and calculate the vote result
         uint256 totalCredits = _voiceCreditsToAllocate + creditsCastToRecipient;
+        // determine actual votes cast
         uint256 voteResult = _sqrt(totalCredits * 1e18);
 
         // update the values
@@ -529,7 +531,7 @@ abstract contract QVBaseStrategy is BaseStrategy {
         totalRecipientVotes += voteResult;
         _recipient.totalVotesReceived += voteResult;
 
-        _allocator.voiceCreditsCastToRecipient[_recipientId] += totalCredits;
+        _allocator.voiceCreditsCastToRecipient[_recipientId] += _voiceCreditsToAllocate;
         _allocator.votesCastToRecipient[_recipientId] += voteResult;
 
         // emit the event with the vote results
