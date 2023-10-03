@@ -472,7 +472,6 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
 
     function testRevert_distribute_NOT_ENOUGH_FUNDS() public {
         __register_setMilestones_allocate_submitUpcomingMilestone();
-        __setMilestones();
         vm.expectRevert(NOT_ENOUGH_FUNDS.selector);
         vm.prank(address(allo()));
         strategy.distribute(new address[](0), "", pool_admin());
