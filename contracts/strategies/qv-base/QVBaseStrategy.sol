@@ -324,7 +324,7 @@ abstract contract QVBaseStrategy is BaseStrategy {
     /// @notice Check if the allocation has ended
     /// @dev Reverts if the allocation has not ended
     function _checkOnlyAfterAllocation() internal view virtual {
-        if (block.timestamp < allocationEndTime) revert ALLOCATION_NOT_ENDED();
+        if (block.timestamp <= allocationEndTime) revert ALLOCATION_NOT_ENDED();
     }
 
     /// @notice Set the start and end dates for the pool

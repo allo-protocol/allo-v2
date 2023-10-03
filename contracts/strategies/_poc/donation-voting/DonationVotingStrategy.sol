@@ -366,7 +366,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Check if allocation has ended
     /// @dev Reverts if allocation has not ended
     function _checkOnlyAfterAllocation() internal view {
-        if (block.timestamp < allocationEndTime) {
+        if (block.timestamp <= allocationEndTime) {
             revert ALLOCATION_NOT_ENDED();
         }
     }
