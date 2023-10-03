@@ -330,7 +330,8 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         // Decode '_data' depending on the 'useRegistryAnchor' flag
         if (useRegistryAnchor) {
             /// @custom:data when 'true' -> (address recipientId, uint256 proposalBid, Metadata metadata)
-            (recipientId, proposalBid, metadata) = abi.decode(_data, (address, uint256, Metadata));
+            (recipientId, recipientAddress, proposalBid, metadata) =
+                abi.decode(_data, (address, address, uint256, Metadata));
 
             // If the sender is not a profile member this will revert
             if (!_isProfileMember(recipientId, _sender)) revert UNAUTHORIZED();

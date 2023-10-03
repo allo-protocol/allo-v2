@@ -375,7 +375,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         address anchor = poolProfile_anchor();
         Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
 
-        bytes memory data = abi.encode(anchor, 1e18, metadata);
+        bytes memory data = abi.encode(anchor, anchor, 1e18, metadata);
 
         vm.expectRevert(UNAUTHORIZED.selector);
         vm.prank(address(allo()));
