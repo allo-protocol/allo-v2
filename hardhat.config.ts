@@ -5,7 +5,6 @@ import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-solhint";
 import "@nomiclabs/hardhat-waffle";
 import "@openzeppelin/hardhat-upgrades";
-import "@primitivefi/hardhat-dodoc";
 import "@typechain/hardhat";
 import fs from "fs";
 import "hardhat-abi-exporter";
@@ -114,12 +113,6 @@ const abiExporter = [
     clear: true,
   },
 ];
-
-const dodoc = {
-  outputDir: "./generated-docs/contracts",
-  include: ["contracts"],
-  exclude: ["lib", "test"],
-};
 
 /** 
  * Generates hardhat network configuration
@@ -259,7 +252,6 @@ const config: HardhatUserConfig = {
     ],
   },
   abiExporter: abiExporter,
-  dodoc: dodoc,
   preprocess: {
     eachLine: (hre) => ({
       transform: (line: string) => {
