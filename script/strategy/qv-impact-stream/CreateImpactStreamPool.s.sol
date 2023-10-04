@@ -29,13 +29,7 @@ contract CreateImpactStreamPool is Script, Native, GoerliConfig {
         managers[0] = address(OWNER);
 
         allo.createPool{value: 1e16}(
-            TEST_PROFILE_2,
-            address(IMPACTSTREAMFORCLONE),
-            encodedStrategyData,
-            NATIVE,
-            1e16,
-            metadata,
-            managers
+            TEST_PROFILE_2, address(IMPACTSTREAMFORCLONE), encodedStrategyData, NATIVE, 1e16, metadata, managers
         );
 
         vm.stopBroadcast();
