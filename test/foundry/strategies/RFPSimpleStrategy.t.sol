@@ -114,7 +114,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         // accepted recipient
         address recipientId = __register_recipient();
         vm.prank(address(allo()));
-        strategy.allocate(abi.encode(recipientId), address(pool_admin()));
+        strategy.allocate(abi.encode(recipientId, 1e18), address(pool_admin()));
 
         RFPSimpleStrategy.Recipient memory rejectedRecipient = strategy.getRecipient(rejectedAddress);
         assertEq(uint8(rejectedRecipient.recipientStatus), uint8(IStrategy.Status.Rejected));
@@ -125,7 +125,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         // set accepted recipient
         address recipientId = __register_recipient();
         vm.prank(address(allo()));
-        strategy.allocate(abi.encode(recipientId), address(pool_admin()));
+        strategy.allocate(abi.encode(recipientId, 1e18), address(pool_admin()));
 
         RFPSimpleStrategy.Recipient memory noRecipient = strategy.getRecipient(randomAddress());
         assertEq(uint8(noRecipient.recipientStatus), uint8(IStrategy.Status.None));
@@ -424,21 +424,30 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
     function testRevert_allocate_UNAUTHORIZED() public {
         vm.expectRevert(UNAUTHORIZED.selector);
         vm.prank(makeAddr("not_pool_manager"));
-        strategy.allocate(abi.encode(recipientAddress()), recipient());
+        strategy.allocate(abi.encode(recipientAddress(), 1e18), recipient());
+    }
+
+    function testRevert_allocate_AMOUNT_TOO_LOW() public {
+        address recipientId = __register_recipient();
+        __setMilestones();
+
+        vm.expectRevert(RFPSimpleStrategy.AMOUNT_TOO_LOW.selector);
+        vm.prank(address(allo()));
+        strategy.allocate(abi.encode(recipientId, 5e17), address(pool_admin()));
     }
 
     function testRevert_allocate_POOL_INACTIVE() public {
         address recipientId = __register_setMilestones_allocate();
         vm.expectRevert(POOL_INACTIVE.selector);
         vm.prank(address(allo()));
-        strategy.allocate(abi.encode(recipientId), address(pool_admin()));
+        strategy.allocate(abi.encode(recipientId, 1e18), address(pool_admin()));
     }
 
     function testRevert_allocate_RECIPIENT_ERROR() public {
         vm.prank(address(allo()));
         vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, address(randomAddress())));
 
-        strategy.allocate(abi.encode(randomAddress()), address(pool_admin()));
+        strategy.allocate(abi.encode(randomAddress(), 1e18), address(pool_admin()));
     }
 
     function test_distribute() public {
@@ -516,7 +525,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
 
         emit Allocated(recipientId, 1e18, NATIVE, address(pool_admin()));
         vm.prank(address(allo()));
-        strategy.allocate(abi.encode(recipientId), address(pool_admin()));
+        strategy.allocate(abi.encode(recipientId, 1e18), address(pool_admin()));
     }
 
     function __register_setMilestones_allocate_submitUpcomingMilestone() internal returns (address recipientId) {

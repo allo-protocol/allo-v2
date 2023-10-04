@@ -395,8 +395,9 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         onlyActivePool
         onlyPoolManager(_sender)
     {
+        uint256 finalProposalBid;
         // Decode the '_data'
-        acceptedRecipientId = abi.decode(_data, (address));
+        (acceptedRecipientId, finalProposalBid) = abi.decode(_data, (address, uint256));
 
         Recipient storage recipient = _recipients[acceptedRecipientId];
 
@@ -407,12 +408,19 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         // Update status of acceptedRecipientId to accepted
         recipient.recipientStatus = Status.Accepted;
 
+        if (recipient.proposalBid != finalProposalBid) {
+            // If the proposal bid is not equal to the final proposal bid this will revert
+            // This is to prevent the pool manager from decreasing the proposal bid
+            // or recipient from front running and increasing the proposal bid
+            revert AMOUNT_TOO_LOW();
+        }
+
         _setPoolActive(false);
 
         IAllo.Pool memory pool = allo.getPool(poolId);
 
         // Emit event for the allocation
-        emit Allocated(acceptedRecipientId, recipient.proposalBid, pool.token, _sender);
+        emit Allocated(acceptedRecipientId, finalProposalBid, pool.token, _sender);
     }
 
     /// @notice Distribute the upcoming milestone to acceptedRecipientId.
