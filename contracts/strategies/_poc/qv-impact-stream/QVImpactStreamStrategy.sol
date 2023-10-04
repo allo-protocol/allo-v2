@@ -120,7 +120,7 @@ contract QVImpactStreamStrategy is BaseStrategy, Multicall {
 
     /// @notice The details of the allocator
     struct Allocator {
-        uint256 voiceCredits;
+        uint256 usedVoiceCredits;
         mapping(address => uint256) voiceCreditsCastToRecipient;
         mapping(address => uint256) votesCastToRecipient;
     }
@@ -364,11 +364,11 @@ contract QVImpactStreamStrategy is BaseStrategy, Multicall {
         if (!_isAcceptedRecipient(recipientId)) revert RECIPIENT_ERROR(recipientId);
 
         // check that the recipient has voice credits left to allocate
-        if (!_hasVoiceCreditsLeft(voiceCreditsToAllocate, allocator.voiceCredits)) revert INVALID();
+        if (!_hasVoiceCreditsLeft(voiceCreditsToAllocate, allocator.usedVoiceCredits)) revert INVALID();
 
         if (voiceCreditsToAllocate == 0) revert INVALID();
 
-        allocator.voiceCredits += voiceCreditsToAllocate;
+        allocator.usedVoiceCredits += voiceCreditsToAllocate;
 
         // creditsCastToRecipient is the voice credits used to cast a vote to the recipient
         // votesCastToRecipient is the actual votes cast to the recipient
@@ -476,14 +476,18 @@ contract QVImpactStreamStrategy is BaseStrategy, Multicall {
         return recipients[_recipientId];
     }
 
-    /// @notice Get the allocator
+    /// @notice Get the voice credits already cast by an allocator
     /// @param _allocator address of the allocator
-    /// @return The allocator
-    function getAllocatorVoiceCredits(address _allocator) external view returns (uint256) {
-        return allocators[_allocator].voiceCredits;
+    /// @return The voice credits spent by the allocator
+    function getVoiceCreditsCastByAllocator(address _allocator) external view returns (uint256) {
+        return allocators[_allocator].usedVoiceCredits;
     }
 
-    function getAllocatorVoiceCreditsCastToRecipient(address _allocator, address _recipientId)
+    /// @notice Get the voice credits already cast by an allocator to a recipient
+    /// @param _allocator address of the allocator
+    /// @param _recipientId ID of the recipient
+    /// @return The voice credits spent by the allocator to the recipient
+    function getVoiceCreditsCastByAllocatorToRecipient(address _allocator, address _recipientId)
         external
         view
         returns (uint256)
@@ -491,7 +495,11 @@ contract QVImpactStreamStrategy is BaseStrategy, Multicall {
         return allocators[_allocator].voiceCreditsCastToRecipient[_recipientId];
     }
 
-    function getAllocatorVotesCastToRecipient(address _allocator, address _recipientId)
+    /// @notice Get the votes already cast by an allocator to a recipient
+    /// @param _allocator address of the allocator
+    /// @param _recipientId ID of the recipient
+    /// @return The votes spent by the allocator to the recipient
+    function getVotesCastByAllocatorToRecipient(address _allocator, address _recipientId)
         external
         view
         returns (uint256)

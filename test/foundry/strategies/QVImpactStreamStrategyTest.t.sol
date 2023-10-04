@@ -214,11 +214,11 @@ contract QVImpactStreamStrategyTest is Test, AlloSetup, RegistrySetupFull, Strat
         assertEq(strategy.getRecipient(recipient1).totalVotesReceived, 1 * 1e9);
         assertEq(strategy.getRecipient(recipient2).totalVotesReceived, 2 * 1e9);
 
-        assertEq(strategy.getAllocatorVoiceCredits(allocator1), 5);
-        assertEq(strategy.getAllocatorVoiceCreditsCastToRecipient(allocator1, recipient1), 1);
-        assertEq(strategy.getAllocatorVoiceCreditsCastToRecipient(allocator1, recipient2), 4);
-        assertEq(strategy.getAllocatorVotesCastToRecipient(allocator1, recipient1), 1 * 1e9);
-        assertEq(strategy.getAllocatorVotesCastToRecipient(allocator1, recipient2), 2 * 1e9);
+        assertEq(strategy.getVoiceCreditsCastByAllocator(allocator1), 5);
+        assertEq(strategy.getVoiceCreditsCastByAllocatorToRecipient(allocator1, recipient1), 1);
+        assertEq(strategy.getVoiceCreditsCastByAllocatorToRecipient(allocator1, recipient2), 4);
+        assertEq(strategy.getVotesCastByAllocatorToRecipient(allocator1, recipient1), 1 * 1e9);
+        assertEq(strategy.getVotesCastByAllocatorToRecipient(allocator1, recipient2), 2 * 1e9);
 
         allo().allocate(poolId, _createAllocateData(recipient1, 1));
         allo().allocate(poolId, _createAllocateData(recipient2, 4));
@@ -226,11 +226,11 @@ contract QVImpactStreamStrategyTest is Test, AlloSetup, RegistrySetupFull, Strat
         assertEq(strategy.getRecipient(recipient1).totalVotesReceived, _sqrt(2 * 1e18));
         assertEq(strategy.getRecipient(recipient2).totalVotesReceived, _sqrt(8 * 1e18));
 
-        assertEq(strategy.getAllocatorVoiceCredits(allocator1), 10);
-        assertEq(strategy.getAllocatorVoiceCreditsCastToRecipient(allocator1, recipient1), 2);
-        assertEq(strategy.getAllocatorVoiceCreditsCastToRecipient(allocator1, recipient2), 8);
-        assertEq(strategy.getAllocatorVotesCastToRecipient(allocator1, recipient1), _sqrt(2 * 1e18));
-        assertEq(strategy.getAllocatorVotesCastToRecipient(allocator1, recipient2), _sqrt(8 * 1e18));
+        assertEq(strategy.getVoiceCreditsCastByAllocator(allocator1), 10);
+        assertEq(strategy.getVoiceCreditsCastByAllocatorToRecipient(allocator1, recipient1), 2);
+        assertEq(strategy.getVoiceCreditsCastByAllocatorToRecipient(allocator1, recipient2), 8);
+        assertEq(strategy.getVotesCastByAllocatorToRecipient(allocator1, recipient1), _sqrt(2 * 1e18));
+        assertEq(strategy.getVotesCastByAllocatorToRecipient(allocator1, recipient2), _sqrt(8 * 1e18));
 
         vm.stopPrank();
     }
