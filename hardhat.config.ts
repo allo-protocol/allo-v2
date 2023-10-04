@@ -1,20 +1,19 @@
 import * as dotenv from "dotenv";
 
+import "@nomicfoundation/hardhat-foundry";
 import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-solhint";
 import "@nomiclabs/hardhat-waffle";
-import "@nomicfoundation/hardhat-foundry";
 import "@openzeppelin/hardhat-upgrades";
-import "@primitivefi/hardhat-dodoc";
 import "@typechain/hardhat";
+import fs from "fs";
 import "hardhat-abi-exporter";
 import "hardhat-contract-sizer";
 import "hardhat-gas-reporter";
+import "hardhat-preprocessor";
 import { HardhatUserConfig } from "hardhat/config";
 import { NetworkUserConfig } from "hardhat/types";
 import "solidity-coverage";
-import "hardhat-preprocessor";
-import fs from "fs";
 
 dotenv.config();
 
@@ -23,7 +22,7 @@ const chainIds = {
   localhost: 31337,
 
   // testnet
-  goerli: 5,
+  "goerli": 5,
   sepolia: 11155111,
   "optimism-goerli": 420,
   "fantom-testnet": 4002,
@@ -45,12 +44,13 @@ if (!deployPrivateKey) {
 }
 
 const infuraIdKey = process.env.INFURA_RPC_ID as string;
+const alchemyIdKey = process.env.ALCHEMY_RPC_ID as string;
 
 /**
  * Reads the remappings.txt file and returns an array of arrays.
  * @returns {string[][]}
  */
-function getRemappings() {
+function getRemappings(): string[][] {
   return fs
     .readFileSync("remappings.txt", "utf8")
     .split("\n")
@@ -76,7 +76,7 @@ function createTestnetConfig(
     chainId: chainIds[network],
     allowUnlimitedContractSize: true,
     url,
-    gasPrice: 20000000000,
+    gasPrice: 30000000000,
   };
 }
 
@@ -114,12 +114,10 @@ const abiExporter = [
   },
 ];
 
-const dodoc = {
-  outputDir: "./generated-docs/contracts",
-  include: ["contracts"],
-  exclude: ["lib", "test"],
-};
-
+/** 
+ * Generates hardhat network configuration
+ * @type import('hardhat/config').HardhatUserConfig
+ */
 const config: HardhatUserConfig = {
   solidity: {
     version: "0.8.19",
@@ -137,7 +135,7 @@ const config: HardhatUserConfig = {
     "optimism-mainnet": createMainnetConfig("optimism-mainnet"),
     "fantom-mainnet": createMainnetConfig(
       "fantom-mainnet",
-      "https://rpc.ftm.tools"
+      "https://rpc.ftm.tools",
     ),
     "pgn-mainnet": {
       accounts: [deployPrivateKey],
@@ -153,14 +151,17 @@ const config: HardhatUserConfig = {
     },
 
     // Test Networks
-    goerli: createTestnetConfig("goerli"),
+    goerli: createTestnetConfig(
+      "goerli",
+      `https://eth-goerli.g.alchemy.com/v2/${alchemyIdKey}`
+    ),
     sepolia: createTestnetConfig(
       "sepolia",
-      "https://eth-sepolia.public.blastapi.io"
+      "https://eth-sepolia.public.blastapi.io",
     ),
     "fantom-testnet": createTestnetConfig(
       "fantom-testnet",
-      "https://rpc.testnet.fantom.network/"
+      "https://rpc.testnet.fantom.network/",
     ),
     "optimism-goerli": {
       accounts: [deployPrivateKey],
@@ -251,7 +252,6 @@ const config: HardhatUserConfig = {
     ],
   },
   abiExporter: abiExporter,
-  dodoc: dodoc,
   preprocess: {
     eachLine: (hre) => ({
       transform: (line: string) => {

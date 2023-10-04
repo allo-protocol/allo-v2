@@ -1,8 +1,8 @@
 {
   "_format": "hh-sol-cache-2",
   "files": {
-    "/home/kurt/git/allo/allo-v2/contracts/core/Allo.sol": {
-      "lastModificationDate": 1693997618260,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/core/Allo.sol": {
+      "lastModificationDate": 1696362242641,
       "contentHash": "3c6b6305a0bb49b4bf24a5a06c5da3e0",
       "sourceName": "contracts/core/Allo.sol",
       "solcConfig": {
@@ -31,7 +31,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -47,6 +47,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -75,75 +76,8 @@
         "Allo"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/contracts/core/interfaces/IAllo.sol": {
-      "lastModificationDate": 1693997618260,
-      "contentHash": "dcf515882f1e49ea617589c937f67e33",
-      "sourceName": "contracts/core/interfaces/IAllo.sol",
-      "solcConfig": {
-        "version": "0.8.19",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 400
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "storageLayout",
-                "devdoc",
-                "userdoc"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          },
-          "libraries": {
-            "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
-            }
-          },
-          "remappings": [
-            "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
-            "@sablier/v2-core/=lib/v2-core/",
-            "ds-test/=lib/forge-std/lib/ds-test/src/",
-            "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
-            "forge-std/=lib/forge-std/src/",
-            "permit2/=lib/permit2/src/interfaces/",
-            "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
-            "openzeppelin-contracts/=lib/openzeppelin-contracts/",
-            "@prb/math/=lib/v2-core/lib/prb-math/",
-            "eas-contracts/=lib/eas-contracts/contracts/",
-            "@prb/test/=lib/v2-core/lib/prb-test/src/",
-            "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
-            "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
-            "prb-math/=lib/v2-core/lib/prb-math/src/",
-            "prb-test/=lib/v2-core/lib/prb-test/src/",
-            "solarray/=lib/v2-core/lib/solarray/src/",
-            "solmate/=lib/permit2/lib/solmate/",
-            "v2-core/=lib/v2-core/"
-          ]
-        }
-      },
-      "imports": [
-        "./IRegistry.sol",
-        "./IStrategy.sol",
-        "../libraries/Metadata.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.19"
-      ],
-      "artifacts": [
-        "IAllo"
-      ]
-    },
-    "/home/kurt/git/allo/allo-v2/contracts/core/libraries/Clone.sol": {
-      "lastModificationDate": 1693916237306,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/core/libraries/Clone.sol": {
+      "lastModificationDate": 1696362242631,
       "contentHash": "2ca8bd8526b77f4b4929c7b56ae9eb08",
       "sourceName": "contracts/core/libraries/Clone.sol",
       "solcConfig": {
@@ -172,7 +106,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -188,6 +122,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -207,8 +142,8 @@
         "Clone"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/contracts/core/libraries/Errors.sol": {
-      "lastModificationDate": 1693916237306,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/core/libraries/Errors.sol": {
+      "lastModificationDate": 1696362242631,
       "contentHash": "b77840ac55298af4701bc38d2e0ae39a",
       "sourceName": "contracts/core/libraries/Errors.sol",
       "solcConfig": {
@@ -237,7 +172,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -253,6 +188,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -270,10 +206,10 @@
         "Errors"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/contracts/core/libraries/Native.sol": {
-      "lastModificationDate": 1693916237278,
-      "contentHash": "1bfef428a1d411d92cc51b5a8a464d1c",
-      "sourceName": "contracts/core/libraries/Native.sol",
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/core/interfaces/IAllo.sol": {
+      "lastModificationDate": 1696362242632,
+      "contentHash": "dcf515882f1e49ea617589c937f67e33",
+      "sourceName": "contracts/core/interfaces/IAllo.sol",
       "solcConfig": {
         "version": "0.8.19",
         "settings": {
@@ -300,7 +236,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -316,6 +252,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -325,16 +262,20 @@
           ]
         }
       },
-      "imports": [],
+      "imports": [
+        "./IRegistry.sol",
+        "./IStrategy.sol",
+        "../libraries/Metadata.sol"
+      ],
       "versionPragmas": [
-        "0.8.19"
+        "^0.8.19"
       ],
       "artifacts": [
-        "Native"
+        "IAllo"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/contracts/core/libraries/Transfer.sol": {
-      "lastModificationDate": 1693997618260,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/core/libraries/Transfer.sol": {
+      "lastModificationDate": 1696362242632,
       "contentHash": "b38950a0e2d65c028336f10e935425d6",
       "sourceName": "contracts/core/libraries/Transfer.sol",
       "solcConfig": {
@@ -363,7 +304,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -379,6 +320,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -399,8 +341,72 @@
         "Transfer"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/lib/openzeppelin-contracts/contracts/access/AccessControl.sol": {
-      "lastModificationDate": 1693505497600,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/core/libraries/Native.sol": {
+      "lastModificationDate": 1696362242631,
+      "contentHash": "1bfef428a1d411d92cc51b5a8a464d1c",
+      "sourceName": "contracts/core/libraries/Native.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 400
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
+            }
+          },
+          "remappings": [
+            "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+            "@sablier/v2-core/=lib/v2-core/",
+            "ds-test/=lib/forge-std/lib/ds-test/src/",
+            "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
+            "forge-std/=lib/forge-std/src/",
+            "permit2/=lib/permit2/src/interfaces/",
+            "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+            "openzeppelin-contracts/=lib/openzeppelin-contracts/",
+            "@prb/math/=lib/v2-core/lib/prb-math/",
+            "eas-contracts/=lib/eas-contracts/contracts/",
+            "@prb/test/=lib/v2-core/lib/prb-test/src/",
+            "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
+            "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
+            "prb-math/=lib/v2-core/lib/prb-math/src/",
+            "prb-test/=lib/v2-core/lib/prb-test/src/",
+            "solarray/=lib/v2-core/lib/solarray/src/",
+            "solmate/=lib/permit2/lib/solmate/",
+            "v2-core/=lib/v2-core/"
+          ]
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "0.8.19"
+      ],
+      "artifacts": [
+        "Native"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/openzeppelin-contracts/contracts/access/AccessControl.sol": {
+      "lastModificationDate": 1695835283359,
       "contentHash": "a2b1ec38a8dad325a596f926890772b8",
       "sourceName": "lib/openzeppelin-contracts/contracts/access/AccessControl.sol",
       "solcConfig": {
@@ -429,7 +435,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -445,6 +451,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -467,8 +474,8 @@
         "AccessControl"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/lib/openzeppelin-contracts-upgradeable/contracts/security/ReentrancyGuardUpgradeable.sol": {
-      "lastModificationDate": 1693505497672,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/openzeppelin-contracts-upgradeable/contracts/security/ReentrancyGuardUpgradeable.sol": {
+      "lastModificationDate": 1695835283592,
       "contentHash": "efeffcf5034292d7ea635de588c95995",
       "sourceName": "lib/openzeppelin-contracts-upgradeable/contracts/security/ReentrancyGuardUpgradeable.sol",
       "solcConfig": {
@@ -497,7 +504,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -513,6 +520,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -532,8 +540,8 @@
         "ReentrancyGuardUpgradeable"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol": {
-      "lastModificationDate": 1693505497672,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol": {
+      "lastModificationDate": 1695835283591,
       "contentHash": "b0970a564d121abf9adfff8d1a01eb16",
       "sourceName": "lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol",
       "solcConfig": {
@@ -562,7 +570,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -578,6 +586,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -597,8 +606,8 @@
         "Initializable"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol": {
-      "lastModificationDate": 1693505497672,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol": {
+      "lastModificationDate": 1695835283593,
       "contentHash": "9a9398a7dbda9d014f04d5eb0fb581fd",
       "sourceName": "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol",
       "solcConfig": {
@@ -627,7 +636,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -643,6 +652,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -660,8 +670,8 @@
         "IERC20Upgradeable"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/node_modules/solady/src/auth/Ownable.sol": {
-      "lastModificationDate": 1693999001407,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/solady/src/auth/Ownable.sol": {
+      "lastModificationDate": 1695836959030,
       "contentHash": "3d54428bac6018778c311266c731869d",
       "sourceName": "solady/src/auth/Ownable.sol",
       "solcConfig": {
@@ -690,7 +700,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -706,6 +716,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -723,199 +734,8 @@
         "Ownable"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/contracts/core/libraries/Metadata.sol": {
-      "lastModificationDate": 1693916237306,
-      "contentHash": "cda0d9f7b8dc1791c80fbbbefc2cad79",
-      "sourceName": "contracts/core/libraries/Metadata.sol",
-      "solcConfig": {
-        "version": "0.8.19",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 400
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "storageLayout",
-                "devdoc",
-                "userdoc"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          },
-          "libraries": {
-            "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
-            }
-          },
-          "remappings": [
-            "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
-            "@sablier/v2-core/=lib/v2-core/",
-            "ds-test/=lib/forge-std/lib/ds-test/src/",
-            "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
-            "forge-std/=lib/forge-std/src/",
-            "permit2/=lib/permit2/src/interfaces/",
-            "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
-            "openzeppelin-contracts/=lib/openzeppelin-contracts/",
-            "@prb/math/=lib/v2-core/lib/prb-math/",
-            "eas-contracts/=lib/eas-contracts/contracts/",
-            "@prb/test/=lib/v2-core/lib/prb-test/src/",
-            "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
-            "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
-            "prb-math/=lib/v2-core/lib/prb-math/src/",
-            "prb-test/=lib/v2-core/lib/prb-test/src/",
-            "solarray/=lib/v2-core/lib/solarray/src/",
-            "solmate/=lib/permit2/lib/solmate/",
-            "v2-core/=lib/v2-core/"
-          ]
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "0.8.19"
-      ],
-      "artifacts": []
-    },
-    "/home/kurt/git/allo/allo-v2/contracts/core/interfaces/IRegistry.sol": {
-      "lastModificationDate": 1693997618260,
-      "contentHash": "e3ed57dbadc594270a2f89af1db779a3",
-      "sourceName": "contracts/core/interfaces/IRegistry.sol",
-      "solcConfig": {
-        "version": "0.8.19",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 400
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "storageLayout",
-                "devdoc",
-                "userdoc"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          },
-          "libraries": {
-            "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
-            }
-          },
-          "remappings": [
-            "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
-            "@sablier/v2-core/=lib/v2-core/",
-            "ds-test/=lib/forge-std/lib/ds-test/src/",
-            "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
-            "forge-std/=lib/forge-std/src/",
-            "permit2/=lib/permit2/src/interfaces/",
-            "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
-            "openzeppelin-contracts/=lib/openzeppelin-contracts/",
-            "@prb/math/=lib/v2-core/lib/prb-math/",
-            "eas-contracts/=lib/eas-contracts/contracts/",
-            "@prb/test/=lib/v2-core/lib/prb-test/src/",
-            "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
-            "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
-            "prb-math/=lib/v2-core/lib/prb-math/src/",
-            "prb-test/=lib/v2-core/lib/prb-test/src/",
-            "solarray/=lib/v2-core/lib/solarray/src/",
-            "solmate/=lib/permit2/lib/solmate/",
-            "v2-core/=lib/v2-core/"
-          ]
-        }
-      },
-      "imports": [
-        "../libraries/Metadata.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.19"
-      ],
-      "artifacts": [
-        "IRegistry"
-      ]
-    },
-    "/home/kurt/git/allo/allo-v2/contracts/core/interfaces/IStrategy.sol": {
-      "lastModificationDate": 1693997618260,
-      "contentHash": "ae1b8fb07d56cb4a7af53d3d42f52035",
-      "sourceName": "contracts/core/interfaces/IStrategy.sol",
-      "solcConfig": {
-        "version": "0.8.19",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 400
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "storageLayout",
-                "devdoc",
-                "userdoc"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          },
-          "libraries": {
-            "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
-            }
-          },
-          "remappings": [
-            "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
-            "@sablier/v2-core/=lib/v2-core/",
-            "ds-test/=lib/forge-std/lib/ds-test/src/",
-            "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
-            "forge-std/=lib/forge-std/src/",
-            "permit2/=lib/permit2/src/interfaces/",
-            "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
-            "openzeppelin-contracts/=lib/openzeppelin-contracts/",
-            "@prb/math/=lib/v2-core/lib/prb-math/",
-            "eas-contracts/=lib/eas-contracts/contracts/",
-            "@prb/test/=lib/v2-core/lib/prb-test/src/",
-            "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
-            "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
-            "prb-math/=lib/v2-core/lib/prb-math/src/",
-            "prb-test/=lib/v2-core/lib/prb-test/src/",
-            "solarray/=lib/v2-core/lib/solarray/src/",
-            "solmate/=lib/permit2/lib/solmate/",
-            "v2-core/=lib/v2-core/"
-          ]
-        }
-      },
-      "imports": [
-        "./IAllo.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.19"
-      ],
-      "artifacts": [
-        "IStrategy"
-      ]
-    },
-    "/home/kurt/git/allo/allo-v2/lib/openzeppelin-contracts-upgradeable/contracts/proxy/ClonesUpgradeable.sol": {
-      "lastModificationDate": 1693505497672,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/openzeppelin-contracts-upgradeable/contracts/proxy/ClonesUpgradeable.sol": {
+      "lastModificationDate": 1695835283591,
       "contentHash": "8719111692ab7741b980a762b23d0151",
       "sourceName": "lib/openzeppelin-contracts-upgradeable/contracts/proxy/ClonesUpgradeable.sol",
       "solcConfig": {
@@ -944,7 +764,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -960,6 +780,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -977,8 +798,202 @@
         "ClonesUpgradeable"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/node_modules/solady/src/utils/SafeTransferLib.sol": {
-      "lastModificationDate": 1693999001407,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/core/interfaces/IStrategy.sol": {
+      "lastModificationDate": 1696362242632,
+      "contentHash": "b5b2b959f210df3bed456fdde3a35611",
+      "sourceName": "contracts/core/interfaces/IStrategy.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 400
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
+            }
+          },
+          "remappings": [
+            "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+            "@sablier/v2-core/=lib/v2-core/",
+            "ds-test/=lib/forge-std/lib/ds-test/src/",
+            "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
+            "forge-std/=lib/forge-std/src/",
+            "permit2/=lib/permit2/src/interfaces/",
+            "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+            "openzeppelin-contracts/=lib/openzeppelin-contracts/",
+            "@prb/math/=lib/v2-core/lib/prb-math/",
+            "eas-contracts/=lib/eas-contracts/contracts/",
+            "@prb/test/=lib/v2-core/lib/prb-test/src/",
+            "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
+            "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
+            "prb-math/=lib/v2-core/lib/prb-math/src/",
+            "prb-test/=lib/v2-core/lib/prb-test/src/",
+            "solarray/=lib/v2-core/lib/solarray/src/",
+            "solmate/=lib/permit2/lib/solmate/",
+            "v2-core/=lib/v2-core/"
+          ]
+        }
+      },
+      "imports": [
+        "./IAllo.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.19"
+      ],
+      "artifacts": [
+        "IStrategy"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/core/interfaces/IRegistry.sol": {
+      "lastModificationDate": 1696362242633,
+      "contentHash": "e3ed57dbadc594270a2f89af1db779a3",
+      "sourceName": "contracts/core/interfaces/IRegistry.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 400
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
+            }
+          },
+          "remappings": [
+            "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+            "@sablier/v2-core/=lib/v2-core/",
+            "ds-test/=lib/forge-std/lib/ds-test/src/",
+            "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
+            "forge-std/=lib/forge-std/src/",
+            "permit2/=lib/permit2/src/interfaces/",
+            "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+            "openzeppelin-contracts/=lib/openzeppelin-contracts/",
+            "@prb/math/=lib/v2-core/lib/prb-math/",
+            "eas-contracts/=lib/eas-contracts/contracts/",
+            "@prb/test/=lib/v2-core/lib/prb-test/src/",
+            "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
+            "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
+            "prb-math/=lib/v2-core/lib/prb-math/src/",
+            "prb-test/=lib/v2-core/lib/prb-test/src/",
+            "solarray/=lib/v2-core/lib/solarray/src/",
+            "solmate/=lib/permit2/lib/solmate/",
+            "v2-core/=lib/v2-core/"
+          ]
+        }
+      },
+      "imports": [
+        "../libraries/Metadata.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.19"
+      ],
+      "artifacts": [
+        "IRegistry"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/core/libraries/Metadata.sol": {
+      "lastModificationDate": 1696362242631,
+      "contentHash": "cda0d9f7b8dc1791c80fbbbefc2cad79",
+      "sourceName": "contracts/core/libraries/Metadata.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 400
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
+            }
+          },
+          "remappings": [
+            "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+            "@sablier/v2-core/=lib/v2-core/",
+            "ds-test/=lib/forge-std/lib/ds-test/src/",
+            "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
+            "forge-std/=lib/forge-std/src/",
+            "permit2/=lib/permit2/src/interfaces/",
+            "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+            "openzeppelin-contracts/=lib/openzeppelin-contracts/",
+            "@prb/math/=lib/v2-core/lib/prb-math/",
+            "eas-contracts/=lib/eas-contracts/contracts/",
+            "@prb/test/=lib/v2-core/lib/prb-test/src/",
+            "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
+            "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
+            "prb-math/=lib/v2-core/lib/prb-math/src/",
+            "prb-test/=lib/v2-core/lib/prb-test/src/",
+            "solarray/=lib/v2-core/lib/solarray/src/",
+            "solmate/=lib/permit2/lib/solmate/",
+            "v2-core/=lib/v2-core/"
+          ]
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/solady/src/utils/SafeTransferLib.sol": {
+      "lastModificationDate": 1695836959032,
       "contentHash": "13fbdcd4b922faa55d3d6f8d764f5cc6",
       "sourceName": "solady/src/utils/SafeTransferLib.sol",
       "solcConfig": {
@@ -1007,7 +1022,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -1023,6 +1038,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -1040,8 +1056,8 @@
         "SafeTransferLib"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/lib/openzeppelin-contracts/contracts/utils/Strings.sol": {
-      "lastModificationDate": 1693505497608,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/openzeppelin-contracts/contracts/utils/Strings.sol": {
+      "lastModificationDate": 1695835283380,
       "contentHash": "48686fc32a22a3754b8e63321857dd2a",
       "sourceName": "lib/openzeppelin-contracts/contracts/utils/Strings.sol",
       "solcConfig": {
@@ -1070,7 +1086,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -1086,6 +1102,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -1106,136 +1123,8 @@
         "Strings"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/lib/openzeppelin-contracts/contracts/utils/Context.sol": {
-      "lastModificationDate": 1693505497608,
-      "contentHash": "5f2c5c4b6af2dd4551027144797bc8be",
-      "sourceName": "lib/openzeppelin-contracts/contracts/utils/Context.sol",
-      "solcConfig": {
-        "version": "0.8.19",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 400
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "storageLayout",
-                "devdoc",
-                "userdoc"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          },
-          "libraries": {
-            "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
-            }
-          },
-          "remappings": [
-            "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
-            "@sablier/v2-core/=lib/v2-core/",
-            "ds-test/=lib/forge-std/lib/ds-test/src/",
-            "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
-            "forge-std/=lib/forge-std/src/",
-            "permit2/=lib/permit2/src/interfaces/",
-            "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
-            "openzeppelin-contracts/=lib/openzeppelin-contracts/",
-            "@prb/math/=lib/v2-core/lib/prb-math/",
-            "eas-contracts/=lib/eas-contracts/contracts/",
-            "@prb/test/=lib/v2-core/lib/prb-test/src/",
-            "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
-            "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
-            "prb-math/=lib/v2-core/lib/prb-math/src/",
-            "prb-test/=lib/v2-core/lib/prb-test/src/",
-            "solarray/=lib/v2-core/lib/solarray/src/",
-            "solmate/=lib/permit2/lib/solmate/",
-            "v2-core/=lib/v2-core/"
-          ]
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.0"
-      ],
-      "artifacts": [
-        "Context"
-      ]
-    },
-    "/home/kurt/git/allo/allo-v2/lib/openzeppelin-contracts/contracts/utils/introspection/ERC165.sol": {
-      "lastModificationDate": 1693505497608,
-      "contentHash": "0e7db055ce108f9da7bb6686a00287c0",
-      "sourceName": "lib/openzeppelin-contracts/contracts/utils/introspection/ERC165.sol",
-      "solcConfig": {
-        "version": "0.8.19",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 400
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "storageLayout",
-                "devdoc",
-                "userdoc"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          },
-          "libraries": {
-            "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
-            }
-          },
-          "remappings": [
-            "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
-            "@sablier/v2-core/=lib/v2-core/",
-            "ds-test/=lib/forge-std/lib/ds-test/src/",
-            "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
-            "forge-std/=lib/forge-std/src/",
-            "permit2/=lib/permit2/src/interfaces/",
-            "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
-            "openzeppelin-contracts/=lib/openzeppelin-contracts/",
-            "@prb/math/=lib/v2-core/lib/prb-math/",
-            "eas-contracts/=lib/eas-contracts/contracts/",
-            "@prb/test/=lib/v2-core/lib/prb-test/src/",
-            "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
-            "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
-            "prb-math/=lib/v2-core/lib/prb-math/src/",
-            "prb-test/=lib/v2-core/lib/prb-test/src/",
-            "solarray/=lib/v2-core/lib/solarray/src/",
-            "solmate/=lib/permit2/lib/solmate/",
-            "v2-core/=lib/v2-core/"
-          ]
-        }
-      },
-      "imports": [
-        "./IERC165.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.0"
-      ],
-      "artifacts": [
-        "ERC165"
-      ]
-    },
-    "/home/kurt/git/allo/allo-v2/lib/openzeppelin-contracts/contracts/access/IAccessControl.sol": {
-      "lastModificationDate": 1693505497600,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/openzeppelin-contracts/contracts/access/IAccessControl.sol": {
+      "lastModificationDate": 1695835283360,
       "contentHash": "57c84298234411cea19c7c284d86be8b",
       "sourceName": "lib/openzeppelin-contracts/contracts/access/IAccessControl.sol",
       "solcConfig": {
@@ -1264,7 +1153,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -1280,6 +1169,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -1297,8 +1187,138 @@
         "IAccessControl"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/lib/openzeppelin-contracts/contracts/utils/math/Math.sol": {
-      "lastModificationDate": 1693505497608,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/openzeppelin-contracts/contracts/utils/Context.sol": {
+      "lastModificationDate": 1695835283379,
+      "contentHash": "5f2c5c4b6af2dd4551027144797bc8be",
+      "sourceName": "lib/openzeppelin-contracts/contracts/utils/Context.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 400
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
+            }
+          },
+          "remappings": [
+            "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+            "@sablier/v2-core/=lib/v2-core/",
+            "ds-test/=lib/forge-std/lib/ds-test/src/",
+            "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
+            "forge-std/=lib/forge-std/src/",
+            "permit2/=lib/permit2/src/interfaces/",
+            "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+            "openzeppelin-contracts/=lib/openzeppelin-contracts/",
+            "@prb/math/=lib/v2-core/lib/prb-math/",
+            "eas-contracts/=lib/eas-contracts/contracts/",
+            "@prb/test/=lib/v2-core/lib/prb-test/src/",
+            "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
+            "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
+            "prb-math/=lib/v2-core/lib/prb-math/src/",
+            "prb-test/=lib/v2-core/lib/prb-test/src/",
+            "solarray/=lib/v2-core/lib/solarray/src/",
+            "solmate/=lib/permit2/lib/solmate/",
+            "v2-core/=lib/v2-core/"
+          ]
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "Context"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/openzeppelin-contracts/contracts/utils/introspection/ERC165.sol": {
+      "lastModificationDate": 1695835283381,
+      "contentHash": "0e7db055ce108f9da7bb6686a00287c0",
+      "sourceName": "lib/openzeppelin-contracts/contracts/utils/introspection/ERC165.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 400
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
+            }
+          },
+          "remappings": [
+            "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+            "@sablier/v2-core/=lib/v2-core/",
+            "ds-test/=lib/forge-std/lib/ds-test/src/",
+            "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
+            "forge-std/=lib/forge-std/src/",
+            "permit2/=lib/permit2/src/interfaces/",
+            "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+            "openzeppelin-contracts/=lib/openzeppelin-contracts/",
+            "@prb/math/=lib/v2-core/lib/prb-math/",
+            "eas-contracts/=lib/eas-contracts/contracts/",
+            "@prb/test/=lib/v2-core/lib/prb-test/src/",
+            "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
+            "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
+            "prb-math/=lib/v2-core/lib/prb-math/src/",
+            "prb-test/=lib/v2-core/lib/prb-test/src/",
+            "solarray/=lib/v2-core/lib/solarray/src/",
+            "solmate/=lib/permit2/lib/solmate/",
+            "v2-core/=lib/v2-core/"
+          ]
+        }
+      },
+      "imports": [
+        "./IERC165.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "ERC165"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/openzeppelin-contracts/contracts/utils/math/Math.sol": {
+      "lastModificationDate": 1695835283381,
       "contentHash": "fe63409d8a06818b926cf89e0ea88b1b",
       "sourceName": "lib/openzeppelin-contracts/contracts/utils/math/Math.sol",
       "solcConfig": {
@@ -1327,7 +1347,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -1343,6 +1363,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -1360,8 +1381,8 @@
         "Math"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/lib/openzeppelin-contracts/contracts/utils/math/SignedMath.sol": {
-      "lastModificationDate": 1693505497608,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/openzeppelin-contracts/contracts/utils/math/SignedMath.sol": {
+      "lastModificationDate": 1695835283382,
       "contentHash": "9488ebd4daacfee8ad04811600d7d061",
       "sourceName": "lib/openzeppelin-contracts/contracts/utils/math/SignedMath.sol",
       "solcConfig": {
@@ -1390,7 +1411,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -1406,6 +1427,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -1423,8 +1445,8 @@
         "SignedMath"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/lib/openzeppelin-contracts/contracts/utils/introspection/IERC165.sol": {
-      "lastModificationDate": 1693505497608,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/openzeppelin-contracts/contracts/utils/introspection/IERC165.sol": {
+      "lastModificationDate": 1695835283381,
       "contentHash": "03e6768535ac4da0e9756f1d8a4a018a",
       "sourceName": "lib/openzeppelin-contracts/contracts/utils/introspection/IERC165.sol",
       "solcConfig": {
@@ -1453,7 +1475,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -1469,6 +1491,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -1486,8 +1509,8 @@
         "IERC165"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/lib/openzeppelin-contracts-upgradeable/contracts/utils/AddressUpgradeable.sol": {
-      "lastModificationDate": 1693505497676,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/openzeppelin-contracts-upgradeable/contracts/utils/AddressUpgradeable.sol": {
+      "lastModificationDate": 1695835283597,
       "contentHash": "c30c805386fda8a42ff515da963d3a95",
       "sourceName": "lib/openzeppelin-contracts-upgradeable/contracts/utils/AddressUpgradeable.sol",
       "solcConfig": {
@@ -1516,7 +1539,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -1532,6 +1555,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -1549,8 +1573,8 @@
         "AddressUpgradeable"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/contracts/strategies/_poc/wrapped-voting-nftmint/NFT.sol": {
-      "lastModificationDate": 1693997618264,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/strategies/_poc/wrapped-voting-nftmint/NFT.sol": {
+      "lastModificationDate": 1696362242634,
       "contentHash": "6fbe0f8e667377409bde64e1ff81379c",
       "sourceName": "contracts/strategies/_poc/wrapped-voting-nftmint/NFT.sol",
       "solcConfig": {
@@ -1579,7 +1603,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -1595,6 +1619,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -1616,8 +1641,8 @@
         "NFT"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/node_modules/solady/src/tokens/ERC721.sol": {
-      "lastModificationDate": 1693999001407,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/solady/src/tokens/ERC721.sol": {
+      "lastModificationDate": 1695836959038,
       "contentHash": "195591e5e31e8a2363d95b206656a46f",
       "sourceName": "solady/src/tokens/ERC721.sol",
       "solcConfig": {
@@ -1646,7 +1671,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -1662,6 +1687,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -1679,9 +1705,9 @@
         "ERC721"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/contracts/strategies/_poc/wrapped-voting-nftmint/WrappedVotingNftMintStrategy.sol": {
-      "lastModificationDate": 1693997618264,
-      "contentHash": "147e7374453a661ecad427dd58b11dd8",
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/strategies/_poc/wrapped-voting-nftmint/WrappedVotingNftMintStrategy.sol": {
+      "lastModificationDate": 1696362242642,
+      "contentHash": "9612cf104fc6764e180f7f5678e25463",
       "sourceName": "contracts/strategies/_poc/wrapped-voting-nftmint/WrappedVotingNftMintStrategy.sol",
       "solcConfig": {
         "version": "0.8.19",
@@ -1709,7 +1735,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -1725,6 +1751,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -1749,8 +1776,8 @@
         "WrappedVotingNftMintStrategy"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/contracts/strategies/BaseStrategy.sol": {
-      "lastModificationDate": 1693997618260,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/strategies/BaseStrategy.sol": {
+      "lastModificationDate": 1696362242643,
       "contentHash": "4811bd6ddf86815b6b38c795e05d0ce9",
       "sourceName": "contracts/strategies/BaseStrategy.sol",
       "solcConfig": {
@@ -1779,7 +1806,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -1795,6 +1822,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -1816,8 +1844,8 @@
         "BaseStrategy"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/contracts/strategies/_poc/wrapped-voting-nftmint/NFTFactory.sol": {
-      "lastModificationDate": 1693997618264,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/strategies/_poc/wrapped-voting-nftmint/NFTFactory.sol": {
+      "lastModificationDate": 1696362242643,
       "contentHash": "3322204f7fea17d03e23afc7ebb7593c",
       "sourceName": "contracts/strategies/_poc/wrapped-voting-nftmint/NFTFactory.sol",
       "solcConfig": {
@@ -1846,7 +1874,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -1862,6 +1890,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -1881,8 +1910,8 @@
         "NFTFactory"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/lib/openzeppelin-contracts/contracts/security/ReentrancyGuard.sol": {
-      "lastModificationDate": 1693505497604,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/openzeppelin-contracts/contracts/security/ReentrancyGuard.sol": {
+      "lastModificationDate": 1695835283374,
       "contentHash": "1535f8c0c68463f8c1b5239f7584e71f",
       "sourceName": "lib/openzeppelin-contracts/contracts/security/ReentrancyGuard.sol",
       "solcConfig": {
@@ -1911,7 +1940,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -1927,6 +1956,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -1944,9 +1974,9 @@
         "ReentrancyGuard"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/contracts/strategies/rfp-simple/RFPSimpleStrategy.sol": {
-      "lastModificationDate": 1693997618264,
-      "contentHash": "28f46a707c58a5aaa0c79089e8a28723",
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/strategies/rfp-simple/RFPSimpleStrategy.sol": {
+      "lastModificationDate": 1696362242648,
+      "contentHash": "43d0d3f0e2c4a662510dcef272df337b",
       "sourceName": "contracts/strategies/rfp-simple/RFPSimpleStrategy.sol",
       "solcConfig": {
         "version": "0.8.19",
@@ -1974,7 +2004,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -1990,6 +2020,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -2013,8 +2044,8 @@
         "RFPSimpleStrategy"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/contracts/strategies/qv-base/QVBaseStrategy.sol": {
-      "lastModificationDate": 1693997618264,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/strategies/qv-base/QVBaseStrategy.sol": {
+      "lastModificationDate": 1696362242655,
       "contentHash": "bd3f83798ce502791b94382ccb054c36",
       "sourceName": "contracts/strategies/qv-base/QVBaseStrategy.sol",
       "solcConfig": {
@@ -2043,7 +2074,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -2059,6 +2090,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -2081,9 +2113,9 @@
         "QVBaseStrategy"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/contracts/strategies/qv-simple/QVSimpleStrategy.sol": {
-      "lastModificationDate": 1693997618264,
-      "contentHash": "65cb2478e856a2877daece549a27cf22",
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/strategies/qv-simple/QVSimpleStrategy.sol": {
+      "lastModificationDate": 1696362242635,
+      "contentHash": "6ba0057457e32ab23d64a2efff917a51",
       "sourceName": "contracts/strategies/qv-simple/QVSimpleStrategy.sol",
       "solcConfig": {
         "version": "0.8.19",
@@ -2111,7 +2143,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -2127,6 +2159,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -2147,8 +2180,8 @@
         "QVSimpleStrategy"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/lib/openzeppelin-contracts/contracts/utils/Multicall.sol": {
-      "lastModificationDate": 1693505497608,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/openzeppelin-contracts/contracts/utils/Multicall.sol": {
+      "lastModificationDate": 1695835283380,
       "contentHash": "5851a44847823be35212ccba46a7ec9e",
       "sourceName": "lib/openzeppelin-contracts/contracts/utils/Multicall.sol",
       "solcConfig": {
@@ -2177,7 +2210,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -2193,6 +2226,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -2212,8 +2246,8 @@
         "Multicall"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/lib/openzeppelin-contracts/contracts/utils/Address.sol": {
-      "lastModificationDate": 1693505497608,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/openzeppelin-contracts/contracts/utils/Address.sol": {
+      "lastModificationDate": 1695835283379,
       "contentHash": "211ffd288c1588ba8c10eae668ca3c66",
       "sourceName": "lib/openzeppelin-contracts/contracts/utils/Address.sol",
       "solcConfig": {
@@ -2242,7 +2276,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -2258,6 +2292,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -2275,8 +2310,8 @@
         "Address"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/lib/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol": {
-      "lastModificationDate": 1693505497604,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol": {
+      "lastModificationDate": 1695835283376,
       "contentHash": "1b5d667d3740d866eca0352758e59827",
       "sourceName": "lib/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol",
       "solcConfig": {
@@ -2305,7 +2340,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -2321,6 +2356,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -2342,8 +2378,8 @@
         "SafeERC20"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol": {
-      "lastModificationDate": 1693505497604,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol": {
+      "lastModificationDate": 1695835283375,
       "contentHash": "df36f7051335cd1e748b1b6463b7fdd3",
       "sourceName": "lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol",
       "solcConfig": {
@@ -2372,7 +2408,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -2388,6 +2424,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -2405,8 +2442,8 @@
         "IERC20"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Permit.sol": {
-      "lastModificationDate": 1693505497604,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Permit.sol": {
+      "lastModificationDate": 1695835283376,
       "contentHash": "aa849939a4ae83a4dcb2dca9b3e9e707",
       "sourceName": "lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Permit.sol",
       "solcConfig": {
@@ -2435,7 +2472,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -2451,6 +2488,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -2468,8 +2506,8 @@
         "IERC20Permit"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/lib/v2-core/src/interfaces/ISablierV2Comptroller.sol": {
-      "lastModificationDate": 1693505497756,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/v2-core/src/interfaces/ISablierV2Comptroller.sol": {
+      "lastModificationDate": 1695835284561,
       "contentHash": "8ca04ec69afc66fdc0ed03c617ca70f6",
       "sourceName": "lib/v2-core/src/interfaces/ISablierV2Comptroller.sol",
       "solcConfig": {
@@ -2498,7 +2536,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -2514,6 +2552,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -2535,8 +2574,8 @@
         "ISablierV2Comptroller"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/lib/v2-core/lib/prb-math/src/UD60x18.sol": {
-      "lastModificationDate": 1693505497864,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/v2-core/lib/prb-math/src/UD60x18.sol": {
+      "lastModificationDate": 1695835285008,
       "contentHash": "55aeee8a1cf7cf9fd8a0176bd06b739f",
       "sourceName": "lib/v2-core/lib/prb-math/src/UD60x18.sol",
       "solcConfig": {
@@ -2565,7 +2604,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -2581,6 +2620,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -2604,8 +2644,8 @@
       ],
       "artifacts": []
     },
-    "/home/kurt/git/allo/allo-v2/lib/v2-core/src/interfaces/IAdminable.sol": {
-      "lastModificationDate": 1693505497756,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/v2-core/src/interfaces/IAdminable.sol": {
+      "lastModificationDate": 1695835284561,
       "contentHash": "8de4cbc58cecc1633e07b8e0dd532d04",
       "sourceName": "lib/v2-core/src/interfaces/IAdminable.sol",
       "solcConfig": {
@@ -2634,7 +2674,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -2650,6 +2690,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -2667,8 +2708,8 @@
         "IAdminable"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/lib/v2-core/lib/prb-math/src/ud60x18/Casting.sol": {
-      "lastModificationDate": 1693505497864,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/v2-core/lib/prb-math/src/ud60x18/Casting.sol": {
+      "lastModificationDate": 1695835285015,
       "contentHash": "210f9ed8d979a7449cdb5b7adb003808",
       "sourceName": "lib/v2-core/lib/prb-math/src/ud60x18/Casting.sol",
       "solcConfig": {
@@ -2697,7 +2738,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -2713,6 +2754,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -2738,134 +2780,8 @@
       ],
       "artifacts": []
     },
-    "/home/kurt/git/allo/allo-v2/lib/v2-core/lib/prb-math/src/ud60x18/Constants.sol": {
-      "lastModificationDate": 1693505497864,
-      "contentHash": "282d93a05c3ed412d5a3b74a4ad05d6d",
-      "sourceName": "lib/v2-core/lib/prb-math/src/ud60x18/Constants.sol",
-      "solcConfig": {
-        "version": "0.8.19",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 400
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "storageLayout",
-                "devdoc",
-                "userdoc"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          },
-          "libraries": {
-            "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
-            }
-          },
-          "remappings": [
-            "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
-            "@sablier/v2-core/=lib/v2-core/",
-            "ds-test/=lib/forge-std/lib/ds-test/src/",
-            "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
-            "forge-std/=lib/forge-std/src/",
-            "permit2/=lib/permit2/src/interfaces/",
-            "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
-            "openzeppelin-contracts/=lib/openzeppelin-contracts/",
-            "@prb/math/=lib/v2-core/lib/prb-math/",
-            "eas-contracts/=lib/eas-contracts/contracts/",
-            "@prb/test/=lib/v2-core/lib/prb-test/src/",
-            "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
-            "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
-            "prb-math/=lib/v2-core/lib/prb-math/src/",
-            "prb-test/=lib/v2-core/lib/prb-test/src/",
-            "solarray/=lib/v2-core/lib/solarray/src/",
-            "solmate/=lib/permit2/lib/solmate/",
-            "v2-core/=lib/v2-core/"
-          ]
-        }
-      },
-      "imports": [
-        "./ValueType.sol"
-      ],
-      "versionPragmas": [
-        ">=0.8.19"
-      ],
-      "artifacts": []
-    },
-    "/home/kurt/git/allo/allo-v2/lib/v2-core/lib/prb-math/src/ud60x18/Errors.sol": {
-      "lastModificationDate": 1693505497864,
-      "contentHash": "63cbb9480bb14e0824736d5c109aa7ce",
-      "sourceName": "lib/v2-core/lib/prb-math/src/ud60x18/Errors.sol",
-      "solcConfig": {
-        "version": "0.8.19",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 400
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "storageLayout",
-                "devdoc",
-                "userdoc"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          },
-          "libraries": {
-            "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
-            }
-          },
-          "remappings": [
-            "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
-            "@sablier/v2-core/=lib/v2-core/",
-            "ds-test/=lib/forge-std/lib/ds-test/src/",
-            "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
-            "forge-std/=lib/forge-std/src/",
-            "permit2/=lib/permit2/src/interfaces/",
-            "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
-            "openzeppelin-contracts/=lib/openzeppelin-contracts/",
-            "@prb/math/=lib/v2-core/lib/prb-math/",
-            "eas-contracts/=lib/eas-contracts/contracts/",
-            "@prb/test/=lib/v2-core/lib/prb-test/src/",
-            "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
-            "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
-            "prb-math/=lib/v2-core/lib/prb-math/src/",
-            "prb-test/=lib/v2-core/lib/prb-test/src/",
-            "solarray/=lib/v2-core/lib/solarray/src/",
-            "solmate/=lib/permit2/lib/solmate/",
-            "v2-core/=lib/v2-core/"
-          ]
-        }
-      },
-      "imports": [
-        "./ValueType.sol"
-      ],
-      "versionPragmas": [
-        ">=0.8.19"
-      ],
-      "artifacts": []
-    },
-    "/home/kurt/git/allo/allo-v2/lib/v2-core/lib/prb-math/src/ud60x18/Conversions.sol": {
-      "lastModificationDate": 1693505497864,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/v2-core/lib/prb-math/src/ud60x18/Conversions.sol": {
+      "lastModificationDate": 1695835285016,
       "contentHash": "7d6126ed4b68e5c939cf0af5cd237b66",
       "sourceName": "lib/v2-core/lib/prb-math/src/ud60x18/Conversions.sol",
       "solcConfig": {
@@ -2894,7 +2810,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -2910,6 +2826,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -2929,8 +2846,72 @@
       ],
       "artifacts": []
     },
-    "/home/kurt/git/allo/allo-v2/lib/v2-core/lib/prb-math/src/ud60x18/Helpers.sol": {
-      "lastModificationDate": 1693505497864,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/v2-core/lib/prb-math/src/ud60x18/Constants.sol": {
+      "lastModificationDate": 1695835285016,
+      "contentHash": "282d93a05c3ed412d5a3b74a4ad05d6d",
+      "sourceName": "lib/v2-core/lib/prb-math/src/ud60x18/Constants.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 400
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
+            }
+          },
+          "remappings": [
+            "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+            "@sablier/v2-core/=lib/v2-core/",
+            "ds-test/=lib/forge-std/lib/ds-test/src/",
+            "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
+            "forge-std/=lib/forge-std/src/",
+            "permit2/=lib/permit2/src/interfaces/",
+            "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+            "openzeppelin-contracts/=lib/openzeppelin-contracts/",
+            "@prb/math/=lib/v2-core/lib/prb-math/",
+            "eas-contracts/=lib/eas-contracts/contracts/",
+            "@prb/test/=lib/v2-core/lib/prb-test/src/",
+            "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
+            "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
+            "prb-math/=lib/v2-core/lib/prb-math/src/",
+            "prb-test/=lib/v2-core/lib/prb-test/src/",
+            "solarray/=lib/v2-core/lib/solarray/src/",
+            "solmate/=lib/permit2/lib/solmate/",
+            "v2-core/=lib/v2-core/"
+          ]
+        }
+      },
+      "imports": [
+        "./ValueType.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/v2-core/lib/prb-math/src/ud60x18/Helpers.sol": {
+      "lastModificationDate": 1695835285016,
       "contentHash": "f17f113af284236759bc9217ed544728",
       "sourceName": "lib/v2-core/lib/prb-math/src/ud60x18/Helpers.sol",
       "solcConfig": {
@@ -2959,7 +2940,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -2975,6 +2956,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -2993,10 +2975,10 @@
       ],
       "artifacts": []
     },
-    "/home/kurt/git/allo/allo-v2/lib/v2-core/lib/prb-math/src/ud60x18/Math.sol": {
-      "lastModificationDate": 1693505497864,
-      "contentHash": "925bb9fcc75f579cf3e9dd58fa10a90c",
-      "sourceName": "lib/v2-core/lib/prb-math/src/ud60x18/Math.sol",
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/v2-core/lib/prb-math/src/ud60x18/Errors.sol": {
+      "lastModificationDate": 1695835285016,
+      "contentHash": "63cbb9480bb14e0824736d5c109aa7ce",
+      "sourceName": "lib/v2-core/lib/prb-math/src/ud60x18/Errors.sol",
       "solcConfig": {
         "version": "0.8.19",
         "settings": {
@@ -3023,7 +3005,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -3039,6 +3021,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -3049,10 +3032,6 @@
         }
       },
       "imports": [
-        "../Common.sol",
-        "./Errors.sol",
-        "./Casting.sol",
-        "./Constants.sol",
         "./ValueType.sol"
       ],
       "versionPragmas": [
@@ -3060,8 +3039,8 @@
       ],
       "artifacts": []
     },
-    "/home/kurt/git/allo/allo-v2/lib/v2-core/lib/prb-math/src/ud60x18/ValueType.sol": {
-      "lastModificationDate": 1693505497864,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/v2-core/lib/prb-math/src/ud60x18/ValueType.sol": {
+      "lastModificationDate": 1695835285016,
       "contentHash": "2cdd6d9529412185283eb7d955e95cbe",
       "sourceName": "lib/v2-core/lib/prb-math/src/ud60x18/ValueType.sol",
       "solcConfig": {
@@ -3090,7 +3069,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -3106,6 +3085,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -3125,8 +3105,76 @@
       ],
       "artifacts": []
     },
-    "/home/kurt/git/allo/allo-v2/lib/v2-core/lib/prb-math/src/ud2x18/Constants.sol": {
-      "lastModificationDate": 1693505497864,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/v2-core/lib/prb-math/src/ud60x18/Math.sol": {
+      "lastModificationDate": 1695835285016,
+      "contentHash": "925bb9fcc75f579cf3e9dd58fa10a90c",
+      "sourceName": "lib/v2-core/lib/prb-math/src/ud60x18/Math.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 400
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
+            }
+          },
+          "remappings": [
+            "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+            "@sablier/v2-core/=lib/v2-core/",
+            "ds-test/=lib/forge-std/lib/ds-test/src/",
+            "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
+            "forge-std/=lib/forge-std/src/",
+            "permit2/=lib/permit2/src/interfaces/",
+            "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+            "openzeppelin-contracts/=lib/openzeppelin-contracts/",
+            "@prb/math/=lib/v2-core/lib/prb-math/",
+            "eas-contracts/=lib/eas-contracts/contracts/",
+            "@prb/test/=lib/v2-core/lib/prb-test/src/",
+            "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
+            "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
+            "prb-math/=lib/v2-core/lib/prb-math/src/",
+            "prb-test/=lib/v2-core/lib/prb-test/src/",
+            "solarray/=lib/v2-core/lib/solarray/src/",
+            "solmate/=lib/permit2/lib/solmate/",
+            "v2-core/=lib/v2-core/"
+          ]
+        }
+      },
+      "imports": [
+        "../Common.sol",
+        "./Errors.sol",
+        "./Casting.sol",
+        "./Constants.sol",
+        "./ValueType.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/v2-core/lib/prb-math/src/ud2x18/Constants.sol": {
+      "lastModificationDate": 1695835285012,
       "contentHash": "93bafe3a5bfec3c48c72e3b6dff0b5ac",
       "sourceName": "lib/v2-core/lib/prb-math/src/ud2x18/Constants.sol",
       "solcConfig": {
@@ -3155,7 +3203,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -3171,6 +3219,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -3188,8 +3237,8 @@
       ],
       "artifacts": []
     },
-    "/home/kurt/git/allo/allo-v2/lib/v2-core/lib/prb-math/src/ud2x18/ValueType.sol": {
-      "lastModificationDate": 1693505497864,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/v2-core/lib/prb-math/src/ud2x18/ValueType.sol": {
+      "lastModificationDate": 1695835285012,
       "contentHash": "4bf392abdd32a2c1d83ad65c640ac7bd",
       "sourceName": "lib/v2-core/lib/prb-math/src/ud2x18/ValueType.sol",
       "solcConfig": {
@@ -3218,7 +3267,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -3234,6 +3283,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -3251,8 +3301,8 @@
       ],
       "artifacts": []
     },
-    "/home/kurt/git/allo/allo-v2/lib/v2-core/lib/prb-math/src/Common.sol": {
-      "lastModificationDate": 1693505497864,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/v2-core/lib/prb-math/src/Common.sol": {
+      "lastModificationDate": 1695835285007,
       "contentHash": "d77a476e938b130819f9bb3bd2932e57",
       "sourceName": "lib/v2-core/lib/prb-math/src/Common.sol",
       "solcConfig": {
@@ -3281,7 +3331,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -3297,6 +3347,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -3312,8 +3363,8 @@
       ],
       "artifacts": []
     },
-    "/home/kurt/git/allo/allo-v2/lib/v2-core/lib/prb-math/src/sd1x18/Constants.sol": {
-      "lastModificationDate": 1693505497864,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/v2-core/lib/prb-math/src/sd1x18/Constants.sol": {
+      "lastModificationDate": 1695835285009,
       "contentHash": "3a00d7986d0f1f5fd47ac9f2dc1475ce",
       "sourceName": "lib/v2-core/lib/prb-math/src/sd1x18/Constants.sol",
       "solcConfig": {
@@ -3342,7 +3393,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -3358,6 +3409,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -3375,134 +3427,8 @@
       ],
       "artifacts": []
     },
-    "/home/kurt/git/allo/allo-v2/lib/v2-core/lib/prb-math/src/sd59x18/Constants.sol": {
-      "lastModificationDate": 1693505497864,
-      "contentHash": "7fc7d96c638cf5317dbba7ae8c07300d",
-      "sourceName": "lib/v2-core/lib/prb-math/src/sd59x18/Constants.sol",
-      "solcConfig": {
-        "version": "0.8.19",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 400
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "storageLayout",
-                "devdoc",
-                "userdoc"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          },
-          "libraries": {
-            "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
-            }
-          },
-          "remappings": [
-            "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
-            "@sablier/v2-core/=lib/v2-core/",
-            "ds-test/=lib/forge-std/lib/ds-test/src/",
-            "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
-            "forge-std/=lib/forge-std/src/",
-            "permit2/=lib/permit2/src/interfaces/",
-            "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
-            "openzeppelin-contracts/=lib/openzeppelin-contracts/",
-            "@prb/math/=lib/v2-core/lib/prb-math/",
-            "eas-contracts/=lib/eas-contracts/contracts/",
-            "@prb/test/=lib/v2-core/lib/prb-test/src/",
-            "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
-            "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
-            "prb-math/=lib/v2-core/lib/prb-math/src/",
-            "prb-test/=lib/v2-core/lib/prb-test/src/",
-            "solarray/=lib/v2-core/lib/solarray/src/",
-            "solmate/=lib/permit2/lib/solmate/",
-            "v2-core/=lib/v2-core/"
-          ]
-        }
-      },
-      "imports": [
-        "./ValueType.sol"
-      ],
-      "versionPragmas": [
-        ">=0.8.19"
-      ],
-      "artifacts": []
-    },
-    "/home/kurt/git/allo/allo-v2/lib/v2-core/lib/prb-math/src/sd1x18/ValueType.sol": {
-      "lastModificationDate": 1693505497864,
-      "contentHash": "f0d7fec0238b9623cd5432462fba5c7f",
-      "sourceName": "lib/v2-core/lib/prb-math/src/sd1x18/ValueType.sol",
-      "solcConfig": {
-        "version": "0.8.19",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 400
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "storageLayout",
-                "devdoc",
-                "userdoc"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          },
-          "libraries": {
-            "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
-            }
-          },
-          "remappings": [
-            "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
-            "@sablier/v2-core/=lib/v2-core/",
-            "ds-test/=lib/forge-std/lib/ds-test/src/",
-            "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
-            "forge-std/=lib/forge-std/src/",
-            "permit2/=lib/permit2/src/interfaces/",
-            "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
-            "openzeppelin-contracts/=lib/openzeppelin-contracts/",
-            "@prb/math/=lib/v2-core/lib/prb-math/",
-            "eas-contracts/=lib/eas-contracts/contracts/",
-            "@prb/test/=lib/v2-core/lib/prb-test/src/",
-            "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
-            "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
-            "prb-math/=lib/v2-core/lib/prb-math/src/",
-            "prb-test/=lib/v2-core/lib/prb-test/src/",
-            "solarray/=lib/v2-core/lib/solarray/src/",
-            "solmate/=lib/permit2/lib/solmate/",
-            "v2-core/=lib/v2-core/"
-          ]
-        }
-      },
-      "imports": [
-        "./Casting.sol"
-      ],
-      "versionPragmas": [
-        ">=0.8.19"
-      ],
-      "artifacts": []
-    },
-    "/home/kurt/git/allo/allo-v2/lib/v2-core/lib/prb-math/src/sd59x18/ValueType.sol": {
-      "lastModificationDate": 1693505497864,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/v2-core/lib/prb-math/src/sd59x18/ValueType.sol": {
+      "lastModificationDate": 1695835285011,
       "contentHash": "a8cbdd366dbe50e8199a8d59109c94ab",
       "sourceName": "lib/v2-core/lib/prb-math/src/sd59x18/ValueType.sol",
       "solcConfig": {
@@ -3531,7 +3457,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -3547,6 +3473,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -3566,8 +3493,136 @@
       ],
       "artifacts": []
     },
-    "/home/kurt/git/allo/allo-v2/lib/v2-core/lib/prb-math/src/ud2x18/Casting.sol": {
-      "lastModificationDate": 1693505497864,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/v2-core/lib/prb-math/src/sd1x18/ValueType.sol": {
+      "lastModificationDate": 1695835285010,
+      "contentHash": "f0d7fec0238b9623cd5432462fba5c7f",
+      "sourceName": "lib/v2-core/lib/prb-math/src/sd1x18/ValueType.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 400
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
+            }
+          },
+          "remappings": [
+            "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+            "@sablier/v2-core/=lib/v2-core/",
+            "ds-test/=lib/forge-std/lib/ds-test/src/",
+            "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
+            "forge-std/=lib/forge-std/src/",
+            "permit2/=lib/permit2/src/interfaces/",
+            "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+            "openzeppelin-contracts/=lib/openzeppelin-contracts/",
+            "@prb/math/=lib/v2-core/lib/prb-math/",
+            "eas-contracts/=lib/eas-contracts/contracts/",
+            "@prb/test/=lib/v2-core/lib/prb-test/src/",
+            "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
+            "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
+            "prb-math/=lib/v2-core/lib/prb-math/src/",
+            "prb-test/=lib/v2-core/lib/prb-test/src/",
+            "solarray/=lib/v2-core/lib/solarray/src/",
+            "solmate/=lib/permit2/lib/solmate/",
+            "v2-core/=lib/v2-core/"
+          ]
+        }
+      },
+      "imports": [
+        "./Casting.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/v2-core/lib/prb-math/src/sd59x18/Constants.sol": {
+      "lastModificationDate": 1695835285010,
+      "contentHash": "7fc7d96c638cf5317dbba7ae8c07300d",
+      "sourceName": "lib/v2-core/lib/prb-math/src/sd59x18/Constants.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 400
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
+            }
+          },
+          "remappings": [
+            "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+            "@sablier/v2-core/=lib/v2-core/",
+            "ds-test/=lib/forge-std/lib/ds-test/src/",
+            "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
+            "forge-std/=lib/forge-std/src/",
+            "permit2/=lib/permit2/src/interfaces/",
+            "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+            "openzeppelin-contracts/=lib/openzeppelin-contracts/",
+            "@prb/math/=lib/v2-core/lib/prb-math/",
+            "eas-contracts/=lib/eas-contracts/contracts/",
+            "@prb/test/=lib/v2-core/lib/prb-test/src/",
+            "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
+            "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
+            "prb-math/=lib/v2-core/lib/prb-math/src/",
+            "prb-test/=lib/v2-core/lib/prb-test/src/",
+            "solarray/=lib/v2-core/lib/solarray/src/",
+            "solmate/=lib/permit2/lib/solmate/",
+            "v2-core/=lib/v2-core/"
+          ]
+        }
+      },
+      "imports": [
+        "./ValueType.sol"
+      ],
+      "versionPragmas": [
+        ">=0.8.19"
+      ],
+      "artifacts": []
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/v2-core/lib/prb-math/src/ud2x18/Casting.sol": {
+      "lastModificationDate": 1695835285012,
       "contentHash": "5b5adfd1cd28d449eccc56ed83738365",
       "sourceName": "lib/v2-core/lib/prb-math/src/ud2x18/Casting.sol",
       "solcConfig": {
@@ -3596,7 +3651,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -3612,6 +3667,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -3636,8 +3692,8 @@
       ],
       "artifacts": []
     },
-    "/home/kurt/git/allo/allo-v2/lib/v2-core/lib/prb-math/src/ud2x18/Errors.sol": {
-      "lastModificationDate": 1693505497864,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/v2-core/lib/prb-math/src/ud2x18/Errors.sol": {
+      "lastModificationDate": 1695835285012,
       "contentHash": "b114bc752027098a098fe200d9600fa4",
       "sourceName": "lib/v2-core/lib/prb-math/src/ud2x18/Errors.sol",
       "solcConfig": {
@@ -3666,7 +3722,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -3682,6 +3738,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -3699,8 +3756,8 @@
       ],
       "artifacts": []
     },
-    "/home/kurt/git/allo/allo-v2/lib/v2-core/lib/prb-math/src/sd1x18/Casting.sol": {
-      "lastModificationDate": 1693505497864,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/v2-core/lib/prb-math/src/sd1x18/Casting.sol": {
+      "lastModificationDate": 1695835285009,
       "contentHash": "fdf620cd0842991c797eef17265b5138",
       "sourceName": "lib/v2-core/lib/prb-math/src/sd1x18/Casting.sol",
       "solcConfig": {
@@ -3729,7 +3786,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -3745,6 +3802,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -3767,8 +3825,8 @@
       ],
       "artifacts": []
     },
-    "/home/kurt/git/allo/allo-v2/lib/v2-core/lib/prb-math/src/sd1x18/Errors.sol": {
-      "lastModificationDate": 1693505497864,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/v2-core/lib/prb-math/src/sd1x18/Errors.sol": {
+      "lastModificationDate": 1695835285009,
       "contentHash": "01ce16eb254b596aa49047e21d548541",
       "sourceName": "lib/v2-core/lib/prb-math/src/sd1x18/Errors.sol",
       "solcConfig": {
@@ -3797,7 +3855,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -3813,6 +3871,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -3830,8 +3889,8 @@
       ],
       "artifacts": []
     },
-    "/home/kurt/git/allo/allo-v2/lib/v2-core/lib/prb-math/src/sd59x18/Casting.sol": {
-      "lastModificationDate": 1693505497864,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/v2-core/lib/prb-math/src/sd59x18/Casting.sol": {
+      "lastModificationDate": 1695835285010,
       "contentHash": "cad7d3fe4dba2c04d2c7c481e6e0e210",
       "sourceName": "lib/v2-core/lib/prb-math/src/sd59x18/Casting.sol",
       "solcConfig": {
@@ -3860,7 +3919,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -3876,6 +3935,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -3900,8 +3960,8 @@
       ],
       "artifacts": []
     },
-    "/home/kurt/git/allo/allo-v2/lib/v2-core/lib/prb-math/src/sd59x18/Helpers.sol": {
-      "lastModificationDate": 1693505497864,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/v2-core/lib/prb-math/src/sd59x18/Helpers.sol": {
+      "lastModificationDate": 1695835285011,
       "contentHash": "7d1863a86f1dd22889ee2c28737b3456",
       "sourceName": "lib/v2-core/lib/prb-math/src/sd59x18/Helpers.sol",
       "solcConfig": {
@@ -3930,7 +3990,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -3946,6 +4006,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -3964,8 +4025,8 @@
       ],
       "artifacts": []
     },
-    "/home/kurt/git/allo/allo-v2/lib/v2-core/lib/prb-math/src/sd59x18/Math.sol": {
-      "lastModificationDate": 1693505497864,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/v2-core/lib/prb-math/src/sd59x18/Math.sol": {
+      "lastModificationDate": 1695835285011,
       "contentHash": "9ba39059764f9bac4b29f829c0dec4db",
       "sourceName": "lib/v2-core/lib/prb-math/src/sd59x18/Math.sol",
       "solcConfig": {
@@ -3994,7 +4055,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -4010,6 +4071,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -4031,8 +4093,8 @@
       ],
       "artifacts": []
     },
-    "/home/kurt/git/allo/allo-v2/lib/v2-core/lib/prb-math/src/sd59x18/Errors.sol": {
-      "lastModificationDate": 1693505497864,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/v2-core/lib/prb-math/src/sd59x18/Errors.sol": {
+      "lastModificationDate": 1695835285011,
       "contentHash": "a7e94006142e69ba7db582ef8ea8a777",
       "sourceName": "lib/v2-core/lib/prb-math/src/sd59x18/Errors.sol",
       "solcConfig": {
@@ -4061,7 +4123,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -4077,6 +4139,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -4094,8 +4157,8 @@
       ],
       "artifacts": []
     },
-    "/home/kurt/git/allo/allo-v2/lib/v2-core/src/interfaces/ISablierV2Base.sol": {
-      "lastModificationDate": 1693505497756,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/v2-core/src/interfaces/ISablierV2Base.sol": {
+      "lastModificationDate": 1695835284561,
       "contentHash": "65d5557a1d2e130c3418c6b85aff0d4b",
       "sourceName": "lib/v2-core/src/interfaces/ISablierV2Base.sol",
       "solcConfig": {
@@ -4124,7 +4187,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -4140,6 +4203,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -4162,8 +4226,8 @@
         "ISablierV2Base"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/lib/v2-core/lib/prb-math/src/UD2x18.sol": {
-      "lastModificationDate": 1693505497864,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/v2-core/lib/prb-math/src/UD2x18.sol": {
+      "lastModificationDate": 1695835285008,
       "contentHash": "71feb4e30bbc21e5e85fe3109fbd5917",
       "sourceName": "lib/v2-core/lib/prb-math/src/UD2x18.sol",
       "solcConfig": {
@@ -4192,7 +4256,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -4208,6 +4272,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -4228,8 +4293,8 @@
       ],
       "artifacts": []
     },
-    "/home/kurt/git/allo/allo-v2/lib/v2-core/src/types/DataTypes.sol": {
-      "lastModificationDate": 1693505497756,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/v2-core/src/types/DataTypes.sol": {
+      "lastModificationDate": 1695835284563,
       "contentHash": "042bd525c1d6aa3ab930542d2ddf127b",
       "sourceName": "lib/v2-core/src/types/DataTypes.sol",
       "solcConfig": {
@@ -4258,7 +4323,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -4274,6 +4339,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -4297,8 +4363,8 @@
         "LockupLinear"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/lib/v2-core/src/interfaces/ISablierV2Lockup.sol": {
-      "lastModificationDate": 1693505497756,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/v2-core/src/interfaces/ISablierV2Lockup.sol": {
+      "lastModificationDate": 1695835284562,
       "contentHash": "8603631731aeba691158070adae29ce0",
       "sourceName": "lib/v2-core/src/interfaces/ISablierV2Lockup.sol",
       "solcConfig": {
@@ -4327,7 +4393,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -4343,6 +4409,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -4366,8 +4433,8 @@
         "ISablierV2Lockup"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/lib/v2-core/src/interfaces/ISablierV2NFTDescriptor.sol": {
-      "lastModificationDate": 1693505497756,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/v2-core/src/interfaces/ISablierV2NFTDescriptor.sol": {
+      "lastModificationDate": 1695835284562,
       "contentHash": "631b2099d7f25f92350428e887cb41c9",
       "sourceName": "lib/v2-core/src/interfaces/ISablierV2NFTDescriptor.sol",
       "solcConfig": {
@@ -4396,7 +4463,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -4412,6 +4479,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -4431,8 +4499,8 @@
         "ISablierV2NFTDescriptor"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/lib/openzeppelin-contracts/contracts/token/ERC721/extensions/IERC721Metadata.sol": {
-      "lastModificationDate": 1693505497608,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/openzeppelin-contracts/contracts/token/ERC721/extensions/IERC721Metadata.sol": {
+      "lastModificationDate": 1695835283378,
       "contentHash": "efbc0d15b80a74e34dbe8da0f3e879bb",
       "sourceName": "lib/openzeppelin-contracts/contracts/token/ERC721/extensions/IERC721Metadata.sol",
       "solcConfig": {
@@ -4461,7 +4529,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -4477,6 +4545,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -4496,8 +4565,8 @@
         "IERC721Metadata"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/lib/openzeppelin-contracts/contracts/token/ERC721/IERC721.sol": {
-      "lastModificationDate": 1693505497604,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/openzeppelin-contracts/contracts/token/ERC721/IERC721.sol": {
+      "lastModificationDate": 1695835283377,
       "contentHash": "48de4c9a3a4ae5ef66a2aa620843413f",
       "sourceName": "lib/openzeppelin-contracts/contracts/token/ERC721/IERC721.sol",
       "solcConfig": {
@@ -4526,7 +4595,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -4542,6 +4611,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -4561,8 +4631,8 @@
         "IERC721"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/contracts/core/Registry.sol": {
-      "lastModificationDate": 1693997618260,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/core/Registry.sol": {
+      "lastModificationDate": 1696362242645,
       "contentHash": "3ff2fffd49ea6d6c90d0a579dd6e18e0",
       "sourceName": "contracts/core/Registry.sol",
       "solcConfig": {
@@ -4591,7 +4661,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -4607,6 +4677,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -4635,8 +4706,8 @@
         "Registry"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/contracts/core/Anchor.sol": {
-      "lastModificationDate": 1693997618260,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/core/Anchor.sol": {
+      "lastModificationDate": 1696362242631,
       "contentHash": "60adb3f0e5e00433496f91d303307d92",
       "sourceName": "contracts/core/Anchor.sol",
       "solcConfig": {
@@ -4665,7 +4736,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -4681,6 +4752,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -4700,71 +4772,8 @@
         "Anchor"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/node_modules/solady/src/utils/CREATE3.sol": {
-      "lastModificationDate": 1693999001407,
-      "contentHash": "af77373aff6820b923a9edf65182b599",
-      "sourceName": "solady/src/utils/CREATE3.sol",
-      "solcConfig": {
-        "version": "0.8.19",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 400
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "storageLayout",
-                "devdoc",
-                "userdoc"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          },
-          "libraries": {
-            "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
-            }
-          },
-          "remappings": [
-            "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
-            "@sablier/v2-core/=lib/v2-core/",
-            "ds-test/=lib/forge-std/lib/ds-test/src/",
-            "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
-            "forge-std/=lib/forge-std/src/",
-            "permit2/=lib/permit2/src/interfaces/",
-            "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
-            "openzeppelin-contracts/=lib/openzeppelin-contracts/",
-            "@prb/math/=lib/v2-core/lib/prb-math/",
-            "eas-contracts/=lib/eas-contracts/contracts/",
-            "@prb/test/=lib/v2-core/lib/prb-test/src/",
-            "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
-            "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
-            "prb-math/=lib/v2-core/lib/prb-math/src/",
-            "prb-test/=lib/v2-core/lib/prb-test/src/",
-            "solarray/=lib/v2-core/lib/solarray/src/",
-            "solmate/=lib/permit2/lib/solmate/",
-            "v2-core/=lib/v2-core/"
-          ]
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.4"
-      ],
-      "artifacts": [
-        "CREATE3"
-      ]
-    },
-    "/home/kurt/git/allo/allo-v2/node_modules/solady/src/tokens/ERC20.sol": {
-      "lastModificationDate": 1693999001407,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/solady/src/tokens/ERC20.sol": {
+      "lastModificationDate": 1695836959038,
       "contentHash": "134b5fcef47789eb8d4e74e22d760dbd",
       "sourceName": "solady/src/tokens/ERC20.sol",
       "solcConfig": {
@@ -4793,7 +4802,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -4809,6 +4818,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -4826,8 +4836,72 @@
         "ERC20"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/contracts/factory/ContractFactory.sol": {
-      "lastModificationDate": 1693997618260,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/solady/src/utils/CREATE3.sol": {
+      "lastModificationDate": 1695836959030,
+      "contentHash": "af77373aff6820b923a9edf65182b599",
+      "sourceName": "solady/src/utils/CREATE3.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 400
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
+            }
+          },
+          "remappings": [
+            "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+            "@sablier/v2-core/=lib/v2-core/",
+            "ds-test/=lib/forge-std/lib/ds-test/src/",
+            "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
+            "forge-std/=lib/forge-std/src/",
+            "permit2/=lib/permit2/src/interfaces/",
+            "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+            "openzeppelin-contracts/=lib/openzeppelin-contracts/",
+            "@prb/math/=lib/v2-core/lib/prb-math/",
+            "eas-contracts/=lib/eas-contracts/contracts/",
+            "@prb/test/=lib/v2-core/lib/prb-test/src/",
+            "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
+            "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
+            "prb-math/=lib/v2-core/lib/prb-math/src/",
+            "prb-test/=lib/v2-core/lib/prb-test/src/",
+            "solarray/=lib/v2-core/lib/solarray/src/",
+            "solmate/=lib/permit2/lib/solmate/",
+            "v2-core/=lib/v2-core/"
+          ]
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.4"
+      ],
+      "artifacts": [
+        "CREATE3"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/factory/ContractFactory.sol": {
+      "lastModificationDate": 1696362242634,
       "contentHash": "a724dc72604a6a66486f36e3c9a204a0",
       "sourceName": "contracts/factory/ContractFactory.sol",
       "solcConfig": {
@@ -4856,7 +4930,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -4872,6 +4946,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -4891,8 +4966,8 @@
         "ContractFactory"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/contracts/strategies/donation-voting-merkle-distribution-vault/DonationVotingMerkleDistributionVaultStrategy.sol": {
-      "lastModificationDate": 1693997618264,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/strategies/donation-voting-merkle-distribution-vault/DonationVotingMerkleDistributionVaultStrategy.sol": {
+      "lastModificationDate": 1696362242633,
       "contentHash": "793433802a5c74433c34c987dbdfca0d",
       "sourceName": "contracts/strategies/donation-voting-merkle-distribution-vault/DonationVotingMerkleDistributionVaultStrategy.sol",
       "solcConfig": {
@@ -4921,7 +4996,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -4937,6 +5012,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -4959,9 +5035,9 @@
         "DonationVotingMerkleDistributionVaultStrategy"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/contracts/strategies/donation-voting-merkle-base/DonationVotingMerkleDistributionBaseStrategy.sol": {
-      "lastModificationDate": 1693997618264,
-      "contentHash": "817c8cce21c42bc57f62e05803895680",
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/strategies/donation-voting-merkle-base/DonationVotingMerkleDistributionBaseStrategy.sol": {
+      "lastModificationDate": 1696362242669,
+      "contentHash": "d8acf425fcf8d2143fe4b884f19b612c",
       "sourceName": "contracts/strategies/donation-voting-merkle-base/DonationVotingMerkleDistributionBaseStrategy.sol",
       "solcConfig": {
         "version": "0.8.19",
@@ -4989,7 +5065,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -5005,6 +5081,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -5031,8 +5108,8 @@
         "DonationVotingMerkleDistributionBaseStrategy"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/lib/permit2/src/interfaces/ISignatureTransfer.sol": {
-      "lastModificationDate": 1693812587022,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/permit2/src/interfaces/ISignatureTransfer.sol": {
+      "lastModificationDate": 1695835283893,
       "contentHash": "3158bafaa78bab6bfdebf3005987c334",
       "sourceName": "lib/permit2/src/interfaces/ISignatureTransfer.sol",
       "solcConfig": {
@@ -5061,7 +5138,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -5077,6 +5154,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -5096,8 +5174,8 @@
         "ISignatureTransfer"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/lib/openzeppelin-contracts/contracts/utils/cryptography/MerkleProof.sol": {
-      "lastModificationDate": 1693505497608,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/openzeppelin-contracts/contracts/utils/cryptography/MerkleProof.sol": {
+      "lastModificationDate": 1695835283380,
       "contentHash": "1ccd3348ad628f1330ce36eb6a30618d",
       "sourceName": "lib/openzeppelin-contracts/contracts/utils/cryptography/MerkleProof.sol",
       "solcConfig": {
@@ -5126,7 +5204,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -5142,6 +5220,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -5159,8 +5238,8 @@
         "MerkleProof"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/lib/permit2/src/interfaces/IEIP712.sol": {
-      "lastModificationDate": 1693812587022,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/permit2/src/interfaces/IEIP712.sol": {
+      "lastModificationDate": 1695835283892,
       "contentHash": "c159d42533cdb69d0020ebfde3d0f736",
       "sourceName": "lib/permit2/src/interfaces/IEIP712.sol",
       "solcConfig": {
@@ -5189,7 +5268,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -5205,6 +5284,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -5222,8 +5302,8 @@
         "IEIP712"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/contracts/strategies/donation-voting-merkle-distribution-direct-transfer/DonationVotingMerkleDistributionDirectTransferStrategy.sol": {
-      "lastModificationDate": 1693997618264,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/strategies/donation-voting-merkle-distribution-direct-transfer/DonationVotingMerkleDistributionDirectTransferStrategy.sol": {
+      "lastModificationDate": 1696362242633,
       "contentHash": "01082d7ac625bdaf79adbe23b866f310",
       "sourceName": "contracts/strategies/donation-voting-merkle-distribution-direct-transfer/DonationVotingMerkleDistributionDirectTransferStrategy.sol",
       "solcConfig": {
@@ -5252,7 +5332,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -5268,6 +5348,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -5289,9 +5370,9 @@
         "DonationVotingMerkleDistributionDirectTransferStrategy"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/contracts/strategies/_poc/donation-voting/DonationVotingStrategy.sol": {
-      "lastModificationDate": 1693997618260,
-      "contentHash": "fffa893bac3499f3b568d1ac0236a5a3",
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/strategies/_poc/donation-voting/DonationVotingStrategy.sol": {
+      "lastModificationDate": 1696362242656,
+      "contentHash": "2d647b679751e80b0bc1d80826762d00",
       "sourceName": "contracts/strategies/_poc/donation-voting/DonationVotingStrategy.sol",
       "solcConfig": {
         "version": "0.8.19",
@@ -5319,7 +5400,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -5335,6 +5416,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -5359,9 +5441,9 @@
         "DonationVotingStrategy"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/contracts/strategies/_poc/donation-voting-custom-registry/DonationVotingCustomRegistryStrategy.sol": {
-      "lastModificationDate": 1693997618260,
-      "contentHash": "1b175b9f8c3fe33892b934fd1f32d81b",
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/strategies/_poc/donation-voting-custom-registry/DonationVotingCustomRegistryStrategy.sol": {
+      "lastModificationDate": 1696362242634,
+      "contentHash": "16255fbda3f6b707de11d8046cd75ba2",
       "sourceName": "contracts/strategies/_poc/donation-voting-custom-registry/DonationVotingCustomRegistryStrategy.sol",
       "solcConfig": {
         "version": "0.8.19",
@@ -5389,7 +5471,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -5405,6 +5487,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -5425,8 +5508,8 @@
         "DonationVotingCustomRegistryStrategy"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/contracts/strategies/_poc/donation-voting-custom-registry/SimpleProjectRegistry.sol": {
-      "lastModificationDate": 1693997618260,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/strategies/_poc/donation-voting-custom-registry/SimpleProjectRegistry.sol": {
+      "lastModificationDate": 1696362242633,
       "contentHash": "ece796e1e8f436b68cb3b084f11529d0",
       "sourceName": "contracts/strategies/_poc/donation-voting-custom-registry/SimpleProjectRegistry.sol",
       "solcConfig": {
@@ -5455,7 +5538,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -5471,6 +5554,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -5490,9 +5574,9 @@
         "SimpleProjectRegistry"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/contracts/strategies/_poc/sablier-v2/LockupLinearStrategy.sol": {
-      "lastModificationDate": 1693997618264,
-      "contentHash": "adf9b09536c9bad1d95146f18b9fc505",
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/strategies/_poc/sablier-v2/LockupLinearStrategy.sol": {
+      "lastModificationDate": 1696362242638,
+      "contentHash": "89c890a0839c82f018d5c0673fe6295d",
       "sourceName": "contracts/strategies/_poc/sablier-v2/LockupLinearStrategy.sol",
       "solcConfig": {
         "version": "0.8.19",
@@ -5520,7 +5604,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -5536,6 +5620,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -5564,8 +5649,8 @@
         "LockupLinearStrategy"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/lib/v2-core/src/interfaces/ISablierV2LockupLinear.sol": {
-      "lastModificationDate": 1693505497756,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/v2-core/src/interfaces/ISablierV2LockupLinear.sol": {
+      "lastModificationDate": 1695835284562,
       "contentHash": "56f92d4d237043c7df4c2c6092a31fb5",
       "sourceName": "lib/v2-core/src/interfaces/ISablierV2LockupLinear.sol",
       "solcConfig": {
@@ -5594,7 +5679,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -5610,6 +5695,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -5631,8 +5717,8 @@
         "ISablierV2LockupLinear"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/lib/v2-core/src/types/Tokens.sol": {
-      "lastModificationDate": 1693505497756,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/v2-core/src/types/Tokens.sol": {
+      "lastModificationDate": 1695835284564,
       "contentHash": "ae7ff9889650dc3fe0a455f459f1cd3d",
       "sourceName": "lib/v2-core/src/types/Tokens.sol",
       "solcConfig": {
@@ -5661,7 +5747,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -5677,6 +5763,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -5695,9 +5782,9 @@
       ],
       "artifacts": []
     },
-    "/home/kurt/git/allo/allo-v2/contracts/strategies/_poc/sablier-v2/LockupDynamicStrategy.sol": {
-      "lastModificationDate": 1693997618264,
-      "contentHash": "9ce69d79fdfaa88f67f7dfb636088bed",
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/strategies/_poc/sablier-v2/LockupDynamicStrategy.sol": {
+      "lastModificationDate": 1696362242643,
+      "contentHash": "83aeac2de61ba8a2f101e888f8f31dc9",
       "sourceName": "contracts/strategies/_poc/sablier-v2/LockupDynamicStrategy.sol",
       "solcConfig": {
         "version": "0.8.19",
@@ -5725,7 +5812,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -5741,6 +5828,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -5769,8 +5857,8 @@
         "LockupDynamicStrategy"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/lib/v2-core/src/interfaces/ISablierV2LockupDynamic.sol": {
-      "lastModificationDate": 1693505497756,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/v2-core/src/interfaces/ISablierV2LockupDynamic.sol": {
+      "lastModificationDate": 1695835284562,
       "contentHash": "94b32872a2abdbeb217e7045ab49fee6",
       "sourceName": "lib/v2-core/src/interfaces/ISablierV2LockupDynamic.sol",
       "solcConfig": {
@@ -5799,7 +5887,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -5815,6 +5903,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -5836,78 +5925,9 @@
         "ISablierV2LockupDynamic"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/contracts/strategies/_poc/direct-grants-simple/DirectGrantsSimpleStrategy.sol": {
-      "lastModificationDate": 1693997618260,
-      "contentHash": "e895644cae7476cc2e1b0122a4a04c99",
-      "sourceName": "contracts/strategies/_poc/direct-grants-simple/DirectGrantsSimpleStrategy.sol",
-      "solcConfig": {
-        "version": "0.8.19",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 400
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "storageLayout",
-                "devdoc",
-                "userdoc"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          },
-          "libraries": {
-            "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
-            }
-          },
-          "remappings": [
-            "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
-            "@sablier/v2-core/=lib/v2-core/",
-            "ds-test/=lib/forge-std/lib/ds-test/src/",
-            "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
-            "forge-std/=lib/forge-std/src/",
-            "permit2/=lib/permit2/src/interfaces/",
-            "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
-            "openzeppelin-contracts/=lib/openzeppelin-contracts/",
-            "@prb/math/=lib/v2-core/lib/prb-math/",
-            "eas-contracts/=lib/eas-contracts/contracts/",
-            "@prb/test/=lib/v2-core/lib/prb-test/src/",
-            "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
-            "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
-            "prb-math/=lib/v2-core/lib/prb-math/src/",
-            "prb-test/=lib/v2-core/lib/prb-test/src/",
-            "solarray/=lib/v2-core/lib/solarray/src/",
-            "solmate/=lib/permit2/lib/solmate/",
-            "v2-core/=lib/v2-core/"
-          ]
-        }
-      },
-      "imports": [
-        "lib/openzeppelin-contracts/contracts/security/ReentrancyGuard.sol",
-        "../../../core/interfaces/IAllo.sol",
-        "../../../core/interfaces/IRegistry.sol",
-        "../../BaseStrategy.sol",
-        "../../../core/libraries/Metadata.sol"
-      ],
-      "versionPragmas": [
-        "0.8.19"
-      ],
-      "artifacts": [
-        "DirectGrantsSimpleStrategy"
-      ]
-    },
-    "/home/kurt/git/allo/allo-v2/contracts/strategies/_poc/proportional-payout/ProportionalPayoutStrategy.sol": {
-      "lastModificationDate": 1693997618260,
-      "contentHash": "b233e064e963e37ea908dbbb368c51d1",
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/strategies/_poc/proportional-payout/ProportionalPayoutStrategy.sol": {
+      "lastModificationDate": 1696362242652,
+      "contentHash": "52378845825a40d20d43f95376843799",
       "sourceName": "contracts/strategies/_poc/proportional-payout/ProportionalPayoutStrategy.sol",
       "solcConfig": {
         "version": "0.8.19",
@@ -5935,7 +5955,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -5951,6 +5971,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -5973,9 +5994,9 @@
         "ProportionalPayoutStrategy"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/contracts/strategies/_poc/qv-nft-tiered/QVNftTieredStrategy.sol": {
-      "lastModificationDate": 1693997618264,
-      "contentHash": "0d8d2c7f54d2788842b5587500ad795c",
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/strategies/_poc/qv-nft-tiered/QVNftTieredStrategy.sol": {
+      "lastModificationDate": 1696362242631,
+      "contentHash": "ad29f57047490128ae46437b3bc164e1",
       "sourceName": "contracts/strategies/_poc/qv-nft-tiered/QVNftTieredStrategy.sol",
       "solcConfig": {
         "version": "0.8.19",
@@ -6003,7 +6024,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -6019,6 +6040,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -6039,9 +6061,9 @@
         "QVNftTieredStrategy"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/contracts/strategies/_poc/qv-hackathon/HackathonQVStrategy.sol": {
-      "lastModificationDate": 1693997618264,
-      "contentHash": "5635cb4572d6a28ea2e84ae5cce1050f",
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/strategies/_poc/qv-hackathon/HackathonQVStrategy.sol": {
+      "lastModificationDate": 1696362242638,
+      "contentHash": "9e8cbd5118b6231385a807a3eff579ea",
       "sourceName": "contracts/strategies/_poc/qv-hackathon/HackathonQVStrategy.sol",
       "solcConfig": {
         "version": "0.8.19",
@@ -6069,7 +6091,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -6085,6 +6107,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -6096,7 +6119,7 @@
       },
       "imports": [
         "solady/src/tokens/ERC721.sol",
-        "eas-contracts/IEAS.sol",
+        "lib/eas-contracts/contracts/IEAS.sol",
         "lib/eas-contracts/contracts/ISchemaRegistry.sol",
         "./SchemaResolver.sol",
         "../../qv-base/QVBaseStrategy.sol"
@@ -6108,8 +6131,8 @@
         "HackathonQVStrategy"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/contracts/strategies/_poc/qv-hackathon/SchemaResolver.sol": {
-      "lastModificationDate": 1693997618264,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/strategies/_poc/qv-hackathon/SchemaResolver.sol": {
+      "lastModificationDate": 1693927188476,
       "contentHash": "cb996efaa6d32de39c1c3d1ab1303424",
       "sourceName": "contracts/strategies/_poc/qv-hackathon/SchemaResolver.sol",
       "solcConfig": {
@@ -6138,7 +6161,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -6154,6 +6177,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -6175,8 +6199,8 @@
         "SchemaResolver"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/lib/eas-contracts/contracts/IEAS.sol": {
-      "lastModificationDate": 1693505497556,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/eas-contracts/contracts/IEAS.sol": {
+      "lastModificationDate": 1695835283159,
       "contentHash": "0bc5d8db4aa4523ce1969f0d4e05c4cc",
       "sourceName": "lib/eas-contracts/contracts/IEAS.sol",
       "solcConfig": {
@@ -6205,7 +6229,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -6221,6 +6245,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -6241,8 +6266,8 @@
         "IEAS"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/lib/eas-contracts/contracts/ISchemaRegistry.sol": {
-      "lastModificationDate": 1693505497556,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/eas-contracts/contracts/ISchemaRegistry.sol": {
+      "lastModificationDate": 1695835283160,
       "contentHash": "cfcd98d4b4eaa32d29d64d49a8976ddb",
       "sourceName": "lib/eas-contracts/contracts/ISchemaRegistry.sol",
       "solcConfig": {
@@ -6271,7 +6296,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -6287,6 +6312,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -6306,8 +6332,8 @@
         "ISchemaRegistry"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/lib/eas-contracts/contracts/Common.sol": {
-      "lastModificationDate": 1693505497556,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/eas-contracts/contracts/Common.sol": {
+      "lastModificationDate": 1695835283159,
       "contentHash": "b538d68cc7e94b64c7b5d644b6f3434f",
       "sourceName": "lib/eas-contracts/contracts/Common.sol",
       "solcConfig": {
@@ -6336,7 +6362,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -6352,6 +6378,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -6367,8 +6394,8 @@
       ],
       "artifacts": []
     },
-    "/home/kurt/git/allo/allo-v2/lib/eas-contracts/contracts/resolver/ISchemaResolver.sol": {
-      "lastModificationDate": 1693505497556,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/eas-contracts/contracts/resolver/ISchemaResolver.sol": {
+      "lastModificationDate": 1695835283160,
       "contentHash": "ac0e965f023f3c69f1c2cc1e7eea9f12",
       "sourceName": "lib/eas-contracts/contracts/resolver/ISchemaResolver.sol",
       "solcConfig": {
@@ -6397,7 +6424,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -6413,6 +6440,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -6432,9 +6460,79 @@
         "ISchemaResolver"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/contracts/strategies/_poc/qv-governance/QVGovernanceERC20Votes.sol": {
-      "lastModificationDate": 1693997618260,
-      "contentHash": "35307c3f39967b9ebee5b003d63d0130",
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/strategies/_poc/direct-grants-simple/DirectGrantsSimpleStrategy.sol": {
+      "lastModificationDate": 1696362242647,
+      "contentHash": "a94da9dcff852f1e2c96886ddf2384b7",
+      "sourceName": "contracts/strategies/_poc/direct-grants-simple/DirectGrantsSimpleStrategy.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 400
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
+            }
+          },
+          "remappings": [
+            "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+            "@sablier/v2-core/=lib/v2-core/",
+            "ds-test/=lib/forge-std/lib/ds-test/src/",
+            "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
+            "forge-std/=lib/forge-std/src/",
+            "permit2/=lib/permit2/src/interfaces/",
+            "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+            "openzeppelin-contracts/=lib/openzeppelin-contracts/",
+            "@prb/math/=lib/v2-core/lib/prb-math/",
+            "eas-contracts/=lib/eas-contracts/contracts/",
+            "@prb/test/=lib/v2-core/lib/prb-test/src/",
+            "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
+            "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
+            "prb-math/=lib/v2-core/lib/prb-math/src/",
+            "prb-test/=lib/v2-core/lib/prb-test/src/",
+            "solarray/=lib/v2-core/lib/solarray/src/",
+            "solmate/=lib/permit2/lib/solmate/",
+            "v2-core/=lib/v2-core/"
+          ]
+        }
+      },
+      "imports": [
+        "lib/openzeppelin-contracts/contracts/security/ReentrancyGuard.sol",
+        "../../../core/interfaces/IAllo.sol",
+        "../../../core/interfaces/IRegistry.sol",
+        "../../BaseStrategy.sol",
+        "../../../core/libraries/Metadata.sol"
+      ],
+      "versionPragmas": [
+        "0.8.19"
+      ],
+      "artifacts": [
+        "DirectGrantsSimpleStrategy"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/strategies/_poc/qv-governance/QVGovernanceERC20Votes.sol": {
+      "lastModificationDate": 1696362242639,
+      "contentHash": "765825eb393a06c2c29e81b5390b2dc2",
       "sourceName": "contracts/strategies/_poc/qv-governance/QVGovernanceERC20Votes.sol",
       "solcConfig": {
         "version": "0.8.19",
@@ -6462,7 +6560,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -6478,6 +6576,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -6498,8 +6597,8 @@
         "QVGovernanceERC20Votes"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/lib/openzeppelin-contracts/contracts/governance/utils/IVotes.sol": {
-      "lastModificationDate": 1693505497600,
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/lib/openzeppelin-contracts/contracts/governance/utils/IVotes.sol": {
+      "lastModificationDate": 1695835283363,
       "contentHash": "e2ea5c24dc3967534a8ac4df343668c2",
       "sourceName": "lib/openzeppelin-contracts/contracts/governance/utils/IVotes.sol",
       "solcConfig": {
@@ -6528,7 +6627,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -6544,6 +6643,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -6561,9 +6661,9 @@
         "IVotes"
       ]
     },
-    "/home/kurt/git/allo/allo-v2/contracts/strategies/rfp-committee/RFPCommitteeStrategy.sol": {
-      "lastModificationDate": 1693916237286,
-      "contentHash": "d967ad73b6a62f32546f3352d88bfa1a",
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/strategies/rfp-committee/RFPCommitteeStrategy.sol": {
+      "lastModificationDate": 1696362242634,
+      "contentHash": "bd336c110442f01880812121e062e3f7",
       "sourceName": "contracts/strategies/rfp-committee/RFPCommitteeStrategy.sol",
       "solcConfig": {
         "version": "0.8.19",
@@ -6591,7 +6691,7 @@
           },
           "libraries": {
             "": {
-              "__CACHE_BREAKER__": "0x0000000000000031363933393939343736383139"
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
             }
           },
           "remappings": [
@@ -6607,6 +6707,7 @@
             "eas-contracts/=lib/eas-contracts/contracts/",
             "@prb/test/=lib/v2-core/lib/prb-test/src/",
             "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
             "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
             "prb-math/=lib/v2-core/lib/prb-math/src/",
             "prb-test/=lib/v2-core/lib/prb-test/src/",
@@ -6624,6 +6725,77 @@
       ],
       "artifacts": [
         "RFPCommitteeStrategy"
+      ]
+    },
+    "/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/contracts/strategies/_poc/qv-impact-stream/QVImpactStreamStrategy.sol": {
+      "lastModificationDate": 1696362242652,
+      "contentHash": "579f5c23189e118dc3b40ea588d473c5",
+      "sourceName": "contracts/strategies/_poc/qv-impact-stream/QVImpactStreamStrategy.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 400
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout",
+                "devdoc",
+                "userdoc"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "libraries": {
+            "": {
+              "__CACHE_BREAKER__": "0x0000000000000031363936333635313739313535"
+            }
+          },
+          "remappings": [
+            "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+            "@sablier/v2-core/=lib/v2-core/",
+            "ds-test/=lib/forge-std/lib/ds-test/src/",
+            "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
+            "forge-std/=lib/forge-std/src/",
+            "permit2/=lib/permit2/src/interfaces/",
+            "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+            "openzeppelin-contracts/=lib/openzeppelin-contracts/",
+            "@prb/math/=lib/v2-core/lib/prb-math/",
+            "eas-contracts/=lib/eas-contracts/contracts/",
+            "@prb/test/=lib/v2-core/lib/prb-test/src/",
+            "forge-gas-snapshot/=lib/permit2/lib/forge-gas-snapshot/src/",
+            "hedgey-vesting/=lib/hedgey-vesting/contracts/",
+            "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
+            "prb-math/=lib/v2-core/lib/prb-math/src/",
+            "prb-test/=lib/v2-core/lib/prb-test/src/",
+            "solarray/=lib/v2-core/lib/solarray/src/",
+            "solmate/=lib/permit2/lib/solmate/",
+            "v2-core/=lib/v2-core/"
+          ]
+        }
+      },
+      "imports": [
+        "lib/openzeppelin-contracts/contracts/utils/Multicall.sol",
+        "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol",
+        "../../../core/interfaces/IAllo.sol",
+        "../../../core/interfaces/IRegistry.sol",
+        "../../BaseStrategy.sol",
+        "../../../core/libraries/Metadata.sol"
+      ],
+      "versionPragmas": [
+        "0.8.19"
+      ],
+      "artifacts": [
+        "QVImpactStreamStrategy"
       ]
     }
   }

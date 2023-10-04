@@ -1,7 +1,7 @@
 import hre from "hardhat";
-import { deployRegistry } from "./deployRegistry";
 import { deployAllo } from "./deployAllo";
 import { deployContractFactory } from "./deployContractFactory";
+import { deployRegistry } from "./deployRegistry";
 
 async function deployCore() {
   const networkName = await hre.network.name;
@@ -13,28 +13,28 @@ async function deployCore() {
     - ContractFactory (used for strategy deployments)
     - Registry
     - Allo
-    ////////////////////////////////////////////////////`
-  );
+    ////////////////////////////////////////////////////
+  `);
 
   // ContractFactory
-  deployContractFactory().then(deployedContract => {
+ // deployContractFactory().then(deployedContract => {
     // Registry
     deployRegistry().then(registryAddress => {
       // Allo
       deployAllo(registryAddress.toString()).then(alloAddress => {
-          // Log deployed addresses
-          console.log(`
+        // Log deployed addresses
+        console.log(`
             ////////////////////////////////////////////////////
             Core Allo V2 deployed to:
             ======================================
-            ContractFactory: ${deployedContract}
+            ContractFactory: ${"0xa5791f9461A4385029e6d0E7aeF5ebD8DC6429e5"}
             Registry: ${registryAddress}
             Allo: ${alloAddress}
-            ////////////////////////////////////////////////////`
-          );
-        });
+            ////////////////////////////////////////////////////
+          `);
+      });
     });
-  })
+ // })
 
 }
 

@@ -1,7 +1,7 @@
 import hre, { ethers, upgrades } from "hardhat";
 import { alloConfig } from "../config/allo.config";
 import { registryConfig } from "../config/registry.config";
-import { confirmContinue, prettyNum, verifyContract } from "../utils/scripts";
+import { confirmContinue, prettyNum } from "../utils/scripts";
 
 export async function deployAllo(_registryAddress? : string) {
   const network = await ethers.provider.getNetwork();
@@ -9,14 +9,13 @@ export async function deployAllo(_registryAddress? : string) {
   const chainId = Number(network.chainId);
   const account = (await ethers.getSigners())[0];
   const deployerAddress = await account.getAddress();
-  const blocksToWait = networkName === "localhost" ? 0 : 5;
   const balance = await ethers.provider.getBalance(deployerAddress);
 
   console.log(`
     ////////////////////////////////////////////////////
             Deploys Allo.sol on ${networkName}
-    ////////////////////////////////////////////////////`
-  );
+    ////////////////////////////////////////////////////
+  `);
 
   const alloParams = alloConfig[chainId];
   if (!alloParams) {
@@ -53,22 +52,13 @@ export async function deployAllo(_registryAddress? : string) {
 
   console.log("Allo.sol deployed to:", instance.target);
 
-  console.log("Initializing...", instance.target);
-  await instance.initialize(
-    registryAddress,
-    alloParams.treasury,
-    alloParams.percentFee,
-    alloParams.baseFee,
-  );
-  console.log("Registry initialized!");
-
-  return instance.target;
+  // return instance.target;
 }
 
-// deployAllo().catch((error) => {
-//   console.error(error);
-//   process.exitCode = 1;
-// });
+deployAllo().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});
 
 // Note: Deploy script to run in terminal:
 // npx hardhat run scripts/deployAllo.ts --network sepolia
