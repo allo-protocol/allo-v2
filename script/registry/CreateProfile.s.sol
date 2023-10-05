@@ -2,7 +2,7 @@
 pragma solidity 0.8.19;
 
 import "forge-std/Script.sol";
-
+import "forge-std/console.sol";
 import {IRegistry} from "../../contracts/core/interfaces/IRegistry.sol";
 
 import {Metadata} from "../../contracts/core/libraries/Metadata.sol";
@@ -24,13 +24,21 @@ contract CreateProfile is Script, GoerliConfig {
         uint256 deployerPrivateKey = vm.envUint("DEPLOYER_PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);
 
+        console.log("Registry ==> %s", REGISTRY);
+
         // Prepare the members array
-        address[] memory members = new address[](1);
+        address[] memory members = new address[](3);
         members[0] = address(OWNER);
+        members[1] = 0xB8cEF765721A6da910f14Be93e7684e9a3714123;
+        members[2] = 0xE7eB5D2b5b188777df902e89c54570E7Ef4F59CE;
 
         // Create a profile
-        registry.createProfile(
-            nonce++, "Jaxcoder Profile", Metadata({protocol: 1, pointer: TEST_METADATA_POINTER_1}), OWNER, members
+        bytes32 profileId = registry.createProfile(
+            nonce++, "Test Profile", Metadata({protocol: 1, pointer: TEST_METADATA_POINTER_1}), OWNER, members
         );
+        IRegistry.Profile memory profile = registry.getProfileById(profileId);
+        console.log("Profile created");
+        console.logBytes32(profileId);
+        console.log("Anchor ==> %s", profile.anchor);
     }
 }

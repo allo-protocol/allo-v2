@@ -34,6 +34,12 @@ contract GoerliConfig {
     bytes32 public constant TEST_PROFILE_1 = 0x844b425d3f8e8348bda70374acf679c3d94eac5fcacde608cfca77acb2a11614;
     bytes32 public constant TEST_PROFILE_2 = 0x5F8F7EF300B0E8FE0417371A068B217C49BB7235E87CCE1E53F55717F3933BD3;
 
+    bytes32 public constant POOL_CREATOR_PROFILE_ID = 0x9d70efa6f5bb7f502cb45f2c2a4558a1c909c4c0fbb7db7abbae58e7074f1ec0;
+    address public constant POOL_CREATOR_ANCHOR_ID = 0x16a200b50ebE50b7fcd347D9B33329dD77612D92;
+
+    bytes32 public constant RECIPIENT_PROFILE_ID = 0xba623a1db131a7aed2eea599053007537d4308e3d6145c94ba1242f255d80859;
+    address public constant RECIPIENT_ANCHOR_ID = 0x27a3528fA5aA9175F94C651be8Bcf75Ad3AF0bF4;
+
     /// @notice This is a test pool ID
     // 1 = DonationVotingStrategy
     // 6 = DirectGrantsSimpleStrategy
@@ -41,7 +47,7 @@ contract GoerliConfig {
     // 12 = DonationVotingStrategy
     // 13 = RFPSimpleStrategy (10e18, false, false)
     // 14 = ImpactStreamStrategy
-    uint256 public constant TEST_POOL_1 = 14;
+    uint256 public constant TEST_POOL_1 = 16;
 
     /// @notice This is a test recipient ID
     address public constant TEST_RECIPIENT_ID_1 = 0x1fD06f088c720bA3b7a3634a8F021Fdd485DcA42;

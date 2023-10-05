@@ -29,17 +29,24 @@ contract RegisterRecipientQVImpactStream is Script, GoerliConfig {
     QVImpactStreamStrategy strategy = QVImpactStreamStrategy(payable(address(IMPACTSTREAM)));
 
     function run() external {
+        console.log("poolId %s", TEST_POOL_1);
+
         uint256 deployerPrivateKey = vm.envUint("DEPLOYER_PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);
 
         // Register 2 recipients
         Metadata memory recipientMetadata1 = Metadata({protocol: 1, pointer: TEST_METADATA_POINTER_1});
-        // IRegistry.Profile memory profile = registry.getProfileByAnchor(OWNER);
 
         // data should be encoded: (address, address, uint256, Metadata)
-        bytes memory recipientData1 = abi.encode(OWNER, OWNER, 1e17, recipientMetadata1);
+        bytes memory recipientData1 =
+            abi.encode(POOL_CREATOR_ANCHOR_ID, POOL_CREATOR_ANCHOR_ID, 1e17, recipientMetadata1);
+        bytes memory recipientData2 = abi.encode(RECIPIENT_ANCHOR_ID, RECIPIENT_ANCHOR_ID, 2e17, recipientMetadata1);
 
-        allo.registerRecipient(TEST_POOL_1, recipientData1);
+        address recipientId1 = allo.registerRecipient(TEST_POOL_1, recipientData1);
+        address recipientId2 = allo.registerRecipient(TEST_POOL_1, recipientData2);
+
+        console.log("recipientId1 %s", recipientId1);
+        console.log("recipientId2 %s", recipientId2);
 
         vm.stopBroadcast();
     }
