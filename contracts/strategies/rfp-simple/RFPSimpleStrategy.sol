@@ -436,9 +436,6 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         // Calculate the amount to be distributed for the milestone
         uint256 amount = (recipient.proposalBid * milestone.amountPercentage) / 1e18;
 
-        // make sure has enough funds to distribute the milestone
-        if (amount > poolAmount) revert NOT_ENOUGH_FUNDS();
-
         // Get the pool, subtract the amount and transfer to the recipient
         poolAmount -= amount;
         _transferAmount(pool.token, recipient.recipientAddress, amount);
