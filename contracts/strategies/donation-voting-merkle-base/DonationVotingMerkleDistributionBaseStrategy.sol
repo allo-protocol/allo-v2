@@ -163,7 +163,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     uint256 public totalPayoutAmount;
 
     /// @notice The total number of recipients.
-    uint256 public recipientsCounter;
+    uint256 public recipientsCounter = 1;
 
     /// @notice The registry contract interface.
     IRegistry private _registry;
@@ -578,9 +578,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
         recipient.metadata = metadata;
         recipient.useRegistryAnchor = useRegistryAnchor ? true : isUsingRegistryAnchor;
 
-        uint8 currentStatus = _getUintRecipientStatus(recipientId);
-
-        if (currentStatus == uint8(Status.None)) {
+        if (recipientToStatusIndexes[recipientId] == 0) {
             // recipient registering new application
             recipientToStatusIndexes[recipientId] = recipientsCounter;
             _setRecipientStatus(recipientId, uint8(Status.Pending));
@@ -590,6 +588,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
 
             recipientsCounter++;
         } else {
+            uint8 currentStatus = _getUintRecipientStatus(recipientId);
             if (currentStatus == uint8(Status.Accepted)) {
                 // recipient updating accepted application
                 _setRecipientStatus(recipientId, uint8(Status.Pending));
@@ -818,6 +817,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     /// @param _recipientId ID of the recipient
     /// @return status The status of the recipient
     function _getUintRecipientStatus(address _recipientId) internal view returns (uint8 status) {
+        if (recipientToStatusIndexes[_recipientId] == 0) return 0;
         // Get the column index and current row
         (, uint256 colIndex, uint256 currentRow) = _getStatusRowColumn(_recipientId);
 
@@ -832,7 +832,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     /// @param _recipientId ID of the recipient
     /// @return (rowIndex, colIndex, currentRow)
     function _getStatusRowColumn(address _recipientId) internal view returns (uint256, uint256, uint256) {
-        uint256 recipientIndex = recipientToStatusIndexes[_recipientId];
+        uint256 recipientIndex = recipientToStatusIndexes[_recipientId] - 1;
 
         uint256 rowIndex = recipientIndex / 64; // 256 / 4
         uint256 colIndex = (recipientIndex % 64) * 4;

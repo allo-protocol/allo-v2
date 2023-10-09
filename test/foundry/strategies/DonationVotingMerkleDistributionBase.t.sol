@@ -586,7 +586,7 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         bytes memory data = abi.encode(recipientAddress(), profile1_anchor(), Metadata(1, "metadata"));
 
         vm.expectEmit(false, false, false, true);
-        emit Registered(profile1_anchor(), abi.encode(data, 0), address(profile1_member1()));
+        emit Registered(profile1_anchor(), abi.encode(data, 1), address(profile1_member1()));
 
         vm.prank(address(allo()));
         address recipientId = _strategy.registerRecipient(data, profile1_member1());
