@@ -427,11 +427,11 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         strategy.allocate(abi.encode(recipientAddress(), 1e18), recipient());
     }
 
-    function testRevert_allocate_AMOUNT_TOO_LOW() public {
+    function testRevert_allocate_INVALID_AMOUNT() public {
         address recipientId = __register_recipient();
         __setMilestones();
 
-        vm.expectRevert(RFPSimpleStrategy.AMOUNT_TOO_LOW.selector);
+        vm.expectRevert(Errors.INVALID.selector);
         vm.prank(address(allo()));
         strategy.allocate(abi.encode(recipientId, 5e17), address(pool_admin()));
     }

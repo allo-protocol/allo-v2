@@ -412,7 +412,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
             // If the proposal bid is not equal to the final proposal bid this will revert
             // This is to prevent the pool manager from decreasing the proposal bid
             // or recipient from front running and increasing the proposal bid
-            revert AMOUNT_TOO_LOW();
+            revert INVALID();
         }
 
         _setPoolActive(false);
