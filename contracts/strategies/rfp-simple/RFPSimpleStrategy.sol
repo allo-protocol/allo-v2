@@ -311,8 +311,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Submit a proposal to RFP pool
     /// @dev Emits a 'Registered()' event
     /// @param _data The data to be decoded
-    /// @custom:data when 'useRegistryAnchor' is 'true' -> (address recipientId, uint256 proposalBid, Metadata metadata)
-    ///              when 'useRegistryAnchor' is 'false' -> (address recipientAddress, address registryAnchor, uint256 proposalBid, Metadata metadata)
+    /// @custom:data (address registryAnchor, address recipientAddress, uint256 proposalBid, Metadata metadata)
     /// @param _sender The sender of the transaction
     /// @return recipientId The id of the recipient
     function _registerRecipient(bytes memory _data, address _sender)
@@ -327,19 +326,16 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         uint256 proposalBid;
         Metadata memory metadata;
 
+        //  @custom:data (address registryAnchor, address recipientAddress, uint256 proposalBid, Metadata metadata)
+        (registryAnchor, recipientAddress, proposalBid, metadata) =
+            abi.decode(_data, (address, address, uint256, Metadata));
+
         // Decode '_data' depending on the 'useRegistryAnchor' flag
         if (useRegistryAnchor) {
-            /// @custom:data when 'true' -> (address recipientId, uint256 proposalBid, Metadata metadata)
-            (recipientId, recipientAddress, proposalBid, metadata) =
-                abi.decode(_data, (address, address, uint256, Metadata));
-
             // If the sender is not a profile member this will revert
+            recipientId = registryAnchor;
             if (!_isProfileMember(recipientId, _sender)) revert UNAUTHORIZED();
         } else {
-            //  @custom:data when 'false' -> (address recipientAddress, address registryAnchor, uint256 proposalBid, Metadata metadata)
-            (recipientAddress, registryAnchor, proposalBid, metadata) =
-                abi.decode(_data, (address, address, uint256, Metadata));
-
             // Check if the registry anchor is valid so we know whether to use it or not
             isUsingRegistryAnchor = registryAnchor != address(0);
 

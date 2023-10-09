@@ -143,7 +143,7 @@ contract RFPCommitteeStrategyTest is Test, RegistrySetupFull, AlloSetup, Native,
         address sender = recipient();
         Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
 
-        bytes memory data = abi.encode(recipientAddress(), false, 1e18, metadata);
+        bytes memory data = abi.encode(address(0), recipientAddress(), 1e18, metadata);
         vm.prank(address(allo()));
         recipientId = strategy.registerRecipient(data, sender);
     }
@@ -152,7 +152,7 @@ contract RFPCommitteeStrategyTest is Test, RegistrySetupFull, AlloSetup, Native,
         address sender = makeAddr("recipient2");
         Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
 
-        bytes memory data = abi.encode(recipientAddress(), false, 1e18, metadata);
+        bytes memory data = abi.encode(address(0), recipientAddress(), 1e18, metadata);
         vm.prank(address(allo()));
         recipientId = strategy.registerRecipient(data, sender);
     }
