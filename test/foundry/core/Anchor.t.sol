@@ -26,7 +26,7 @@ contract AnchorTest is Test {
         profileId = bytes32("test_profile");
         mockRegistry = new MockRegistry();
         vm.prank(address(mockRegistry));
-        anchor = new Anchor(profileId);
+        anchor = new Anchor(profileId, address(mockRegistry));
     }
 
     function test_deploy() public {

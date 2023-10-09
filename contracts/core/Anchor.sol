@@ -52,8 +52,8 @@ contract Anchor {
     /// @notice Constructor
     /// @dev We create an instance of the 'Registry' contract using the 'msg.sender' and set the profileId.
     /// @param _profileId The ID of the allowed profile to execute calls
-    constructor(bytes32 _profileId) {
-        registry = Registry(msg.sender);
+    constructor(bytes32 _profileId, address _registry) {
+        registry = Registry(_registry);
         profileId = _profileId;
     }
 
