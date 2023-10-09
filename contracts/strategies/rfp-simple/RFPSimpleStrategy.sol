@@ -330,21 +330,14 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         (registryAnchor, recipientAddress, proposalBid, metadata) =
             abi.decode(_data, (address, address, uint256, Metadata));
 
-        // Decode '_data' depending on the 'useRegistryAnchor' flag
-        if (useRegistryAnchor) {
-            // If the sender is not a profile member this will revert
-            recipientId = registryAnchor;
-            if (!_isProfileMember(recipientId, _sender)) revert UNAUTHORIZED();
-        } else {
-            // Check if the registry anchor is valid so we know whether to use it or not
-            isUsingRegistryAnchor = registryAnchor != address(0);
+        // Check if the registry anchor is valid so we know whether to use it or not
+        isUsingRegistryAnchor = useRegistryAnchor || registryAnchor != address(0);
 
-            // Ternerary to set the recipient id based on whether or not we are using the 'registryAnchor' or '_sender'
-            recipientId = isUsingRegistryAnchor ? registryAnchor : _sender;
+        // Ternerary to set the recipient id based on whether or not we are using the 'registryAnchor' or '_sender'
+        recipientId = isUsingRegistryAnchor ? registryAnchor : _sender;
 
-            // Checks if the '_sender' is a member of the profile 'anchor' being used and reverts if not
-            if (isUsingRegistryAnchor && !_isProfileMember(recipientId, _sender)) revert UNAUTHORIZED();
-        }
+        // Checks if the '_sender' is a member of the profile 'anchor' being used and reverts if not
+        if (isUsingRegistryAnchor && !_isProfileMember(recipientId, _sender)) revert UNAUTHORIZED();
 
         // Check if the metadata is required and if it is, check if it is valid, otherwise revert
         if (metadataRequired && (bytes(metadata.pointer).length == 0 || metadata.protocol == 0)) {
