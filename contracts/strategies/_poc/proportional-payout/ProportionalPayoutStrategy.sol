@@ -159,7 +159,7 @@ contract ProportionalPayoutStrategy is BaseStrategy {
     /// @notice Checks if the allocation has ended
     /// @dev Reverts if the allocation has not ended
     function _checkOnlyAfterAllocation() internal view {
-        if (block.timestamp < allocationEndTime) {
+        if (block.timestamp <= allocationEndTime) {
             revert ALLOCATION_NOT_ENDED();
         }
     }
