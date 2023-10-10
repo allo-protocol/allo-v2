@@ -220,7 +220,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Toggle the status between active and inactive.
     /// @dev 'msg.sender' must be a pool manager to close the pool. Emits a 'PoolActive()' event.
     /// @param _flag The flag to set the pool to active or inactive
-    function setPoolActive(bool _flag) external {
+    function setPoolActive(bool _flag) external onlyPoolManager(msg.sender) {
         _setPoolActive(_flag);
         emit PoolActive(_flag);
     }
