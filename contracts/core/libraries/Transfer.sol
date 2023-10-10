@@ -91,4 +91,16 @@ contract Transfer is Native {
             SafeTransferLib.safeTransfer(_token, _to, _amount);
         }
     }
+
+    /// @notice Get the balance of a token for an account
+    /// @param _token The token to get the balance of
+    /// @param _account The account to get the balance for
+    /// @return The balance of the token for the account
+    function _getBalance(address _token, address _account) internal returns (uint256) {
+        if (_token == NATIVE) {
+            return payable(_account).balance;
+        } else {
+            return SafeTransferLib.balanceOf(_token, _account);
+        }
+    }
 }

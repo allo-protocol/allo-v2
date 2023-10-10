@@ -510,10 +510,31 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
             feeAmount = (_amount * percentFee) / getFeeDenominator();
             amountAfterFee -= feeAmount;
 
-            _transferAmountFrom(_token, TransferData({from: msg.sender, to: treasury, amount: feeAmount}));
+            if (_token == NATIVE) {
+                _transferAmountFrom(_token, TransferData({from: msg.sender, to: treasury, amount: feeAmount}));
+            } else {
+                uint256 balanceBeforeFee = _getBalance(_token, treasury);
+                _transferAmountFrom(_token, TransferData({from: msg.sender, to: treasury, amount: feeAmount}));
+                uint256 balanceAfterFee = _getBalance(_token, treasury);
+                // Track actual fee paid to account for fee on ERC20 token transfers
+                feeAmount = balanceAfterFee - balanceBeforeFee;
+            }
         }
 
-        _transferAmountFrom(_token, TransferData({from: msg.sender, to: address(_strategy), amount: amountAfterFee}));
+        if (_token == NATIVE) {
+            _transferAmountFrom(
+                _token, TransferData({from: msg.sender, to: address(_strategy), amount: amountAfterFee})
+            );
+        } else {
+            uint256 balanceBeforeFundingPool = _getBalance(_token, address(_strategy));
+            _transferAmountFrom(
+                _token, TransferData({from: msg.sender, to: address(_strategy), amount: amountAfterFee})
+            );
+            uint256 balanceAfterFundingPool = _getBalance(_token, address(_strategy));
+            // Track actual fee paid to account for fee on ERC20 token transfers
+            amountAfterFee = balanceAfterFundingPool - balanceBeforeFundingPool;
+        }
+
         _strategy.increasePoolAmount(amountAfterFee);
 
         emit PoolFunded(_poolId, amountAfterFee, feeAmount);
