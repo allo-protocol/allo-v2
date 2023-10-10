@@ -254,11 +254,13 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     }
 
     /// @notice Submit milestone by the acceptedRecipientId.
-    /// @dev 'msg.sender' must be the 'acceptedRecipientId' and must be a member
-    ///      of a 'Profile' to sumbit a milestone. Emits a 'MilestonesSubmitted()' event.
+    /// @dev 'msg.sender' should be the 'acceptedRecipientId' OR must be a member
+    ///      of a 'Profile' assuming that 'acceptedRecipientId' is profile on the registry
+    //       Emits a 'MilestonesSubmitted()' event.
     /// @param _metadata The proof of work
     function submitUpcomingMilestone(Metadata calldata _metadata) external {
-        // Check if the 'msg.sender' is the 'acceptedRecipientId' and is a member of the 'Profile'
+        // Check if the 'msg.sender' is the 'acceptedRecipientId' or
+        // 'acceptedRecipientId' is a profile on the Registry and sender is a member of the profile
         if (acceptedRecipientId != msg.sender && !_isProfileMember(acceptedRecipientId, msg.sender)) {
             revert UNAUTHORIZED();
         }
