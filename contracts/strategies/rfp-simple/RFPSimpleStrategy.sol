@@ -311,8 +311,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Submit a proposal to RFP pool
     /// @dev Emits a 'Registered()' event
     /// @param _data The data to be decoded
-    /// @custom:data when 'useRegistryAnchor' is 'true' -> (address recipientId, uint256 proposalBid, Metadata metadata)
-    ///              when 'useRegistryAnchor' is 'false' -> (address recipientAddress, address registryAnchor, uint256 proposalBid, Metadata metadata)
+    /// @custom:data (address registryAnchor, address recipientAddress, uint256 proposalBid, Metadata metadata)
     /// @param _sender The sender of the transaction
     /// @return recipientId The id of the recipient
     function _registerRecipient(bytes memory _data, address _sender)
@@ -327,27 +326,18 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         uint256 proposalBid;
         Metadata memory metadata;
 
-        // Decode '_data' depending on the 'useRegistryAnchor' flag
-        if (useRegistryAnchor) {
-            /// @custom:data when 'true' -> (address recipientId, uint256 proposalBid, Metadata metadata)
-            (recipientId, proposalBid, metadata) = abi.decode(_data, (address, uint256, Metadata));
+        //  @custom:data (address registryAnchor, address recipientAddress, uint256 proposalBid, Metadata metadata)
+        (registryAnchor, recipientAddress, proposalBid, metadata) =
+            abi.decode(_data, (address, address, uint256, Metadata));
 
-            // If the sender is not a profile member this will revert
-            if (!_isProfileMember(recipientId, _sender)) revert UNAUTHORIZED();
-        } else {
-            //  @custom:data when 'false' -> (address recipientAddress, address registryAnchor, uint256 proposalBid, Metadata metadata)
-            (recipientAddress, registryAnchor, proposalBid, metadata) =
-                abi.decode(_data, (address, address, uint256, Metadata));
+        // Check if the registry anchor is valid so we know whether to use it or not
+        isUsingRegistryAnchor = useRegistryAnchor || registryAnchor != address(0);
 
-            // Check if the registry anchor is valid so we know whether to use it or not
-            isUsingRegistryAnchor = registryAnchor != address(0);
+        // Ternerary to set the recipient id based on whether or not we are using the 'registryAnchor' or '_sender'
+        recipientId = isUsingRegistryAnchor ? registryAnchor : _sender;
 
-            // Ternerary to set the recipient id based on whether or not we are using the 'registryAnchor' or '_sender'
-            recipientId = isUsingRegistryAnchor ? registryAnchor : _sender;
-
-            // Checks if the '_sender' is a member of the profile 'anchor' being used and reverts if not
-            if (isUsingRegistryAnchor && !_isProfileMember(recipientId, _sender)) revert UNAUTHORIZED();
-        }
+        // Checks if the '_sender' is a member of the profile 'anchor' being used and reverts if not
+        if (isUsingRegistryAnchor && !_isProfileMember(recipientId, _sender)) revert UNAUTHORIZED();
 
         // Check if the metadata is required and if it is, check if it is valid, otherwise revert
         if (metadataRequired && (bytes(metadata.pointer).length == 0 || metadata.protocol == 0)) {

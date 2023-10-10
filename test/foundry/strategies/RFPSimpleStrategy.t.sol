@@ -107,7 +107,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         address rejectedAddress = randomAddress();
         Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
 
-        bytes memory data = abi.encode(recipientAddress(), false, 1e18, metadata);
+        bytes memory data = abi.encode(address(0), recipientAddress(), 1e18, metadata);
         vm.prank(address(allo()));
         strategy.registerRecipient(data, rejectedAddress);
 
@@ -287,7 +287,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         address sender = recipient();
         Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
 
-        bytes memory data = abi.encode(recipientAddress(), false, 1e18, metadata);
+        bytes memory data = abi.encode(address(0), recipientAddress(), 1e18, metadata);
 
         vm.expectEmit(true, false, false, true);
         emit Registered(sender, data, sender);
@@ -303,7 +303,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         address sender = recipient();
         Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
 
-        bytes memory data = abi.encode(recipientAddress(), false, 0, metadata);
+        bytes memory data = abi.encode(address(0), recipientAddress(), 0, metadata);
 
         vm.expectEmit(true, false, false, true);
         emit Registered(sender, data, sender);
@@ -321,7 +321,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         address sender = recipient();
         Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
 
-        bytes memory data = abi.encode(recipientAddress(), false, 0, metadata);
+        bytes memory data = abi.encode(address(0), recipientAddress(), 0, metadata);
 
         vm.expectEmit(true, false, false, true);
         emit UpdatedRegistration(sender, data, sender);
@@ -340,7 +340,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
 
         // optionally using anchor
         address anchor = profile1_anchor();
-        bytes memory data = abi.encode(profile1_member1(), anchor, 1e18, metadata);
+        bytes memory data = abi.encode(anchor, profile1_member1(), 1e18, metadata);
 
         vm.prank(address(allo()));
         strategy.registerRecipient(data, profile1_member1());
@@ -375,7 +375,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         address anchor = poolProfile_anchor();
         Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
 
-        bytes memory data = abi.encode(anchor, 1e18, metadata);
+        bytes memory data = abi.encode(anchor, anchor, 1e18, metadata);
 
         vm.expectRevert(UNAUTHORIZED.selector);
         vm.prank(address(allo()));
@@ -386,7 +386,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         address sender = randomAddress();
         Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
 
-        bytes memory data = abi.encode(sender, true, 1e18, metadata);
+        bytes memory data = abi.encode(randomAddress(), sender, 1e18, metadata);
 
         vm.expectRevert(UNAUTHORIZED.selector);
         vm.prank(address(allo()));
@@ -397,7 +397,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         address sender = recipient();
         Metadata memory metadata = Metadata({protocol: 0, pointer: ""});
 
-        bytes memory data = abi.encode(recipientAddress(), false, 1e18, metadata);
+        bytes memory data = abi.encode(address(0), recipientAddress(), 1e18, metadata);
 
         vm.expectRevert(INVALID_METADATA.selector);
         vm.prank(address(allo()));
@@ -408,7 +408,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         address sender = recipient();
         Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
 
-        bytes memory data = abi.encode(recipientAddress(), false, 1e19, metadata);
+        bytes memory data = abi.encode(address(0), recipientAddress(), 1e19, metadata);
 
         vm.expectRevert(RFPSimpleStrategy.EXCEEDING_MAX_BID.selector);
         vm.prank(address(allo()));
@@ -482,7 +482,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         address sender = recipient();
         Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
 
-        bytes memory data = abi.encode(recipientAddress(), false, 1e18, metadata);
+        bytes memory data = abi.encode(address(0), recipientAddress(), 1e18, metadata);
         vm.prank(address(allo()));
         recipientId = strategy.registerRecipient(data, sender);
     }
