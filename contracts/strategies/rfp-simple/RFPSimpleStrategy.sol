@@ -229,7 +229,10 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @dev 'msg.sender' must be a pool manager to set milestones. Emits 'MilestonesSet' event
     /// @param _milestones Milestone[] The milestones to be set
     function setMilestones(Milestone[] memory _milestones) external onlyPoolManager(msg.sender) {
-        if (upcomingMilestone != 0) revert MILESTONES_ALREADY_SET();
+        if (milestones.length > 0) {
+            if (milestones[0].milestoneStatus != Status.None) revert MILESTONES_ALREADY_SET();
+            delete milestones;
+        }
 
         uint256 totalAmountPercentage;
 
