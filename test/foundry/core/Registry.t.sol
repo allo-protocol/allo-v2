@@ -225,6 +225,15 @@ contract RegistryTest is Test, RegistrySetup, Native, Errors {
         registry().updateProfileMetadata(newProfileId, newMetadata);
     }
 
+    function test_create_anchor() public {
+        // create profile
+        bytes32 newProfileId = registry().createProfile(nonce, name, metadata, profile1_owner(), profile1_members());
+        Registry.Profile memory profile = registry().getProfileById(newProfileId);
+        Anchor _anchor = Anchor(payable(profile.anchor));
+
+        assertEq(address(registry()), address(_anchor.registry()), "wrong anchor registry");
+    }
+
     function test_isOwnerOrMemberOfProfile() public {
         bytes32 newProfileId = registry().createProfile(nonce, name, metadata, profile1_owner(), profile1_members());
 

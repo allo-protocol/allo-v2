@@ -344,7 +344,8 @@ contract Registry is IRegistry, Native, AccessControl, Transfer, Initializable, 
             anchor = preCalculatedAddress;
         } else {
             // check if the contract has already been deployed by checking code size of address
-            bytes memory creationCode = abi.encodePacked(type(Anchor).creationCode, abi.encode(_profileId));
+            bytes memory creationCode =
+                abi.encodePacked(type(Anchor).creationCode, abi.encode(_profileId, address(this)));
 
             // Use CREATE3 to deploy the anchor contract
             anchor = CREATE3.deploy(salt, creationCode, 0);
