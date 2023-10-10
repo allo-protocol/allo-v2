@@ -62,4 +62,7 @@ contract NFT is ERC721, Ownable {
             revert WithdrawTransfer();
         }
     }
+
+    /// @notice Receive function
+    receive() external payable {}
 }

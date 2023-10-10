@@ -10,7 +10,7 @@ contract NFTFactory {
 
     function createNFTContract(string memory _name, string memory _symbol, uint256 _price, address _owner)
         external
-        returns (address)
+        returns (address payable)
     {
         NFT nft = new NFT(
             _name,
@@ -23,6 +23,6 @@ contract NFTFactory {
 
         emit NFTContractCreated(address(nft));
 
-        return address(nft);
+        return payable(address(nft));
     }
 }

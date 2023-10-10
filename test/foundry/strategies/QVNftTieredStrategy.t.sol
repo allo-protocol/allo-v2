@@ -41,8 +41,8 @@ contract QVNftTieredStrategyTest is QVBaseStrategyTest {
         vm.startPrank(pool_admin());
         _createPoolWithCustomStrategy();
 
-        MockERC721(address(nfts[0])).mint(randomAddress(), 1);
-        MockERC721(address(nfts[1])).mint(randomAddress(), 1);
+        MockERC721(payable(address(nfts[0]))).mint(randomAddress(), 1);
+        MockERC721(payable(address(nfts[1]))).mint(randomAddress(), 1);
     }
 
     function _createPoolWithCustomStrategy() internal override {
