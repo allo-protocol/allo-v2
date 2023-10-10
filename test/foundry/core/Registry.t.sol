@@ -271,6 +271,7 @@ contract RegistryTest is Test, RegistrySetup, Native, Errors {
 
     function test_create_anchor() public {
         // create profile
+        vm.prank(profile1_owner());
         bytes32 newProfileId = registry().createProfile(nonce, name, metadata, profile1_owner(), profile1_members());
         Registry.Profile memory profile = registry().getProfileById(newProfileId);
         Anchor _anchor = Anchor(payable(profile.anchor));
