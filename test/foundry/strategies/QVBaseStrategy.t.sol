@@ -520,6 +520,22 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
         assertEq(uint8(IStrategy.Status.Rejected), uint8(recipient.recipientStatus));
     }
 
+    function testRevert_reviewRecipients_ALREADY_REVIEWED() public {
+        address recipientId = __register_recipient();
+
+        address[] memory recipientIds = new address[](1);
+        recipientIds[0] = recipientId;
+        IStrategy.Status[] memory Statuses = new IStrategy.Status[](1);
+        Statuses[0] = IStrategy.Status.Rejected;
+
+        vm.startPrank(pool_manager1());
+        qvStrategy().reviewRecipients(recipientIds, Statuses);
+
+        vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, recipientId));
+        qvStrategy().reviewRecipients(recipientIds, Statuses);
+        vm.stopPrank();
+    }
+
     function test_reviewRecipient_reviewTreshold() public virtual {
         address recipientId = __register_recipient();
 

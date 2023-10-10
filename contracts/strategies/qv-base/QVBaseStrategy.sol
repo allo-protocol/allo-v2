@@ -160,6 +160,9 @@ abstract contract QVBaseStrategy is BaseStrategy {
     // recipientId -> status -> count
     mapping(address => mapping(Status => uint256)) public reviewsByStatus;
 
+    // recipientId -> reviewer -> status
+    mapping(address => mapping(address => bool)) public reviewedByManager;
+
     /// ================================
     /// ========== Modifier ============
     /// ================================
@@ -270,6 +273,9 @@ abstract contract QVBaseStrategy is BaseStrategy {
                 revert RECIPIENT_ERROR(recipientId);
             }
 
+            if (reviewedByManager[recipientId][msg.sender]) revert RECIPIENT_ERROR(recipientId);
+
+            reviewedByManager[recipientId][msg.sender] = true;
             reviewsByStatus[recipientId][recipientStatus]++;
 
             if (reviewsByStatus[recipientId][recipientStatus] >= reviewThreshold) {
