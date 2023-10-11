@@ -389,25 +389,30 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     }
 
     /// @notice Withdraw funds from pool
-    /// @dev This can only be called after the allocation has ended and 30 days have passed. If the
-    ///      '_amount' is greater than the pool amount or if 'msg.sender' is not a pool manager.
-    /// @param _amount The amount to be withdrawn
-    function withdraw(uint256 _amount) external onlyPoolManager(msg.sender) {
+    /// @dev This can only be called after the allocation has ended and 30 days have passed.
+    /// @param _token The token to be withdrawn
+    function withdraw(address _token) external onlyPoolManager(msg.sender) {
         if (block.timestamp <= allocationEndTime + 30 days) {
             revert INVALID();
         }
 
-        IAllo.Pool memory pool = allo.getPool(poolId);
+        // get the actual balance hold by the pool
+        uint256 amount = _getBalance(_token, address(this));
 
-        if (_amount > poolAmount) {
-            revert INVALID();
-        }
+        // get the token amount in vault which belong to the recipients
+        uint256 tokenInVault = _tokenAmountInVault(_token);
 
-        poolAmount -= _amount;
+        // calculate the amount which is accessible
+        uint256 accessableAmount = amount - tokenInVault;
 
-        // Transfer the tokens to the 'msg.sender' (pool manager calling function)
-        _transferAmount(pool.token, msg.sender, _amount);
+        // transfer the amount to the pool manager
+        _transferAmount(_token, msg.sender, accessableAmount);
     }
+
+    /// @notice Internal function to return the token amount locked in vault
+    /// @dev This function will return 0 if all funds are accessible
+    /// @param _token The address of the token
+    function _tokenAmountInVault(address _token) internal view virtual returns (uint256);
 
     /// ==================================
     /// ============ Merkle ==============
