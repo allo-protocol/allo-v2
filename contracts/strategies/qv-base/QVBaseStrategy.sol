@@ -540,6 +540,9 @@ abstract contract QVBaseStrategy is BaseStrategy {
         // check the `_voiceCreditsToAllocate` is > 0
         if (_voiceCreditsToAllocate == 0) revert INVALID();
 
+        // check if the recipient is accepted
+        if (!_isAcceptedRecipient(_recipientId)) revert RECIPIENT_ERROR(_recipientId);
+
         // update the allocator voice credits
         _allocator.voiceCredits += _voiceCreditsToAllocate;
 
