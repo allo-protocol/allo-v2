@@ -259,13 +259,7 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
 
     function test_registerRecipient_accepted() public virtual {
         address recipientId = __register_accept_recipient();
-        assertEq(uint8(qvStrategy().getRecipientStatus(recipient1())), uint8(IStrategy.Status.Accepted));
-
-        recipientId = __register_recipient();
-
-        QVBaseStrategy.Recipient memory receipt = qvStrategy().getRecipient(recipientId);
-
-        assertEq(uint8(receipt.recipientStatus), __afterRegistrationStatus());
+        assertEq(uint8(qvStrategy().getRecipientStatus(recipientId)), uint8(IStrategy.Status.Accepted));
     }
 
     function test_registerRecipient_new_withRegistryAnchor() public {

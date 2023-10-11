@@ -436,7 +436,7 @@ abstract contract QVBaseStrategy is BaseStrategy {
 
         if (currentStatus == Status.Accepted) {
             // revert if the recipient has already been accepted
-            revert RECIPIENT_ALREADY_ACCEPTED(recipientId);
+            revert RECIPIENT_ALREADY_ACCEPTED();
         } else if (currentStatus == Status.None) {
             // recipient registering new application
             recipient.recipientStatus = Status.Pending;
