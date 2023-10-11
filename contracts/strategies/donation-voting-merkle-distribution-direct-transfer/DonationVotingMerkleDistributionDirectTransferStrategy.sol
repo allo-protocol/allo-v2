@@ -73,7 +73,7 @@ contract DonationVotingMerkleDistributionDirectTransferStrategy is DonationVotin
         }
     }
 
-    /// @notice Internal function to estimate the token amount owned by a user
+    /// @notice Internal function to return the token amount locked in vault
     /// @dev This function will return 0 since all funds are transferred directly to the recipient
     function _tokenAmountInVault(address) internal pure override returns (uint256) {
         return 0;

@@ -409,7 +409,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
         _transferAmount(_token, msg.sender, accessableAmount);
     }
 
-    /// @notice Internal function to estimate the token amount in vault
+    /// @notice Internal function to return the token amount locked in vault
     /// @dev This function will return 0 if all funds are accessible
     /// @param _token The address of the token
     function _tokenAmountInVault(address _token) internal view virtual returns (uint256);
