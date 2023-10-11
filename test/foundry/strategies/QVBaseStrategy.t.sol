@@ -746,7 +746,7 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
         assertEq(token.balanceOf(recipient1()), 9.9e17);
     }
 
-    function testRevert_fundPool_afterDistribution() public {
+    function testRevert_fundPool_afterDistribution() public virtual {
         __register_accept_allocate_recipient();
 
         address[] memory recipients = new address[](1);
@@ -757,6 +757,7 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
         vm.startPrank(address(allo()));
         qvStrategy().distribute(recipients, "", pool_admin());
 
+        // fund pool
         vm.expectRevert(INVALID.selector);
         qvStrategy().increasePoolAmount(1e18);
     }
