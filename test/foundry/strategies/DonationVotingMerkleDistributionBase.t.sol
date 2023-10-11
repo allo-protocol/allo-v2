@@ -460,21 +460,13 @@ contract DonationVotingMerkleDistributionBaseMockTest is
 
         vm.expectRevert(INVALID.selector);
         vm.prank(pool_admin());
-        strategy.withdraw(1e18);
-    }
-
-    function testRevert_withdraw_NOT_ALLOWED_exceed_amount() public {
-        vm.warp(block.timestamp + 31 days);
-
-        vm.expectRevert(INVALID.selector);
-        vm.prank(pool_admin());
-        strategy.withdraw(2e18);
+        strategy.withdraw(NATIVE);
     }
 
     function testRevert_withdraw_UNAUTHORIZED() public {
         vm.expectRevert(UNAUTHORIZED.selector);
         vm.prank(randomAddress());
-        strategy.withdraw(1e18);
+        strategy.withdraw(NATIVE);
     }
 
     function test_withdraw() public {
@@ -483,7 +475,7 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         uint256 balanceBefore = pool_admin().balance;
 
         vm.prank(pool_admin());
-        strategy.withdraw(1e18);
+        strategy.withdraw(NATIVE);
 
         assertEq(pool_admin().balance, balanceBefore + 1e18);
     }

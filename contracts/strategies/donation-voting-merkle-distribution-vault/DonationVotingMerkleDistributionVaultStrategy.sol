@@ -53,6 +53,9 @@ contract DonationVotingMerkleDistributionVaultStrategy is
     /// @notice 'recipientId' => 'token' => 'amount'.
     mapping(address => mapping(address => uint256)) public claims;
 
+    /// @notice token => total claimable amount
+    mapping(address => uint256) public totalClaimableAmount;
+
     /// ===============================
     /// ======== Constructor ==========
     /// ===============================
@@ -81,10 +84,12 @@ contract DonationVotingMerkleDistributionVaultStrategy is
                 revert INVALID();
             }
 
+            address token = singleClaim.token;
+
             /// Delete the claim from the mapping
             delete claims[singleClaim.recipientId][singleClaim.token];
 
-            address token = singleClaim.token;
+            totalClaimableAmount[token] -= amount;
 
             // Transfer the tokens to the recipient
             _transferAmount(token, recipient.recipientAddress, amount);
@@ -131,7 +136,15 @@ contract DonationVotingMerkleDistributionVaultStrategy is
             );
         }
 
-        // Update the total payout amount for the claim
+        // Update the total payout amount for the claim and the total claimable amount
         claims[recipientId][token] += amount;
+        totalClaimableAmount[token] += amount;
+    }
+
+    /// @notice Internal function to return the token amount locked in vault
+    /// @dev This function will return 0 if all funds are accessible
+    /// @param _token The address of the token
+    function _tokenAmountInVault(address _token) internal view override returns (uint256) {
+        return totalClaimableAmount[_token];
     }
 }
