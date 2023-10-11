@@ -862,4 +862,6 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
     }
 
     function test_registerRecipient_accepted() public override {}
+
+    function testRevert_fundPool_afterDistribution() public override {}
 }

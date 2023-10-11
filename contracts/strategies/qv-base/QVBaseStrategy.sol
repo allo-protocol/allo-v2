@@ -97,6 +97,9 @@ abstract contract QVBaseStrategy is BaseStrategy {
     /// @notice Whether or not the strategy requires metadata
     bool public metadataRequired;
 
+    /// @notice Whether the distribution started or not
+    bool public distributionStarted;
+
     /// @notice The registry contract
     IRegistry private _registry;
 
@@ -307,6 +310,20 @@ abstract contract QVBaseStrategy is BaseStrategy {
         _updatePoolTimestamps(_registrationStartTime, _registrationEndTime, _allocationStartTime, _allocationEndTime);
     }
 
+    /// @notice Withdraw the tokens from the pool
+    /// @dev Callable by the pool manager only 30 days after the allocation has ended
+    /// @param _token The token to withdraw
+    function withdraw(address _token) external onlyPoolManager(msg.sender) {
+        if (block.timestamp <= allocationEndTime + 30 days) {
+            revert INVALID();
+        }
+
+        uint256 amount = _getBalance(_token, address(this));
+
+        // Transfer the tokens to the 'msg.sender' (pool manager calling function)
+        _transferAmount(_token, msg.sender, amount);
+    }
+
     /// ====================================
     /// ============ Internal ==============
     /// ====================================
@@ -468,6 +485,9 @@ abstract contract QVBaseStrategy is BaseStrategy {
                 ++i;
             }
         }
+        if (!distributionStarted) {
+            distributionStarted = true;
+        }
     }
 
     /// @notice Check if sender is a profile member
@@ -582,5 +602,11 @@ abstract contract QVBaseStrategy is BaseStrategy {
             amount = poolAmount * recipient.totalVotesReceived / totalRecipientVotes;
         }
         return PayoutSummary(recipient.recipientAddress, amount);
+    }
+
+    function _beforeIncreasePoolAmount(uint256) internal virtual override {
+        if (distributionStarted) {
+            revert INVALID();
+        }
     }
 }

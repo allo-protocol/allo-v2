@@ -492,6 +492,23 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
         );
     }
 
+    function test_withdraw() public {
+        vm.warp(allocationEndTime + 31 days);
+        vm.startPrank(pool_admin());
+
+        uint256 strategyBalance = token.balanceOf(address(qvStrategy()));
+        qvStrategy().withdraw(address(token));
+
+        assertEq(address(allo()).balance, strategyBalance);
+    }
+
+    function testRevert_withdraw_INVALID() public {
+        vm.startPrank(pool_admin());
+        vm.expectRevert(INVALID.selector);
+
+        qvStrategy().withdraw(address(token));
+    }
+
     function test_isPoolActive() public {
         vm.warp(registrationStartTime - 1);
         assertFalse(qvStrategy().isPoolActive());
@@ -727,6 +744,22 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
         qvStrategy().distribute(recipients, "", pool_admin());
 
         assertEq(token.balanceOf(recipient1()), 9.9e17);
+    }
+
+    function testRevert_fundPool_afterDistribution() public virtual {
+        __register_accept_allocate_recipient();
+
+        address[] memory recipients = new address[](1);
+        recipients[0] = recipient1();
+
+        assertEq(token.balanceOf(address(qvStrategy())), 9.9e17);
+
+        vm.startPrank(address(allo()));
+        qvStrategy().distribute(recipients, "", pool_admin());
+
+        // fund pool
+        vm.expectRevert(INVALID.selector);
+        qvStrategy().increasePoolAmount(1e18);
     }
 
     function test_distribute_twice_to_same_recipient() public {

@@ -281,19 +281,19 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         allo().fundPool{value: 1e18}(poolId, 1e18);
         vm.startPrank(pool_admin());
         strategy.setPoolActive(false);
-        strategy.withdraw(9.9e17); // 1e18 - 1e17 fee = 9.9e17
+        strategy.withdraw(NATIVE);
         assertEq(address(allo()).balance, 0);
     }
 
     function testRevert_withdraw_UNAUTHORIZED() public {
         vm.expectRevert(UNAUTHORIZED.selector);
-        strategy.withdraw(1e18);
+        strategy.withdraw(NATIVE);
     }
 
     function testRevert_withdraw_POOL_ACTIVE() public {
         vm.expectRevert(POOL_ACTIVE.selector);
         vm.prank(pool_admin());
-        strategy.withdraw(1e18);
+        strategy.withdraw(NATIVE);
     }
 
     function test_registerRecipient() public {
