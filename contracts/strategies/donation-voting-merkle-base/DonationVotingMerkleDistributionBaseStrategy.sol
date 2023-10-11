@@ -339,11 +339,13 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     /// - 4: appealed
     /// Emits the RecipientStatusUpdated() event.
     /// @param statuses new statuses
-    function reviewRecipients(ApplicationStatus[] memory statuses)
+    /// @param refRecipientsCounter the recipientCounter the transaction is based on
+    function reviewRecipients(ApplicationStatus[] memory statuses, uint256 refRecipientsCounter)
         external
         onlyActiveRegistration
         onlyPoolManager(msg.sender)
     {
+        if (refRecipientsCounter != recipientsCounter) revert INVALID();
         // Loop through the statuses and set the status
         for (uint256 i; i < statuses.length;) {
             uint256 rowIndex = statuses[i].index;

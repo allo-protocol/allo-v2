@@ -365,26 +365,29 @@ contract DonationVotingMerkleDistributionBaseMockTest is
     // Tests that you can only review recipients when registration is active
     function testRevert_reviewRecipients_REGISTRATION_NOT_ACTIVE() public {
         __register_recipient();
+        uint256 refRecipientsCounter = strategy.recipientsCounter();
+
         vm.expectRevert(REGISTRATION_NOT_ACTIVE.selector);
         vm.warp(allocationStartTime + 1);
 
         DonationVotingMerkleDistributionBaseStrategy.ApplicationStatus[] memory statuses =
             new DonationVotingMerkleDistributionBaseStrategy.ApplicationStatus[](1);
         statuses[0] = DonationVotingMerkleDistributionBaseStrategy.ApplicationStatus({index: 0, statusRow: 1});
-        strategy.reviewRecipients(statuses);
+        strategy.reviewRecipients(statuses, refRecipientsCounter);
     }
 
     // Tests that only the pool admin can review recipients
     function testRevert_reviewRecipients_UNAUTHORIZED() public {
         __register_recipient();
+        uint256 refRecipientsCounter = strategy.recipientsCounter();
+
         vm.expectRevert(UNAUTHORIZED.selector);
         vm.warp(registrationStartTime + 1);
 
         DonationVotingMerkleDistributionBaseStrategy.ApplicationStatus[] memory statuses =
             new DonationVotingMerkleDistributionBaseStrategy.ApplicationStatus[](1);
         statuses[0] = DonationVotingMerkleDistributionBaseStrategy.ApplicationStatus({index: 0, statusRow: 1});
-
-        strategy.reviewRecipients(statuses);
+        strategy.reviewRecipients(statuses, refRecipientsCounter);
     }
 
     function test_getPayouts() public {
@@ -854,6 +857,7 @@ contract DonationVotingMerkleDistributionBaseMockTest is
 
     function __register_accept_recipient() internal returns (address recipientId) {
         recipientId = __register_recipient();
+        uint256 refRecipientsCounter = strategy.recipientsCounter();
 
         address[] memory recipientIds = new address[](1);
         recipientIds[0] = recipientId;
@@ -863,11 +867,12 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         statuses[0] = __buildStatusRow(0, uint8(IStrategy.Status.Accepted));
 
         vm.prank(pool_admin());
-        strategy.reviewRecipients(statuses);
+        strategy.reviewRecipients(statuses, refRecipientsCounter);
     }
 
     function __register_reject_recipient() internal returns (address recipientId) {
         recipientId = __register_recipient();
+        uint256 refRecipientsCounter = strategy.recipientsCounter();
 
         address[] memory recipientIds = new address[](1);
         recipientIds[0] = recipientId;
@@ -880,7 +885,7 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         emit RecipientStatusUpdated(0, statuses[0].statusRow, pool_admin());
 
         vm.prank(pool_admin());
-        strategy.reviewRecipients(statuses);
+        strategy.reviewRecipients(statuses, refRecipientsCounter);
     }
 
     function __register_accept_recipient_allocate() internal returns (address) {
