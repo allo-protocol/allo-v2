@@ -338,9 +338,23 @@ contract Registry is IRegistry, Initializable, Native, AccessControlUpgradeable,
     /// @param _name The name of the profile
     /// @return anchor The address of the deployed anchor contract
     function _generateAnchor(bytes32 _profileId, string memory _name) internal returns (address anchor) {
-        bytes32 salt = keccak256(abi.encodePacked(_profileId, _name));
-        // TODO: Add a check to make sure the anchor is not already deployed
-        anchor = new Anchor{salt: salt}(abi.encode(_profileId, address(this)));
+        bytes memory encodedData = abi.encode(_profileId, _name);
+        bytes memory encodedConstructor = abi.encode(_profileId, address(this));
+
+        bytes memory bytecode = abi.encodePacked(type(Anchor).creationCode, encodedConstructor);
+
+        bytes32 salt = keccak256(encodedData);
+
+        address preComputedAddress = address(
+            uint160(uint256(keccak256(abi.encodePacked(bytes1(0xff), address(this), salt, keccak256(bytecode)))))
+        );
+
+        try new Anchor{salt: salt}(_profileId, address(this)) returns (Anchor _anchor) {
+            anchor = address(_anchor);
+        } catch {
+            if (Anchor(payable(preComputedAddress)).profileId() != _profileId) revert ANCHOR_ERROR();
+            anchor = preComputedAddress;
+        }
     }
 
     /// @notice Generates the 'profileId' based on msg.sender and nonce
