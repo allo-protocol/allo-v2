@@ -1,0 +1,71 @@
+name: "💡 Feature Request"
+description: Suggest an idea for this project
+title: "[DATE] 💡 [REQUEST] - <title>"
+labels: ["question"]
+body:
+  - type: input
+    id: start_date
+    attributes:
+      label: "Start Date"
+      description: Start of development
+      placeholder: "month/day/year"
+    validations:
+      required: false
+  - type: textarea
+    id: problem
+    attributes:
+      label: "Problem"
+      description: Summarize the raw idea, use case, or something you’ve seen that motivates us to work on this.
+      placeholder: Describe in a few lines the problem you are solving.
+    validations:
+      required: true
+  - type: checkboxes
+    id: appetite
+    attributes:
+      label: "Apetite"
+      description: Select one of the following and delete the other. Add any nuance below. How much time are we willing to spend on this and how does that constrain the solution?
+      multiple: true
+      options:
+        - label: Small Batch
+        - label: Big Batch
+          required: true
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: "Solution"
+      description: The core elements you came up with, presented in a form that’s easy for people to understand. Drawings and doodles are very encouraged.
+      placeholder: Describe in a few lines the solution you are proposing.
+    validations:
+      required: true
+  - type: textarea
+    id: references
+    attributes:
+      label: "References"
+      description: Provide a list or overview of references helpful in understanding the problem or solution.
+      placeholder: Provide references.
+    validations:
+      required: false
+  - type: textarea
+    id: rabbit_holes
+    attributes:
+      label: "Rabbit Holes"
+      description: What additional details about the solution are worth calling out? What things are we specifically trying to avoid?
+    validations:
+      required: false
+  - type: textarea
+    id: planning_docs
+    attributes:
+      label: "Planning Docs"
+      description: List or provide any other, related planning docs that will help someone grok the problem or solution.
+    validations:
+      required: false
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our [Code of Conduct](/CODE_OF_CONDUCT.md)
+      options:
+        - label: I agree to follow this project's Code of Conduct
+          required: true
