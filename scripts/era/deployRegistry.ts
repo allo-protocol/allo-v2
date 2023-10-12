@@ -1,9 +1,9 @@
-import * as hre from "hardhat";
-import * as dotenv from "dotenv";
-import { registryConfig } from "../config/registry.config";
-import { confirmContinue, prettyNum } from "../utils/scripts";
 import { Deployer } from "@matterlabs/hardhat-zksync-deploy";
+import * as dotenv from "dotenv";
+import * as hre from "hardhat";
 import { Wallet } from "zksync-web3";
+import { registryConfig } from "../config/registry.config";
+import { confirmContinue } from "../utils/scripts";
 
 dotenv.config();
 
@@ -12,7 +12,7 @@ export async function deployRegistry() {
     const networkName = await hre.network.name;
     const chainId = Number(network.chainId);
 
-    const deployerAddress = new Wallet(process.env.DEPLOYER_PRIVATE_KEY);
+    const deployerWallet = new Wallet(process.env.DEPLOYER_PRIVATE_KEY ?? "");
 
     console.log(`
         ////////////////////////////////////////////////////
@@ -24,13 +24,13 @@ export async function deployRegistry() {
         contract: "Registry.sol",
         chainId: chainId,
         network: networkName,
-        deployerAddress: deployerAddress.address,
+        deployerAddress: deployerWallet.address,
         registryOwner: registryConfig[chainId].owner,
     });
 
     console.log("Deploying Registry...");
 
-    const deployer = new Deployer(hre, deployerAddress);
+    const deployer = new Deployer(hre, deployerWallet);
     const Registry = await deployer.loadArtifact("Registry");
     const instance = await hre.zkUpgrades.deployProxy(
         deployer.zkWallet, Registry,
