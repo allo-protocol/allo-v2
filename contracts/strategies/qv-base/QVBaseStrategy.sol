@@ -164,7 +164,7 @@ abstract contract QVBaseStrategy is BaseStrategy {
     mapping(address => mapping(Status => uint256)) public reviewsByStatus;
 
     // recipientId -> reviewer -> status
-    mapping(address => mapping(address => bool)) public reviewedByManager;
+    mapping(address => mapping(address => Status)) public reviewedByManager;
 
     /// ================================
     /// ========== Modifier ============
@@ -276,11 +276,14 @@ abstract contract QVBaseStrategy is BaseStrategy {
                 revert RECIPIENT_ERROR(recipientId);
             }
 
-            if (reviewedByManager[recipientId][msg.sender]) revert RECIPIENT_ERROR(recipientId);
+            // revert if the pool manager has previously accepted the recipient
+            if (reviewedByManager[recipientId][msg.sender] == Status.Accepted) revert RECIPIENT_ERROR(recipientId);
 
-            reviewedByManager[recipientId][msg.sender] = true;
+            // track the review cast for the recipient
+            reviewedByManager[recipientId][msg.sender] = recipientStatus;
             reviewsByStatus[recipientId][recipientStatus]++;
 
+            // update the recipient status if the review threshold has been reached
             if (reviewsByStatus[recipientId][recipientStatus] >= reviewThreshold) {
                 Recipient storage recipient = recipients[recipientId];
                 recipient.recipientStatus = recipientStatus;

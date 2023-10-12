@@ -537,7 +537,7 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
         address[] memory recipientIds = new address[](1);
         recipientIds[0] = recipientId;
         IStrategy.Status[] memory Statuses = new IStrategy.Status[](1);
-        Statuses[0] = IStrategy.Status.Rejected;
+        Statuses[0] = IStrategy.Status.Accepted;
 
         vm.startPrank(pool_manager1());
         qvStrategy().reviewRecipients(recipientIds, Statuses);
