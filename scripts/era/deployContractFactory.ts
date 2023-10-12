@@ -52,4 +52,4 @@ export async function deployContractFactory() {
 // });
 
 // Note: Deploy script to run in terminal:
-// npx hardhat run scripts/deployContractFactory.ts --network zksync-testnet --config era.hardhat.config.ts
+// npx hardhat run scripts/era/deployContractFactory.ts --network zksync-testnet --config era.hardhat.config.ts

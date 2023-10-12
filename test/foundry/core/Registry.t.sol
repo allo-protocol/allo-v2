@@ -55,7 +55,7 @@ contract RegistryTest is Test, RegistrySetup, Native, Errors {
         newRegistry.initialize(address(0));
     }
 
-    function test_createProfile() public {
+    function test_createProfile_shit() public {
         vm.expectEmit(true, false, false, true);
 
         bytes32 testProfileId = TestUtilities._testUtilGenerateProfileId(nonce, profile1_owner());

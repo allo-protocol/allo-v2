@@ -339,9 +339,9 @@ contract Registry is IRegistry, Initializable, Native, AccessControlUpgradeable,
     /// @return anchor The address of the deployed anchor contract
     function _generateAnchor(bytes32 _profileId, string memory _name) internal returns (address anchor) {
         bytes memory encodedData = abi.encode(_profileId, _name);
-        bytes memory encodedConstructor = abi.encode(_profileId, address(this));
+        bytes memory encodedConstructorArgs = abi.encode(_profileId, address(this));
 
-        bytes memory bytecode = abi.encodePacked(type(Anchor).creationCode, encodedConstructor);
+        bytes memory bytecode = abi.encodePacked(type(Anchor).creationCode, encodedConstructorArgs);
 
         bytes32 salt = keccak256(encodedData);
 
@@ -349,6 +349,7 @@ contract Registry is IRegistry, Initializable, Native, AccessControlUpgradeable,
             uint160(uint256(keccak256(abi.encodePacked(bytes1(0xff), address(this), salt, keccak256(bytecode)))))
         );
 
+        // Try to deploy the anchor contract, if it fails then the anchor already exists
         try new Anchor{salt: salt}(_profileId, address(this)) returns (Anchor _anchor) {
             anchor = address(_anchor);
         } catch {

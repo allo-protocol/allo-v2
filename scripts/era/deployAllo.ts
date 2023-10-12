@@ -65,4 +65,4 @@ export async function deployAllo(_registryAddress? : string) {
 // });
 
 // Note: Deploy script to run in terminal:
-// npx hardhat run scripts/deployAllo.ts --network zksync-testnet --config era.hardhat.config.ts
+// npx hardhat run scripts/era/deployAllo.ts --network zksync-testnet --config era.hardhat.config.ts

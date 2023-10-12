@@ -952,7 +952,7 @@ contract DonationVotingMerkleDistributionBaseMockTest is
 
     function __getMerkleRootAndDistributions()
         internal
-        pure
+        view
         returns (bytes32, DonationVotingMerkleDistributionBaseStrategy.Distribution[] memory)
     {
         DonationVotingMerkleDistributionBaseStrategy.Distribution[] memory distributions =
@@ -961,50 +961,51 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         DonationVotingMerkleDistributionBaseStrategy.Distribution memory distribution0 =
         DonationVotingMerkleDistributionBaseStrategy.Distribution({
             index: 0,
-            recipientId: 0xad5FDFa74961f0b6F1745eF0A1Fa0e115caa9641,
+            recipientId: profile1_anchor(),
             // recipientAddress: '0x7b6d3eB9bb22D0B13a2FAd6D6bDBDc34Ad2c5849',
             amount: 1e18,
             merkleProof: new bytes32[](1)
         });
-        distribution0.merkleProof[0] = 0x84de05a8497b125afa0c428b43e98c4378eb0f8eadae82538ee2b53e44bea806;
+        distribution0.merkleProof[0] = 0x6bcdc32579ad574da095b1c76501182d9390c80a751cf576cc57d536828174c2;
 
         DonationVotingMerkleDistributionBaseStrategy.Distribution memory distribution1 =
         DonationVotingMerkleDistributionBaseStrategy.Distribution({
             index: 1,
-            recipientId: 0x4E0aB029b2128e740fA408a26aC5f314e769469f,
+            recipientId: profile2_anchor(),
             // recipientAddress: '0x0c73C6E53042522CDd21Bd8F1C63e14e66869E99',
             amount: 2e18,
             merkleProof: new bytes32[](1)
         });
-        distribution1.merkleProof[0] = 0x4a3e9be6ab6503dfc6dd903fddcbabf55baef0c6aaca9f2cce2dc6d6350303f5;
+        distribution1.merkleProof[0] = 0x9556850961fdd0344b962c7a2125ee7993f4dfff6e417f0cd5e51a86e30dc632;
 
         distributions[0] = distribution0;
         distributions[1] = distribution1;
 
-        bytes32 merkleRoot = 0xbd6f4408f5de99e3401b90770fc87cc4e23b76c093f812d61df2bce4b881d88c;
+        bytes32 merkleRoot = 0x0e46380a33ed8feaa6d37621663f5a56d328a3f6fda1968de326cb37cdbd7deb;
 
         return (merkleRoot, distributions);
 
-        //        distributions [
-        //   [
-        //     0,
-        //     '0xad5FDFa74961f0b6F1745eF0A1Fa0e115caa9641',
-        //     '0x7b6d3eB9bb22D0B13a2FAd6D6bDBDc34Ad2c5849',
-        //     BigNumber { value: "1000000000000000000" }
-        //   ],
-        //   [
-        //     1,
-        //     '0x4E0aB029b2128e740fA408a26aC5f314e769469f',
-        //     '0x0c73C6E53042522CDd21Bd8F1C63e14e66869E99',
-        //     BigNumber { value: "2000000000000000000" }
-        //   ]
-        // ]
-        // tree.root 0xbd6f4408f5de99e3401b90770fc87cc4e23b76c093f812d61df2bce4b881d88c
-        // proof0.root [
-        //   '0x84de05a8497b125afa0c428b43e98c4378eb0f8eadae82538ee2b53e44bea806'
-        // ]
-        // proof1.root [
-        //   '0x4a3e9be6ab6503dfc6dd903fddcbabf55baef0c6aaca9f2cce2dc6d6350303f5'
+        // distributions [
+        //     [
+        //         0,
+        //         '0xeA49994Fcb09126fbdA63CEe827E6721A58b262c',
+        //         '0x7b6d3eB9bb22D0B13a2FAd6D6bDBDc34Ad2c5849',
+        //         BigNumber { value: "1000000000000000000" }
+        //     ],
+        //     [
+        //         1,
+        //         '0x19b723B08FFbb89E3328a562d434ADD26218669a',
+        //         '0x0c73C6E53042522CDd21Bd8F1C63e14e66869E99',
+        //         BigNumber { value: "2000000000000000000" }
+        //     ]
+        //     ]
+        //     tree.root 0x0e46380a33ed8feaa6d37621663f5a56d328a3f6fda1968de326cb37cdbd7deb
+        //     proof0.root [
+        //     '0x6bcdc32579ad574da095b1c76501182d9390c80a751cf576cc57d536828174c2'
+        //     ]
+        //     proof1.root [
+        //     '0x9556850961fdd0344b962c7a2125ee7993f4dfff6e417f0cd5e51a86e30dc632'
+        //     ]
         // ]
     }
 

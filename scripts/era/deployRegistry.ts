@@ -43,10 +43,10 @@ export async function deployRegistry() {
     return instance.address;
 }
 
-// deployRegistry().catch((error) => {
-//     console.error(error);
-//     process.exitCode = 1;
-// });
+deployRegistry().catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+});
 
 // Note: Deploy script to run in terminal:
-// npx hardhat run scripts/deployRegistry.ts --network zksync-testnet --config era.hardhat.config.ts
+// npx hardhat run scripts/era/deployRegistry.ts --network zksync-testnet --config era.hardhat.config.ts

@@ -12,22 +12,23 @@ library TestUtilities {
         pure
         returns (address)
     {
-        bytes32 salt = keccak256(abi.encodePacked(_profileId, _name));
+        bytes memory encodedData = abi.encode(_profileId, _name);
+        bytes memory encodedConstructor = abi.encode(_profileId, address(_registry));
 
-        return getDeployed(salt, _profileId, _registry);
+        bytes memory bytecode = abi.encodePacked(type(Anchor).creationCode, encodedConstructor);
+
+        bytes32 salt = keccak256(encodedData);
+
+        address preComputedAddress = address(
+            uint160(uint256(keccak256(abi.encodePacked(bytes1(0xff), address(_registry), salt, keccak256(bytecode)))))
+        );
+
+        return preComputedAddress;
     }
 
     /// @notice Generates the profileId based on msg.sender
     /// @param _nonce Nonce used to generate profileId
     function _testUtilGenerateProfileId(uint256 _nonce, address sender) internal pure returns (bytes32) {
         return keccak256(abi.encodePacked(_nonce, sender));
-    }
-
-    /// @dev Returns the deterministic address for `salt`.
-    function getDeployed(bytes32 salt, bytes32 profileId, address registry) internal pure returns (address) {
-       bytes memory bytecode = abi.encodePacked(type(Anchor).creationCode, abi.encode(profileId, registry));
-       return address(
-            uint160(uint256(keccak256(abi.encodePacked(bytes1(0xff), registry, salt, keccak256(bytecode)))))
-        );
     }
 }
