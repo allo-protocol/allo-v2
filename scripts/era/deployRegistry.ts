@@ -13,6 +13,7 @@ export async function deployRegistry() {
     const chainId = Number(network.chainId);
 
     const deployerWallet = new Wallet(process.env.DEPLOYER_PRIVATE_KEY ?? "");
+    const registryOwner = registryConfig[chainId].owner;
 
     console.log(`
         ////////////////////////////////////////////////////
@@ -25,7 +26,7 @@ export async function deployRegistry() {
         chainId: chainId,
         network: networkName,
         deployerAddress: deployerWallet.address,
-        registryOwner: registryConfig[chainId].owner,
+        registryOwner: registryOwner,
     });
 
     console.log("Deploying Registry...");
@@ -34,7 +35,7 @@ export async function deployRegistry() {
     const Registry = await deployer.loadArtifact("Registry");
     const instance = await hre.zkUpgrades.deployProxy(
         deployer.zkWallet, Registry,
-        [registryConfig[chainId].owner],
+        [registryOwner],
         { initializer: "initialize" }
     );
 
@@ -43,10 +44,10 @@ export async function deployRegistry() {
     return instance.address;
 }
 
-// deployRegistry().catch((error) => {
-//     console.error(error);
-//     process.exitCode = 1;
-// });
+deployRegistry().catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+});
 
 // Note: Deploy script to run in terminal:
-// npx hardhat run scripts/deployRegistry.ts --network zksync-testnet --config era.hardhat.config.ts
+// npx hardhat run scripts/era/deployRegistry.ts --network zksync-testnet --config era.hardhat.config.ts

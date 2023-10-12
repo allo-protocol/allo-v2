@@ -18,15 +18,15 @@ export const registryConfig: DeployParams = {
   },
   // Goerli
   5: {
-    registryImplementation: "0xd34db3b8b10faa6bfc421e919fab0272d542c1d6",
-    registryProxy: "0xBC23124Ed2655A1579291f7ADDE581fF18327D41",
-    owner: "0x1fD06f088c720bA3b7a3634a8F021Fdd485DcA42",
+    registryImplementation: "0x29F37376391738Cb030e4B3F529A52070D6C87D0",
+    registryProxy: "0xC81746A4Af93cD4c76C3225b1DA48a927f8bcbbA",
+    owner: "0x445202a3CB9f41Defdb8A7804035195467471ECA",
   },
   // Sepolia
   11155111: {
-    registryImplementation: "",
-    registryProxy: "",
-    owner: "",
+    registryImplementation: "0x29F37376391738Cb030e4B3F529A52070D6C87D0",
+    registryProxy: "0xC81746A4Af93cD4c76C3225b1DA48a927f8bcbbA",
+    owner: "0x445202a3CB9f41Defdb8A7804035195467471ECA",
   },
   // PGN
   424: {

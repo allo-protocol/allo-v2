@@ -14,6 +14,11 @@
       "address": "0xbb6B237a98D907b04682D8567F4a8d0b4b611a3b",
       "txHash": "0x4980c433eee083f108452753680c8d82fffde2a933197286e7ed1b71d09d1687",
       "kind": "transparent"
+    },
+    {
+      "address": "0xC81746A4Af93cD4c76C3225b1DA48a927f8bcbbA",
+      "txHash": "0x34be9a679c9cc914854cae25d27caf4fe8e3e1dc5b2cc8cbab155b344fe7089f",
+      "kind": "transparent"
     }
   ],
   "impls": {
@@ -603,6 +608,188 @@
             "numberOfBytes": "224"
           },
           "t_struct(RoleData)18365_storage": {
+            "label": "struct AccessControl.RoleData",
+            "members": [
+              {
+                "label": "members",
+                "type": "t_mapping(t_address,t_bool)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "390017c4b070aad751c42b4638e4109303d0ebed8dcc0e974309b270f4df981c": {
+      "address": "0x29F37376391738Cb030e4B3F529A52070D6C87D0",
+      "txHash": "0xc4d0a1a1eb642e46cd57681430119a61b3bad060c8260b551111382a3d9e3bb7",
+      "layout": {
+        "solcVersion": "0.8.19",
+        "storage": [
+          {
+            "label": "_roles",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)19560_storage)",
+            "contract": "AccessControl",
+            "src": "lib/openzeppelin-contracts/contracts/access/AccessControl.sol:56"
+          },
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol:63",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "1",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol:68"
+          },
+          {
+            "label": "anchorToProfileId",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_mapping(t_address,t_bytes32)",
+            "contract": "Registry",
+            "src": "contracts/core/Registry.sol:109"
+          },
+          {
+            "label": "profilesById",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_mapping(t_bytes32,t_struct(Profile)2452_storage)",
+            "contract": "Registry",
+            "src": "contracts/core/Registry.sol:111"
+          },
+          {
+            "label": "profileIdToPendingOwner",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_mapping(t_bytes32,t_address)",
+            "contract": "Registry",
+            "src": "contracts/core/Registry.sol:113"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_bytes32)": {
+            "label": "mapping(address => bytes32)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_address)": {
+            "label": "mapping(bytes32 => address)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(Profile)2452_storage)": {
+            "label": "mapping(bytes32 => struct IRegistry.Profile)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)19560_storage)": {
+            "label": "mapping(bytes32 => struct AccessControl.RoleData)",
+            "numberOfBytes": "32"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_struct(Metadata)2918_storage": {
+            "label": "struct Metadata",
+            "members": [
+              {
+                "label": "protocol",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "pointer",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(Profile)2452_storage": {
+            "label": "struct IRegistry.Profile",
+            "members": [
+              {
+                "label": "id",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "nonce",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "name",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "metadata",
+                "type": "t_struct(Metadata)2918_storage",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "owner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "5"
+              },
+              {
+                "label": "anchor",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "6"
+              }
+            ],
+            "numberOfBytes": "224"
+          },
+          "t_struct(RoleData)19560_storage": {
             "label": "struct AccessControl.RoleData",
             "members": [
               {
