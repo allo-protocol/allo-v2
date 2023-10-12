@@ -164,7 +164,7 @@ abstract contract QVBaseStrategy is BaseStrategy {
     mapping(address => mapping(Status => uint256)) public reviewsByStatus;
 
     // recipientId -> reviewer -> status
-    mapping(address => mapping(address => bool)) public reviewedByManager;
+    mapping(address => mapping(address => Status)) public reviewedByManager;
 
     /// ================================
     /// ========== Modifier ============
@@ -276,11 +276,14 @@ abstract contract QVBaseStrategy is BaseStrategy {
                 revert RECIPIENT_ERROR(recipientId);
             }
 
-            if (reviewedByManager[recipientId][msg.sender]) revert RECIPIENT_ERROR(recipientId);
+            // revert if the pool manager has previously accepted the recipient
+            if (reviewedByManager[recipientId][msg.sender] == Status.Accepted) revert RECIPIENT_ERROR(recipientId);
 
-            reviewedByManager[recipientId][msg.sender] = true;
+            // track the review cast for the recipient
+            reviewedByManager[recipientId][msg.sender] = recipientStatus;
             reviewsByStatus[recipientId][recipientStatus]++;
 
+            // update the recipient status if the review threshold has been reached
             if (reviewsByStatus[recipientId][recipientStatus] >= reviewThreshold) {
                 Recipient storage recipient = recipients[recipientId];
                 recipient.recipientStatus = recipientStatus;
@@ -434,15 +437,16 @@ abstract contract QVBaseStrategy is BaseStrategy {
 
         Status currentStatus = recipient.recipientStatus;
 
-        if (currentStatus == Status.None) {
+        if (currentStatus == Status.Accepted) {
+            // revert if the recipient has already been accepted
+            revert RECIPIENT_ALREADY_ACCEPTED();
+        } else if (currentStatus == Status.None) {
             // recipient registering new application
             recipient.recipientStatus = Status.Pending;
             emit Registered(recipientId, _data, _sender);
         } else {
-            if (currentStatus == Status.Accepted) {
-                // recipient updating accepted application
-                recipient.recipientStatus = Status.Pending;
-            } else if (currentStatus == Status.Rejected) {
+            // recipient updating rejected/pending/appealed application
+            if (currentStatus == Status.Rejected) {
                 // recipient updating rejected application
                 recipient.recipientStatus = Status.Appealed;
             }
@@ -538,6 +542,9 @@ abstract contract QVBaseStrategy is BaseStrategy {
     ) internal onlyActiveAllocation {
         // check the `_voiceCreditsToAllocate` is > 0
         if (_voiceCreditsToAllocate == 0) revert INVALID();
+
+        // check if the recipient is accepted
+        if (!_isAcceptedRecipient(_recipientId)) revert RECIPIENT_ERROR(_recipientId);
 
         // update the allocator voice credits
         _allocator.voiceCredits += _voiceCreditsToAllocate;
