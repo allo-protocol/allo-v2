@@ -26,8 +26,9 @@ body:
       description: Select one of the following and delete the other. Add any nuance below. How much time are we willing to spend on this and how does that constrain the solution?
       multiple: true
       options:
-        - Small Batch
-        - Big Batch
+        - label: Small Batch
+        - label: Big Batch
+          required: true
     validations:
       required: true
   - type: textarea
@@ -60,3 +61,11 @@ body:
       description: List or provide any other, related planning docs that will help someone grok the problem or solution.
     validations:
       required: false
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our [Code of Conduct](https://example.com)
+      options:
+        - label: I agree to follow this project's Code of Conduct
+          required: true
