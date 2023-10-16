@@ -227,6 +227,14 @@ contract QVSimpleStrategyTest is QVBaseStrategyTest {
         qvSimpleStrategy().removeAllocator(allocator);
     }
 
+    function testRevert_removeAllocator_INVALID() public {
+        __register_accept_allocate_recipient();
+
+        vm.startPrank(pool_manager1());
+        vm.expectRevert(INVALID.selector);
+        qvSimpleStrategy().removeAllocator(randomAddress());
+    }
+
     function testRevert_removeAllocator_UNAUTHORIZED() public {
         vm.startPrank(randomAddress());
         address allocator = makeAddr("allocator");

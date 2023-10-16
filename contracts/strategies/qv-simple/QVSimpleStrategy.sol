@@ -96,6 +96,9 @@ contract QVSimpleStrategy is QVBaseStrategy, Multicall {
     /// @dev Only the pool manager(s) can call this function and emits an `AllocatorRemoved` event
     /// @param _allocator The allocator address
     function removeAllocator(address _allocator) external onlyPoolManager(msg.sender) {
+        Allocator storage allocator = allocators[_allocator];
+        if (allocator.voiceCredits > 0) revert INVALID();
+
         allowedAllocators[_allocator] = false;
 
         emit AllocatorRemoved(_allocator, msg.sender);
