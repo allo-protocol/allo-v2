@@ -117,12 +117,14 @@ contract DonationVotingMerkleDistributionVaultStrategy is
         address token = p2Data.permit.permitted.token;
         uint256 amount = p2Data.permit.permitted.amount;
 
+        uint256 transferredAmount = amount;
         if (token == NATIVE) {
             if (msg.value < amount) {
                 revert AMOUNT_MISMATCH();
             }
             SafeTransferLib.safeTransferETH(address(this), amount);
         } else {
+            uint256 balanceBefore = SafeTransferLib.balanceOf(token, address(this));
             PERMIT2.permitTransferFrom(
                 // The permit message.
                 p2Data.permit,
@@ -134,11 +136,14 @@ contract DonationVotingMerkleDistributionVaultStrategy is
                 // the EIP712 hash of `_permit`.
                 p2Data.signature
             );
+
+            uint256 balanceAfter = SafeTransferLib.balanceOf(token, address(this));
+            transferredAmount = balanceAfter - balanceBefore;
         }
 
         // Update the total payout amount for the claim and the total claimable amount
-        claims[recipientId][token] += amount;
-        totalClaimableAmount[token] += amount;
+        claims[recipientId][token] += transferredAmount;
+        totalClaimableAmount[token] += transferredAmount;
     }
 
     /// @notice Internal function to return the token amount locked in vault
