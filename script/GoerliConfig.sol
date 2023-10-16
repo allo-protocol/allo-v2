@@ -7,7 +7,7 @@ pragma solidity 0.8.19;
 contract GoerliConfig {
     address public constant ALLO = 0xbb6B237a98D907b04682D8567F4a8d0b4b611a3b;
 
-    address public constant REGISTRY = 0xBC23124Ed2655A1579291f7ADDE581fF18327D41;
+    address public constant REGISTRY = 0xC81746A4Af93cD4c76C3225b1DA48a927f8bcbbA;
 
     address public constant DONATIONVOTINGSTRATEGY = 0x81Abcb682cc61c463Cdbe1Ef1804CbEfC1d54d7f;
     address public constant DONATIONVOTINGMERKLEPAYOUTSTRATEGYFORCLONE = 0x81Abcb682cc61c463Cdbe1Ef1804CbEfC1d54d7f;
@@ -18,7 +18,7 @@ contract GoerliConfig {
     address public constant DONATIONVOTINGVAULTSTRATEGYFORCLONE = 0xB42C26e4029e932CDd53981f7CbefF89e74F03c2;
     address public constant IMPACTSTREAMFORCLONE = 0x7Bb23D29BA83D92EACD99e17B32a2794A1A10cdd;
 
-    address public constant OWNER = 0x1fD06f088c720bA3b7a3634a8F021Fdd485DcA42;
+    address public constant OWNER = 0x445202a3CB9f41Defdb8A7804035195467471ECA;
 
     // TODO: update this when we deploy new strategy/strategies
     address public constant DONATIONVOTISTRATEGY = 0xDecE8A9aEc94106CDfe652685243E6eB48fd50A1;
@@ -31,11 +31,11 @@ contract GoerliConfig {
     // address public constant DONATIONVOTINGVAULTSTRATEGY = ;
 
     /// @notice This is a test profile ID
-    bytes32 public constant TEST_PROFILE_1 = 0x844b425d3f8e8348bda70374acf679c3d94eac5fcacde608cfca77acb2a11614;
+    bytes32 public constant TEST_PROFILE_1 = 0x8F6B2D2D290E43CE76E89917955AF5396597ED618CE401A3CFD615E03B8E98F9;
     bytes32 public constant TEST_PROFILE_2 = 0x5F8F7EF300B0E8FE0417371A068B217C49BB7235E87CCE1E53F55717F3933BD3;
 
     bytes32 public constant POOL_CREATOR_PROFILE_ID = 0x9d70efa6f5bb7f502cb45f2c2a4558a1c909c4c0fbb7db7abbae58e7074f1ec0;
-    address public constant POOL_CREATOR_ANCHOR_ID = 0x16a200b50ebE50b7fcd347D9B33329dD77612D92;
+    address public constant POOL_CREATOR_ANCHOR_ID = 0x3ABbde464E29381429733BF3638906D826E5846F;
 
     bytes32 public constant RECIPIENT_PROFILE_ID = 0xba623a1db131a7aed2eea599053007537d4308e3d6145c94ba1242f255d80859;
     address public constant RECIPIENT_ANCHOR_ID = 0x27a3528fA5aA9175F94C651be8Bcf75Ad3AF0bF4;

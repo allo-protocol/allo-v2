@@ -11,7 +11,7 @@ import {GoerliConfig} from "./../GoerliConfig.sol";
 /// @notice This script is used to create profile test data for the Allo V2 contracts
 /// @dev Use this to run
 ///      'source .env' if you are using a .env file for your rpc-url
-///      'forge script script/CreateProfile.s.sol:CreateProfile --rpc-url $GOERLI_RPC_URL --broadcast  -vvvv'
+///      'forge script script/registry/CreateProfile.s.sol:CreateProfile --rpc-url $GOERLI_RPC_URL --broadcast  -vvvv'
 contract CreateProfile is Script, GoerliConfig {
     // Adding a nonce for reusability
     uint256 nonce = block.timestamp;
@@ -34,7 +34,7 @@ contract CreateProfile is Script, GoerliConfig {
 
         // Create a profile
         bytes32 profileId = registry.createProfile(
-            nonce++, "Test Profile", Metadata({protocol: 1, pointer: TEST_METADATA_POINTER_1}), OWNER, members
+            nonce++, "Jax Profile 1", Metadata({protocol: 1, pointer: TEST_METADATA_POINTER_1}), OWNER, members
         );
         IRegistry.Profile memory profile = registry.getProfileById(profileId);
         console.log("Profile created");
