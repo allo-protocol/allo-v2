@@ -155,6 +155,27 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         assertEq(uint8(strategy.getMilestoneStatus(0)), uint8(IStrategy.Status.Pending));
     }
 
+    function testRevert_setMilestone_INVALID_MILESTONE_zeroPercentage() public {
+        RFPSimpleStrategy.Milestone[] memory milestones = new RFPSimpleStrategy.Milestone[](2);
+        RFPSimpleStrategy.Milestone memory milestone = RFPSimpleStrategy.Milestone({
+            metadata: Metadata({protocol: 1, pointer: "metadata"}),
+            amountPercentage: 0,
+            milestoneStatus: IStrategy.Status.Pending
+        });
+        RFPSimpleStrategy.Milestone memory milestone2 = RFPSimpleStrategy.Milestone({
+            metadata: Metadata({protocol: 1, pointer: "metadata"}),
+            amountPercentage: 1e18,
+            milestoneStatus: IStrategy.Status.Pending
+        });
+
+        milestones[0] = milestone;
+        milestones[1] = milestone2;
+
+        vm.prank(address(pool_admin()));
+        vm.expectRevert(RFPSimpleStrategy.INVALID_MILESTONE.selector);
+        strategy.setMilestones(milestones);
+    }
+
     function test_setMilestone_getMilestone() public {
         __setMilestones();
         RFPSimpleStrategy.Milestone memory milestones0 = strategy.getMilestone(0);
