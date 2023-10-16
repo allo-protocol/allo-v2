@@ -513,6 +513,14 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         strategy.distribute(new address[](0), "", pool_admin());
     }
 
+    function testRevert_distribute_INVALID_MILESTONE_notPendingMilestone() public {
+        test_rejectMilestone();
+
+        vm.expectRevert(RFPSimpleStrategy.INVALID_MILESTONE.selector);
+        vm.prank(address(allo()));
+        strategy.distribute(new address[](0), "", pool_admin());
+    }
+
     function testRevert_distribute_NOT_ENOUGH_FUNDS() public {
         __register_setMilestones_allocate_submitUpcomingMilestone();
         vm.expectRevert(); // Arithmetic underflow revert
