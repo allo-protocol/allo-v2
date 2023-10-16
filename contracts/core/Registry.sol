@@ -2,7 +2,7 @@
 pragma solidity 0.8.19;
 
 // External Libraries
-import {AccessControl} from "openzeppelin-contracts/contracts/access/AccessControl.sol";
+import "openzeppelin-contracts-upgradeable/contracts/access/AccessControlUpgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
 import {CREATE3} from "solady/src/utils/CREATE3.sol";
 import {ERC20} from "solady/src/tokens/ERC20.sol";
@@ -37,7 +37,7 @@ import "./libraries/Transfer.sol";
 ///      It is also used to deploy the anchor contract for each profile which acts as a proxy
 ///      for the profile and is used to receive funds and execute transactions on behalf of the profile
 ///      The Registry is also used to add and remove members from a profile and update the profile 'Metadata'
-contract Registry is IRegistry, Native, AccessControl, Transfer, Initializable, Errors {
+contract Registry is IRegistry, Initializable, Native, AccessControlUpgradeable, Transfer, Errors {
     /// ==========================
     /// === Storage Variables ====
     /// ==========================
