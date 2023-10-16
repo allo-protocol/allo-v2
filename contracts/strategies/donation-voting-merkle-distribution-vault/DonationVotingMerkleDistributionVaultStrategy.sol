@@ -124,7 +124,7 @@ contract DonationVotingMerkleDistributionVaultStrategy is
             }
             SafeTransferLib.safeTransferETH(address(this), amount);
         } else {
-            uint256 balanceBefore = IERC20Upgradeable(token).balanceOf(address(this));
+            uint256 balanceBefore = SafeTransferLib.balanceOf(token, address(this));
             PERMIT2.permitTransferFrom(
                 // The permit message.
                 p2Data.permit,
@@ -137,7 +137,7 @@ contract DonationVotingMerkleDistributionVaultStrategy is
                 p2Data.signature
             );
 
-            uint256 balanceAfter = IERC20Upgradeable(token).balanceOf(address(this));
+            uint256 balanceAfter = SafeTransferLib.balanceOf(token, address(this));
             transferredAmount = balanceAfter - balanceBefore;
         }
 
