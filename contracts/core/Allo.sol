@@ -349,8 +349,11 @@ contract Allo is
         // if amount is 0, revert with 'NOT_ENOUGH_FUNDS()' error
         if (_amount == 0) revert NOT_ENOUGH_FUNDS();
 
+        Pool memory pool = pools[_poolId];
+        if (pool.token == NATIVE && _amount != msg.value) revert NOT_ENOUGH_FUNDS();
+
         // Call the internal fundPool() function
-        _fundPool(_amount, _poolId, pools[_poolId].strategy);
+        _fundPool(_amount, _poolId, pool.strategy);
     }
 
     /// @notice Allocate to a recipient or multiple recipients.
@@ -479,7 +482,7 @@ contract Allo is
             // To prevent paying the baseFee from the Allo contract's balance
             // If _token is NATIVE, then baseFee + _amount should be > than msg.value.
             // If _token is not NATIVE, then baseFee should be > than msg.value.
-            if ((_token == NATIVE && (baseFee + _amount > msg.value)) || (_token != NATIVE && baseFee > msg.value)) {
+            if ((_token == NATIVE && (baseFee + _amount != msg.value)) || (_token != NATIVE && baseFee != msg.value)) {
                 revert NOT_ENOUGH_FUNDS();
             }
             _transferAmount(NATIVE, treasury, baseFee);
