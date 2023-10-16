@@ -29,8 +29,8 @@ contract QVNftTieredStrategyTest is QVBaseStrategyTest {
         super.setUp();
     }
 
-    function _createStrategy() internal override returns (address) {
-        return address(new QVNftTieredStrategy(address(allo()), "MockStrategy"));
+    function _createStrategy() internal override returns (address payable) {
+        return payable(address(new QVNftTieredStrategy(address(allo()), "MockStrategy")));
     }
 
     function qvNftStrategy() internal view returns (QVNftTieredStrategy) {

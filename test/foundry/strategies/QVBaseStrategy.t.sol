@@ -49,7 +49,7 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
     uint64 public allocationStartTime;
     uint64 public allocationEndTime;
 
-    address internal _strategy;
+    address payable internal _strategy;
     MockERC20 public token;
     Metadata public poolMetadata;
 
@@ -93,8 +93,8 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
         _initialize();
     }
 
-    function _createStrategy() internal virtual returns (address) {
-        return address(new QVBaseStrategyTestMock(address(allo()), "MockStrategy"));
+    function _createStrategy() internal virtual returns (address payable) {
+        return payable(address(new QVBaseStrategyTestMock(address(allo()), "MockStrategy")));
     }
 
     function _initialize() internal virtual {
@@ -139,7 +139,7 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
 
     function test_initialize_UNAUTHORIZED() public virtual {
         vm.startPrank(allo_owner());
-        address strategy = address(new QVBaseStrategyTestMock(address(allo()), "MockStrategy"));
+        address payable strategy = payable(address(new QVBaseStrategyTestMock(address(allo()), "MockStrategy")));
         vm.expectRevert(UNAUTHORIZED.selector);
         vm.stopPrank();
         vm.startPrank(randomAddress());

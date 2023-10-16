@@ -26,8 +26,8 @@ contract QVGovernanceERC20VotesTest is QVBaseStrategyTest {
         super.setUp();
     }
 
-    function _createStrategy() internal override returns (address) {
-        return address(new QVGovernanceERC20Votes(address(allo()), "MockStrategy"));
+    function _createStrategy() internal override returns (address payable) {
+        return payable(address(new QVGovernanceERC20Votes(address(allo()), "MockStrategy")));
     }
 
     function qvGovStrategy() internal view returns (QVGovernanceERC20Votes) {
