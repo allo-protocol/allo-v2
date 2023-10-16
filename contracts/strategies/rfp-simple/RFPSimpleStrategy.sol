@@ -40,6 +40,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         address recipientAddress;
         uint256 proposalBid;
         Status recipientStatus;
+        Metadata metadata;
     }
 
     /// @notice Stores the details of the milestone
@@ -378,6 +379,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         recipient.recipientAddress = recipientAddress;
         recipient.useRegistryAnchor = isUsingRegistryAnchor ? true : recipient.useRegistryAnchor;
         recipient.proposalBid = proposalBid;
+        recipient.metadata = metadata;
         recipient.recipientStatus = Status.Pending;
     }
 
