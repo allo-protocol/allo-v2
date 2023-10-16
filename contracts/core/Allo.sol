@@ -350,8 +350,8 @@ contract Allo is
         if (_amount == 0) revert NOT_ENOUGH_FUNDS();
 
         Pool memory pool = pools[_poolId];
-        if(pool.token == NATIVE && _amount != msg.value) revert NOT_ENOUGH_FUNDS();
-        
+        if (pool.token == NATIVE && _amount != msg.value) revert NOT_ENOUGH_FUNDS();
+
         // Call the internal fundPool() function
         _fundPool(_amount, _poolId, pool.strategy);
     }

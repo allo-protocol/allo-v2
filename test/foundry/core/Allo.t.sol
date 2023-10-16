@@ -190,7 +190,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors {
         vm.deal(address(pool_admin()), 1e18);
 
         vm.prank(pool_admin());
-        allo().createPoolWithCustomStrategy{value: 1e18}(
+        allo().createPoolWithCustomStrategy{value: 1e17}(
             poolProfile_id(), strategy, "0x", NATIVE, 0, metadata, pool_managers()
         );
     }
