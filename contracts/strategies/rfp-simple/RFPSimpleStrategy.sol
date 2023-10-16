@@ -434,6 +434,9 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         Milestone storage milestone = milestones[upcomingMilestone];
         Recipient memory recipient = _recipients[acceptedRecipientId];
 
+        // Check if the milestone is pending
+        if (milestone.milestoneStatus != Status.Pending) revert INVALID_MILESTONE();
+
         // Calculate the amount to be distributed for the milestone
         uint256 amount = (recipient.proposalBid * milestone.amountPercentage) / 1e18;
 
