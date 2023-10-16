@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
+import "openzeppelin-contracts/contracts/token/ERC721/utils/ERC721Holder.sol";
+import "openzeppelin-contracts/contracts/token/ERC1155/utils/ERC1155Holder.sol";
+
 // Core Contracts
 import {Registry} from "./Registry.sol";
 
@@ -24,7 +27,7 @@ import {Registry} from "./Registry.sol";
 /// @notice Anchors are associated with profiles and are accessible exclusively by the profile owner. This contract ensures secure
 ///         and authorized interaction with external addresses, enhancing the capabilities of profiles and enabling controlled
 ///         execution of operations. The contract leverages the `Registry` contract for ownership verification and access control.
-contract Anchor {
+contract Anchor is ERC721Holder, ERC1155Holder {
     /// ==========================
     /// === Storage Variables ====
     /// ==========================
