@@ -468,9 +468,9 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
 
         if (baseFee > 0) {
             // To prevent paying the baseFee from the Allo contract's balance
-            // If _token is NATIVE, then baseFee + _amount should be >= than msg.value.
-            // If _token is not NATIVE, then baseFee should be >= than msg.value.
-            if ((_token == NATIVE && (baseFee + _amount >= msg.value)) || (_token != NATIVE && baseFee >= msg.value)) {
+            // If _token is NATIVE, then baseFee + _amount should be > than msg.value.
+            // If _token is not NATIVE, then baseFee should be > than msg.value.
+            if ((_token == NATIVE && (baseFee + _amount > msg.value)) || (_token != NATIVE && baseFee > msg.value)) {
                 revert NOT_ENOUGH_FUNDS();
             }
             _transferAmount(NATIVE, treasury, baseFee);
