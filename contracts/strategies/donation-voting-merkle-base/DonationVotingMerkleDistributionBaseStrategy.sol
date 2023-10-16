@@ -847,6 +847,6 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
         return (rowIndex, colIndex, statusesBitMap[rowIndex]);
     }
 
-    /// @notice Contract should be able to receive ETH
+    /// @notice Contract should be able to receive NATIVE
     receive() external payable {}
 }

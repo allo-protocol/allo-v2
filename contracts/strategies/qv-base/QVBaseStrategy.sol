@@ -616,4 +616,7 @@ abstract contract QVBaseStrategy is BaseStrategy {
             revert INVALID();
         }
     }
+
+    /// @notice Contract should be able to receive NATIVE
+    receive() external payable {}
 }

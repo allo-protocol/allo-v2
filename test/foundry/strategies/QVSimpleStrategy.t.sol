@@ -21,8 +21,8 @@ contract QVSimpleStrategyTest is QVBaseStrategyTest {
         super.setUp();
     }
 
-    function _createStrategy() internal override returns (address) {
-        return address(new QVSimpleStrategy(address(allo()), "MockStrategy"));
+    function _createStrategy() internal override returns (address payable) {
+        return payable(address(new QVSimpleStrategy(address(allo()), "MockStrategy")));
     }
 
     function _initialize() internal override {
