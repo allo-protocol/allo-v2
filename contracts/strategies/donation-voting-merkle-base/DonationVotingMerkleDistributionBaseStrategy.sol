@@ -619,6 +619,8 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
         override
         onlyPoolManager(_sender)
     {
+        if (merkleRoot == "") revert INVALID();
+
         if (!distributionStarted) {
             distributionStarted = true;
         }

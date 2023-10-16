@@ -763,6 +763,16 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         strategy.distribute(new address[](0), abi.encode(distributions), pool_admin());
     }
 
+    function testRevert_distribute_INVALID_shit() public {
+        (bytes32 merkleRoot, DonationVotingMerkleDistributionBaseStrategy.Distribution[] memory distributions) =
+            __getMerkleRootAndDistributions();
+
+        vm.prank(address(allo()));
+        vm.expectRevert(INVALID.selector);
+
+        strategy.distribute(new address[](0), abi.encode(distributions), pool_admin());
+    }
+
     function testRevert_distribute_twice_to_same_recipient() public {
         (bytes32 merkleRoot, DonationVotingMerkleDistributionBaseStrategy.Distribution[] memory distributions) =
             __getMerkleRootAndDistributions();
