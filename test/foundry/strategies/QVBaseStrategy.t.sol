@@ -622,9 +622,9 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
         assertEq(qvStrategy().reviewsByStatus(recipientId, IStrategy.Status.Accepted), 1);
     }
 
-    function testRevert_reviewRecipients_REGISTRATION_NOT_ACTIVE() public {
-        vm.warp(allocationStartTime + 10);
-        vm.expectRevert(REGISTRATION_NOT_ACTIVE.selector);
+    function testRevert_reviewRecipients_ALLOCATION_NOT_ACTIVE() public {
+        vm.warp(allocationEndTime + 10);
+        vm.expectRevert(ALLOCATION_NOT_ACTIVE.selector);
         vm.startPrank(pool_manager1());
         qvStrategy().reviewRecipients(new address[](1), new IStrategy.Status[](1));
     }

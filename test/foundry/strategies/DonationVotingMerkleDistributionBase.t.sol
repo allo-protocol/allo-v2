@@ -363,12 +363,12 @@ contract DonationVotingMerkleDistributionBaseMockTest is
     }
 
     // Tests that you can only review recipients when registration is active
-    function testRevert_reviewRecipients_REGISTRATION_NOT_ACTIVE() public {
+    function testRevert_reviewRecipients_ALLOCATION_NOT_ACTIVE() public {
         __register_recipient();
         uint256 refRecipientsCounter = strategy.recipientsCounter();
 
-        vm.expectRevert(REGISTRATION_NOT_ACTIVE.selector);
-        vm.warp(allocationStartTime + 1);
+        vm.expectRevert(ALLOCATION_NOT_ACTIVE.selector);
+        vm.warp(allocationEndTime + 1);
 
         DonationVotingMerkleDistributionBaseStrategy.ApplicationStatus[] memory statuses =
             new DonationVotingMerkleDistributionBaseStrategy.ApplicationStatus[](1);

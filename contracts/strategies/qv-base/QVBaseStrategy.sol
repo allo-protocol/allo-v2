@@ -191,6 +191,13 @@ abstract contract QVBaseStrategy is BaseStrategy {
         _;
     }
 
+    /// @notice Modifier to check if the allocation has ended
+    /// @dev This will revert if the allocation has ended.
+    modifier onlyBeforeAllocationEnds() {
+        _checkOnlyBeforeAllocationEnds();
+        _;
+    }
+
     /// ====================================
     /// ========== Constructor =============
     /// ====================================
@@ -261,7 +268,7 @@ abstract contract QVBaseStrategy is BaseStrategy {
         external
         virtual
         onlyPoolManager(msg.sender)
-        onlyActiveRegistration
+        onlyBeforeAllocationEnds
     {
         // make sure the arrays are the same length
         uint256 recipientLength = _recipientIds.length;
@@ -351,6 +358,14 @@ abstract contract QVBaseStrategy is BaseStrategy {
     /// @dev Reverts if the allocation has not ended
     function _checkOnlyAfterAllocation() internal view virtual {
         if (block.timestamp <= allocationEndTime) revert ALLOCATION_NOT_ENDED();
+    }
+
+    /// @notice Checks if the allocation has not ended and reverts if it has.
+    /// @dev This will revert if the allocation has ended.
+    function _checkOnlyBeforeAllocationEnds() internal view {
+        if (block.timestamp > allocationEndTime) {
+            revert ALLOCATION_NOT_ACTIVE();
+        }
     }
 
     /// @notice Set the start and end dates for the pool
