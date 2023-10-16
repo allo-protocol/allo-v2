@@ -309,7 +309,7 @@ contract Allo is
     /// @return recipientId The recipient ID that has been registered
     function registerRecipient(uint256 _poolId, bytes memory _data) external payable nonReentrant returns (address) {
         // Return the recipientId (address) from the strategy
-        return pools[_poolId].strategy.registerRecipient(_data, msg.sender);
+        return pools[_poolId].strategy.registerRecipient{value: msg.value}(_data, msg.sender);
     }
 
     /// @notice Register multiple recipients to multiple pools.

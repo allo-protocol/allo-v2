@@ -767,6 +767,7 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         (bytes32 merkleRoot, DonationVotingMerkleDistributionBaseStrategy.Distribution[] memory distributions) =
             __getMerkleRootAndDistributions();
 
+        merkleRoot;
         vm.prank(address(allo()));
         vm.expectRevert(INVALID.selector);
 
