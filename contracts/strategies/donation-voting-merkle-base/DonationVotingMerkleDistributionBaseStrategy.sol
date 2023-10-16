@@ -230,6 +230,13 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
         _;
     }
 
+    /// @notice Modifier to check if the allocation has ended
+    /// @dev This will revert if the allocation has ended.
+    modifier onlyBeforeAllocationEnds() {
+        _checkOnlyBeforeAllocationEnds();
+        _;
+    }
+
     /// ===============================
     /// ======== Constructor ==========
     /// ===============================
@@ -342,7 +349,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     /// @param refRecipientsCounter the recipientCounter the transaction is based on
     function reviewRecipients(ApplicationStatus[] memory statuses, uint256 refRecipientsCounter)
         external
-        onlyActiveRegistration
+        onlyBeforeAllocationEnds
         onlyPoolManager(msg.sender)
     {
         if (refRecipientsCounter != recipientsCounter) revert INVALID();
@@ -481,6 +488,14 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     function _checkOnlyAfterAllocation() internal view {
         if (block.timestamp <= allocationEndTime) {
             revert ALLOCATION_NOT_ENDED();
+        }
+    }
+
+    /// @notice Checks if the allocation has not ended and reverts if it has.
+    /// @dev This will revert if the allocation has ended.
+    function _checkOnlyBeforeAllocationEnds() internal view {
+        if (block.timestamp > allocationEndTime) {
+            revert ALLOCATION_NOT_ACTIVE();
         }
     }
 
