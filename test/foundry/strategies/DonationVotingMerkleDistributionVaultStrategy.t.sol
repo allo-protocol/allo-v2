@@ -167,6 +167,38 @@ contract DonationVotingMerkleDistributionVaultStrategyTest is DonationVotingMerk
         vm.stopPrank();
     }
 
+    function testRevert_allocate_ERC20_InvalidSigner_frontrun() public {
+        // register recipient
+        __register_accept_recipient();
+        vm.warp(allocationStartTime + 1);
+
+        // create signer
+        (address signer, uint256 signerKrey) = makeAddrAndKey("signer");
+
+        vm.startPrank(signer);
+        // mint erc20 token
+        mockERC20.mint(signer, 1e18);
+        mockERC20.approve(address(permit2), type(uint256).max);
+
+        // create permit 2
+        uint256 nonce = 0;
+        ISignatureTransfer.PermitTransferFrom memory permit = defaultERC20PermitTransfer(address(mockERC20), nonce);
+        permit.permitted.amount = 1e17;
+        bytes memory sig =
+            __getPermitTransferSignature(permit, signerKrey, permit2.DOMAIN_SEPARATOR(), address(strategy));
+
+        // try front run attack
+        vm.startPrank(makeAddr("front-runner"));
+
+        vm.expectRevert(InvalidSigner.selector);
+        permit2.permitTransferFrom(
+            permit,
+            ISignatureTransfer.SignatureTransferDetails({to: address(strategy), requestedAmount: 1e17}),
+            signer,
+            sig
+        );
+    }
+
     function testRevert_allocate_ERC20_SignatureExpired() public {
         uint256 fromPrivateKey = 0x12341234;
 
