@@ -5,11 +5,11 @@ import "@matterlabs/hardhat-zksync-solc";
 import "@matterlabs/hardhat-zksync-upgradable";
 import "@matterlabs/hardhat-zksync-verify";
 import "@nomicfoundation/hardhat-foundry";
-import "hardhat-preprocessor";
 import "@typechain/hardhat";
-import { HardhatUserConfig, subtask } from "hardhat/config";
-import { NetworkUserConfig } from "hardhat/types";
 import fs from "fs";
+import "hardhat-preprocessor";
+import { HardhatUserConfig } from "hardhat/config";
+import { NetworkUserConfig } from "hardhat/types";
 
 dotenv.config();
 
@@ -146,7 +146,7 @@ const config: HardhatUserConfig = {
     cache: "./cache_hardhat",
   },
   zksolc: {
-    version: "1.3.13",
+    version: "1.3.14",
     compilerSource: "binary",
     settings: {
       isSystem: true,

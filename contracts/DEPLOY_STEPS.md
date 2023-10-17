@@ -62,7 +62,7 @@ The section here shows how to set up the project registry for the first time on 
 
 1. Deploy the `Registry` contract
 ```shell
- npx hardhat run scripts/deployRegistry.ts --network goerli
+ npx hardhat run scripts/core/deployRegistry.ts --network goerli
 ```
 
 ### Deploying Allo
@@ -71,7 +71,7 @@ The section here shows how to deploy the Allo contract on a given network. In th
 
 1. Deploy the `Allo` contract
 ```shell
- npx hardhat run scripts/deployAllo.ts --network goerli
+ npx hardhat run scripts/core/deployAllo.ts --network goerli
 ```
 
 ### Contract Verification

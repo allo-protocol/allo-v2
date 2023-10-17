@@ -15,18 +15,18 @@
 <tbody>
     <tr>
         <td>Registry</td>
-        <td>0xBC23124Ed2655A1579291f7ADDE581fF18327D41</td>
-        <td><a href="https://goerli.etherscan.io/address/0xBC23124Ed2655A1579291f7ADDE581fF18327D41">&#x1F517;</a></td>
+        <td>0xC3938E57400D495143094574b939a58C879Dd6d8</td>
+        <td><a href="https://goerli.etherscan.io/address/">&#x1F517;</a></td>
     </tr>
     <tr>
         <td>Allo Proxy</td>
-        <td>0xbb6B237a98D907b04682D8567F4a8d0b4b611a3b</td>
-        <td><a href="https://goerli.etherscan.io/address/0xbb6B237a98D907b04682D8567F4a8d0b4b611a3b">&#x1F517;</a></td>
+        <td></td>
+        <td><a href="https://goerli.etherscan.io/address/">&#x1F517;</a></td>
     </tr>
     <tr>
         <td>Allo Implementation</td>
-        <td>0x9c6455ccdbe69e0a9352f9cef9d2204c46bec977</td>
-        <td><a href="https://goerli.etherscan.io/address/0x9c6455ccdbe69e0a9352f9cef9d2204c46bec977">&#x1F517;</a></td>
+        <td></td>
+        <td><a href="https://goerli.etherscan.io/address/">&#x1F517;</a></td>
     </tr>
 </tbody>
 </table>

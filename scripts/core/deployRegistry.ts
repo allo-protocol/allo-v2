@@ -4,7 +4,7 @@ import { confirmContinue, prettyNum } from "../utils/scripts";
 
 export async function deployRegistry() {
     const network = await ethers.provider.getNetwork();
-    const networkName = await hre.network.name;
+    const networkName = hre.network.name;
     const chainId = Number(network.chainId);
     const account = (await ethers.getSigners())[0];
     const deployerAddress = await account.getAddress();

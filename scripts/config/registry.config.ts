@@ -26,7 +26,7 @@ export const registryConfig: DeployParams = {
   11155111: {
     registryImplementation: "",
     registryProxy: "",
-    owner: "",
+    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
   },
   // PGN
   424: {
@@ -50,7 +50,7 @@ export const registryConfig: DeployParams = {
   420: {
     registryImplementation: "",
     registryProxy: "",
-    owner: "",
+    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
   },
   // Fantom
   250: {
@@ -78,14 +78,14 @@ export const registryConfig: DeployParams = {
   },
   // zkSync-testnet
   280: {
-    registryImplementation: "0x0",
-    registryProxy: "0x0",
-    owner: "",
+    registryImplementation: "0xfaF9135F264fED9729fe2Ff9CdF8D46224B0bA1A",
+    registryProxy: "0xBA48F79EAF897e02547c2441f694E2Fc6f45127C",
+    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
   },
   // zkSync-mainnet
   324: {
-    registryImplementation: "0x0",
-    registryProxy: "0x0",
-    owner: "",
+    registryImplementation: "",
+    registryProxy: "",
+    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
   },
 };

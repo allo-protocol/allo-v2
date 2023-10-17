@@ -157,7 +157,7 @@ const config: HardhatUserConfig = {
     ),
     sepolia: createTestnetConfig(
       "sepolia",
-      "https://eth-sepolia.public.blastapi.io",
+      "https://ethereum-sepolia.publicnode.com",
     ),
     "fantom-testnet": createTestnetConfig(
       "fantom-testnet",
