@@ -522,6 +522,8 @@ contract Allo is
             feeAmount = (_amount * percentFee) / getFeeDenominator();
             amountAfterFee -= feeAmount;
 
+            if (feeAmount + amountAfterFee != _amount) revert INVALID();
+
             if (_token == NATIVE) {
                 _transferAmountFrom(_token, TransferData({from: msg.sender, to: treasury, amount: feeAmount}));
             } else {
