@@ -181,8 +181,8 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         RFPSimpleStrategy.Milestone memory milestones0 = strategy.getMilestone(0);
         RFPSimpleStrategy.Milestone memory milestones1 = strategy.getMilestone(1);
 
-        assertEq(uint8(milestones0.milestoneStatus), uint8(IStrategy.Status.Pending));
-        assertEq(uint8(milestones1.milestoneStatus), uint8(IStrategy.Status.Pending));
+        assertEq(uint8(milestones0.milestoneStatus), uint8(IStrategy.Status.None));
+        assertEq(uint8(milestones1.milestoneStatus), uint8(IStrategy.Status.None));
 
         assertEq(milestones0.amountPercentage, 7e17);
         assertEq(milestones1.amountPercentage, 3e17);
@@ -235,6 +235,9 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
     function testRevert_submitUpcomingMilestone_INVALID_MILESTONE() public {
         _register_allocate_submit_distribute();
 
+        vm.prank(recipient());
+        strategy.submitUpcomingMilestone(Metadata({protocol: 1, pointer: "metadata"}));
+
         vm.prank(address(allo()));
         strategy.distribute(new address[](0), "", pool_admin());
 
@@ -278,9 +281,17 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         strategy.rejectMilestone(0);
     }
 
-    function test_rejectMilestone_MILESTONE_ALREADY_ACCEPTED() public {
+    function testRevert_rejectMilestone_MILESTONE_NOT_PENDING_before_submit() public {
+        __register_setMilestones_allocate();
+
+        vm.expectRevert(RFPSimpleStrategy.MILESTONE_NOT_PENDING.selector);
+        vm.prank(pool_admin());
+        strategy.rejectMilestone(0);
+    }
+
+    function test_rejectMilestone_MILESTONE_NOT_PENDING_after_distribution() public {
         _register_allocate_submit_distribute();
-        vm.expectRevert(RFPSimpleStrategy.MILESTONE_ALREADY_ACCEPTED.selector);
+        vm.expectRevert(RFPSimpleStrategy.MILESTONE_NOT_PENDING.selector);
         vm.prank(pool_admin());
         strategy.rejectMilestone(0);
     }
@@ -503,10 +514,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
     }
 
     function testRevert_distribute_INVALID_MILESTONE() public {
-        _register_allocate_submit_distribute();
-
-        vm.prank(address(allo()));
-        strategy.distribute(new address[](0), "", pool_admin());
+        __register_setMilestones_allocate();
 
         vm.expectRevert(RFPSimpleStrategy.INVALID_MILESTONE.selector);
         vm.prank(address(allo()));
@@ -542,12 +550,12 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         RFPSimpleStrategy.Milestone memory milestone = RFPSimpleStrategy.Milestone({
             metadata: Metadata({protocol: 1, pointer: "metadata"}),
             amountPercentage: 7e17,
-            milestoneStatus: IStrategy.Status.Pending
+            milestoneStatus: IStrategy.Status.None
         });
         RFPSimpleStrategy.Milestone memory milestone2 = RFPSimpleStrategy.Milestone({
             metadata: Metadata({protocol: 1, pointer: "metadata"}),
             amountPercentage: 3e17,
-            milestoneStatus: IStrategy.Status.Pending
+            milestoneStatus: IStrategy.Status.None
         });
 
         milestones[0] = milestone;
