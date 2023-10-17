@@ -749,12 +749,12 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         vm.prank(address(allo()));
         vm.expectEmit(false, false, false, true);
         emit FundsDistributed(
-            1e18, 0x7b6d3eB9bb22D0B13a2FAd6D6bDBDc34Ad2c5849, NATIVE, 0xad5FDFa74961f0b6F1745eF0A1Fa0e115caa9641
+            1e18, 0x7b6d3eB9bb22D0B13a2FAd6D6bDBDc34Ad2c5849, NATIVE, 0x236BB9Cf3dC40Df67173aF2F65b4b0d904B4eDe0
         );
 
         vm.expectEmit(false, false, false, true);
         emit FundsDistributed(
-            2e18, 0x0c73C6E53042522CDd21Bd8F1C63e14e66869E99, NATIVE, 0x4E0aB029b2128e740fA408a26aC5f314e769469f
+            2e18, 0x0c73C6E53042522CDd21Bd8F1C63e14e66869E99, NATIVE, 0x6b0c8b268742D274f67f4235e22E10470F872f33
         );
 
         vm.expectEmit(false, false, false, true);
@@ -961,51 +961,50 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         DonationVotingMerkleDistributionBaseStrategy.Distribution memory distribution0 =
         DonationVotingMerkleDistributionBaseStrategy.Distribution({
             index: 0,
-            recipientId: profile1_anchor(),
+            recipientId: 0x236BB9Cf3dC40Df67173aF2F65b4b0d904B4eDe0, // profile1_anchor
             // recipientAddress: '0x7b6d3eB9bb22D0B13a2FAd6D6bDBDc34Ad2c5849',
             amount: 1e18,
             merkleProof: new bytes32[](1)
         });
-        distribution0.merkleProof[0] = 0x6bcdc32579ad574da095b1c76501182d9390c80a751cf576cc57d536828174c2;
+        distribution0.merkleProof[0] = 0x372ce6c86f99c51f7943af06c5cf86320ac63f9a71483cdecd8170e70332ffa7;
 
         DonationVotingMerkleDistributionBaseStrategy.Distribution memory distribution1 =
         DonationVotingMerkleDistributionBaseStrategy.Distribution({
             index: 1,
-            recipientId: profile2_anchor(),
+            recipientId: 0x6b0c8b268742D274f67f4235e22E10470F872f33, // profile2_anchor
             // recipientAddress: '0x0c73C6E53042522CDd21Bd8F1C63e14e66869E99',
             amount: 2e18,
             merkleProof: new bytes32[](1)
         });
-        distribution1.merkleProof[0] = 0x9556850961fdd0344b962c7a2125ee7993f4dfff6e417f0cd5e51a86e30dc632;
+        distribution1.merkleProof[0] = 0xd67f0c989dd83f78f1ce0dc68f2119e2a044681a7c5d5f060e035551e5567b00;
 
         distributions[0] = distribution0;
         distributions[1] = distribution1;
 
-        bytes32 merkleRoot = 0x0e46380a33ed8feaa6d37621663f5a56d328a3f6fda1968de326cb37cdbd7deb;
+        bytes32 merkleRoot = 0x0466335513002f277c01ce602eb815bb1287b06fe4fa0b59f1d030f137019f7d;
 
         return (merkleRoot, distributions);
 
         // distributions [
-        //     [
-        //         0,
-        //         '0xeA49994Fcb09126fbdA63CEe827E6721A58b262c',
-        //         '0x7b6d3eB9bb22D0B13a2FAd6D6bDBDc34Ad2c5849',
-        //         BigNumber { value: "1000000000000000000" }
-        //     ],
-        //     [
-        //         1,
-        //         '0x19b723B08FFbb89E3328a562d434ADD26218669a',
-        //         '0x0c73C6E53042522CDd21Bd8F1C63e14e66869E99',
-        //         BigNumber { value: "2000000000000000000" }
-        //     ]
-        //     ]
-        //     tree.root 0x0e46380a33ed8feaa6d37621663f5a56d328a3f6fda1968de326cb37cdbd7deb
-        //     proof0.root [
-        //     '0x6bcdc32579ad574da095b1c76501182d9390c80a751cf576cc57d536828174c2'
-        //     ]
-        //     proof1.root [
-        //     '0x9556850961fdd0344b962c7a2125ee7993f4dfff6e417f0cd5e51a86e30dc632'
-        //     ]
+        // [
+        //     0,
+        //     '0x236BB9Cf3dC40Df67173aF2F65b4b0d904B4eDe0',
+        //     '0x7b6d3eB9bb22D0B13a2FAd6D6bDBDc34Ad2c5849',
+        //     BigNumber { value: "1000000000000000000" }
+        // ],
+        // [
+        //     1,
+        //     '0x6b0c8b268742D274f67f4235e22E10470F872f33',
+        //     '0x0c73C6E53042522CDd21Bd8F1C63e14e66869E99',
+        //     BigNumber { value: "2000000000000000000" }
+        // ]
+        // ]
+        // tree.root 0x0466335513002f277c01ce602eb815bb1287b06fe4fa0b59f1d030f137019f7d
+        // proof0.root [
+        // '0x372ce6c86f99c51f7943af06c5cf86320ac63f9a71483cdecd8170e70332ffa7'
+        // ]
+        // proof1.root [
+        // '0xd67f0c989dd83f78f1ce0dc68f2119e2a044681a7c5d5f060e035551e5567b00'
         // ]
     }
 
