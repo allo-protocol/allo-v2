@@ -64,8 +64,8 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Thrown when the milestone is invalid
     error INVALID_MILESTONE();
 
-    /// @notice Thrown when the milestone is already accepted
-    error MILESTONE_ALREADY_ACCEPTED();
+    /// @notice Thrown when the milestone is not pending
+    error MILESTONE_NOT_PENDING();
 
     /// @notice Thrown when the proposal bid exceeds maximum bid
     error EXCEEDING_MAX_BID();
@@ -245,6 +245,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
             if (amountPercentage == 0) revert INVALID_MILESTONE();
 
             totalAmountPercentage += amountPercentage;
+            _milestones[i].milestoneStatus = Status.None;
             milestones.push(_milestones[i]);
 
             unchecked {
@@ -295,8 +296,8 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @dev 'msg.sender' must be a pool manager to reject a milestone. Emits a 'MilestoneStatusChanged()' event.
     /// @param _milestoneId ID of the milestone
     function rejectMilestone(uint256 _milestoneId) external onlyPoolManager(msg.sender) {
-        // Check if the milestone is already accepted
-        if (milestones[_milestoneId].milestoneStatus == Status.Accepted) revert MILESTONE_ALREADY_ACCEPTED();
+        // Check if the milestone status is pending
+        if (milestones[_milestoneId].milestoneStatus != Status.Pending) revert MILESTONE_NOT_PENDING();
 
         milestones[_milestoneId].milestoneStatus = Status.Rejected;
 
