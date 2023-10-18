@@ -6,6 +6,8 @@ import "forge-std/Test.sol";
 
 // Interfaces
 import {IStrategy} from "../../../contracts/core/interfaces/IStrategy.sol";
+import {Registry} from "../../../contracts/core/Registry.sol";
+
 // Strategy Contracts
 import {DonationVotingMerkleDistributionBaseMock} from "../../utils/DonationVotingMerkleDistributionBaseMock.sol";
 import {DonationVotingMerkleDistributionBaseStrategy} from
@@ -350,6 +352,7 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         emit UpdatedRegistration(profile1_anchor(), data, profile1_member1(), 4);
 
         vm.prank(address(allo()));
+        __isOwnerOrMemberOfProfileTrue();
         strategy.registerRecipient(data, profile1_member1());
 
         IStrategy.Status recipientStatus = strategy.getRecipientStatus(recipientId);
@@ -582,6 +585,7 @@ contract DonationVotingMerkleDistributionBaseMockTest is
 
         vm.expectEmit(false, false, false, true);
         emit Registered(profile1_anchor(), abi.encode(data, 1), address(profile1_member1()));
+        __isOwnerOrMemberOfProfileTrue();
 
         vm.prank(address(allo()));
         address recipientId = _strategy.registerRecipient(data, profile1_member1());
@@ -645,6 +649,7 @@ contract DonationVotingMerkleDistributionBaseMockTest is
 
         vm.prank(address(allo()));
 
+        __isOwnerOrMemberOfProfileTrue();
         bytes memory data = abi.encode(profile1_anchor(), address(0), metadata);
         strategy.registerRecipient(data, profile1_member1());
     }
@@ -657,6 +662,7 @@ contract DonationVotingMerkleDistributionBaseMockTest is
 
         vm.prank(address(allo()));
 
+        __isOwnerOrMemberOfProfileTrue();
         bytes memory data = abi.encode(profile1_anchor(), recipientAddress(), metadata);
         strategy.registerRecipient(data, profile1_member1());
     }
@@ -843,14 +849,22 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         return __getEncodedData(recipientAddress(), 1, "metadata");
     }
 
-    function __generateRecipientWithId(address _recipientId) internal returns (bytes memory) {
+    function __generateRecipientWithId(address _recipientId) internal pure returns (bytes memory) {
         Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
 
         return abi.encode(_recipientId, recipientAddress(), metadata);
     }
 
+    function __isOwnerOrMemberOfProfileTrue() internal {
+        vm.mockCall(
+            address(registry()), abi.encodeWithSelector(Registry.isOwnerOrMemberOfProfile.selector), abi.encode(true)
+        );
+    }
+
     function __register_recipient() internal returns (address recipientId) {
         vm.warp(registrationStartTime + 10);
+
+        __isOwnerOrMemberOfProfileTrue();
 
         vm.prank(address(allo()));
         bytes memory data = __generateRecipientWithId(profile1_anchor());
@@ -860,6 +874,8 @@ contract DonationVotingMerkleDistributionBaseMockTest is
     function __register_recipient2() internal returns (address recipientId) {
         vm.warp(registrationStartTime + 10);
         Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
+
+        __isOwnerOrMemberOfProfileTrue();
 
         vm.prank(address(allo()));
         bytes memory data = abi.encode(profile2_anchor(), randomAddress(), metadata);
@@ -952,7 +968,7 @@ contract DonationVotingMerkleDistributionBaseMockTest is
 
     function __getMerkleRootAndDistributions()
         internal
-        view
+        pure
         returns (bytes32, DonationVotingMerkleDistributionBaseStrategy.Distribution[] memory)
     {
         DonationVotingMerkleDistributionBaseStrategy.Distribution[] memory distributions =
@@ -961,50 +977,50 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         DonationVotingMerkleDistributionBaseStrategy.Distribution memory distribution0 =
         DonationVotingMerkleDistributionBaseStrategy.Distribution({
             index: 0,
-            recipientId: 0x236BB9Cf3dC40Df67173aF2F65b4b0d904B4eDe0, // profile1_anchor
+            recipientId: profile1_anchor(), // profile1_anchor
             // recipientAddress: '0x7b6d3eB9bb22D0B13a2FAd6D6bDBDc34Ad2c5849',
             amount: 1e18,
             merkleProof: new bytes32[](1)
         });
-        distribution0.merkleProof[0] = 0x372ce6c86f99c51f7943af06c5cf86320ac63f9a71483cdecd8170e70332ffa7;
+        distribution0.merkleProof[0] = 0x84de05a8497b125afa0c428b43e98c4378eb0f8eadae82538ee2b53e44bea806;
 
         DonationVotingMerkleDistributionBaseStrategy.Distribution memory distribution1 =
         DonationVotingMerkleDistributionBaseStrategy.Distribution({
             index: 1,
-            recipientId: 0x6b0c8b268742D274f67f4235e22E10470F872f33, // profile2_anchor
+            recipientId: profile2_anchor(), // profile2_anchor
             // recipientAddress: '0x0c73C6E53042522CDd21Bd8F1C63e14e66869E99',
             amount: 2e18,
             merkleProof: new bytes32[](1)
         });
-        distribution1.merkleProof[0] = 0xd67f0c989dd83f78f1ce0dc68f2119e2a044681a7c5d5f060e035551e5567b00;
+        distribution1.merkleProof[0] = 0x4a3e9be6ab6503dfc6dd903fddcbabf55baef0c6aaca9f2cce2dc6d6350303f5;
 
         distributions[0] = distribution0;
         distributions[1] = distribution1;
 
-        bytes32 merkleRoot = 0x0466335513002f277c01ce602eb815bb1287b06fe4fa0b59f1d030f137019f7d;
+        bytes32 merkleRoot = 0xbd6f4408f5de99e3401b90770fc87cc4e23b76c093f812d61df2bce4b881d88c;
 
         return (merkleRoot, distributions);
 
-        // distributions [
-        // [
+        //        distributions [
+        //   [
         //     0,
-        //     '0x236BB9Cf3dC40Df67173aF2F65b4b0d904B4eDe0',
+        //     '0xad5FDFa74961f0b6F1745eF0A1Fa0e115caa9641',
         //     '0x7b6d3eB9bb22D0B13a2FAd6D6bDBDc34Ad2c5849',
         //     BigNumber { value: "1000000000000000000" }
-        // ],
-        // [
+        //   ],
+        //   [
         //     1,
-        //     '0x6b0c8b268742D274f67f4235e22E10470F872f33',
+        //     '0x4E0aB029b2128e740fA408a26aC5f314e769469f',
         //     '0x0c73C6E53042522CDd21Bd8F1C63e14e66869E99',
         //     BigNumber { value: "2000000000000000000" }
+        //   ]
         // ]
-        // ]
-        // tree.root 0x0466335513002f277c01ce602eb815bb1287b06fe4fa0b59f1d030f137019f7d
+        // tree.root 0xbd6f4408f5de99e3401b90770fc87cc4e23b76c093f812d61df2bce4b881d88c
         // proof0.root [
-        // '0x372ce6c86f99c51f7943af06c5cf86320ac63f9a71483cdecd8170e70332ffa7'
+        //   '0x84de05a8497b125afa0c428b43e98c4378eb0f8eadae82538ee2b53e44bea806'
         // ]
         // proof1.root [
-        // '0xd67f0c989dd83f78f1ce0dc68f2119e2a044681a7c5d5f060e035551e5567b00'
+        //   '0x4a3e9be6ab6503dfc6dd903fddcbabf55baef0c6aaca9f2cce2dc6d6350303f5'
         // ]
     }
 
@@ -1034,5 +1050,21 @@ contract DonationVotingMerkleDistributionBaseMockTest is
 
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(privateKey, msgHash);
         return bytes.concat(r, s, bytes1(v));
+    }
+
+    function profile1_anchor() public pure override returns (address) {
+        return 0xad5FDFa74961f0b6F1745eF0A1Fa0e115caa9641;
+    }
+
+    function profile2_anchor() public pure override returns (address) {
+        return 0x4E0aB029b2128e740fA408a26aC5f314e769469f;
+    }
+
+    function recipientAddress() public pure override returns (address) {
+        return 0x7b6d3eB9bb22D0B13a2FAd6D6bDBDc34Ad2c5849;
+    }
+
+    function randomAddress() public pure override returns (address) {
+        return 0x0c73C6E53042522CDd21Bd8F1C63e14e66869E99;
     }
 }
