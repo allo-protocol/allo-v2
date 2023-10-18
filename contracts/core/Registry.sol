@@ -4,7 +4,6 @@ pragma solidity 0.8.19;
 // External Libraries
 import "openzeppelin-contracts-upgradeable/contracts/access/AccessControlUpgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
-import {CREATE3} from "solady/src/utils/CREATE3.sol";
 import {ERC20} from "solady/src/tokens/ERC20.sol";
 // Interfaces
 import "./interfaces/IRegistry.sol";
@@ -339,22 +338,23 @@ contract Registry is IRegistry, Initializable, Native, AccessControlUpgradeable,
     /// @param _name The name of the profile
     /// @return anchor The address of the deployed anchor contract
     function _generateAnchor(bytes32 _profileId, string memory _name) internal returns (address anchor) {
-        bytes32 salt = keccak256(abi.encodePacked(_profileId, _name));
+        bytes memory encodedData = abi.encode(_profileId, _name);
+        bytes memory encodedConstructorArgs = abi.encode(_profileId, address(this));
 
-        address preCalculatedAddress = CREATE3.getDeployed(salt);
+        bytes memory bytecode = abi.encodePacked(type(Anchor).creationCode, encodedConstructorArgs);
 
-        // check if the contract already exists and if the profileId matches
-        if (preCalculatedAddress.code.length > 0) {
-            if (Anchor(payable(preCalculatedAddress)).profileId() != _profileId) revert ANCHOR_ERROR();
+        bytes32 salt = keccak256(encodedData);
 
-            anchor = preCalculatedAddress;
-        } else {
-            // check if the contract has already been deployed by checking code size of address
-            bytes memory creationCode =
-                abi.encodePacked(type(Anchor).creationCode, abi.encode(_profileId, address(this)));
+        address preComputedAddress = address(
+            uint160(uint256(keccak256(abi.encodePacked(bytes1(0xff), address(this), salt, keccak256(bytecode)))))
+        );
 
-            // Use CREATE3 to deploy the anchor contract
-            anchor = CREATE3.deploy(salt, creationCode, 0);
+        // Try to deploy the anchor contract, if it fails then the anchor already exists
+        try new Anchor{salt: salt}(_profileId, address(this)) returns (Anchor _anchor) {
+            anchor = address(_anchor);
+        } catch {
+            if (Anchor(payable(preComputedAddress)).profileId() != _profileId) revert ANCHOR_ERROR();
+            anchor = preComputedAddress;
         }
     }
 
