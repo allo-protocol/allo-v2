@@ -8,19 +8,19 @@ contract Accounts is StdCheats {
     // Protocol adresses
     // //////////////////////
 
-    function local() public pure returns (address) {
-        return 0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496;
+    function local() public view virtual returns (address) {
+        return address(this);
     }
 
-    function registry_owner() public returns (address) {
+    function registry_owner() public virtual returns (address) {
         return makeAddr("registry_owner");
     }
 
-    function allo_owner() public returns (address) {
+    function allo_owner() public virtual returns (address) {
         return makeAddr("allo_owner");
     }
 
-    function allo_treasury() public returns (address payable) {
+    function allo_treasury() public virtual returns (address payable) {
         return payable(makeAddr("allo_treasury"));
     }
 
@@ -28,23 +28,23 @@ contract Accounts is StdCheats {
     // Null Profile adresses
     // //////////////////////
 
-    function nullProfile_owner() public pure returns (address) {
+    function nullProfile_owner() public pure virtual returns (address) {
         return 0x0000000000000000000000000000000000000000;
     }
 
-    function nullProfile_notAMember() public pure returns (address) {
+    function nullProfile_notAMember() public pure virtual returns (address) {
         return 0x0000000000000000000000000000000000000000;
     }
 
-    function nullProfile_member1() public pure returns (address) {
+    function nullProfile_member1() public pure virtual returns (address) {
         return 0x0000000000000000000000000000000000000000;
     }
 
-    function nullProfile_member2() public pure returns (address) {
+    function nullProfile_member2() public pure virtual returns (address) {
         return 0x0000000000000000000000000000000000000000;
     }
 
-    function nullProfile_members() public pure returns (address[] memory) {
+    function nullProfile_members() public pure virtual returns (address[] memory) {
         return new address[](2);
     }
 
@@ -52,23 +52,23 @@ contract Accounts is StdCheats {
     // Pool adresses
     // //////////////////////
 
-    function pool_admin() public returns (address) {
+    function pool_admin() public virtual returns (address) {
         return makeAddr("pool_admin");
     }
 
-    function pool_notAManager() public returns (address) {
+    function pool_notAManager() public virtual returns (address) {
         return makeAddr("pool_notAManager");
     }
 
-    function pool_manager1() public returns (address) {
+    function pool_manager1() public virtual returns (address) {
         return makeAddr("pool_manager1");
     }
 
-    function pool_manager2() public returns (address) {
+    function pool_manager2() public virtual returns (address) {
         return makeAddr("pool_manager2");
     }
 
-    function pool_managers() public returns (address[] memory) {
+    function pool_managers() public virtual returns (address[] memory) {
         address[] memory _members = new address[](2);
         _members[0] = pool_manager1();
         _members[1] = pool_manager2();
@@ -80,23 +80,23 @@ contract Accounts is StdCheats {
     // Profile 1 adresses
     // //////////////////////
 
-    function profile1_owner() public returns (address) {
+    function profile1_owner() public virtual returns (address) {
         return makeAddr("profile1_owner");
     }
 
-    function profile1_notAMember() public returns (address) {
+    function profile1_notAMember() public virtual returns (address) {
         return makeAddr("profile1_notAMember");
     }
 
-    function profile1_member1() public returns (address) {
+    function profile1_member1() public virtual returns (address) {
         return makeAddr("profile1_member1");
     }
 
-    function profile1_member2() public returns (address) {
+    function profile1_member2() public virtual returns (address) {
         return makeAddr("profile1_member2");
     }
 
-    function profile1_members() public returns (address[] memory) {
+    function profile1_members() public virtual returns (address[] memory) {
         address[] memory _members = new address[](2);
         _members[0] = profile1_member1();
         _members[1] = profile1_member2();
@@ -108,23 +108,23 @@ contract Accounts is StdCheats {
     // Profile 2 adresses
     // //////////////////////
 
-    function profile2_owner() public returns (address) {
+    function profile2_owner() public virtual returns (address) {
         return makeAddr("profile2_owner");
     }
 
-    function profile2_notAMember() public returns (address) {
+    function profile2_notAMember() public virtual returns (address) {
         return makeAddr("profile2_notAMember");
     }
 
-    function profile2_member1() public returns (address) {
+    function profile2_member1() public virtual returns (address) {
         return makeAddr("profile2_member1");
     }
 
-    function profile2_member2() public returns (address) {
+    function profile2_member2() public virtual returns (address) {
         return makeAddr("profile2_member2");
     }
 
-    function profile2_members() public returns (address[] memory) {
+    function profile2_members() public virtual returns (address[] memory) {
         address[] memory _members = new address[](2);
         _members[0] = profile2_member1();
         _members[1] = profile2_member2();
@@ -136,23 +136,23 @@ contract Accounts is StdCheats {
     // Recipient adresses
     // //////////////////////
 
-    function recipient1() public returns (address) {
+    function recipient1() public virtual returns (address) {
         return makeAddr("recipient1");
     }
 
-    function recipient2() public returns (address) {
+    function recipient2() public virtual returns (address) {
         return makeAddr("recipient2");
     }
 
-    function recipient() public returns (address) {
+    function recipient() public virtual returns (address) {
         return makeAddr("recipient");
     }
 
-    function recipientAddress() public returns (address) {
+    function recipientAddress() public virtual returns (address) {
         return makeAddr("recipientAddress");
     }
 
-    function no_recipient() public returns (address) {
+    function no_recipient() public virtual returns (address) {
         return makeAddr("no_recipient");
     }
 
@@ -160,7 +160,7 @@ contract Accounts is StdCheats {
     // Random adresses
     // //////////////////////
 
-    function randomAddress() public returns (address) {
+    function randomAddress() public virtual returns (address) {
         return makeAddr("random chad");
     }
 }
