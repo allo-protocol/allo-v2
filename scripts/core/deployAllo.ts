@@ -64,8 +64,9 @@ export async function deployAllo() {
   console.log("Registry implementation deployed to:", implementation);
 
   const objToWrite = {
-    alloImplementation: implementation,
-    alloProxy: instance.target,
+    name: "Allo",
+    implementation: implementation,
+    proxy: instance.target,
     treasury: alloParams.treasury,
     percentFee: alloParams.percentFee,
     baseFee: alloParams.baseFee,

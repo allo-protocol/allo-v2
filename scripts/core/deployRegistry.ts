@@ -41,7 +41,7 @@ export async function deployRegistry() {
   ]);
 
   await instance.waitForDeployment();
-  await new Promise((r) => setTimeout(r, 20000));
+  
 
   const implementation = await getImplementationAddress(
     instance.target as string
@@ -51,15 +51,18 @@ export async function deployRegistry() {
   console.log("Registry implementation deployed to:", implementation);
 
   const objToWrite = {
-    registryImplementation: implementation,
-    registryProxy: instance.target,
+    name: "Registry",
+    implementation: implementation,
+    proxy: instance.target,
     deployerAddress: deployerAddress,
     owner: registryConfig[chainId].owner,
   };
 
   deployments.write(objToWrite);
 
+  await new Promise((r) => setTimeout(r, 20000));
   await verifyContract(implementation, []);
+
   return instance.target;
 }
 

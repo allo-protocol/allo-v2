@@ -15,7 +15,7 @@ export async function waitForInput(query: string): Promise<unknown> {
     rl.question(query, (ans) => {
       rl.close();
       resolve(ans);
-    }),
+    })
   );
 }
 
@@ -45,30 +45,32 @@ export const prettyNum = (_n: number | string) => {
 
 export const verifyContract = async (
   contractAddress: string,
-  verifyArgs: string[],
-) => {
+  verifyArgs: string[]
+): Promise<boolean> => {
   console.log("Verifying contract...");
   const networkName = hre.network.name;
   const cmd = `npx hardhat verify --network ${networkName} ${contractAddress} ${verifyArgs.join(
-    " ",
+    " "
   )}`;
   console.log("Run: ", cmd);
   exec(cmd, (error, stdout, stderr) => {
     if (error) {
       console.error(`Error: ${error.message}`);
-      return;
+      return false;
     }
     if (stderr) {
       console.error(`Error: ${stderr}`);
-      return;
+      return false;
     }
     console.log(`Result: ${stdout}`);
   });
+
+  return true;
 };
 
 export const getImplementationAddress = async (proxyAddress: string) => {
   const implementationAddress = await upgrades.erc1967.getImplementationAddress(
-    proxyAddress,
+    proxyAddress
   );
 
   return implementationAddress;
@@ -110,22 +112,24 @@ export class Deployments {
 
   public getRegistry = (): string => {
     const obj = this.readFile("registry");
-    const registryAddress = obj[this.chainId].registryProxy ?? "";
+    const registryAddress = obj[this.chainId].proxy ?? "";
 
     return registryAddress;
   };
 
   public getAllo = (): string => {
     const obj = this.readFile("allo");
-    const alloAddress = obj[this.chainId].alloProxy ?? "";
+    const alloAddress = obj[this.chainId].proxy ?? "";
 
     return alloAddress;
   };
 
   public getContractFactory = (): string => {
     const obj = this.readFile("contractFactory");
-    const contractFactoryAddress = obj[this.chainId].contractFactory ?? "";
+    const contractFactoryAddress = obj[this.chainId].address ?? "";
 
     return contractFactoryAddress;
   };
 }
+
+export const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));

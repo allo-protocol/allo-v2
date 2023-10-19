@@ -2,6 +2,7 @@ import hre, { ethers } from "hardhat";
 import {
   Deployments,
   confirmContinue,
+  delay,
   prettyNum,
   verifyContract,
 } from "../utils/scripts";
@@ -38,17 +39,18 @@ export async function deployContractFactory() {
 
   console.log("ContractFactory deployed to:", instance.target);
 
-  await new Promise((r) => setTimeout(r, 20000));
-  await verifyContract(instance.target.toString(), []);
-
   const objToWrite = {
-    contractFactory: instance.target,
+    name: "ContractFactory",
+    address: instance.target,
     deployerAddress: deployerAddress,
   };
 
   deploymentIo.write(objToWrite);
 
-  return instance.target;
+  await delay(20000);
+  return await verifyContract(instance.target.toString(), []).then(
+    () => instance.target
+  );
 }
 
 if (require.main === module) {
