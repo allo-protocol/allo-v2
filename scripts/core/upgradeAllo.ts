@@ -1,5 +1,5 @@
 import hre, { ethers, upgrades } from "hardhat";
-import { confirmContinue, prettyNum } from "../utils/scripts";
+import { Deployments, confirmContinue, getImplementationAddress, prettyNum, verifyContract } from "../utils/scripts";
 import { alloConfig } from "../config/allo.config";
 
 async function upgradeAllo() {
@@ -7,14 +7,14 @@ async function upgradeAllo() {
     const networkName = await hre.network.name;
     let account;
     let accountAddress;
-    const blocksToWait = hre.network.name === "localhost" ? 0 : 10;
     const chainId = Number(network.chainId);
-
-    const alloParams = alloConfig[chainId];
 
     account = (await ethers.getSigners())[0];
     accountAddress = await account.getAddress();
     const balance = await ethers.provider.getBalance(accountAddress);
+
+    const deployments = new Deployments(chainId, "allo");
+    const proxyAddress = deployments.getAllo();    
 
     console.log(`This script upgrades the Allo contract on ${networkName}`);
 
@@ -24,19 +24,29 @@ async function upgradeAllo() {
         network: network.name,
         account: accountAddress,
         balance: prettyNum(balance.toString()),
-        proxyAddress: alloParams.alloProxy,
+        proxyAddress: proxyAddress,
       });
 
     console.log("Upgrading Allo...");
 
     const AlloV2 = await ethers.getContractFactory("Allo", account);
-    const instance = await upgrades.upgradeProxy(alloParams.alloProxy, AlloV2);
-    // console.log("tx hash", instance.deployTransaction);
-    // await instance.deployed(blocksToWait);
+    const instance = await upgrades.upgradeProxy(proxyAddress, AlloV2);
 
-    // const gas = await instance.deployTransaction.estimateGas();
-    // console.log(`gas used: ${gas}`)
-    console.log("Allo upgraded");
+    await instance.waitForDeployment();
+    await new Promise((r) => setTimeout(r, 20000));
+  
+    const implementation = await getImplementationAddress(
+      instance.target as string,
+    );
+
+    const objectToWrite =  deployments.get(chainId);
+    objectToWrite.alloImplementation = implementation;
+    deployments.write(objectToWrite);
+  
+    verifyContract(implementation, []);
+    
+    console.log("Allo Proxy Upgraded at:", instance.target);
+    console.log("Registry implementation updated to:", implementation);
 }
 
 upgradeAllo().catch((error) => {
@@ -45,4 +55,4 @@ upgradeAllo().catch((error) => {
 });
 
 // Note: Deploy script to run in terminal:
-// npx hardhat run scripts/upgradeAllo.ts --network sepolia
+// npx hardhat run scripts/core/upgradeAllo.ts --network sepolia

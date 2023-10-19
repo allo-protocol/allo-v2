@@ -1,9 +1,8 @@
 import * as dotenv from "dotenv";
 
 import "@nomicfoundation/hardhat-foundry";
-import "@nomiclabs/hardhat-etherscan";
+import "@nomicfoundation/hardhat-verify";
 import "@nomiclabs/hardhat-solhint";
-import "@nomiclabs/hardhat-waffle";
 import "@openzeppelin/hardhat-upgrades";
 import "@typechain/hardhat";
 import fs from "fs";
@@ -22,7 +21,7 @@ const chainIds = {
   localhost: 31337,
 
   // testnet
-  "goerli": 5,
+  goerli: 5,
   sepolia: 11155111,
   "optimism-goerli": 420,
   "fantom-testnet": 4002,
@@ -66,7 +65,7 @@ function getRemappings(): string[][] {
  */
 function createTestnetConfig(
   network: keyof typeof chainIds,
-  url?: string
+  url?: string,
 ): NetworkUserConfig {
   if (!url) {
     url = `https://${network}.infura.io/v3/${infuraIdKey}`;
@@ -88,7 +87,7 @@ function createTestnetConfig(
  */
 function createMainnetConfig(
   network: keyof typeof chainIds,
-  url?: string
+  url?: string,
 ): NetworkUserConfig {
   if (!url) {
     url = `https://${network}.infura.io/v3/${infuraIdKey}`;
@@ -114,7 +113,7 @@ const abiExporter = [
   },
 ];
 
-/** 
+/**
  * Generates hardhat network configuration
  * @type import('hardhat/config').HardhatUserConfig
  */
@@ -153,13 +152,13 @@ const config: HardhatUserConfig = {
     // Test Networks
     goerli: createTestnetConfig(
       "goerli",
-      `https://eth-goerli.g.alchemy.com/v2/${alchemyIdKey}`
+      `https://eth-goerli.g.alchemy.com/v2/${alchemyIdKey}`,
     ),
     sepolia: createTestnetConfig(
       "sepolia",
       "https://eth-sepolia.public.blastapi.io",
     ),
-    "fantom-testnet": createTestnetConfig(
+    ftmTestnet: createTestnetConfig(
       "fantom-testnet",
       "https://rpc.testnet.fantom.network/",
     ),

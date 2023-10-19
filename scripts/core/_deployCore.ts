@@ -21,7 +21,7 @@ async function deployCore() {
     // Registry
     deployRegistry().then(registryAddress => {
       // Allo
-      deployAllo(registryAddress.toString()).then(alloAddress => {
+      deployAllo().then(alloAddress => {
         // Log deployed addresses
         console.log(`
             ////////////////////////////////////////////////////

@@ -1,5 +1,5 @@
 import hre, { ethers } from "hardhat";
-import { confirmContinue, prettyNum } from "../utils/scripts";
+import { Deployments, confirmContinue, prettyNum } from "../utils/scripts";
 
 export async function deployContractFactory() {
   const network = await ethers.provider.getNetwork();
@@ -9,6 +9,8 @@ export async function deployContractFactory() {
   const deployerAddress = await account.getAddress();
   // const blocksToWait = networkName === "localhost" ? 0 : 5;
   const balance = await ethers.provider.getBalance(deployerAddress);
+
+  const deploymentIo = new Deployments(chainId, "contractFactory");
 
   console.log(`
     ////////////////////////////////////////////////////
@@ -33,6 +35,13 @@ export async function deployContractFactory() {
 
   // await verifyContract(instance.target.toString());
 
+  const objToWrite = {
+    contractFactory: instance.target,
+    deployerAddress: deployerAddress,
+  };
+
+  deploymentIo.write(objToWrite);
+
   return instance.target;
 }
 
@@ -42,4 +51,4 @@ deployContractFactory().catch((error) => {
 });
 
 // Note: Deploy script to run in terminal:
-// npx hardhat run scripts/deployContractFactory.ts --network sepolia
+// npx hardhat run scripts/core/deployContractFactory.ts --network sepolia
