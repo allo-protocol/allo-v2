@@ -1,6 +1,12 @@
 import hre, { ethers, upgrades } from "hardhat";
 import { alloConfig } from "../config/allo.config";
-import { Deployments, confirmContinue, getImplementationAddress, prettyNum, verifyContract } from "../utils/scripts";
+import {
+  Deployments,
+  confirmContinue,
+  getImplementationAddress,
+  prettyNum,
+  verifyContract,
+} from "../utils/scripts";
 
 export async function deployAllo() {
   const network = await ethers.provider.getNetwork();
@@ -51,7 +57,7 @@ export async function deployAllo() {
   await new Promise((r) => setTimeout(r, 20000));
 
   const implementation = await getImplementationAddress(
-    instance.target as string,
+    instance.target as string
   );
 
   console.log("Allo Proxy deployed to:", instance.target);
@@ -73,10 +79,13 @@ export async function deployAllo() {
   return instance.target;
 }
 
-deployAllo().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+// Check if this script is the main module (being run directly)
+if (require.main === module) {
+  deployAllo().catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+  });
+}
 
 // Note: Deploy script to run in terminal:
 // npx hardhat run scripts/deployAllo.ts --network sepolia

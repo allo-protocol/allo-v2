@@ -1,5 +1,10 @@
 import hre, { ethers } from "hardhat";
-import { Deployments, confirmContinue, prettyNum } from "../utils/scripts";
+import {
+  Deployments,
+  confirmContinue,
+  prettyNum,
+  verifyContract,
+} from "../utils/scripts";
 
 export async function deployContractFactory() {
   const network = await ethers.provider.getNetwork();
@@ -33,7 +38,8 @@ export async function deployContractFactory() {
 
   console.log("ContractFactory deployed to:", instance.target);
 
-  // await verifyContract(instance.target.toString());
+  await new Promise((r) => setTimeout(r, 20000));
+  await verifyContract(instance.target.toString(), []);
 
   const objToWrite = {
     contractFactory: instance.target,
@@ -45,10 +51,12 @@ export async function deployContractFactory() {
   return instance.target;
 }
 
-deployContractFactory().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+if (require.main === module) {
+  deployContractFactory().catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+  });
+}
 
 // Note: Deploy script to run in terminal:
 // npx hardhat run scripts/core/deployContractFactory.ts --network sepolia

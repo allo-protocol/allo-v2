@@ -1,8 +1,8 @@
-import "dotenv/config";
-import hre, { run, upgrades } from "hardhat";
-import readline from "readline";
-import fs from "fs";
 import { exec } from "child_process";
+import "dotenv/config";
+import fs from "fs";
+import hre, { upgrades } from "hardhat";
+import readline from "readline";
 
 // --- User verification ---
 // Helper method for waiting on user input. Source: https://stackoverflow.com/a/50890409
@@ -110,21 +110,21 @@ export class Deployments {
 
   public getRegistry = (): string => {
     const obj = this.readFile("registry");
-    const registryAddress = obj[this.chainId].registryProxy;
+    const registryAddress = obj[this.chainId].registryProxy ?? "";
 
     return registryAddress;
   };
 
   public getAllo = (): string => {
     const obj = this.readFile("allo");
-    const alloAddress = obj[this.chainId].alloProxy;
+    const alloAddress = obj[this.chainId].alloProxy ?? "";
 
     return alloAddress;
   };
 
   public getContractFactory = (): string => {
     const obj = this.readFile("contractFactory");
-    const contractFactoryAddress = obj[this.chainId].contractFactory;
+    const contractFactoryAddress = obj[this.chainId].contractFactory ?? "";
 
     return contractFactoryAddress;
   };

@@ -1,16 +1,16 @@
 import hre, { ethers, upgrades } from "hardhat";
 import { registryConfig } from "../config/registry.config";
 import {
-  Deployments,
-  confirmContinue,
-  getImplementationAddress,
-  prettyNum,
-  verifyContract,
+    Deployments,
+    confirmContinue,
+    getImplementationAddress,
+    prettyNum,
+    verifyContract,
 } from "../utils/scripts";
 
 export async function deployRegistry() {
   const network = await ethers.provider.getNetwork();
-  const networkName = await hre.network.name;
+  const networkName = hre.network.name;
   const chainId = Number(network.chainId);
   const account = (await ethers.getSigners())[0];
   const deployerAddress = await account.getAddress();
@@ -44,7 +44,7 @@ export async function deployRegistry() {
   await new Promise((r) => setTimeout(r, 20000));
 
   const implementation = await getImplementationAddress(
-    instance.target as string,
+    instance.target as string
   );
 
   console.log("Registry proxy deployed to:", instance.target);
@@ -59,14 +59,16 @@ export async function deployRegistry() {
 
   deployments.write(objToWrite);
 
-  verifyContract(implementation, []);
+  await verifyContract(implementation, []);
   return instance.target;
 }
 
-deployRegistry().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+if (require.main === module) {
+  deployRegistry().catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+  });
+}
 
 // Note: Deploy script to run in terminal:
 // npx hardhat run scripts/core/deployRegistry.ts --network sepolia
