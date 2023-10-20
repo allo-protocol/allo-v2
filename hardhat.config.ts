@@ -10,7 +10,7 @@ import "hardhat-abi-exporter";
 import "hardhat-contract-sizer";
 import "hardhat-gas-reporter";
 import "hardhat-preprocessor";
-import { HardhatUserConfig } from "hardhat/config";
+import { HardhatUserConfig, task, types } from "hardhat/config";
 import { NetworkUserConfig } from "hardhat/types";
 import "solidity-coverage";
 
@@ -65,7 +65,7 @@ function getRemappings(): string[][] {
  */
 function createTestnetConfig(
   network: keyof typeof chainIds,
-  url?: string,
+  url?: string
 ): NetworkUserConfig {
   if (!url) {
     url = `https://${network}.infura.io/v3/${infuraIdKey}`;
@@ -87,7 +87,7 @@ function createTestnetConfig(
  */
 function createMainnetConfig(
   network: keyof typeof chainIds,
-  url?: string,
+  url?: string
 ): NetworkUserConfig {
   if (!url) {
     url = `https://${network}.infura.io/v3/${infuraIdKey}`;
@@ -134,7 +134,7 @@ const config: HardhatUserConfig = {
     "optimism-mainnet": createMainnetConfig("optimism-mainnet"),
     "fantom-mainnet": createMainnetConfig(
       "fantom-mainnet",
-      "https://rpc.ftm.tools",
+      "https://rpc.ftm.tools"
     ),
     "pgn-mainnet": {
       accounts: [deployPrivateKey],
@@ -152,15 +152,15 @@ const config: HardhatUserConfig = {
     // Test Networks
     goerli: createTestnetConfig(
       "goerli",
-      `https://eth-goerli.g.alchemy.com/v2/${alchemyIdKey}`,
+      `https://eth-goerli.g.alchemy.com/v2/${alchemyIdKey}`
     ),
     sepolia: createTestnetConfig(
       "sepolia",
-      "https://eth-sepolia.public.blastapi.io",
+      "https://eth-sepolia.public.blastapi.io"
     ),
     ftmTestnet: createTestnetConfig(
       "fantom-testnet",
-      "https://rpc.testnet.fantom.network/",
+      "https://rpc.testnet.fantom.network/"
     ),
     "optimism-goerli": {
       accounts: [deployPrivateKey],
@@ -273,3 +273,45 @@ const config: HardhatUserConfig = {
 };
 
 export default config;
+
+// TODO: this still needs some work
+// - iterate through development directory and use all configs available
+// - figure out how to get the block explorer urls for each network
+task("extract-info", "Extracts and formats information into a Markdown file")
+  .addParam("data", "The path to your JSON data file")
+  .addParam("chainId", "The network chain ID", undefined, types.int)
+  .setAction(async (taskArgs, hre) => {
+    // Import necessary libraries
+    const fs = require("fs");
+    const path = require("path");
+
+    // Read the JSON data file
+    const dataPath = path.resolve(__dirname, taskArgs.data);
+    const rawData = fs.readFileSync(dataPath);
+    const jsonData = JSON.parse(rawData);
+    const itemData = jsonData[taskArgs.chainId];
+
+    // Extract the necessary fields
+    const implementation = itemData.implementation;
+    const proxy = itemData.proxy;
+    const name = itemData.name;
+
+    // links
+    const etherscan = `https://etherscan.io/address/${proxy}#code`;
+
+    // Format the information
+    const mdContent = `
+# Deployment Information For Supported Networks
+
+| Network | Name | Implementation | Proxy |
+| --- | --- | --- | --- |
+| ${taskArgs.chainId} | ${name} | ${implementation} | ${proxy} |
+
+    `;
+
+    // Write the formatted information to a Markdown file
+    const outputPath = path.resolve(__dirname, "DEPLOYMENT_INFORMATION.md");
+    fs.appendFileSync(outputPath, mdContent.trim());
+
+    console.log(`Information has been written to ${outputPath}`);
+  });
