@@ -7,6 +7,7 @@ import {
   prettyNum,
   verifyContract,
 } from "../utils/scripts";
+import { Validator } from "../utils/Validator";
 
 export async function deployAllo() {
   const network = await ethers.provider.getNetwork();
@@ -54,10 +55,9 @@ export async function deployAllo() {
   ]);
 
   await instance.waitForDeployment();
-  await new Promise((r) => setTimeout(r, 20000));
 
   const implementation = await getImplementationAddress(
-    instance.target as string
+    instance.target as string,
   );
 
   console.log("Allo Proxy deployed to:", instance.target);
@@ -76,7 +76,20 @@ export async function deployAllo() {
 
   deployments.write(objToWrite);
 
+  await verifyContract(instance.target.toString(), []);
   await verifyContract(implementation, []);
+
+  const validator = await new Validator("Allo", instance.target);
+  await validator.validate("getRegistry", [], registryAddress);
+  await validator.validate("getTreasury", [], alloParams.treasury);
+  await validator.validate(
+    "getPercentFee",
+    [],
+    alloParams.percentFee.toString(),
+  );
+  await validator.validate("getBaseFee", [], alloParams.baseFee.toString());
+  await validator.validate("owner", [], deployerAddress.toString());
+
   return instance.target;
 }
 

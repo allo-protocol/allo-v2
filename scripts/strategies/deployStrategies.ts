@@ -1,9 +1,18 @@
 import hre, { ethers } from "hardhat";
-import { alloConfig } from "../config/allo.config";
-import { deployContractUsingFactory } from "../utils/deployProxy";
-import { confirmContinue, prettyNum } from "../utils/scripts";
+import { Args, deployContractUsingFactory } from "../utils/deployProxy";
+import {
+  Deployments,
+  confirmContinue,
+  prettyNum,
+  verifyContract,
+} from "../utils/scripts";
+import { Validator } from "../utils/Validator";
 
-export async function deployStrategies(strategyName: string, version: string) {
+export async function deployStrategies(
+  strategyName: string,
+  version: string,
+  additionalArgs?: Args,
+): Promise<string> {
   const network = await ethers.provider.getNetwork();
   const networkName = await hre.network.name;
   const chainId = Number(network.chainId);
@@ -11,6 +20,11 @@ export async function deployStrategies(strategyName: string, version: string) {
   const deployerAddress = await account.getAddress();
   // const blocksToWait = networkName === "localhost" ? 0 : 5;
   const balance = await ethers.provider.getBalance(deployerAddress);
+
+  const fileName = strategyName.toLowerCase();
+  const deployments = new Deployments(chainId, fileName);
+
+  const alloAddress = deployments.getAllo();
 
   console.log(`
     ////////////////////////////////////////////////////
@@ -28,10 +42,42 @@ export async function deployStrategies(strategyName: string, version: string) {
 
   console.log(`Deploying ${strategyName}.sol`);
 
-  deployContractUsingFactory(strategyName, version, {
-    types: ["address", "string"],
-    values: [alloConfig[chainId].alloProxy, strategyName + version],
-  });
+  const types = ["address", "string"].concat(additionalArgs?.types ?? []);
+  const values = [alloAddress, strategyName + version].concat(
+    additionalArgs?.values ?? [],
+  );
+
+  const impl = await deployContractUsingFactory(
+    deployments.getContractFactory(),
+    strategyName,
+    version,
+    {
+      types,
+      values,
+    },
+  );
+
+  const hashBytesStrategyName = ethers.keccak256(
+    new ethers.AbiCoder().encode(["string"], [strategyName + version]),
+  );
+
+  const objToWrite = {
+    id: hashBytesStrategyName,
+    name: strategyName,
+    version: version,
+    address: impl.toString(),
+    deployerAddress: deployerAddress,
+  };
+
+  deployments.write(objToWrite);
+
+  await verifyContract(impl, [...values]);
+
+  const validator = await new Validator(strategyName, impl);
+  await validator.validate("getAllo", [], alloAddress);
+  await validator.validate("getStrategyId", [], hashBytesStrategyName);
+
+  return impl.toString();
 }
 
 // Note: Deploy script to run in terminal:

@@ -1,12 +1,13 @@
 import hre, { ethers, upgrades } from "hardhat";
 import { registryConfig } from "../config/registry.config";
 import {
-    Deployments,
-    confirmContinue,
-    getImplementationAddress,
-    prettyNum,
-    verifyContract,
+  Deployments,
+  confirmContinue,
+  getImplementationAddress,
+  prettyNum,
+  verifyContract,
 } from "../utils/scripts";
+import { Validator } from "../utils/Validator";
 
 export async function deployRegistry() {
   const network = await ethers.provider.getNetwork();
@@ -41,10 +42,9 @@ export async function deployRegistry() {
   ]);
 
   await instance.waitForDeployment();
-  
 
   const implementation = await getImplementationAddress(
-    instance.target as string
+    instance.target as string,
   );
 
   console.log("Registry proxy deployed to:", instance.target);
@@ -60,8 +60,18 @@ export async function deployRegistry() {
 
   deployments.write(objToWrite);
 
-  await new Promise((r) => setTimeout(r, 20000));
+  await verifyContract(instance.target.toString(), []);
   await verifyContract(implementation, []);
+
+  const validator = await new Validator("Registry", instance.target);
+  const ownerRole =
+    "0x815b5a78dc333d344c7df9da23c04dbd432015cc701876ddb9ffe850e6882747"; //keccak256("ALLO_OWNER");
+
+  await validator.validate(
+    "hasRole",
+    [ownerRole, registryConfig[chainId].owner],
+    "true",
+  );
 
   return instance.target;
 }

@@ -12,7 +12,7 @@ type DeployParams = Record<number, AlloConfig>;
 export const alloConfig: DeployParams = {
   // Mainnet
   1: {
-    treasury: "",
+    treasury: "0x1fD06f088c720bA3b7a3634a8F021Fdd485DcA42",
     percentFee: 0,
     baseFee: 0,
   },
@@ -24,103 +24,103 @@ export const alloConfig: DeployParams = {
   },
   // Sepolia
   11155111: {
-    treasury: "",
+    treasury: "0x1fD06f088c720bA3b7a3634a8F021Fdd485DcA42",
     percentFee: 0,
     baseFee: 0,
   },
   // PGN
   424: {
-    treasury: "",
+    treasury: "0x1fD06f088c720bA3b7a3634a8F021Fdd485DcA42",
     percentFee: 0,
     baseFee: 0,
   },
   // PGN Sepolia
   58008: {
-    treasury: "",
+    treasury: "0x1fD06f088c720bA3b7a3634a8F021Fdd485DcA42",
     percentFee: 0,
     baseFee: 0,
   },
   // Optimism
   10: {
-    treasury: "",
+    treasury: "0x1fD06f088c720bA3b7a3634a8F021Fdd485DcA42",
     percentFee: 0,
     baseFee: 0,
   },
   // Optimism Goerli
   420: {
-    treasury: "",
+    treasury: "0x1fD06f088c720bA3b7a3634a8F021Fdd485DcA42",
     percentFee: 0,
     baseFee: 0,
   },
   // Fantom
   250: {
-    treasury: "",
+    treasury: "0x1fD06f088c720bA3b7a3634a8F021Fdd485DcA42",
     percentFee: 0,
     baseFee: 0,
   },
   // Fantom Testnet
   4002: {
-    treasury: "",
+    treasury: "0x1fD06f088c720bA3b7a3634a8F021Fdd485DcA42",
     percentFee: 0,
     baseFee: 0,
   },
   // Celo Mainnet
   42220: {
-    treasury: "",
+    treasury: "0x1fD06f088c720bA3b7a3634a8F021Fdd485DcA42",
     percentFee: 0,
     baseFee: 0,
   },
   // Celo Testnet Alfajores
   44787: {
-    treasury: "",
+    treasury: "0x1fD06f088c720bA3b7a3634a8F021Fdd485DcA42",
     percentFee: 0,
     baseFee: 0,
   },
   // ZkSync Era Mainnet
   324: {
-    treasury: "",
+    treasury: "0x1fD06f088c720bA3b7a3634a8F021Fdd485DcA42",
     percentFee: 0,
     baseFee: 0,
   },
   // ZkSync Era Testnet
   280: {
-    treasury: "",
+    treasury: "0x1fD06f088c720bA3b7a3634a8F021Fdd485DcA42",
     percentFee: 0,
     baseFee: 0,
   },
   // Polygon Mainnet
   137: {
-    treasury: "",
+    treasury: "0x1fD06f088c720bA3b7a3634a8F021Fdd485DcA42",
     percentFee: 0,
     baseFee: 0,
   },
   // Mumbai
   80001: {
-    treasury: "",
+    treasury: "0x1fD06f088c720bA3b7a3634a8F021Fdd485DcA42",
     percentFee: 0,
     baseFee: 0,
   },
   // Arbitrum One
   42161: {
-    treasury: "",
+    treasury: "0x1fD06f088c720bA3b7a3634a8F021Fdd485DcA42",
     percentFee: 0,
     baseFee: 0,
   },
   // Arbitrum Goerli
   421613: {
-    treasury: "",
+    treasury: "0x1fD06f088c720bA3b7a3634a8F021Fdd485DcA42",
     percentFee: 0,
     baseFee: 0,
   },
   // Avalanche Mainnet
   43114: {
-    treasury: "",
+    treasury: "0x1fD06f088c720bA3b7a3634a8F021Fdd485DcA42",
     percentFee: 0,
     baseFee: 0,
   },
   // Avalanche Fuji Testnet
   43113: {
-    treasury: "",
+    treasury: "0x1fD06f088c720bA3b7a3634a8F021Fdd485DcA42",
     percentFee: 0,
     baseFee: 0,
   },

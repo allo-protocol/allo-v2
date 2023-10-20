@@ -6,6 +6,7 @@ import {
   prettyNum,
   verifyContract,
 } from "../utils/scripts";
+import { Validator } from "../utils/Validator";
 
 export async function deployContractFactory() {
   const network = await ethers.provider.getNetwork();
@@ -48,9 +49,16 @@ export async function deployContractFactory() {
   deploymentIo.write(objToWrite);
 
   await delay(20000);
-  return await verifyContract(instance.target.toString(), []).then(
-    () => instance.target
-  );
+  await verifyContract(instance.target.toString(), []);
+
+  const validator = await new Validator("ContractFactory", instance.target);
+
+  let result;
+  await validator.validate("isDeployer", [deployerAddress], "true").then(() => {
+    result = instance.target;
+  });
+
+  return result;
 }
 
 if (require.main === module) {

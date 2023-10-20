@@ -38,7 +38,6 @@ async function upgradeAllo() {
   const instance = await upgrades.upgradeProxy(proxyAddress, AlloV2);
 
   await instance.waitForDeployment();
-  await new Promise((r) => setTimeout(r, 20000));
 
   const implementation = await getImplementationAddress(
     instance.target as string

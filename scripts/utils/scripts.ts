@@ -1,5 +1,5 @@
-import { exec } from "child_process";
 import "dotenv/config";
+import { Addressable } from "ethers";
 import fs from "fs";
 import hre, { upgrades } from "hardhat";
 import readline from "readline";
@@ -15,7 +15,7 @@ export async function waitForInput(query: string): Promise<unknown> {
     rl.question(query, (ans) => {
       rl.close();
       resolve(ans);
-    })
+    }),
   );
 }
 
@@ -44,33 +44,20 @@ export const prettyNum = (_n: number | string) => {
 };
 
 export const verifyContract = async (
-  contractAddress: string,
-  verifyArgs: string[]
+  contractAddress: string | Addressable,
+  verifyArgs: string[],
 ): Promise<boolean> => {
-  console.log("Verifying contract...");
-  const networkName = hre.network.name;
-  const cmd = `npx hardhat verify --network ${networkName} ${contractAddress} ${verifyArgs.join(
-    " "
-  )}`;
-  console.log("Run: ", cmd);
-  exec(cmd, (error, stdout, stderr) => {
-    if (error) {
-      console.error(`Error: ${error.message}`);
-      return false;
-    }
-    if (stderr) {
-      console.error(`Error: ${stderr}`);
-      return false;
-    }
-    console.log(`Result: ${stdout}`);
+  console.log("\nVerifying contract...");
+  await new Promise((r) => setTimeout(r, 20000));
+  return await hre.run("verify:verify", {
+    address: contractAddress.toString(),
+    constructorArguments: verifyArgs,
   });
-
-  return true;
 };
 
 export const getImplementationAddress = async (proxyAddress: string) => {
   const implementationAddress = await upgrades.erc1967.getImplementationAddress(
-    proxyAddress
+    proxyAddress,
   );
 
   return implementationAddress;
