@@ -105,11 +105,18 @@ interface IAllo {
     /// ====================================
 
     /// @notice Initialize the Allo contract
+    /// @param _owner Address of the owner
     /// @param _registry Address of the registry contract
     /// @param _treasury Address of the treasury
     /// @param _percentFee Percentage for the fee
     /// @param _baseFee Base fee amount
-    function initialize(address _registry, address payable _treasury, uint256 _percentFee, uint256 _baseFee) external;
+    function initialize(
+        address _owner,
+        address _registry,
+        address payable _treasury,
+        uint256 _percentFee,
+        uint256 _baseFee
+    ) external;
 
     /// @notice Updates a pools metadata.
     /// @dev 'msg.sender' must be a pool admin.

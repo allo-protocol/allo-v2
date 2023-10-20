@@ -36,6 +36,7 @@ export async function deployAllo() {
     contract: "Deploy Allo.sol",
     chainId: chainId,
     network: networkName,
+    owner: alloParams.owner,
     registry: registryAddress,
     treasury: alloParams.treasury,
     percentFee: alloParams.percentFee,
@@ -48,6 +49,7 @@ export async function deployAllo() {
 
   const Allo = await ethers.getContractFactory("Allo");
   const instance = await upgrades.deployProxy(Allo, [
+    alloParams.owner,
     registryAddress,
     alloParams.treasury,
     alloParams.percentFee,
@@ -71,6 +73,7 @@ export async function deployAllo() {
     percentFee: alloParams.percentFee,
     baseFee: alloParams.baseFee,
     registry: registryAddress,
+    owner: alloParams.owner,
     deployerAddress: deployerAddress,
   };
 

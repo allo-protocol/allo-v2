@@ -87,6 +87,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors {
         emit BaseFeeUpdated(1e16);
 
         coreContract.initialize(
+            address(allo_owner()), // _owner
             address(registry()), // _registry
             allo_treasury(), // _treasury
             1e16, // _percentFee
@@ -103,6 +104,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors {
         vm.expectRevert("Initializable: contract is already initialized");
 
         allo().initialize(
+            address(allo_owner()), // _owner
             address(registry()), // _registry
             allo_treasury(), // _treasury
             1e16, // _percentFee
