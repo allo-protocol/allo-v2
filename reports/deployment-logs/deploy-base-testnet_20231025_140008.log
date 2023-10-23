@@ -1,0 +1,64 @@
+Warning: Unreachable code.
+   --> contracts/strategies/BaseStrategy.sol:174:9:
+    |
+174 |         _afterRegisterRecipient(_data, _sender);
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Compiled 112 Solidity files successfully (evm target: paris).
+
+    ////////////////////////////////////////////////////
+    Deploy core Allo V2 contracts to base-testnet
+    ======================================
+    - ContractFactory (used for strategy deployments)
+    - Registry
+    - Allo
+    ////////////////////////////////////////////////////
+  
+
+    ////////////////////////////////////////////////////
+        Deploys ContractFactory.sol on base-testnet
+    ////////////////////////////////////////////////////
+  
+Deploying ContractFactory.sol...
+ContractFactory deployed to: 0xb868986571c7d8673519Eb97D47d89a67af54B9b
+[90m
+	Validating isDeployer(0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781) == true[0m
+[32m	✅ PASSED with Result: true[0m
+
+    ////////////////////////////////////////////////////
+            Deploys Registry.sol on base-testnet
+    ////////////////////////////////////////////////////
+  
+Deploying Registry...
+/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/hardhat/src/internal/core/providers/http.ts:88
+      const error = new ProviderError(
+                    ^
+ProviderError: insufficient funds for gas * price + value
+    at HttpProvider.request (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/hardhat/src/internal/core/providers/http.ts:88:21)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at async HardhatEthersSigner.sendTransaction (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@nomicfoundation/hardhat-ethers/src/signers.ts:125:18)
+    at async ContractFactory.deploy (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/ethers/src.ts/contract/factory.ts:111:24)
+    at async ethersDeploy (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/utils/deploy.ts:32:28)
+    at async deploy (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/utils/deploy.ts:24:12)
+    at async /Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/utils/deploy-impl.ts:127:49
+    at async resumeOrDeploy (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/upgrades-core/src/deployment.ts:76:24)
+    at async /Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/upgrades-core/src/impl-store.ts:63:23
+    at async Manifest.lockedRun (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/upgrades-core/src/manifest.ts:265:14) {
+  parent: undefined,
+  _stack: 'ProviderError: insufficient funds for gas * price + value\n' +
+    '    at HttpProvider.request (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/hardhat/src/internal/core/providers/http.ts:88:21)\n' +
+    '    at processTicksAndRejections (node:internal/process/task_queues:96:5)\n' +
+    '    at async HardhatEthersSigner.sendTransaction (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@nomicfoundation/hardhat-ethers/src/signers.ts:125:18)\n' +
+    '    at async ContractFactory.deploy (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/ethers/src.ts/contract/factory.ts:111:24)\n' +
+    '    at async ethersDeploy (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/utils/deploy.ts:32:28)\n' +
+    '    at async deploy (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/utils/deploy.ts:24:12)\n' +
+    '    at async /Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/utils/deploy-impl.ts:127:49\n' +
+    '    at async resumeOrDeploy (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/upgrades-core/src/deployment.ts:76:24)\n' +
+    '    at async /Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/upgrades-core/src/impl-store.ts:63:23\n' +
+    '    at async Manifest.lockedRun (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/upgrades-core/src/manifest.ts:265:14)',
+  code: -32000,
+  _isProviderError: true,
+  data: undefined
+}
+error: "hardhat" exited with code 1 (SIGHUP)

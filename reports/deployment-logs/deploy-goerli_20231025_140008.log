@@ -1,0 +1,118 @@
+Warning: Unreachable code.
+   --> contracts/strategies/BaseStrategy.sol:174:9:
+    |
+174 |         _afterRegisterRecipient(_data, _sender);
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Compiled 112 Solidity files successfully (evm target: paris).
+
+    ////////////////////////////////////////////////////
+    Deploy core Allo V2 contracts to goerli
+    ======================================
+    - ContractFactory (used for strategy deployments)
+    - Registry
+    - Allo
+    ////////////////////////////////////////////////////
+  
+
+    ////////////////////////////////////////////////////
+        Deploys ContractFactory.sol on goerli
+    ////////////////////////////////////////////////////
+  
+Deploying ContractFactory.sol...
+ContractFactory deployed to: 0x816f8e50949EBcb3f1a7AEc6B5B5BAd78E192c92
+[90m
+	Validating isDeployer(0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781) == true[0m
+[32m	✅ PASSED with Result: true[0m
+
+    ////////////////////////////////////////////////////
+            Deploys Registry.sol on goerli
+    ////////////////////////////////////////////////////
+  
+Deploying Registry...
+Registry proxy deployed to: 0x42806bf05E969374f261018Ba96A01b1fE00426f
+Registry implementation deployed to: 0xc06935C5ce0233FE03C5C5E284fab585Ae26B66c
+
+Verifying contract...
+Verifying implementation: 0xc06935C5ce0233FE03C5C5E284fab585Ae26B66c
+Successfully submitted source code for contract
+contracts/core/Registry.sol:Registry at 0xc06935C5ce0233FE03C5C5E284fab585Ae26B66c
+for verification on the block explorer. Waiting for verification result...
+
+Successfully verified contract Registry on the block explorer.
+https://goerli.etherscan.io/address/0xc06935C5ce0233FE03C5C5E284fab585Ae26B66c#code
+Verifying proxy: 0x42806bf05E969374f261018Ba96A01b1fE00426f
+Contract at 0x42806bf05E969374f261018Ba96A01b1fE00426f already verified.
+Linking proxy 0x42806bf05E969374f261018Ba96A01b1fE00426f with implementation
+Successfully linked proxy to implementation.
+Verifying proxy admin: 0x7488ec0541CAea8bc7dc9829939f26497e1504A5
+Contract at 0x7488ec0541CAea8bc7dc9829939f26497e1504A5 already verified.
+
+Proxy fully verified.
+
+Verifying contract...
+The contract 0xc06935C5ce0233FE03C5C5E284fab585Ae26B66c has already been verified.
+https://goerli.etherscan.io/address/0xc06935C5ce0233FE03C5C5E284fab585Ae26B66c#code
+[90m
+	Validating hasRole(0x815b5a78dc333d344c7df9da23c04dbd432015cc701876ddb9ffe850e6882747,0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781) == true[0m
+[32m	✅ PASSED with Result: true[0m
+
+    ////////////////////////////////////////////////////
+            Deploys Allo.sol on goerli
+    ////////////////////////////////////////////////////
+  
+Deploying Allo.sol...
+Allo Proxy deployed to: 0x806d38A3D1934C1833CC9B81e668079A80961a2C
+Registry implementation deployed to: 0xFff2b67465da6885E30c0E901fA111E0E54B2d3d
+
+Verifying contract...
+Verifying implementation: 0xFff2b67465da6885E30c0E901fA111E0E54B2d3d
+The contract 0xFff2b67465da6885E30c0E901fA111E0E54B2d3d has already been verified.
+https://goerli.etherscan.io/address/0xFff2b67465da6885E30c0E901fA111E0E54B2d3d#code
+Verifying proxy: 0x806d38A3D1934C1833CC9B81e668079A80961a2C
+Could not find an event with any of the following topics in the logs for address 0x806d38A3D1934C1833CC9B81e668079A80961a2C: AdminChanged(address,address), Upgraded(address)
+
+If the proxy was recently deployed, the transaction may not be available on Etherscan yet. Try running the verify task again after waiting a few blocks.
+Failed to verify directly using hardhat verify: The contract you want to verify was compiled with solidity 0.8.9, but your configured compiler version is: 0.8.19.
+
+Possible causes are:
+- You are not in the same commit that was used to deploy the contract.
+- Wrong compiler version selected in hardhat config.
+- The given address is wrong.
+- The selected network (goerli) is wrong.
+Linking proxy 0x806d38A3D1934C1833CC9B81e668079A80961a2C with implementation
+Failed to link proxy 0x806d38A3D1934C1833CC9B81e668079A80961a2C with its implementation. Reason: Max rate limit reached
+Verifying proxy admin: 0x7488ec0541CAea8bc7dc9829939f26497e1504A5
+/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/verify-proxy.ts:137
+    throw new UpgradesError(summary);
+          ^
+UpgradesError: 
+Verification completed with the following errors.
+
+Error 1: Could not find an event with any of the following topics in the logs for address 0x806d38A3D1934C1833CC9B81e668079A80961a2C: AdminChanged(address,address), Upgraded(address)
+
+If the proxy was recently deployed, the transaction may not be available on Etherscan yet. Try running the verify task again after waiting a few blocks.
+
+Error 2: Failed to verify directly using hardhat verify: The contract you want to verify was compiled with solidity 0.8.9, but your configured compiler version is: 0.8.19.
+
+Possible causes are:
+- You are not in the same commit that was used to deploy the contract.
+- Wrong compiler version selected in hardhat config.
+- The given address is wrong.
+- The selected network (goerli) is wrong.
+
+Error 3: Failed to link proxy 0x806d38A3D1934C1833CC9B81e668079A80961a2C with its implementation. Reason: Max rate limit reached
+
+
+    at displayErrorReport (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/verify-proxy.ts:137:11)
+    at verify (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/verify-proxy.ts:112:5)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at async OverriddenTaskDefinition._action (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/index.ts:198:12)
+    at async Environment._runTaskDefinition (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:358:14)
+    at async Environment.run (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:191:14)
+    at async SimpleTaskDefinition.action (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/index.ts:546:7)
+    at async Environment._runTaskDefinition (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:358:14)
+    at async Environment.run (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:191:14)
+    at async verifyContract (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/scripts/utils/scripts.ts:52:10)
+error: "hardhat" exited with code 1 (SIGHUP)

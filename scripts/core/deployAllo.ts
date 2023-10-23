@@ -1,13 +1,11 @@
 import hre, { ethers, upgrades } from "hardhat";
 import { alloConfig } from "../config/allo.config";
+import { Validator } from "../utils/Validator";
 import {
   Deployments,
-  confirmContinue,
   getImplementationAddress,
-  prettyNum,
-  verifyContract,
+  verifyContract
 } from "../utils/scripts";
-import { Validator } from "../utils/Validator";
 
 export async function deployAllo() {
   const network = await ethers.provider.getNetwork();
@@ -15,7 +13,7 @@ export async function deployAllo() {
   const chainId = Number(network.chainId);
   const account = (await ethers.getSigners())[0];
   const deployerAddress = await account.getAddress();
-  const balance = await ethers.provider.getBalance(deployerAddress);
+  // const balance = await ethers.provider.getBalance(deployerAddress);
 
   const deployments = new Deployments(chainId, "allo");
 
@@ -32,24 +30,22 @@ export async function deployAllo() {
 
   const registryAddress = deployments.getRegistry();
 
-  await confirmContinue({
-    contract: "Deploy Allo.sol",
-    chainId: chainId,
-    network: networkName,
-    owner: alloParams.owner,
-    registry: registryAddress,
-    treasury: alloParams.treasury,
-    percentFee: alloParams.percentFee,
-    baseFee: alloParams.baseFee,
-    deployerAddress: deployerAddress,
-    balance: prettyNum(balance.toString()),
-  });
+  // await confirmContinue({
+  //   contract: "Deploy Allo.sol",
+  //   chainId: chainId,
+  //   network: networkName,
+  //   registry: registryAddress,
+  //   treasury: alloParams.treasury,
+  //   percentFee: alloParams.percentFee,
+  //   baseFee: alloParams.baseFee,
+  //   deployerAddress: deployerAddress,
+  //   balance: ethers.formatEther(balance),
+  // });
 
-  console.log("Deploying Allo...");
+  console.log("Deploying Allo.sol...");
 
   const Allo = await ethers.getContractFactory("Allo");
   const instance = await upgrades.deployProxy(Allo, [
-    alloParams.owner,
     registryAddress,
     alloParams.treasury,
     alloParams.percentFee,
@@ -73,7 +69,6 @@ export async function deployAllo() {
     percentFee: alloParams.percentFee,
     baseFee: alloParams.baseFee,
     registry: registryAddress,
-    owner: alloParams.owner,
     deployerAddress: deployerAddress,
   };
 

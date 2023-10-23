@@ -1,0 +1,9 @@
+20231025_140008 - Executing: bun hardhat run scripts/core/_deployCore.ts --network goerli | tee ./reports/deployment-logs/deploy-goerli_20231025_140008.log
+20231025_140434 - Executing: bun hardhat run scripts/core/_deployCore.ts --network sepolia | tee ./reports/deployment-logs/deploy-sepolia_20231025_140008.log
+20231025_140838 - Executing: bun hardhat run scripts/core/_deployCore.ts --network arbitrum-goerli | tee ./reports/deployment-logs/deploy-arbitrum-goerli_20231025_140008.log
+20231025_141155 - Executing: bun hardhat run scripts/core/_deployCore.ts --network optimism-goerli | tee ./reports/deployment-logs/deploy-optimism-goerli_20231025_140008.log
+20231025_141520 - Executing: bun hardhat run scripts/core/_deployCore.ts --network base-testnet | tee ./reports/deployment-logs/deploy-base-testnet_20231025_140008.log
+20231025_141618 - Executing: bun hardhat run scripts/core/_deployCore.ts --network celo-testnet | tee ./reports/deployment-logs/deploy-celo-testnet_20231025_140008.log
+20231025_141958 - Executing: bun hardhat run scripts/core/_deployCore.ts --network mumbai | tee ./reports/deployment-logs/deploy-mumbai_20231025_140008.log
+20231025_142143 - Executing: bun hardhat run scripts/core/_deployCore.ts --network pgn-sepolia | tee ./reports/deployment-logs/deploy-pgn-sepolia_20231025_140008.log
+20231025_142332 - Deployment finished with 0 error(s)

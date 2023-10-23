@@ -4,7 +4,6 @@ import hre, { ethers, upgrades } from "hardhat";
 import { Manifest } from "@openzeppelin/upgrades-core";
 import ProxyAdmin from "@openzeppelin/upgrades-core/artifacts/@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol/ProxyAdmin.json";
 import TransparentUpgradeableProxy from "@openzeppelin/upgrades-core/artifacts/@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol/TransparentUpgradeableProxy.json";
-import { deployerContractAddress } from "../config/deployment.config";
 
 export type Args = {
   types: Array<string>;
@@ -25,7 +24,7 @@ export type ProxyAddresses = {
 
 export const deployProxyUsingFactory = async (
   contractFactoryAddress: string | Addressable,
-  deployProxyOptions: DeployProxyOptions,
+  deployProxyOptions: DeployProxyOptions
 ): Promise<ProxyAddresses> => {
   const networkName = hre.network.name;
   const account = (await ethers.getSigners())[0];
@@ -61,30 +60,31 @@ export const deployProxyUsingFactory = async (
     implementationCreationCode,
     "Implementation " + contractName,
     version,
-    deployProxyOptions.constructorArgs,
+    deployProxyOptions.constructorArgs
   );
 
   const fragment = ImplementationFactory.interface.getFunction("initialize");
 
-  const transparentProxyAddress: string = await deployContractUsingFactoryWithBytecode(
-    contractFactoryAddress,
-    TransparentUpgradeableProxy.bytecode,
-    "TransparentUpgradeableProxy " + contractName,
-    version,
-    {
-      types: ["address", "address", "bytes"],
-      values: [
-        implementationAddress,
-        proxyAdmin,
-        deployProxyOptions.initializerArgs && fragment
-          ? ImplementationFactory.interface.encodeFunctionData(
-            fragment,
-            deployProxyOptions.initializerArgs.values,
-          )
-          : "0x",
-      ],
-    },
-  );
+  const transparentProxyAddress: string =
+    await deployContractUsingFactoryWithBytecode(
+      contractFactoryAddress,
+      TransparentUpgradeableProxy.bytecode,
+      "TransparentUpgradeableProxy " + contractName,
+      version,
+      {
+        types: ["address", "address", "bytes"],
+        values: [
+          implementationAddress,
+          proxyAdmin,
+          deployProxyOptions.initializerArgs && fragment
+            ? ImplementationFactory.interface.encodeFunctionData(
+                fragment,
+                deployProxyOptions.initializerArgs.values
+              )
+            : "0x",
+        ],
+      }
+    );
 
   await upgrades.forceImport(transparentProxyAddress, ImplementationFactory, {
     kind: "transparent",
@@ -101,10 +101,10 @@ export const deployContractUsingFactoryWithBytecode = async (
   bytecode: string,
   contractName: string,
   version: string,
-  constructorArgs?: Args,
+  constructorArgs?: Args
 ): Promise<string> => {
   const ContractFactory = await hre.ethers.getContractFactory(
-    "ContractFactory",
+    "ContractFactory"
   );
   // Attach the deployed Deployer contract
   const deployerContract: any = ContractFactory.attach(contractFactoryAddress);
@@ -114,7 +114,7 @@ export const deployContractUsingFactoryWithBytecode = async (
   if (constructorArgs) {
     encodedParams = new AbiCoder().encode(
       constructorArgs.types,
-      constructorArgs.values,
+      constructorArgs.values
     );
   }
 
@@ -130,21 +130,21 @@ export const deployContractUsingFactoryWithBytecode = async (
     contractAddress = await deployerContract.deploy.staticCall(
       contractName,
       version,
-      creationCodeWithConstructor,
+      creationCodeWithConstructor
     );
 
     // Deploy the contract and get the transaction response
     const txResponse = await deployerContract.deploy(
       contractName,
       version,
-      creationCodeWithConstructor,
+      creationCodeWithConstructor
     );
 
     // Wait for the transaction to be mined
     await txResponse.wait();
 
     logPink(
-      "Contract " + contractName + " deployed at address: " + contractAddress,
+      "Contract " + contractName + " deployed at address: " + contractAddress
     );
   } catch (error) {
     logPink("Error calling deploy() function. \n" + error);
@@ -157,7 +157,7 @@ export const deployContractUsingFactory = async (
   deployerContract: string,
   contractName: string,
   version: string,
-  constructorArgs?: Args,
+  constructorArgs?: Args
 ): Promise<string | Addressable> => {
   const network = await ethers.provider.getNetwork();
   const ImplementationFactory = await ethers.getContractFactory(contractName);
@@ -167,7 +167,7 @@ export const deployContractUsingFactory = async (
     implementationCreationCode,
     contractName,
     version,
-    constructorArgs,
+    constructorArgs
   );
 
   return implementationAddress;

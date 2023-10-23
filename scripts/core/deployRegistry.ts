@@ -1,13 +1,11 @@
 import hre, { ethers, upgrades } from "hardhat";
 import { registryConfig } from "../config/registry.config";
+import { Validator } from "../utils/Validator";
 import {
   Deployments,
-  confirmContinue,
   getImplementationAddress,
-  prettyNum,
-  verifyContract,
+  verifyContract
 } from "../utils/scripts";
-import { Validator } from "../utils/Validator";
 
 export async function deployRegistry() {
   const network = await ethers.provider.getNetwork();
@@ -25,14 +23,14 @@ export async function deployRegistry() {
     ////////////////////////////////////////////////////
   `);
 
-  await confirmContinue({
-    contract: "Registry.sol",
-    chainId: chainId,
-    network: networkName,
-    deployerAddress: deployerAddress,
-    registryOwner: registryConfig[chainId].owner,
-    balance: prettyNum(balance.toString()),
-  });
+  // await confirmContinue({
+  //   contract: "Registry.sol",
+  //   chainId: chainId,
+  //   network: networkName,
+  //   deployerAddress: deployerAddress,
+  //   registryOwner: registryConfig[chainId].owner,
+  //   balance: prettyNum(balance.toString()),
+  // });
 
   console.log("Deploying Registry...");
 

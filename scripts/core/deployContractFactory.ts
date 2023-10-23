@@ -1,12 +1,9 @@
 import hre, { ethers } from "hardhat";
+import { Validator } from "../utils/Validator";
 import {
   Deployments,
-  confirmContinue,
-  delay,
-  prettyNum,
-  verifyContract,
+  delay
 } from "../utils/scripts";
-import { Validator } from "../utils/Validator";
 
 export async function deployContractFactory() {
   const network = await ethers.provider.getNetwork();
@@ -14,8 +11,8 @@ export async function deployContractFactory() {
   const chainId = Number(network.chainId);
   const account = (await ethers.getSigners())[0];
   const deployerAddress = await account.getAddress();
-  // const blocksToWait = networkName === "localhost" ? 0 : 5;
-  const balance = await ethers.provider.getBalance(deployerAddress);
+  const blocksToWait = networkName === "localhost" ? 0 : 5;
+  // const balance = await ethers.provider.getBalance(deployerAddress);
 
   const deploymentIo = new Deployments(chainId, "contractFactory");
 
@@ -25,18 +22,21 @@ export async function deployContractFactory() {
     ////////////////////////////////////////////////////
   `);
 
-  await confirmContinue({
-    contract: "Deploy ContractFactory.sol",
-    chainId: chainId,
-    network: networkName,
-    deployerAddress: deployerAddress,
-    balance: prettyNum(balance.toString()),
-  });
+  // await confirmContinue({
+  //   contract: "Deploy ContractFactory.sol",
+  //   chainId: chainId,
+  //   network: networkName,
+  //   deployerAddress: deployerAddress,
+  //   balance: ethers.formatEther(balance),
+  // });
 
   console.log("Deploying ContractFactory.sol...");
 
   const ContractFactory = await ethers.getContractFactory("ContractFactory");
   const instance = await ContractFactory.deploy();
+
+  await instance.waitForDeployment();
+  await instance.deploymentTransaction()?.wait(blocksToWait);
 
   console.log("ContractFactory deployed to:", instance.target);
 
@@ -47,10 +47,7 @@ export async function deployContractFactory() {
   };
 
   deploymentIo.write(objToWrite);
-
   await delay(20000);
-  await verifyContract(instance.target.toString(), []);
-
   const validator = await new Validator("ContractFactory", instance.target);
 
   let result;

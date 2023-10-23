@@ -8,12 +8,17 @@ typechain
 typechain-types
 lcov.info
 lcov.info.pruned
+
 # Hardhat files
 artifacts
 cache
 cache_hardhat
-cache_hardhat_zk
+cache_hardhat-zk
+
+
 abis
+# reports/*
+# snapshots/*
 
 # Foundry files
 out
@@ -31,3 +36,7 @@ cache/solidity-files-cache.json
 artifacts-zk/
 
 generated-docs
+bun.lockb
+reports/deploy-arbitrum-goerli.log
+reports/deploy.log
+reports/gas-report.log

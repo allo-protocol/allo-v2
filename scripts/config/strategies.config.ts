@@ -9,122 +9,6 @@ type StrategyConfig = {
 };
 
 type DeployParams = Record<number, StrategyConfig>;
-
-type DeployerConfig = {
-  [key: number]: { address: string };
-};
-
-export const deployerContractAddress: DeployerConfig = {
-  // Mainnet
-  1: {
-    address: "",
-  },
-  // Goerli
-  5: {
-    address: "0x737b811828B34838e2188c59cfF72BD1019A1070",
-  },
-  // Sepolia
-  11155111: {
-    address: "0x737b811828B34838e2188c59cfF72BD1019A1070",
-  },
-  // PGN
-  424: {
-    address: "",
-  },
-  // PGN Sepolia
-  58008: {
-    address: "0x737b811828B34838e2188c59cfF72BD1019A1070",
-  },
-  // Optimism
-  10: {
-    address: "",
-  },
-  // Optimism Goerli
-  420: {
-    address: "0x737b811828B34838e2188c59cfF72BD1019A1070",
-  },
-  // Fantom
-  250: {
-    address: "",
-  },
-  // Fantom Testnet
-  4002: {
-    address: "",
-  },
-  // Celo Mainnet
-  42220: {
-    address: "",
-  },
-  // Celo Alfajores
-  44787: {
-    address: "0x737b811828B34838e2188c59cfF72BD1019A1070",
-  },
-  // ZkSync Era Mainnet
-  324: {
-    address: "",
-  },
-  // ZkSync Era Testnet
-  280: {
-    address: "",
-  },
-};
-
-export const permit2Contract: DeployerConfig = {
-  // Mainnet
-  1: {
-    address: "",
-  },
-  // Goerli
-  5: {
-    address: "",
-  },
-  // Sepolia // random address for now
-  11155111: {
-    address: "0x737b811828B34838e2188c59cfF72BD1019A1070",
-  },
-  // PGN
-  424: {
-    address: "",
-  },
-  // PGN Sepolia
-  58008: {
-    address: "",
-  },
-  // Optimism
-  10: {
-    address: "",
-  },
-  // Optimism Goerli
-  420: {
-    address: "",
-  },
-  // Fantom
-  250: {
-    address: "",
-  },
-  // Fantom Testnet
-  4002: {
-    address: "",
-  },
-  // Celo Mainnet
-  42220: {
-    address: "",
-  },
-  // Celo Alfajores
-  44787: {
-    address: "",
-  },
-  // ZkSync Era Mainnet
-  324: {
-    address: "",
-  },
-  // ZkSync Era Testnet
-  280: {
-    address: "",
-  },
-};
-
-
 // NOTE: This will be the version address for each registy on each network.
 export const nameConfig: DeployParams = {
   // Mainnet
@@ -490,6 +374,174 @@ export const nameConfig: DeployParams = {
   },
   // ZkSync Era Testnet
   280: {
+    "donation-voting": {
+      name: "DonationVotingStrategy",
+      version: "v1",
+      address: "",
+    },
+    "direct-grants-simple": {
+      name: "DirectGrantsSimpleStrategy",
+      version: "v1",
+      address: "",
+    },
+    "donation-voting-direct": {
+      name: "DonationVotingMerkleDistributionDirectTransferStrategy",
+      version: "v1",
+      address: "",
+    },
+    "donation-voting-vault": {
+      name: "DonationVotingMerkleDistributionVaultStrategy",
+      version: "",
+      address: "",
+    },
+    "rfp-simple": {
+      name: "",
+      version: "",
+      address: "",
+    },
+  },
+  // Polygon Mainnet
+  137: {
+    "donation-voting": {
+      name: "DonationVotingStrategy",
+      version: "v1",
+      address: "",
+    },
+    "direct-grants-simple": {
+      name: "DirectGrantsSimpleStrategy",
+      version: "v1",
+      address: "",
+    },
+    "donation-voting-direct": {
+      name: "DonationVotingMerkleDistributionDirectTransferStrategy",
+      version: "v1",
+      address: "",
+    },
+    "donation-voting-vault": {
+      name: "DonationVotingMerkleDistributionVaultStrategy",
+      version: "",
+      address: "",
+    },
+    "rfp-simple": {
+      name: "",
+      version: "",
+      address: "",
+    },
+  },
+  // Mumbai
+  80001: {
+    "donation-voting": {
+      name: "DonationVotingStrategy",
+      version: "v1",
+      address: "",
+    },
+    "direct-grants-simple": {
+      name: "DirectGrantsSimpleStrategy",
+      version: "v1",
+      address: "",
+    },
+    "donation-voting-direct": {
+      name: "DonationVotingMerkleDistributionDirectTransferStrategy",
+      version: "v1",
+      address: "",
+    },
+    "donation-voting-vault": {
+      name: "DonationVotingMerkleDistributionVaultStrategy",
+      version: "",
+      address: "",
+    },
+    "rfp-simple": {
+      name: "",
+      version: "",
+      address: "",
+    },
+  },
+  // Arbitrum One Mainnet
+  42161: {
+    "donation-voting": {
+      name: "DonationVotingStrategy",
+      version: "v1",
+      address: "",
+    },
+    "direct-grants-simple": {
+      name: "DirectGrantsSimpleStrategy",
+      version: "v1",
+      address: "",
+    },
+    "donation-voting-direct": {
+      name: "DonationVotingMerkleDistributionDirectTransferStrategy",
+      version: "v1",
+      address: "",
+    },
+    "donation-voting-vault": {
+      name: "DonationVotingMerkleDistributionVaultStrategy",
+      version: "",
+      address: "",
+    },
+    "rfp-simple": {
+      name: "",
+      version: "",
+      address: "",
+    },
+  },
+  // Arbitrum Goerli
+  421613: {
+    "donation-voting": {
+      name: "DonationVotingStrategy",
+      version: "v1",
+      address: "",
+    },
+    "direct-grants-simple": {
+      name: "DirectGrantsSimpleStrategy",
+      version: "v1",
+      address: "",
+    },
+    "donation-voting-direct": {
+      name: "DonationVotingMerkleDistributionDirectTransferStrategy",
+      version: "v1",
+      address: "",
+    },
+    "donation-voting-vault": {
+      name: "DonationVotingMerkleDistributionVaultStrategy",
+      version: "",
+      address: "",
+    },
+    "rfp-simple": {
+      name: "",
+      version: "",
+      address: "",
+    },
+  },
+  // Base Mainnet
+  8453: {
+    "donation-voting": {
+      name: "DonationVotingStrategy",
+      version: "v1",
+      address: "",
+    },
+    "direct-grants-simple": {
+      name: "DirectGrantsSimpleStrategy",
+      version: "v1",
+      address: "",
+    },
+    "donation-voting-direct": {
+      name: "DonationVotingMerkleDistributionDirectTransferStrategy",
+      version: "v1",
+      address: "",
+    },
+    "donation-voting-vault": {
+      name: "DonationVotingMerkleDistributionVaultStrategy",
+      version: "",
+      address: "",
+    },
+    "rfp-simple": {
+      name: "",
+      version: "",
+      address: "",
+    },
+  },
+  // Base Testnet Goerli
+  84531: {
     "donation-voting": {
       name: "DonationVotingStrategy",
       version: "v1",
