@@ -1,46 +1,49 @@
 import { ethers, upgrades } from "hardhat";
-import { alloConfig } from "../config/allo.config";
+import { registryConfig } from "../config/registry.config";
 import { confirmContinue, prettyNum } from "../utils/scripts";
 
-async function upgradeAllo() {
+async function upgradeRegistry() {
   const network = await ethers.provider.getNetwork();
   let account;
   let accountAddress;
   //  const blocksToWait = hre.network.name === "localhost" ? 0 : 10;
   const chainId = Number(network.chainId);
-  const alloParams = alloConfig[chainId];
+  const registryParams = registryConfig[chainId];
 
   account = (await ethers.getSigners())[0];
   accountAddress = await account.getAddress();
   const balance = await ethers.provider.getBalance(accountAddress);
 
-  console.log(`This script upgrades the Allo contract on ${network.name}`);
+  console.log(`This script upgrades the Registryontract on ${network.name}`);
 
   await confirmContinue({
-    contract: "Upgrading Allo",
+    contract: "Upgrading Registry",
     chainId: network.chainId,
     network: network.name,
     account: accountAddress,
     balance: prettyNum(balance.toString()),
-    proxyAddress: alloParams.alloProxy,
+    proxyAddress: registryParams.registryProxy,
   });
 
-  console.log("Upgrading Allo...");
+  console.log("Upgrading Registry.");
 
-  const AlloV2 = await ethers.getContractFactory("Allo", account);
-  const instance = await upgrades.upgradeProxy(alloParams.alloProxy, AlloV2);
+  const Registry = await ethers.getContractFactory("Registry", account);
+  const instance = await upgrades.upgradeProxy(
+    registryParams.registryProxy,
+    Registry
+  );
   // console.log("tx hash", instance.deployTransaction);
   // await instance.deployed(blocksToWait);
 
   // const gas = await instance.deployTransaction.estimateGas();
   // console.log(`gas used: ${gas}`)
-  console.log("Allo upgraded");
+  console.log("Registrypgraded");
 }
 
-upgradeAllo().catch((error) => {
+upgradeRegistry().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });
 
 // Note: Deploy script to run in terminal:
-// npx hardhat run scripts/upgradeAllo.ts --network sepolia
+// npx hardhat run scripts/upgradeRegistry.ts --network sepolia
