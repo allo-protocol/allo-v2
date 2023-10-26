@@ -25,7 +25,7 @@ handle_insufficient_funds_error() {
 
 timestamp=$(date +"%Y%m%d_%H%M%S")
 
-mkdir -p ./reports/deployment-logs/
+mkdir -p ./reports/deployment-logs/$timestamp
 
 # Testnet commands
 commands=(
@@ -54,7 +54,7 @@ commands=(
 for cmd in "${commands[@]}"; do
     log "Executing: $cmd"
     # Extract the individual log file path from the command string
-    individual_logfile=$(echo $cmd | grep -o './reports/deployment-logs/deploy-[^ ]*.log')
+    individual_logfile=$(echo $cmd | grep -o './reports/deployment-logs/**/deploy-[^ ]*.log')
     # Remove the tee command from the command string
     cmd=${cmd%|*}
     # Define a temporary file to hold the command output

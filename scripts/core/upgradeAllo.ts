@@ -1,12 +1,11 @@
 import hre, { ethers, upgrades } from "hardhat";
 import {
   Deployments,
-  confirmContinue,
   getImplementationAddress,
-  verifyContract,
+  verifyContract
 } from "../utils/scripts";
 
-async function upgradeAllo() {
+export async function upgradeAllo() {
   const network = await ethers.provider.getNetwork();
   const networkName = await hre.network.name;
   let account;
@@ -22,7 +21,7 @@ async function upgradeAllo() {
 
   console.log(`This script upgrades the Allo contract on ${networkName}`);
 
-  await confirmContinue({
+  console.table ({
     contract: "Upgrading Allo",
     chainId: network.chainId,
     network: network.name,
