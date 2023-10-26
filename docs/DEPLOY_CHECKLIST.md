@@ -18,6 +18,7 @@
 - [ ] Add the treasury address to the `allo.config.ts` file.
 - [ ] Initial Fee's will be set to zero (0) i.e. `percentFee` and `baseFee`.
 - [ ] Add the initial owner to the `registry.config.ts` file.
+- [ ] Delete the `cache_hardhat` contents.
 
 
 ### 💰 Fund Deployer Wallet (need gas estimate for deployment)

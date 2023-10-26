@@ -1,0 +1,154 @@
+Warning: Unreachable code.
+   --> contracts/strategies/BaseStrategy.sol:174:9:
+    |
+174 |         _afterRegisterRecipient(_data, _sender);
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Compiled 112 Solidity files successfully (evm target: paris).
+
+    ////////////////////////////////////////////////////
+    Deploy core Allo V2 contracts to goerli
+    ======================================
+    - ContractFactory (used for strategy deployments)
+    - Registry
+    - Allo
+    ////////////////////////////////////////////////////
+  
+
+    ////////////////////////////////////////////////////
+        Deploys ContractFactory.sol on goerli
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────┐
+│     (index)     │                    Values                    │
+├─────────────────┼──────────────────────────────────────────────┤
+│    contract     │         'Deploy ContractFactory.sol'         │
+│     chainId     │                      5                       │
+│     network     │                   'goerli'                   │
+│ deployerAddress │ '0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781' │
+│     balance     │            '0.910938208174753998'            │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying ContractFactory.sol...
+ContractFactory deployed to: 0x87BCF559Df8E06846f4Cd70E75D0cAa193416369
+
+Verifying contract...
+Successfully submitted source code for contract
+contracts/factory/ContractFactory.sol:ContractFactory at 0x87BCF559Df8E06846f4Cd70E75D0cAa193416369
+for verification on the block explorer. Waiting for verification result...
+
+Successfully verified contract ContractFactory on the block explorer.
+https://goerli.etherscan.io/address/0x87BCF559Df8E06846f4Cd70E75D0cAa193416369#code
+[90m
+	Validating isDeployer(0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781) == true[0m
+[32m	✅ PASSED with Result: true[0m
+
+    ////////////////////////////////////////////////////
+            Deploys Registry.sol on goerli
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────┐
+│     (index)     │                    Values                    │
+├─────────────────┼──────────────────────────────────────────────┤
+│    contract     │                'Registry.sol'                │
+│     chainId     │                      5                       │
+│     network     │                   'goerli'                   │
+│ deployerAddress │ '0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781' │
+│  registryOwner  │ '0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781' │
+│     balance     │            '0.900276268174753998'            │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying Registry...
+Registry proxy deployed to: 0xF3Cb85A1DA4B1fe4D99DE133C8EDA4ebe1b1809E
+Registry implementation deployed to: 0x929c29Eb5B4644EAFfE5B38b4E8C73757aD634FE
+
+Verifying contract...
+Verifying implementation: 0x929c29Eb5B4644EAFfE5B38b4E8C73757aD634FE
+Successfully submitted source code for contract
+contracts/core/Registry.sol:Registry at 0x929c29Eb5B4644EAFfE5B38b4E8C73757aD634FE
+for verification on the block explorer. Waiting for verification result...
+
+Successfully verified contract Registry on the block explorer.
+https://goerli.etherscan.io/address/0x929c29Eb5B4644EAFfE5B38b4E8C73757aD634FE#code
+Verifying proxy: 0xF3Cb85A1DA4B1fe4D99DE133C8EDA4ebe1b1809E
+Contract at 0xF3Cb85A1DA4B1fe4D99DE133C8EDA4ebe1b1809E already verified.
+Linking proxy 0xF3Cb85A1DA4B1fe4D99DE133C8EDA4ebe1b1809E with implementation
+Successfully linked proxy to implementation.
+Verifying proxy admin: 0x7488ec0541CAea8bc7dc9829939f26497e1504A5
+Contract at 0x7488ec0541CAea8bc7dc9829939f26497e1504A5 already verified.
+
+Proxy fully verified.
+
+Verifying contract...
+The contract 0x929c29Eb5B4644EAFfE5B38b4E8C73757aD634FE has already been verified.
+https://goerli.etherscan.io/address/0x929c29Eb5B4644EAFfE5B38b4E8C73757aD634FE#code
+[90m
+	Validating hasRole(0x815b5a78dc333d344c7df9da23c04dbd432015cc701876ddb9ffe850e6882747,0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781) == true[0m
+[32m	✅ PASSED with Result: true[0m
+
+    ////////////////////////////////////////////////////
+            Deploys Allo.sol on goerli
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────┐
+│     (index)     │                    Values                    │
+├─────────────────┼──────────────────────────────────────────────┤
+│    contract     │              'Deploy Allo.sol'               │
+│     chainId     │                      5                       │
+│     network     │                   'goerli'                   │
+│      owner      │ '0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781' │
+│    registry     │ '0xF3Cb85A1DA4B1fe4D99DE133C8EDA4ebe1b1809E' │
+│    treasury     │ '0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781' │
+│   percentFee    │                      0                       │
+│     baseFee     │                      0                       │
+│ deployerAddress │ '0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781' │
+│     balance     │            '0.805624438174753998'            │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying Allo.sol...
+Allo Proxy deployed to: 0x932e2a496Af5081F51a5CDF52917B0C9eC3A796f
+Registry implementation deployed to: 0x5a8D0ec16E607958c8AF6F8D92f912fbE14952Da
+
+Verifying contract...
+Verifying implementation: 0x5a8D0ec16E607958c8AF6F8D92f912fbE14952Da
+Successfully submitted source code for contract
+contracts/core/Allo.sol:Allo at 0x5a8D0ec16E607958c8AF6F8D92f912fbE14952Da
+for verification on the block explorer. Waiting for verification result...
+
+Successfully verified contract Allo on the block explorer.
+https://goerli.etherscan.io/address/0x5a8D0ec16E607958c8AF6F8D92f912fbE14952Da#code
+Verifying proxy: 0x932e2a496Af5081F51a5CDF52917B0C9eC3A796f
+Contract at 0x932e2a496Af5081F51a5CDF52917B0C9eC3A796f already verified.
+Linking proxy 0x932e2a496Af5081F51a5CDF52917B0C9eC3A796f with implementation
+Successfully linked proxy to implementation.
+Verifying proxy admin: 0x7488ec0541CAea8bc7dc9829939f26497e1504A5
+Contract at 0x7488ec0541CAea8bc7dc9829939f26497e1504A5 already verified.
+
+Proxy fully verified.
+
+Verifying contract...
+The contract 0x5a8D0ec16E607958c8AF6F8D92f912fbE14952Da has already been verified.
+https://goerli.etherscan.io/address/0x5a8D0ec16E607958c8AF6F8D92f912fbE14952Da#code
+[90m
+	Validating getRegistry() == 0xF3Cb85A1DA4B1fe4D99DE133C8EDA4ebe1b1809E[0m
+[32m	✅ PASSED with Result: 0xF3Cb85A1DA4B1fe4D99DE133C8EDA4ebe1b1809E[0m
+[90m
+	Validating getTreasury() == 0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781[0m
+[32m	✅ PASSED with Result: 0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781[0m
+[90m
+	Validating getPercentFee() == 0[0m
+[32m	✅ PASSED with Result: 0[0m
+[90m
+	Validating getBaseFee() == 0[0m
+[32m	✅ PASSED with Result: 0[0m
+[90m
+	Validating owner() == 0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781[0m
+[32m	✅ PASSED with Result: 0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781[0m
+
+            ////////////////////////////////////////////////////
+            Core Allo V2 deployed to:
+            ======================================
+            ContractFactory: 0x87BCF559Df8E06846f4Cd70E75D0cAa193416369
+            Registry: 0xF3Cb85A1DA4B1fe4D99DE133C8EDA4ebe1b1809E
+            Allo: 0x932e2a496Af5081F51a5CDF52917B0C9eC3A796f
+            DeploymentFactory: 0x87BCF559Df8E06846f4Cd70E75D0cAa193416369
+            ////////////////////////////////////////////////////
+          
