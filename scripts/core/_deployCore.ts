@@ -17,11 +17,11 @@ async function deployCore() {
   `);
 
   // ContractFactory
- // deployContractFactory().then(deployedContract => {
+  deployContractFactory().then((deployedContract) => {
     // Registry
-    deployRegistry().then(registryAddress => {
+    deployRegistry().then((registryAddress) => {
       // Allo
-      deployAllo(registryAddress.toString()).then(alloAddress => {
+      deployAllo().then((alloAddress) => {
         // Log deployed addresses
         console.log(`
             ////////////////////////////////////////////////////
@@ -30,12 +30,12 @@ async function deployCore() {
             ContractFactory: ${"0xa5791f9461A4385029e6d0E7aeF5ebD8DC6429e5"}
             Registry: ${registryAddress}
             Allo: ${alloAddress}
+            DeploymentFactory: ${deployedContract}
             ////////////////////////////////////////////////////
           `);
       });
     });
- // })
-
+  });
 }
 
 deployCore().catch((error) => {

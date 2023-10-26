@@ -1,5 +1,12 @@
 import hre, { ethers } from "hardhat";
-import { confirmContinue, prettyNum } from "../utils/scripts";
+import {
+  Deployments,
+  confirmContinue,
+  delay,
+  prettyNum,
+  verifyContract,
+} from "../utils/scripts";
+import { Validator } from "../utils/Validator";
 
 export async function deployContractFactory() {
   const network = await ethers.provider.getNetwork();
@@ -9,6 +16,8 @@ export async function deployContractFactory() {
   const deployerAddress = await account.getAddress();
   // const blocksToWait = networkName === "localhost" ? 0 : 5;
   const balance = await ethers.provider.getBalance(deployerAddress);
+
+  const deploymentIo = new Deployments(chainId, "contractFactory");
 
   console.log(`
     ////////////////////////////////////////////////////
@@ -31,15 +40,33 @@ export async function deployContractFactory() {
 
   console.log("ContractFactory deployed to:", instance.target);
 
-  // await verifyContract(instance.target.toString());
+  const objToWrite = {
+    name: "ContractFactory",
+    address: instance.target,
+    deployerAddress: deployerAddress,
+  };
 
-  return instance.target;
+  deploymentIo.write(objToWrite);
+
+  await delay(20000);
+  await verifyContract(instance.target.toString(), []);
+
+  const validator = await new Validator("ContractFactory", instance.target);
+
+  let result;
+  await validator.validate("isDeployer", [deployerAddress], "true").then(() => {
+    result = instance.target;
+  });
+
+  return result;
 }
 
-deployContractFactory().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+if (require.main === module) {
+  deployContractFactory().catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+  });
+}
 
 // Note: Deploy script to run in terminal:
-// npx hardhat run scripts/deployContractFactory.ts --network sepolia
+// npx hardhat run scripts/core/deployContractFactory.ts --network sepolia

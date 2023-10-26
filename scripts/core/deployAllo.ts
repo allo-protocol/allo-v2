@@ -1,15 +1,23 @@
 import hre, { ethers, upgrades } from "hardhat";
 import { alloConfig } from "../config/allo.config";
-import { registryConfig } from "../config/registry.config";
-import { confirmContinue, prettyNum } from "../utils/scripts";
+import {
+  Deployments,
+  confirmContinue,
+  getImplementationAddress,
+  prettyNum,
+  verifyContract,
+} from "../utils/scripts";
+import { Validator } from "../utils/Validator";
 
-export async function deployAllo(_registryAddress? : string) {
+export async function deployAllo() {
   const network = await ethers.provider.getNetwork();
   const networkName = await hre.network.name;
   const chainId = Number(network.chainId);
   const account = (await ethers.getSigners())[0];
   const deployerAddress = await account.getAddress();
   const balance = await ethers.provider.getBalance(deployerAddress);
+
+  const deployments = new Deployments(chainId, "allo");
 
   console.log(`
     ////////////////////////////////////////////////////
@@ -22,7 +30,7 @@ export async function deployAllo(_registryAddress? : string) {
     throw new Error(`Allo params not found for chainId: ${chainId}`);
   }
 
-  const registryAddress = _registryAddress ? _registryAddress : registryConfig[chainId].registryProxy;
+  const registryAddress = deployments.getRegistry();
 
   await confirmContinue({
     contract: "Deploy Allo.sol",
@@ -45,20 +53,53 @@ export async function deployAllo(_registryAddress? : string) {
     alloParams.percentFee,
     alloParams.baseFee,
   ]);
-  // await instance.waitForDeployment();
-  // await instance.deploymentTransaction()?.wait(blocksToWait);
 
-  // await verifyContract(instance.target.toString());
+  await instance.waitForDeployment();
 
-  console.log("Allo.sol deployed to:", instance.target);
+  const implementation = await getImplementationAddress(
+    instance.target as string,
+  );
 
-  // return instance.target;
+  console.log("Allo Proxy deployed to:", instance.target);
+  console.log("Registry implementation deployed to:", implementation);
+
+  const objToWrite = {
+    name: "Allo",
+    implementation: implementation,
+    proxy: instance.target,
+    treasury: alloParams.treasury,
+    percentFee: alloParams.percentFee,
+    baseFee: alloParams.baseFee,
+    registry: registryAddress,
+    deployerAddress: deployerAddress,
+  };
+
+  deployments.write(objToWrite);
+
+  await verifyContract(instance.target.toString(), []);
+  await verifyContract(implementation, []);
+
+  const validator = await new Validator("Allo", instance.target);
+  await validator.validate("getRegistry", [], registryAddress);
+  await validator.validate("getTreasury", [], alloParams.treasury);
+  await validator.validate(
+    "getPercentFee",
+    [],
+    alloParams.percentFee.toString(),
+  );
+  await validator.validate("getBaseFee", [], alloParams.baseFee.toString());
+  await validator.validate("owner", [], deployerAddress.toString());
+
+  return instance.target;
 }
 
-deployAllo().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+// Check if this script is the main module (being run directly)
+if (require.main === module) {
+  deployAllo().catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+  });
+}
 
 // Note: Deploy script to run in terminal:
 // npx hardhat run scripts/deployAllo.ts --network sepolia
