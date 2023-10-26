@@ -13,11 +13,10 @@ remappings = []
 # Gas reporting
 gas_reports = ["ContractFactory", "Registry", "Allo"]
 gas_reports_ignore = [
-  "/test/utils/*",
-  # "TestStrategy",
-  # "QVBaseStrategyTestMock",
-  # "Permit2",
-  # "MockStrategy",
+  "TestStrategy",
+  "QVBaseStrategyTestMock",
+  "Permit2",
+  "MockStrategy",
 ]
 
 # Storage layout compatibility 
