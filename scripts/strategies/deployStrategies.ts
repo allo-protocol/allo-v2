@@ -1,12 +1,10 @@
 import hre, { ethers } from "hardhat";
+import { Validator } from "../utils/Validator";
 import { Args, deployContractUsingFactory } from "../utils/deployProxy";
 import {
   Deployments,
-  confirmContinue,
-  prettyNum,
   verifyContract,
 } from "../utils/scripts";
-import { Validator } from "../utils/Validator";
 
 export async function deployStrategies(
   strategyName: string,
@@ -32,12 +30,12 @@ export async function deployStrategies(
     ////////////////////////////////////////////////////
   `);
 
-  await confirmContinue({
+  console.table({
     contract: `${strategyName}.sol`,
     chainId: chainId,
     network: networkName,
     deployerAddress: deployerAddress,
-    balance: prettyNum(balance.toString()),
+    balance: ethers.formatEther(balance),
   });
 
   console.log(`Deploying ${strategyName}.sol`);

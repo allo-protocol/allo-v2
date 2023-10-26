@@ -1,13 +1,11 @@
 import hre, { ethers, upgrades } from "hardhat";
 import { alloConfig } from "../config/allo.config";
+import { Validator } from "../utils/Validator";
 import {
   Deployments,
-  confirmContinue,
   getImplementationAddress,
-  prettyNum,
-  verifyContract,
+  verifyContract
 } from "../utils/scripts";
-import { Validator } from "../utils/Validator";
 
 export async function deployAllo() {
   const network = await ethers.provider.getNetwork();
@@ -32,7 +30,7 @@ export async function deployAllo() {
 
   const registryAddress = deployments.getRegistry();
 
-  await confirmContinue({
+  console.table({
     contract: "Deploy Allo.sol",
     chainId: chainId,
     network: networkName,
@@ -42,10 +40,10 @@ export async function deployAllo() {
     percentFee: alloParams.percentFee,
     baseFee: alloParams.baseFee,
     deployerAddress: deployerAddress,
-    balance: prettyNum(balance.toString()),
+    balance: ethers.formatEther(balance),
   });
 
-  console.log("Deploying Allo...");
+  console.log("Deploying Allo.sol...");
 
   const Allo = await ethers.getContractFactory("Allo");
   const instance = await upgrades.deployProxy(Allo, [
@@ -105,4 +103,4 @@ if (require.main === module) {
 }
 
 // Note: Deploy script to run in terminal:
-// npx hardhat run scripts/deployAllo.ts --network sepolia
+// npx hardhat run scripts/core/deployAllo.ts --network sepolia

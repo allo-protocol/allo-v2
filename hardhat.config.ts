@@ -10,7 +10,7 @@ import "hardhat-abi-exporter";
 import "hardhat-contract-sizer";
 import "hardhat-gas-reporter";
 import "hardhat-preprocessor";
-import { HardhatUserConfig, task, types } from "hardhat/config";
+import { HardhatUserConfig } from "hardhat/config";
 import { NetworkUserConfig } from "hardhat/types";
 import "solidity-coverage";
 
@@ -27,6 +27,9 @@ const chainIds = {
   "fantom-testnet": 4002,
   "pgn-sepolia": 58008,
   "celo-testnet": 44787,
+  "arbitrum-goerli": 421613,
+  "base-testnet": 84531,
+  mumbai: 80001,
 
   // mainnet
   mainnet: 1,
@@ -34,6 +37,9 @@ const chainIds = {
   "pgn-mainnet": 424,
   "fantom-mainnet": 250,
   "celo-mainnet": 42220,
+  "arbitrum-mainnet": 42161,
+  base: 8453,
+  polygon: 137,
 };
 
 let deployPrivateKey = process.env.DEPLOYER_PRIVATE_KEY as string;
@@ -131,21 +137,37 @@ const config: HardhatUserConfig = {
   networks: {
     // Main Networks
     mainnet: createMainnetConfig("mainnet"),
-    "optimism-mainnet": createMainnetConfig("optimism-mainnet"),
+    "optimism-mainnet": {
+      ...createMainnetConfig("optimism-mainnet"),
+      url: `https://opt-mainnet.g.alchemy.com/v2/${alchemyIdKey}`,
+      gasPrice: 20000000000,
+    },
+    "arbitrum-mainnet": createMainnetConfig(
+      "arbitrum-mainnet",
+      `https://arb-mainnet.g.alchemy.com/v2/${alchemyIdKey}`
+    ),
     "fantom-mainnet": createMainnetConfig(
       "fantom-mainnet",
       "https://rpc.ftm.tools"
     ),
     "pgn-mainnet": {
-      accounts: [deployPrivateKey],
-      chainId: chainIds["pgn-mainnet"],
+      ...createMainnetConfig("pgn-mainnet"),
       url: "https://rpc.publicgoods.network",
       gasPrice: 20000000000,
     },
     "celo-mainnet": {
-      accounts: [deployPrivateKey],
-      chainId: chainIds["celo-mainnet"],
+      ...createMainnetConfig("celo-mainnet"),
       url: "https://forno.celo.org",
+      gasPrice: 20000000000,
+    },
+    base: {
+      ...createMainnetConfig("base"),
+      url: `https://base-mainnet.g.alchemy.com/v2/${alchemyIdKey}`,
+      gasPrice: 20000000000,
+    },
+    polygon: {
+      ...createMainnetConfig("polygon"),
+      url: `https://polygon-mainnet.g.alchemy.com/v2/${alchemyIdKey}`,
       gasPrice: 20000000000,
     },
 
@@ -156,28 +178,39 @@ const config: HardhatUserConfig = {
     ),
     sepolia: createTestnetConfig(
       "sepolia",
-      "https://eth-sepolia.public.blastapi.io"
+      `https://eth-sepolia.g.alchemy.com/v2/${alchemyIdKey}`
+    ),
+    "arbitrum-goerli": createTestnetConfig(
+      "arbitrum-goerli",
+      `https://arb-goerli.g.alchemy.com/v2/${alchemyIdKey}`
     ),
     ftmTestnet: createTestnetConfig(
       "fantom-testnet",
       "https://rpc.testnet.fantom.network/"
     ),
     "optimism-goerli": {
-      accounts: [deployPrivateKey],
-      chainId: chainIds["optimism-goerli"],
+      ...createTestnetConfig("optimism-goerli"),
       url: "https://optimism-goerli.publicnode.com",
       gasPrice: 20000000000,
     },
     "pgn-sepolia": {
-      accounts: [deployPrivateKey],
-      chainId: chainIds["pgn-sepolia"],
+      ...createTestnetConfig("pgn-sepolia"),
       url: "https://sepolia.publicgoods.network",
       gasPrice: 20000000000,
     },
     "celo-testnet": {
-      accounts: [deployPrivateKey],
-      chainId: chainIds["celo-testnet"],
+      ...createTestnetConfig("celo-testnet"),
       url: "https://alfajores-forno.celo-testnet.org",
+      gasPrice: 20000000000,
+    },
+    "base-testnet": {
+      ...createTestnetConfig("base-testnet"),
+      url: `https://base-goerli.g.alchemy.com/v2/${alchemyIdKey}`,
+      gasPrice: 20000000000,
+    },
+    mumbai: {
+      ...createTestnetConfig("mumbai"),
+      url: `https://polygon-mumbai.g.alchemy.com/v2/${alchemyIdKey}`,
       gasPrice: 20000000000,
     },
 
@@ -214,6 +247,18 @@ const config: HardhatUserConfig = {
       "celo-mainnet": process.env.CELOSCAN_API_KEY,
       // @ts-ignore
       "celo-testnet": process.env.CELOSCAN_API_KEY,
+      // @ts-ignore
+      base: process.env.BASESCAN_API_KEY,
+      // @ts-ignore
+      "base-testnet": process.env.BASESCAN_API_KEY,
+      // @ts-ignore
+      polygon: process.env.POLYGONSCAN_API_KEY,
+      // @ts-ignore
+      mumbai: process.env.POLYGONSCAN_API_KEY,
+      // @ts-ignore
+      "arbitrum-mainnet": process.env.ARBITRUMSCAN_API_KEY,
+      // @ts-ignore
+      "arbitrum-goerli": process.env.ARBITRUMSCAN_API_KEY,
     },
     customChains: [
       {
@@ -248,6 +293,54 @@ const config: HardhatUserConfig = {
           browserURL: "https://alfajores.celoscan.io",
         },
       },
+      {
+        network: "base",
+        chainId: chainIds["base"],
+        urls: {
+          apiURL: "https://api.basescan.org/api",
+          browserURL: "https://basescan.org/",
+        },
+      },
+      {
+        network: "base-testnet",
+        chainId: chainIds["base-testnet"],
+        urls: {
+          apiURL: "https://goerli.basescan.org/api",
+          browserURL: "https://goerli.basescan.org/",
+        },
+      },
+      {
+        network: "polygon",
+        chainId: chainIds["polygon"],
+        urls: {
+          apiURL: "https://api.polygonscan.com/api",
+          browserURL: "https://polygonscan.com",
+        },
+      },
+      {
+        network: "mumbai",
+        chainId: chainIds["mumbai"],
+        urls: {
+          apiURL: "https://mumbai.polygonscan.com//api",
+          browserURL: "https://mumbai.polygonscan.com/",
+        },
+      },
+      {
+        network: "arbitrum-mainnet",
+        chainId: chainIds["arbitrum-mainnet"],
+        urls: {
+          apiURL: "https://api.arbiscan.io/api",
+          browserURL: "https://arbiscan.io",
+        },
+      },
+      {
+        network: "arbitrum-goerli",
+        chainId: chainIds["arbitrum-goerli"],
+        urls: {
+          apiURL: "https://api-goerli.arbiscan.io/api",
+          browserURL: "https://arbiscan.io",
+        },
+      },
     ],
   },
   abiExporter: abiExporter,
@@ -273,45 +366,3 @@ const config: HardhatUserConfig = {
 };
 
 export default config;
-
-// TODO: this still needs some work
-// - iterate through development directory and use all configs available
-// - figure out how to get the block explorer urls for each network
-task("extract-info", "Extracts and formats information into a Markdown file")
-  .addParam("data", "The path to your JSON data file")
-  .addParam("chainId", "The network chain ID", undefined, types.int)
-  .setAction(async (taskArgs, hre) => {
-    // Import necessary libraries
-    const fs = require("fs");
-    const path = require("path");
-
-    // Read the JSON data file
-    const dataPath = path.resolve(__dirname, taskArgs.data);
-    const rawData = fs.readFileSync(dataPath);
-    const jsonData = JSON.parse(rawData);
-    const itemData = jsonData[taskArgs.chainId];
-
-    // Extract the necessary fields
-    const implementation = itemData.implementation;
-    const proxy = itemData.proxy;
-    const name = itemData.name;
-
-    // links
-    const etherscan = `https://etherscan.io/address/${proxy}#code`;
-
-    // Format the information
-    const mdContent = `
-# Deployment Information For Supported Networks
-
-| Network | Name | Implementation | Proxy |
-| --- | --- | --- | --- |
-| ${taskArgs.chainId} | ${name} | ${implementation} | ${proxy} |
-
-    `;
-
-    // Write the formatted information to a Markdown file
-    const outputPath = path.resolve(__dirname, "DEPLOYMENT_INFORMATION.md");
-    fs.appendFileSync(outputPath, mdContent.trim());
-
-    console.log(`Information has been written to ${outputPath}`);
-  });

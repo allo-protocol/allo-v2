@@ -1,5 +1,5 @@
 import { Addressable } from "ethers";
-import hre, { ethers } from "hardhat";
+import { ethers } from "hardhat";
 
 export class Validator {
   contractName: string;
@@ -25,7 +25,7 @@ export class Validator {
   public async validate(
     functionName: string,
     args: any[],
-    expectedResult: string,
+    expectedResult: string
   ) {
     logGray(`\n\tValidating ${functionName}(${args}) == ${expectedResult}`);
     try {

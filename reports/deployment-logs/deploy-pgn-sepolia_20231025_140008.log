@@ -1,0 +1,66 @@
+Warning: Unreachable code.
+   --> contracts/strategies/BaseStrategy.sol:174:9:
+    |
+174 |         _afterRegisterRecipient(_data, _sender);
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Compiled 112 Solidity files successfully (evm target: paris).
+
+    ////////////////////////////////////////////////////
+    Deploy core Allo V2 contracts to pgn-sepolia
+    ======================================
+    - ContractFactory (used for strategy deployments)
+    - Registry
+    - Allo
+    ////////////////////////////////////////////////////
+  
+
+    ////////////////////////////////////////////////////
+        Deploys ContractFactory.sol on pgn-sepolia
+    ////////////////////////////////////////////////////
+  
+Deploying ContractFactory.sol...
+ContractFactory deployed to: 0xA24aF1a94b02e25A102e29B6bE44ad715C262790
+[90m
+	Validating isDeployer(0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781) == true[0m
+[32m	✅ PASSED with Result: true[0m
+
+    ////////////////////////////////////////////////////
+            Deploys Registry.sol on pgn-sepolia
+    ////////////////////////////////////////////////////
+  
+Deploying Registry...
+Registry proxy deployed to: 0xfE5FAeAFE3a585f57A9C87095DCA1e5437112C62
+Registry implementation deployed to: 0x48ec14DF06dA7322f0D63541BC1eC5B2785D3FD2
+
+Verifying contract...
+Verifying implementation: 0x48ec14DF06dA7322f0D63541BC1eC5B2785D3FD2
+Successfully submitted source code for contract
+contracts/core/Registry.sol:Registry at 0x48ec14DF06dA7322f0D63541BC1eC5B2785D3FD2
+for verification on the block explorer. Waiting for verification result...
+
+Failed to verify implementation contract at 0x48ec14DF06dA7322f0D63541BC1eC5B2785D3FD2: The API responded with an unexpected message.
+Please report this issue to the Hardhat team.
+Contract verification may have succeeded and should be checked manually.
+Message: Unknown UID
+Verifying proxy: 0xfE5FAeAFE3a585f57A9C87095DCA1e5437112C62
+Failed to verify TransparentUpgradeableProxy contract at 0xfE5FAeAFE3a585f57A9C87095DCA1e5437112C62: Unknown UID
+Linking proxy 0xfE5FAeAFE3a585f57A9C87095DCA1e5437112C62 with implementation
+/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/utils/etherscan-api.ts:27
+    throw new UpgradesError(
+          ^
+UpgradesError: Etherscan API call failed with status 400, response: {"message":"Unknown action","result":null,"status":"0"}
+
+
+    at callEtherscanApi (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/utils/etherscan-api.ts:27:11)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at async linkProxyWithImplementationAbi (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/verify-proxy.ts:589:22)
+    at async fullVerifyTransparentOrUUPS (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/verify-proxy.ts:205:3)
+    at async verify (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/verify-proxy.ts:99:5)
+    at async OverriddenTaskDefinition._action (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/index.ts:198:12)
+    at async Environment._runTaskDefinition (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:358:14)
+    at async Environment.run (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:191:14)
+    at async SimpleTaskDefinition.action (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/index.ts:546:7)
+    at async Environment._runTaskDefinition (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:358:14)
+error: "hardhat" exited with code 1 (SIGHUP)

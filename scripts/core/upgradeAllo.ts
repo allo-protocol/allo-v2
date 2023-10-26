@@ -3,7 +3,6 @@ import {
   Deployments,
   confirmContinue,
   getImplementationAddress,
-  prettyNum,
   verifyContract,
 } from "../utils/scripts";
 
@@ -28,7 +27,7 @@ async function upgradeAllo() {
     chainId: network.chainId,
     network: network.name,
     account: accountAddress,
-    balance: prettyNum(balance.toString()),
+    balance: ethers.formatEther(balance),
     proxy: proxyAddress,
   });
 
