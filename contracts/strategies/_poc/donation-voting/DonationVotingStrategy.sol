@@ -478,7 +478,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
         }
 
         uint256 transferredAmount = amount;
-         if (token == NATIVE) {
+        if (token == NATIVE) {
             if (msg.value < amount) {
                 revert AMOUNT_MISMATCH();
             }
