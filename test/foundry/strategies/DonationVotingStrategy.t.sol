@@ -30,6 +30,8 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         address indexed recipientId, DonationVotingStrategy.Status recipientStatus, address sender
     );
 
+    error AMOUNT_MISMATCH();
+
     bool public useRegistryAnchor;
     bool public metadataRequired;
 
@@ -821,14 +823,14 @@ contract DonationVotingStrategyTest is Test, AlloSetup, RegistrySetupFull, Event
         strategy.allocate(allocateData, allocator);
     }
 
-    function testRevert_allocate_INVALID_amountMismatch() public {
+    function testRevert_allocate_AMOUNT_MISMATCH() public {
         address allocator = makeAddr("allocator");
         deal(address(allo()), 1e18);
 
         address recipientId = __register_accept_recipient();
 
         vm.warp(allocationStartTime + 10);
-        vm.expectRevert(INVALID.selector);
+        vm.expectRevert(AMOUNT_MISMATCH.selector);
 
         bytes memory allocateData = abi.encode(recipientId, 1e18, NATIVE);
         vm.prank(address(allo()));
