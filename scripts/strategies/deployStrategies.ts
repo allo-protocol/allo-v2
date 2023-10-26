@@ -3,7 +3,6 @@ import { Validator } from "../utils/Validator";
 import { Args, deployContractUsingFactory } from "../utils/deployProxy";
 import {
   Deployments,
-  confirmContinue,
   verifyContract,
 } from "../utils/scripts";
 
@@ -31,7 +30,7 @@ export async function deployStrategies(
     ////////////////////////////////////////////////////
   `);
 
-  await confirmContinue({
+  console.log({
     contract: `${strategyName}.sol`,
     chainId: chainId,
     network: networkName,

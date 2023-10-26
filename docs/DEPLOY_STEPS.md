@@ -39,11 +39,11 @@ cp ../.env.sample ../.env
 
 2. Install dependencies
 ```shell
-yarn install
+bun install
 ```
 
 3. Install Foundry [Install Docs](https://book.getfoundry.sh/getting-started/installation)
-   🤚 Only do this if you don't have it installed already, by running the `yarn compile`
+   🤚 Only do this if you don't have it installed already, by running the `bun compile`
    command, it will update libs for you.
 ```shell
 foundryup
@@ -51,7 +51,7 @@ foundryup
 
 1. Compile Contracts
 ```shell
-yarn compile
+bun compile
 ```
 
 1. Running Tests
@@ -61,18 +61,18 @@ For detailed information on how the testing framework works, refer [Test Options
 
 Run all tests without verbosity
 ```bash
-yarn test
-yarn test -vvvv # with verbosity
-yarn test -vvvv --match-test <test_name> # specific test
-yarn test -vvvv --match-contract <contract_name> # specific contract
+bun test
+bun test -vvvv # with verbosity
+bun test -vvvv --match-test <test_name> # specific test
+bun test -vvvv --match-contract <contract_name> # specific contract
 # the two above can be used together to dial into a specific test
 ```
 
 7. Coverage
 
 ```bash
-yarn coverage # generate coverage on terminal
-yarn coverage:html # generate lcov coverage on html
+buncoverage # generate coverage on terminal
+buncoverage:html # generate lcov coverage on html
 ```
 
 

@@ -3,8 +3,6 @@ import * as dotenv from "dotenv";
 import { Deployer } from "@matterlabs/hardhat-zksync-deploy";
 import { Wallet } from "zksync-web3";
 
-import { confirmContinue, prettyNum } from "../utils/scripts";
-
 dotenv.config();
 
 export async function deployContractFactory() {
@@ -21,7 +19,7 @@ export async function deployContractFactory() {
     ////////////////////////////////////////////////////`
   );
 
-  await confirmContinue({
+  console.log({
     contract: "Deploy ContractFactory.sol",
     chainId: chainId,
     network: networkName,

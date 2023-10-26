@@ -1,6 +1,5 @@
 import hre, { ethers } from "hardhat";
 import { alloConfig } from "../config/allo.config";
-import { confirmContinue, prettyNum } from "../utils/scripts";
 import {AbiCoder} from "ethers";
 
 export async function createPool() {
@@ -17,13 +16,13 @@ export async function createPool() {
 
     const allo = alloConfig[chainId].alloProxy;
 
-    await confirmContinue({
+    console.log({
         contract: "allo: create pool",
         chainId: chainId,
         network: networkName,
         deployerAddress: deployerAddress,
         allo: allo,
-        balance: prettyNum(balance.toString())
+        balance: ethers.formatEther(balance)
     });
 
     console.log("Creating pool...");

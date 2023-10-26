@@ -2,7 +2,8 @@ import hre, { ethers } from "hardhat";
 import { Validator } from "../utils/Validator";
 import {
   Deployments,
-  delay
+  delay,
+  verifyContract
 } from "../utils/scripts";
 
 export async function deployContractFactory() {
@@ -12,7 +13,7 @@ export async function deployContractFactory() {
   const account = (await ethers.getSigners())[0];
   const deployerAddress = await account.getAddress();
   const blocksToWait = networkName === "localhost" ? 0 : 5;
-  // const balance = await ethers.provider.getBalance(deployerAddress);
+  const balance = await ethers.provider.getBalance(deployerAddress);
 
   const deploymentIo = new Deployments(chainId, "contractFactory");
 
@@ -22,13 +23,13 @@ export async function deployContractFactory() {
     ////////////////////////////////////////////////////
   `);
 
-  // await confirmContinue({
-  //   contract: "Deploy ContractFactory.sol",
-  //   chainId: chainId,
-  //   network: networkName,
-  //   deployerAddress: deployerAddress,
-  //   balance: ethers.formatEther(balance),
-  // });
+  console.log({
+    contract: "Deploy ContractFactory.sol",
+    chainId: chainId,
+    network: networkName,
+    deployerAddress: deployerAddress,
+    balance: ethers.formatEther(balance),
+  });
 
   console.log("Deploying ContractFactory.sol...");
 
@@ -48,6 +49,8 @@ export async function deployContractFactory() {
 
   deploymentIo.write(objToWrite);
   await delay(20000);
+  await verifyContract(instance.target.toString(), []);
+
   const validator = await new Validator("ContractFactory", instance.target);
 
   let result;

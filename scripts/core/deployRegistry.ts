@@ -23,14 +23,14 @@ export async function deployRegistry() {
     ////////////////////////////////////////////////////
   `);
 
-  // await confirmContinue({
-  //   contract: "Registry.sol",
-  //   chainId: chainId,
-  //   network: networkName,
-  //   deployerAddress: deployerAddress,
-  //   registryOwner: registryConfig[chainId].owner,
-  //   balance: prettyNum(balance.toString()),
-  // });
+  console.log({
+    contract: "Registry.sol",
+    chainId: chainId,
+    network: networkName,
+    deployerAddress: deployerAddress,
+    registryOwner: registryConfig[chainId].owner,
+    balance: ethers.formatEther(balance),
+  });
 
   console.log("Deploying Registry...");
 
