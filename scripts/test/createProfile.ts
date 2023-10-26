@@ -15,7 +15,7 @@ export async function createProfile() {
 
     const registry = registryConfig[chainId].registryProxy;
 
-    console.log({
+    console.table({
         contract: "registry: create profile",
         chainId: chainId,
         network: networkName,

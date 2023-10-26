@@ -19,7 +19,7 @@ export async function deployRegistry() {
         ////////////////////////////////////////////////////`
     );
 
-    console.log({
+    console.table({
         contract: "Registry.sol",
         chainId: chainId,
         network: networkName,

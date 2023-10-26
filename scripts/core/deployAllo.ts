@@ -30,7 +30,7 @@ export async function deployAllo() {
 
   const registryAddress = deployments.getRegistry();
 
-  console.log({
+  console.table({
     contract: "Deploy Allo.sol",
     chainId: chainId,
     network: networkName,

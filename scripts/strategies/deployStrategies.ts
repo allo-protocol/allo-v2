@@ -30,7 +30,7 @@ export async function deployStrategies(
     ////////////////////////////////////////////////////
   `);
 
-  console.log({
+  console.table({
     contract: `${strategyName}.sol`,
     chainId: chainId,
     network: networkName,

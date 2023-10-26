@@ -29,25 +29,25 @@ mkdir -p ./reports/deployment-logs/
 
 # Testnet commands
 commands=(
-    "bun hardhat run scripts/core/_deployCore.ts --network goerli | tee ./reports/deployment-logs/deploy-goerli_$timestamp.log"
-    "bun hardhat run scripts/core/_deployCore.ts --network sepolia | tee ./reports/deployment-logs/deploy-sepolia_$timestamp.log"
-    "bun hardhat run scripts/core/_deployCore.ts --network arbitrum-goerli | tee ./reports/deployment-logs/deploy-arbitrum-goerli_$timestamp.log"
-    "bun hardhat run scripts/core/_deployCore.ts --network optimism-goerli | tee ./reports/deployment-logs/deploy-optimism-goerli_$timestamp.log"
-    "bun hardhat run scripts/core/_deployCore.ts --network base-testnet | tee ./reports/deployment-logs/deploy-base-testnet_$timestamp.log"
-    "bun hardhat run scripts/core/_deployCore.ts --network celo-testnet | tee ./reports/deployment-logs/deploy-celo-testnet_$timestamp.log"
-    "bun hardhat run scripts/core/_deployCore.ts --network mumbai | tee ./reports/deployment-logs/deploy-mumbai_$timestamp.log"
-    "bun hardhat run scripts/core/_deployCore.ts --network pgn-sepolia | tee ./reports/deployment-logs/deploy-pgn-sepolia_$timestamp.log"
+    "bun hardhat run scripts/core/_deployCore.ts --network goerli | tee ./reports/deployment-logs/$timestamp/deploy-goerli_$timestamp.log"
+    "bun hardhat run scripts/core/_deployCore.ts --network sepolia | tee ./reports/deployment-logs/$timestamp/deploy-sepolia_$timestamp.log"
+    "bun hardhat run scripts/core/_deployCore.ts --network arbitrum-goerli | tee ./reports/deployment-logs/$timestamp/deploy-arbitrum-goerli_$timestamp.log"
+    "bun hardhat run scripts/core/_deployCore.ts --network optimism-goerli | tee ./reports/deployment-logs/$timestamp/deploy-optimism-goerli_$timestamp.log"
+    "bun hardhat run scripts/core/_deployCore.ts --network base-testnet | tee ./reports/deployment-logs/$timestamp/deploy-base-testnet_$timestamp.log"
+    "bun hardhat run scripts/core/_deployCore.ts --network celo-testnet | tee ./reports/deployment-logs/$timestamp/deploy-celo-testnet_$timestamp.log"
+    "bun hardhat run scripts/core/_deployCore.ts --network mumbai | tee ./reports/deployment-logs/$timestamp/deploy-mumbai_$timestamp.log"
+    "bun hardhat run scripts/core/_deployCore.ts --network pgn-sepolia | tee ./reports/deployment-logs/$timestamp/deploy-pgn-sepolia_$timestamp.log"
 )
 
 # Mainnet commands
 # commands=(
-#     "bun hardhat run scripts/core/_deployCore.ts --network mainnet | tee ./reports/deployment-logs/deploy-mainnet_$timestamp.log"
-#     "bun hardhat run scripts/core/_deployCore.ts --network optimism-mainnet | tee ./reports/deployment-logs/deploy-optimi_sm-mainnet_$timestamp.log"
-#     "bun hardhat run scripts/core/_deployCore.ts --network pgn-mainnet | tee ./reports/deployment-logs/deploy-pgn-mainnet_$timestamp.log"
-#     "bun hardhat run scripts/core/_deployCore.ts --network celo-mainnet | tee ./reports/deployment-logs/deploy-celo-mainnet_$timestamp.log"
-#     "bun hardhat run scripts/core/_deployCore.ts --network arbitrum-mainnet | tee ./reports/deployment-logs/deploy-arbitrum-mainnet_$timestamp.log"
-#     "bun hardhat run scripts/core/_deployCore.ts --network base | tee ./reports/deployment-logs/deploy-base_$timestamp.log"
-#     "bun hardhat run scripts/core/_deployCore.ts --network polygon | tee ./reports/deployment-logs/deploy-polygon_$timestamp.log"
+#     "bun hardhat run scripts/core/_deployCore.ts --network mainnet | tee ./reports/deployment-logs/$timestamp/deploy-mainnet_$timestamp.log"
+#     "bun hardhat run scripts/core/_deployCore.ts --network optimism-mainnet | tee ./reports/deployment-logs/$timestamp/deploy-optimism-mainnet_$timestamp.log"
+#     "bun hardhat run scripts/core/_deployCore.ts --network pgn-mainnet | tee ./reports/deployment-logs/$timestamp/deploy-pgn-mainnet_$timestamp.log"
+#     "bun hardhat run scripts/core/_deployCore.ts --network celo-mainnet | tee ./reports/deployment-logs/$timestamp/deploy-celo-mainnet_$timestamp.log"
+#     "bun hardhat run scripts/core/_deployCore.ts --network arbitrum-mainnet | tee ./reports/deployment-logs/$timestamp/deploy-arbitrum-mainnet_$timestamp.log"
+#     "bun hardhat run scripts/core/_deployCore.ts --network base | tee ./reports/deployment-logs/$timestamp/deploy-base_$timestamp.log"
+#     "bun hardhat run scripts/core/_deployCore.ts --network polygon | tee ./reports/deployment-logs/$timestamp/deploy-polygon_$timestamp.log"
 # )
 
 # Execute the commands

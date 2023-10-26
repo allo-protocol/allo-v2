@@ -27,7 +27,7 @@ export async function deployAllo(_registryAddress? : string) {
       throw new Error(`Allo params not found for chainId: ${chainId}`);
     }
 
-    console.log({
+    console.table({
         contract: "Allo.sol",
         chainId: chainId,
         network: networkName,

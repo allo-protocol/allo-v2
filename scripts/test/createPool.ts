@@ -16,7 +16,7 @@ export async function createPool() {
 
     const allo = alloConfig[chainId].alloProxy;
 
-    console.log({
+    console.table({
         contract: "allo: create pool",
         chainId: chainId,
         network: networkName,

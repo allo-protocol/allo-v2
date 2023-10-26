@@ -23,7 +23,7 @@ export async function deployContractFactory() {
     ////////////////////////////////////////////////////
   `);
 
-  console.log({
+  console.table({
     contract: "Deploy ContractFactory.sol",
     chainId: chainId,
     network: networkName,
