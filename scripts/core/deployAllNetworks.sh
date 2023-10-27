@@ -1,5 +1,7 @@
 #!/bin/bash
 
+timestamp=$(date +"%Y%m%d_%H%M%S")
+
 # Log file
 logfile="./reports/deployment-logs/deploy.log"
 error_count=0
@@ -23,20 +25,18 @@ handle_insufficient_funds_error() {
     log "Insufficient funds error while executing: $cmd"
 }
 
-timestamp=$(date +"%Y%m%d_%H%M%S")
-
 mkdir -p ./reports/deployment-logs/$timestamp
 
 # Testnet commands
 commands=(
-    "bun hardhat run scripts/core/_deployCore.ts --network goerli | tee ./reports/deployment-logs/$timestamp/deploy-goerli_$timestamp.log"
-    "bun hardhat run scripts/core/_deployCore.ts --network sepolia | tee ./reports/deployment-logs/$timestamp/deploy-sepolia_$timestamp.log"
-    "bun hardhat run scripts/core/_deployCore.ts --network arbitrum-goerli | tee ./reports/deployment-logs/$timestamp/deploy-arbitrum-goerli_$timestamp.log"
-    "bun hardhat run scripts/core/_deployCore.ts --network optimism-goerli | tee ./reports/deployment-logs/$timestamp/deploy-optimism-goerli_$timestamp.log"
-    "bun hardhat run scripts/core/_deployCore.ts --network base-testnet | tee ./reports/deployment-logs/$timestamp/deploy-base-testnet_$timestamp.log"
-    "bun hardhat run scripts/core/_deployCore.ts --network celo-testnet | tee ./reports/deployment-logs/$timestamp/deploy-celo-testnet_$timestamp.log"
-    "bun hardhat run scripts/core/_deployCore.ts --network mumbai | tee ./reports/deployment-logs/$timestamp/deploy-mumbai_$timestamp.log"
-    "bun hardhat run scripts/core/_deployCore.ts --network pgn-sepolia | tee ./reports/deployment-logs/$timestamp/deploy-pgn-sepolia_$timestamp.log"
+    "bun hardhat run scripts/core/_deployCore.ts --network goerli | tee ./reports/deployment-logs/$timestamp/deploy-goerli.log"
+    # "bun hardhat run scripts/core/_deployCore.ts --network sepolia | tee ./reports/deployment-logs/$timestamp/deploy-sepolia_$timestamp.log"
+    # "bun hardhat run scripts/core/_deployCore.ts --network arbitrum-goerli | tee ./reports/deployment-logs/$timestamp/deploy-arbitrum-goerli_$timestamp.log"
+    # "bun hardhat run scripts/core/_deployCore.ts --network optimism-goerli | tee ./reports/deployment-logs/$timestamp/deploy-optimism-goerli_$timestamp.log"
+    # "bun hardhat run scripts/core/_deployCore.ts --network base-testnet | tee ./reports/deployment-logs/$timestamp/deploy-base-testnet_$timestamp.log"
+    # "bun hardhat run scripts/core/_deployCore.ts --network celo-testnet | tee ./reports/deployment-logs/$timestamp/deploy-celo-testnet_$timestamp.log"
+    # "bun hardhat run scripts/core/_deployCore.ts --network mumbai | tee ./reports/deployment-logs/$timestamp/deploy-mumbai_$timestamp.log"
+    # "bun hardhat run scripts/core/_deployCore.ts --network pgn-sepolia | tee ./reports/deployment-logs/$timestamp/deploy-pgn-sepolia_$timestamp.log"
 )
 
 # Mainnet commands
@@ -54,7 +54,7 @@ commands=(
 for cmd in "${commands[@]}"; do
     log "Executing: $cmd"
     # Extract the individual log file path from the command string
-    individual_logfile=$(echo $cmd | grep -o './reports/deployment-logs/**/deploy-[^ ]*.log')
+    individual_logfile=$(echo $cmd | grep -o './reports/deployment-logs/[^ ]*/deploy-[^ ]*.log')
     # Remove the tee command from the command string
     cmd=${cmd%|*}
     # Define a temporary file to hold the command output
@@ -68,6 +68,5 @@ for cmd in "${commands[@]}"; do
     # Move the temporary file to the desired log file location
     mv $temp_file $individual_logfile
 done
-
 
 log "Deployment finished with $error_count error(s)"
