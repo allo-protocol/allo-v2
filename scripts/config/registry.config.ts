@@ -2,6 +2,7 @@
 
 type RegistryConfig = {
   owner: string;
+  proxyAdminOwner?: string;
 };
 
 type DeployParams = Record<number, RegistryConfig>;
@@ -15,6 +16,7 @@ export const registryConfig: DeployParams = {
   // Goerli
   5: {
     owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
+    proxyAdminOwner: "0x66Be9a4412ac7a10eF46298B2cA72B42C95e80b4",
   },
   // Sepolia
   11155111: {

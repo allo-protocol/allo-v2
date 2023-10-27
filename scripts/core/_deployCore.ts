@@ -2,6 +2,7 @@ import hre from "hardhat";
 import { deployAllo } from "./deployAllo";
 import { deployContractFactory } from "./deployContractFactory";
 import { deployRegistry } from "./deployRegistry";
+import { transferProxyAdminOwnership } from "./transferProxyAdminOwnership";
 
 export async function deployCore() {
   const networkName = hre.network.name;
@@ -13,6 +14,7 @@ export async function deployCore() {
     - ContractFactory (used for strategy deployments)
     - Registry
     - Allo
+    - TransferProxyAdminOwnership
     ////////////////////////////////////////////////////
   `);
 
@@ -22,8 +24,9 @@ export async function deployCore() {
     deployRegistry().then((registryAddress) => {
       // Allo
       deployAllo().then((alloAddress) => {
+        transferProxyAdminOwnership().then(() => {
         // Log deployed addresses
-        console.log(`
+          console.log(`
             ////////////////////////////////////////////////////
             Core Allo V2 deployed to:
             ======================================
@@ -33,6 +36,7 @@ export async function deployCore() {
             DeploymentFactory: ${deployedContract}
             ////////////////////////////////////////////////////
           `);
+        });
       });
     });
   });
