@@ -11,8 +11,8 @@ The proxy admin and logic governance should be separate addresses to prevent los
 
 ![](https://hackmd.io/_uploads/rywRD_dGa.png)
 
-
-
+---
+>The below will not work for DAO/Allo - has to be ran with EOA and we are using Multi-sig wallet.
 ---
 
 ### 💎 Hard Requirements
@@ -29,23 +29,23 @@ The proxy admin and logic governance should be separate addresses to prevent los
 #### Updating the Registry Contract Implementation
 
 
-1. Update the Allo implementaion contract address for each network in the `registry.config.ts` file.
-2. Run the following script from the terminal.
+
+1. Run the following script from the terminal.
 
 ```bash
 ./scripts/core/updateAllNetworks registry
 ```
-
+2. Update the Allo implementaion contract address for each network in the `registry.config.ts` file.
 3. Update the readme with the new deployed implementation address for the network the contract was upgraded on.
 
 #### Updating the Allo Contract Implementation
 
 
-1. Update the Allo implementaion contract address for each network in the `allo.config.ts` file.
-2. Run the following script from the terminal.
+1. Run the following script from the terminal.
 
 ```bash
 ./scripts/core/updateAllNetworks allo
 ```
+2. Update the Allo implementaion contract address for each network in the `allo.config.ts` file.
 
 3. Update the readme with the new deployed implementation address for the network the contract was upgraded on.
