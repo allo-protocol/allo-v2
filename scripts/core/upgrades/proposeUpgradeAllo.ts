@@ -1,11 +1,11 @@
-import hre, { ethers, upgrades } from "hardhat";
+import hre, { ethers, defender } from "hardhat";
 import {
   Deployments,
-  getImplementationAddress,
   verifyContract
-} from "../utils/scripts";
+} from "../../utils/scripts";
 
-export async function upgradeAllo() {
+
+export async function proposeUpgradeAllo() {
   const network = await ethers.provider.getNetwork();
   const networkName = await hre.network.name;
   let account;
@@ -19,10 +19,10 @@ export async function upgradeAllo() {
   const deployments = new Deployments(chainId, "allo");
   const proxyAddress = deployments.getAllo();
 
-  console.log(`This script upgrades the Allo contract on ${networkName}`);
+  console.log(`This script proposes an upgrades the Allo contract on ${networkName} via defender`);
 
   console.table ({
-    contract: "Upgrading Allo",
+    contract: "Proposing Upgrading Allo on Defender",
     chainId: network.chainId,
     network: network.name,
     account: accountAddress,
@@ -30,31 +30,27 @@ export async function upgradeAllo() {
     proxy: proxyAddress,
   });
 
-  console.log("Upgrading Allo...");
-
   const AlloV2 = await ethers.getContractFactory("Allo", account);
-  const instance = await upgrades.upgradeProxy(proxyAddress, AlloV2);
-
-  await instance.waitForDeployment();
-
-  const implementation = await getImplementationAddress(
-    instance.target as string
-  );
+  console.log("Preparing Allo upgrade proposal...");
+  const proposal = await defender.proposeUpgrade(proxyAddress, AlloV2);
+  console.log("Upgrade proposal created at:", proposal.url);
+  const implementation = proposal!.metadata!.newImplementationAddress;
 
   const objectToWrite = deployments.get(chainId);
   objectToWrite.implementation = implementation;
   deployments.write(objectToWrite);
 
-  verifyContract(implementation, []);
+  verifyContract(implementation as string, []);
 
-  console.log("Allo Proxy Upgraded at:", instance.target);
-  console.log("Allo implementation updated to:", implementation);
+  console.log("Proposed upgrade for Allo Proxy:", objectToWrite.proxy);
+  console.log("Proposed Implementation Address:", implementation);
+
 }
 
-upgradeAllo().catch((error) => {
+proposeUpgradeAllo().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });
 
 // Note: Deploy script to run in terminal:
-// npx hardhat run scripts/core/upgradeAllo.ts --network sepolia
+// npx hardhat run scripts/core/upgrades/proposeUpgradeAllo.ts --network sepolia

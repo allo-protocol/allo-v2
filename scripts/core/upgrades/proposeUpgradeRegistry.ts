@@ -1,12 +1,11 @@
-import hre, { ethers, upgrades } from "hardhat";
+import hre, { ethers, defender } from "hardhat";
 import {
   Deployments,
   confirmContinue,
-  getImplementationAddress,
   verifyContract,
-} from "../utils/scripts";
+} from "../../utils/scripts";
 
-export async function upgradeRegistry() {
+export async function proposeUpgradeRegistry() {
   const network = await ethers.provider.getNetwork();
   const networkName = hre.network.name;
   let account;
@@ -20,10 +19,10 @@ export async function upgradeRegistry() {
   const deployments = new Deployments(chainId, "registry");
   const proxyAddress = deployments.getAllo();
 
-  console.log(`This script upgrades the Registry contract on ${networkName}`);
+  console.log(`This script proposes an upgrades the Registry contract on ${networkName} via defender`);
 
   await confirmContinue({
-    contract: "Upgrading Registry",
+    contract: "Proposing Upgrading Registry on Defender",
     chainId: network.chainId,
     network: network.name,
     account: accountAddress,
@@ -31,31 +30,27 @@ export async function upgradeRegistry() {
     proxy: proxyAddress,
   });
 
-  console.log("Upgrading Registry...");
-
   const RegistryV2 = await ethers.getContractFactory("Registry", account);
-  const instance = await upgrades.upgradeProxy(proxyAddress, RegistryV2);
-
-  await instance.waitForDeployment();
-
-  const implementation = await getImplementationAddress(
-    instance.target as string
-  );
+  console.log("Preparing Allo upgrade proposal...");
+  const proposal = await defender.proposeUpgrade(proxyAddress, RegistryV2);
+  console.log("Upgrade proposal created at:", proposal.url);
+  const implementation = proposal!.metadata!.newImplementationAddress;
 
   const objectToWrite = deployments.get(chainId);
   objectToWrite.implementation = implementation;
   deployments.write(objectToWrite);
 
-  verifyContract(implementation, []);
+  verifyContract(implementation as string, []);
 
-  console.log("Registry Proxy Upgraded at:", instance.target);
-  console.log("Registry implementation updated to:", implementation);
+  console.log("Proposed upgrade for Registry Proxy:", objectToWrite.proxy);
+  console.log("Proposed Implementation Address:", implementation);
+
 }
 
-upgradeRegistry().catch((error) => {
+proposeUpgradeRegistry().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });
 
 // Note: Deploy script to run in terminal:
-// npx hardhat run scripts/core/upgradeRegistry.ts --network sepolia
+// npx hardhat run scripts/core/upgrades/proposeUpgradeRegistry.ts --network sepolia

@@ -98,6 +98,14 @@ flowchart LR
 ### Upgrading Core Contracts across all networks
 
 - Ensure the patch fix has been made
-- Check `./scripts/core/upgradeAllNetworks.sh` and ensure the networks you need to deploy on are uncommented
-- Run `./scripts/core/upgradeAllNetworks.sh allo` to upgrade Allo contracts
-- Run `./scripts/core/upgradeAllNetworks.sh registry` to upgrade Registry contracts
+- Check `./scripts/core/upgrades/upgradeAllNetworks.sh` and ensure the networks you need to deploy on are uncommented
+- Run `./scripts/core/upgrades/upgradeAllNetworks.sh allo` to upgrade Allo contracts
+- Run `./scripts/core/upgrades/upgradeAllNetworks.sh registry` to upgrade Registry contracts
+
+
+### Propose Upgrading Core Contracts across all networks
+
+- Ensure the patch fix has been made
+- Check `./scripts/core/upgrades/proposeUpgradeAllNetworks.sh` and ensure the networks you need to deploy on are uncommented
+- Run `./scripts/core/upgrades/proposeUpgradeAllNetworks.sh allo` to propose an upgrade on Allo contract
+- Run `./scripts/core/upgrades/proposeUpgradeAllNetworks.sh registry` to propose an upgrade on Registry contract
