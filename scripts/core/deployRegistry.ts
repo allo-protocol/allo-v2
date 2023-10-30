@@ -23,12 +23,17 @@ export async function deployRegistry() {
     ////////////////////////////////////////////////////
   `);
 
+  const registryParams = registryConfig[chainId];
+  if (!registryParams) {
+    throw new Error(`Registry params not found for chainId: ${chainId}`);
+  }
+
   console.table({
     contract: "Registry.sol",
     chainId: chainId,
     network: networkName,
     deployerAddress: deployerAddress,
-    registryOwner: registryConfig[chainId].owner,
+    registryOwner: registryParams.owner,
     balance: ethers.formatEther(balance),
   });
 
@@ -36,7 +41,7 @@ export async function deployRegistry() {
 
   const Registry = await ethers.getContractFactory("Registry");
   const instance = await upgrades.deployProxy(Registry, [
-    registryConfig[chainId].owner,
+    registryParams.owner,
   ]);
 
   await instance.waitForDeployment();
@@ -45,15 +50,22 @@ export async function deployRegistry() {
     instance.target as string,
   );
 
+  const proxyAdmin = await upgrades.erc1967.getAdminAddress(instance.target as string);
+  let proxyAdminOwner = account.address;
+
   console.log("Registry proxy deployed to:", instance.target);
   console.log("Registry implementation deployed to:", implementation);
+  console.log("Proxy Admin: ", proxyAdmin);
+  console.log("Proxy Admin Owner: ", proxyAdminOwner);
 
   const objToWrite = {
     name: "Registry",
     implementation: implementation,
     proxy: instance.target,
     deployerAddress: deployerAddress,
-    owner: registryConfig[chainId].owner,
+    owner: registryParams.owner,
+    proxyAdmin: proxyAdmin,
+    proxyAdminOwner: proxyAdminOwner,
   };
 
   deployments.write(objToWrite);
@@ -67,7 +79,7 @@ export async function deployRegistry() {
 
   await validator.validate(
     "hasRole",
-    [ownerRole, registryConfig[chainId].owner],
+    [ownerRole, registryParams.owner],
     "true",
   );
 

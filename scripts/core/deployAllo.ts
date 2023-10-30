@@ -60,8 +60,13 @@ export async function deployAllo() {
     instance.target as string,
   );
 
+  const proxyAdmin = await upgrades.erc1967.getAdminAddress(instance.target as string);
+  let proxyAdminOwner = account.address;
+
   console.log("Allo Proxy deployed to:", instance.target);
   console.log("Registry implementation deployed to:", implementation);
+  console.log("Proxy Admin: ", proxyAdmin);
+  console.log("Proxy Admin Owner: ", proxyAdminOwner);
 
   const objToWrite = {
     name: "Allo",
@@ -73,6 +78,8 @@ export async function deployAllo() {
     registry: registryAddress,
     owner: alloParams.owner,
     deployerAddress: deployerAddress,
+    proxyAdmin: proxyAdmin,
+    proxyAdminOwner: proxyAdminOwner,
   };
 
   deployments.write(objToWrite);

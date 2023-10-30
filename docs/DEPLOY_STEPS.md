@@ -75,28 +75,37 @@ buncoverage # generate coverage on terminal
 buncoverage:html # generate lcov coverage on html
 ```
 
+### Deploying Core Contracts across all networks
 
-### Deploying Project Registry
-
-The section here shows how to set up the project registry for the first time on a given network. Ideally these steps would be done once per chain. In this example, we would be deploying on goerli.
-
-1. Deploy the `Registry` contract
-```shell
- npx hardhat run scripts/deployRegistry.ts --network goerli
+```mermaid
+flowchart LR
+    deployAllNetworks.sh --> Deploy-ContractFactory --> DeployRegistry --> DeployAllo --> TransferProxyAdminOwnership
 ```
 
-### Deploying Allo
+- Ensure the configuration has been set in 
+   - `allo.config.ts`
+   - `registry.config.ts`
+   - `common.config.ts`
+- Check `./scripts/core/deployAllNetworks.sh` and ensure the networks you need to deploy on are uncommented
+- Run `./scripts/core/deployAllNetworks.sh`
+- This should deploy and generate the log for the deployments for 
+   - ContractFactory
+   - Registry
+   - Allo
+   - and update the AlloProxyAdmin 
 
-The section here shows how to deploy the Allo contract on a given network. In this example, we would be deploying on goerli.
 
-1. Deploy the `Allo` contract
-```shell
- npx hardhat run scripts/deployAllo.ts --network goerli
-```
+### Upgrading Core Contracts across all networks
 
-### Contract Verification
+- Ensure the patch fix has been made
+- Check `./scripts/core/upgrades/upgradeAllNetworks.sh` and ensure the networks you need to deploy on are uncommented
+- Run `./scripts/core/upgrades/upgradeAllNetworks.sh allo` to upgrade Allo contracts
+- Run `./scripts/core/upgrades/upgradeAllNetworks.sh registry` to upgrade Registry contracts
 
-1. Run the verify command
-```shell
-npx hardhat verify --network goerli <CONTRACT_ADDRESS> "<ARGS>" "<ARGS>" "<ARGS>"
-```
+
+### Propose Upgrading Core Contracts across all networks
+
+- Ensure the patch fix has been made
+- Check `./scripts/core/upgrades/proposeUpgradeAllNetworks.sh` and ensure the networks you need to deploy on are uncommented
+- Run `./scripts/core/upgrades/proposeUpgradeAllNetworks.sh allo` to propose an upgrade on Allo contract
+- Run `./scripts/core/upgrades/proposeUpgradeAllNetworks.sh registry` to propose an upgrade on Registry contract

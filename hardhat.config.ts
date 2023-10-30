@@ -50,6 +50,8 @@ if (!deployPrivateKey) {
 
 const infuraIdKey = process.env.INFURA_RPC_ID as string;
 const alchemyIdKey = process.env.ALCHEMY_RPC_ID as string;
+const DEFENDER_TEAM_API_KEY = process.env.DEFENDER_TEAM_API_KEY as string;
+const DEFENDER_TEAM_API_SECRET_KEY = process.env.DEFENDER_TEAM_API_SECRET_KEY as string;
 
 /**
  * Reads the remappings.txt file and returns an array of arrays.
@@ -124,6 +126,10 @@ const abiExporter = [
  * @type import('hardhat/config').HardhatUserConfig
  */
 const config: HardhatUserConfig = {
+  defender: {
+    "apiKey": DEFENDER_TEAM_API_KEY,
+    "apiSecret": DEFENDER_TEAM_API_SECRET_KEY,
+  },
   solidity: {
     version: "0.8.19",
     settings: {
