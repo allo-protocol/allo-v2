@@ -1,16 +1,17 @@
-// import deployStrategies
-
 import { ethers } from "hardhat";
+import { permit2Contract, strategyConfig } from "../config/strategies.config";
 import { deployStrategies } from "./deployStrategies";
-import { permit2Contract } from "../config/strategies.config";
 import { Validator } from "../utils/Validator";
 
-const deployDonationVoting = async () => {
+const deployStrategy = async () => {
   const network = await ethers.provider.getNetwork();
   const chainId = Number(network.chainId);
+
+  const strategyParams = strategyConfig[chainId]["donation-voting-merkle-distribution-direct"];
+
   const address = await deployStrategies(
-    "DonationVotingMerkleDistributionDirectTransferStrategy",
-    "v1",
+    strategyParams.name,
+    strategyParams.version,
     {
       types: ["address"],
       values: [permit2Contract[chainId].address],
@@ -18,14 +19,14 @@ const deployDonationVoting = async () => {
   );
 
   const validator = await new Validator(
-    "DonationVotingMerkleDistributionDirectTransferStrategy",
+    strategyParams.name,
     address,
   );
 
   await validator.validate("PERMIT2", [], permit2Contract[chainId].address);
 };
 
-deployDonationVoting().catch((error) => {
+deployStrategy().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });

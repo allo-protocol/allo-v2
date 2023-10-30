@@ -8,7 +8,7 @@ type StrategyConfig = {
 };
 
 type DeployParams = Record<number, StrategyConfig>;
-export const nameConfig: DeployParams = {
+export const strategyConfig: DeployParams = {
   // Mainnet
   1: {
     "rfp-simple": {
@@ -23,11 +23,11 @@ export const nameConfig: DeployParams = {
       name: "QVSimpleStrategy",
       version: "v1",
     },
-    "donation-voting-merkle": {
+    "donation-voting-merkle-distribution-direct": {
       name: "DonationVotingMerkleDistributionDirectTransferStrategy",
       version: "v1",
     },
-    "donation-voting-vault": {
+    "donation-voting-merkle-distribution-vault": {
       name: "DonationVotingMerkleDistributionValutStrategy",
       version: "v1",
     },

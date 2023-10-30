@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 const deployStrategy = async () => {
   const network = await ethers.provider.getNetwork();
   const chainId = Number(network.chainId);
-  const strategyParams = strategyConfig[chainId]["rfp-committee"];
+  const strategyParams = strategyConfig[chainId]["qv-base"];
 
   deployStrategies(strategyParams.name, strategyParams.version);
 };

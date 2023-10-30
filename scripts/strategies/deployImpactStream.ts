@@ -1,12 +1,16 @@
-// import deployStrategies
-
 import { deployStrategies } from "./deployStrategies";
+import { strategyConfig } from "../config/strategies.config";
+import { ethers } from "hardhat";
 
-const deployDonationVoting = async () => {
-  deployStrategies("QVImpactStreamStrategy", "v1");
+const deployStrategy = async () => {
+  const network = await ethers.provider.getNetwork();
+  const chainId = Number(network.chainId);
+  const strategyParams = strategyConfig[chainId]["qv-impact-stream"];
+
+  deployStrategies(strategyParams.name, strategyParams.version);
 };
 
-deployDonationVoting().catch((error) => {
+deployStrategy().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });
