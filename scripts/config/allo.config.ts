@@ -60,20 +60,6 @@ export const alloConfig: DeployParams = {
     percentFee: 0,
     baseFee: 0,
   },
-  // Fantom
-  250: {
-    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
-    treasury: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
-    percentFee: 0,
-    baseFee: 0,
-  },
-  // Fantom Testnet
-  4002: {
-    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
-    treasury: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
-    percentFee: 0,
-    baseFee: 0,
-  },
   // Celo Mainnet
   42220: {
     owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
@@ -83,20 +69,6 @@ export const alloConfig: DeployParams = {
   },
   // Celo Testnet Alfajores
   44787: {
-    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
-    treasury: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
-    percentFee: 0,
-    baseFee: 0,
-  },
-  // ZkSync Era Mainnet
-  324: {
-    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
-    treasury: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
-    percentFee: 0,
-    baseFee: 0,
-  },
-  // ZkSync Era Testnet
-  280: {
     owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
     treasury: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
     percentFee: 0,
@@ -125,20 +97,6 @@ export const alloConfig: DeployParams = {
   },
   // Arbitrum Goerli
   421613: {
-    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
-    treasury: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
-    percentFee: 0,
-    baseFee: 0,
-  },
-  // Avalanche Mainnet
-  43114: {
-    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
-    treasury: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
-    percentFee: 0,
-    baseFee: 0,
-  },
-  // Avalanche Fuji Testnet
-  43113: {
     owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
     treasury: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
     percentFee: 0,

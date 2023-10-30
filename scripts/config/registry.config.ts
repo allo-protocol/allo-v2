@@ -2,7 +2,6 @@
 
 type RegistryConfig = {
   owner: string;
-  proxyAdminOwner?: string;
 };
 
 type DeployParams = Record<number, RegistryConfig>;
@@ -16,7 +15,6 @@ export const registryConfig: DeployParams = {
   // Goerli
   5: {
     owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
-    proxyAdminOwner: "0x66Be9a4412ac7a10eF46298B2cA72B42C95e80b4",
   },
   // Sepolia
   11155111: {
@@ -38,28 +36,12 @@ export const registryConfig: DeployParams = {
   420: {
     owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
   },
-  // Fantom
-  250: {
-    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
-  },
-  // Fantom Testnet
-  4002: {
-    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
-  },
   // Celo Mainnet
   42220: {
     owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
   },
   // Celo Testnet Alfajores
   44787: {
-    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
-  },
-  // zkSync-testnet
-  280: {
-    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
-  },
-  // zkSync-mainnet
-  324: {
     owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
   },
   // Polygon Mainnet
