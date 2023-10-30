@@ -3,7 +3,7 @@ import { permit2Contract, strategyConfig } from "../config/strategies.config";
 import { deployStrategies } from "./deployStrategies";
 import { Validator } from "../utils/Validator";
 
-const deployStrategy = async () => {
+export const deployDonationVotingMerkleDistributionVault = async () => {
   const network = await ethers.provider.getNetwork();
   const chainId = Number(network.chainId);
 
@@ -26,7 +26,10 @@ const deployStrategy = async () => {
   await validator.validate("PERMIT2", [], permit2Contract[chainId].address);
 };
 
-deployStrategy().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+// Check if this script is the main module (being run directly)
+if (require.main === module) {
+  deployDonationVotingMerkleDistributionVault().catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+  });
+}

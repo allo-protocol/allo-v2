@@ -2,7 +2,7 @@ import { deployStrategies } from "./deployStrategies";
 import { strategyConfig } from "../config/strategies.config";
 import { ethers } from "hardhat";
 
-const deployStrategy = async () => {
+export const deployImpactStreamStrategy = async () => {
   const network = await ethers.provider.getNetwork();
   const chainId = Number(network.chainId);
   const strategyParams = strategyConfig[chainId]["qv-impact-stream"];
@@ -10,7 +10,10 @@ const deployStrategy = async () => {
   deployStrategies(strategyParams.name, strategyParams.version);
 };
 
-deployStrategy().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+// Check if this script is the main module (being run directly)
+if (require.main === module) {
+  deployImpactStreamStrategy().catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+  });
+}
