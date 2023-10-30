@@ -89,16 +89,20 @@ contract Allo is
 
     /// @notice Initializes the contract after an upgrade
     /// @dev During upgrade -> a higher version should be passed to reinitializer
+    /// @param _owner The owner of allo
     /// @param _registry The address of the registry
     /// @param _treasury The address of the treasury
     /// @param _percentFee The percentage fee
     /// @param _baseFee The base fee
-    function initialize(address _registry, address payable _treasury, uint256 _percentFee, uint256 _baseFee)
-        external
-        reinitializer(1)
-    {
+    function initialize(
+        address _owner,
+        address _registry,
+        address payable _treasury,
+        uint256 _percentFee,
+        uint256 _baseFee
+    ) external reinitializer(1) {
         // Initialize the owner using Solady ownable library
-        _initializeOwner(msg.sender);
+        _initializeOwner(_owner);
 
         // Set the address of the registry
         _updateRegistry(_registry);

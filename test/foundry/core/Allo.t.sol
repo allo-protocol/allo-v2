@@ -19,8 +19,9 @@ import {RegistrySetupFull} from "../shared/RegistrySetup.sol";
 import {TestStrategy} from "../../utils/TestStrategy.sol";
 import {MockStrategy} from "../../utils/MockStrategy.sol";
 import {MockERC20} from "../../utils/MockERC20.sol";
+import {GasHelpers} from "../../utils/GasHelpers.sol";
 
-contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors {
+contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelpers {
     event PoolCreated(
         uint256 indexed poolId,
         bytes32 indexed profileId,
@@ -87,6 +88,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors {
         emit BaseFeeUpdated(1e16);
 
         coreContract.initialize(
+            address(allo_owner()), // _owner
             address(registry()), // _registry
             allo_treasury(), // _treasury
             1e16, // _percentFee
@@ -103,6 +105,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors {
         vm.expectRevert("Initializable: contract is already initialized");
 
         allo().initialize(
+            address(allo_owner()), // _owner
             address(registry()), // _registry
             allo_treasury(), // _treasury
             1e16, // _percentFee
@@ -111,6 +114,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors {
     }
 
     function test_createPool() public {
+        startMeasuringGas("createPool");
         allo().addToCloneableStrategies(strategy);
 
         vm.expectEmit(true, true, false, false);
@@ -120,6 +124,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors {
         uint256 poolId = allo().createPool(poolProfile_id(), strategy, "0x", NATIVE, 0, metadata, pool_managers());
 
         IAllo.Pool memory pool = allo().getPool(poolId);
+        stopMeasuringGas();
 
         assertEq(pool.profileId, poolProfile_id());
         assertNotEq(address(pool.strategy), address(strategy));

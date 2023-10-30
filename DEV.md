@@ -9,11 +9,11 @@ git clone https://github.com/allo-protocol/allo-v2
 ### Install Dependencies
 
 ```bash
-# Install JS dependencies
-yarn install
-
 # Install Solidity dependences
 forge install
+
+# Install JS dependencies
+bun run install
 ```
 
 > Make sure you have foundry installed globally. [Get it here](https://book.getfoundry.sh/getting-started/installation).
@@ -31,17 +31,17 @@ forge update
 ### Compile
 
 ```bash
-yarn compile
+bun run compile
 ```
 
 ### Format
 
 ```bash
-yarn fmt
+bun run fmt
 ```
 
 ### Storage Check
 
 ```bash
-yarn storage-check
+bun run storage-check
 ```

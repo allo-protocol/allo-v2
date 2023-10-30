@@ -3,6 +3,7 @@ pragma solidity 0.8.19;
 
 // External Libraries
 import {ReentrancyGuard} from "openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
+import {SafeTransferLib} from "solady/src/utils/SafeTransferLib.sol";
 // Interfaces
 import {IAllo} from "../../../core/interfaces/IAllo.sol";
 import {IRegistry} from "../../../core/interfaces/IRegistry.sol";
@@ -476,15 +477,25 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
             revert INVALID();
         }
 
-        if (token == NATIVE && msg.value != amount) {
-            revert INVALID();
+        uint256 transferredAmount = amount;
+        if (token == NATIVE) {
+            if (msg.value < amount) {
+                revert AMOUNT_MISMATCH();
+            }
+            SafeTransferLib.safeTransferETH(address(this), amount);
+        } else {
+            uint256 balanceBefore = SafeTransferLib.balanceOf(token, address(this));
+
+            _transferAmount(token, address(this), amount);
+
+            uint256 balanceAfter = SafeTransferLib.balanceOf(token, address(this));
+            transferredAmount = balanceAfter - balanceBefore;
         }
 
-        _transferAmount(token, address(this), amount);
+        // Update the total payout amount for the claim and the total claimable amount
+        claims[recipientId][token] += transferredAmount;
 
-        claims[recipientId][token] += amount;
-
-        emit Allocated(recipientId, amount, token, _sender);
+        emit Allocated(recipientId, transferredAmount, token, _sender);
     }
 
     function _distribute(address[] memory _recipientIds, bytes memory, address _sender)

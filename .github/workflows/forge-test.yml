@@ -17,14 +17,11 @@ jobs:
           submodules: "recursive"
           fetch-depth: 1
 
-      - name: Setup node env
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node }}
-          cache: yarn
+      - name: Setup bun env
+        uses: oven-sh/setup-bun@v1
 
       - name: Install dependencies
-        run: yarn install --immutable
+        run: bun install
 
       - name: Install foundry
         uses: foundry-rs/foundry-toolchain@v1.0.9

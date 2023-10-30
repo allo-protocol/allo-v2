@@ -2,9 +2,10 @@ import hre from "hardhat";
 import { deployAllo } from "./deployAllo";
 import { deployContractFactory } from "./deployContractFactory";
 import { deployRegistry } from "./deployRegistry";
+import { transferProxyAdminOwnership } from "./transferProxyAdminOwnership";
 
-async function deployCore() {
-  const networkName = await hre.network.name;
+export async function deployCore() {
+  const networkName = hre.network.name;
 
   console.log(`
     ////////////////////////////////////////////////////
@@ -13,29 +14,32 @@ async function deployCore() {
     - ContractFactory (used for strategy deployments)
     - Registry
     - Allo
+    - TransferProxyAdminOwnership
     ////////////////////////////////////////////////////
   `);
 
   // ContractFactory
- // deployContractFactory().then(deployedContract => {
+  deployContractFactory().then((deployedContract) => {
     // Registry
-    deployRegistry().then(registryAddress => {
+    deployRegistry().then((registryAddress) => {
       // Allo
-      deployAllo(registryAddress.toString()).then(alloAddress => {
+      deployAllo().then((alloAddress) => {
+        transferProxyAdminOwnership().then(() => {
         // Log deployed addresses
-        console.log(`
+          console.log(`
             ////////////////////////////////////////////////////
             Core Allo V2 deployed to:
             ======================================
-            ContractFactory: ${"0xa5791f9461A4385029e6d0E7aeF5ebD8DC6429e5"}
+            ContractFactory: ${deployedContract}
             Registry: ${registryAddress}
             Allo: ${alloAddress}
+            DeploymentFactory: ${deployedContract}
             ////////////////////////////////////////////////////
           `);
+        });
       });
     });
- // })
-
+  });
 }
 
 deployCore().catch((error) => {
