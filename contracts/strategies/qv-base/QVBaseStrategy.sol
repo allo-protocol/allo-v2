@@ -283,10 +283,18 @@ abstract contract QVBaseStrategy is BaseStrategy {
                 revert RECIPIENT_ERROR(recipientId);
             }
 
-            // revert if the pool manager has previously accepted the recipient
-            if (reviewedByManager[recipientId][msg.sender] == Status.Accepted) revert RECIPIENT_ERROR(recipientId);
+            Status oldStatus = reviewedByManager[recipientId][msg.sender];
 
-            // track the review cast for the recipient
+            // pool manager is updating the review for the recipient
+            if (oldStatus != Status.None) {
+                // revert if pool manager is reviewing with same status as before
+                if (oldStatus == recipientStatus) revert RECIPIENT_ERROR(recipientId);
+
+                // decrement the old status counter as pool manager is changing their review
+                reviewsByStatus[recipientId][oldStatus]--;
+            }
+
+            // track the review cast for the recipient and update status counter
             reviewedByManager[recipientId][msg.sender] = recipientStatus;
             reviewsByStatus[recipientId][recipientStatus]++;
 
