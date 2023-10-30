@@ -19,4 +19,8 @@ contract DonationVotingMerkleDistributionBaseMock is DonationVotingMerkleDistrib
     constructor(address _allo, string memory _name, ISignatureTransfer _permit2)
         DonationVotingMerkleDistributionBaseStrategy(_allo, _name, _permit2)
     {}
+
+    function _tokenAmountInVault(address) internal pure override returns (uint256) {
+        return 0;
+    }
 }

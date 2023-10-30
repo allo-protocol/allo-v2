@@ -3,8 +3,10 @@ pragma solidity ^0.8.19;
 
 import "forge-std/Test.sol";
 import {Anchor} from "../../../contracts/core/Anchor.sol";
-
+import "openzeppelin-contracts/contracts/token/ERC721/IERC721Receiver.sol";
+import "openzeppelin-contracts/contracts/token/ERC1155/IERC1155Receiver.sol";
 // Mock Registry contract
+
 contract MockRegistry {
     mapping(bytes32 => address) public owners;
 
@@ -26,12 +28,33 @@ contract AnchorTest is Test {
         profileId = bytes32("test_profile");
         mockRegistry = new MockRegistry();
         vm.prank(address(mockRegistry));
-        anchor = new Anchor(profileId);
+        anchor = new Anchor(profileId, address(mockRegistry));
     }
 
     function test_deploy() public {
         assertEq(anchor.profileId(), bytes32("test_profile"));
         assertEq(address(anchor.registry()), address(mockRegistry));
+    }
+
+    function test_erc721Holder() public {
+        bytes4 retval = anchor.onERC721Received(address(1), address(2), 1, "");
+        assertEq(retval, IERC721Receiver.onERC721Received.selector);
+    }
+
+    function test_erc1155Holder() public {
+        bytes4 retval = anchor.onERC1155Received(address(1), address(2), 1, 2, "");
+        assertEq(retval, IERC1155Receiver.onERC1155Received.selector);
+    }
+
+    function test_erc1155HolderBatch() public {
+        uint256[] memory ids = new uint256[](1);
+        ids[0] = 1;
+
+        uint256[] memory values = new uint256[](1);
+        values[0] = 2;
+
+        bytes4 retval = anchor.onERC1155BatchReceived(address(1), address(2), ids, values, "");
+        assertEq(retval, IERC1155Receiver.onERC1155BatchReceived.selector);
     }
 
     function test_execute() public {

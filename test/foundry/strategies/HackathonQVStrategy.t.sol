@@ -63,8 +63,8 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
         __setAllowedRecipientId();
     }
 
-    function _createStrategy() internal override returns (address) {
-        return address(new HackathonQVStrategy(address(allo()), "MockStrategy"));
+    function _createStrategy() internal override returns (address payable) {
+        return payable(address(new HackathonQVStrategy(address(allo()), "MockStrategy")));
     }
 
     function hQvStrategy() internal view returns (HackathonQVStrategy) {
@@ -862,4 +862,6 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
     }
 
     function test_registerRecipient_accepted() public override {}
+
+    function testRevert_fundPool_afterDistribution() public override {}
 }

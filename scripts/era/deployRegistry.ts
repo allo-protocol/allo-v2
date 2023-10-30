@@ -1,7 +1,6 @@
 import * as hre from "hardhat";
 import * as dotenv from "dotenv";
 import { registryConfig } from "../config/registry.config";
-import { confirmContinue, prettyNum } from "../utils/scripts";
 import { Deployer } from "@matterlabs/hardhat-zksync-deploy";
 import { Wallet } from "zksync-web3";
 
@@ -20,7 +19,7 @@ export async function deployRegistry() {
         ////////////////////////////////////////////////////`
     );
 
-    await confirmContinue({
+    console.table({
         contract: "Registry.sol",
         chainId: chainId,
         network: networkName,

@@ -1,9 +1,8 @@
 import * as dotenv from "dotenv";
 
 import "@nomicfoundation/hardhat-foundry";
-import "@nomiclabs/hardhat-etherscan";
+import "@nomicfoundation/hardhat-verify";
 import "@nomiclabs/hardhat-solhint";
-import "@nomiclabs/hardhat-waffle";
 import "@openzeppelin/hardhat-upgrades";
 import "@typechain/hardhat";
 import fs from "fs";
@@ -22,12 +21,15 @@ const chainIds = {
   localhost: 31337,
 
   // testnet
-  "goerli": 5,
+  goerli: 5,
   sepolia: 11155111,
   "optimism-goerli": 420,
   "fantom-testnet": 4002,
   "pgn-sepolia": 58008,
   "celo-testnet": 44787,
+  "arbitrum-goerli": 421613,
+  "base-testnet": 84531,
+  mumbai: 80001,
 
   // mainnet
   mainnet: 1,
@@ -35,6 +37,9 @@ const chainIds = {
   "pgn-mainnet": 424,
   "fantom-mainnet": 250,
   "celo-mainnet": 42220,
+  "arbitrum-mainnet": 42161,
+  base: 8453,
+  polygon: 137,
 };
 
 let deployPrivateKey = process.env.DEPLOYER_PRIVATE_KEY as string;
@@ -45,6 +50,8 @@ if (!deployPrivateKey) {
 
 const infuraIdKey = process.env.INFURA_RPC_ID as string;
 const alchemyIdKey = process.env.ALCHEMY_RPC_ID as string;
+const DEFENDER_TEAM_API_KEY = process.env.DEFENDER_TEAM_API_KEY as string;
+const DEFENDER_TEAM_API_SECRET_KEY = process.env.DEFENDER_TEAM_API_SECRET_KEY as string;
 
 /**
  * Reads the remappings.txt file and returns an array of arrays.
@@ -114,11 +121,15 @@ const abiExporter = [
   },
 ];
 
-/** 
+/**
  * Generates hardhat network configuration
  * @type import('hardhat/config').HardhatUserConfig
  */
 const config: HardhatUserConfig = {
+  defender: {
+    "apiKey": DEFENDER_TEAM_API_KEY,
+    "apiSecret": DEFENDER_TEAM_API_SECRET_KEY,
+  },
   solidity: {
     version: "0.8.19",
     settings: {
@@ -132,21 +143,37 @@ const config: HardhatUserConfig = {
   networks: {
     // Main Networks
     mainnet: createMainnetConfig("mainnet"),
-    "optimism-mainnet": createMainnetConfig("optimism-mainnet"),
+    "optimism-mainnet": {
+      ...createMainnetConfig("optimism-mainnet"),
+      url: `https://opt-mainnet.g.alchemy.com/v2/${alchemyIdKey}`,
+      gasPrice: 20000000000,
+    },
+    "arbitrum-mainnet": createMainnetConfig(
+      "arbitrum-mainnet",
+      `https://arb-mainnet.g.alchemy.com/v2/${alchemyIdKey}`
+    ),
     "fantom-mainnet": createMainnetConfig(
       "fantom-mainnet",
-      "https://rpc.ftm.tools",
+      "https://rpc.ftm.tools"
     ),
     "pgn-mainnet": {
-      accounts: [deployPrivateKey],
-      chainId: chainIds["pgn-mainnet"],
+      ...createMainnetConfig("pgn-mainnet"),
       url: "https://rpc.publicgoods.network",
       gasPrice: 20000000000,
     },
     "celo-mainnet": {
-      accounts: [deployPrivateKey],
-      chainId: chainIds["celo-mainnet"],
+      ...createMainnetConfig("celo-mainnet"),
       url: "https://forno.celo.org",
+      gasPrice: 20000000000,
+    },
+    base: {
+      ...createMainnetConfig("base"),
+      url: `https://base-mainnet.g.alchemy.com/v2/${alchemyIdKey}`,
+      gasPrice: 20000000000,
+    },
+    polygon: {
+      ...createMainnetConfig("polygon"),
+      url: `https://polygon-mainnet.g.alchemy.com/v2/${alchemyIdKey}`,
       gasPrice: 20000000000,
     },
 
@@ -157,28 +184,39 @@ const config: HardhatUserConfig = {
     ),
     sepolia: createTestnetConfig(
       "sepolia",
-      "https://eth-sepolia.public.blastapi.io",
+      `https://eth-sepolia.g.alchemy.com/v2/${alchemyIdKey}`
     ),
-    "fantom-testnet": createTestnetConfig(
+    "arbitrum-goerli": createTestnetConfig(
+      "arbitrum-goerli",
+      `https://arb-goerli.g.alchemy.com/v2/${alchemyIdKey}`
+    ),
+    ftmTestnet: createTestnetConfig(
       "fantom-testnet",
-      "https://rpc.testnet.fantom.network/",
+      "https://rpc.testnet.fantom.network/"
     ),
     "optimism-goerli": {
-      accounts: [deployPrivateKey],
-      chainId: chainIds["optimism-goerli"],
+      ...createTestnetConfig("optimism-goerli"),
       url: "https://optimism-goerli.publicnode.com",
       gasPrice: 20000000000,
     },
     "pgn-sepolia": {
-      accounts: [deployPrivateKey],
-      chainId: chainIds["pgn-sepolia"],
+      ...createTestnetConfig("pgn-sepolia"),
       url: "https://sepolia.publicgoods.network",
       gasPrice: 20000000000,
     },
     "celo-testnet": {
-      accounts: [deployPrivateKey],
-      chainId: chainIds["celo-testnet"],
+      ...createTestnetConfig("celo-testnet"),
       url: "https://alfajores-forno.celo-testnet.org",
+      gasPrice: 20000000000,
+    },
+    "base-testnet": {
+      ...createTestnetConfig("base-testnet"),
+      url: `https://base-goerli.g.alchemy.com/v2/${alchemyIdKey}`,
+      gasPrice: 20000000000,
+    },
+    mumbai: {
+      ...createTestnetConfig("mumbai"),
+      url: `https://polygon-mumbai.g.alchemy.com/v2/${alchemyIdKey}`,
       gasPrice: 20000000000,
     },
 
@@ -215,6 +253,18 @@ const config: HardhatUserConfig = {
       "celo-mainnet": process.env.CELOSCAN_API_KEY,
       // @ts-ignore
       "celo-testnet": process.env.CELOSCAN_API_KEY,
+      // @ts-ignore
+      base: process.env.BASESCAN_API_KEY,
+      // @ts-ignore
+      "base-testnet": process.env.BASESCAN_API_KEY,
+      // @ts-ignore
+      polygon: process.env.POLYGONSCAN_API_KEY,
+      // @ts-ignore
+      mumbai: process.env.POLYGONSCAN_API_KEY,
+      // @ts-ignore
+      "arbitrum-mainnet": process.env.ARBITRUMSCAN_API_KEY,
+      // @ts-ignore
+      "arbitrum-goerli": process.env.ARBITRUMSCAN_API_KEY,
     },
     customChains: [
       {
@@ -247,6 +297,54 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://api-alfajores.celoscan.io/api",
           browserURL: "https://alfajores.celoscan.io",
+        },
+      },
+      {
+        network: "base",
+        chainId: chainIds["base"],
+        urls: {
+          apiURL: "https://api.basescan.org/api",
+          browserURL: "https://basescan.org/",
+        },
+      },
+      {
+        network: "base-testnet",
+        chainId: chainIds["base-testnet"],
+        urls: {
+          apiURL: "https://goerli.basescan.org/api",
+          browserURL: "https://goerli.basescan.org/",
+        },
+      },
+      {
+        network: "polygon",
+        chainId: chainIds["polygon"],
+        urls: {
+          apiURL: "https://api.polygonscan.com/api",
+          browserURL: "https://polygonscan.com",
+        },
+      },
+      {
+        network: "mumbai",
+        chainId: chainIds["mumbai"],
+        urls: {
+          apiURL: "https://mumbai.polygonscan.com//api",
+          browserURL: "https://mumbai.polygonscan.com/",
+        },
+      },
+      {
+        network: "arbitrum-mainnet",
+        chainId: chainIds["arbitrum-mainnet"],
+        urls: {
+          apiURL: "https://api.arbiscan.io/api",
+          browserURL: "https://arbiscan.io",
+        },
+      },
+      {
+        network: "arbitrum-goerli",
+        chainId: chainIds["arbitrum-goerli"],
+        urls: {
+          apiURL: "https://api-goerli.arbiscan.io/api",
+          browserURL: "https://arbiscan.io",
         },
       },
     ],

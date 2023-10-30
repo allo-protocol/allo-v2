@@ -128,4 +128,7 @@ contract MockERC721 is ERC721 {
             result := or(a, shl(160, gas()))
         }
     }
+
+    /// @notice Receive function
+    receive() external payable {}
 }

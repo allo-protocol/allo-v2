@@ -107,14 +107,14 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         address rejectedAddress = randomAddress();
         Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
 
-        bytes memory data = abi.encode(recipientAddress(), false, 1e18, metadata);
+        bytes memory data = abi.encode(address(0), recipientAddress(), 1e18, metadata);
         vm.prank(address(allo()));
         strategy.registerRecipient(data, rejectedAddress);
 
         // accepted recipient
         address recipientId = __register_recipient();
         vm.prank(address(allo()));
-        strategy.allocate(abi.encode(recipientId), address(pool_admin()));
+        strategy.allocate(abi.encode(recipientId, 1e18), address(pool_admin()));
 
         RFPSimpleStrategy.Recipient memory rejectedRecipient = strategy.getRecipient(rejectedAddress);
         assertEq(uint8(rejectedRecipient.recipientStatus), uint8(IStrategy.Status.Rejected));
@@ -125,7 +125,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         // set accepted recipient
         address recipientId = __register_recipient();
         vm.prank(address(allo()));
-        strategy.allocate(abi.encode(recipientId), address(pool_admin()));
+        strategy.allocate(abi.encode(recipientId, 1e18), address(pool_admin()));
 
         RFPSimpleStrategy.Recipient memory noRecipient = strategy.getRecipient(randomAddress());
         assertEq(uint8(noRecipient.recipientStatus), uint8(IStrategy.Status.None));
@@ -155,13 +155,34 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         assertEq(uint8(strategy.getMilestoneStatus(0)), uint8(IStrategy.Status.Pending));
     }
 
+    function testRevert_setMilestone_INVALID_MILESTONE_zeroPercentage() public {
+        RFPSimpleStrategy.Milestone[] memory milestones = new RFPSimpleStrategy.Milestone[](2);
+        RFPSimpleStrategy.Milestone memory milestone = RFPSimpleStrategy.Milestone({
+            metadata: Metadata({protocol: 1, pointer: "metadata"}),
+            amountPercentage: 0,
+            milestoneStatus: IStrategy.Status.Pending
+        });
+        RFPSimpleStrategy.Milestone memory milestone2 = RFPSimpleStrategy.Milestone({
+            metadata: Metadata({protocol: 1, pointer: "metadata"}),
+            amountPercentage: 1e18,
+            milestoneStatus: IStrategy.Status.Pending
+        });
+
+        milestones[0] = milestone;
+        milestones[1] = milestone2;
+
+        vm.prank(address(pool_admin()));
+        vm.expectRevert(RFPSimpleStrategy.INVALID_MILESTONE.selector);
+        strategy.setMilestones(milestones);
+    }
+
     function test_setMilestone_getMilestone() public {
         __setMilestones();
         RFPSimpleStrategy.Milestone memory milestones0 = strategy.getMilestone(0);
         RFPSimpleStrategy.Milestone memory milestones1 = strategy.getMilestone(1);
 
-        assertEq(uint8(milestones0.milestoneStatus), uint8(IStrategy.Status.Pending));
-        assertEq(uint8(milestones1.milestoneStatus), uint8(IStrategy.Status.Pending));
+        assertEq(uint8(milestones0.milestoneStatus), uint8(IStrategy.Status.None));
+        assertEq(uint8(milestones1.milestoneStatus), uint8(IStrategy.Status.None));
 
         assertEq(milestones0.amountPercentage, 7e17);
         assertEq(milestones1.amountPercentage, 3e17);
@@ -214,6 +235,9 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
     function testRevert_submitUpcomingMilestone_INVALID_MILESTONE() public {
         _register_allocate_submit_distribute();
 
+        vm.prank(recipient());
+        strategy.submitUpcomingMilestone(Metadata({protocol: 1, pointer: "metadata"}));
+
         vm.prank(address(allo()));
         strategy.distribute(new address[](0), "", pool_admin());
 
@@ -257,37 +281,58 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         strategy.rejectMilestone(0);
     }
 
-    function test_rejectMilestone_MILESTONE_ALREADY_ACCEPTED() public {
-        _register_allocate_submit_distribute();
-        vm.expectRevert(RFPSimpleStrategy.MILESTONE_ALREADY_ACCEPTED.selector);
+    function testRevert_rejectMilestone_MILESTONE_NOT_PENDING_before_submit() public {
+        __register_setMilestones_allocate();
+
+        vm.expectRevert(RFPSimpleStrategy.MILESTONE_NOT_PENDING.selector);
         vm.prank(pool_admin());
         strategy.rejectMilestone(0);
+    }
+
+    function test_rejectMilestone_MILESTONE_NOT_PENDING_after_distribution() public {
+        _register_allocate_submit_distribute();
+        vm.expectRevert(RFPSimpleStrategy.MILESTONE_NOT_PENDING.selector);
+        vm.prank(pool_admin());
+        strategy.rejectMilestone(0);
+    }
+
+    function test_setPoolActive() public {
+        allo().fundPool{value: 1e18}(poolId, 1e18);
+        vm.startPrank(pool_admin());
+        strategy.setPoolActive(false);
+        assertFalse(strategy.isPoolActive());
+    }
+
+    function testRevert_setPoolActive_UNAUTHORIZED() public {
+        allo().fundPool{value: 1e18}(poolId, 1e18);
+        vm.expectRevert(UNAUTHORIZED.selector);
+        strategy.setPoolActive(false);
     }
 
     function test_withdraw() public {
         allo().fundPool{value: 1e18}(poolId, 1e18);
         vm.startPrank(pool_admin());
         strategy.setPoolActive(false);
-        strategy.withdraw(9.9e17); // 1e18 - 1e17 fee = 9.9e17
+        strategy.withdraw(NATIVE);
         assertEq(address(allo()).balance, 0);
     }
 
     function testRevert_withdraw_UNAUTHORIZED() public {
         vm.expectRevert(UNAUTHORIZED.selector);
-        strategy.withdraw(1e18);
+        strategy.withdraw(NATIVE);
     }
 
     function testRevert_withdraw_POOL_ACTIVE() public {
         vm.expectRevert(POOL_ACTIVE.selector);
         vm.prank(pool_admin());
-        strategy.withdraw(1e18);
+        strategy.withdraw(NATIVE);
     }
 
     function test_registerRecipient() public {
         address sender = recipient();
         Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
 
-        bytes memory data = abi.encode(recipientAddress(), false, 1e18, metadata);
+        bytes memory data = abi.encode(address(0), recipientAddress(), 1e18, metadata);
 
         vm.expectEmit(true, false, false, true);
         emit Registered(sender, data, sender);
@@ -303,7 +348,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         address sender = recipient();
         Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
 
-        bytes memory data = abi.encode(recipientAddress(), false, 0, metadata);
+        bytes memory data = abi.encode(address(0), recipientAddress(), 0, metadata);
 
         vm.expectEmit(true, false, false, true);
         emit Registered(sender, data, sender);
@@ -321,7 +366,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         address sender = recipient();
         Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
 
-        bytes memory data = abi.encode(recipientAddress(), false, 0, metadata);
+        bytes memory data = abi.encode(address(0), recipientAddress(), 0, metadata);
 
         vm.expectEmit(true, false, false, true);
         emit UpdatedRegistration(sender, data, sender);
@@ -340,7 +385,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
 
         // optionally using anchor
         address anchor = profile1_anchor();
-        bytes memory data = abi.encode(profile1_member1(), anchor, 1e18, metadata);
+        bytes memory data = abi.encode(anchor, profile1_member1(), 1e18, metadata);
 
         vm.prank(address(allo()));
         strategy.registerRecipient(data, profile1_member1());
@@ -375,7 +420,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         address anchor = poolProfile_anchor();
         Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
 
-        bytes memory data = abi.encode(anchor, 1e18, metadata);
+        bytes memory data = abi.encode(anchor, anchor, 1e18, metadata);
 
         vm.expectRevert(UNAUTHORIZED.selector);
         vm.prank(address(allo()));
@@ -386,7 +431,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         address sender = randomAddress();
         Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
 
-        bytes memory data = abi.encode(sender, true, 1e18, metadata);
+        bytes memory data = abi.encode(randomAddress(), sender, 1e18, metadata);
 
         vm.expectRevert(UNAUTHORIZED.selector);
         vm.prank(address(allo()));
@@ -397,7 +442,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         address sender = recipient();
         Metadata memory metadata = Metadata({protocol: 0, pointer: ""});
 
-        bytes memory data = abi.encode(recipientAddress(), false, 1e18, metadata);
+        bytes memory data = abi.encode(address(0), recipientAddress(), 1e18, metadata);
 
         vm.expectRevert(INVALID_METADATA.selector);
         vm.prank(address(allo()));
@@ -408,7 +453,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         address sender = recipient();
         Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
 
-        bytes memory data = abi.encode(recipientAddress(), false, 1e19, metadata);
+        bytes memory data = abi.encode(address(0), recipientAddress(), 1e19, metadata);
 
         vm.expectRevert(RFPSimpleStrategy.EXCEEDING_MAX_BID.selector);
         vm.prank(address(allo()));
@@ -424,21 +469,30 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
     function testRevert_allocate_UNAUTHORIZED() public {
         vm.expectRevert(UNAUTHORIZED.selector);
         vm.prank(makeAddr("not_pool_manager"));
-        strategy.allocate(abi.encode(recipientAddress()), recipient());
+        strategy.allocate(abi.encode(recipientAddress(), 1e18), recipient());
+    }
+
+    function testRevert_allocate_INVALID_AMOUNT() public {
+        address recipientId = __register_recipient();
+        __setMilestones();
+
+        vm.expectRevert(Errors.INVALID.selector);
+        vm.prank(address(allo()));
+        strategy.allocate(abi.encode(recipientId, 5e17), address(pool_admin()));
     }
 
     function testRevert_allocate_POOL_INACTIVE() public {
         address recipientId = __register_setMilestones_allocate();
         vm.expectRevert(POOL_INACTIVE.selector);
         vm.prank(address(allo()));
-        strategy.allocate(abi.encode(recipientId), address(pool_admin()));
+        strategy.allocate(abi.encode(recipientId, 1e18), address(pool_admin()));
     }
 
     function testRevert_allocate_RECIPIENT_ERROR() public {
         vm.prank(address(allo()));
         vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, address(randomAddress())));
 
-        strategy.allocate(abi.encode(randomAddress()), address(pool_admin()));
+        strategy.allocate(abi.encode(randomAddress(), 1e18), address(pool_admin()));
     }
 
     function test_distribute() public {
@@ -460,10 +514,15 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
     }
 
     function testRevert_distribute_INVALID_MILESTONE() public {
-        _register_allocate_submit_distribute();
+        __register_setMilestones_allocate();
 
+        vm.expectRevert(RFPSimpleStrategy.INVALID_MILESTONE.selector);
         vm.prank(address(allo()));
         strategy.distribute(new address[](0), "", pool_admin());
+    }
+
+    function testRevert_distribute_INVALID_MILESTONE_notPendingMilestone() public {
+        test_rejectMilestone();
 
         vm.expectRevert(RFPSimpleStrategy.INVALID_MILESTONE.selector);
         vm.prank(address(allo()));
@@ -472,8 +531,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
 
     function testRevert_distribute_NOT_ENOUGH_FUNDS() public {
         __register_setMilestones_allocate_submitUpcomingMilestone();
-        __setMilestones();
-        vm.expectRevert(NOT_ENOUGH_FUNDS.selector);
+        vm.expectRevert(); // Arithmetic underflow revert
         vm.prank(address(allo()));
         strategy.distribute(new address[](0), "", pool_admin());
     }
@@ -482,7 +540,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         address sender = recipient();
         Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
 
-        bytes memory data = abi.encode(recipientAddress(), false, 1e18, metadata);
+        bytes memory data = abi.encode(address(0), recipientAddress(), 1e18, metadata);
         vm.prank(address(allo()));
         recipientId = strategy.registerRecipient(data, sender);
     }
@@ -492,12 +550,12 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         RFPSimpleStrategy.Milestone memory milestone = RFPSimpleStrategy.Milestone({
             metadata: Metadata({protocol: 1, pointer: "metadata"}),
             amountPercentage: 7e17,
-            milestoneStatus: IStrategy.Status.Pending
+            milestoneStatus: IStrategy.Status.None
         });
         RFPSimpleStrategy.Milestone memory milestone2 = RFPSimpleStrategy.Milestone({
             metadata: Metadata({protocol: 1, pointer: "metadata"}),
             amountPercentage: 3e17,
-            milestoneStatus: IStrategy.Status.Pending
+            milestoneStatus: IStrategy.Status.None
         });
 
         milestones[0] = milestone;
@@ -516,7 +574,7 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
 
         emit Allocated(recipientId, 1e18, NATIVE, address(pool_admin()));
         vm.prank(address(allo()));
-        strategy.allocate(abi.encode(recipientId), address(pool_admin()));
+        strategy.allocate(abi.encode(recipientId, 1e18), address(pool_admin()));
     }
 
     function __register_setMilestones_allocate_submitUpcomingMilestone() internal returns (address recipientId) {

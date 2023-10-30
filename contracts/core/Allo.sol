@@ -5,7 +5,7 @@ pragma solidity 0.8.19;
 import "solady/src/auth/Ownable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
-import "openzeppelin-contracts/contracts/access/AccessControl.sol";
+import "openzeppelin-contracts-upgradeable/contracts/access/AccessControlUpgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/security/ReentrancyGuardUpgradeable.sol";
 // Interfaces
 import "./interfaces/IAllo.sol";
@@ -35,7 +35,16 @@ import {Transfer} from "./libraries/Transfer.sol";
 /// @author @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>, @0xZakk <zakk@gitcoin.co>, @nfrgosselin <nate@gitcoin.co>
 /// @notice This contract is used to create & manage pools as well as manage the protocol.
 /// @dev The contract must be initialized with the 'initialize()' function.
-contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl, ReentrancyGuardUpgradeable, Errors {
+contract Allo is
+    IAllo,
+    Native,
+    Transfer,
+    Initializable,
+    Ownable,
+    AccessControlUpgradeable,
+    ReentrancyGuardUpgradeable,
+    Errors
+{
     // ==========================
     // === Storage Variables ====
     // ==========================
@@ -80,16 +89,20 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
 
     /// @notice Initializes the contract after an upgrade
     /// @dev During upgrade -> a higher version should be passed to reinitializer
+    /// @param _owner The owner of allo
     /// @param _registry The address of the registry
     /// @param _treasury The address of the treasury
     /// @param _percentFee The percentage fee
     /// @param _baseFee The base fee
-    function initialize(address _registry, address payable _treasury, uint256 _percentFee, uint256 _baseFee)
-        external
-        reinitializer(1)
-    {
+    function initialize(
+        address _owner,
+        address _registry,
+        address payable _treasury,
+        uint256 _percentFee,
+        uint256 _baseFee
+    ) external reinitializer(1) {
         // Initialize the owner using Solady ownable library
-        _initializeOwner(msg.sender);
+        _initializeOwner(_owner);
 
         // Set the address of the registry
         _updateRegistry(_registry);
@@ -300,7 +313,7 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
     /// @return recipientId The recipient ID that has been registered
     function registerRecipient(uint256 _poolId, bytes memory _data) external payable nonReentrant returns (address) {
         // Return the recipientId (address) from the strategy
-        return pools[_poolId].strategy.registerRecipient(_data, msg.sender);
+        return pools[_poolId].strategy.registerRecipient{value: msg.value}(_data, msg.sender);
     }
 
     /// @notice Register multiple recipients to multiple pools.
@@ -340,8 +353,11 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
         // if amount is 0, revert with 'NOT_ENOUGH_FUNDS()' error
         if (_amount == 0) revert NOT_ENOUGH_FUNDS();
 
+        Pool memory pool = pools[_poolId];
+        if (pool.token == NATIVE && _amount != msg.value) revert NOT_ENOUGH_FUNDS();
+
         // Call the internal fundPool() function
-        _fundPool(_amount, _poolId, pools[_poolId].strategy);
+        _fundPool(_amount, _poolId, pool.strategy);
     }
 
     /// @notice Allocate to a recipient or multiple recipients.
@@ -468,9 +484,9 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
 
         if (baseFee > 0) {
             // To prevent paying the baseFee from the Allo contract's balance
-            // If _token is NATIVE, then baseFee + _amount should be >= than msg.value.
-            // If _token is not NATIVE, then baseFee should be >= than msg.value.
-            if ((_token == NATIVE && (baseFee + _amount >= msg.value)) || (_token != NATIVE && baseFee >= msg.value)) {
+            // If _token is NATIVE, then baseFee + _amount should be > than msg.value.
+            // If _token is not NATIVE, then baseFee should be > than msg.value.
+            if ((_token == NATIVE && (baseFee + _amount != msg.value)) || (_token != NATIVE && baseFee != msg.value)) {
                 revert NOT_ENOUGH_FUNDS();
             }
             _transferAmount(NATIVE, treasury, baseFee);
@@ -510,10 +526,33 @@ contract Allo is IAllo, Native, Transfer, Initializable, Ownable, AccessControl,
             feeAmount = (_amount * percentFee) / getFeeDenominator();
             amountAfterFee -= feeAmount;
 
-            _transferAmountFrom(_token, TransferData({from: msg.sender, to: treasury, amount: feeAmount}));
+            if (feeAmount + amountAfterFee != _amount) revert INVALID();
+
+            if (_token == NATIVE) {
+                _transferAmountFrom(_token, TransferData({from: msg.sender, to: treasury, amount: feeAmount}));
+            } else {
+                uint256 balanceBeforeFee = _getBalance(_token, treasury);
+                _transferAmountFrom(_token, TransferData({from: msg.sender, to: treasury, amount: feeAmount}));
+                uint256 balanceAfterFee = _getBalance(_token, treasury);
+                // Track actual fee paid to account for fee on ERC20 token transfers
+                feeAmount = balanceAfterFee - balanceBeforeFee;
+            }
         }
 
-        _transferAmountFrom(_token, TransferData({from: msg.sender, to: address(_strategy), amount: amountAfterFee}));
+        if (_token == NATIVE) {
+            _transferAmountFrom(
+                _token, TransferData({from: msg.sender, to: address(_strategy), amount: amountAfterFee})
+            );
+        } else {
+            uint256 balanceBeforeFundingPool = _getBalance(_token, address(_strategy));
+            _transferAmountFrom(
+                _token, TransferData({from: msg.sender, to: address(_strategy), amount: amountAfterFee})
+            );
+            uint256 balanceAfterFundingPool = _getBalance(_token, address(_strategy));
+            // Track actual fee paid to account for fee on ERC20 token transfers
+            amountAfterFee = balanceAfterFundingPool - balanceBeforeFundingPool;
+        }
+
         _strategy.increasePoolAmount(amountAfterFee);
 
         emit PoolFunded(_poolId, amountAfterFee, feeAmount);

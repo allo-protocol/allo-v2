@@ -163,7 +163,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     uint256 public totalPayoutAmount;
 
     /// @notice The total number of recipients.
-    uint256 public recipientsCounter;
+    uint256 public recipientsCounter = 1;
 
     /// @notice The registry contract interface.
     IRegistry private _registry;
@@ -227,6 +227,13 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     /// @dev This will revert if the allocation has not ended.
     modifier onlyAfterAllocation() {
         _checkOnlyAfterAllocation();
+        _;
+    }
+
+    /// @notice Modifier to check if the allocation has ended
+    /// @dev This will revert if the allocation has ended.
+    modifier onlyBeforeAllocationEnds() {
+        _checkOnlyBeforeAllocationEnds();
         _;
     }
 
@@ -339,11 +346,13 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     /// - 4: appealed
     /// Emits the RecipientStatusUpdated() event.
     /// @param statuses new statuses
-    function reviewRecipients(ApplicationStatus[] memory statuses)
+    /// @param refRecipientsCounter the recipientCounter the transaction is based on
+    function reviewRecipients(ApplicationStatus[] memory statuses, uint256 refRecipientsCounter)
         external
-        onlyActiveRegistration
+        onlyBeforeAllocationEnds
         onlyPoolManager(msg.sender)
     {
+        if (refRecipientsCounter != recipientsCounter) revert INVALID();
         // Loop through the statuses and set the status
         for (uint256 i; i < statuses.length;) {
             uint256 rowIndex = statuses[i].index;
@@ -389,25 +398,30 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     }
 
     /// @notice Withdraw funds from pool
-    /// @dev This can only be called after the allocation has ended and 30 days have passed. If the
-    ///      '_amount' is greater than the pool amount or if 'msg.sender' is not a pool manager.
-    /// @param _amount The amount to be withdrawn
-    function withdraw(uint256 _amount) external onlyPoolManager(msg.sender) {
+    /// @dev This can only be called after the allocation has ended and 30 days have passed.
+    /// @param _token The token to be withdrawn
+    function withdraw(address _token) external onlyPoolManager(msg.sender) {
         if (block.timestamp <= allocationEndTime + 30 days) {
             revert INVALID();
         }
 
-        IAllo.Pool memory pool = allo.getPool(poolId);
+        // get the actual balance hold by the pool
+        uint256 amount = _getBalance(_token, address(this));
 
-        if (_amount > poolAmount) {
-            revert INVALID();
-        }
+        // get the token amount in vault which belong to the recipients
+        uint256 tokenInVault = _tokenAmountInVault(_token);
 
-        poolAmount -= _amount;
+        // calculate the amount which is accessible
+        uint256 accessableAmount = amount - tokenInVault;
 
-        // Transfer the tokens to the 'msg.sender' (pool manager calling function)
-        _transferAmount(pool.token, msg.sender, _amount);
+        // transfer the amount to the pool manager
+        _transferAmount(_token, msg.sender, accessableAmount);
     }
+
+    /// @notice Internal function to return the token amount locked in vault
+    /// @dev This function will return 0 if all funds are accessible
+    /// @param _token The address of the token
+    function _tokenAmountInVault(address _token) internal view virtual returns (uint256);
 
     /// ==================================
     /// ============ Merkle ==============
@@ -472,8 +486,16 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     /// @notice Checks if the allocation has ended and reverts if not.
     /// @dev This will revert if the allocation has not ended.
     function _checkOnlyAfterAllocation() internal view {
-        if (block.timestamp < allocationEndTime) {
+        if (block.timestamp <= allocationEndTime) {
             revert ALLOCATION_NOT_ENDED();
+        }
+    }
+
+    /// @notice Checks if the allocation has not ended and reverts if it has.
+    /// @dev This will revert if the allocation has ended.
+    function _checkOnlyBeforeAllocationEnds() internal view {
+        if (block.timestamp > allocationEndTime) {
+            revert ALLOCATION_NOT_ACTIVE();
         }
     }
 
@@ -578,9 +600,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
         recipient.metadata = metadata;
         recipient.useRegistryAnchor = useRegistryAnchor ? true : isUsingRegistryAnchor;
 
-        uint8 currentStatus = _getUintRecipientStatus(recipientId);
-
-        if (currentStatus == uint8(Status.None)) {
+        if (recipientToStatusIndexes[recipientId] == 0) {
             // recipient registering new application
             recipientToStatusIndexes[recipientId] = recipientsCounter;
             _setRecipientStatus(recipientId, uint8(Status.Pending));
@@ -590,6 +610,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
 
             recipientsCounter++;
         } else {
+            uint8 currentStatus = _getUintRecipientStatus(recipientId);
             if (currentStatus == uint8(Status.Accepted)) {
                 // recipient updating accepted application
                 _setRecipientStatus(recipientId, uint8(Status.Pending));
@@ -613,6 +634,8 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
         override
         onlyPoolManager(_sender)
     {
+        if (merkleRoot == "") revert INVALID();
+
         if (!distributionStarted) {
             distributionStarted = true;
         }
@@ -818,6 +841,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     /// @param _recipientId ID of the recipient
     /// @return status The status of the recipient
     function _getUintRecipientStatus(address _recipientId) internal view returns (uint8 status) {
+        if (recipientToStatusIndexes[_recipientId] == 0) return 0;
         // Get the column index and current row
         (, uint256 colIndex, uint256 currentRow) = _getStatusRowColumn(_recipientId);
 
@@ -832,7 +856,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     /// @param _recipientId ID of the recipient
     /// @return (rowIndex, colIndex, currentRow)
     function _getStatusRowColumn(address _recipientId) internal view returns (uint256, uint256, uint256) {
-        uint256 recipientIndex = recipientToStatusIndexes[_recipientId];
+        uint256 recipientIndex = recipientToStatusIndexes[_recipientId] - 1;
 
         uint256 rowIndex = recipientIndex / 64; // 256 / 4
         uint256 colIndex = (recipientIndex % 64) * 4;
@@ -840,6 +864,6 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
         return (rowIndex, colIndex, statusesBitMap[rowIndex]);
     }
 
-    /// @notice Contract should be able to receive ETH
+    /// @notice Contract should be able to receive NATIVE
     receive() external payable {}
 }

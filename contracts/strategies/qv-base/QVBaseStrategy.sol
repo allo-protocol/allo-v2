@@ -97,6 +97,9 @@ abstract contract QVBaseStrategy is BaseStrategy {
     /// @notice Whether or not the strategy requires metadata
     bool public metadataRequired;
 
+    /// @notice Whether the distribution started or not
+    bool public distributionStarted;
+
     /// @notice The registry contract
     IRegistry private _registry;
 
@@ -160,6 +163,9 @@ abstract contract QVBaseStrategy is BaseStrategy {
     // recipientId -> status -> count
     mapping(address => mapping(Status => uint256)) public reviewsByStatus;
 
+    // recipientId -> reviewer -> status
+    mapping(address => mapping(address => Status)) public reviewedByManager;
+
     /// ================================
     /// ========== Modifier ============
     /// ================================
@@ -182,6 +188,13 @@ abstract contract QVBaseStrategy is BaseStrategy {
     /// @dev Reverts if the allocation has not ended
     modifier onlyAfterAllocation() {
         _checkOnlyAfterAllocation();
+        _;
+    }
+
+    /// @notice Modifier to check if the allocation has ended
+    /// @dev This will revert if the allocation has ended.
+    modifier onlyBeforeAllocationEnds() {
+        _checkOnlyBeforeAllocationEnds();
         _;
     }
 
@@ -255,7 +268,7 @@ abstract contract QVBaseStrategy is BaseStrategy {
         external
         virtual
         onlyPoolManager(msg.sender)
-        onlyActiveRegistration
+        onlyBeforeAllocationEnds
     {
         // make sure the arrays are the same length
         uint256 recipientLength = _recipientIds.length;
@@ -270,8 +283,22 @@ abstract contract QVBaseStrategy is BaseStrategy {
                 revert RECIPIENT_ERROR(recipientId);
             }
 
+            Status oldStatus = reviewedByManager[recipientId][msg.sender];
+
+            // pool manager is updating the review for the recipient
+            if (oldStatus != Status.None) {
+                // revert if pool manager is reviewing with same status as before
+                if (oldStatus == recipientStatus) revert RECIPIENT_ERROR(recipientId);
+
+                // decrement the old status counter as pool manager is changing their review
+                reviewsByStatus[recipientId][oldStatus]--;
+            }
+
+            // track the review cast for the recipient and update status counter
+            reviewedByManager[recipientId][msg.sender] = recipientStatus;
             reviewsByStatus[recipientId][recipientStatus]++;
 
+            // update the recipient status if the review threshold has been reached
             if (reviewsByStatus[recipientId][recipientStatus] >= reviewThreshold) {
                 Recipient storage recipient = recipients[recipientId];
                 recipient.recipientStatus = recipientStatus;
@@ -301,6 +328,20 @@ abstract contract QVBaseStrategy is BaseStrategy {
         _updatePoolTimestamps(_registrationStartTime, _registrationEndTime, _allocationStartTime, _allocationEndTime);
     }
 
+    /// @notice Withdraw the tokens from the pool
+    /// @dev Callable by the pool manager only 30 days after the allocation has ended
+    /// @param _token The token to withdraw
+    function withdraw(address _token) external onlyPoolManager(msg.sender) {
+        if (block.timestamp <= allocationEndTime + 30 days) {
+            revert INVALID();
+        }
+
+        uint256 amount = _getBalance(_token, address(this));
+
+        // Transfer the tokens to the 'msg.sender' (pool manager calling function)
+        _transferAmount(_token, msg.sender, amount);
+    }
+
     /// ====================================
     /// ============ Internal ==============
     /// ====================================
@@ -324,7 +365,15 @@ abstract contract QVBaseStrategy is BaseStrategy {
     /// @notice Check if the allocation has ended
     /// @dev Reverts if the allocation has not ended
     function _checkOnlyAfterAllocation() internal view virtual {
-        if (block.timestamp < allocationEndTime) revert ALLOCATION_NOT_ENDED();
+        if (block.timestamp <= allocationEndTime) revert ALLOCATION_NOT_ENDED();
+    }
+
+    /// @notice Checks if the allocation has not ended and reverts if it has.
+    /// @dev This will revert if the allocation has ended.
+    function _checkOnlyBeforeAllocationEnds() internal view {
+        if (block.timestamp > allocationEndTime) {
+            revert ALLOCATION_NOT_ACTIVE();
+        }
     }
 
     /// @notice Set the start and end dates for the pool
@@ -411,15 +460,16 @@ abstract contract QVBaseStrategy is BaseStrategy {
 
         Status currentStatus = recipient.recipientStatus;
 
-        if (currentStatus == Status.None) {
+        if (currentStatus == Status.Accepted) {
+            // revert if the recipient has already been accepted
+            revert RECIPIENT_ALREADY_ACCEPTED();
+        } else if (currentStatus == Status.None) {
             // recipient registering new application
             recipient.recipientStatus = Status.Pending;
             emit Registered(recipientId, _data, _sender);
         } else {
-            if (currentStatus == Status.Accepted) {
-                // recipient updating accepted application
-                recipient.recipientStatus = Status.Pending;
-            } else if (currentStatus == Status.Rejected) {
+            // recipient updating rejected/pending/appealed application
+            if (currentStatus == Status.Rejected) {
                 // recipient updating rejected application
                 recipient.recipientStatus = Status.Appealed;
             }
@@ -461,6 +511,9 @@ abstract contract QVBaseStrategy is BaseStrategy {
             unchecked {
                 ++i;
             }
+        }
+        if (!distributionStarted) {
+            distributionStarted = true;
         }
     }
 
@@ -513,12 +566,20 @@ abstract contract QVBaseStrategy is BaseStrategy {
         // check the `_voiceCreditsToAllocate` is > 0
         if (_voiceCreditsToAllocate == 0) revert INVALID();
 
-        // get the previous values
+        // check if the recipient is accepted
+        if (!_isAcceptedRecipient(_recipientId)) revert RECIPIENT_ERROR(_recipientId);
+
+        // update the allocator voice credits
+        _allocator.voiceCredits += _voiceCreditsToAllocate;
+
+        // creditsCastToRecipient is the voice credits used to cast a vote to the recipient
+        // votesCastToRecipient is the actual votes cast to the recipient
         uint256 creditsCastToRecipient = _allocator.voiceCreditsCastToRecipient[_recipientId];
         uint256 votesCastToRecipient = _allocator.votesCastToRecipient[_recipientId];
 
         // get the total credits and calculate the vote result
         uint256 totalCredits = _voiceCreditsToAllocate + creditsCastToRecipient;
+        // determine actual votes cast
         uint256 voteResult = _sqrt(totalCredits * 1e18);
 
         // update the values
@@ -526,7 +587,7 @@ abstract contract QVBaseStrategy is BaseStrategy {
         totalRecipientVotes += voteResult;
         _recipient.totalVotesReceived += voteResult;
 
-        _allocator.voiceCreditsCastToRecipient[_recipientId] += totalCredits;
+        _allocator.voiceCreditsCastToRecipient[_recipientId] += _voiceCreditsToAllocate;
         _allocator.votesCastToRecipient[_recipientId] += voteResult;
 
         // emit the event with the vote results
@@ -572,4 +633,13 @@ abstract contract QVBaseStrategy is BaseStrategy {
         }
         return PayoutSummary(recipient.recipientAddress, amount);
     }
+
+    function _beforeIncreasePoolAmount(uint256) internal virtual override {
+        if (distributionStarted) {
+            revert INVALID();
+        }
+    }
+
+    /// @notice Contract should be able to receive NATIVE
+    receive() external payable {}
 }

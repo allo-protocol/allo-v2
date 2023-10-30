@@ -40,6 +40,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         address recipientAddress;
         uint256 proposalBid;
         Status recipientStatus;
+        Metadata metadata;
     }
 
     /// @notice Stores the details of the milestone
@@ -63,8 +64,8 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Thrown when the milestone is invalid
     error INVALID_MILESTONE();
 
-    /// @notice Thrown when the milestone is already accepted
-    error MILESTONE_ALREADY_ACCEPTED();
+    /// @notice Thrown when the milestone is not pending
+    error MILESTONE_NOT_PENDING();
 
     /// @notice Thrown when the proposal bid exceeds maximum bid
     error EXCEEDING_MAX_BID();
@@ -220,7 +221,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Toggle the status between active and inactive.
     /// @dev 'msg.sender' must be a pool manager to close the pool. Emits a 'PoolActive()' event.
     /// @param _flag The flag to set the pool to active or inactive
-    function setPoolActive(bool _flag) external {
+    function setPoolActive(bool _flag) external onlyPoolManager(msg.sender) {
         _setPoolActive(_flag);
         emit PoolActive(_flag);
     }
@@ -229,14 +230,22 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @dev 'msg.sender' must be a pool manager to set milestones. Emits 'MilestonesSet' event
     /// @param _milestones Milestone[] The milestones to be set
     function setMilestones(Milestone[] memory _milestones) external onlyPoolManager(msg.sender) {
-        if (upcomingMilestone != 0) revert MILESTONES_ALREADY_SET();
+        if (milestones.length > 0) {
+            if (milestones[0].milestoneStatus != Status.None) revert MILESTONES_ALREADY_SET();
+            delete milestones;
+        }
 
         uint256 totalAmountPercentage;
 
         // Loop through the milestones and add them to the milestones array
         uint256 milestonesLength = _milestones.length;
         for (uint256 i; i < milestonesLength;) {
-            totalAmountPercentage += _milestones[i].amountPercentage;
+            uint256 amountPercentage = _milestones[i].amountPercentage;
+
+            if (amountPercentage == 0) revert INVALID_MILESTONE();
+
+            totalAmountPercentage += amountPercentage;
+            _milestones[i].milestoneStatus = Status.None;
             milestones.push(_milestones[i]);
 
             unchecked {
@@ -251,11 +260,13 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     }
 
     /// @notice Submit milestone by the acceptedRecipientId.
-    /// @dev 'msg.sender' must be the 'acceptedRecipientId' and must be a member
-    ///      of a 'Profile' to sumbit a milestone. Emits a 'MilestonesSubmitted()' event.
+    /// @dev 'msg.sender' should be the 'acceptedRecipientId' OR must be a member
+    ///      of a 'Profile' assuming that 'acceptedRecipientId' is profile on the registry
+    //       Emits a 'MilestonesSubmitted()' event.
     /// @param _metadata The proof of work
     function submitUpcomingMilestone(Metadata calldata _metadata) external {
-        // Check if the 'msg.sender' is the 'acceptedRecipientId' and is a member of the 'Profile'
+        // Check if the 'msg.sender' is the 'acceptedRecipientId' or
+        // 'acceptedRecipientId' is a profile on the Registry and sender is a member of the profile
         if (acceptedRecipientId != msg.sender && !_isProfileMember(acceptedRecipientId, msg.sender)) {
             revert UNAUTHORIZED();
         }
@@ -285,23 +296,22 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @dev 'msg.sender' must be a pool manager to reject a milestone. Emits a 'MilestoneStatusChanged()' event.
     /// @param _milestoneId ID of the milestone
     function rejectMilestone(uint256 _milestoneId) external onlyPoolManager(msg.sender) {
-        // Check if the milestone is already accepted
-        if (milestones[_milestoneId].milestoneStatus == Status.Accepted) revert MILESTONE_ALREADY_ACCEPTED();
+        // Check if the milestone status is pending
+        if (milestones[_milestoneId].milestoneStatus != Status.Pending) revert MILESTONE_NOT_PENDING();
 
         milestones[_milestoneId].milestoneStatus = Status.Rejected;
 
         emit MilestoneStatusChanged(_milestoneId, milestones[_milestoneId].milestoneStatus);
     }
 
-    /// @notice Withdraw funds from pool.
-    /// @dev 'msg.sender' must be a pool manager to withdraw funds.
-    /// @param _amount The amount to be withdrawn
-    function withdraw(uint256 _amount) external onlyPoolManager(msg.sender) onlyInactivePool {
-        // Decrement the pool amount
-        poolAmount -= _amount;
+    /// @notice Withdraw the tokens from the pool
+    /// @dev Callable by the pool manager
+    /// @param _token The token to withdraw
+    function withdraw(address _token) external onlyPoolManager(msg.sender) onlyInactivePool {
+        uint256 amount = _getBalance(_token, address(this));
 
-        // Transfer the amount to the pool manager
-        _transferAmount(allo.getPool(poolId).token, msg.sender, _amount);
+        // Transfer the tokens to the 'msg.sender' (pool manager calling function)
+        _transferAmount(_token, msg.sender, amount);
     }
 
     /// ====================================
@@ -311,8 +321,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Submit a proposal to RFP pool
     /// @dev Emits a 'Registered()' event
     /// @param _data The data to be decoded
-    /// @custom:data when 'useRegistryAnchor' is 'true' -> (address recipientId, uint256 proposalBid, Metadata metadata)
-    ///              when 'useRegistryAnchor' is 'false' -> (address recipientAddress, address registryAnchor, uint256 proposalBid, Metadata metadata)
+    /// @custom:data (address registryAnchor, address recipientAddress, uint256 proposalBid, Metadata metadata)
     /// @param _sender The sender of the transaction
     /// @return recipientId The id of the recipient
     function _registerRecipient(bytes memory _data, address _sender)
@@ -327,27 +336,18 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         uint256 proposalBid;
         Metadata memory metadata;
 
-        // Decode '_data' depending on the 'useRegistryAnchor' flag
-        if (useRegistryAnchor) {
-            /// @custom:data when 'true' -> (address recipientId, uint256 proposalBid, Metadata metadata)
-            (recipientId, proposalBid, metadata) = abi.decode(_data, (address, uint256, Metadata));
+        //  @custom:data (address registryAnchor, address recipientAddress, uint256 proposalBid, Metadata metadata)
+        (registryAnchor, recipientAddress, proposalBid, metadata) =
+            abi.decode(_data, (address, address, uint256, Metadata));
 
-            // If the sender is not a profile member this will revert
-            if (!_isProfileMember(recipientId, _sender)) revert UNAUTHORIZED();
-        } else {
-            //  @custom:data when 'false' -> (address recipientAddress, address registryAnchor, uint256 proposalBid, Metadata metadata)
-            (recipientAddress, registryAnchor, proposalBid, metadata) =
-                abi.decode(_data, (address, address, uint256, Metadata));
+        // Check if the registry anchor is valid so we know whether to use it or not
+        isUsingRegistryAnchor = useRegistryAnchor || registryAnchor != address(0);
 
-            // Check if the registry anchor is valid so we know whether to use it or not
-            isUsingRegistryAnchor = registryAnchor != address(0);
+        // Ternerary to set the recipient id based on whether or not we are using the 'registryAnchor' or '_sender'
+        recipientId = isUsingRegistryAnchor ? registryAnchor : _sender;
 
-            // Ternerary to set the recipient id based on whether or not we are using the 'registryAnchor' or '_sender'
-            recipientId = isUsingRegistryAnchor ? registryAnchor : _sender;
-
-            // Checks if the '_sender' is a member of the profile 'anchor' being used and reverts if not
-            if (isUsingRegistryAnchor && !_isProfileMember(recipientId, _sender)) revert UNAUTHORIZED();
-        }
+        // Checks if the '_sender' is a member of the profile 'anchor' being used and reverts if not
+        if (isUsingRegistryAnchor && !_isProfileMember(recipientId, _sender)) revert UNAUTHORIZED();
 
         // Check if the metadata is required and if it is, check if it is valid, otherwise revert
         if (metadataRequired && (bytes(metadata.pointer).length == 0 || metadata.protocol == 0)) {
@@ -380,6 +380,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         recipient.recipientAddress = recipientAddress;
         recipient.useRegistryAnchor = isUsingRegistryAnchor ? true : recipient.useRegistryAnchor;
         recipient.proposalBid = proposalBid;
+        recipient.metadata = metadata;
         recipient.recipientStatus = Status.Pending;
     }
 
@@ -395,8 +396,9 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         onlyActivePool
         onlyPoolManager(_sender)
     {
+        uint256 finalProposalBid;
         // Decode the '_data'
-        acceptedRecipientId = abi.decode(_data, (address));
+        (acceptedRecipientId, finalProposalBid) = abi.decode(_data, (address, uint256));
 
         Recipient storage recipient = _recipients[acceptedRecipientId];
 
@@ -407,12 +409,19 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         // Update status of acceptedRecipientId to accepted
         recipient.recipientStatus = Status.Accepted;
 
+        if (recipient.proposalBid != finalProposalBid) {
+            // If the proposal bid is not equal to the final proposal bid this will revert
+            // This is to prevent the pool manager from decreasing the proposal bid
+            // or recipient from front running and increasing the proposal bid
+            revert INVALID();
+        }
+
         _setPoolActive(false);
 
         IAllo.Pool memory pool = allo.getPool(poolId);
 
         // Emit event for the allocation
-        emit Allocated(acceptedRecipientId, recipient.proposalBid, pool.token, _sender);
+        emit Allocated(acceptedRecipientId, finalProposalBid, pool.token, _sender);
     }
 
     /// @notice Distribute the upcoming milestone to acceptedRecipientId.
@@ -432,8 +441,8 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         Milestone storage milestone = milestones[upcomingMilestone];
         Recipient memory recipient = _recipients[acceptedRecipientId];
 
-        // make sure has enough funds to distribute based on the proposal bid
-        if (recipient.proposalBid > poolAmount) revert NOT_ENOUGH_FUNDS();
+        // Check if the milestone is pending
+        if (milestone.milestoneStatus != Status.Pending) revert INVALID_MILESTONE();
 
         // Calculate the amount to be distributed for the milestone
         uint256 amount = (recipient.proposalBid * milestone.amountPercentage) / 1e18;

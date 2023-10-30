@@ -2,9 +2,8 @@
 pragma solidity 0.8.19;
 
 // External Libraries
-import {AccessControl} from "openzeppelin-contracts/contracts/access/AccessControl.sol";
+import "openzeppelin-contracts-upgradeable/contracts/access/AccessControlUpgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
-import {CREATE3} from "solady/src/utils/CREATE3.sol";
 import {ERC20} from "solady/src/tokens/ERC20.sol";
 // Interfaces
 import "./interfaces/IRegistry.sol";
@@ -37,7 +36,7 @@ import "./libraries/Transfer.sol";
 ///      It is also used to deploy the anchor contract for each profile which acts as a proxy
 ///      for the profile and is used to receive funds and execute transactions on behalf of the profile
 ///      The Registry is also used to add and remove members from a profile and update the profile 'Metadata'
-contract Registry is IRegistry, Native, AccessControl, Transfer, Initializable, Errors {
+contract Registry is IRegistry, Initializable, Native, AccessControlUpgradeable, Transfer, Errors {
     /// ==========================
     /// === Storage Variables ====
     /// ==========================
@@ -114,7 +113,7 @@ contract Registry is IRegistry, Native, AccessControl, Transfer, Initializable, 
     /// @param _name The name of the profile
     /// @param _metadata The metadata of the profile
     /// @param _owner The owner of the profile
-    /// @param _members The members of the profile
+    /// @param _members The members of the profile (can be set only if msg.sender == _owner)
     /// @return The ID for the created profile
     function createProfile(
         uint256 _nonce,
@@ -124,7 +123,7 @@ contract Registry is IRegistry, Native, AccessControl, Transfer, Initializable, 
         address[] memory _members
     ) external returns (bytes32) {
         // Generate a profile ID using a nonce and the msg.sender
-        bytes32 profileId = _generateProfileId(_nonce);
+        bytes32 profileId = _generateProfileId(_nonce, _owner);
 
         // Make sure the nonce is available
         if (profilesById[profileId].anchor != address(0)) revert NONCE_NOT_AVAILABLE();
@@ -147,6 +146,12 @@ contract Registry is IRegistry, Native, AccessControl, Transfer, Initializable, 
 
         // Assign roles for the profile members
         uint256 memberLength = _members.length;
+
+        // Only profile owner can add members
+        if (memberLength > 0 && _owner != msg.sender) {
+            revert UNAUTHORIZED();
+        }
+
         for (uint256 i; i < memberLength;) {
             address member = _members[i];
 
@@ -333,30 +338,33 @@ contract Registry is IRegistry, Native, AccessControl, Transfer, Initializable, 
     /// @param _name The name of the profile
     /// @return anchor The address of the deployed anchor contract
     function _generateAnchor(bytes32 _profileId, string memory _name) internal returns (address anchor) {
-        bytes32 salt = keccak256(abi.encodePacked(_profileId, _name));
+        bytes memory encodedData = abi.encode(_profileId, _name);
+        bytes memory encodedConstructorArgs = abi.encode(_profileId, address(this));
 
-        address preCalculatedAddress = CREATE3.getDeployed(salt);
+        bytes memory bytecode = abi.encodePacked(type(Anchor).creationCode, encodedConstructorArgs);
 
-        // check if the contract already exists and if the profileId matches
-        if (preCalculatedAddress.code.length > 0) {
-            if (Anchor(payable(preCalculatedAddress)).profileId() != _profileId) revert ANCHOR_ERROR();
+        bytes32 salt = keccak256(encodedData);
 
-            anchor = preCalculatedAddress;
-        } else {
-            // check if the contract has already been deployed by checking code size of address
-            bytes memory creationCode = abi.encodePacked(type(Anchor).creationCode, abi.encode(_profileId));
+        address preComputedAddress = address(
+            uint160(uint256(keccak256(abi.encodePacked(bytes1(0xff), address(this), salt, keccak256(bytecode)))))
+        );
 
-            // Use CREATE3 to deploy the anchor contract
-            anchor = CREATE3.deploy(salt, creationCode, 0);
+        // Try to deploy the anchor contract, if it fails then the anchor already exists
+        try new Anchor{salt: salt}(_profileId, address(this)) returns (Anchor _anchor) {
+            anchor = address(_anchor);
+        } catch {
+            if (Anchor(payable(preComputedAddress)).profileId() != _profileId) revert ANCHOR_ERROR();
+            anchor = preComputedAddress;
         }
     }
 
     /// @notice Generates the 'profileId' based on msg.sender and nonce
     /// @dev Internal function used by 'createProfile()' to generate profileId.
     /// @param _nonce Nonce provided by the caller to generate 'profileId'
+    /// @param _owner The owner of the profile
     /// @return 'profileId' The ID of the profile
-    function _generateProfileId(uint256 _nonce) internal view returns (bytes32) {
-        return keccak256(abi.encodePacked(_nonce, msg.sender));
+    function _generateProfileId(uint256 _nonce, address _owner) internal pure returns (bytes32) {
+        return keccak256(abi.encodePacked(_nonce, _owner));
     }
 
     /// @notice Checks if an address is the owner of the profile

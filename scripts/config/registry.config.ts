@@ -1,91 +1,89 @@
 // NOTE: Update this file anytime a new Registry is deployed.
 
 type RegistryConfig = {
-  registryImplementation: string;
-  registryProxy: string;
   owner: string;
+  proxyAdminOwner?: string;
 };
 
 type DeployParams = Record<number, RegistryConfig>;
 
-// NOTE: This will be the owner address for each registy on each network.
+// NOTE: This will be the owner address for each registry on each network.
 export const registryConfig: DeployParams = {
   // Mainnet
   1: {
-    registryImplementation: "0x0",
-    registryProxy: "0x0",
-    owner: "",
+    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
   },
   // Goerli
   5: {
-    registryImplementation: "0xd34db3b8b10faa6bfc421e919fab0272d542c1d6",
-    registryProxy: "0xBC23124Ed2655A1579291f7ADDE581fF18327D41",
-    owner: "0x1fD06f088c720bA3b7a3634a8F021Fdd485DcA42",
+    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
+    proxyAdminOwner: "0x66Be9a4412ac7a10eF46298B2cA72B42C95e80b4",
   },
   // Sepolia
   11155111: {
-    registryImplementation: "",
-    registryProxy: "",
-    owner: "",
+    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
   },
   // PGN
   424: {
-    registryImplementation: "0x0",
-    registryProxy: "0x0",
-    owner: "",
+    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
   },
   // PGN Sepolia
   58008: {
-    registryImplementation: "",
-    registryProxy: "",
-    owner: "",
+    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
   },
   // Optimism
   10: {
-    registryImplementation: "0x0",
-    registryProxy: "0x0",
-    owner: "",
+    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
   },
   // Optimism Goerli
   420: {
-    registryImplementation: "",
-    registryProxy: "",
-    owner: "",
+    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
   },
   // Fantom
   250: {
-    registryImplementation: "0x0",
-    registryProxy: "0x0",
-    owner: "",
+    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
   },
   // Fantom Testnet
   4002: {
-    registryImplementation: "0xa850b156d256ba38c56e62c84421218b27b82031",
-    registryProxy: "0xfF65C1D4432D23C45b0730DaeCd03b6B92cd074a",
-    owner: "",
+    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
   },
   // Celo Mainnet
   42220: {
-    registryImplementation: "0x0",
-    registryProxy: "0x0",
-    owner: "",
+    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
   },
   // Celo Testnet Alfajores
   44787: {
-    registryImplementation: "",
-    registryProxy: "",
-    owner: "",
+    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
   },
   // zkSync-testnet
   280: {
-    registryImplementation: "0x0",
-    registryProxy: "0x0",
-    owner: "",
+    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
   },
   // zkSync-mainnet
   324: {
-    registryImplementation: "0x0",
-    registryProxy: "0x0",
-    owner: "",
+    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
+  },
+  // Polygon Mainnet
+  137: {
+    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
+  },
+  // Polygon Mumbai Testnet
+  80001: {
+    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
+  },
+  // Arbitrum One Mainnet
+  42161: {
+    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
+  },
+  // Arbitrum Goerli
+  421613: {
+    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
+  },
+  // Base Mainnet
+  8453: {
+    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
+  },
+  // Base Testnet Goerli
+  84531: {
+    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
   },
 };

@@ -29,8 +29,8 @@ contract QVNftTieredStrategyTest is QVBaseStrategyTest {
         super.setUp();
     }
 
-    function _createStrategy() internal override returns (address) {
-        return address(new QVNftTieredStrategy(address(allo()), "MockStrategy"));
+    function _createStrategy() internal override returns (address payable) {
+        return payable(address(new QVNftTieredStrategy(address(allo()), "MockStrategy")));
     }
 
     function qvNftStrategy() internal view returns (QVNftTieredStrategy) {
@@ -41,8 +41,8 @@ contract QVNftTieredStrategyTest is QVBaseStrategyTest {
         vm.startPrank(pool_admin());
         _createPoolWithCustomStrategy();
 
-        MockERC721(address(nfts[0])).mint(randomAddress(), 1);
-        MockERC721(address(nfts[1])).mint(randomAddress(), 1);
+        MockERC721(payable(address(nfts[0]))).mint(randomAddress(), 1);
+        MockERC721(payable(address(nfts[1]))).mint(randomAddress(), 1);
     }
 
     function _createPoolWithCustomStrategy() internal override {

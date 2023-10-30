@@ -3,7 +3,6 @@ import * as dotenv from "dotenv";
 import { Deployer } from "@matterlabs/hardhat-zksync-deploy";
 import { Wallet } from "zksync-web3";
 import { alloConfig } from "../config/allo.config";
-import { confirmContinue, prettyNum } from "../utils/scripts";
 import { registryConfig } from "../config/registry.config";
 
 dotenv.config();
@@ -28,7 +27,7 @@ export async function deployAllo(_registryAddress? : string) {
       throw new Error(`Allo params not found for chainId: ${chainId}`);
     }
 
-    await confirmContinue({
+    console.table({
         contract: "Allo.sol",
         chainId: chainId,
         network: networkName,
