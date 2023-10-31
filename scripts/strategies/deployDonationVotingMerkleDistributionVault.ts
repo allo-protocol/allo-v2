@@ -1,7 +1,8 @@
 import { ethers } from "hardhat";
-import { permit2Contract, strategyConfig } from "../config/strategies.config";
-import { deployStrategies } from "./deployStrategies";
+import { commonConfig } from "../config/common.config";
+import { strategyConfig } from "../config/strategies.config";
 import { Validator } from "../utils/Validator";
+import { deployStrategies } from "./deployStrategies";
 
 export const deployDonationVotingMerkleDistributionVault = async () => {
   const network = await ethers.provider.getNetwork();
@@ -14,7 +15,7 @@ export const deployDonationVotingMerkleDistributionVault = async () => {
     strategyParams.version,
     {
       types: ["address"],
-      values: [permit2Contract[chainId].address],
+      values: [commonConfig[chainId].permit2Address],
     },
   );
 
@@ -23,7 +24,7 @@ export const deployDonationVotingMerkleDistributionVault = async () => {
     address,
   );
 
-  await validator.validate("PERMIT2", [], permit2Contract[chainId].address);
+  await validator.validate("PERMIT2", [], commonConfig[chainId].permit2Address);
 };
 
 // Check if this script is the main module (being run directly)
