@@ -50,11 +50,11 @@ export const strategyConfig: DeployParams = {
       name: "QVSimpleStrategy",
       version: "v1",
     },
-    "donation-voting-merkle": {
+    "donation-voting-merkle-distribution-direct": {
       name: "DonationVotingMerkleDistributionDirectTransferStrategy",
       version: "v1",
     },
-    "donation-voting-vault": {
+    "donation-voting-merkle-distribution-vault": {
       name: "DonationVotingMerkleDistributionValutStrategy",
       version: "v1",
     },
@@ -77,11 +77,11 @@ export const strategyConfig: DeployParams = {
       name: "QVSimpleStrategy",
       version: "v1",
     },
-    "donation-voting-merkle": {
+    "donation-voting-merkle-distribution-direct": {
       name: "DonationVotingMerkleDistributionDirectTransferStrategy",
       version: "v1",
     },
-    "donation-voting-vault": {
+    "donation-voting-merkle-distribution-vault": {
       name: "DonationVotingMerkleDistributionValutStrategy",
       version: "v1",
     },
@@ -104,11 +104,11 @@ export const strategyConfig: DeployParams = {
       name: "QVSimpleStrategy",
       version: "v1",
     },
-    "donation-voting-merkle": {
+    "donation-voting-merkle-distribution-direct": {
       name: "DonationVotingMerkleDistributionDirectTransferStrategy",
       version: "v1",
     },
-    "donation-voting-vault": {
+    "donation-voting-merkle-distribution-vault": {
       name: "DonationVotingMerkleDistributionValutStrategy",
       version: "v1",
     },
@@ -131,11 +131,11 @@ export const strategyConfig: DeployParams = {
       name: "QVSimpleStrategy",
       version: "v1",
     },
-    "donation-voting-merkle": {
+    "donation-voting-merkle-distribution-direct": {
       name: "DonationVotingMerkleDistributionDirectTransferStrategy",
       version: "v1",
     },
-    "donation-voting-vault": {
+    "donation-voting-merkle-distribution-vault": {
       name: "DonationVotingMerkleDistributionValutStrategy",
       version: "v1",
     },
@@ -158,11 +158,11 @@ export const strategyConfig: DeployParams = {
       name: "QVSimpleStrategy",
       version: "v1",
     },
-    "donation-voting-merkle": {
+    "donation-voting-merkle-distribution-direct": {
       name: "DonationVotingMerkleDistributionDirectTransferStrategy",
       version: "v1",
     },
-    "donation-voting-vault": {
+    "donation-voting-merkle-distribution-vault": {
       name: "DonationVotingMerkleDistributionValutStrategy",
       version: "v1",
     },
@@ -185,11 +185,11 @@ export const strategyConfig: DeployParams = {
       name: "QVSimpleStrategy",
       version: "v1",
     },
-    "donation-voting-merkle": {
+    "donation-voting-merkle-distribution-direct": {
       name: "DonationVotingMerkleDistributionDirectTransferStrategy",
       version: "v1",
     },
-    "donation-voting-vault": {
+    "donation-voting-merkle-distribution-vault": {
       name: "DonationVotingMerkleDistributionValutStrategy",
       version: "v1",
     },
@@ -212,11 +212,11 @@ export const strategyConfig: DeployParams = {
       name: "QVSimpleStrategy",
       version: "v1",
     },
-    "donation-voting-merkle": {
+    "donation-voting-merkle-distribution-direct": {
       name: "DonationVotingMerkleDistributionDirectTransferStrategy",
       version: "v1",
     },
-    "donation-voting-vault": {
+    "donation-voting-merkle-distribution-vault": {
       name: "DonationVotingMerkleDistributionValutStrategy",
       version: "v1",
     },
@@ -239,11 +239,11 @@ export const strategyConfig: DeployParams = {
       name: "QVSimpleStrategy",
       version: "v1",
     },
-    "donation-voting-merkle": {
+    "donation-voting-merkle-distribution-direct": {
       name: "DonationVotingMerkleDistributionDirectTransferStrategy",
       version: "v1",
     },
-    "donation-voting-vault": {
+    "donation-voting-merkle-distribution-vault": {
       name: "DonationVotingMerkleDistributionValutStrategy",
       version: "v1",
     },
@@ -266,11 +266,11 @@ export const strategyConfig: DeployParams = {
       name: "QVSimpleStrategy",
       version: "v1",
     },
-    "donation-voting-merkle": {
+    "donation-voting-merkle-distribution-direct": {
       name: "DonationVotingMerkleDistributionDirectTransferStrategy",
       version: "v1",
     },
-    "donation-voting-vault": {
+    "donation-voting-merkle-distribution-vault": {
       name: "DonationVotingMerkleDistributionValutStrategy",
       version: "v1",
     },
@@ -293,11 +293,11 @@ export const strategyConfig: DeployParams = {
       name: "QVSimpleStrategy",
       version: "v1",
     },
-    "donation-voting-merkle": {
+    "donation-voting-merkle-distribution-direct": {
       name: "DonationVotingMerkleDistributionDirectTransferStrategy",
       version: "v1",
     },
-    "donation-voting-vault": {
+    "donation-voting-merkle-distribution-vault": {
       name: "DonationVotingMerkleDistributionValutStrategy",
       version: "v1",
     },
@@ -320,11 +320,11 @@ export const strategyConfig: DeployParams = {
       name: "QVSimpleStrategy",
       version: "v1",
     },
-    "donation-voting-merkle": {
+    "donation-voting-merkle-distribution-direct": {
       name: "DonationVotingMerkleDistributionDirectTransferStrategy",
       version: "v1",
     },
-    "donation-voting-vault": {
+    "donation-voting-merkle-distribution-vault": {
       name: "DonationVotingMerkleDistributionValutStrategy",
       version: "v1",
     },
@@ -347,11 +347,11 @@ export const strategyConfig: DeployParams = {
       name: "QVSimpleStrategy",
       version: "v1",
     },
-    "donation-voting-merkle": {
+    "donation-voting-merkle-distribution-direct": {
       name: "DonationVotingMerkleDistributionDirectTransferStrategy",
       version: "v1",
     },
-    "donation-voting-vault": {
+    "donation-voting-merkle-distribution-vault": {
       name: "DonationVotingMerkleDistributionValutStrategy",
       version: "v1",
     },
@@ -374,11 +374,11 @@ export const strategyConfig: DeployParams = {
       name: "QVSimpleStrategy",
       version: "v1",
     },
-    "donation-voting-merkle": {
+    "donation-voting-merkle-distribution-direct": {
       name: "DonationVotingMerkleDistributionDirectTransferStrategy",
       version: "v1",
     },
-    "donation-voting-vault": {
+    "donation-voting-merkle-distribution-vault": {
       name: "DonationVotingMerkleDistributionValutStrategy",
       version: "v1",
     },
@@ -401,11 +401,11 @@ export const strategyConfig: DeployParams = {
       name: "QVSimpleStrategy",
       version: "v1",
     },
-    "donation-voting-merkle": {
+    "donation-voting-merkle-distribution-direct": {
       name: "DonationVotingMerkleDistributionDirectTransferStrategy",
       version: "v1",
     },
-    "donation-voting-vault": {
+    "donation-voting-merkle-distribution-vault": {
       name: "DonationVotingMerkleDistributionValutStrategy",
       version: "v1",
     },

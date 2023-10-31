@@ -29,9 +29,9 @@ mkdir -p ./reports/deployment-logs/core/$timestamp
 
 # Testnet commands
 commands=(
-    "bun hardhat run scripts/core/_deployCore.ts --network goerli | tee ./reports/deployment-logs/core/$timestamp/deploy-goerli.log"
+    # "bun hardhat run scripts/core/_deployCore.ts --network goerli | tee ./reports/deployment-logs/core/$timestamp/deploy-goerli.log"
     # "bun hardhat run scripts/core/_deployCore.ts --network sepolia | tee ./reports/deployment-logs/core/$timestamp/deploy-sepolia_$timestamp.log"
-    # "bun hardhat run scripts/core/_deployCore.ts --network arbitrum-goerli | tee ./reports/deployment-logs/core/$timestamp/deploy-arbitrum-goerli_$timestamp.log"
+    "bun hardhat run scripts/core/_deployCore.ts --network arbitrum-goerli | tee ./reports/deployment-logs/core/$timestamp/deploy-arbitrum-goerli_$timestamp.log"
     # "bun hardhat run scripts/core/_deployCore.ts --network optimism-goerli | tee ./reports/deployment-logs/core/$timestamp/deploy-optimism-goerli_$timestamp.log"
     # "bun hardhat run scripts/core/_deployCore.ts --network base-testnet | tee ./reports/deployment-logs/core/$timestamp/deploy-base-testnet_$timestamp.log"
     # "bun hardhat run scripts/core/_deployCore.ts --network celo-testnet | tee ./reports/deployment-logs/core/$timestamp/deploy-celo-testnet_$timestamp.log"

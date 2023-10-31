@@ -1,10 +1,8 @@
 import hre from "hardhat";
 import { deployDonationVotingMerkleDistributionDirect } from "./deployDonationVotingMerkleDistributionDirect";
 import { deployDonationVotingMerkleDistributionVault } from "./deployDonationVotingMerkleDistributionVault";
-import { deployRFPSimpleStrategy } from "./deployRFPSimple";
-import { deployRFPCommitteeStrategy } from "./deployRFPCommittee";
 import { deployImpactStreamStrategy } from "./deployImpactStream";
-import { deployQVBaseStrategy } from "./deployQVBase";
+import { deployRFPCommitteeStrategy } from "./deployRFPCommittee";
 
 export async function deployStrategies() {
   const networkName = hre.network.name;
@@ -15,9 +13,11 @@ export async function deployStrategies() {
     ///////////////////////////////////////////////////////
   `);
 
-  await deployRFPSimpleStrategy();
+  // await deployRFPSimpleStrategy();
   await deployRFPCommitteeStrategy();
-  await deployQVBaseStrategy();
+
+  // QVBaseStrategy is abstract contract
+  // await deployQVBaseStrategy();
   await deployDonationVotingMerkleDistributionDirect();
   await deployDonationVotingMerkleDistributionVault();
   await deployImpactStreamStrategy();

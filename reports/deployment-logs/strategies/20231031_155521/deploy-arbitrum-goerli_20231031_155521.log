@@ -1,0 +1,72 @@
+Warning: Unreachable code.
+   --> contracts/strategies/BaseStrategy.sol:174:9:
+    |
+174 |         _afterRegisterRecipient(_data, _sender);
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Compiled 112 Solidity files successfully (evm target: paris).
+
+    ////////////////////////////////////////////////////////
+    Deploy Strategies on Allo V2 contracts to arbitrum-goerli
+    ///////////////////////////////////////////////////////
+  
+
+    ////////////////////////////////////////////////////
+      Deploys RFPCommitteeStrategy.sol on arbitrum-goerli
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────┐
+│     (index)     │                    Values                    │
+├─────────────────┼──────────────────────────────────────────────┤
+│    contract     │          'RFPCommitteeStrategy.sol'          │
+│     chainId     │                    421613                    │
+│     network     │              'arbitrum-goerli'               │
+│ deployerAddress │ '0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781' │
+│     balance     │               '0.992845326002'               │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying RFPCommitteeStrategy.sol
+
+    ////////////////////////////////////////////////////
+      Deploys DonationVotingMerkleDistributionDirectTransferStrategy.sol on arbitrum-goerli
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────────────────────┐
+│     (index)     │                            Values                            │
+├─────────────────┼──────────────────────────────────────────────────────────────┤
+│    contract     │ 'DonationVotingMerkleDistributionDirectTransferStrategy.sol' │
+│     chainId     │                            421613                            │
+│     network     │                      'arbitrum-goerli'                       │
+│ deployerAddress │         '0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781'         │
+│     balance     │                       '0.992845326002'                       │
+└─────────────────┴──────────────────────────────────────────────────────────────┘
+Deploying DonationVotingMerkleDistributionDirectTransferStrategy.sol
+[35mError calling deploy() function. 
+ProviderError: execution reverted[0m
+
+Verifying contract...
+[35mContract DonationVotingMerkleDistributionDirectTransferStrategy deployed at address: 0x39fC2298F68f5238C4435362Bf967bAb1C9515C0[0m
+
+Verifying contract...
+/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/index.ts:530
+        throw new InvalidAddressError(address);
+              ^
+NomicLabsHardhatPluginError [InvalidAddressError]:  is an invalid address.
+    at SimpleTaskDefinition.action (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/index.ts:530:15)
+    at async Environment._runTaskDefinition (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:358:14)
+    at async Environment.run (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:191:14)
+    at async verifyContract (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/scripts/utils/scripts.ts:38:10)
+    at async deployStrategies (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/scripts/strategies/deployStrategies.ts:72:3) {
+  parent: undefined,
+  _stack: 'InvalidAddressError:  is an invalid address.\n' +
+    '    at SimpleTaskDefinition.action (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/index.ts:530:15)\n' +
+    '    at async Environment._runTaskDefinition (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:358:14)\n' +
+    '    at async Environment.run (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:191:14)\n' +
+    '    at async verifyContract (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/scripts/utils/scripts.ts:38:10)\n' +
+    '    at async deployStrategies (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/scripts/strategies/deployStrategies.ts:72:3)',
+  pluginName: '@nomicfoundation/hardhat-verify',
+  _isHardhatPluginError: true,
+  shouldBeReported: false,
+  _isNomicLabsHardhatPluginError: true
+}
+error: "hardhat" exited with code 1 (SIGHUP)
