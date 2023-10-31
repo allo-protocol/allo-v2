@@ -14,7 +14,7 @@
     "fork": "anvil --fork-url",
     "chain": "anvil --block-time 10",
     "snap": "forge snapshot --snap ./snapshots/snapshot.json",
-    "gas-report": "forge test --gas-report | tee ./reports/gas-report.log",
+    "gas-report": "forge test --no-match-contract Lockup --gas-report | tee ./reports/gas-report.log",
     "gas-table": "awk '/Allo contract/,/Ran 25/' ./reports/gas-report.log > ./reports/gas-table.md",
     "storage-check": "npx @openzeppelin/upgrades-core validate",
     "export-abi": "npx hardhat export-abi",

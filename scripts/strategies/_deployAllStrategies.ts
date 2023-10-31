@@ -2,6 +2,7 @@ import hre from "hardhat";
 import { deployDonationVotingMerkleDistributionDirect } from "./deployDonationVotingMerkleDistributionDirect";
 import { deployDonationVotingMerkleDistributionVault } from "./deployDonationVotingMerkleDistributionVault";
 import { deployImpactStreamStrategy } from "./deployImpactStream";
+import { deployQVSimpleStrategy } from "./deployQVSimple";
 import { deployRFPCommitteeStrategy } from "./deployRFPCommittee";
 import { deployRFPSimpleStrategy } from "./deployRFPSimple";
 
@@ -14,6 +15,7 @@ export async function deployStrategies() {
     ///////////////////////////////////////////////////////
   `);
 
+  await deployQVSimpleStrategy();
   await deployRFPSimpleStrategy();
   await deployRFPCommitteeStrategy();
   await deployDonationVotingMerkleDistributionDirect();

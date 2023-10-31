@@ -11,7 +11,17 @@ cache_path = 'cache_forge'
 remappings = []
 
 # Gas reporting
-gas_reports = ["ContractFactory", "Registry", "Allo"]
+gas_reports = [
+  "ContractFactory",
+  "Registry",
+  "Allo",
+  "RFPSimpleStrategy",
+  "RFPCommitteeStrategy",
+  "QVSimpleStrategy",
+  "DonationVotingMerkleDistributionDirectTransferStrategy",
+  "DonationVotingMerkleDistributionVaultStrategy",
+  "QVImpactStreamStrategy",
+]
 gas_reports_ignore = [
   "TestStrategy",
   "QVBaseStrategyTestMock",
