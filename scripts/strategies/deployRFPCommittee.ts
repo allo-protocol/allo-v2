@@ -1,10 +1,19 @@
 import { deployStrategies } from "./deployStrategies";
+import { strategyConfig } from "../config/strategies.config";
+import { ethers } from "hardhat";
 
-const deployDonationVoting = async () => {
-  deployStrategies("RFPCommitteeStrategy", "v1");
+export const deployRFPCommitteeStrategy = async () => {
+  const network = await ethers.provider.getNetwork();
+  const chainId = Number(network.chainId);
+  const strategyParams = strategyConfig[chainId]["rfp-committee"];
+
+  deployStrategies(strategyParams.name, strategyParams.version);
 };
 
-deployDonationVoting().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+// Check if this script is the main module (being run directly)
+if (require.main === module) {
+  deployRFPCommitteeStrategy().catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+  });
+}

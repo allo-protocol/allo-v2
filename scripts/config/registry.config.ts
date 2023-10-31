@@ -2,7 +2,6 @@
 
 type RegistryConfig = {
   owner: string;
-  proxyAdminOwner?: string;
 };
 
 type DeployParams = Record<number, RegistryConfig>;
@@ -11,79 +10,62 @@ type DeployParams = Record<number, RegistryConfig>;
 export const registryConfig: DeployParams = {
   // Mainnet
   1: {
-    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
+    owner: "",
   },
   // Goerli
   5: {
-    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
-    proxyAdminOwner: "0x66Be9a4412ac7a10eF46298B2cA72B42C95e80b4",
+    owner: "",
   },
   // Sepolia
   11155111: {
-    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
+    owner: "",
   },
   // PGN
   424: {
-    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
+    owner: "",
   },
   // PGN Sepolia
   58008: {
-    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
+    owner: "",
   },
   // Optimism
   10: {
-    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
+    owner: "",
   },
   // Optimism Goerli
   420: {
-    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
-  },
-  // Fantom
-  250: {
-    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
-  },
-  // Fantom Testnet
-  4002: {
-    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
+    owner: "",
   },
   // Celo Mainnet
   42220: {
-    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
+    owner: "",
   },
   // Celo Testnet Alfajores
   44787: {
-    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
-  },
-  // zkSync-testnet
-  280: {
-    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
-  },
-  // zkSync-mainnet
-  324: {
-    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
+    owner: "",
   },
   // Polygon Mainnet
   137: {
-    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
+    owner: "",
   },
   // Polygon Mumbai Testnet
   80001: {
-    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
+    owner: "",
   },
   // Arbitrum One Mainnet
   42161: {
-    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
+    owner: "",
   },
   // Arbitrum Goerli
   421613: {
-    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
+    owner: "",
   },
   // Base Mainnet
   8453: {
-    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
+    owner: "",
   },
   // Base Testnet Goerli
   84531: {
-    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
+    owner: "",
   },
 };

@@ -3,7 +3,7 @@
 timestamp=$(date +"%Y%m%d_%H%M%S")
 
 # Log file
-logfile="./reports/deployment-logs/deploy.log"
+logfile="./reports/deployment-logs/core/deploy.log"
 error_count=0
 
 # Function to log messages
@@ -25,36 +25,36 @@ handle_insufficient_funds_error() {
     log "Insufficient funds error while executing: $cmd"
 }
 
-mkdir -p ./reports/deployment-logs/$timestamp
+mkdir -p ./reports/deployment-logs/core/$timestamp
 
 # Testnet commands
 commands=(
-    "bun hardhat run scripts/core/_deployCore.ts --network goerli | tee ./reports/deployment-logs/$timestamp/deploy-goerli.log"
-    # "bun hardhat run scripts/core/_deployCore.ts --network sepolia | tee ./reports/deployment-logs/$timestamp/deploy-sepolia_$timestamp.log"
-    # "bun hardhat run scripts/core/_deployCore.ts --network arbitrum-goerli | tee ./reports/deployment-logs/$timestamp/deploy-arbitrum-goerli_$timestamp.log"
-    # "bun hardhat run scripts/core/_deployCore.ts --network optimism-goerli | tee ./reports/deployment-logs/$timestamp/deploy-optimism-goerli_$timestamp.log"
-    # "bun hardhat run scripts/core/_deployCore.ts --network base-testnet | tee ./reports/deployment-logs/$timestamp/deploy-base-testnet_$timestamp.log"
-    # "bun hardhat run scripts/core/_deployCore.ts --network celo-testnet | tee ./reports/deployment-logs/$timestamp/deploy-celo-testnet_$timestamp.log"
-    # "bun hardhat run scripts/core/_deployCore.ts --network mumbai | tee ./reports/deployment-logs/$timestamp/deploy-mumbai_$timestamp.log"
-    # "bun hardhat run scripts/core/_deployCore.ts --network pgn-sepolia | tee ./reports/deployment-logs/$timestamp/deploy-pgn-sepolia_$timestamp.log"
+    "bun hardhat run scripts/core/_deployCore.ts --network goerli | tee ./reports/deployment-logs/core/$timestamp/deploy-goerli.log"
+    # "bun hardhat run scripts/core/_deployCore.ts --network sepolia | tee ./reports/deployment-logs/core/$timestamp/deploy-sepolia_$timestamp.log"
+    # "bun hardhat run scripts/core/_deployCore.ts --network arbitrum-goerli | tee ./reports/deployment-logs/core/$timestamp/deploy-arbitrum-goerli_$timestamp.log"
+    # "bun hardhat run scripts/core/_deployCore.ts --network optimism-goerli | tee ./reports/deployment-logs/core/$timestamp/deploy-optimism-goerli_$timestamp.log"
+    # "bun hardhat run scripts/core/_deployCore.ts --network base-testnet | tee ./reports/deployment-logs/core/$timestamp/deploy-base-testnet_$timestamp.log"
+    # "bun hardhat run scripts/core/_deployCore.ts --network celo-testnet | tee ./reports/deployment-logs/core/$timestamp/deploy-celo-testnet_$timestamp.log"
+    # "bun hardhat run scripts/core/_deployCore.ts --network mumbai | tee ./reports/deployment-logs/core/$timestamp/deploy-mumbai_$timestamp.log"
+    # "bun hardhat run scripts/core/_deployCore.ts --network pgn-sepolia | tee ./reports/deployment-logs/core/$timestamp/deploy-pgn-sepolia_$timestamp.log"
 )
 
 # Mainnet commands
 # commands=(
-#     "bun hardhat run scripts/core/_deployCore.ts --network mainnet | tee ./reports/deployment-logs/$timestamp/deploy-mainnet_$timestamp.log"
-#     "bun hardhat run scripts/core/_deployCore.ts --network optimism-mainnet | tee ./reports/deployment-logs/$timestamp/deploy-optimism-mainnet_$timestamp.log"
-#     "bun hardhat run scripts/core/_deployCore.ts --network pgn-mainnet | tee ./reports/deployment-logs/$timestamp/deploy-pgn-mainnet_$timestamp.log"
-#     "bun hardhat run scripts/core/_deployCore.ts --network celo-mainnet | tee ./reports/deployment-logs/$timestamp/deploy-celo-mainnet_$timestamp.log"
-#     "bun hardhat run scripts/core/_deployCore.ts --network arbitrum-mainnet | tee ./reports/deployment-logs/$timestamp/deploy-arbitrum-mainnet_$timestamp.log"
-#     "bun hardhat run scripts/core/_deployCore.ts --network base | tee ./reports/deployment-logs/$timestamp/deploy-base_$timestamp.log"
-#     "bun hardhat run scripts/core/_deployCore.ts --network polygon | tee ./reports/deployment-logs/$timestamp/deploy-polygon_$timestamp.log"
+#     "bun hardhat run scripts/core/_deployCore.ts --network mainnet | tee ./reports/deployment-logs/core/$timestamp/deploy-mainnet_$timestamp.log"
+#     "bun hardhat run scripts/core/_deployCore.ts --network optimism-mainnet | tee ./reports/deployment-logs/core/$timestamp/deploy-optimism-mainnet_$timestamp.log"
+#     "bun hardhat run scripts/core/_deployCore.ts --network pgn-mainnet | tee ./reports/deployment-logs/core/$timestamp/deploy-pgn-mainnet_$timestamp.log"
+#     "bun hardhat run scripts/core/_deployCore.ts --network celo-mainnet | tee ./reports/deployment-logs/core/$timestamp/deploy-celo-mainnet_$timestamp.log"
+#     "bun hardhat run scripts/core/_deployCore.ts --network arbitrum-mainnet | tee ./reports/deployment-logs/core/$timestamp/deploy-arbitrum-mainnet_$timestamp.log"
+#     "bun hardhat run scripts/core/_deployCore.ts --network base | tee ./reports/deployment-logs/core/$timestamp/deploy-base_$timestamp.log"
+#     "bun hardhat run scripts/core/_deployCore.ts --network polygon | tee ./reports/deployment-logs/core/$timestamp/deploy-polygon_$timestamp.log"
 # )
 
 # Execute the commands
 for cmd in "${commands[@]}"; do
     log "Executing: $cmd"
     # Extract the individual log file path from the command string
-    individual_logfile=$(echo $cmd | grep -o './reports/deployment-logs/[^ ]*/deploy-[^ ]*.log')
+    individual_logfile=$(echo $cmd | grep -o './reports/deployment-logs/core/[^ ]*/deploy-[^ ]*.log')
     # Remove the tee command from the command string
     cmd=${cmd%|*}
     # Define a temporary file to hold the command output

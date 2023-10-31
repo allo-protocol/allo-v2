@@ -12,7 +12,6 @@ All the deploy scripts will expect network param to know which network the contr
 | `optimism` | `10` | Optimism |
 | `arbitrum`   | `42161` | Arbitrum One   |
 | `celo`   | `42220` | Celo   |
-| `zksync-era`  | `324` | zkSync Era  |
 | `base`    | `84531`  | Base  |
 | `polygon`    | `137`  | Polygon PoS  |
 
@@ -24,7 +23,6 @@ All the deploy scripts will expect network param to know which network the contr
 | `sepolia`          | `11155111`  | Sepolia PoS Testnet |
 | `base-testnet`          | `84531`  | Base Testnet  |
 | `polygon-mumbai`          | `80001`  | Polygon Mumbai Testnet |
-| `zksync-testnet`         | `280`  | zkSync Testnet  |
 | `arbitrum-goerli` | `421613` | Arbitrum Goerli Testnet |
 | `celo-alfajores`   | `44787` | Celo Alfajores Testnet   |
 | `optimism-goerli`   | `420` | Optimism Goerli Testnet  |
@@ -109,3 +107,12 @@ flowchart LR
 - Check `./scripts/core/upgrades/proposeUpgradeAllNetworks.sh` and ensure the networks you need to deploy on are uncommented
 - Run `./scripts/core/upgrades/proposeUpgradeAllNetworks.sh allo` to propose an upgrade on Allo contract
 - Run `./scripts/core/upgrades/proposeUpgradeAllNetworks.sh registry` to propose an upgrade on Registry contract
+
+### Deploying Strategies across all networks
+
+- Check `./_deployAllStrategies.ts` to the strategies to be deployed are included.
+- Check `./scripts/strategies/deployAllStrategies.sh` and ensure the networks you need to deploy on are uncommented
+- Run `./scripts/strategies/deployAllStrategies.sh`
+- This should deploy and generate the log for the deployments for all the strategies
+
+Note: The strategies need to be marked as approved strategies on the Allo contract which has to be done by the owner. If you are replacing an existing strategy, ensure the old one is unapproved
