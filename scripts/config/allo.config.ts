@@ -13,15 +13,15 @@ type DeployParams = Record<number, AlloConfig>;
 export const alloConfig: DeployParams = {
   // Mainnet
   1: {
-    owner: "",
-    treasury: "",
+    owner: "0x34d82D1ED8B4fB6e6A569d6D086A39f9f734107E",
+    treasury: "0x34d82D1ED8B4fB6e6A569d6D086A39f9f734107E",
     percentFee: 0,
     baseFee: 0,
   },
   // Goerli
   5: {
-    owner: "",
-    treasury: "",
+    owner: "0x443dA927D9877C1B7D5E13C092Cb1958D3b90FaE",
+    treasury: "0x443dA927D9877C1B7D5E13C092Cb1958D3b90FaE",
     percentFee: 0,
     baseFee: 0,
   },
@@ -48,8 +48,8 @@ export const alloConfig: DeployParams = {
   },
   // Optimism
   10: {
-    owner: "",
-    treasury: "",
+    owner: "0x791BB7b7e16982BDa029893077EEb4F77A2CD564",
+    treasury: "0x791BB7b7e16982BDa029893077EEb4F77A2CD564",
     percentFee: 0,
     baseFee: 0,
   },
@@ -76,8 +76,8 @@ export const alloConfig: DeployParams = {
   },
   // Polygon Mainnet
   137: {
-    owner: "",
-    treasury: "",
+    owner: "0xc8c4F1b9980B583E3428F183BA44c65D78C15251",
+    treasury: "0xc8c4F1b9980B583E3428F183BA44c65D78C15251",
     percentFee: 0,
     baseFee: 0,
   },
@@ -90,15 +90,29 @@ export const alloConfig: DeployParams = {
   },
   // Arbitrum One
   42161: {
-    owner: "",
-    treasury: "",
+    owner: "0xEfEAB1ea32A5d7c6B1DE6192ee531A2eF51198D9",
+    treasury: "0xEfEAB1ea32A5d7c6B1DE6192ee531A2eF51198D9",
     percentFee: 0,
     baseFee: 0,
   },
   // Arbitrum Goerli
   421613: {
-    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
-    treasury: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
+    owner: "",
+    treasury: "",
+    percentFee: 0,
+    baseFee: 0,
+  },
+  // Base Mainnet
+  8453: {
+    owner: "0x850a5515123f49c298DdF33E581cA01bFF928FEf",
+    treasury: "0x850a5515123f49c298DdF33E581cA01bFF928FEf",
+    percentFee: 0,
+    baseFee: 0,
+  },
+  // Base Testnet Goerli
+  84531: {
+    owner: "",
+    treasury: "",
     percentFee: 0,
     baseFee: 0,
   },
