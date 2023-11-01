@@ -8,12 +8,12 @@ type DeployParams = Record<number, CommonConfig>;
 export const commonConfig: DeployParams = {
   // Mainnet
   1: {
-    proxyAdminOwner: "",
+    proxyAdminOwner: "0x34d82D1ED8B4fB6e6A569d6D086A39f9f734107E",
     permit2Address: "",
   },
   // Goerli
   5: {
-    proxyAdminOwner: "",
+    proxyAdminOwner: "0x443dA927D9877C1B7D5E13C092Cb1958D3b90FaE",
     permit2Address: "",
   },
   // Sepolia
@@ -33,7 +33,7 @@ export const commonConfig: DeployParams = {
   },
   // Optimism
   10: {
-    proxyAdminOwner: "",
+    proxyAdminOwner: "0x791BB7b7e16982BDa029893077EEb4F77A2CD564",
     permit2Address: "",
   },
   // Optimism Goerli
@@ -53,7 +53,7 @@ export const commonConfig: DeployParams = {
   },
   // Polygon Mainnet
   137: {
-    proxyAdminOwner: "",
+    proxyAdminOwner: "0xc8c4F1b9980B583E3428F183BA44c65D78C15251",
     permit2Address: "",
   },
   // Mumbai
@@ -63,11 +63,21 @@ export const commonConfig: DeployParams = {
   },
   // Arbitrum One
   42161: {
-    proxyAdminOwner: "",
+    proxyAdminOwner: "0xEfEAB1ea32A5d7c6B1DE6192ee531A2eF51198D9",
     permit2Address: "",
   },
   // Arbitrum Goerli
   421613: {
+    proxyAdminOwner: "",
+    permit2Address: "",
+  },
+  // Base Mainnet
+  8453: {
+    proxyAdminOwner: "0x850a5515123f49c298DdF33E581cA01bFF928FEf",
+    permit2Address: "",
+  },
+  // Base Testnet Goerli
+  84531: {
     proxyAdminOwner: "",
     permit2Address: "",
   },

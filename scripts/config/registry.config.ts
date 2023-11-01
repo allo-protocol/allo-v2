@@ -10,11 +10,11 @@ type DeployParams = Record<number, RegistryConfig>;
 export const registryConfig: DeployParams = {
   // Mainnet
   1: {
-    owner: "",
+    owner: "0x34d82D1ED8B4fB6e6A569d6D086A39f9f734107E",
   },
   // Goerli
   5: {
-    owner: "",
+    owner: "0x443dA927D9877C1B7D5E13C092Cb1958D3b90FaE",
   },
   // Sepolia
   11155111: {
@@ -30,7 +30,7 @@ export const registryConfig: DeployParams = {
   },
   // Optimism
   10: {
-    owner: "",
+    owner: "0x791BB7b7e16982BDa029893077EEb4F77A2CD564",
   },
   // Optimism Goerli
   420: {
@@ -46,7 +46,7 @@ export const registryConfig: DeployParams = {
   },
   // Polygon Mainnet
   137: {
-    owner: "",
+    owner: "0xc8c4F1b9980B583E3428F183BA44c65D78C15251",
   },
   // Polygon Mumbai Testnet
   80001: {
@@ -54,7 +54,7 @@ export const registryConfig: DeployParams = {
   },
   // Arbitrum One Mainnet
   42161: {
-    owner: "",
+    owner: "0xEfEAB1ea32A5d7c6B1DE6192ee531A2eF51198D9",
   },
   // Arbitrum Goerli
   421613: {
@@ -62,7 +62,7 @@ export const registryConfig: DeployParams = {
   },
   // Base Mainnet
   8453: {
-    owner: "",
+    owner: "0x850a5515123f49c298DdF33E581cA01bFF928FEf",
   },
   // Base Testnet Goerli
   84531: {
