@@ -1,18 +1,18 @@
-import { deployStrategies } from "./deployStrategies";
-import { strategyConfig } from "../config/strategies.config";
 import { ethers } from "hardhat";
+import { strategyConfig } from "../config/strategies.config";
+import { deployStrategies } from "./deployStrategies";
 
-export const deployQVBaseStrategy = async () => {
+export const deployQVSimpleStrategy = async () => {
   const network = await ethers.provider.getNetwork();
   const chainId = Number(network.chainId);
-  const strategyParams = strategyConfig[chainId]["qv-base"];
+  const strategyParams = strategyConfig[chainId]["qv-simple"];
 
   deployStrategies(strategyParams.name, strategyParams.version);
 };
 
 // Check if this script is the main module (being run directly)
 if (require.main === module) {
-  deployQVBaseStrategy().catch((error) => {
+  deployQVSimpleStrategy().catch((error) => {
     console.error(error);
     process.exitCode = 1;
   });

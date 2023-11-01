@@ -1,0 +1,1167 @@
+No files changed, compilation skipped
+
+Running 6 tests for test/foundry/factory/ContractFactory.t.sol:ContractFactoryTest
+[32m[PASS][0m testRevert_deploy_SALT_USED() (gas: 615695)
+[32m[PASS][0m testRevert_deploy_UNAUTHORIZED() (gas: 29408)
+[32m[PASS][0m testRevert_setDeployer_UNAUTHORIZED() (gas: 14160)
+[32m[PASS][0m test_constructor() (gas: 13002)
+[32m[PASS][0m test_deploy_shit() (gas: 598707)
+[32m[PASS][0m test_setDeployer() (gas: 36305)
+Test result: [32mok[0m. 6 passed; 0 failed; 0 skipped; finished in 3.03ms
+
+Running 8 tests for test/foundry/core/Anchor.t.sol:AnchorTest
+[32m[PASS][0m test_deploy() (gas: 8399)
+[32m[PASS][0m test_erc1155Holder() (gas: 6415)
+[32m[PASS][0m test_erc1155HolderBatch() (gas: 8183)
+[32m[PASS][0m test_erc721Holder() (gas: 6363)
+[32m[PASS][0m test_execute() (gas: 149449)
+[32m[PASS][0m test_execute_CALL_FAILED() (gas: 93846)
+[32m[PASS][0m test_execute_CALL_FAILED_zeroAddress() (gas: 42024)
+[32m[PASS][0m test_execute_UNAUTHORIZED() (gas: 104352)
+Test result: [32mok[0m. 8 passed; 0 failed; 0 skipped; finished in 1.41ms
+
+Running 8 tests for test/foundry/strategies/BaseStrategy.t.sol:BaseStrategyTest
+[32m[PASS][0m testRevert_initialize_INVALID_zeroPoolId() (gas: 13566)
+[32m[PASS][0m test_getAllo() (gas: 7701)
+[32m[PASS][0m test_getPoolAmount() (gas: 7618)
+[32m[PASS][0m test_getPoolId() (gas: 7541)
+[32m[PASS][0m test_getStrategyId() (gas: 5660)
+[32m[PASS][0m test_increasePoolAmount() (gas: 33709)
+[32m[PASS][0m test_isPoolActive() (gas: 7709)
+[32m[PASS][0m test_setPoolActive() (gas: 29758)
+Test result: [32mok[0m. 8 passed; 0 failed; 0 skipped; finished in 8.60ms
+
+Running 27 tests for test/foundry/strategies/ProportionalPayoutStrategy.t.sol:ProportionalPayoutStrategyTest
+[32m[PASS][0m testRevert_allocate_ALLOCATION_NOT_ACTIVE() (gas: 46562)
+[32m[PASS][0m testRevert_allocate_RECIPIENT_ERROR_shit() (gas: 265572)
+[32m[PASS][0m testRevert_allocate_UNAUTHORIZED() (gas: 106487)
+[32m[PASS][0m testRevert_distribute_RECIPIENT_ERROR() (gas: 495663)
+[32m[PASS][0m testRevert_distribute_RECIPIENT_ERROR_amountZero() (gas: 194450)
+[32m[PASS][0m testRevert_distribute_RECIPIENT_ERROR_notAcceptedStatus() (gas: 34818)
+[32m[PASS][0m testRevert_getPayouts_mismatch() (gas: 493123)
+[32m[PASS][0m testRevert_initialize_ALREADY_INITIALIZED() (gas: 1864223)
+[32m[PASS][0m testRevert_initialize_INVALID() (gas: 1811958)
+[32m[PASS][0m testRevert_initialize_UNAUTHORIZED() (gas: 1743898)
+[32m[PASS][0m testRevert_registerRecipient_MAX_REACHED() (gas: 299959)
+[32m[PASS][0m testRevert_registerRecipient_RECIPIENT_ERROR_invalidStatus() (gas: 60629)
+[32m[PASS][0m testRevert_registerRecipient_RECIPIENT_ERROR_zeroRecipientAddress() (gas: 56442)
+[32m[PASS][0m testRevert_registerRecipient_RECIPIENT_ERROR_zeroRecipientId() (gas: 54760)
+[32m[PASS][0m testRevert_registerRecipient_UNAUTHORIZED() (gas: 59534)
+[32m[PASS][0m testRevert_setAllocationTimes_INVALID() (gas: 34768)
+[32m[PASS][0m testRevert_setAllocationTimes_UNAUTHORIZED() (gas: 27150)
+[32m[PASS][0m test_allocate() (gas: 329272)
+[32m[PASS][0m test_deployment() (gas: 1738665)
+[32m[PASS][0m test_distribute() (gas: 489312)
+[32m[PASS][0m test_getPayouts() (gas: 495896)
+[32m[PASS][0m test_getRecipient() (gas: 184925)
+[32m[PASS][0m test_initialize() (gas: 1868408)
+[32m[PASS][0m test_isValidAllocator() (gas: 67160)
+[32m[PASS][0m test_registerRecipient_acceptApplication() (gas: 183196)
+[32m[PASS][0m test_registerRecipient_rejectApprovedApplication() (gas: 191048)
+[32m[PASS][0m test_setAllocationTimes() (gas: 27907)
+Test result: [32mok[0m. 27 passed; 0 failed; 0 skipped; finished in 23.82ms
+
+Running 52 tests for test/foundry/strategies/DonationVotingStrategy.t.sol:DonationVotingStrategyTest
+[32m[PASS][0m testRevert_allocate_ALLOCATION_NOT_ACTIVE() (gas: 146904)
+[32m[PASS][0m testRevert_allocate_AMOUNT_MISMATCH() (gas: 163711)
+[32m[PASS][0m testRevert_allocate_INVALID_invalidToken() (gas: 2940702)
+[32m[PASS][0m testRevert_allocate_RECIPIENT_ERROR() (gas: 150927)
+[32m[PASS][0m testRevert_claim() (gas: 213288)
+[32m[PASS][0m testRevert_distribute_RECIPIENT_ERROR() (gas: 371012)
+[32m[PASS][0m testRevert_distribute_twice_to_same_recipient() (gas: 369049)
+[32m[PASS][0m testRevert_initialize_ALREADY_INITIALIZED() (gas: 27418)
+[32m[PASS][0m testRevert_initialize_INVALID() (gas: 2974497)
+[32m[PASS][0m testRevert_initialize_withNoAllowedToken() (gas: 2807173)
+[32m[PASS][0m testRevert_registerRecipient_INVALID_METADATA() (gas: 39869)
+[32m[PASS][0m testRevert_registerRecipient_RECIPIENT_ERROR() (gas: 26195)
+[32m[PASS][0m testRevert_registerRecipient_REGISTRATION_NOT_ACTIVE() (gas: 23650)
+[32m[PASS][0m testRevert_registerRecipient_UNAUTHORIZED() (gas: 14417)
+[32m[PASS][0m testRevert_registerRecipient_isUsingRegistryAnchor_UNAUTHORIZED() (gas: 53276)
+[32m[PASS][0m testRevert_registerRecipient_withAnchorGating_UNAUTHORIZED() (gas: 2849366)
+[32m[PASS][0m testRevert_reviewRecipients_INVALID() (gas: 31109)
+[32m[PASS][0m testRevert_reviewRecipients_REGISTRATION_NOT_ACTIVE() (gas: 28465)
+[32m[PASS][0m testRevert_reviewRecipients_UNAUTHORIZED() (gas: 28933)
+[32m[PASS][0m testRevert_reviewRecipients_withAppealedStatus_RECIPIENT_ERROR() (gas: 34396)
+[32m[PASS][0m testRevert_reviewRecipients_withNoneStatus_RECIPIENT_ERROR() (gas: 34425)
+[32m[PASS][0m testRevert_setPayout_ALLOCATION_NOT_ENDED() (gas: 29119)
+[32m[PASS][0m testRevert_setPayout_INVALID_amountExceeded() (gas: 176469)
+[32m[PASS][0m testRevert_setPayout_INVALID_mismatchLength() (gas: 31869)
+[32m[PASS][0m testRevert_setPayout_INVALID_rejectedApplication() (gas: 149079)
+[32m[PASS][0m testRevert_setPayout_RECIPIENT_ERROR() (gas: 344832)
+[32m[PASS][0m testRevert_setPayout_UNAUTHORIZED() (gas: 26910)
+[32m[PASS][0m testRevert_updatePoolTimestamps_INVALID() (gas: 27880)
+[32m[PASS][0m testRevert_updatePoolTimestamps_UNAUTHORIZED() (gas: 30032)
+[32m[PASS][0m testRevert_withdraw_NOT_ALLOWED_30days() (gas: 30077)
+[32m[PASS][0m testRevert_withdraw_NOT_ALLOWED_exceed_amount() (gas: 46930)
+[32m[PASS][0m testRevert_withdraw_UNAUTHORIZED() (gas: 25174)
+[32m[PASS][0m test_allocate() (gas: 194848)
+[32m[PASS][0m test_claim() (gas: 224900)
+[32m[PASS][0m test_deployment() (gas: 8799)
+[32m[PASS][0m test_distribute() (gas: 374932)
+[32m[PASS][0m test_getPayouts() (gas: 341716)
+[32m[PASS][0m test_getRecipient() (gas: 125727)
+[32m[PASS][0m test_getRecipientStatus() (gas: 124008)
+[32m[PASS][0m test_getRecipientStatus_appeal() (gas: 157683)
+[32m[PASS][0m test_initialize() (gas: 27668)
+[32m[PASS][0m test_initialize_UNAUTHORIZED() (gas: 23224)
+[32m[PASS][0m test_isPoolActive() (gas: 14189)
+[32m[PASS][0m test_isValidAllocator() (gas: 11058)
+[32m[PASS][0m test_registerRecipient_accepted() (gas: 163883)
+[32m[PASS][0m test_registerRecipient_appeal() (gas: 162763)
+[32m[PASS][0m test_registerRecipient_new() (gas: 133251)
+[32m[PASS][0m test_registerRecipient_new_withRegistryAnchor() (gas: 2955200)
+[32m[PASS][0m test_reviewRecipients() (gas: 147152)
+[32m[PASS][0m test_setPayout() (gas: 337806)
+[32m[PASS][0m test_updatePoolTimestamps() (gas: 46572)
+[32m[PASS][0m test_withdraw() (gas: 166293)
+Test result: [32mok[0m. 52 passed; 0 failed; 0 skipped; finished in 34.32ms
+
+Running 51 tests for test/foundry/core/Allo.t.sol:AlloTest
+[32m[PASS][0m testRevert_addPoolManager_UNAUTHORIZED() (gas: 354944)
+[32m[PASS][0m testRevert_addPoolManager_ZERO_ADDRESS() (gas: 353450)
+[32m[PASS][0m testRevert_addToCloneableStrategies_UNAUTHORIZED() (gas: 14380)
+[32m[PASS][0m testRevert_addToCloneableStrategies_ZERO_ADDRESS() (gas: 10747)
+[32m[PASS][0m testRevert_batchAllocate_MISMATCH() (gas: 1334032)
+[32m[PASS][0m testRevert_batchRegister_MISMATCH() (gas: 1336329)
+[32m[PASS][0m testRevert_createPoolWithCustomStrategy_IS_APPROVED_STRATEGY() (gas: 52361)
+[32m[PASS][0m testRevert_createPoolWithCustomStrategy_ZERO_ADDRESS() (gas: 23537)
+[32m[PASS][0m testRevert_createPool_NOT_APPROVED_STRATEGY() (gas: 50035)
+[32m[PASS][0m testRevert_createPool_UNAUTHORIZED() (gas: 35882)
+[32m[PASS][0m testRevert_createPool_ZERO_ADDRESS() (gas: 288343)
+[32m[PASS][0m testRevert_createPool_allo_MISMATCH() (gas: 758887)
+[32m[PASS][0m testRevert_createPool_poolId_MISMATCH() (gas: 778645)
+[32m[PASS][0m testRevert_createPool_withBaseFee_NOT_ENOUGH_FUNDS() (gas: 370043)
+[32m[PASS][0m testRevert_fundPool_NOT_ENOUGH_FUNDS() (gas: 374922)
+[32m[PASS][0m testRevert_initialize_ALREADY_INITIALIZED() (gas: 16808)
+[32m[PASS][0m testRevert_recoverFunds_UNAUTHORIZED() (gas: 14484)
+[32m[PASS][0m testRevert_removeFromCloneableStrategies_UNAUTHORIZED() (gas: 14404)
+[32m[PASS][0m testRevert_removePoolManager_UNAUTHORIZED() (gas: 355031)
+[32m[PASS][0m testRevert_updatePercentFee_UNAUTHORIZED() (gas: 12674)
+[32m[PASS][0m testRevert_updatePoolMetadata_UNAUTHORIZED() (gas: 358914)
+[32m[PASS][0m testRevert_updateRegistry_UNAUTHORIZED() (gas: 14408)
+[32m[PASS][0m testRevert_updateRegistry_ZERO_ADDRESS() (gas: 10834)
+[32m[PASS][0m testRevert_updateTreasury_UNAUTHORIZED() (gas: 14358)
+[32m[PASS][0m testRevert_updateTreasury_ZERO_ADDRESS() (gas: 10812)
+[32m[PASS][0m test_addPoolManager() (gas: 388416)
+[32m[PASS][0m test_addToCloneableStrategies() (gas: 37788)
+[32m[PASS][0m test_allocate() (gas: 397275)
+[32m[PASS][0m test_batchAllocate() (gas: 1383303)
+[32m[PASS][0m test_batchRegisterRecipient() (gas: 1385475)
+[32m[PASS][0m test_createPool() (gas: 498618)
+[32m[PASS][0m test_createPoolWithBaseFee() (gas: 420671)
+[32m[PASS][0m test_createPool_WithAmount() (gas: 457066)
+[32m[PASS][0m test_distribute() (gas: 399000)
+[32m[PASS][0m test_fundPool() (gas: 473978)
+[32m[PASS][0m test_getStartegy() (gas: 350782)
+[32m[PASS][0m test_initialize() (gas: 2945183)
+[32m[PASS][0m test_isPoolAdmin() (gas: 357893)
+[32m[PASS][0m test_isPoolManager() (gas: 360484)
+[32m[PASS][0m test_recoverFunds() (gas: 45582)
+[32m[PASS][0m test_recoverFunds_ERC20() (gas: 54880)
+[32m[PASS][0m test_registerRecipient() (gas: 397529)
+[32m[PASS][0m test_removeFromCloneableStrategies() (gas: 27935)
+[32m[PASS][0m test_removePoolManager() (gas: 346654)
+[32m[PASS][0m test_updateBaseFee() (gas: 35845)
+[32m[PASS][0m test_updateBaseFee_UNAUTHORIZED() (gas: 12677)
+[32m[PASS][0m test_updatePercentFee() (gas: 18778)
+[32m[PASS][0m test_updatePercentFee_INVALID_FEE() (gas: 10692)
+[32m[PASS][0m test_updatePoolMetadata() (gas: 368874)
+[32m[PASS][0m test_updateRegistry() (gas: 20694)
+[32m[PASS][0m test_updateTreasury() (gas: 20694)
+Test result: [32mok[0m. 51 passed; 0 failed; 0 skipped; finished in 42.49ms
+
+Running 55 tests for test/foundry/strategies/DonationVotingMerkleDistributionVaultStrategy.t.sol:DonationVotingMerkleDistributionVaultStrategyTest
+[32m[PASS][0m testRevert_allocate_ALLOCATION_NOT_ACTIVE() (gas: 48428)
+[32m[PASS][0m testRevert_allocate_ERC20_InvalidSignature() (gas: 362321)
+[32m[PASS][0m testRevert_allocate_ERC20_InvalidSigner() (gas: 364623)
+[32m[PASS][0m testRevert_allocate_ERC20_InvalidSigner_frontrun() (gas: 299032)
+[32m[PASS][0m testRevert_allocate_ERC20_SignatureExpired() (gas: 339060)
+[32m[PASS][0m testRevert_allocate_INVALID_amountMismatch() (gas: 252862)
+[32m[PASS][0m testRevert_allocate_INVALID_invalidToken() (gas: 241493)
+[32m[PASS][0m testRevert_allocate_RECIPIENT_ERROR() (gas: 59563)
+[32m[PASS][0m testRevert_claim_ALLOCATION_NOT_ENDED() (gas: 333131)
+[32m[PASS][0m testRevert_claim_INVALID_amountIsZero() (gas: 337813)
+[32m[PASS][0m testRevert_distribute_INVALID_shit() (gas: 32274)
+[32m[PASS][0m testRevert_distribute_RECIPIENT_ERROR() (gas: 421606)
+[32m[PASS][0m testRevert_distribute_twice_to_same_recipient() (gas: 587864)
+[32m[PASS][0m testRevert_distribute_wrongProof() (gas: 471115)
+[32m[PASS][0m testRevert_initialize_ALREADY_INITIALIZED() (gas: 30461)
+[32m[PASS][0m testRevert_initialize_INVALID() (gas: 3477160)
+[32m[PASS][0m testRevert_initialize_withNoAllowedToken() (gas: 3103661)
+[32m[PASS][0m testRevert_initialize_withNotAllowedToken() (gas: 3104721)
+[32m[PASS][0m testRevert_registerRecipient_INVALID_METADATA() (gas: 51259)
+[32m[PASS][0m testRevert_registerRecipient_RECIPIENT_ERROR() (gas: 51860)
+[32m[PASS][0m testRevert_registerRecipient_REGISTRATION_NOT_ACTIVE() (gas: 19265)
+[32m[PASS][0m testRevert_registerRecipient_UNAUTHORIZED() (gas: 53320)
+[32m[PASS][0m testRevert_registerRecipient_new_withRegistryAnchor_UNAUTHORIZED() (gas: 3163385)
+[32m[PASS][0m testRevert_reviewRecipients_ALLOCATION_NOT_ACTIVE() (gas: 183226)
+[32m[PASS][0m testRevert_reviewRecipients_UNAUTHORIZED() (gas: 191318)
+[32m[PASS][0m testRevert_updateDistribution_ALLOCATION_NOT_ENDED() (gas: 13889)
+[32m[PASS][0m testRevert_updateDistribution_INVALID() (gas: 589658)
+[32m[PASS][0m testRevert_updateDistribution_UNAUTHORIZED() (gas: 29465)
+[32m[PASS][0m testRevert_updatePoolTimestamps_INVALID() (gas: 27966)
+[32m[PASS][0m testRevert_updatePoolTimestamps_UNAUTHORIZED() (gas: 28282)
+[32m[PASS][0m testRevert_withdraw_NOT_ALLOWED_30days() (gas: 30174)
+[32m[PASS][0m testRevert_withdraw_UNAUTHORIZED() (gas: 23573)
+[32m[PASS][0m test_allocate() (gas: 310136)
+[32m[PASS][0m test_allocate_ERC20() (gas: 437516)
+[32m[PASS][0m test_claim() (gas: 335463)
+[32m[PASS][0m test_deployment() (gas: 8808)
+[32m[PASS][0m test_distribute() (gas: 582614)
+[32m[PASS][0m test_getPayouts() (gas: 418659)
+[32m[PASS][0m test_getRecipient() (gas: 180344)
+[32m[PASS][0m test_getRecipientStatus() (gas: 177454)
+[32m[PASS][0m test_hasBeenDistributed_False() (gas: 8123)
+[32m[PASS][0m test_hasBeenDistributed_True() (gas: 583909)
+[32m[PASS][0m test_initialize() (gas: 27682)
+[32m[PASS][0m test_initialize_UNAUTHORIZED() (gas: 24476)
+[32m[PASS][0m test_isDistributionSet_False() (gas: 7732)
+[32m[PASS][0m test_isDistributionSet_True() (gas: 103837)
+[32m[PASS][0m test_isPoolActive() (gas: 14257)
+[32m[PASS][0m test_isValidAllocator() (gas: 11091)
+[32m[PASS][0m test_registerRecipient_new_withRegistryAnchor() (gas: 3290904)
+[32m[PASS][0m test_register_getRecipientStatus_appeal() (gas: 232807)
+[32m[PASS][0m test_reviewRecipients() (gas: 196151)
+[32m[PASS][0m test_updateDistribution() (gas: 106079)
+[32m[PASS][0m test_updatePoolTimestamps() (gas: 48807)
+[32m[PASS][0m test_withdraw() (gas: 68251)
+[32m[PASS][0m test_withdraw_ERC20() (gas: 484991)
+Test result: [32mok[0m. 55 passed; 0 failed; 0 skipped; finished in 40.29ms
+
+Running 52 tests for test/foundry/strategies/RFPSimpleStrategy.t.sol:RFPSimpleStrategyTest
+[32m[PASS][0m testRevert_allocate_INVALID_AMOUNT() (gas: 385106)
+[32m[PASS][0m testRevert_allocate_POOL_INACTIVE() (gas: 410119)
+[32m[PASS][0m testRevert_allocate_RECIPIENT_ERROR() (gas: 44909)
+[32m[PASS][0m testRevert_allocate_UNAUTHORIZED() (gas: 14964)
+[32m[PASS][0m testRevert_distribute_INVALID_MILESTONE() (gas: 418530)
+[32m[PASS][0m testRevert_distribute_INVALID_MILESTONE_notPendingMilestone() (gas: 459800)
+[32m[PASS][0m testRevert_distribute_NOT_ENOUGH_FUNDS() (gas: 448627)
+[32m[PASS][0m testRevert_distribute_POOL_ACTIVE() (gas: 18280)
+[32m[PASS][0m testRevert_distribute_UNAUTHORIZED() (gas: 438178)
+[32m[PASS][0m testRevert_increaseMaxBid_AMOUNT_TOO_LOW() (gas: 27250)
+[32m[PASS][0m testRevert_increaseMaxBid_UNAUTHORIZED() (gas: 23056)
+[32m[PASS][0m testRevert_initialize_ALREADY_INITIALIZED() (gas: 2722946)
+[32m[PASS][0m testRevert_initialize_UNAUTHORIZED() (gas: 2601125)
+[32m[PASS][0m testRevert_registerRecipient_EXCEEDING_MAX_BID() (gas: 26708)
+[32m[PASS][0m testRevert_registerRecipient_INVALID_METADATA() (gas: 24331)
+[32m[PASS][0m testRevert_registerRecipient_POOL_INACTIVE() (gas: 409942)
+[32m[PASS][0m testRevert_registerRecipient_withOptionallyUsingRegistryAnchor_UNAUTHORIZED() (gas: 54301)
+[32m[PASS][0m testRevert_registerRecipient_withUseRegistryAnchor_UNAUTHORIZED() (gas: 2757721)
+[32m[PASS][0m testRevert_registerRecipient_zero_recipientAddress() (gas: 25607)
+[32m[PASS][0m testRevert_rejectMilestone_MILESTONE_NOT_PENDING_before_submit() (gas: 407997)
+[32m[PASS][0m testRevert_rejectMilestone_UNAUTHORIZED() (gas: 23090)
+[32m[PASS][0m testRevert_setMilestone_INVALID_MILESTONE() (gas: 119754)
+[32m[PASS][0m testRevert_setMilestone_INVALID_MILESTONE_zeroPercentage() (gas: 32190)
+[32m[PASS][0m testRevert_setMilestone_MILESTONES_ALREADY_SET() (gas: 626727)
+[32m[PASS][0m testRevert_setMilestone_UNAUTHORIZED() (gas: 25797)
+[32m[PASS][0m testRevert_setPoolActive_UNAUTHORIZED() (gas: 140324)
+[32m[PASS][0m testRevert_submitUpcomingMilestone_INVALID_MILESTONE() (gas: 676279)
+[32m[PASS][0m testRevert_submitUpcomingMilestone_UNAUTHORIZED() (gas: 43321)
+[32m[PASS][0m testRevert_withdraw_POOL_ACTIVE() (gas: 27374)
+[32m[PASS][0m testRevert_withdraw_UNAUTHORIZED() (gas: 23121)
+[32m[PASS][0m test_allocate() (gas: 405662)
+[32m[PASS][0m test_deployment() (gas: 2595564)
+[32m[PASS][0m test_distribute() (gas: 621625)
+[32m[PASS][0m test_getMilestoneStatus() (gas: 433376)
+[32m[PASS][0m test_getPayouts() (gas: 627416)
+[32m[PASS][0m test_getRecipient() (gas: 192677)
+[32m[PASS][0m test_getRecipientStatus() (gas: 190428)
+[32m[PASS][0m test_getRecipient_None() (gas: 241139)
+[32m[PASS][0m test_getRecipient_Rejected() (gas: 377786)
+[32m[PASS][0m test_increaseMaxBid() (gas: 33177)
+[32m[PASS][0m test_initialize() (gas: 2723493)
+[32m[PASS][0m test_isValidAllocator() (gas: 31836)
+[32m[PASS][0m test_registerRecipient() (gas: 197591)
+[32m[PASS][0m test_registerRecipient_UpdatedRegistration() (gas: 221115)
+[32m[PASS][0m test_registerRecipient_withOptionallyUsingRegistryAnchor() (gas: 2939856)
+[32m[PASS][0m test_registerRecipient_zero_proposalBid() (gas: 199759)
+[32m[PASS][0m test_rejectMilestone() (gas: 445531)
+[32m[PASS][0m test_rejectMilestone_MILESTONE_NOT_PENDING_after_distribution() (gas: 626016)
+[32m[PASS][0m test_setMilestone_getMilestone() (gas: 202162)
+[32m[PASS][0m test_setPoolActive() (gas: 145477)
+[32m[PASS][0m test_submitUpcomingMilestone() (gas: 436168)
+[32m[PASS][0m test_withdraw() (gas: 180037)
+Test result: [32mok[0m. 52 passed; 0 failed; 0 skipped; finished in 63.68ms
+
+Running 46 tests for test/foundry/strategies/DonationVotingMerkleDistributionBase.t.sol:DonationVotingMerkleDistributionBaseMockTest
+[32m[PASS][0m testRevert_allocate_ALLOCATION_NOT_ACTIVE() (gas: 48398)
+[32m[PASS][0m testRevert_allocate_INVALID_amountMismatch() (gas: 252797)
+[32m[PASS][0m testRevert_allocate_INVALID_invalidToken() (gas: 241383)
+[32m[PASS][0m testRevert_allocate_RECIPIENT_ERROR() (gas: 59439)
+[32m[PASS][0m testRevert_distribute_INVALID_shit() (gas: 32258)
+[32m[PASS][0m testRevert_distribute_RECIPIENT_ERROR() (gas: 421477)
+[32m[PASS][0m testRevert_distribute_twice_to_same_recipient() (gas: 587771)
+[32m[PASS][0m testRevert_distribute_wrongProof() (gas: 470993)
+[32m[PASS][0m testRevert_initialize_ALREADY_INITIALIZED() (gas: 30483)
+[32m[PASS][0m testRevert_initialize_INVALID() (gas: 3477204)
+[32m[PASS][0m testRevert_initialize_withNoAllowedToken() (gas: 3103661)
+[32m[PASS][0m testRevert_initialize_withNotAllowedToken() (gas: 3104691)
+[32m[PASS][0m testRevert_registerRecipient_INVALID_METADATA() (gas: 51266)
+[32m[PASS][0m testRevert_registerRecipient_RECIPIENT_ERROR() (gas: 51801)
+[32m[PASS][0m testRevert_registerRecipient_REGISTRATION_NOT_ACTIVE() (gas: 19272)
+[32m[PASS][0m testRevert_registerRecipient_UNAUTHORIZED() (gas: 53327)
+[32m[PASS][0m testRevert_registerRecipient_new_withRegistryAnchor_UNAUTHORIZED() (gas: 3163392)
+[32m[PASS][0m testRevert_reviewRecipients_ALLOCATION_NOT_ACTIVE() (gas: 183255)
+[32m[PASS][0m testRevert_reviewRecipients_UNAUTHORIZED() (gas: 191347)
+[32m[PASS][0m testRevert_updateDistribution_ALLOCATION_NOT_ENDED() (gas: 13845)
+[32m[PASS][0m testRevert_updateDistribution_INVALID() (gas: 589572)
+[32m[PASS][0m testRevert_updateDistribution_UNAUTHORIZED() (gas: 29442)
+[32m[PASS][0m testRevert_updatePoolTimestamps_INVALID() (gas: 27928)
+[32m[PASS][0m testRevert_updatePoolTimestamps_UNAUTHORIZED() (gas: 28304)
+[32m[PASS][0m testRevert_withdraw_NOT_ALLOWED_30days() (gas: 30137)
+[32m[PASS][0m testRevert_withdraw_UNAUTHORIZED() (gas: 23529)
+[32m[PASS][0m test_allocate() (gas: 253709)
+[32m[PASS][0m test_deployment() (gas: 8807)
+[32m[PASS][0m test_distribute() (gas: 582479)
+[32m[PASS][0m test_getPayouts() (gas: 418575)
+[32m[PASS][0m test_getRecipient() (gas: 180373)
+[32m[PASS][0m test_getRecipientStatus() (gas: 177461)
+[32m[PASS][0m test_hasBeenDistributed_False() (gas: 8100)
+[32m[PASS][0m test_hasBeenDistributed_True() (gas: 583883)
+[32m[PASS][0m test_initialize() (gas: 27747)
+[32m[PASS][0m test_initialize_UNAUTHORIZED() (gas: 24476)
+[32m[PASS][0m test_isDistributionSet_False() (gas: 7731)
+[32m[PASS][0m test_isDistributionSet_True() (gas: 103820)
+[32m[PASS][0m test_isPoolActive() (gas: 14257)
+[32m[PASS][0m test_isValidAllocator() (gas: 11120)
+[32m[PASS][0m test_registerRecipient_new_withRegistryAnchor() (gas: 3290918)
+[32m[PASS][0m test_register_getRecipientStatus_appeal() (gas: 232798)
+[32m[PASS][0m test_reviewRecipients() (gas: 196187)
+[32m[PASS][0m test_updateDistribution() (gas: 105998)
+[32m[PASS][0m test_updatePoolTimestamps() (gas: 48820)
+[32m[PASS][0m test_withdraw() (gas: 65996)
+Test result: [32mok[0m. 46 passed; 0 failed; 0 skipped; finished in 69.39ms
+
+Running 10 tests for test/foundry/strategies/SimpleProjectRegistry.t.sol:SimpleProjectRegistryStrategyTest
+[32m[PASS][0m testRevert_addProject_ALREADY_EXISTS() (gas: 41446)
+[32m[PASS][0m testRevert_addProject_UNAUTHORIZED() (gas: 14581)
+[32m[PASS][0m testRevert_removeProject_DOESNT_EXIST() (gas: 16843)
+[32m[PASS][0m testRevert_removeProject_UNAUTHORIZED() (gas: 41171)
+[32m[PASS][0m testRevert_removeProjects_UNAUTHORIZED() (gas: 41878)
+[32m[PASS][0m test_Deployment() (gas: 11964)
+[32m[PASS][0m test_addProject() (gas: 40710)
+[32m[PASS][0m test_addProjects() (gas: 73127)
+[32m[PASS][0m test_removeProject() (gas: 30851)
+[32m[PASS][0m test_removeProjects() (gas: 32880)
+Test result: [32mok[0m. 10 passed; 0 failed; 0 skipped; finished in 5.48ms
+
+Running 54 tests for test/foundry/strategies/DonationVotingCustomRegistryStrategy.t.sol:DonationVotingCustomRegistryStrategyTest
+[32m[PASS][0m testRevert_allocate_ALLOCATION_NOT_ACTIVE() (gas: 156106)
+[32m[PASS][0m testRevert_allocate_AMOUNT_MISMATCH() (gas: 172936)
+[32m[PASS][0m testRevert_allocate_INVALID_invalidToken() (gas: 2964877)
+[32m[PASS][0m testRevert_allocate_RECIPIENT_ERROR() (gas: 160130)
+[32m[PASS][0m testRevert_claim() (gas: 222428)
+[32m[PASS][0m testRevert_distribute_RECIPIENT_ERROR() (gas: 380210)
+[32m[PASS][0m testRevert_distribute_twice_to_same_recipient() (gas: 378225)
+[32m[PASS][0m testRevert_initialize_ALREADY_INITIALIZED() (gas: 30600)
+[32m[PASS][0m testRevert_initialize_INVALID() (gas: 3002210)
+[32m[PASS][0m testRevert_initialize_withNoAllowedToken() (gas: 2798509)
+[32m[PASS][0m testRevert_registerRecipient_INVALID_METADATA() (gas: 58254)
+[32m[PASS][0m testRevert_registerRecipient_RECIPIENT_ERROR() (gas: 35381)
+[32m[PASS][0m testRevert_registerRecipient_REGISTRATION_NOT_ACTIVE() (gas: 25323)
+[32m[PASS][0m testRevert_registerRecipient_UNAUTHORIZED() (gas: 16090)
+[32m[PASS][0m testRevert_registerRecipient_isUsingRegistryAnchor_UNAUTHORIZED() (gas: 32826)
+[32m[PASS][0m testRevert_registerRecipient_withAnchorGating_UNAUTHORIZED() (gas: 2849359)
+[32m[PASS][0m testRevert_reviewRecipients_INVALID() (gas: 31179)
+[32m[PASS][0m testRevert_reviewRecipients_REGISTRATION_NOT_ACTIVE() (gas: 28491)
+[32m[PASS][0m testRevert_reviewRecipients_UNAUTHORIZED() (gas: 28959)
+[32m[PASS][0m testRevert_reviewRecipients_withAppealedStatus_RECIPIENT_ERROR() (gas: 34444)
+[32m[PASS][0m testRevert_reviewRecipients_withNoneStatus_RECIPIENT_ERROR() (gas: 34451)
+[32m[PASS][0m testRevert_setPayout_ALLOCATION_NOT_ENDED() (gas: 29145)
+[32m[PASS][0m testRevert_setPayout_INVALID_amountExceeded() (gas: 185698)
+[32m[PASS][0m testRevert_setPayout_INVALID_mismatchLength() (gas: 31873)
+[32m[PASS][0m testRevert_setPayout_INVALID_rejectedApplication() (gas: 158286)
+[32m[PASS][0m testRevert_setPayout_RECIPIENT_ERROR() (gas: 354050)
+[32m[PASS][0m testRevert_setPayout_UNAUTHORIZED() (gas: 26914)
+[32m[PASS][0m testRevert_updatePoolTimestamps_INVALID() (gas: 27884)
+[32m[PASS][0m testRevert_updatePoolTimestamps_UNAUTHORIZED() (gas: 30036)
+[32m[PASS][0m testRevert_withdraw_NOT_ALLOWED_30days() (gas: 30081)
+[32m[PASS][0m testRevert_withdraw_NOT_ALLOWED_exceed_amount() (gas: 46892)
+[32m[PASS][0m testRevert_withdraw_UNAUTHORIZED() (gas: 25200)
+[32m[PASS][0m test_allocate() (gas: 204006)
+[32m[PASS][0m test_claim() (gas: 234129)
+[32m[PASS][0m test_deployment() (gas: 8799)
+[32m[PASS][0m test_distribute() (gas: 384108)
+[32m[PASS][0m test_getPayouts() (gas: 350930)
+[32m[PASS][0m test_getRecipient() (gas: 134904)
+[32m[PASS][0m test_getRecipientStatus() (gas: 133210)
+[32m[PASS][0m test_getRecipientStatus_appeal() (gas: 169566)
+[32m[PASS][0m test_initialize() (gas: 27712)
+[32m[PASS][0m test_initialize_UNAUTHORIZED() (gas: 23214)
+[32m[PASS][0m test_initialize_custom_registry_ALREADY_INITIALIZED() (gas: 3100822)
+[32m[PASS][0m test_initialize_registry() (gas: 9861)
+[32m[PASS][0m test_isPoolActive() (gas: 14189)
+[32m[PASS][0m test_isValidAllocator() (gas: 11080)
+[32m[PASS][0m test_registerRecipient_accepted() (gas: 175764)
+[32m[PASS][0m test_registerRecipient_appeal() (gas: 174669)
+[32m[PASS][0m test_registerRecipient_new() (gas: 142428)
+[32m[PASS][0m test_registerRecipient_new_withRegistryAnchor() (gas: 2955193)
+[32m[PASS][0m test_reviewRecipients() (gas: 156355)
+[32m[PASS][0m test_setPayout() (gas: 347020)
+[32m[PASS][0m test_updatePoolTimestamps() (gas: 46598)
+[32m[PASS][0m test_withdraw() (gas: 166255)
+Test result: [32mok[0m. 54 passed; 0 failed; 0 skipped; finished in 54.74ms
+
+Running 50 tests for test/foundry/strategies/DonationVotingMerkleDistributionDirectTransferStrategy.t.sol:DonationVotingMerkleDistributionDirectTransferStrategyTest
+[32m[PASS][0m testRevert_allocate_ALLOCATION_NOT_ACTIVE() (gas: 48428)
+[32m[PASS][0m testRevert_allocate_ERC20_InvalidSignature() (gas: 359743)
+[32m[PASS][0m testRevert_allocate_ERC20_InvalidSigner() (gas: 362017)
+[32m[PASS][0m testRevert_allocate_ERC20_SignatureExpired() (gas: 336396)
+[32m[PASS][0m testRevert_allocate_INVALID_amountMismatch() (gas: 252877)
+[32m[PASS][0m testRevert_allocate_INVALID_invalidToken() (gas: 241463)
+[32m[PASS][0m testRevert_allocate_RECIPIENT_ERROR() (gas: 59489)
+[32m[PASS][0m testRevert_distribute_INVALID_shit() (gas: 32273)
+[32m[PASS][0m testRevert_distribute_RECIPIENT_ERROR() (gas: 421537)
+[32m[PASS][0m testRevert_distribute_twice_to_same_recipient() (gas: 587861)
+[32m[PASS][0m testRevert_distribute_wrongProof() (gas: 471135)
+[32m[PASS][0m testRevert_initialize_ALREADY_INITIALIZED() (gas: 30483)
+[32m[PASS][0m testRevert_initialize_INVALID() (gas: 3477204)
+[32m[PASS][0m testRevert_initialize_withNoAllowedToken() (gas: 3103661)
+[32m[PASS][0m testRevert_initialize_withNotAllowedToken() (gas: 3104743)
+[32m[PASS][0m testRevert_registerRecipient_INVALID_METADATA() (gas: 51281)
+[32m[PASS][0m testRevert_registerRecipient_RECIPIENT_ERROR() (gas: 51816)
+[32m[PASS][0m testRevert_registerRecipient_REGISTRATION_NOT_ACTIVE() (gas: 19287)
+[32m[PASS][0m testRevert_registerRecipient_UNAUTHORIZED() (gas: 53342)
+[32m[PASS][0m testRevert_registerRecipient_new_withRegistryAnchor_UNAUTHORIZED() (gas: 3163407)
+[32m[PASS][0m testRevert_reviewRecipients_ALLOCATION_NOT_ACTIVE() (gas: 183292)
+[32m[PASS][0m testRevert_reviewRecipients_UNAUTHORIZED() (gas: 191362)
+[32m[PASS][0m testRevert_updateDistribution_ALLOCATION_NOT_ENDED() (gas: 13860)
+[32m[PASS][0m testRevert_updateDistribution_INVALID() (gas: 589610)
+[32m[PASS][0m testRevert_updateDistribution_UNAUTHORIZED() (gas: 29442)
+[32m[PASS][0m testRevert_updatePoolTimestamps_INVALID() (gas: 27943)
+[32m[PASS][0m testRevert_updatePoolTimestamps_UNAUTHORIZED() (gas: 28304)
+[32m[PASS][0m testRevert_withdraw_NOT_ALLOWED_30days() (gas: 30152)
+[32m[PASS][0m testRevert_withdraw_UNAUTHORIZED() (gas: 23529)
+[32m[PASS][0m test_allocate() (gas: 290158)
+[32m[PASS][0m test_allocate_ERC20() (gas: 392316)
+[32m[PASS][0m test_deployment() (gas: 8807)
+[32m[PASS][0m test_distribute() (gas: 582569)
+[32m[PASS][0m test_getPayouts() (gas: 418679)
+[32m[PASS][0m test_getRecipient() (gas: 180388)
+[32m[PASS][0m test_getRecipientStatus() (gas: 177476)
+[32m[PASS][0m test_hasBeenDistributed_False() (gas: 8167)
+[32m[PASS][0m test_hasBeenDistributed_True() (gas: 583973)
+[32m[PASS][0m test_initialize() (gas: 27769)
+[32m[PASS][0m test_initialize_UNAUTHORIZED() (gas: 24476)
+[32m[PASS][0m test_isDistributionSet_False() (gas: 7709)
+[32m[PASS][0m test_isDistributionSet_True() (gas: 103835)
+[32m[PASS][0m test_isPoolActive() (gas: 14257)
+[32m[PASS][0m test_isValidAllocator() (gas: 11157)
+[32m[PASS][0m test_registerRecipient_new_withRegistryAnchor() (gas: 3290948)
+[32m[PASS][0m test_register_getRecipientStatus_appeal() (gas: 232873)
+[32m[PASS][0m test_reviewRecipients() (gas: 196195)
+[32m[PASS][0m test_updateDistribution() (gas: 105991)
+[32m[PASS][0m test_updatePoolTimestamps() (gas: 48850)
+[32m[PASS][0m test_withdraw() (gas: 66019)
+Test result: [32mok[0m. 50 passed; 0 failed; 0 skipped; finished in 92.12ms
+
+Running 53 tests for test/foundry/strategies/QVSimpleStrategy.t.sol:QVSimpleStrategyTest
+[32m[PASS][0m testRevert_ReviewRecipients_UNAUTHORIZED() (gas: 30432)
+[32m[PASS][0m testRevert_addAllocator_UNAUTHORIZED() (gas: 26905)
+[32m[PASS][0m testRevert_allocate_ALLOCATION_NOT_ACTIVE() (gas: 234998)
+[32m[PASS][0m testRevert_allocate_INVALID_noVoiceTokens() (gas: 242173)
+[32m[PASS][0m testRevert_allocate_INVALID_tooManyVoiceCredits() (gas: 244556)
+[32m[PASS][0m testRevert_allocate_INVALID_voiceTokensMismatch() (gas: 244503)
+[32m[PASS][0m testRevert_allocate_RECIPIENT_ERROR() (gas: 239628)
+[32m[PASS][0m testRevert_allocate_UNAUTHORIZED() (gas: 230454)
+[32m[PASS][0m testRevert_distribute_RECIPIENT_ERROR_noRecipient() (gas: 610951)
+[32m[PASS][0m testRevert_distribute_RECIPIENT_ERROR_zeroAmount() (gas: 242348)
+[32m[PASS][0m testRevert_fundPool_afterDistribution() (gas: 598790)
+[32m[PASS][0m testRevert_initialize_ALREADY_INITIALIZED() (gas: 24709)
+[32m[PASS][0m testRevert_initialize_INVALID() (gas: 3156125)
+[32m[PASS][0m testRevert_registerRecipient_INVALID_METADATA() (gas: 39970)
+[32m[PASS][0m testRevert_registerRecipient_RECIPIENT_ERROR() (gas: 26221)
+[32m[PASS][0m testRevert_registerRecipient_REGISTRATION_NOT_ACTIVE() (gas: 23692)
+[32m[PASS][0m testRevert_registerRecipient_UNAUTHORIZED() (gas: 14450)
+[32m[PASS][0m testRevert_registerRecipient_isUsingRegistryAnchor_UNAUTHORIZED() (gas: 53385)
+[32m[PASS][0m testRevert_registerRecipient_new_withRegistryAnchor_UNAUTHORIZED() (gas: 2641532)
+[32m[PASS][0m testRevert_registerRecipient_withAnchorGating_UNAUTHORIZED() (gas: 2651634)
+[32m[PASS][0m testRevert_removeAllocator_UNAUTHORIZED() (gas: 26888)
+[32m[PASS][0m testRevert_reviewRecipients_ALLOCATION_NOT_ACTIVE() (gas: 26737)
+[32m[PASS][0m testRevert_reviewRecipients_ALREADY_REVIEWED() (gas: 187573)
+[32m[PASS][0m testRevert_reviewRecipients_INVALID() (gas: 26565)
+[32m[PASS][0m testRevert_reviewRecipients_UNAUTHORIZED() (gas: 29076)
+[32m[PASS][0m testRevert_reviewRecipients_withAppealedStatus_RECIPIENT_ERROR() (gas: 29831)
+[32m[PASS][0m testRevert_reviewRecipients_withNoneStatus_RECIPIENT_ERROR() (gas: 29860)
+[32m[PASS][0m testRevert_updatePoolTimestamps_INVALID() (gas: 27970)
+[32m[PASS][0m testRevert_updatePoolTimestamps_UNAUTHORIZED() (gas: 27922)
+[32m[PASS][0m testRevert_withdraw_INVALID() (gas: 29618)
+[32m[PASS][0m test_addAllocator() (gas: 49214)
+[32m[PASS][0m test_allocate() (gas: 360943)
+[32m[PASS][0m test_deployment() (gas: 8829)
+[32m[PASS][0m test_distribute() (gas: 607565)
+[32m[PASS][0m test_distribute_twice_to_same_recipient() (gas: 600022)
+[32m[PASS][0m test_getPayouts() (gas: 576286)
+[32m[PASS][0m test_getPayouts_ALREADY_DISTRIBUTED() (gas: 602938)
+[32m[PASS][0m test_getRecipientStatus() (gas: 227936)
+[32m[PASS][0m test_initialize() (gas: 23398)
+[32m[PASS][0m test_initialize_UNAUTHORIZED() (gas: 2857811)
+[32m[PASS][0m test_initialize_maxVoiceCreditsPerAllocator() (gas: 9723)
+[32m[PASS][0m test_isPoolActive() (gas: 14864)
+[32m[PASS][0m test_isValidAllocator() (gas: 18823)
+[32m[PASS][0m test_registerRecipient_accepted() (gas: 227912)
+[32m[PASS][0m test_registerRecipient_appeal() (gas: 245005)
+[32m[PASS][0m test_registerRecipient_new() (gas: 138578)
+[32m[PASS][0m test_registerRecipient_new_withRegistryAnchor() (gas: 2742493)
+[32m[PASS][0m test_removeAllocator() (gas: 29235)
+[32m[PASS][0m test_reviewRecipient_reviewTreshold() (gas: 288999)
+[32m[PASS][0m test_reviewRecipient_reviewTreshold_noStatusChange() (gas: 294967)
+[32m[PASS][0m test_reviewRecipients() (gas: 228543)
+[32m[PASS][0m test_updatePoolTimestamps() (gas: 44398)
+[32m[PASS][0m test_withdraw() (gas: 46070)
+Test result: [32mok[0m. 53 passed; 0 failed; 0 skipped; finished in 96.58ms
+
+Running 43 tests for test/foundry/strategies/QVBaseStrategy.t.sol:QVBaseStrategyTest
+[32m[PASS][0m testRevert_ReviewRecipients_UNAUTHORIZED() (gas: 30362)
+[32m[PASS][0m testRevert_allocate_ALLOCATION_NOT_ACTIVE() (gas: 228018)
+[32m[PASS][0m testRevert_distribute_RECIPIENT_ERROR_noRecipient() (gas: 605127)
+[32m[PASS][0m testRevert_distribute_RECIPIENT_ERROR_zeroAmount() (gas: 241910)
+[32m[PASS][0m testRevert_fundPool_afterDistribution() (gas: 593232)
+[32m[PASS][0m testRevert_initialize_ALREADY_INITIALIZED() (gas: 21811)
+[32m[PASS][0m testRevert_initialize_INVALID() (gas: 2801554)
+[32m[PASS][0m testRevert_registerRecipient_INVALID_METADATA() (gas: 39902)
+[32m[PASS][0m testRevert_registerRecipient_RECIPIENT_ERROR() (gas: 26165)
+[32m[PASS][0m testRevert_registerRecipient_REGISTRATION_NOT_ACTIVE() (gas: 23670)
+[32m[PASS][0m testRevert_registerRecipient_UNAUTHORIZED() (gas: 14406)
+[32m[PASS][0m testRevert_registerRecipient_isUsingRegistryAnchor_UNAUTHORIZED() (gas: 53313)
+[32m[PASS][0m testRevert_registerRecipient_new_withRegistryAnchor_UNAUTHORIZED() (gas: 2641510)
+[32m[PASS][0m testRevert_registerRecipient_withAnchorGating_UNAUTHORIZED() (gas: 2651584)
+[32m[PASS][0m testRevert_reviewRecipients_ALLOCATION_NOT_ACTIVE() (gas: 26689)
+[32m[PASS][0m testRevert_reviewRecipients_ALREADY_REVIEWED() (gas: 187407)
+[32m[PASS][0m testRevert_reviewRecipients_INVALID() (gas: 26495)
+[32m[PASS][0m testRevert_reviewRecipients_UNAUTHORIZED() (gas: 29028)
+[32m[PASS][0m testRevert_reviewRecipients_withAppealedStatus_RECIPIENT_ERROR() (gas: 29779)
+[32m[PASS][0m testRevert_reviewRecipients_withNoneStatus_RECIPIENT_ERROR() (gas: 29808)
+[32m[PASS][0m testRevert_updatePoolTimestamps_INVALID() (gas: 27921)
+[32m[PASS][0m testRevert_updatePoolTimestamps_UNAUTHORIZED() (gas: 27873)
+[32m[PASS][0m testRevert_withdraw_INVALID() (gas: 29570)
+[32m[PASS][0m test_allocate() (gas: 355667)
+[32m[PASS][0m test_deployment() (gas: 8807)
+[32m[PASS][0m test_distribute() (gas: 602007)
+[32m[PASS][0m test_distribute_twice_to_same_recipient() (gas: 594464)
+[32m[PASS][0m test_getPayouts() (gas: 570974)
+[32m[PASS][0m test_getPayouts_ALREADY_DISTRIBUTED() (gas: 597401)
+[32m[PASS][0m test_getRecipientStatus() (gas: 227776)
+[32m[PASS][0m test_initialize() (gas: 23462)
+[32m[PASS][0m test_initialize_UNAUTHORIZED() (gas: 2506375)
+[32m[PASS][0m test_isPoolActive() (gas: 14820)
+[32m[PASS][0m test_isValidAllocator() (gas: 5894)
+[32m[PASS][0m test_registerRecipient_accepted() (gas: 227797)
+[32m[PASS][0m test_registerRecipient_appeal() (gas: 244789)
+[32m[PASS][0m test_registerRecipient_new() (gas: 138565)
+[32m[PASS][0m test_registerRecipient_new_withRegistryAnchor() (gas: 2742493)
+[32m[PASS][0m test_reviewRecipient_reviewTreshold() (gas: 288677)
+[32m[PASS][0m test_reviewRecipient_reviewTreshold_noStatusChange() (gas: 294623)
+[32m[PASS][0m test_reviewRecipients() (gas: 228448)
+[32m[PASS][0m test_updatePoolTimestamps() (gas: 44304)
+[32m[PASS][0m test_withdraw() (gas: 46000)
+Test result: [32mok[0m. 43 passed; 0 failed; 0 skipped; finished in 32.65ms
+
+Running 8 tests for test/foundry/strategies/RFPCommitteeStrategy.t.sol:RFPCommitteeStrategyTest
+[32m[PASS][0m testRevert_allocate_RECIPIENT_ALREADY_ACCEPTED() (gas: 420244)
+[32m[PASS][0m testRevert_allocate_UNAUTHORIZED() (gas: 14581)
+[32m[PASS][0m testRevert_initialize_ALREADY_INITIALIZED() (gas: 2808392)
+[32m[PASS][0m testRevert_initialize_UNAUTHORIZED() (gas: 2663758)
+[32m[PASS][0m test_allocate() (gas: 415354)
+[32m[PASS][0m test_allocate_reallocating() (gas: 522752)
+[32m[PASS][0m test_deployment() (gas: 2655850)
+[32m[PASS][0m test_initialize() (gas: 2809513)
+Test result: [32mok[0m. 8 passed; 0 failed; 0 skipped; finished in 8.07ms
+
+Running 38 tests for test/foundry/core/Registry.t.sol:RegistryTest
+[32m[PASS][0m testRevert_acceptProfileOwnership_INVALID_ID() (gas: 15282)
+[32m[PASS][0m testRevert_acceptProfileOwnership_NOT_PENDING_profile1_owner() (gas: 721223)
+[32m[PASS][0m testRevert_addMembers_INVALID_ID() (gas: 20044)
+[32m[PASS][0m testRevert_addMembers_UNAUTHORIZED() (gas: 697330)
+[32m[PASS][0m testRevert_addMembers_ZERO_ADDRESS() (gas: 693805)
+[32m[PASS][0m testRevert_createProfile_NONCE_NOT_AVAILABLE() (gas: 757127)
+[32m[PASS][0m testRevert_createProfile_UNAUTHORIZED_AddMemberWhenNotOwner() (gas: 688661)
+[32m[PASS][0m testRevert_createProfile_existing_anchor_wrong_profile() (gas: 8937393460516753664)
+[32m[PASS][0m testRevert_createProfile_member_ZERO_ADDRESS() (gas: 687215)
+[32m[PASS][0m testRevert_createProfile_owner_ZERO_ADDRESS() (gas: 28175)
+[32m[PASS][0m testRevert_initialize_zeroAddress() (gas: 2448752)
+[32m[PASS][0m testRevert_recoverFunds_INVALID_TOKEN_ADDRESS() (gas: 16015)
+[32m[PASS][0m testRevert_recoverFunds_ZERO_RECIPIENT() (gas: 13189)
+[32m[PASS][0m testRevert_removeMembers_INVALID_ID() (gas: 19999)
+[32m[PASS][0m testRevert_removeMembers_UNAUTHORIZED() (gas: 697308)
+[32m[PASS][0m testRevert_updateProfileMetadata_UNAUTHORIZED() (gas: 749381)
+[32m[PASS][0m testRevert_updateProfileNameForInvalidId() (gas: 15998)
+[32m[PASS][0m testRevert_updateProfileName_UNAUTHORIZED() (gas: 749035)
+[32m[PASS][0m testRevert_updateProfileName_UNAUTHORIZED_bymember() (gas: 749057)
+[32m[PASS][0m testRevert_updateProfilePendingOwner_UNAUTHORIZED() (gas: 694328)
+[32m[PASS][0m test_acceptProfileOwnership() (gas: 723033)
+[32m[PASS][0m test_addMembers() (gas: 761222)
+[32m[PASS][0m test_createProfile() (gas: 781225)
+[32m[PASS][0m test_createProfile_forAnotherOwner() (gas: 725576)
+[32m[PASS][0m test_create_anchor() (gas: 751627)
+[32m[PASS][0m test_initialize() (gas: 2479344)
+[32m[PASS][0m test_isMemberOfProfile() (gas: 753017)
+[32m[PASS][0m test_isOwnerOfProfile() (gas: 753894)
+[32m[PASS][0m test_isOwnerOrMemberOfProfile() (gas: 756490)
+[32m[PASS][0m test_recoverFunds() (gas: 47914)
+[32m[PASS][0m test_recoverFunds_ERC20() (gas: 71992)
+[32m[PASS][0m test_removeMembers() (gas: 730885)
+[32m[PASS][0m test_removeMembers_NON_EXISTING_MEMBERS() (gas: 763831)
+[32m[PASS][0m test_updateProfileMetadataForInvalidId() (gas: 16349)
+[32m[PASS][0m test_updateProfileMetadata_byprofile1_owner() (gas: 762900)
+[32m[PASS][0m test_updateProfileName() (gas: 1265647)
+[32m[PASS][0m test_updateProfileName_toTheNameBefore() (gas: 8937393460516754368)
+[32m[PASS][0m test_updateProfilePendingprofile1_owner() (gas: 724102)
+Test result: [32mok[0m. 38 passed; 0 failed; 0 skipped; finished in 28.54ms
+
+Running 49 tests for test/foundry/strategies/QVNftTieredStrategy.t.sol:QVNftTieredStrategyTest
+[32m[PASS][0m testRevert_ReviewRecipients_UNAUTHORIZED() (gas: 30428)
+[32m[PASS][0m testRevert_allocate_ALLOCATION_NOT_ACTIVE() (gas: 243182)
+[32m[PASS][0m testRevert_allocate_INVALID_noVoiceTokens() (gas: 244063)
+[32m[PASS][0m testRevert_allocate_INVALID_tooManyVoiceCredits() (gas: 244032)
+[32m[PASS][0m testRevert_allocate_RECIPIENT_ERROR() (gas: 238951)
+[32m[PASS][0m testRevert_allocate_UNAUTHORIZED() (gas: 238419)
+[32m[PASS][0m testRevert_distribute_RECIPIENT_ERROR_noRecipient() (gas: 643470)
+[32m[PASS][0m testRevert_distribute_RECIPIENT_ERROR_zeroAmount() (gas: 242250)
+[32m[PASS][0m testRevert_fundPool_afterDistribution() (gas: 631286)
+[32m[PASS][0m testRevert_initialize_ALREADY_INITIALIZED() (gas: 38472)
+[32m[PASS][0m testRevert_initialize_INVALID() (gas: 3196078)
+[32m[PASS][0m testRevert_initialize_arrayLengthMismatch_INVALID() (gas: 9604785)
+[32m[PASS][0m testRevert_registerRecipient_INVALID_METADATA() (gas: 39902)
+[32m[PASS][0m testRevert_registerRecipient_RECIPIENT_ERROR() (gas: 26209)
+[32m[PASS][0m testRevert_registerRecipient_REGISTRATION_NOT_ACTIVE() (gas: 23714)
+[32m[PASS][0m testRevert_registerRecipient_UNAUTHORIZED() (gas: 14428)
+[32m[PASS][0m testRevert_registerRecipient_isUsingRegistryAnchor_UNAUTHORIZED() (gas: 53335)
+[32m[PASS][0m testRevert_registerRecipient_new_withRegistryAnchor_UNAUTHORIZED() (gas: 2641467)
+[32m[PASS][0m testRevert_registerRecipient_withAnchorGating_UNAUTHORIZED() (gas: 2651628)
+[32m[PASS][0m testRevert_reviewRecipients_ALLOCATION_NOT_ACTIVE() (gas: 26688)
+[32m[PASS][0m testRevert_reviewRecipients_ALREADY_REVIEWED() (gas: 187501)
+[32m[PASS][0m testRevert_reviewRecipients_INVALID() (gas: 26583)
+[32m[PASS][0m testRevert_reviewRecipients_UNAUTHORIZED() (gas: 28986)
+[32m[PASS][0m testRevert_reviewRecipients_withAppealedStatus_RECIPIENT_ERROR() (gas: 29845)
+[32m[PASS][0m testRevert_reviewRecipients_withNoneStatus_RECIPIENT_ERROR() (gas: 29830)
+[32m[PASS][0m testRevert_updatePoolTimestamps_INVALID() (gas: 27899)
+[32m[PASS][0m testRevert_updatePoolTimestamps_UNAUTHORIZED() (gas: 27895)
+[32m[PASS][0m testRevert_withdraw_INVALID() (gas: 29614)
+[32m[PASS][0m test_allocate() (gas: 393483)
+[32m[PASS][0m test_deployment() (gas: 8851)
+[32m[PASS][0m test_distribute() (gas: 640062)
+[32m[PASS][0m test_distribute_twice_to_same_recipient() (gas: 632541)
+[32m[PASS][0m test_getPayouts() (gas: 608799)
+[32m[PASS][0m test_getPayouts_ALREADY_DISTRIBUTED() (gas: 635435)
+[32m[PASS][0m test_getRecipientStatus() (gas: 227908)
+[32m[PASS][0m test_initialize() (gas: 23506)
+[32m[PASS][0m test_initialize_UNAUTHORIZED() (gas: 2887624)
+[32m[PASS][0m test_initialize_nftTiered() (gas: 3107351)
+[32m[PASS][0m test_isPoolActive() (gas: 14864)
+[32m[PASS][0m test_isValidAllocator() (gas: 32621)
+[32m[PASS][0m test_registerRecipient_accepted() (gas: 227907)
+[32m[PASS][0m test_registerRecipient_appeal() (gas: 244921)
+[32m[PASS][0m test_registerRecipient_new() (gas: 138566)
+[32m[PASS][0m test_registerRecipient_new_withRegistryAnchor() (gas: 2742493)
+[32m[PASS][0m test_reviewRecipient_reviewTreshold() (gas: 288853)
+[32m[PASS][0m test_reviewRecipient_reviewTreshold_noStatusChange() (gas: 294821)
+[32m[PASS][0m test_reviewRecipients() (gas: 228449)
+[32m[PASS][0m test_updatePoolTimestamps() (gas: 44348)
+[32m[PASS][0m test_withdraw() (gas: 46022)
+Test result: [32mok[0m. 49 passed; 0 failed; 0 skipped; finished in 15.59ms
+
+Running 41 tests for test/foundry/strategies/QVImpactStreamStrategyTest.t.sol:QVImpactStreamStrategyTest
+[32m[PASS][0m test_Revert_recoverFunds_UNAUTHORIZED() (gas: 23193)
+[32m[PASS][0m test_Revert_setPayouts_INVALID_already_set() (gas: 452179)
+[32m[PASS][0m test_Revert_updateTimestamps_INVALID() (gas: 23632)
+[32m[PASS][0m test_Revert_updateTimestamps_UNAUTHORIZED() (gas: 25563)
+[32m[PASS][0m test__registerRecipient() (gas: 224416)
+[32m[PASS][0m test__registerRecipient_Revert_RECIPIENT_ERROR_no_ProfileId() (gas: 81236)
+[32m[PASS][0m test__registerRecipient_Revert_RECIPIENT_ERROR_no_recipientAddress() (gas: 82445)
+[32m[PASS][0m test__registerRecipient_Update() (gas: 254110)
+[32m[PASS][0m test_addAllocator() (gas: 49926)
+[32m[PASS][0m test_addAllocator_Revert_UNAUTHORIZED() (gas: 23075)
+[32m[PASS][0m test_allocate() (gas: 664307)
+[32m[PASS][0m test_allocate_Revert_ALLOCATION_NOT_ACTIVE_after_allocation() (gas: 211819)
+[32m[PASS][0m test_allocate_Revert_ALLOCATION_NOT_ACTIVE_before_allocation() (gas: 211668)
+[32m[PASS][0m test_allocate_Revert_INVALID_noVoiceCreditsLeft() (gas: 219040)
+[32m[PASS][0m test_allocate_Revert_INVALID_zero_voiceCredits() (gas: 219106)
+[32m[PASS][0m test_allocate_Revert_RECIPIENT_ERROR_no_ProfileId() (gas: 55129)
+[32m[PASS][0m test_allocate_Revert_UNAUTHORIZED() (gas: 51955)
+[32m[PASS][0m test_batchAddAllocator() (gas: 80694)
+[32m[PASS][0m test_batchAddAllocator_Revert_UNAUTHORIZED() (gas: 24393)
+[32m[PASS][0m test_batchRemoveAllocator() (gas: 41764)
+[32m[PASS][0m test_batchRemoveAllocator_Revert_UNAUTHORIZED() (gas: 28545)
+[32m[PASS][0m test_deployment() (gas: 15956)
+[32m[PASS][0m test_distribute() (gas: 518745)
+[32m[PASS][0m test_distribute_Revert_RECIPIENT_ERROR_zeroAmount() (gas: 509512)
+[32m[PASS][0m test_getPayouts() (gas: 480328)
+[32m[PASS][0m test_initialize() (gas: 2536687)
+[32m[PASS][0m test_initialize_Revert_ALREADY_INITIALIZED() (gas: 23222)
+[32m[PASS][0m test_initialize_Revert_INVALID() (gas: 2573843)
+[32m[PASS][0m test_initialize_Revert_UNAUTHORIZED() (gas: 2452997)
+[32m[PASS][0m test_isPoolActive() (gas: 15089)
+[32m[PASS][0m test_recoverFunds_ERC20() (gas: 811362)
+[32m[PASS][0m test_recoverFunds_native() (gas: 53343)
+[32m[PASS][0m test_removeAllocator() (gas: 30444)
+[32m[PASS][0m test_removeAllocator_Revert_UNAUTHORIZED() (gas: 25160)
+[32m[PASS][0m test_setPayouts() (gas: 455041)
+[32m[PASS][0m test_setPayouts_Revert_ALLOCATION_NOT_ENDED() (gas: 364670)
+[32m[PASS][0m test_setPayouts_Revert_INVALID_amount_exceeds_poolAmount() (gas: 444674)
+[32m[PASS][0m test_setPayouts_Revert_RECIPIENT_ERROR_recipient_not_accepted() (gas: 279135)
+[32m[PASS][0m test_setPayouts_Revert_RECIPIENT_ERROR_zero_amount() (gas: 416930)
+[32m[PASS][0m test_setPayouts_Revert_UNAUTHORIZED() (gas: 29271)
+[32m[PASS][0m test_updateTimestamps() (gas: 36904)
+Test result: [32mok[0m. 41 passed; 0 failed; 0 skipped; finished in 31.63ms
+
+Running 48 tests for test/foundry/strategies/QVGovernanceERC20Votes.t.sol:QVGovernanceERC20VotesTest
+[32m[PASS][0m testRevert_ReviewRecipients_UNAUTHORIZED() (gas: 30362)
+[32m[PASS][0m testRevert_allocate_ALLOCATION_NOT_ACTIVE() (gas: 238172)
+[32m[PASS][0m testRevert_allocate_INVALID_noVoiceTokens() (gas: 239009)
+[32m[PASS][0m testRevert_allocate_INVALID_tooManyVoiceCredits() (gas: 238778)
+[32m[PASS][0m testRevert_allocate_RECIPIENT_ERROR() (gas: 238503)
+[32m[PASS][0m testRevert_distribute_RECIPIENT_ERROR_noRecipient() (gas: 614108)
+[32m[PASS][0m testRevert_distribute_RECIPIENT_ERROR_zeroAmount() (gas: 242239)
+[32m[PASS][0m testRevert_fundPool_afterDistribution() (gas: 601969)
+[32m[PASS][0m testRevert_initialize_ALREADY_INITIALIZED() (gas: 26962)
+[32m[PASS][0m testRevert_initialize_INVALID() (gas: 2987573)
+[32m[PASS][0m testRevert_initialize_noGovToken() (gas: 3557517)
+[32m[PASS][0m testRevert_registerRecipient_INVALID_METADATA() (gas: 39880)
+[32m[PASS][0m testRevert_registerRecipient_RECIPIENT_ERROR() (gas: 26209)
+[32m[PASS][0m testRevert_registerRecipient_REGISTRATION_NOT_ACTIVE() (gas: 23714)
+[32m[PASS][0m testRevert_registerRecipient_UNAUTHORIZED() (gas: 14450)
+[32m[PASS][0m testRevert_registerRecipient_isUsingRegistryAnchor_UNAUTHORIZED() (gas: 53335)
+[32m[PASS][0m testRevert_registerRecipient_new_withRegistryAnchor_UNAUTHORIZED() (gas: 2641510)
+[32m[PASS][0m testRevert_registerRecipient_withAnchorGating_UNAUTHORIZED() (gas: 2651628)
+[32m[PASS][0m testRevert_reviewRecipients_ALLOCATION_NOT_ACTIVE() (gas: 26689)
+[32m[PASS][0m testRevert_reviewRecipients_ALREADY_REVIEWED() (gas: 187446)
+[32m[PASS][0m testRevert_reviewRecipients_INVALID() (gas: 26517)
+[32m[PASS][0m testRevert_reviewRecipients_UNAUTHORIZED() (gas: 28964)
+[32m[PASS][0m testRevert_reviewRecipients_withAppealedStatus_RECIPIENT_ERROR() (gas: 29779)
+[32m[PASS][0m testRevert_reviewRecipients_withNoneStatus_RECIPIENT_ERROR() (gas: 29742)
+[32m[PASS][0m testRevert_updatePoolTimestamps_INVALID() (gas: 27898)
+[32m[PASS][0m testRevert_updatePoolTimestamps_UNAUTHORIZED() (gas: 27917)
+[32m[PASS][0m testRevert_withdraw_INVALID() (gas: 29637)
+[32m[PASS][0m test_allocate() (gas: 364116)
+[32m[PASS][0m test_deployment() (gas: 8795)
+[32m[PASS][0m test_distribute() (gas: 610744)
+[32m[PASS][0m test_distribute_twice_to_same_recipient() (gas: 603179)
+[32m[PASS][0m test_getPayouts() (gas: 579393)
+[32m[PASS][0m test_getPayouts_ALREADY_DISTRIBUTED() (gas: 606116)
+[32m[PASS][0m test_getRecipientStatus() (gas: 227809)
+[32m[PASS][0m test_initialize() (gas: 23407)
+[32m[PASS][0m test_initialize_UNAUTHORIZED() (gas: 2506397)
+[32m[PASS][0m test_initilize_QVGovernance() (gas: 14959)
+[32m[PASS][0m test_isPoolActive() (gas: 14864)
+[32m[PASS][0m test_isValidAllocator() (gas: 19897)
+[32m[PASS][0m test_registerRecipient_accepted() (gas: 227852)
+[32m[PASS][0m test_registerRecipient_appeal() (gas: 244833)
+[32m[PASS][0m test_registerRecipient_new() (gas: 138620)
+[32m[PASS][0m test_registerRecipient_new_withRegistryAnchor() (gas: 2742515)
+[32m[PASS][0m test_reviewRecipient_reviewTreshold() (gas: 288875)
+[32m[PASS][0m test_reviewRecipient_reviewTreshold_noStatusChange() (gas: 294832)
+[32m[PASS][0m test_reviewRecipients() (gas: 228459)
+[32m[PASS][0m test_updatePoolTimestamps() (gas: 44326)
+[32m[PASS][0m test_withdraw() (gas: 46045)
+Test result: [32mok[0m. 48 passed; 0 failed; 0 skipped; finished in 29.49ms
+
+Running 63 tests for test/foundry/strategies/HackathonQVStrategy.t.sol:HackathonQVStrategyTest
+[32m[PASS][0m testRevert_ReviewRecipients_UNAUTHORIZED() (gas: 30426)
+[32m[PASS][0m testRevert_allocate_ALLOCATION_NOT_ACTIVE() (gas: 281181)
+[32m[PASS][0m testRevert_allocate_INVALID_noPayoutPercentages() (gas: 319397)
+[32m[PASS][0m testRevert_allocate_INVALID_noVoiceCreditsLeft() (gas: 477886)
+[32m[PASS][0m testRevert_allocate_UNAUTHORIZED() (gas: 276993)
+[32m[PASS][0m testRevert_distribute_RECIPIENT_ERROR_noRecipient() (gas: 571721)
+[32m[PASS][0m testRevert_distribute_RECIPIENT_ERROR_zeroAmount() (gas: 286359)
+[32m[PASS][0m testRevert_fundPool_afterDistribution() (gas: 211)
+[32m[PASS][0m testRevert_initialize_ALREADY_INITIALIZED() (gas: 40823)
+[32m[PASS][0m testRevert_initialize_INVALID() (gas: 2801621)
+[32m[PASS][0m testRevert_initialize_INVALID_SCHEMA() (gas: 4353953)
+[32m[PASS][0m testRevert_registerRecipient_INVALID_METADATA() (gas: 101401)
+[32m[PASS][0m testRevert_registerRecipient_RECIPIENT_ERROR() (gas: 57287)
+[32m[PASS][0m testRevert_registerRecipient_REGISTRATION_NOT_ACTIVE() (gas: 23671)
+[32m[PASS][0m testRevert_registerRecipient_UNAUTHORIZED() (gas: 152973)
+[32m[PASS][0m testRevert_registerRecipient_UNAUTHORIZED_recipientIdToUIDIsZero() (gas: 56868)
+[32m[PASS][0m testRevert_registerRecipient_isUsingRegistryAnchor_UNAUTHORIZED() (gas: 53574)
+[32m[PASS][0m testRevert_registerRecipient_new_withRegistryAnchor_UNAUTHORIZED() (gas: 2641489)
+[32m[PASS][0m testRevert_registerRecipient_withAnchorGating_UNAUTHORIZED() (gas: 2652463)
+[32m[PASS][0m testRevert_reviewRecipients_ALLOCATION_NOT_ACTIVE() (gas: 26751)
+[32m[PASS][0m testRevert_reviewRecipients_ALREADY_REVIEWED() (gas: 329688)
+[32m[PASS][0m testRevert_reviewRecipients_INVALID() (gas: 26582)
+[32m[PASS][0m testRevert_reviewRecipients_UNAUTHORIZED() (gas: 28985)
+[32m[PASS][0m testRevert_reviewRecipients_withAppealedStatus_RECIPIENT_ERROR() (gas: 29844)
+[32m[PASS][0m testRevert_reviewRecipients_withNoneStatus_RECIPIENT_ERROR() (gas: 29829)
+[32m[PASS][0m testRevert_setAllowedRecipientIds_ALREADY_ADDED() (gas: 36877)
+[32m[PASS][0m testRevert_setPayoutPercentages_ALLOCATION_ACTIVE() (gas: 31045)
+[32m[PASS][0m testRevert_setPayoutPercentages_INVALID_AMOUNT() (gas: 122522)
+[32m[PASS][0m testRevert_setPayoutPercentages_INVALID_OUT_OF_ORDER() (gas: 30741)
+[32m[PASS][0m testRevert_updatePoolTimestamps_INVALID() (gas: 27966)
+[32m[PASS][0m testRevert_updatePoolTimestamps_UNAUTHORIZED() (gas: 27918)
+[32m[PASS][0m testRevert_withdraw_INVALID() (gas: 29615)
+[32m[PASS][0m test_allocate() (gas: 475943)
+[32m[PASS][0m test_contract_deployment() (gas: 4151575)
+[32m[PASS][0m test_deployment() (gas: 8807)
+[32m[PASS][0m test_distribute() (gas: 566334)
+[32m[PASS][0m test_distribute_twice_to_same_recipient() (gas: 497515)
+[32m[PASS][0m test_getAttestation() (gas: 41348)
+[32m[PASS][0m test_getPayouts() (gas: 494355)
+[32m[PASS][0m test_getPayouts_ALREADY_DISTRIBUTED() (gas: 578259)
+[32m[PASS][0m test_getRecipientStatus() (gas: 268693)
+[32m[PASS][0m test_getSchema() (gas: 15308)
+[32m[PASS][0m test_initialize() (gas: 23628)
+[32m[PASS][0m test_initialize_UNAUTHORIZED() (gas: 2506386)
+[32m[PASS][0m test_isAttestationExpired() (gas: 52661)
+[32m[PASS][0m test_isPayable() (gas: 5725)
+[32m[PASS][0m test_isPoolActive() (gas: 14864)
+[32m[PASS][0m test_isValidAllocator() (gas: 22043)
+[32m[PASS][0m test_onAttest() (gas: 13980)
+[32m[PASS][0m test_onRevoke() (gas: 13960)
+[32m[PASS][0m test_register() (gas: 270683)
+[32m[PASS][0m test_registerRecipient_accepted() (gas: 233)
+[32m[PASS][0m test_registerRecipient_appeal() (gas: 251062)
+[32m[PASS][0m test_registerRecipient_new() (gas: 290716)
+[32m[PASS][0m test_registerRecipient_new_withRegistryAnchor() (gas: 2742493)
+[32m[PASS][0m test_reviewRecipient_reviewTreshold() (gas: 232)
+[32m[PASS][0m test_reviewRecipient_reviewTreshold_noStatusChange() (gas: 254)
+[32m[PASS][0m test_reviewRecipients() (gas: 370768)
+[32m[PASS][0m test_setAllowedRecipientIds() (gas: 4476229)
+[32m[PASS][0m test_setPayoutPercentages() (gas: 122084)
+[32m[PASS][0m test_updatePoolTimestamps() (gas: 44557)
+[32m[PASS][0m test_winnerlist() (gas: 13228968)
+[32m[PASS][0m test_withdraw() (gas: 46023)
+Test result: [32mok[0m. 63 passed; 0 failed; 0 skipped; finished in 125.48ms
+
+Running 28 tests for test/foundry/strategies/WrappedVotingNftMintStrategy.t.sol:WrappedVotingNftMintStrategyTest
+[32m[PASS][0m testFuzz_setAllocationTimestamps(uint64,uint64) (runs: 256, μ: 35613, ~: 35613)
+[32m[PASS][0m testRevert_allocate_INVALID_AMOUNT() (gas: 51394)
+[32m[PASS][0m testRevert_distribute_ALLOCATION_NOT_ENDED() (gas: 1311983)
+[32m[PASS][0m testRevert_distribute_INVALID_POOL_AMOUNT_ZERO() (gas: 1215585)
+[32m[PASS][0m testRevert_distribute_UNAUTHORIZED() (gas: 1196009)
+[32m[PASS][0m testRevert_getPayouts_ARRAY_MISMATCH() (gas: 1196134)
+[32m[PASS][0m testRevert_initialize_ALREADY_INITIALIZED() (gas: 1378950)
+[32m[PASS][0m testRevert_initialize_INVALID_NFT_FACTORY_ADDRESS() (gas: 1327454)
+[32m[PASS][0m testRevert_initialize_INVALID_TIMESTAMPS() (gas: 1327441)
+[32m[PASS][0m testRevert_initialize_UNAUTHORIZED() (gas: 1304244)
+[32m[PASS][0m testRevert_mintTo_MaxSupply() (gas: 1240855)
+[32m[PASS][0m testRevert_mintTo_MintPriceNotPaid() (gas: 14841)
+[32m[PASS][0m testRevert_nft_RevertingReceiver() (gas: 1175208)
+[32m[PASS][0m testRevert_registerRecipient_NOT_IMPLEMENTED() (gas: 14614)
+[32m[PASS][0m testRevert_setAllocationTimestamps_INVALID() (gas: 21069)
+[32m[PASS][0m testRevert_withdrawPayments_UNAUTHORIZED() (gas: 1318256)
+[32m[PASS][0m testRevert_withdrawPayments_WithdrawTransfer() (gas: 254)
+[32m[PASS][0m test_allocate() (gas: 1189089)
+[32m[PASS][0m test_deployment() (gas: 1294579)
+[32m[PASS][0m test_distribute() (gas: 1301975)
+[32m[PASS][0m test_getPayouts() (gas: 1316063)
+[32m[PASS][0m test_getRecipientStatus() (gas: 1064154)
+[32m[PASS][0m test_initialize() (gas: 1382990)
+[32m[PASS][0m test_isValidAllocator() (gas: 17959)
+[32m[PASS][0m test_setAllocationTimestamps() (gas: 38149)
+[32m[PASS][0m test_setAllocationTimestamps_UNAUTHORIZED() (gas: 25434)
+[32m[PASS][0m test_tokenURI() (gas: 7846)
+[32m[PASS][0m test_withdrawPayments() (gas: 1225140)
+Test result: [32mok[0m. 28 passed; 0 failed; 0 skipped; finished in 120.74ms
+
+Running 39 tests for test/foundry/strategies/DirectGrantsSimpleStrategy.t.sol:DirectGrantsSimpleStrategyTest
+[32m[PASS][0m testRever_submitMilestones_RECIPIENT_NOT_ACCEPTED() (gas: 236505)
+[32m[PASS][0m testRevert_allocate_ALLOCATION_EXCEEDS_POOL_AMOUNT() (gas: 259334)
+[32m[PASS][0m testRevert_allocate_MILESTONES_ALREADY_SET() (gas: 652160)
+[32m[PASS][0m testRevert_distribute_INVALID_MILESTONE() (gas: 563635)
+[32m[PASS][0m testRevert_registerRecipient_INVALID_METADATA() (gas: 107710)
+[32m[PASS][0m testRevert_registerRecipient_INVALID_REGISTRATION() (gas: 59220)
+[32m[PASS][0m testRevert_registerRecipient_RECIPIENT_ALREADY_ACCEPTED() (gas: 290009)
+[32m[PASS][0m testRevert_registerRecipient_UNAUTHORIZED() (gas: 59077)
+[32m[PASS][0m testRevert_registerRecipient_noRegistryGating_UNAUTHORIZED() (gas: 513648)
+[32m[PASS][0m testRevert_rejectMilestone_MILESTONE_ALREADY_ACCEPTED() (gas: 650342)
+[32m[PASS][0m testRevert_rejectMilestones_INVALID_MILESTONE() (gas: 543827)
+[32m[PASS][0m testRevert_reviewSetMilestones_INVALID_MILESTONE() (gas: 278756)
+[32m[PASS][0m testRevert_reviewSetMilestones_MILESTONES_ALREADY_SET() (gas: 465666)
+[32m[PASS][0m testRevert_reviewSetMilestones_UNAUTHORIZED() (gas: 469065)
+[32m[PASS][0m testRevert_setMilestones_INVALID_MILESTONE_exceed_percentage() (gas: 453574)
+[32m[PASS][0m testRevert_setMilestones_INVALID_MILESTONE_wrong_status() (gas: 383991)
+[32m[PASS][0m testRevert_setMilestones_MILESTONES_ALREADY_SET() (gas: 663421)
+[32m[PASS][0m testRevert_setMilestones_RECIPIENT_NOT_ACCEPTED() (gas: 62784)
+[32m[PASS][0m testRevert_setMilestones_UNAUTHORIZED() (gas: 296024)
+[32m[PASS][0m testRevert_submitMilestone_INVALID_MILESTONE() (gas: 474360)
+[32m[PASS][0m testRevert_submitMilestone_MILESTONE_ALREADY_ACCEPTED() (gas: 659563)
+[32m[PASS][0m testRevert_submitMilestone_UNAUTHORIZED() (gas: 474283)
+[32m[PASS][0m test_allocate_accept() (gas: 277586)
+[32m[PASS][0m test_allocate_reject() (gas: 225318)
+[32m[PASS][0m test_distribute() (gas: 655114)
+[32m[PASS][0m test_getPayouts() (gas: 296057)
+[32m[PASS][0m test_initialize() (gas: 480843)
+[32m[PASS][0m test_isPoolActive() (gas: 38001)
+[32m[PASS][0m test_isValidAllocator() (gas: 49468)
+[32m[PASS][0m test_registerRecipient() (gas: 194235)
+[32m[PASS][0m test_registerRecipient_noRegistryGating() (gas: 638087)
+[32m[PASS][0m test_rejectMilestone() (gas: 554521)
+[32m[PASS][0m test_reviewSetMilestones() (gas: 495305)
+[32m[PASS][0m test_setMilestonesByPoolManager() (gas: 468980)
+[32m[PASS][0m test_setMilestonesByRecipient() (gas: 468372)
+[32m[PASS][0m test_setMilestones_by_overriding_existing_milestones() (gas: 513393)
+[32m[PASS][0m test_setRecipientStatusToInReview() (gas: 199337)
+[32m[PASS][0m test_submitMilestones() (gas: 546874)
+[32m[PASS][0m test_withdraw() (gas: 77627)
+Test result: [32mok[0m. 39 passed; 0 failed; 0 skipped; finished in 204.48ms
+
+Running 2 tests for test/foundry/fuzz/QVSimpleStrategyFuzz.t.sol:QVSimpleStrategyTest
+[32m[PASS][0m testFuzz_initialize_timestamps(uint64,uint64,uint64,uint64) (runs: 256, μ: 122995, ~: 122995)
+[32m[PASS][0m test_initialize() (gas: 2953413)
+Test result: [32mok[0m. 2 passed; 0 failed; 0 skipped; finished in 296.81ms
+| contracts/core/Allo.sol:Allo contract |                 |        |        |        |         |
+|---------------------------------------|-----------------|--------|--------|--------|---------|
+| Deployment Cost                       | Deployment Size |        |        |        |         |
+| 2748792                               | 13761           |        |        |        |         |
+| Function Name                         | min             | avg    | median | max    | # calls |
+| addPoolManager                        | 1005            | 9220   | 2959   | 23698  | 3       |
+| addToCloneableStrategies              | 2531            | 23048  | 23861  | 25861  | 45      |
+| allocate                              | 5234            | 54757  | 40032  | 138575 | 47      |
+| batchAllocate                         | 23629           | 48191  | 48191  | 72753  | 2       |
+| batchRegisterRecipient                | 24157           | 49199  | 49199  | 74242  | 2       |
+| createPool                            | 26687           | 464014 | 478535 | 478535 | 44      |
+| createPoolWithCustomStrategy          | 2364            | 433361 | 433228 | 533340 | 704     |
+| distribute                            | 14075           | 72808  | 92781  | 92781  | 9       |
+| fundPool                              | 22548           | 93781  | 92121  | 121964 | 137     |
+| getBaseFee                            | 394             | 394    | 394    | 394    | 2       |
+| getPercentFee                         | 404             | 404    | 404    | 404    | 2       |
+| getPool                               | 2921            | 6250   | 2921   | 16921  | 179     |
+| getRegistry                           | 420             | 666    | 420    | 2420   | 754     |
+| getStrategy                           | 572             | 572    | 572    | 572    | 42      |
+| getTreasury                           | 399             | 399    | 399    | 399    | 2       |
+| initialize                            | 3051            | 120985 | 121113 | 141013 | 771     |
+| isCloneableStrategy                   | 634             | 1134   | 634    | 2634   | 4       |
+| isPoolAdmin                           | 972             | 1972   | 1972   | 2972   | 2       |
+| isPoolManager                         | 999             | 5092   | 3488   | 9488   | 948     |
+| recoverFunds                          | 2610            | 19544  | 21399  | 34625  | 3       |
+| registerRecipient                     | 9007            | 134319 | 157607 | 182224 | 48      |
+| removeFromCloneableStrategies         | 1529            | 2031   | 2031   | 2533   | 2       |
+| removePoolManager                     | 2995            | 2998   | 2998   | 3002   | 2       |
+| transferOwnership                     | 2335            | 2335   | 2335   | 2335   | 51      |
+| updateBaseFee                         | 2456            | 19865  | 25669  | 25669  | 4       |
+| updatePercentFee                      | 1355            | 1404   | 1355   | 8593   | 193     |
+| updatePoolMetadata                    | 5981            | 6814   | 6814   | 7648   | 2       |
+| updateRegistry                        | 2532            | 4628   | 2630   | 8722   | 3       |
+| updateTreasury                        | 2531            | 4627   | 2629   | 8721   | 3       |
+
+
+| contracts/core/Registry.sol:Registry contract |                 |                     |        |                     |         |
+|-----------------------------------------------|-----------------|---------------------|--------|---------------------|---------|
+| Deployment Cost                               | Deployment Size |                     |        |                     |         |
+| 2387760                                       | 11958           |                     |        |                     |         |
+| Function Name                                 | min             | avg                 | median | max                 | # calls |
+| ALLO_OWNER                                    | 284             | 284                 | 284    | 284                 | 1       |
+| acceptProfileOwnership                        | 602             | 1780                | 2137   | 2602                | 3       |
+| addMembers                                    | 1325            | 25149               | 25909  | 46778               | 67      |
+| anchorToProfileId                             | 608             | 608                 | 608    | 608                 | 4       |
+| createProfile                                 | 2627            | 699935              | 700009 | 830027              | 2345    |
+| getProfileByAnchor                            | 3585            | 15312               | 19585  | 20071               | 270     |
+| getProfileById                                | 3776            | 3782                | 3776   | 5240                | 2325    |
+| hasRole                                       | 743             | 743                 | 743    | 743                 | 1       |
+| initialize                                    | 22848           | 48613               | 48645  | 48645               | 809     |
+| isMemberOfProfile                             | 816             | 1649                | 816    | 2816                | 12      |
+| isOwnerOfProfile                              | 713             | 713                 | 713    | 713                 | 7       |
+| isOwnerOrMemberOfProfile                      | 0               | 966                 | 696    | 5016                | 988     |
+| profileIdToPendingOwner                       | 523             | 523                 | 523    | 523                 | 3       |
+| recoverFunds                                  | 2914            | 16688               | 14478  | 34883               | 4       |
+| removeMembers                                 | 1302            | 3022                | 2719   | 5348                | 4       |
+| updateProfileMetadata                         | 1228            | 3114                | 3228   | 4887                | 3       |
+| updateProfileName                             | 976             | 2553540988718927679 | 491722 | 8937393460515998189 | 7       |
+| updateProfilePendingOwner                     | 669             | 18408               | 24321  | 24321               | 4       |
+
+
+| contracts/factory/ContractFactory.sol:ContractFactory contract |                 |        |        |        |         |
+|----------------------------------------------------------------|-----------------|--------|--------|--------|---------|
+| Deployment Cost                                                | Deployment Size |        |        |        |         |
+| 306928                                                         | 1483            |        |        |        |         |
+| Function Name                                                  | min             | avg    | median | max    | # calls |
+| deploy                                                         | 2891            | 289075 | 289393 | 574624 | 4       |
+| isDeployer                                                     | 530             | 2030   | 2530   | 2530   | 4       |
+| setDeployer                                                    | 2635            | 20304  | 22829  | 22829  | 8       |
+
+
+| contracts/strategies/_poc/qv-impact-stream/QVImpactStreamStrategy.sol:QVImpactStreamStrategy contract |                 |        |        |        |         |
+|-------------------------------------------------------------------------------------------------------|-----------------|--------|--------|--------|---------|
+| Deployment Cost                                                                                       | Deployment Size |        |        |        |         |
+| 2380139                                                                                               | 12534           |        |        |        |         |
+| Function Name                                                                                         | min             | avg    | median | max    | # calls |
+| addAllocator                                                                                          | 14950           | 23538  | 23538  | 32127  | 2       |
+| allocate                                                                                              | 3245            | 26656  | 10624  | 108753 | 10      |
+| allocationEndTime                                                                                     | 436             | 436    | 436    | 436    | 3       |
+| allocationStartTime                                                                                   | 358             | 1691   | 2358   | 2358   | 3       |
+| batchAddAllocator                                                                                     | 15601           | 51861  | 52677  | 54688  | 43      |
+| batchRemoveAllocator                                                                                  | 15557           | 15942  | 15942  | 16328  | 2       |
+| distribute                                                                                            | 43588           | 56251  | 56251  | 68915  | 2       |
+| getAllo                                                                                               | 315             | 315    | 315    | 315    | 41      |
+| getPayouts                                                                                            | 24697           | 24697  | 24697  | 24697  | 1       |
+| getPoolId                                                                                             | 327             | 327    | 327    | 327    | 41      |
+| getRecipient                                                                                          | 3172            | 3505   | 3172   | 5172   | 6       |
+| getRecipientStatus                                                                                    | 4461            | 4461   | 4461   | 4461   | 1       |
+| getVoiceCreditsCastByAllocator                                                                        | 610             | 610    | 610    | 610    | 2       |
+| getVoiceCreditsCastByAllocatorToRecipient                                                             | 784             | 784    | 784    | 784    | 4       |
+| getVotesCastByAllocatorToRecipient                                                                    | 829             | 829    | 829    | 829    | 4       |
+| increasePoolAmount                                                                                    | 22629           | 22629  | 22629  | 22629  | 41      |
+| initialize                                                                                            | 5560            | 90658  | 95195  | 97195  | 46      |
+| isPoolActive                                                                                          | 657             | 1656   | 1656   | 2656   | 2       |
+| isValidAllocator                                                                                      | 644             | 1644   | 1644   | 2644   | 12      |
+| maxVoiceCreditsPerAllocator                                                                           | 2352            | 2352   | 2352   | 2352   | 2       |
+| payouts                                                                                               | 613             | 613    | 613    | 613    | 2       |
+| receive                                                                                               | 55              | 55     | 55     | 55     | 41      |
+| recoverFunds                                                                                          | 15029           | 29789  | 29312  | 45026  | 3       |
+| registerRecipient                                                                                     | 16903           | 136552 | 153113 | 153113 | 28      |
+| removeAllocator                                                                                       | 11992           | 13460  | 13460  | 14929  | 2       |
+| setPayouts                                                                                            | 3225            | 59630  | 82431  | 85483  | 11      |
+| updatePoolTimestamps                                                                                  | 10619           | 14310  | 15005  | 17307  | 3       |
+
+
+| contracts/strategies/donation-voting-merkle-distribution-direct-transfer/DonationVotingMerkleDistributionDirectTransferStrategy.sol:DonationVotingMerkleDistributionDirectTransferStrategy contract |                 |        |        |        |         |
+|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------|--------|--------|--------|---------|
+| Deployment Cost                                                                                                                                                                                     | Deployment Size |        |        |        |         |
+| 3029610                                                                                                                                                                                             | 15862           |        |        |        |         |
+| Function Name                                                                                                                                                                                       | min             | avg    | median | max    | # calls |
+| allocate                                                                                                                                                                                            | 5311            | 25806  | 13452  | 63688  | 9       |
+| allocationEndTime                                                                                                                                                                                   | 381             | 1381   | 1381   | 2381   | 2       |
+| allocationStartTime                                                                                                                                                                                 | 441             | 441    | 441    | 441    | 2       |
+| allowedTokens                                                                                                                                                                                       | 2592            | 2592   | 2592   | 2592   | 1       |
+| distribute                                                                                                                                                                                          | 7239            | 73154  | 98246  | 117471 | 8       |
+| getAllo                                                                                                                                                                                             | 293             | 293    | 293    | 293    | 51      |
+| getPayouts                                                                                                                                                                                          | 19487           | 19487  | 19487  | 19487  | 1       |
+| getPoolId                                                                                                                                                                                           | 393             | 432    | 393    | 2393   | 51      |
+| getRecipient                                                                                                                                                                                        | 2581            | 2581   | 2581   | 2581   | 1       |
+| getRecipientStatus                                                                                                                                                                                  | 1612            | 1612   | 1612   | 1612   | 2       |
+| getStrategyId                                                                                                                                                                                       | 227             | 227    | 227    | 227    | 1       |
+| hasBeenDistributed                                                                                                                                                                                  | 761             | 1761   | 1761   | 2761   | 2       |
+| increasePoolAmount                                                                                                                                                                                  | 5507            | 20774  | 22607  | 22607  | 56      |
+| initialize                                                                                                                                                                                          | 926             | 139976 | 145461 | 145461 | 52      |
+| isDistributionSet                                                                                                                                                                                   | 372             | 1372   | 1372   | 2372   | 2       |
+| isPoolActive                                                                                                                                                                                        | 627             | 1559   | 1559   | 2492   | 2       |
+| isValidAllocator                                                                                                                                                                                    | 499             | 499    | 499    | 499    | 2       |
+| metadataRequired                                                                                                                                                                                    | 410             | 410    | 410    | 410    | 1       |
+| receive                                                                                                                                                                                             | 55              | 55     | 55     | 55     | 56      |
+| recipientsCounter                                                                                                                                                                                   | 374             | 374    | 374    | 374    | 18      |
+| registerRecipient                                                                                                                                                                                   | 5331            | 125489 | 155627 | 155627 | 31      |
+| registrationEndTime                                                                                                                                                                                 | 420             | 420    | 420    | 420    | 2       |
+| registrationStartTime                                                                                                                                                                               | 436             | 436    | 436    | 436    | 2       |
+| reviewRecipients                                                                                                                                                                                    | 3109            | 14627  | 15437  | 15437  | 18      |
+| statusesBitMap                                                                                                                                                                                      | 537             | 537    | 537    | 537    | 1       |
+| updateDistribution                                                                                                                                                                                  | 3121            | 59587  | 73093  | 89593  | 12      |
+| updatePoolTimestamps                                                                                                                                                                                | 15268           | 18584  | 15405  | 25081  | 3       |
+| useRegistryAnchor                                                                                                                                                                                   | 2400            | 2400   | 2400   | 2400   | 1       |
+| withdraw                                                                                                                                                                                            | 14989           | 27228  | 17229  | 49467  | 3       |
+
+
+| contracts/strategies/donation-voting-merkle-distribution-vault/DonationVotingMerkleDistributionVaultStrategy.sol:DonationVotingMerkleDistributionVaultStrategy contract |                 |        |        |        |         |
+|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------|--------|--------|--------|---------|
+| Deployment Cost                                                                                                                                                         | Deployment Size |        |        |        |         |
+| 3280719                                                                                                                                                                 | 17116           |        |        |        |         |
+| Function Name                                                                                                                                                           | min             | avg    | median | max    | # calls |
+| allocate                                                                                                                                                                | 5311            | 46446  | 44869  | 111864 | 13      |
+| allocationEndTime                                                                                                                                                       | 404             | 1404   | 1404   | 2404   | 2       |
+| allocationStartTime                                                                                                                                                     | 441             | 441    | 441    | 441    | 2       |
+| allowedTokens                                                                                                                                                           | 2592            | 2592   | 2592   | 2592   | 1       |
+| claim                                                                                                                                                                   | 22825           | 33152  | 26870  | 49762  | 3       |
+| claims                                                                                                                                                                  | 787             | 787    | 787    | 787    | 2       |
+| distribute                                                                                                                                                              | 7262            | 73177  | 98269  | 117494 | 8       |
+| getAllo                                                                                                                                                                 | 271             | 271    | 271    | 271    | 56      |
+| getPayouts                                                                                                                                                              | 19510           | 19510  | 19510  | 19510  | 1       |
+| getPoolId                                                                                                                                                               | 371             | 406    | 371    | 2371   | 56      |
+| getRecipient                                                                                                                                                            | 2559            | 2559   | 2559   | 2559   | 1       |
+| getRecipientStatus                                                                                                                                                      | 1612            | 1612   | 1612   | 1612   | 2       |
+| getStrategyId                                                                                                                                                           | 250             | 250    | 250    | 250    | 1       |
+| hasBeenDistributed                                                                                                                                                      | 739             | 1739   | 1739   | 2739   | 2       |
+| increasePoolAmount                                                                                                                                                      | 5507            | 20925  | 22607  | 22607  | 61      |
+| initialize                                                                                                                                                              | 926             | 140457 | 145461 | 145461 | 57      |
+| isDistributionSet                                                                                                                                                       | 395             | 1395   | 1395   | 2395   | 2       |
+| isPoolActive                                                                                                                                                            | 627             | 1559   | 1559   | 2492   | 2       |
+| isValidAllocator                                                                                                                                                        | 477             | 477    | 477    | 477    | 2       |
+| metadataRequired                                                                                                                                                        | 388             | 388    | 388    | 388    | 1       |
+| receive                                                                                                                                                                 | 55              | 55     | 55     | 55     | 65      |
+| recipientsCounter                                                                                                                                                       | 352             | 352    | 352    | 352    | 23      |
+| registerRecipient                                                                                                                                                       | 5309            | 129653 | 155605 | 155605 | 36      |
+| registrationEndTime                                                                                                                                                     | 420             | 420    | 420    | 420    | 2       |
+| registrationStartTime                                                                                                                                                   | 414             | 414    | 414    | 414    | 2       |
+| reviewRecipients                                                                                                                                                        | 3109            | 14803  | 15437  | 15437  | 23      |
+| statusesBitMap                                                                                                                                                          | 537             | 537    | 537    | 537    | 1       |
+| updateDistribution                                                                                                                                                      | 3144            | 59610  | 73116  | 89616  | 12      |
+| updatePoolTimestamps                                                                                                                                                    | 15246           | 18562  | 15383  | 25059  | 3       |
+| useRegistryAnchor                                                                                                                                                       | 2378            | 2378   | 2378   | 2378   | 1       |
+| withdraw                                                                                                                                                                | 15033           | 27773  | 22169  | 51721  | 4       |
+
+
+| contracts/strategies/qv-simple/QVSimpleStrategy.sol:QVSimpleStrategy contract |                 |        |        |        |         |
+|-------------------------------------------------------------------------------|-----------------|--------|--------|--------|---------|
+| Deployment Cost                                                               | Deployment Size |        |        |        |         |
+| 2801455                                                                       | 14644           |        |        |        |         |
+| Function Name                                                                 | min             | avg    | median | max    | # calls |
+| addAllocator                                                                  | 4226            | 16006  | 7737   | 34137  | 112     |
+| allocate                                                                      | 1982            | 72348  | 129542 | 129542 | 13      |
+| allocationEndTime                                                             | 442             | 442    | 442    | 442    | 2       |
+| allocationStartTime                                                           | 420             | 420    | 420    | 420    | 2       |
+| distribute                                                                    | 12912           | 46870  | 51804  | 61484  | 6       |
+| getAllo                                                                       | 271             | 271    | 271    | 271    | 54      |
+| getPayouts                                                                    | 4611            | 13524  | 13524  | 22438  | 2       |
+| getPoolId                                                                     | 327             | 364    | 327    | 2327   | 54      |
+| getRecipient                                                                  | 3086            | 4086   | 4086   | 5086   | 2       |
+| getRecipientStatus                                                            | 2428            | 4410   | 4428   | 12255  | 10      |
+| getStrategyId                                                                 | 271             | 271    | 271    | 271    | 1       |
+| increasePoolAmount                                                            | 591             | 19623  | 22795  | 22795  | 7       |
+| initialize                                                                    | 891             | 113168 | 120853 | 120853 | 61      |
+| isPoolActive                                                                  | 612             | 1547   | 1547   | 2483   | 2       |
+| isValidAllocator                                                              | 2644            | 2644   | 2644   | 2644   | 3       |
+| maxVoiceCreditsPerAllocator                                                   | 2352            | 2352   | 2352   | 2352   | 1       |
+| metadataRequired                                                              | 2389            | 2389   | 2389   | 2389   | 1       |
+| registerRecipient                                                             | 962             | 79418  | 103337 | 103337 | 30      |
+| registrationEndTime                                                           | 413             | 413    | 413    | 413    | 2       |
+| registrationStartTime                                                         | 381             | 1381   | 1381   | 2381   | 2       |
+| removeAllocator                                                               | 14199           | 14583  | 14583  | 14968  | 2       |
+| reviewRecipients                                                              | 3626            | 42075  | 32863  | 61048  | 50      |
+| reviewsByStatus                                                               | 771             | 771    | 771    | 771    | 7       |
+| updatePoolTimestamps                                                          | 15246           | 17821  | 15383  | 22835  | 3       |
+| withdraw                                                                      | 17267           | 20313  | 20313  | 23360  | 2       |
+
+
+| contracts/strategies/rfp-committee/RFPCommitteeStrategy.sol:RFPCommitteeStrategy contract |                 |        |        |        |         |
+|-------------------------------------------------------------------------------------------|-----------------|--------|--------|--------|---------|
+| Deployment Cost                                                                           | Deployment Size |        |        |        |         |
+| 2616539                                                                                   | 13629           |        |        |        |         |
+| Function Name                                                                             | min             | avg    | median | max    | # calls |
+| allocate                                                                                  | 912             | 34742  | 49272  | 51992  | 8       |
+| getAllo                                                                                   | 260             | 260    | 260    | 260    | 9       |
+| getPoolId                                                                                 | 349             | 349    | 349    | 349    | 9       |
+| getRecipientStatus                                                                        | 2758            | 2758   | 2758   | 2758   | 1       |
+| getStrategyId                                                                             | 282             | 282    | 282    | 282    | 1       |
+| initialize                                                                                | 1486            | 117720 | 140555 | 142555 | 12      |
+| maxBid                                                                                    | 406             | 406    | 406    | 406    | 1       |
+| metadataRequired                                                                          | 410             | 410    | 410    | 410    | 1       |
+| registerRecipient                                                                         | 142103          | 164528 | 172003 | 172003 | 4       |
+| setMilestones                                                                             | 104661          | 104661 | 104661 | 104661 | 3       |
+| useRegistryAnchor                                                                         | 377             | 377    | 377    | 377    | 1       |
+| voteThreshold                                                                             | 385             | 385    | 385    | 385    | 1       |
+| votedFor                                                                                  | 629             | 629    | 629    | 629    | 2       |
+| votes                                                                                     | 624             | 1290   | 624    | 2624   | 6       |
+
+
+| contracts/strategies/rfp-simple/RFPSimpleStrategy.sol:RFPSimpleStrategy contract |                 |        |        |        |         |
+|----------------------------------------------------------------------------------|-----------------|--------|--------|--------|---------|
+| Deployment Cost                                                                  | Deployment Size |        |        |        |         |
+| 2556255                                                                          | 13322           |        |        |        |         |
+| Function Name                                                                    | min             | avg    | median | max    | # calls |
+| allocate                                                                         | 940             | 24607  | 26748  | 33834  | 22      |
+| distribute                                                                       | 1359            | 37878  | 22598  | 69998  | 11      |
+| getAllo                                                                          | 260             | 260    | 260    | 260    | 53      |
+| getMilestone                                                                     | 2541            | 2541   | 2541   | 2541   | 5       |
+| getMilestoneStatus                                                               | 754             | 754    | 754    | 754    | 2       |
+| getPayouts                                                                       | 3683            | 3683   | 3683   | 3683   | 1       |
+| getPoolId                                                                        | 371             | 371    | 371    | 371    | 53      |
+| getRecipient                                                                     | 3295            | 4773   | 3295   | 13354  | 7       |
+| getRecipientStatus                                                               | 2539            | 2615   | 2615   | 2691   | 2       |
+| getStrategyId                                                                    | 304             | 304    | 304    | 304    | 1       |
+| increaseMaxBid                                                                   | 14910           | 17658  | 17059  | 21006  | 3       |
+| increasePoolAmount                                                               | 22629           | 22629  | 22629  | 22629  | 8       |
+| initialize                                                                       | 1295            | 114038 | 117920 | 119920 | 58      |
+| isPoolActive                                                                     | 393             | 393    | 393    | 393    | 1       |
+| isValidAllocator                                                                 | 6578            | 10828  | 10828  | 15078  | 2       |
+| maxBid                                                                           | 341             | 341    | 341    | 341    | 2       |
+| metadataRequired                                                                 | 366             | 366    | 366    | 366    | 1       |
+| receive                                                                          | 55              | 55     | 55     | 55     | 8       |
+| registerRecipient                                                                | 1249            | 138885 | 171936 | 202378 | 33      |
+| rejectMilestone                                                                  | 2819            | 6117   | 4998   | 14953  | 5       |
+| setMilestones                                                                    | 3296            | 150429 | 175478 | 179978 | 22      |
+| setPoolActive                                                                    | 8472            | 11172  | 12522  | 12522  | 3       |
+| submitUpcomingMilestone                                                          | 799             | 23834  | 25187  | 32636  | 14      |
+| useRegistryAnchor                                                                | 399             | 399    | 399    | 399    | 1       |
+| withdraw                                                                         | 14962           | 22280  | 17108  | 34771  | 3       |
+
+
+
+Ran 23 test suites: 831 tests passed, 0 failed, 0 skipped (831 total tests)

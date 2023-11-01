@@ -147,7 +147,12 @@ export const deployContractUsingFactoryWithBytecode = async (
       "Contract " + contractName + " deployed at address: " + contractAddress
     );
   } catch (error) {
-    logPink("Error calling deploy() function. \n" + error);
+    logPink(
+      "Error calling deploy() function for contract " +
+        contractName +
+        "\n" +
+        error
+    );
   }
 
   return contractAddress;
