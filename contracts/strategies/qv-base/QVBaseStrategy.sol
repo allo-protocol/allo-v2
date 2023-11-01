@@ -34,16 +34,21 @@ abstract contract QVBaseStrategy is BaseStrategy {
 
     /// @notice Emitted when a recipient updates their registration
     /// @param recipientId ID of the recipient
+    /// @param applicationId ID of the recipient's application
     /// @param data The encoded data - (address recipientId, address recipientAddress, Metadata metadata)
     /// @param sender The sender of the transaction
     /// @param status The updated status of the recipient
-    event UpdatedRegistration(address indexed recipientId, bytes data, address sender, Status status);
+    event UpdatedRegistration(
+        address indexed recipientId, uint256 applicationId, bytes data, address sender, Status status
+    );
 
     /// @notice Emitted when a recipient is registered
     /// @param recipientId ID of the recipient
+    /// @param applicationId ID of the recipient's application
     /// @param status The status of the recipient
     /// @param sender The sender of the transaction
-    event RecipientStatusUpdated(address indexed recipientId, Status status, address sender);
+    event RecipientStatusUpdated(address indexed recipientId, uint256 applicationId, Status status, address sender);
+
     /// @notice Emitted when the pool timestamps are updated
     /// @param registrationStartTime The start time for the registration
     /// @param registrationEndTime The end time for the registration
@@ -66,9 +71,10 @@ abstract contract QVBaseStrategy is BaseStrategy {
 
     /// @notice Emitted when a recipient is reviewed
     /// @param recipientId ID of the recipient
+    /// @param applicationId ID of the recipient's application
     /// @param status The status of the recipient
     /// @param sender The sender of the transaction
-    event Reviewed(address indexed recipientId, Status status, address sender);
+    event Reviewed(address indexed recipientId, uint256 applicationId, Status status, address sender);
 
     /// ======================
     /// ======= Storage ======
@@ -137,7 +143,8 @@ abstract contract QVBaseStrategy is BaseStrategy {
         address recipientAddress;
         Metadata metadata;
         Status recipientStatus;
-        uint256 nonce;
+        // slot 2
+        uint256 applicationId;
     }
 
     /// @notice The details of the allocator
@@ -161,10 +168,10 @@ abstract contract QVBaseStrategy is BaseStrategy {
     /// @dev recipientId => paid out
     mapping(address => bool) public paidOut;
 
-    // recipientId -> nonce -> status -> count
+    // recipientId -> applicationId -> status -> count
     mapping(address => mapping(uint256 => mapping(Status => uint256))) public reviewsByStatus;
 
-    // recipientId -> nonce -> reviewer -> status
+    // recipientId -> applicationId -> reviewer -> status
     mapping(address => mapping(uint256 => mapping(address => Status))) public reviewedByManager;
 
     /// ================================
@@ -279,29 +286,29 @@ abstract contract QVBaseStrategy is BaseStrategy {
             Status recipientStatus = _recipientStatuses[i];
             address recipientId = _recipientIds[i];
             Recipient storage recipient = recipients[recipientId];
-            uint256 nonce = recipient.nonce;
+            uint256 applicationId = recipient.applicationId;
 
             // if the status is none or appealed then revert
             if (recipientStatus == Status.None || recipientStatus == Status.Appealed) {
                 revert RECIPIENT_ERROR(recipientId);
             }
 
-            if (reviewedByManager[recipientId][nonce][msg.sender] > Status.None) {
+            if (reviewedByManager[recipientId][applicationId][msg.sender] > Status.None) {
                 revert RECIPIENT_ERROR(recipientId);
             }
 
             // track the review cast for the recipient and update status counter
-            reviewedByManager[recipientId][nonce][msg.sender] = recipientStatus;
-            reviewsByStatus[recipientId][nonce][recipientStatus]++;
+            reviewedByManager[recipientId][applicationId][msg.sender] = recipientStatus;
+            reviewsByStatus[recipientId][applicationId][recipientStatus]++;
 
             // update the recipient status if the review threshold has been reached
-            if (reviewsByStatus[recipientId][nonce][recipientStatus] >= reviewThreshold) {
+            if (reviewsByStatus[recipientId][applicationId][recipientStatus] >= reviewThreshold) {
                 recipient.recipientStatus = recipientStatus;
 
-                emit RecipientStatusUpdated(recipientId, recipientStatus, address(0));
+                emit RecipientStatusUpdated(recipientId, applicationId, recipientStatus, address(0));
             }
 
-            emit Reviewed(recipientId, recipientStatus, msg.sender);
+            emit Reviewed(recipientId, applicationId, recipientStatus, msg.sender);
 
             unchecked {
                 ++i;
@@ -452,26 +459,25 @@ abstract contract QVBaseStrategy is BaseStrategy {
         recipient.recipientAddress = recipientAddress;
         recipient.metadata = metadata;
         recipient.useRegistryAnchor = registryGating ? true : isUsingRegistryAnchor;
-        ++recipient.nonce;
+        ++recipient.applicationId;
 
         Status currentStatus = recipient.recipientStatus;
 
-        if (currentStatus == Status.Accepted) {
-            // revert if the recipient has already been accepted
-            revert RECIPIENT_ALREADY_ACCEPTED();
-        } else if (currentStatus == Status.None) {
+        if (currentStatus == Status.None) {
             // recipient registering new application
             recipient.recipientStatus = Status.Pending;
             emit Registered(recipientId, _data, _sender);
         } else {
-            // recipient updating rejected/pending/appealed application
+            // recipient updating rejected/pending/appealed/accepted application
             if (currentStatus == Status.Rejected) {
-                // recipient updating rejected application
                 recipient.recipientStatus = Status.Appealed;
+            } else if (currentStatus == Status.Accepted) {
+                // recipient updating already accepted application
+                recipient.recipientStatus = Status.Pending;
             }
 
             // emit the new status with the '_data' that was passed in
-            emit UpdatedRegistration(recipientId, _data, _sender, recipient.recipientStatus);
+            emit UpdatedRegistration(recipientId, recipient.applicationId, _data, _sender, recipient.recipientStatus);
         }
     }
 
