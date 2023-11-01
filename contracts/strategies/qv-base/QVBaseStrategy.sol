@@ -137,6 +137,7 @@ abstract contract QVBaseStrategy is BaseStrategy {
         address recipientAddress;
         Metadata metadata;
         Status recipientStatus;
+        uint256 nonce;
     }
 
     /// @notice The details of the allocator
@@ -160,11 +161,11 @@ abstract contract QVBaseStrategy is BaseStrategy {
     /// @dev recipientId => paid out
     mapping(address => bool) public paidOut;
 
-    // recipientId -> status -> count
-    mapping(address => mapping(Status => uint256)) public reviewsByStatus;
+    // recipientId -> nonce -> status -> count
+    mapping(address => mapping(uint256 => mapping(Status => uint256))) public reviewsByStatus;
 
-    // recipientId -> reviewer -> status
-    mapping(address => mapping(address => Status)) public reviewedByManager;
+    // recipientId -> nonce -> reviewer -> status
+    mapping(address => mapping(uint256 => mapping(address => Status))) public reviewedByManager;
 
     /// ================================
     /// ========== Modifier ============
@@ -277,30 +278,24 @@ abstract contract QVBaseStrategy is BaseStrategy {
         for (uint256 i; i < recipientLength;) {
             Status recipientStatus = _recipientStatuses[i];
             address recipientId = _recipientIds[i];
+            Recipient storage recipient = recipients[recipientId];
+            uint256 nonce = recipient.nonce;
 
             // if the status is none or appealed then revert
             if (recipientStatus == Status.None || recipientStatus == Status.Appealed) {
                 revert RECIPIENT_ERROR(recipientId);
             }
 
-            Status oldStatus = reviewedByManager[recipientId][msg.sender];
-
-            // pool manager is updating the review for the recipient
-            if (oldStatus != Status.None) {
-                // revert if pool manager is reviewing with same status as before
-                if (oldStatus == recipientStatus) revert RECIPIENT_ERROR(recipientId);
-
-                // decrement the old status counter as pool manager is changing their review
-                reviewsByStatus[recipientId][oldStatus]--;
+            if (reviewedByManager[recipientId][nonce][msg.sender] > Status.None) {
+                revert RECIPIENT_ERROR(recipientId);
             }
 
             // track the review cast for the recipient and update status counter
-            reviewedByManager[recipientId][msg.sender] = recipientStatus;
-            reviewsByStatus[recipientId][recipientStatus]++;
+            reviewedByManager[recipientId][nonce][msg.sender] = recipientStatus;
+            reviewsByStatus[recipientId][nonce][recipientStatus]++;
 
             // update the recipient status if the review threshold has been reached
-            if (reviewsByStatus[recipientId][recipientStatus] >= reviewThreshold) {
-                Recipient storage recipient = recipients[recipientId];
+            if (reviewsByStatus[recipientId][nonce][recipientStatus] >= reviewThreshold) {
                 recipient.recipientStatus = recipientStatus;
 
                 emit RecipientStatusUpdated(recipientId, recipientStatus, address(0));
@@ -457,6 +452,7 @@ abstract contract QVBaseStrategy is BaseStrategy {
         recipient.recipientAddress = recipientAddress;
         recipient.metadata = metadata;
         recipient.useRegistryAnchor = registryGating ? true : isUsingRegistryAnchor;
+        ++recipient.nonce;
 
         Status currentStatus = recipient.recipientStatus;
 
