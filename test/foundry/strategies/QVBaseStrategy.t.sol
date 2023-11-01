@@ -58,7 +58,9 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
     uint256 public poolId;
 
     event Reviewed(address indexed recipientId, uint256 applicationId, QVBaseStrategy.Status status, address sender);
-    event RecipientStatusUpdated(address indexed recipientId, uint256 applicationId, IStrategy.Status status, address sender);
+    event RecipientStatusUpdated(
+        address indexed recipientId, uint256 applicationId, IStrategy.Status status, address sender
+    );
     event PoolCreated(
         uint256 indexed poolId,
         bytes32 indexed profileId,
