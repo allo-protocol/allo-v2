@@ -325,7 +325,6 @@ contract QVBaseStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup
         address recipientId = __register_reject_recipient();
         __register_recipient();
 
-        // test status mapping. Internal: Appealed -> Global: Pendi
         IStrategy.Status newStatus = qvStrategy().getRecipientStatus(recipientId);
         // get Recipient
         QVBaseStrategy.Recipient memory recipient = qvStrategy().getRecipient(recipientId);
