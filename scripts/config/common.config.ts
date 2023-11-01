@@ -68,7 +68,7 @@ export const commonConfig: DeployParams = {
   },
   // Arbitrum Goerli
   421613: {
-    proxyAdminOwner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
-    permit2Address: "0x000000000022D473030F116dDEE9F6B43aC78BA3",
+    proxyAdminOwner: "",
+    permit2Address: "",
   },
 };

@@ -58,7 +58,7 @@ export const registryConfig: DeployParams = {
   },
   // Arbitrum Goerli
   421613: {
-    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
+    owner: "",
   },
   // Base Mainnet
   8453: {

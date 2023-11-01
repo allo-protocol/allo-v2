@@ -97,8 +97,8 @@ export const alloConfig: DeployParams = {
   },
   // Arbitrum Goerli
   421613: {
-    owner: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
-    treasury: "0x5078a23B2C95e1B2f7C2Cee9F1Fb5534d473E781",
+    owner: "",
+    treasury: "",
     percentFee: 0,
     baseFee: 0,
   },
