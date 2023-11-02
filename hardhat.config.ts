@@ -127,8 +127,8 @@ const abiExporter = [
  */
 const config: HardhatUserConfig = {
   defender: {
-    "apiKey": DEFENDER_TEAM_API_KEY,
-    "apiSecret": DEFENDER_TEAM_API_SECRET_KEY,
+    apiKey: DEFENDER_TEAM_API_KEY,
+    apiSecret: DEFENDER_TEAM_API_SECRET_KEY,
   },
   solidity: {
     version: "0.8.19",
@@ -146,14 +146,15 @@ const config: HardhatUserConfig = {
     "optimism-mainnet": {
       ...createMainnetConfig("optimism-mainnet"),
       url: `https://opt-mainnet.g.alchemy.com/v2/${alchemyIdKey}`,
+      // gasPrice: 35000000000,
     },
     "arbitrum-mainnet": createMainnetConfig(
       "arbitrum-mainnet",
-      `https://arb-mainnet.g.alchemy.com/v2/${alchemyIdKey}`
+      `https://arb-mainnet.g.alchemy.com/v2/${alchemyIdKey}`,
     ),
     "fantom-mainnet": createMainnetConfig(
       "fantom-mainnet",
-      "https://rpc.ftm.tools"
+      "https://rpc.ftm.tools",
     ),
     "pgn-mainnet": {
       ...createMainnetConfig("pgn-mainnet"),
@@ -177,19 +178,19 @@ const config: HardhatUserConfig = {
     // Test Networks
     goerli: createTestnetConfig(
       "goerli",
-      `https://eth-goerli.g.alchemy.com/v2/${alchemyIdKey}`
+      `https://eth-goerli.g.alchemy.com/v2/${alchemyIdKey}`,
     ),
     sepolia: createTestnetConfig(
       "sepolia",
-      `https://eth-sepolia.g.alchemy.com/v2/${alchemyIdKey}`
+      `https://eth-sepolia.g.alchemy.com/v2/${alchemyIdKey}`,
     ),
     "arbitrum-goerli": createTestnetConfig(
       "arbitrum-goerli",
-      `https://arb-goerli.g.alchemy.com/v2/${alchemyIdKey}`
+      `https://arb-goerli.g.alchemy.com/v2/${alchemyIdKey}`,
     ),
     ftmTestnet: createTestnetConfig(
       "fantom-testnet",
-      "https://rpc.testnet.fantom.network/"
+      "https://rpc.testnet.fantom.network/",
     ),
     "optimism-goerli": {
       ...createTestnetConfig("optimism-goerli"),

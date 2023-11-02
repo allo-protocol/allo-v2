@@ -1,0 +1,33 @@
+WARNING: You are currently using Node.js v21.1.0, which is not supported by Hardhat. This can lead to unexpected behavior. See https://hardhat.org/nodejs-versions
+
+
+
+    ////////////////////////////////////////////////////
+      Deploys RFPCommitteeStrategy.sol on mainnet
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────┐
+│     (index)     │                    Values                    │
+├─────────────────┼──────────────────────────────────────────────┤
+│    contract     │          'RFPCommitteeStrategy.sol'          │
+│     chainId     │                      1                       │
+│     network     │                  'mainnet'                   │
+│ deployerAddress │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│     balance     │            '0.806946941057514804'            │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying RFPCommitteeStrategy.sol
+[35mContract RFPCommitteeStrategy deployed at address: 0x8Def91f220f3D1C16D406097ffb0dAEe0732772f[0m
+
+Verifying contract...
+Successfully submitted source code for contract
+contracts/strategies/rfp-committee/RFPCommitteeStrategy.sol:RFPCommitteeStrategy at 0x8Def91f220f3D1C16D406097ffb0dAEe0732772f
+for verification on the block explorer. Waiting for verification result...
+
+Successfully verified contract RFPCommitteeStrategy on the block explorer.
+https://etherscan.io/address/0x8Def91f220f3D1C16D406097ffb0dAEe0732772f#code
+[90m
+	Validating getAllo() == 0x1133eA7Af70876e64665ecD07C0A0476d09465a1[0m
+[32m	✅ PASSED with Result: 0x1133eA7Af70876e64665ecD07C0A0476d09465a1[0m
+[90m
+	Validating getStrategyId() == 0x7d143166a83c6a8a303ae32a6ccd287e48d79818f5d15d89e185391199909803[0m
+[32m	✅ PASSED with Result: 0x7d143166a83c6a8a303ae32a6ccd287e48d79818f5d15d89e185391199909803[0m
