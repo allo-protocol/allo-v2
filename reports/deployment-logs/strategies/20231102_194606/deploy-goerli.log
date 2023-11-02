@@ -1,0 +1,109 @@
+Warning: Unreachable code.
+   --> contracts/strategies/BaseStrategy.sol:174:9:
+    |
+174 |         _afterRegisterRecipient(_data, _sender);
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Compiled 112 Solidity files successfully (evm target: paris).
+
+    ////////////////////////////////////////////////////////
+    Deploy Strategies on Allo V2 contracts to goerli
+    ///////////////////////////////////////////////////////
+  
+
+    ////////////////////////////////////////////////////
+      Deploys DonationVotingMerkleDistributionDirectTransferStrategy.sol on goerli
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────────────────────┐
+│     (index)     │                            Values                            │
+├─────────────────┼──────────────────────────────────────────────────────────────┤
+│    contract     │ 'DonationVotingMerkleDistributionDirectTransferStrategy.sol' │
+│     chainId     │                              5                               │
+│     network     │                           'goerli'                           │
+│ deployerAddress │         '0xda4983d787769A607244C8f061c2a93FC5772240'         │
+│     balance     │                         '1.51135073'                         │
+└─────────────────┴──────────────────────────────────────────────────────────────┘
+Deploying DonationVotingMerkleDistributionDirectTransferStrategy.sol
+[35mContract DonationVotingMerkleDistributionDirectTransferStrategy deployed at address: 0xC8364D945f55d5aceA457Be4fE33bcE2d4964bBC[0m
+
+Verifying contract...
+Successfully submitted source code for contract
+contracts/strategies/donation-voting-merkle-distribution-direct-transfer/DonationVotingMerkleDistributionDirectTransferStrategy.sol:DonationVotingMerkleDistributionDirectTransferStrategy at 0xC8364D945f55d5aceA457Be4fE33bcE2d4964bBC
+for verification on the block explorer. Waiting for verification result...
+
+Successfully verified contract DonationVotingMerkleDistributionDirectTransferStrategy on the block explorer.
+https://goerli.etherscan.io/address/0xC8364D945f55d5aceA457Be4fE33bcE2d4964bBC#code
+[90m
+	Validating getAllo() == 0x33044dAEB67C882F8Dd697394A9319e0b353f59B[0m
+[32m	✅ PASSED with Result: 0x33044dAEB67C882F8Dd697394A9319e0b353f59B[0m
+[90m
+	Validating getStrategyId() == 0x3d153d330e5749340e78a3328cf599998d873ab33aa01aac24730596c5cd6e77[0m
+[32m	✅ PASSED with Result: 0x3d153d330e5749340e78a3328cf599998d873ab33aa01aac24730596c5cd6e77[0m
+[90m
+	Validating PERMIT2() == 0x000000000022d473030f116ddee9f6b43ac78ba3[0m
+[32m	✅ PASSED with Result: 0x000000000022d473030f116ddee9f6b43ac78ba3[0m
+
+    ////////////////////////////////////////////////////
+      Deploys DonationVotingMerkleDistributionVaultStrategy.sol on goerli
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬─────────────────────────────────────────────────────┐
+│     (index)     │                       Values                        │
+├─────────────────┼─────────────────────────────────────────────────────┤
+│    contract     │ 'DonationVotingMerkleDistributionVaultStrategy.sol' │
+│     chainId     │                          5                          │
+│     network     │                      'goerli'                       │
+│ deployerAddress │    '0xda4983d787769A607244C8f061c2a93FC5772240'     │
+│     balance     │                    '1.41290126'                     │
+└─────────────────┴─────────────────────────────────────────────────────┘
+Deploying DonationVotingMerkleDistributionVaultStrategy.sol
+[35mContract DonationVotingMerkleDistributionVaultStrategy deployed at address: 0x3556D76c60f1aab990Bb442632F372A0A035a8b7[0m
+
+Verifying contract...
+Successfully submitted source code for contract
+contracts/strategies/donation-voting-merkle-distribution-vault/DonationVotingMerkleDistributionVaultStrategy.sol:DonationVotingMerkleDistributionVaultStrategy at 0x3556D76c60f1aab990Bb442632F372A0A035a8b7
+for verification on the block explorer. Waiting for verification result...
+
+Successfully verified contract DonationVotingMerkleDistributionVaultStrategy on the block explorer.
+https://goerli.etherscan.io/address/0x3556D76c60f1aab990Bb442632F372A0A035a8b7#code
+[90m
+	Validating getAllo() == 0x33044dAEB67C882F8Dd697394A9319e0b353f59B[0m
+[32m	✅ PASSED with Result: 0x33044dAEB67C882F8Dd697394A9319e0b353f59B[0m
+[90m
+	Validating getStrategyId() == 0xbf38c40ee207066ac165fc50e196cb442249bdc0ad738bbd2955a304944ef79c[0m
+[32m	✅ PASSED with Result: 0xbf38c40ee207066ac165fc50e196cb442249bdc0ad738bbd2955a304944ef79c[0m
+[90m
+	Validating PERMIT2() == 0x000000000022d473030f116ddee9f6b43ac78ba3[0m
+[32m	✅ PASSED with Result: 0x000000000022d473030f116ddee9f6b43ac78ba3[0m
+
+    ////////////////////////////////////////////////////
+      Deploys QVImpactStreamStrategy.sol on goerli
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────┐
+│     (index)     │                    Values                    │
+├─────────────────┼──────────────────────────────────────────────┤
+│    contract     │         'QVImpactStreamStrategy.sol'         │
+│     chainId     │                      5                       │
+│     network     │                   'goerli'                   │
+│ deployerAddress │ '0xda4983d787769A607244C8f061c2a93FC5772240' │
+│     balance     │                 '1.30662767'                 │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying QVImpactStreamStrategy.sol
+[35mContract QVImpactStreamStrategy deployed at address: 0x706e93bBF6A1D8366bdd2F05d21EaE8222d082f9[0m
+
+Verifying contract...
+Successfully submitted source code for contract
+contracts/strategies/_poc/qv-impact-stream/QVImpactStreamStrategy.sol:QVImpactStreamStrategy at 0x706e93bBF6A1D8366bdd2F05d21EaE8222d082f9
+for verification on the block explorer. Waiting for verification result...
+
+Successfully verified contract QVImpactStreamStrategy on the block explorer.
+https://goerli.etherscan.io/address/0x706e93bBF6A1D8366bdd2F05d21EaE8222d082f9#code
+[90m
+	Validating getAllo() == 0x33044dAEB67C882F8Dd697394A9319e0b353f59B[0m
+[32m	✅ PASSED with Result: 0x33044dAEB67C882F8Dd697394A9319e0b353f59B[0m
+[90m
+	Validating getStrategyId() == 0x5553ecb0fe086478a8a529fc9a95217033b592d70afb87e4cddfc0a79cc5f7c2[0m
+[32m	✅ PASSED with Result: 0x5553ecb0fe086478a8a529fc9a95217033b592d70afb87e4cddfc0a79cc5f7c2[0m
