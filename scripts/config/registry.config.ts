@@ -50,7 +50,7 @@ export const registryConfig: DeployParams = {
   },
   // Polygon Mumbai Testnet
   80001: {
-    owner: "",
+    owner: "0x00F06079089ca6F56D64682b8F3D4C6b067b612C",
   },
   // Arbitrum One Mainnet
   42161: {

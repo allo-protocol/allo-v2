@@ -58,7 +58,7 @@ export const commonConfig: DeployParams = {
   },
   // Mumbai
   80001: {
-    proxyAdminOwner: "",
+    proxyAdminOwner: "0x00F06079089ca6F56D64682b8F3D4C6b067b612C",
     permit2Address: "",
   },
   // Arbitrum One

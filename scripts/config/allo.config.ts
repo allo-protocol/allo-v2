@@ -83,8 +83,8 @@ export const alloConfig: DeployParams = {
   },
   // Mumbai
   80001: {
-    owner: "",
-    treasury: "",
+    owner: "0x00F06079089ca6F56D64682b8F3D4C6b067b612C",
+    treasury: "0x00F06079089ca6F56D64682b8F3D4C6b067b612C",
     percentFee: 0,
     baseFee: 0,
   },
