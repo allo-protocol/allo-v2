@@ -1,0 +1,30 @@
+WARNING: You are currently using Node.js v21.1.0, which is not supported by Hardhat. This can lead to unexpected behavior. See https://hardhat.org/nodejs-versions
+
+
+
+    ////////////////////////////////////////////////////
+        Deploys ContractFactory.sol on goerli
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────┐
+│     (index)     │                    Values                    │
+├─────────────────┼──────────────────────────────────────────────┤
+│    contract     │         'Deploy ContractFactory.sol'         │
+│     chainId     │                      5                       │
+│     network     │                   'goerli'                   │
+│ deployerAddress │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│     balance     │                 '0.34706633'                 │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying ContractFactory.sol...
+ContractFactory deployed to: 0xE195743480D1591B79106FF9B296A0cD38aDa807
+
+Verifying contract...
+Successfully submitted source code for contract
+contracts/factory/ContractFactory.sol:ContractFactory at 0xE195743480D1591B79106FF9B296A0cD38aDa807
+for verification on the block explorer. Waiting for verification result...
+
+Successfully verified contract ContractFactory on the block explorer.
+https://goerli.etherscan.io/address/0xE195743480D1591B79106FF9B296A0cD38aDa807#code
+[90m
+	Validating isDeployer(0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C) == true[0m
+[32m	✅ PASSED with Result: true[0m

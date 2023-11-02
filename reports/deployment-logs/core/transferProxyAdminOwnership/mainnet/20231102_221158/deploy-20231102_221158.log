@@ -1,0 +1,26 @@
+WARNING: You are currently using Node.js v21.1.0, which is not supported by Hardhat. This can lead to unexpected behavior. See https://hardhat.org/nodejs-versions
+
+
+Current Proxy Admin Owner:  0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C
+
+        ////////////////////////////////////////////////////
+            TransferProxyAdminOwnership on mainnet
+        ////////////////////////////////////////////////////
+      
+┌────────────────────┬──────────────────────────────────────────────┐
+│      (index)       │                    Values                    │
+├────────────────────┼──────────────────────────────────────────────┤
+│      contract      │        'TransferProxyAdminOwnership'         │
+│      chainId       │                      1                       │
+│      network       │                  'mainnet'                   │
+│        allo        │ '0x1133eA7Af70876e64665ecD07C0A0476d09465a1' │
+│      registry      │ '0x4AAcca72145e1dF2aeC137E1f3C5E3D75DB8b5f3' │
+│     proxyAdmin     │ '0x758b87af7fdB4783f848a1dDEa1F025dC48B9858' │
+│  deployerAddress   │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│ newProxyAdminOwner │ '0x34d82D1ED8B4fB6e6A569d6D086A39f9f734107E' │
+│      balance       │             '1.0290889677851099'             │
+└────────────────────┴──────────────────────────────────────────────┘
+Transfering ProxyAdminOwnership...
+✔ 0x4AAcca72145e1dF2aeC137E1f3C5E3D75DB8b5f3 (transparent) proxy ownership transfered through admin proxy
+✔ 0x1133eA7Af70876e64665ecD07C0A0476d09465a1 (transparent) proxy ownership transfered through admin proxy
+Proxy Admin Owner Transferred to:  0x34d82D1ED8B4fB6e6A569d6D086A39f9f734107E
