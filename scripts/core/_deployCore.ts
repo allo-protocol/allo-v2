@@ -18,14 +18,14 @@ export async function deployCore() {
     ////////////////////////////////////////////////////
   `);
 
-  // ContractFactory
-  deployContractFactory().then((deployedContract) => {
-    // Registry
-    deployRegistry().then((registryAddress) => {
+  // Registry
+  deployRegistry().then((registryAddress) => {
+    // ContractFactory
+    deployContractFactory().then((deployedContract) => {
       // Allo
       deployAllo().then((alloAddress) => {
         transferProxyAdminOwnership().then(() => {
-        // Log deployed addresses
+          // Log deployed addresses
           console.log(`
             ////////////////////////////////////////////////////
             Core Allo V2 deployed to:

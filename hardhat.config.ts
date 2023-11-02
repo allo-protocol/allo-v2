@@ -146,7 +146,6 @@ const config: HardhatUserConfig = {
     "optimism-mainnet": {
       ...createMainnetConfig("optimism-mainnet"),
       url: `https://opt-mainnet.g.alchemy.com/v2/${alchemyIdKey}`,
-      gasPrice: 20000000000,
     },
     "arbitrum-mainnet": createMainnetConfig(
       "arbitrum-mainnet",
@@ -164,17 +163,15 @@ const config: HardhatUserConfig = {
     "celo-mainnet": {
       ...createMainnetConfig("celo-mainnet"),
       url: "https://forno.celo.org",
-      gasPrice: 20000000000,
     },
     base: {
       ...createMainnetConfig("base"),
       url: `https://base-mainnet.g.alchemy.com/v2/${alchemyIdKey}`,
-      gasPrice: 20000000000,
     },
     polygon: {
       ...createMainnetConfig("polygon"),
       url: `https://polygon-mainnet.g.alchemy.com/v2/${alchemyIdKey}`,
-      gasPrice: 20000000000,
+      gasPrice: 300000000000,
     },
 
     // Test Networks
