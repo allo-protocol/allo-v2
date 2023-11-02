@@ -13,12 +13,12 @@ export const commonConfig: DeployParams = {
   },
   // Goerli
   5: {
-    proxyAdminOwner: "0x443dA927D9877C1B7D5E13C092Cb1958D3b90FaE",
+    proxyAdminOwner: "0x91AE7C39D43fbEA2E564E5128ac0469200e50da1",
     permit2Address: "",
   },
   // Sepolia
   11155111: {
-    proxyAdminOwner: "",
+    proxyAdminOwner: "0xD5e7B9A4587a6760a308b9D6E7956a41023d7Bb2",
     permit2Address: "",
   },
   // PGN
@@ -38,17 +38,17 @@ export const commonConfig: DeployParams = {
   },
   // Optimism Goerli
   420: {
-    proxyAdminOwner: "",
+    proxyAdminOwner: "0x2709Ec5Fbe9Ed9b985Bd9F2C9587E09A8Fa8af33",
     permit2Address: "",
   },
   // Celo Mainnet
   42220: {
-    proxyAdminOwner: "",
+    proxyAdminOwner: "0x8AA4514A31A69e3cba946F8f29899Bc189b01f2C",
     permit2Address: "",
   },
   // Celo Testnet Alfajores
   44787: {
-    proxyAdminOwner: "",
+    proxyAdminOwner: "0x0C08E6cA059907769a42F95274f0b2b9D96fA4D2",
     permit2Address: "",
   },
   // Polygon Mainnet
@@ -58,7 +58,7 @@ export const commonConfig: DeployParams = {
   },
   // Mumbai
   80001: {
-    proxyAdminOwner: "",
+    proxyAdminOwner: "0x00F06079089ca6F56D64682b8F3D4C6b067b612C",
     permit2Address: "",
   },
   // Arbitrum One
@@ -68,7 +68,7 @@ export const commonConfig: DeployParams = {
   },
   // Arbitrum Goerli
   421613: {
-    proxyAdminOwner: "",
+    proxyAdminOwner: "0xE64c2171bB7c7412eb2ad3c4c027C499FEf345DC",
     permit2Address: "",
   },
   // Base Mainnet
@@ -78,7 +78,7 @@ export const commonConfig: DeployParams = {
   },
   // Base Testnet Goerli
   84531: {
-    proxyAdminOwner: "",
+    proxyAdminOwner: "0xB145b7742A5a082C4f334981247E148dB9dF0cb3",
     permit2Address: "",
   },
 };
