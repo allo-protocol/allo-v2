@@ -1,0 +1,54 @@
+Warning: Unreachable code.
+   --> contracts/strategies/BaseStrategy.sol:174:9:
+    |
+174 |         _afterRegisterRecipient(_data, _sender);
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Compiled 112 Solidity files successfully (evm target: paris).
+
+    ////////////////////////////////////////////////////
+    Deploy core Allo V2 contracts to base-testnet
+    ======================================
+    - ContractFactory (used for strategy deployments)
+    - Registry
+    - Allo
+    - TransferProxyAdminOwnership
+    ////////////////////////////////////////////////////
+  
+
+    ////////////////////////////////////////////////////
+        Deploys ContractFactory.sol on base-testnet
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────┐
+│     (index)     │                    Values                    │
+├─────────────────┼──────────────────────────────────────────────┤
+│    contract     │         'Deploy ContractFactory.sol'         │
+│     chainId     │                    84531                     │
+│     network     │                'base-testnet'                │
+│ deployerAddress │ '0xda4983d787769A607244C8f061c2a93FC5772240' │
+│     balance     │                    '0.0'                     │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying ContractFactory.sol...
+/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/hardhat/src/internal/core/providers/http.ts:88
+      const error = new ProviderError(
+                    ^
+ProviderError: insufficient funds for gas * price + value: balance 0, tx cost 7106480000218880, overshot 7106480000218880
+    at HttpProvider.request (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/hardhat/src/internal/core/providers/http.ts:88:21)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async HardhatEthersSigner.sendTransaction (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/@nomicfoundation/hardhat-ethers/src/signers.ts:125:18)
+    at async ContractFactory.deploy (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/ethers/src.ts/contract/factory.ts:111:24)
+    at async deployContractFactory (/Users/thelostone-mc/Labs/allo/allo-v2/scripts/core/deployContractFactory.ts:37:20) {
+  parent: undefined,
+  _stack: 'ProviderError: insufficient funds for gas * price + value: balance 0, tx cost 7106480000218880, overshot 7106480000218880\n' +
+    '    at HttpProvider.request (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/hardhat/src/internal/core/providers/http.ts:88:21)\n' +
+    '    at processTicksAndRejections (node:internal/process/task_queues:95:5)\n' +
+    '    at async HardhatEthersSigner.sendTransaction (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/@nomicfoundation/hardhat-ethers/src/signers.ts:125:18)\n' +
+    '    at async ContractFactory.deploy (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/ethers/src.ts/contract/factory.ts:111:24)\n' +
+    '    at async deployContractFactory (/Users/thelostone-mc/Labs/allo/allo-v2/scripts/core/deployContractFactory.ts:37:20)',
+  code: -32000,
+  _isProviderError: true,
+  data: undefined
+}
+error: "hardhat" exited with code 1 (SIGHUP)

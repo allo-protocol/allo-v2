@@ -96,7 +96,7 @@ export async function deployAllo() {
     alloParams.percentFee.toString(),
   );
   await validator.validate("getBaseFee", [], alloParams.baseFee.toString());
-  await validator.validate("owner", [], deployerAddress.toString());
+  await validator.validate("owner", [], alloParams.owner.toString());
 
   return instance.target;
 }

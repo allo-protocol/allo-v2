@@ -28,27 +28,27 @@ handle_insufficient_funds_error() {
 mkdir -p ./reports/deployment-logs/core/$timestamp
 
 # Testnet commands
-commands=(
-    "bun hardhat run scripts/core/_deployCore.ts --network goerli | tee ./reports/deployment-logs/core/$timestamp/deploy-goerli.log"
-    "bun hardhat run scripts/core/_deployCore.ts --network sepolia | tee ./reports/deployment-logs/core/$timestamp/deploy-sepolia_$timestamp.log"
-    "bun hardhat run scripts/core/_deployCore.ts --network arbitrum-goerli | tee ./reports/deployment-logs/core/$timestamp/deploy-arbitrum-goerli_$timestamp.log"
-    "bun hardhat run scripts/core/_deployCore.ts --network optimism-goerli | tee ./reports/deployment-logs/core/$timestamp/deploy-optimism-goerli_$timestamp.log"
-    "bun hardhat run scripts/core/_deployCore.ts --network base-testnet | tee ./reports/deployment-logs/core/$timestamp/deploy-base-testnet_$timestamp.log"
-    "bun hardhat run scripts/core/_deployCore.ts --network celo-testnet | tee ./reports/deployment-logs/core/$timestamp/deploy-celo-testnet_$timestamp.log"
-    "bun hardhat run scripts/core/_deployCore.ts --network mumbai | tee ./reports/deployment-logs/core/$timestamp/deploy-mumbai_$timestamp.log"
+# commands=(
+    # "bun hardhat run scripts/core/_deployCore.ts --network goerli | tee ./reports/deployment-logs/core/$timestamp/deploy-goerli.log"
+    # "bun hardhat run scripts/core/_deployCore.ts --network sepolia | tee ./reports/deployment-logs/core/$timestamp/deploy-sepolia_$timestamp.log"
+    # "bun hardhat run scripts/core/_deployCore.ts --network arbitrum-goerli | tee ./reports/deployment-logs/core/$timestamp/deploy-arbitrum-goerli_$timestamp.log"
+    # "bun hardhat run scripts/core/_deployCore.ts --network optimism-goerli | tee ./reports/deployment-logs/core/$timestamp/deploy-optimism-goerli_$timestamp.log"
+    # "bun hardhat run scripts/core/_deployCore.ts --network base-testnet | tee ./reports/deployment-logs/core/$timestamp/deploy-base-testnet_$timestamp.log"
+    # "bun hardhat run scripts/core/_deployCore.ts --network celo-testnet | tee ./reports/deployment-logs/core/$timestamp/deploy-celo-testnet_$timestamp.log"
+    # "bun hardhat run scripts/core/_deployCore.ts --network mumbai | tee ./reports/deployment-logs/core/$timestamp/deploy-mumbai_$timestamp.log"
     # "bun hardhat run scripts/core/_deployCore.ts --network pgn-sepolia | tee ./reports/deployment-logs/core/$timestamp/deploy-pgn-sepolia_$timestamp.log"
-)
+# )
 
 # Mainnet commands
-# commands=(
-#     "bun hardhat run scripts/core/_deployCore.ts --network mainnet | tee ./reports/deployment-logs/core/$timestamp/deploy-mainnet_$timestamp.log"
-#     "bun hardhat run scripts/core/_deployCore.ts --network optimism-mainnet | tee ./reports/deployment-logs/core/$timestamp/deploy-optimism-mainnet_$timestamp.log"
-#     "bun hardhat run scripts/core/_deployCore.ts --network pgn-mainnet | tee ./reports/deployment-logs/core/$timestamp/deploy-pgn-mainnet_$timestamp.log"
-#     "bun hardhat run scripts/core/_deployCore.ts --network celo-mainnet | tee ./reports/deployment-logs/core/$timestamp/deploy-celo-mainnet_$timestamp.log"
-#     "bun hardhat run scripts/core/_deployCore.ts --network arbitrum-mainnet | tee ./reports/deployment-logs/core/$timestamp/deploy-arbitrum-mainnet_$timestamp.log"
-#     "bun hardhat run scripts/core/_deployCore.ts --network base | tee ./reports/deployment-logs/core/$timestamp/deploy-base_$timestamp.log"
-#     "bun hardhat run scripts/core/_deployCore.ts --network polygon | tee ./reports/deployment-logs/core/$timestamp/deploy-polygon_$timestamp.log"
-# )
+commands=(
+    "bun hardhat run scripts/core/_deployCore.ts --network mainnet | tee ./reports/deployment-logs/core/$timestamp/deploy-mainnet_$timestamp.log"
+    "bun hardhat run scripts/core/_deployCore.ts --network optimism-mainnet | tee ./reports/deployment-logs/core/$timestamp/deploy-optimism-mainnet_$timestamp.log"
+    "bun hardhat run scripts/core/_deployCore.ts --network celo-mainnet | tee ./reports/deployment-logs/core/$timestamp/deploy-celo-mainnet_$timestamp.log"
+    "bun hardhat run scripts/core/_deployCore.ts --network arbitrum-mainnet | tee ./reports/deployment-logs/core/$timestamp/deploy-arbitrum-mainnet_$timestamp.log"
+    "bun hardhat run scripts/core/_deployCore.ts --network base | tee ./reports/deployment-logs/core/$timestamp/deploy-base_$timestamp.log"
+    "bun hardhat run scripts/core/_deployCore.ts --network polygon | tee ./reports/deployment-logs/core/$timestamp/deploy-polygon_$timestamp.log"
+    # "bun hardhat run scripts/core/_deployCore.ts --network pgn-mainnet | tee ./reports/deployment-logs/core/$timestamp/deploy-pgn-mainnet_$timestamp.log"
+)
 
 # Execute the commands
 for cmd in "${commands[@]}"; do

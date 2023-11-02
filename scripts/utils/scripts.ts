@@ -35,10 +35,15 @@ export const verifyContract = async (
 ): Promise<boolean> => {
   console.log("\nVerifying contract...");
   await new Promise((r) => setTimeout(r, 20000));
-  return await hre.run("verify:verify", {
-    address: contractAddress.toString(),
-    constructorArguments: verifyArgs,
-  });
+  try {
+    await hre.run("verify:verify", {
+      address: contractAddress.toString(),
+      constructorArguments: verifyArgs,
+    });
+  } catch (e) {
+    console.log(e);
+  }
+  return true;
 };
 
 export const getImplementationAddress = async (proxyAddress: string) => {
