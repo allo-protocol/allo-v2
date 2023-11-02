@@ -29,13 +29,13 @@ mkdir -p ./reports/deployment-logs/strategies/$timestamp
 
 # Testnet commands
 commands=(
-    # "bun hardhat run scripts/strategies/_deployAllStrategies.ts --network goerli | tee ./reports/deployment-logs/strategies/$timestamp/deploy-goerli.log"
-    # "bun hardhat run scripts/strategies/_deployAllStrategies.ts --network sepolia | tee ./reports/deployment-logs/strategies/$timestamp/deploy-sepolia_$timestamp.log"
+    "bun hardhat run scripts/strategies/_deployAllStrategies.ts --network goerli | tee ./reports/deployment-logs/strategies/$timestamp/deploy-goerli.log"
+    "bun hardhat run scripts/strategies/_deployAllStrategies.ts --network sepolia | tee ./reports/deployment-logs/strategies/$timestamp/deploy-sepolia_$timestamp.log"
     "bun hardhat run scripts/strategies/_deployAllStrategies.ts --network arbitrum-goerli | tee ./reports/deployment-logs/strategies/$timestamp/deploy-arbitrum-goerli_$timestamp.log"
-    # "bun hardhat run scripts/strategies/_deployAllStrategies.ts --network optimism-goerli | tee ./reports/deployment-logs/strategies/$timestamp/deploy-optimism-goerli_$timestamp.log"
-    # "bun hardhat run scripts/strategies/_deployAllStrategies.ts --network base-testnet | tee ./reports/deployment-logs/strategies/$timestamp/deploy-base-testnet_$timestamp.log"
-    # "bun hardhat run scripts/strategies/_deployAllStrategies.ts --network celo-testnet | tee ./reports/deployment-logs/strategies/$timestamp/deploy-celo-testnet_$timestamp.log"
-    # "bun hardhat run scripts/strategies/_deployAllStrategies.ts --network mumbai | tee ./reports/deployment-logs/strategies/$timestamp/deploy-mumbai_$timestamp.log"
+    "bun hardhat run scripts/strategies/_deployAllStrategies.ts --network optimism-goerli | tee ./reports/deployment-logs/strategies/$timestamp/deploy-optimism-goerli_$timestamp.log"
+    "bun hardhat run scripts/strategies/_deployAllStrategies.ts --network base-testnet | tee ./reports/deployment-logs/strategies/$timestamp/deploy-base-testnet_$timestamp.log"
+    "bun hardhat run scripts/strategies/_deployAllStrategies.ts --network celo-testnet | tee ./reports/deployment-logs/strategies/$timestamp/deploy-celo-testnet_$timestamp.log"
+    "bun hardhat run scripts/strategies/_deployAllStrategies.ts --network mumbai | tee ./reports/deployment-logs/strategies/$timestamp/deploy-mumbai_$timestamp.log"
     # "bun hardhat run scripts/strategies/_deployAllStrategies.ts --network pgn-sepolia | tee ./reports/deployment-logs/strategies/$timestamp/deploy-pgn-sepolia_$timestamp.log"
 )
 
