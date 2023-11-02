@@ -173,14 +173,14 @@ contract QVImpactStreamStrategyTest is Test, AlloSetup, RegistrySetupFull, Strat
 
         emit Registered(
             profile1_anchor(),
-            _createRecipientData(profile1_anchor(), recipient1(), 1e18, _createMetadata("Recipient-Metadata")),
+            _createRecipientData(profile1_anchor(), profile1_member1(), 1e18, _createMetadata("Recipient-Metadata")),
             pool_manager1()
         );
 
         __registerRecipient(1);
         assertEq(uint8(strategy.getRecipientStatus(profile1_anchor())), uint256(IStrategy.Status.Accepted));
         QVImpactStreamStrategy.Recipient memory recipient = strategy.getRecipient(profile1_anchor());
-        assertEq(recipient.recipientAddress, recipient1());
+        assertEq(recipient.recipientAddress, profile1_member1());
         assertEq(recipient.requestedAmount, 1e18);
         assertEq(recipient.metadata.protocol, 1);
         assertEq(recipient.metadata.pointer, "Recipient-Metadata");
@@ -188,29 +188,49 @@ contract QVImpactStreamStrategyTest is Test, AlloSetup, RegistrySetupFull, Strat
 
     function testRevert_registerRecipient_RECIPIENT_ERROR_no_ProfileId() public virtual {
         vm.prank(pool_manager1());
-        vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, address(123)));
+        vm.expectRevert(UNAUTHORIZED.selector);
         allo().registerRecipient(
-            poolId, _createRecipientData(address(123), recipient1(), 1e18, _createMetadata("Recipient-Metadata"))
+            poolId, _createRecipientData(address(123), profile1_member1(), 1e18, _createMetadata("Recipient-Metadata"))
         );
     }
 
     function testRevert_registerRecipient_RECIPIENT_ERROR_no_recipientAddress() public virtual {
-        vm.prank(pool_manager1());
-        vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, profile1_anchor()));
-        allo().registerRecipient(
-            poolId, _createRecipientData(profile1_anchor(), address(0), 1e18, _createMetadata("Recipient-Metadata"))
+        QVImpactStreamStrategy newStrategy = new QVImpactStreamStrategy(
+          address(allo()),
+          "QVImpactStreamStrategy");
+
+        vm.deal(pool_manager1(), 100 * 1e18);
+        vm.startPrank(pool_manager1());
+        uint256 newPoolId = allo().createPoolWithCustomStrategy{value: 100 * 1e18}(
+            poolProfile_id(),
+            address(newStrategy),
+            _createInitData(
+                false, metadataRequired, allocationStartTime, allocationEndTime, maxVoiceCreditsPerAllocator
+            ),
+            NATIVE,
+            0,
+            _createMetadata("Pool-Metadata"),
+            pool_managers()
         );
+
+        vm.warp(allocationStartTime + 10);
+
+        vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, pool_manager1()));
+        allo().registerRecipient(
+            newPoolId, _createRecipientData(address(0), address(0), 1e18, _createMetadata("Recipient-Metadata"))
+        );
+
+        vm.stopPrank();
     }
 
     function testRevert_registerRecipient_INVALID_METADATA() public {
-        address sender = recipient();
         Metadata memory metadata = Metadata({protocol: 0, pointer: ""});
 
-        bytes memory data = abi.encode(address(0), recipientAddress(), 1e18, metadata);
+        bytes memory data = abi.encode(profile1_anchor(), profile1_member1(), 1e18, metadata);
 
         vm.expectRevert(INVALID_METADATA.selector);
-        vm.prank(address(allo()));
-        strategy.registerRecipient(data, sender);
+        vm.prank(pool_manager1());
+        allo().registerRecipient(poolId, data);
     }
 
     function test__registerRecipient_Update() public virtual {
@@ -218,7 +238,7 @@ contract QVImpactStreamStrategyTest is Test, AlloSetup, RegistrySetupFull, Strat
 
         emit Registered(
             profile1_anchor(),
-            _createRecipientData(profile1_anchor(), recipient1(), 1e18, _createMetadata("Recipient-Metadata")),
+            _createRecipientData(profile1_anchor(), profile1_member1(), 1e18, _createMetadata("Recipient-Metadata")),
             pool_manager1()
         );
 
@@ -226,14 +246,18 @@ contract QVImpactStreamStrategyTest is Test, AlloSetup, RegistrySetupFull, Strat
 
         emit UpdatedRegistration(
             profile1_anchor(),
-            _createRecipientData(profile1_anchor(), recipient1(), 1e18, _createMetadata("Recipient-Metadata-Updated")),
+            _createRecipientData(
+                profile1_anchor(), profile1_member1(), 1e18, _createMetadata("Recipient-Metadata-Updated")
+            ),
             pool_manager1()
         );
 
         vm.prank(pool_manager1());
         allo().registerRecipient(
             poolId,
-            _createRecipientData(profile1_anchor(), recipient1(), 1e18, _createMetadata("Recipient-Metadata-Updated"))
+            _createRecipientData(
+                profile1_anchor(), profile1_member1(), 1e18, _createMetadata("Recipient-Metadata-Updated")
+            )
         );
 
         QVImpactStreamStrategy.Recipient memory recipient = strategy.getRecipient(profile1_anchor());
@@ -569,10 +593,10 @@ contract QVImpactStreamStrategyTest is Test, AlloSetup, RegistrySetupFull, Strat
 
         IStrategy.PayoutSummary[] memory payoutSummaries = strategy.getPayouts(recipients, new bytes[](3));
 
-        assertEq(payoutSummaries[0].recipientAddress, recipient1());
+        assertEq(payoutSummaries[0].recipientAddress, profile1_member1());
         assertEq(payoutSummaries[0].amount, 1e18);
 
-        assertEq(payoutSummaries[1].recipientAddress, recipient2());
+        assertEq(payoutSummaries[1].recipientAddress, profile2_member1());
         assertEq(payoutSummaries[1].amount, 1e18);
 
         assertEq(payoutSummaries[2].recipientAddress, address(0));
@@ -583,20 +607,20 @@ contract QVImpactStreamStrategyTest is Test, AlloSetup, RegistrySetupFull, Strat
         __registerRecipients_setPayouts();
 
         vm.expectEmit(true, false, false, true);
-        emit Distributed(profile1_anchor(), recipient1(), 1e18, pool_manager1());
+        emit Distributed(profile1_anchor(), profile1_member1(), 1e18, pool_manager1());
 
         address[] memory recipients = new address[](2);
         recipients[0] = profile1_anchor();
         recipients[1] = profile2_anchor();
 
-        uint256 recipient1AmountBefore = recipient1().balance;
-        uint256 recipient2AmountBefore = recipient2().balance;
+        uint256 recipient1AmountBefore = profile1_member1().balance;
+        uint256 recipient2AmountBefore = profile2_member1().balance;
 
         vm.prank(pool_manager1());
         allo().distribute(poolId, recipients, "");
 
-        assertEq(recipient1().balance, recipient1AmountBefore + 1e18);
-        assertEq(recipient2().balance, recipient2AmountBefore + 1e18);
+        assertEq(profile1_member1().balance, recipient1AmountBefore + 1e18);
+        assertEq(profile2_member1().balance, recipient2AmountBefore + 1e18);
     }
 
     function test_distribute_Revert_RECIPIENT_ERROR_zeroAmount() public {
@@ -675,10 +699,10 @@ contract QVImpactStreamStrategyTest is Test, AlloSetup, RegistrySetupFull, Strat
         address recipientAddress;
         if (_id == 1) {
             recipientId = profile1_anchor();
-            recipientAddress = recipient1();
+            recipientAddress = profile1_member1();
         } else if (_id == 2) {
             recipientId = profile2_anchor();
-            recipientAddress = recipient2();
+            recipientAddress = profile2_member1();
         } else {
             revert();
         }
