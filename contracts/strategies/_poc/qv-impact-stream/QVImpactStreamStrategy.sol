@@ -69,6 +69,12 @@ contract QVImpactStreamStrategy is BaseStrategy, Multicall {
     /// ======= Storage ======
     /// ======================
 
+    /// @notice Flag to indicate whether to use the registry anchor or not.
+    bool public useRegistryAnchor;
+
+    /// @notice Flag to indicate whether metadata is required or not.
+    bool public metadataRequired;
+
     /// @notice The start and end times for registrations and allocations
     /// @dev The values will be in milliseconds since the epoch
     uint64 public allocationStartTime;
@@ -104,6 +110,8 @@ contract QVImpactStreamStrategy is BaseStrategy, Multicall {
 
     /// @notice The parameters used to initialize the strategy
     struct InitializeParams {
+        bool useRegistryAnchor;
+        bool metadataRequired;
         uint64 allocationStartTime;
         uint64 allocationEndTime;
         uint256 maxVoiceCreditsPerAllocator;
@@ -111,6 +119,8 @@ contract QVImpactStreamStrategy is BaseStrategy, Multicall {
 
     /// @notice The details of the recipient
     struct Recipient {
+        bool useRegistryAnchor;
+        bool metadataRequired;
         uint256 totalVotesReceived;
         uint256 requestedAmount;
         address recipientAddress;
@@ -165,7 +175,10 @@ contract QVImpactStreamStrategy is BaseStrategy, Multicall {
     function initialize(uint256 _poolId, bytes memory _data) external virtual override {
         (InitializeParams memory initializeParams) = abi.decode(_data, (InitializeParams));
 
+        // Set the strategy specific variables
         maxVoiceCreditsPerAllocator = initializeParams.maxVoiceCreditsPerAllocator;
+        useRegistryAnchor = initializeParams.useRegistryAnchor;
+        metadataRequired = initializeParams.metadataRequired;
 
         __BaseStrategy_init(_poolId);
         _registry = allo.getRegistry();
@@ -405,16 +418,31 @@ contract QVImpactStreamStrategy is BaseStrategy, Multicall {
         onlyPoolManager(_sender)
         returns (address recipientId)
     {
+        bool isUsingRegistryAnchor;
         address recipientAddress;
+        address registryAnchor;
         uint256 requestedAmount;
         Metadata memory metadata;
 
-        // decode data custom to this strategy
-        (recipientId, recipientAddress, requestedAmount, metadata) =
+        //  @custom:data (address registryAnchor, address recipientAddress, uint256 proposalBid, Metadata metadata)
+        (registryAnchor, recipientAddress, requestedAmount, metadata) =
             abi.decode(_data, (address, address, uint256, Metadata));
 
-        IRegistry.Profile memory profile = _registry.getProfileByAnchor(recipientId);
-        if (profile.id == bytes32(0) || recipientAddress == address(0)) {
+        // Check if the registry anchor is valid so we know whether to use it or not
+        isUsingRegistryAnchor = useRegistryAnchor || registryAnchor != address(0);
+
+        // Ternerary to set the recipient id based on whether or not we are using the 'registryAnchor' or '_sender'
+        recipientId = isUsingRegistryAnchor ? registryAnchor : _sender;
+
+        // Checks if the '_sender' is a member of the profile 'anchor' being used and reverts if not
+        if (isUsingRegistryAnchor && !_isProfileMember(recipientId, _sender)) revert UNAUTHORIZED();
+
+        // Check if the metadata is required and if it is, check if it is valid, otherwise revert
+        if (metadataRequired && (bytes(metadata.pointer).length == 0 || metadata.protocol == 0)) {
+            revert INVALID_METADATA();
+        }
+
+        if (recipientAddress == address(0)) {
             revert RECIPIENT_ERROR(recipientId);
         }
 
@@ -427,9 +455,19 @@ contract QVImpactStreamStrategy is BaseStrategy, Multicall {
         }
         // update the recipients data
         recipient.recipientAddress = recipientAddress;
+        recipient.useRegistryAnchor = isUsingRegistryAnchor ? true : recipient.useRegistryAnchor;
         recipient.metadata = metadata;
         recipient.recipientStatus = Status.Accepted;
         recipient.requestedAmount = requestedAmount;
+    }
+
+    /// @notice Check if sender is a profile owner or member.
+    /// @param _anchor Anchor of the profile
+    /// @param _sender The sender of the transaction
+    /// @return 'true' if the sender is the owner or member of the profile, otherwise 'false'
+    function _isProfileMember(address _anchor, address _sender) internal view returns (bool) {
+        IRegistry.Profile memory profile = _registry.getProfileByAnchor(_anchor);
+        return _registry.isOwnerOrMemberOfProfile(profile.id, _sender);
     }
 
     /// @notice Returns if the recipient is accepted
