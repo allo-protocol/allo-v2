@@ -34,6 +34,10 @@ contract QVImpactStreamStrategyTest is Test, AlloSetup, RegistrySetupFull, Strat
 
     QVImpactStreamStrategy strategyImplementation;
     QVImpactStreamStrategy strategy;
+
+    bool public useRegistryAnchor;
+    bool public metadataRequired;
+
     uint64 public allocationStartTime;
     uint64 public allocationEndTime;
     uint256 public maxVoiceCreditsPerAllocator;
@@ -48,6 +52,9 @@ contract QVImpactStreamStrategyTest is Test, AlloSetup, RegistrySetupFull, Strat
     function setUp() public {
         __RegistrySetupFull();
         __AlloSetup(address(registry()));
+
+        useRegistryAnchor = true;
+        metadataRequired = true;
 
         allocationStartTime = uint64(nextWeek());
         allocationEndTime = uint64(weekAfterNext());
@@ -64,7 +71,9 @@ contract QVImpactStreamStrategyTest is Test, AlloSetup, RegistrySetupFull, Strat
         poolId = allo().createPoolWithCustomStrategy{value: 100 * 1e18}(
             poolProfile_id(),
             address(strategyImplementation),
-            _createInitData(allocationStartTime, allocationEndTime, maxVoiceCreditsPerAllocator),
+            _createInitData(
+                useRegistryAnchor, metadataRequired, allocationStartTime, allocationEndTime, maxVoiceCreditsPerAllocator
+            ),
             NATIVE,
             100 * 1e18,
             _createMetadata("Pool-Metadata"),
@@ -90,7 +99,10 @@ contract QVImpactStreamStrategyTest is Test, AlloSetup, RegistrySetupFull, Strat
 
         vm.prank(address(allo()));
         newStrategy.initialize(
-            poolId, _createInitData(allocationStartTime, allocationEndTime, maxVoiceCreditsPerAllocator)
+            poolId,
+            _createInitData(
+                useRegistryAnchor, metadataRequired, allocationStartTime, allocationEndTime, maxVoiceCreditsPerAllocator
+            )
         );
         assertEq(strategy.allocationStartTime(), allocationStartTime);
         assertEq(strategy.allocationEndTime(), allocationEndTime);
@@ -102,7 +114,10 @@ contract QVImpactStreamStrategyTest is Test, AlloSetup, RegistrySetupFull, Strat
 
         vm.expectRevert(ALREADY_INITIALIZED.selector);
         strategy.initialize(
-            poolId, _createInitData(allocationStartTime, allocationEndTime, maxVoiceCreditsPerAllocator)
+            poolId,
+            _createInitData(
+                useRegistryAnchor, metadataRequired, allocationStartTime, allocationEndTime, maxVoiceCreditsPerAllocator
+            )
         );
     }
 
@@ -113,7 +128,10 @@ contract QVImpactStreamStrategyTest is Test, AlloSetup, RegistrySetupFull, Strat
 
         vm.expectRevert(UNAUTHORIZED.selector);
         newStrategy.initialize(
-            poolId, _createInitData(allocationStartTime, allocationEndTime, maxVoiceCreditsPerAllocator)
+            poolId,
+            _createInitData(
+                useRegistryAnchor, metadataRequired, allocationStartTime, allocationEndTime, maxVoiceCreditsPerAllocator
+            )
         );
     }
 
@@ -126,11 +144,25 @@ contract QVImpactStreamStrategyTest is Test, AlloSetup, RegistrySetupFull, Strat
 
         vm.expectRevert(INVALID.selector);
         newStrategy.initialize(
-            poolId, _createInitData(uint64(block.timestamp - 1 days), allocationEndTime, maxVoiceCreditsPerAllocator)
+            poolId,
+            _createInitData(
+                useRegistryAnchor,
+                metadataRequired,
+                uint64(block.timestamp - 1 days),
+                allocationEndTime,
+                maxVoiceCreditsPerAllocator
+            )
         );
         vm.expectRevert(INVALID.selector);
         newStrategy.initialize(
-            poolId, _createInitData(allocationStartTime, uint64(block.timestamp - 1 days), maxVoiceCreditsPerAllocator)
+            poolId,
+            _createInitData(
+                useRegistryAnchor,
+                metadataRequired,
+                allocationStartTime,
+                uint64(block.timestamp - 1 days),
+                maxVoiceCreditsPerAllocator
+            )
         );
 
         vm.stopPrank();
@@ -154,7 +186,7 @@ contract QVImpactStreamStrategyTest is Test, AlloSetup, RegistrySetupFull, Strat
         assertEq(recipient.metadata.pointer, "Recipient-Metadata");
     }
 
-    function test__registerRecipient_Revert_RECIPIENT_ERROR_no_ProfileId() public virtual {
+    function testRevert_registerRecipient_RECIPIENT_ERROR_no_ProfileId() public virtual {
         vm.prank(pool_manager1());
         vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, address(123)));
         allo().registerRecipient(
@@ -162,12 +194,23 @@ contract QVImpactStreamStrategyTest is Test, AlloSetup, RegistrySetupFull, Strat
         );
     }
 
-    function test__registerRecipient_Revert_RECIPIENT_ERROR_no_recipientAddress() public virtual {
+    function testRevert_registerRecipient_RECIPIENT_ERROR_no_recipientAddress() public virtual {
         vm.prank(pool_manager1());
         vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, profile1_anchor()));
         allo().registerRecipient(
             poolId, _createRecipientData(profile1_anchor(), address(0), 1e18, _createMetadata("Recipient-Metadata"))
         );
+    }
+
+    function testRevert_registerRecipient_INVALID_METADATA() public {
+        address sender = recipient();
+        Metadata memory metadata = Metadata({protocol: 0, pointer: ""});
+
+        bytes memory data = abi.encode(address(0), recipientAddress(), 1e18, metadata);
+
+        vm.expectRevert(INVALID_METADATA.selector);
+        vm.prank(address(allo()));
+        strategy.registerRecipient(data, sender);
     }
 
     function test__registerRecipient_Update() public virtual {
@@ -600,11 +643,19 @@ contract QVImpactStreamStrategyTest is Test, AlloSetup, RegistrySetupFull, Strat
     }
 
     function _createInitData(
+        bool _useRegistryAnchor,
+        bool _metadataRequired,
         uint64 _allocationStartTime,
         uint64 _allocationEndTime,
         uint256 _maxVoiceCreditsPerAllocator
     ) internal pure returns (bytes memory) {
-        return abi.encode(_allocationStartTime, _allocationEndTime, _maxVoiceCreditsPerAllocator);
+        return abi.encode(
+            _useRegistryAnchor,
+            _metadataRequired,
+            _allocationStartTime,
+            _allocationEndTime,
+            _maxVoiceCreditsPerAllocator
+        );
     }
 
     function _createRecipientData(
