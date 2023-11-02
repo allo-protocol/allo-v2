@@ -20,15 +20,15 @@ export const alloConfig: DeployParams = {
   },
   // Goerli
   5: {
-    owner: "0x443dA927D9877C1B7D5E13C092Cb1958D3b90FaE",
-    treasury: "0x443dA927D9877C1B7D5E13C092Cb1958D3b90FaE",
+    owner: "0x91AE7C39D43fbEA2E564E5128ac0469200e50da1",
+    treasury: "0x91AE7C39D43fbEA2E564E5128ac0469200e50da1",
     percentFee: 0,
     baseFee: 0,
   },
   // Sepolia
   11155111: {
-    owner: "",
-    treasury: "",
+    owner: "0xD5e7B9A4587a6760a308b9D6E7956a41023d7Bb2",
+    treasury: "0xD5e7B9A4587a6760a308b9D6E7956a41023d7Bb2",
     percentFee: 0,
     baseFee: 0,
   },
@@ -55,22 +55,22 @@ export const alloConfig: DeployParams = {
   },
   // Optimism Goerli
   420: {
-    owner: "",
-    treasury: "",
+    owner: "0x2709Ec5Fbe9Ed9b985Bd9F2C9587E09A8Fa8af33",
+    treasury: "0x2709Ec5Fbe9Ed9b985Bd9F2C9587E09A8Fa8af33",
     percentFee: 0,
     baseFee: 0,
   },
   // Celo Mainnet
   42220: {
-    owner: "",
-    treasury: "",
+    owner: "0x8AA4514A31A69e3cba946F8f29899Bc189b01f2C",
+    treasury: "0x8AA4514A31A69e3cba946F8f29899Bc189b01f2C",
     percentFee: 0,
     baseFee: 0,
   },
   // Celo Testnet Alfajores
   44787: {
-    owner: "",
-    treasury: "",
+    owner: "0x0C08E6cA059907769a42F95274f0b2b9D96fA4D2",
+    treasury: "0x0C08E6cA059907769a42F95274f0b2b9D96fA4D2",
     percentFee: 0,
     baseFee: 0,
   },
@@ -97,8 +97,8 @@ export const alloConfig: DeployParams = {
   },
   // Arbitrum Goerli
   421613: {
-    owner: "",
-    treasury: "",
+    owner: "0xE64c2171bB7c7412eb2ad3c4c027C499FEf345DC",
+    treasury: "0xE64c2171bB7c7412eb2ad3c4c027C499FEf345DC",
     percentFee: 0,
     baseFee: 0,
   },
@@ -111,8 +111,8 @@ export const alloConfig: DeployParams = {
   },
   // Base Testnet Goerli
   84531: {
-    owner: "",
-    treasury: "",
+    owner: "0xB145b7742A5a082C4f334981247E148dB9dF0cb3",
+    treasury: "0xB145b7742A5a082C4f334981247E148dB9dF0cb3",
     percentFee: 0,
     baseFee: 0,
   },
