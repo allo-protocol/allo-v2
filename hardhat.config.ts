@@ -311,7 +311,7 @@ const config: HardhatUserConfig = {
         network: "base-testnet",
         chainId: chainIds["base-testnet"],
         urls: {
-          apiURL: "https://goerli.basescan.org/api",
+          apiURL: "https://api-goerli.basescan.org/api",
           browserURL: "https://goerli.basescan.org/",
         },
       },
@@ -327,7 +327,7 @@ const config: HardhatUserConfig = {
         network: "mumbai",
         chainId: chainIds["mumbai"],
         urls: {
-          apiURL: "https://mumbai.polygonscan.com//api",
+          apiURL: "https://mumbai.polygonscan.com/api",
           browserURL: "https://mumbai.polygonscan.com/",
         },
       },

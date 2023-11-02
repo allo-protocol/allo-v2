@@ -1,0 +1,109 @@
+Warning: Unreachable code.
+   --> contracts/strategies/BaseStrategy.sol:174:9:
+    |
+174 |         _afterRegisterRecipient(_data, _sender);
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Compiled 112 Solidity files successfully (evm target: paris).
+
+    ////////////////////////////////////////////////////////
+    Deploy Strategies on Allo V2 contracts to arbitrum-goerli
+    ///////////////////////////////////////////////////////
+  
+
+    ////////////////////////////////////////////////////
+      Deploys DonationVotingMerkleDistributionDirectTransferStrategy.sol on arbitrum-goerli
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────────────────────┐
+│     (index)     │                            Values                            │
+├─────────────────┼──────────────────────────────────────────────────────────────┤
+│    contract     │ 'DonationVotingMerkleDistributionDirectTransferStrategy.sol' │
+│     chainId     │                            421613                            │
+│     network     │                      'arbitrum-goerli'                       │
+│ deployerAddress │         '0xda4983d787769A607244C8f061c2a93FC5772240'         │
+│     balance     │                        '1.9983376069'                        │
+└─────────────────┴──────────────────────────────────────────────────────────────┘
+Deploying DonationVotingMerkleDistributionDirectTransferStrategy.sol
+[35mContract DonationVotingMerkleDistributionDirectTransferStrategy deployed at address: 0x3de04C220767530cF1Aca555de6bA3fBA9217De5[0m
+
+Verifying contract...
+Successfully submitted source code for contract
+contracts/strategies/donation-voting-merkle-distribution-direct-transfer/DonationVotingMerkleDistributionDirectTransferStrategy.sol:DonationVotingMerkleDistributionDirectTransferStrategy at 0x3de04C220767530cF1Aca555de6bA3fBA9217De5
+for verification on the block explorer. Waiting for verification result...
+
+Successfully verified contract DonationVotingMerkleDistributionDirectTransferStrategy on the block explorer.
+https://arbiscan.io/address/0x3de04C220767530cF1Aca555de6bA3fBA9217De5#code
+[90m
+	Validating getAllo() == 0x33044dAEB67C882F8Dd697394A9319e0b353f59B[0m
+[32m	✅ PASSED with Result: 0x33044dAEB67C882F8Dd697394A9319e0b353f59B[0m
+[90m
+	Validating getStrategyId() == 0xf6494e385cd5e206b2e8ca0f07a1433344f5ab8ac7aac9b064aa45132eddf03e[0m
+[32m	✅ PASSED with Result: 0xf6494e385cd5e206b2e8ca0f07a1433344f5ab8ac7aac9b064aa45132eddf03e[0m
+[90m
+	Validating PERMIT2() == 0x000000000022d473030f116ddee9f6b43ac78ba3[0m
+[32m	✅ PASSED with Result: 0x000000000022d473030f116ddee9f6b43ac78ba3[0m
+
+    ////////////////////////////////////////////////////
+      Deploys DonationVotingMerkleDistributionVaultStrategy.sol on arbitrum-goerli
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬─────────────────────────────────────────────────────┐
+│     (index)     │                       Values                        │
+├─────────────────┼─────────────────────────────────────────────────────┤
+│    contract     │ 'DonationVotingMerkleDistributionVaultStrategy.sol' │
+│     chainId     │                       421613                        │
+│     network     │                  'arbitrum-goerli'                  │
+│ deployerAddress │    '0xda4983d787769A607244C8f061c2a93FC5772240'     │
+│     balance     │                   '1.9980095332'                    │
+└─────────────────┴─────────────────────────────────────────────────────┘
+Deploying DonationVotingMerkleDistributionVaultStrategy.sol
+[35mContract DonationVotingMerkleDistributionVaultStrategy deployed at address: 0x40E313Ee5ccc85429b50F35FefD7EDA1dB136365[0m
+
+Verifying contract...
+Successfully submitted source code for contract
+contracts/strategies/donation-voting-merkle-distribution-vault/DonationVotingMerkleDistributionVaultStrategy.sol:DonationVotingMerkleDistributionVaultStrategy at 0x40E313Ee5ccc85429b50F35FefD7EDA1dB136365
+for verification on the block explorer. Waiting for verification result...
+
+Successfully verified contract DonationVotingMerkleDistributionVaultStrategy on the block explorer.
+https://arbiscan.io/address/0x40E313Ee5ccc85429b50F35FefD7EDA1dB136365#code
+[90m
+	Validating getAllo() == 0x33044dAEB67C882F8Dd697394A9319e0b353f59B[0m
+[32m	✅ PASSED with Result: 0x33044dAEB67C882F8Dd697394A9319e0b353f59B[0m
+[90m
+	Validating getStrategyId() == 0x18597ecf2c30cb09b03e84caafc02b25453977cae54af1788bbbfb367f805714[0m
+[32m	✅ PASSED with Result: 0x18597ecf2c30cb09b03e84caafc02b25453977cae54af1788bbbfb367f805714[0m
+[90m
+	Validating PERMIT2() == 0x000000000022d473030f116ddee9f6b43ac78ba3[0m
+[32m	✅ PASSED with Result: 0x000000000022d473030f116ddee9f6b43ac78ba3[0m
+
+    ////////////////////////////////////////////////////
+      Deploys QVImpactStreamStrategy.sol on arbitrum-goerli
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────┐
+│     (index)     │                    Values                    │
+├─────────────────┼──────────────────────────────────────────────┤
+│    contract     │         'QVImpactStreamStrategy.sol'         │
+│     chainId     │                    421613                    │
+│     network     │              'arbitrum-goerli'               │
+│ deployerAddress │ '0xda4983d787769A607244C8f061c2a93FC5772240' │
+│     balance     │                '1.9976553867'                │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying QVImpactStreamStrategy.sol
+[35mContract QVImpactStreamStrategy deployed at address: 0x4641259272A2abe99E04DcABADD752385bc31e5f[0m
+
+Verifying contract...
+Successfully submitted source code for contract
+contracts/strategies/_poc/qv-impact-stream/QVImpactStreamStrategy.sol:QVImpactStreamStrategy at 0x4641259272A2abe99E04DcABADD752385bc31e5f
+for verification on the block explorer. Waiting for verification result...
+
+Successfully verified contract QVImpactStreamStrategy on the block explorer.
+https://arbiscan.io/address/0x4641259272A2abe99E04DcABADD752385bc31e5f#code
+[90m
+	Validating getAllo() == 0x33044dAEB67C882F8Dd697394A9319e0b353f59B[0m
+[32m	✅ PASSED with Result: 0x33044dAEB67C882F8Dd697394A9319e0b353f59B[0m
+[90m
+	Validating getStrategyId() == 0xc3276532aa72a2c10f4c9b2068f3c56624cf053c8ee78e826e245690cb72fae9[0m
+[32m	✅ PASSED with Result: 0xc3276532aa72a2c10f4c9b2068f3c56624cf053c8ee78e826e245690cb72fae9[0m
