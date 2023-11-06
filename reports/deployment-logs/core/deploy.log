@@ -153,3 +153,11 @@
 20231102_234919 - Executing: bun hardhat run scripts/strategies/deployRFPSimple.ts --no-compile --network polygon | tee ./reports/deployment-logs/strategies/deployRFPSimple/polygon/20231102_232742/deploy-20231102_232742.log
 20231102_235014 - Executing: bun hardhat run scripts/strategies/deployRFPSimple.ts --no-compile --network mainnet | tee ./reports/deployment-logs/strategies/deployRFPSimple/mainnet/20231102_232742/deploy-20231102_232742.log
 20231102_235115 - Deployment finished with 0 error(s)
+20231106_122925 - Executing: bun hardhat run scripts/strategies/deployImpactStream.ts --no-compile --network goerli | tee ./reports/deployment-logs/strategies/deployImpactStream/goerli/20231106_122925/deploy-20231106_122925.log
+20231106_122933 - Deployment finished with 0 error(s)
+20231106_123207 - Executing: bun hardhat run scripts/strategies/deployImpactStream.ts --no-compile --network goerli | tee ./reports/deployment-logs/strategies/deployImpactStream/goerli/20231106_123207/deploy-20231106_123207.log
+20231106_123329 - Deployment finished with 0 error(s)
+20231106_123416 - Executing: bun hardhat run scripts/strategies/deployImpactStream.ts --no-compile --network celo-testnet | tee ./reports/deployment-logs/strategies/deployImpactStream/celo-testnet/20231106_123416/deploy-20231106_123416.log
+20231106_123515 - Deployment finished with 0 error(s)
+20231106_123525 - Executing: bun hardhat run scripts/strategies/deployImpactStream.ts --no-compile --network celo-mainnet | tee ./reports/deployment-logs/strategies/deployImpactStream/celo-mainnet/20231106_123525/deploy-20231106_123525.log
+20231106_123619 - Deployment finished with 0 error(s)

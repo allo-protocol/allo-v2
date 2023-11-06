@@ -1,0 +1,30 @@
+
+    ////////////////////////////////////////////////////
+      Deploys QVImpactStreamStrategy.sol on goerli
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────┐
+│     (index)     │                    Values                    │
+├─────────────────┼──────────────────────────────────────────────┤
+│    contract     │         'QVImpactStreamStrategy.sol'         │
+│     chainId     │                      5                       │
+│     network     │                   'goerli'                   │
+│ deployerAddress │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│     balance     │                 '1.7616373'                  │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying QVImpactStreamStrategy.sol
+[35mContract QVImpactStreamStrategy deployed at address: 0x53546C765f8c71Cc0Ec4236a9Bf71603BB6193F7[0m
+
+Verifying contract...
+Successfully submitted source code for contract
+contracts/strategies/_poc/qv-impact-stream/QVImpactStreamStrategy.sol:QVImpactStreamStrategy at 0x53546C765f8c71Cc0Ec4236a9Bf71603BB6193F7
+for verification on the block explorer. Waiting for verification result...
+
+Successfully verified contract QVImpactStreamStrategy on the block explorer.
+https://goerli.etherscan.io/address/0x53546C765f8c71Cc0Ec4236a9Bf71603BB6193F7#code
+[90m
+	Validating getAllo() == 0x1133eA7Af70876e64665ecD07C0A0476d09465a1[0m
+[32m	✅ PASSED with Result: 0x1133eA7Af70876e64665ecD07C0A0476d09465a1[0m
+[90m
+	Validating getStrategyId() == 0xabfcca1d30fa9e47a7dc8a1f68d063e23414e0122a16b4bd765033a08d7d37e7[0m
+[32m	✅ PASSED with Result: 0xabfcca1d30fa9e47a7dc8a1f68d063e23414e0122a16b4bd765033a08d7d37e7[0m

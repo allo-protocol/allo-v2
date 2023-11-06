@@ -1,6 +1,6 @@
-import { deployStrategies } from "./deployStrategies";
-import { strategyConfig } from "../config/strategies.config";
 import { ethers } from "hardhat";
+import { strategyConfig } from "../config/strategies.config";
+import { deployStrategies } from "./deployStrategies";
 
 export const deployImpactStreamStrategy = async () => {
   const network = await ethers.provider.getNetwork();
