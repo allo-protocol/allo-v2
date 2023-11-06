@@ -22,7 +22,9 @@ contract CreateImpactStreamPool is Script, Native, GoerliConfig {
         vm.startBroadcast(deployerPrivateKey);
 
         bytes memory encodedStrategyData = abi.encode(
-            QVImpactStreamStrategy.InitializeParams(uint64(block.timestamp + 500), uint64(block.timestamp + 10000), 10)
+            QVImpactStreamStrategy.InitializeParams(
+                false, false, uint64(block.timestamp + 500), uint64(block.timestamp + 10000), 10
+            )
         );
 
         console.log("Allo ==> %s", ALLO);
