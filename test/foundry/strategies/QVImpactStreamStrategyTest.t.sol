@@ -215,7 +215,7 @@ contract QVImpactStreamStrategyTest is Test, AlloSetup, RegistrySetupFull, Strat
 
         vm.warp(allocationStartTime + 10);
 
-        vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, pool_manager1()));
+        vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, address(0)));
         allo().registerRecipient(
             newPoolId, _createRecipientData(address(0), address(0), 1e18, _createMetadata("Recipient-Metadata"))
         );
