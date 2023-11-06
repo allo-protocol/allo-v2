@@ -39,8 +39,8 @@ networks=(
 #   "base"
 #   "polygon"
 #   "mainnet"
-  # "pgn-sepolia"
-  # "pgn-mainnet"
+#   "pgn-sepolia"
+#   "pgn-mainnet"
 )
 
 scripts=(
@@ -54,7 +54,6 @@ scripts=(
     # "strategies/deployRFPCommittee"
     # "strategies/deployRFPSimple"
 
-    # Do not deploy this strategy
     # "strategies/deployImpactStream"
 )
 

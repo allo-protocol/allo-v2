@@ -1,0 +1,35 @@
+
+    ////////////////////////////////////////////////////
+      Deploys QVImpactStreamStrategy.sol on celo-mainnet
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────┐
+│     (index)     │                    Values                    │
+├─────────────────┼──────────────────────────────────────────────┤
+│    contract     │         'QVImpactStreamStrategy.sol'         │
+│     chainId     │                    42220                     │
+│     network     │                'celo-mainnet'                │
+│ deployerAddress │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│     balance     │                 '4.56839455'                 │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying QVImpactStreamStrategy.sol
+[35mContract QVImpactStreamStrategy deployed at address: 0x53546C765f8c71Cc0Ec4236a9Bf71603BB6193F7[0m
+
+Verifying contract...
+HardhatVerifyError: Invalid API URL endpoint, use https://api.celoscan.io
+    at Etherscan.verify (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/internal/etherscan.ts:173:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async SimpleTaskDefinition.action (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/index.ts:471:33)
+    at async Environment._runTaskDefinition (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:358:14)
+    at async Environment.run (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:191:14)
+    at async SimpleTaskDefinition.action (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/index.ts:298:9)
+    at async Environment._runTaskDefinition (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:358:14)
+    at async hardhatVerify (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/verify-proxy.ts:118:12)
+    at async OverriddenTaskDefinition._action (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/index.ts:198:12)
+    at async Environment._runTaskDefinition (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:358:14)
+[90m
+	Validating getAllo() == 0x1133eA7Af70876e64665ecD07C0A0476d09465a1[0m
+[32m	✅ PASSED with Result: 0x1133eA7Af70876e64665ecD07C0A0476d09465a1[0m
+[90m
+	Validating getStrategyId() == 0xabfcca1d30fa9e47a7dc8a1f68d063e23414e0122a16b4bd765033a08d7d37e7[0m
+[32m	✅ PASSED with Result: 0xabfcca1d30fa9e47a7dc8a1f68d063e23414e0122a16b4bd765033a08d7d37e7[0m

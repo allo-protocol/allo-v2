@@ -1,0 +1,25 @@
+
+    ////////////////////////////////////////////////////
+      Deploys QVImpactStreamStrategy.sol on goerli
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────┐
+│     (index)     │                    Values                    │
+├─────────────────┼──────────────────────────────────────────────┤
+│    contract     │         'QVImpactStreamStrategy.sol'         │
+│     chainId     │                      5                       │
+│     network     │                   'goerli'                   │
+│ deployerAddress │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│     balance     │                 '1.7616373'                  │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying QVImpactStreamStrategy.sol
+HardhatError: HH700: Artifact for contract "QVImpactStreamStrategy" not found. 
+    at Artifacts._handleWrongArtifactForContractName (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/hardhat/src/internal/artifacts.ts:733:11)
+    at Artifacts._getArtifactPathFromFiles (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/hardhat/src/internal/artifacts.ts:864:19)
+    at Artifacts._getArtifactPath (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/hardhat/src/internal/artifacts.ts:522:21)
+    at async Artifacts.readArtifact (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/hardhat/src/internal/artifacts.ts:71:26)
+    at async getContractFactory (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/@nomicfoundation/hardhat-ethers/src/internal/helpers.ts:107:22)
+    at async deployContractUsingFactory (/Users/thelostone-mc/Labs/allo/allo-v2/scripts/utils/deployProxy.ts:168:33)
+    at async deployStrategies (/Users/thelostone-mc/Labs/allo/allo-v2/scripts/strategies/deployStrategies.ts:48:16)
+    at async deployImpactStreamStrategy (/Users/thelostone-mc/Labs/allo/allo-v2/scripts/strategies/deployImpactStream.ts:10:3)
+error: "hardhat" exited with code 1 (SIGHUP)
