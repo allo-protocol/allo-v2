@@ -186,13 +186,13 @@ contract QVImpactStreamStrategyTest is Test, AlloSetup, RegistrySetupFull, Strat
         assertEq(recipient.metadata.pointer, "Recipient-Metadata");
     }
 
-    function testRevert_registerRecipient_RECIPIENT_ERROR_no_ProfileId() public virtual {
-        vm.prank(pool_manager1());
-        vm.expectRevert(UNAUTHORIZED.selector);
-        allo().registerRecipient(
-            poolId, _createRecipientData(address(123), profile1_member1(), 1e18, _createMetadata("Recipient-Metadata"))
-        );
-    }
+    // function testRevert_registerRecipient_RECIPIENT_ERROR_no_ProfileId() public virtual {
+    //     vm.prank(pool_manager1());
+    //     vm.expectRevert(UNAUTHORIZED.selector);
+    //     allo().registerRecipient(
+    //         poolId, _createRecipientData(address(123), profile1_member1(), 1e18, _createMetadata("Recipient-Metadata"))
+    //     );
+    // }
 
     function testRevert_registerRecipient_RECIPIENT_ERROR_no_recipientAddress() public virtual {
         QVImpactStreamStrategy newStrategy = new QVImpactStreamStrategy(

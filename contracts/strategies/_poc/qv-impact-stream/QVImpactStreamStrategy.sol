@@ -434,9 +434,6 @@ contract QVImpactStreamStrategy is BaseStrategy, Multicall {
         // Ternerary to set the recipient id based on whether or not we are using the 'registryAnchor' or '_sender'
         recipientId = isUsingRegistryAnchor ? registryAnchor : _sender;
 
-        // Checks if the '_sender' is a member of the profile 'anchor' being used and reverts if not
-        // if (isUsingRegistryAnchor && !_isProfileMember(recipientId, recipientAddress)) revert UNAUTHORIZED();
-
         // Check if the metadata is required and if it is, check if it is valid, otherwise revert
         if (metadataRequired && (bytes(metadata.pointer).length == 0 || metadata.protocol == 0)) {
             revert INVALID_METADATA();
