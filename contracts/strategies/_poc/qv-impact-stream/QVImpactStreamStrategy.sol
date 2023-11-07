@@ -431,11 +431,8 @@ contract QVImpactStreamStrategy is BaseStrategy, Multicall {
         // Check if the registry anchor is valid so we know whether to use it or not
         isUsingRegistryAnchor = useRegistryAnchor || registryAnchor != address(0);
 
-        // Ternerary to set the recipient id based on whether or not we are using the 'registryAnchor' or '_sender'
-        recipientId = isUsingRegistryAnchor ? registryAnchor : _sender;
-
-        // Checks if the '_sender' is a member of the profile 'anchor' being used and reverts if not
-        if (isUsingRegistryAnchor && !_isProfileMember(recipientId, recipientAddress)) revert UNAUTHORIZED();
+        // Ternerary to set the recipient id based on whether or not we are using the 'registryAnchor' or 'recipientAddress'
+        recipientId = isUsingRegistryAnchor ? registryAnchor : recipientAddress;
 
         // Check if the metadata is required and if it is, check if it is valid, otherwise revert
         if (metadataRequired && (bytes(metadata.pointer).length == 0 || metadata.protocol == 0)) {
@@ -543,6 +540,13 @@ contract QVImpactStreamStrategy is BaseStrategy, Multicall {
         returns (uint256)
     {
         return allocators[_allocator].votesCastToRecipient[_recipientId];
+    }
+
+    /// @notice Get the total votes received for a recipient
+    /// @param _recipientId ID of the recipient
+    /// @return The total votes received by the recipient
+    function getTotalVotesForRecipient(address _recipientId) external view returns (uint256) {
+        return recipients[_recipientId].totalVotesReceived;
     }
 
     /// @notice Get recipient status
