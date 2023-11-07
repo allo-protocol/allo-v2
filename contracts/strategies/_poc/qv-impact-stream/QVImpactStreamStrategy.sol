@@ -542,6 +542,9 @@ contract QVImpactStreamStrategy is BaseStrategy, Multicall {
         return allocators[_allocator].votesCastToRecipient[_recipientId];
     }
 
+    /// @notice Get the total votes received for a recipient
+    /// @param _recipientId ID of the recipient
+    /// @return The total votes received by the recipient
     function getTotalVotesForRecipient(address _recipientId) external view returns (uint256) {
         return recipients[_recipientId].totalVotesReceived;
     }
