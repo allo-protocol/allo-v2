@@ -426,7 +426,7 @@ contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
         if (isUsingRegistryAnchor && !_isProfileMember(recipientId, _sender)) revert UNAUTHORIZED();
 
         // Check if metadata it is valid, otherwise revert
-        if (bytes(metadata.pointer).length == 0 || metadata.protocol == 0)) {
+        if (bytes(metadata.pointer).length == 0 || metadata.protocol == 0) {
             revert INVALID_METADATA();
         }
 
@@ -444,10 +444,7 @@ contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
         // Get the recipient
         Recipient storage recipient = _recipients[recipientId];
 
-        // Check if the recipient is already accepted
-        if (recipient.recipientStatus == Status.Accepted) revert RECIPIENT_ALREADY_ACCEPTED();
-
-        // Check if the recipient is already pending
+        // check if recipient has already approvals
         if (recipient.approvalsAllocated != 0) revert UNAUTHORIZED()
 
         if (recipient.recipientStatus == Status.None) {
