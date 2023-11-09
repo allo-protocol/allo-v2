@@ -81,7 +81,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// ===============================
 
     /// @notice Emitted when the maximum bid is increased.
-    /// @param maxBid The mew maximum bid
+    /// @param maxBid The new maximum bid
     event MaxBidIncreased(uint256 maxBid);
 
     /// @notice Emitted when a milestone is submitted.
@@ -223,7 +223,6 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _flag The flag to set the pool to active or inactive
     function setPoolActive(bool _flag) external onlyPoolManager(msg.sender) {
         _setPoolActive(_flag);
-        emit PoolActive(_flag);
     }
 
     /// @notice Set the milestones for the acceptedRecipientId.

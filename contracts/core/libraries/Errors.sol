@@ -39,6 +39,9 @@ contract Errors {
     /// @notice Thrown when address is the zero address
     error ZERO_ADDRESS();
 
+    /// @notice Thrown when the function is not implemented
+    error NOT_IMPLEMENTED();
+
     /// ======================
     /// ====== Registry ======
     /// ======================
