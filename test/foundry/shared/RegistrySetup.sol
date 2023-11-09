@@ -68,6 +68,7 @@ contract RegistrySetupFull is RegistrySetup {
         return _profile1Id_;
     }
 
+    // Use ths anchor with Accounts.profile1_member1 or Accounts.profile1_member2
     function profile1_anchor() public view virtual returns (address) {
         return _profile1Anchor_;
     }
@@ -76,6 +77,7 @@ contract RegistrySetupFull is RegistrySetup {
         return _profile2Id_;
     }
 
+    // Use ths anchor with Accounts.profile2_member1 or Accounts.profile2_member2
     function profile2_anchor() public view virtual returns (address) {
         return _profile2Anchor_;
     }
