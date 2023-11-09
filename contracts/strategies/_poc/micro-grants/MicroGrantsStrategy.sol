@@ -454,13 +454,11 @@ contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
         }
 
         // update the recipients data
-        recipient.approvalsAllocated = 0;
         recipient.recipientAddress = recipientAddress;
         recipient.useRegistryAnchor = isUsingRegistryAnchor;
         recipient.requestedAmount = requestedAmount;
         recipient.metadata = metadata;
         recipient.recipientStatus = Status.Pending;
-
     }
 
     /// @notice Allocate votes to a recipient
