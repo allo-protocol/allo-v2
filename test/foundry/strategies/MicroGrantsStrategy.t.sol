@@ -42,8 +42,8 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
         __AlloSetup(address(registry()));
 
         useRegistryAnchor = true;
-        allocationStartTime = 0;
-        allocationEndTime = 0;
+        allocationStartTime = uint64(block.timestamp);
+        allocationEndTime = uint64(block.timestamp + 1 days);
         maxRequestedAmount = 0;
         approvalThreshold = 0;
 
@@ -61,5 +61,13 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
             poolMetadata,
             pool_managers()
         );
+    }
+
+    function test_deployment() public {
+        MicroGrantsStrategy strategy_ = new MicroGrantsStrategy(address(allo()), "MicroGrantsStrategy");
+
+        assertTrue(address(strategy_) != address(0));
+        assertTrue(address(strategy_.getAllo()) == address(allo()));
+        assertTrue(strategy_.getStrategyId() == keccak256(abi.encode("MicroGrantsStrategy")));
     }
 }
