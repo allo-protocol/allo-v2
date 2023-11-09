@@ -5,6 +5,7 @@ pragma solidity 0.8.19;
 import {ReentrancyGuard} from "openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
 // Interfaces
 import {IRegistry} from "../../../core/interfaces/IRegistry.sol";
+import {IAllo} from "../../../core/interfaces/IAllo.sol";
 // Core Contracts
 import {BaseStrategy} from "../../BaseStrategy.sol";
 // Internal Libraries
@@ -34,7 +35,6 @@ contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
     struct Recipient {
         bool useRegistryAnchor;
         address recipientAddress;
-        uint256 approvalsAllocated;
         uint256 requestedAmount;
         Status recipientStatus;
         Metadata metadata;
@@ -55,6 +55,7 @@ contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Thrown when the pool manager attempts to the lower the requested amount
     error AMOUNT_TOO_LOW();
+    error EXCEEDING_MAX_BID();
 
     /// ===============================
     /// ========== Events =============
@@ -63,12 +64,7 @@ contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Emitted when an allocator is added
     /// @param allocator The allocator address
     /// @param sender The sender of the transaction
-    event AllocatorAdded(address indexed allocator, address sender);
-
-    /// @notice Emitted when an allocator is removed
-    /// @param allocator The allocator address
-    /// @param sender The sender of the transaction
-    event AllocatorRemoved(address indexed allocator, address sender);
+    event AllocatorSet(address indexed allocator, bool indexed _flag, address sender);
 
     /// @notice Emitted when the max requested amount is increased.
     /// @param maxRequestedAmount The new max requested amount
@@ -89,6 +85,12 @@ contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
     /// @param data The encoded data - (address recipientId, address recipientAddress, Metadata metadata)
     /// @param sender The sender of the transaction
     event UpdatedRegistration(address indexed recipientId, bytes data, address sender);
+
+    /// @notice Emitted when an allocation is made
+    /// @param recipientId Id of the recipient
+    /// @param status The status of the allocation
+    /// @param sender The sender of the transaction
+    event Allocated(address indexed recipientId, Status status, address sender);
 
     /// ================================
     /// ========== Storage =============
@@ -117,6 +119,12 @@ contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
     /// @dev 'allocator address' to 'bool'
     mapping(address => bool) public allocators;
 
+    /// @notice This maps the allocator to the recipient to their approval status
+    /// @dev 'allocator address' to 'recipient address' to 'bool'
+    mapping(address => mapping(address => bool)) public allocated;
+
+    /// @notice This maps the recipientId to the Status to the number of allocations
+    mapping(address => mapping(Status => uint256)) public recipientAllocations;
     /// ================================
     /// ========== Modifier ============
     /// ================================
@@ -228,21 +236,24 @@ contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
     ///      Emits a 'TimestampsUpdated()' event.
     /// @param _allocationStartTime The start time for the allocation
     /// @param _allocationEndTime The end time for the allocation
-    function updatePoolTimestamps(
-        uint64 _allocationStartTime,
-        uint64 _allocationEndTime
-    ) external onlyPoolManager(msg.sender) {
+    function updatePoolTimestamps(uint64 _allocationStartTime, uint64 _allocationEndTime)
+        external
+        onlyPoolManager(msg.sender)
+    {
         _updatePoolTimestamps(_allocationStartTime, _allocationEndTime);
     }
-
 
     /// @notice Add allocator array
     /// @dev Only the pool manager(s) can call this function and emits an `AllocatorAdded` event
     /// @param _allocators The allocator address array
-    function batchAddAllocator(address[] memory _allocators) external onlyPoolManager(msg.sender) {
+    /// @param _flags The flag array to set
+    function batchSetAllocator(address[] memory _allocators, bool[] memory _flags)
+        external
+        onlyPoolManager(msg.sender)
+    {
         uint256 length = _allocators.length;
         for (uint256 i = 0; i < length;) {
-            _addAllocator(_allocators[i]);
+            _setAllocator(_allocators[i], _flags[i]);
 
             unchecked {
                 ++i;
@@ -250,32 +261,12 @@ contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
         }
     }
 
-    /// @notice Add allocator
-    /// @dev Only the pool manager(s) can call this function and emits an `AllocatorAdded` event
+    /// @notice Set allocator
+    /// @dev Only the pool manager(s) can call this function and emits an `AllocatorSet` event
     /// @param _allocator The allocators address
-    function addAllocator(address _allocator) external onlyPoolManager(msg.sender) {
-        _addAllocator(_allocator);
-    }
-
-    /// @notice Remove allocator array // todo: remove and replace with setAllocators(address[], bool[])
-    /// @dev Only the pool manager(s) can call this function and emits an `AllocatorRemoved` event
-    /// @param _allocators The allocators address array
-    function batchRemoveAllocator(address[] memory _allocators) external onlyPoolManager(msg.sender) {
-        uint256 length = _allocators.length;
-        for (uint256 i = 0; i < length;) {
-            _removeAllocator(_allocators[i]);
-
-            unchecked {
-                ++i;
-            }
-        }
-    }
-
-    /// @notice Remove allocator
-    /// @dev Only the pool manager(s) can call this function and emits an `AllocatorRemoved` event
-    /// @param _allocator The allocator address
-    function removeAllocator(address _allocator) external onlyPoolManager(msg.sender) {
-        _removeAllocator(_allocator);
+    /// @param _flag The flag to set
+    function setAllocator(address _allocator, bool _flag) external onlyPoolManager(msg.sender) {
+        _setAllocator(_allocator, _flag);
     }
 
     /// @notice Withdraw the tokens from the pool
@@ -311,7 +302,7 @@ contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Checks if address is valid allocator.
     /// @param _allocator The allocator address
     /// @return Always returns true for this strategy
-    function _isValidAllocator(address _allocator) internal pure override returns (bool) {
+    function _isValidAllocator(address _allocator) internal view override returns (bool) {
         return allocators[_allocator];
     }
 
@@ -320,10 +311,7 @@ contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
     ///      Emits a 'TimestampsUpdated()' event.
     /// @param _allocationStartTime The start time for the allocation
     /// @param _allocationEndTime The end time for the allocation
-    function _updatePoolTimestamps(
-        uint64 _allocationStartTime,
-        uint64 _allocationEndTime
-    ) internal {
+    function _updatePoolTimestamps(uint64 _allocationStartTime, uint64 _allocationEndTime) internal {
         // If the timestamps are invalid this will revert - See details in '_isPoolTimestampValid'
         _isPoolTimestampValid(_allocationStartTime, _allocationEndTime);
 
@@ -342,34 +330,18 @@ contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
     /// If any of these conditions are true, this will revert.
     /// @param _allocationStartTime The start time for the allocation
     /// @param _allocationEndTime The end time for the allocation
-    function _isPoolTimestampValid(
-        uint64 _allocationStartTime,
-        uint64 _allocationEndTime
-    ) internal view {
-        if (
-            block.timestamp > _allocationStartTime ||
-            _allocationStartTime > _allocationEndTime
-        ) {
+    function _isPoolTimestampValid(uint64 _allocationStartTime, uint64 _allocationEndTime) internal view {
+        if (block.timestamp > _allocationStartTime || _allocationStartTime > _allocationEndTime) {
             revert INVALID();
         }
     }
 
-    /// @notice Add allocator
-    /// @dev Only the pool manager(s) can call this function and emits an `AllocatorAdded` event
-    /// @param _allocator The allocator address
-    function _addAllocator(address _allocator) internal {
-        allocators[_allocator] = true;
-
-        emit AllocatorAdded(_allocator, msg.sender);
-    }
-
     /// @notice Remove allocator
-    /// @dev Only the pool manager(s) can call this function and emits an `AllocatorRemoved` event
+    /// @dev Only the pool manager(s) can call this function and emits an `AllocatorSet` event
     /// @param _allocator The allocator address
-    function _removeAllocator(address _allocator) internal {
-        allocators[_allocator] = false;
-
-        emit AllocatorRemoved(_allocator, msg.sender);
+    function _setAllocator(address _allocator, bool _flag) internal {
+        allocators[_allocator] = _flag;
+        emit AllocatorSet(_allocator, _flag, msg.sender);
     }
 
     /// @notice Update max requested amount
@@ -392,16 +364,15 @@ contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Checks whether a pool is active or not.
     /// @dev This will return true if the allocationEndTime is greater than the current block timestamp.
     /// @return 'true' if pool is active, otherwise 'false'
-    function _isPoolActive() internal view override returns (bool) { // todo: we also need to check if timestamp > startTime
-        if (block.timestamp <= allocationEndTime) {
+    function _isPoolActive() internal view override returns (bool) {
+        if (allocationStartTime <= block.timestamp || block.timestamp <= allocationEndTime) {
             return true;
         }
         return false;
     }
 
-    // TODO: add register
     function _registerRecipient(bytes memory _data, address _sender)
-        internal 
+        internal
         virtual
         override
         returns (address recipientId)
@@ -444,8 +415,11 @@ contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
         // Get the recipient
         Recipient storage recipient = _recipients[recipientId];
 
-        // check if recipient has already approvals
-        if (recipient.approvalsAllocated != 0) revert UNAUTHORIZED()
+        // check if recipient already has allocations
+        if (
+            recipientAllocations[recipientId][Status.Accepted] > 0
+                || recipientAllocations[recipientId][Status.Rejected] > 0
+        ) revert UNAUTHORIZED();
 
         if (recipient.recipientStatus == Status.None) {
             emit Registered(recipientId, _data, _sender);
@@ -459,6 +433,8 @@ contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
         recipient.requestedAmount = requestedAmount;
         recipient.metadata = metadata;
         recipient.recipientStatus = Status.Pending;
+
+        return recipientId;
     }
 
     /// @notice Allocate votes to a recipient
@@ -466,22 +442,38 @@ contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _sender The sender of the transaction
     /// @dev Only the pool manager(s) can call this function
     function _allocate(bytes memory _data, address _sender) internal virtual override onlyActiveAllocation {
-        // (address recipientId, Status status) = abi.decode(_data, (address, Status));
+        if (!allocators[_sender]) revert UNAUTHORIZED();
 
-        // // Check if allocator is valid
-        // if (allocators[_sender]) revert UNAUTHORIZED();
+        (address recipientId, Status status) = abi.decode(_data, (address, Status));
+        Recipient storage recipient = _recipients[recipientId];
 
-        // Recipient memory recipient = _getRecipient(recipientId);
+        if (allocated[_sender][recipientId] || recipient.recipientStatus == Status.Accepted) {
+            revert RECIPIENT_ERROR(recipientId);
+        }
+
+        allocated[_sender][recipientId] = true;
+
+        recipientAllocations[recipientId][status] += 1;
+
+        if (recipientAllocations[recipientId][Status.Accepted] == approvalThreshold) {
+            recipient.recipientStatus = Status.Accepted;
+
+            IAllo.Pool memory pool = allo.getPool(poolId);
+            uint256 amount = recipient.requestedAmount;
+
+            poolAmount -= amount;
+
+            _transferAmount(pool.token, recipient.recipientAddress, amount);
+
+            emit Distributed(recipientId, recipient.recipientAddress, recipient.requestedAmount, _sender);
+        }
+
+        emit Allocated(recipientId, status, _sender);
     }
 
-
     /// @notice Not implemented
-    function _distribute(address[] memory, bytes memory, address)
-        internal
-        virtual
-        override
-    {
-        revert NOT_IMPLEMENTED();
+    function _distribute(address[] memory, bytes memory, address) internal virtual override {
+        assert(false);
     }
 
     /// @notice Check if sender is a profile owner or member.
@@ -507,4 +499,3 @@ contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Contract should be able to receive NATIVE
     receive() external payable {}
 }
-

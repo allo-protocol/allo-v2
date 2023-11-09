@@ -161,7 +161,8 @@ contract WrappedVotingNftMintStrategy is Native, BaseStrategy, ReentrancyGuard {
 
     /// @notice Internal function to register a recipient (reverts as it is not implemented)
     function _registerRecipient(bytes memory, address) internal pure override returns (address) {
-        revert();
+        assert(false);
+        return address(0);
     }
 
     /// @notice Internal function to allocate based on the given data.
