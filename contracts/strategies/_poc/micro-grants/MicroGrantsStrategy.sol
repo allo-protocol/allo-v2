@@ -4,7 +4,6 @@ pragma solidity 0.8.19;
 // External Libraries
 import {ReentrancyGuard} from "openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
 // Interfaces
-import {IAllo} from "../../../core/interfaces/IAllo.sol";
 import {IRegistry} from "../../../core/interfaces/IRegistry.sol";
 // Core Contracts
 import {BaseStrategy} from "../../BaseStrategy.sol";
@@ -111,9 +110,6 @@ contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice The approval threshold for a recipient to be accepted.
     uint256 public approvalThreshold;
 
-    /// @notice Internal collection of recipients
-    address[] private _recipientIds;
-
     /// @notice 'recipientId' => 'Recipient' struct.
     mapping(address => Recipient) internal _recipients;
 
@@ -217,7 +213,7 @@ contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
     /// @dev 'msg.sender' must be a pool manager to update the max requested amount.
     /// @param _maxRequestedAmount The max requested amount to be set
     function increaseMaxRequestedAmount(uint256 _maxRequestedAmount) external onlyPoolManager(msg.sender) {
-        _increaseMaxRequestedAmount(_maxRequestedAmount);
+        _increaseMaxRequestedAmount(_maxRequestedAmount); // todo: we could use setMaxRequestedAmount instead and "overwriting" te requestAmount if its to high
     }
 
     /// @notice Update the approval threshold for recipient to be accepted
@@ -261,7 +257,7 @@ contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
         _addAllocator(_allocator);
     }
 
-    /// @notice Remove allocator array
+    /// @notice Remove allocator array // todo: remove and replace with setAllocators(address[], bool[])
     /// @dev Only the pool manager(s) can call this function and emits an `AllocatorRemoved` event
     /// @param _allocators The allocators address array
     function batchRemoveAllocator(address[] memory _allocators) external onlyPoolManager(msg.sender) {
@@ -396,7 +392,7 @@ contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Checks whether a pool is active or not.
     /// @dev This will return true if the allocationEndTime is greater than the current block timestamp.
     /// @return 'true' if pool is active, otherwise 'false'
-    function _isPoolActive() internal view override returns (bool) {
+    function _isPoolActive() internal view override returns (bool) { // todo: we also need to check if timestamp > startTime
         if (block.timestamp <= allocationEndTime) {
             return true;
         }
@@ -454,11 +450,7 @@ contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
         // Check if the recipient is already pending
         if (recipient.approvalsAllocated != 0) revert UNAUTHORIZED()
 
-        // TODO: check if recipient has gotten vote
-
         if (recipient.recipientStatus == Status.None) {
-            // If the recipient status is 'None' add the recipient to the '_recipientIds' array
-            _recipientIds.push(recipientId);
             emit Registered(recipientId, _data, _sender);
         } else {
             emit UpdatedRegistration(recipientId, _data, _sender);
