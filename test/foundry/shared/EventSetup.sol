@@ -22,4 +22,11 @@ contract EventSetup {
     event Claimed(address indexed recipientId, address recipientAddress, uint256 amount, address token);
     event TimestampsUpdated(uint64 allocationStartTime, uint64 allocationEndTime, address sender);
     event NFTContractCreated(address nftContractAddress);
+    event AllocatorSet(address indexed allocator, bool indexed _flag, address sender);
+    event MaxRequestedAmountIncreased(uint256 maxRequestedAmount);
+    event ApprovalThresholdUpdated(uint256 approvalThreshold);
+    event UpdatedRegistration(address indexed recipientId, bytes data, address sender);
+    event MilestonesSet(uint256 milestonesLength);
+    event MaxBidIncreased(uint256 maxBid);
+    event MilstoneSubmitted(uint256 milestoneId);
 }

@@ -18,11 +18,7 @@ import {EventSetup} from "../shared/EventSetup.sol";
 
 contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, EventSetup, Errors {
     // Events
-    event MaxBidIncreased(uint256 maxBid);
-    event MilstoneSubmitted(uint256 milestoneId);
     event MilestoneStatusChanged(uint256 milestoneId, IStrategy.Status status);
-    event MilestonesSet(uint256 milestonesLength);
-    event UpdatedRegistration(address indexed recipientId, bytes data, address sender);
 
     bool public useRegistryAnchor;
     bool public metadataRequired;
