@@ -130,7 +130,7 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
         assertEq(uint8(recipientStatus), uint8(IStrategy.Status.Pending));
     }
 
-    function test_revert_register_recipient_INVALID_METADATA() public {
+    function testRevert_register_recipient_INVALID_METADATA() public {
         vm.prank(address(allo()));
         vm.expectRevert(INVALID_METADATA.selector);
 
@@ -140,7 +140,7 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
         );
     }
 
-    function test_revert_register_recipient_EXCEEDING_MAX_BID() public {
+    function testRevert_register_recipient_EXCEEDING_MAX_BID() public {
         vm.prank(address(allo()));
         vm.expectRevert(EXCEEDING_MAX_BID.selector);
 
@@ -219,7 +219,7 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
 
     function test_allocate() public {}
 
-    function test_revert_allocate_ALLOCATION_NOT_ACTIVE() public {
+    function testRevert_allocate_ALLOCATION_NOT_ACTIVE() public {
         address recipientId = __register_recipient();
         // decoded data => (address recipientId, Status status)
         bytes memory allocationData = abi.encode(recipientId, IStrategy.Status.Accepted);
@@ -233,7 +233,7 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
         allo().allocate(poolId, allocationData);
     }
 
-    function test_revert_allocate_UNAUTHORIZED() public {
+    function testRevert_allocate_UNAUTHORIZED() public {
         address[] memory recipientIds = new address[](1);
         address recipientId = __register_recipient();
         recipientIds[0] = recipientId;
@@ -244,45 +244,45 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
         strategy.allocate(allocationData, profile1_member1());
     }
 
-    function test_increase_max_requested_amount() public {
+    function test_increaseMaxRequestedAmount() public {
         vm.prank(pool_manager1());
         strategy.increaseMaxRequestedAmount(5e18);
 
         assertEq(strategy.maxRequestedAmount(), 5e18);
     }
 
-    function test_revert_increase_max_requested_amount_UNAUTHORIZED() public {
+    function testRevert_increaseMaxRequestedAmount_UNAUTHORIZED() public {
         vm.prank(makeAddr("chad"));
         vm.expectRevert(UNAUTHORIZED.selector);
 
         strategy.increaseMaxRequestedAmount(5e18);
     }
 
-    function test_revert_increase_max_requested_amount_AMOUNT_TOO_LOW() public {
+    function testRevert_increaseMaxRequestedAmount_AMOUNT_TOO_LOW() public {
         vm.prank(pool_manager1());
         vm.expectRevert(AMOUNT_TOO_LOW.selector);
 
         strategy.increaseMaxRequestedAmount(5e17);
     }
 
-    function test_set_approval_threshold() public {
+    function test_setApprovalThreshold() public {
         vm.prank(pool_manager1());
         strategy.setApprovalThreshold(5);
 
         assertEq(strategy.approvalThreshold(), 5);
     }
 
-    function test_revert_set_approval_threshold_UNAUTHORIZED() public {
+    function testRevert_setApprovalThreshold_UNAUTHORIZED() public {
         vm.prank(makeAddr("chad"));
         vm.expectRevert(UNAUTHORIZED.selector);
 
         strategy.setApprovalThreshold(5);
     }
 
-    function test_is_pool_active() public {
+    function test_isPoolActive() public {
         assertTrue(strategy.isPoolActive());
         address recipientId = __register_recipient();
-        __add_allocators();
+        __addAllocators();
 
         vm.deal(pool_admin(), 1e19);
         vm.prank(pool_admin());
@@ -294,13 +294,12 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
         allo().allocate(poolId, abi.encode(recipientId, IStrategy.Status.Accepted));
         vm.prank(profile2_member2());
         allo().allocate(poolId, abi.encode(recipientId, IStrategy.Status.Accepted));
+        
         vm.warp(2 days);
-
-        // FIXME: this assertion keeps failing... 😱
-        // assertFalse(strategy.isPoolActive());
+        assertFalse(strategy.isPoolActive());
     }
 
-    function test_only_active_allocation() public {
+    function test_onlyActiveAllocation() public {
         address recipientId = __register_recipient();
         // decoded data => (address recipientId, Status status)
         bytes memory allocationData = abi.encode(recipientId, IStrategy.Status.Accepted);
@@ -314,7 +313,7 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
         allo().allocate(poolId, allocationData);
     }
 
-    function test_update_pool_timestamps() public {
+    function test_updatePoolTimestamps() public {
         vm.prank(pool_admin());
         strategy.updatePoolTimestamps(uint64(block.timestamp), uint64(block.timestamp + 2 days));
 
@@ -322,14 +321,13 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
         assertEq(strategy.allocationEndTime(), uint64(block.timestamp + 2 days));
     }
 
-    function test_revert_update_pool_timestamps_UNAUTHORIZED() public {
-        vm.prank(makeAddr("chad"));
+    function testRevert_updatePoolTimestamps_UNAUTHORIZED() public {
         vm.expectRevert(UNAUTHORIZED.selector);
 
         strategy.updatePoolTimestamps(uint64(block.timestamp), uint64(block.timestamp + 2 days));
     }
 
-    function test_revert_update_pool_timestamps_INVALID() public {
+    function testRevert_updatePoolTimestamps_INVALID() public {
         vm.startPrank(pool_admin());
         vm.expectRevert(INVALID.selector);
         strategy.updatePoolTimestamps(allocationStartTime - 1, allocationEndTime);
@@ -339,18 +337,16 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
         strategy.updatePoolTimestamps(allocationStartTime + 1, allocationStartTime);
     }
 
-    function test_set_allocator() public {
-        __add_allocators();
+    function test_setAllocator() public {
+        __addAllocators();
     }
 
-    function test_revert_set_allocator_UNAUTHORIZED() public {
+    function testRevert_setAllocator_UNAUTHORIZED() public {
         vm.expectRevert(UNAUTHORIZED.selector);
-        vm.startPrank(makeAddr("chad"));
-
         strategy.setAllocator(profile1_member1(), true);
     }
 
-    function test_batch_set_allocator() public {
+    function test_batchSetAllocator() public {
         address[] memory allocatorAddresses = new address[](2);
         allocatorAddresses[0] = profile1_member1();
         allocatorAddresses[1] = profile1_member2();
@@ -370,7 +366,7 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
         strategy.withdraw(NATIVE);
     }
 
-    function test_revert_withdraw_UNAUTHORIZED() public {
+    function testRevert_withdraw_UNAUTHORIZED() public {
         _register_allocate();
         vm.prank(makeAddr("chad"));
 
@@ -378,7 +374,7 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
         strategy.withdraw(NATIVE);
     }
 
-    function test_revert_distribute() public {
+    function testRevert_distribute() public {
         address[] memory recipientIds = new address[](1);
         address recipientId = __register_recipient();
         recipientIds[0] = recipientId;
@@ -389,8 +385,8 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
         strategy.distribute(recipientIds, data, profile1_member1());
     }
 
-    function test_is_valid_allocator() public {
-        __add_allocators();
+    function test_isValidAllocator() public {
+        __addAllocators();
 
         assertTrue(strategy.isValidAllocator(profile1_member1()));
         assertTrue(strategy.isValidAllocator(profile1_member2()));
@@ -398,7 +394,7 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
         assertTrue(strategy.isValidAllocator(profile2_member2()));
     }
 
-    function __add_allocators() internal {
+    function __addAllocators() internal {
         vm.startPrank(pool_admin());
         strategy.setAllocator(profile1_member1(), true);
         strategy.setAllocator(profile1_member2(), true);

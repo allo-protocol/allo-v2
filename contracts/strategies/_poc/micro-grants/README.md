@@ -145,3 +145,11 @@ The `initialize` function initializes the strategy with specific parameters, inc
 * An allocator can vote only once for a recipientId
 * An allocator can choose to: accept/reject a recipient
     * If the allocator accepts the recipient, we check to see if the recipient has approvals which are equal to the approvalThreshold, then the funds are distributed to the recipient
+
+### Withdrawing Funds from Pool
+
+* Pool Manager initiates a withdrawal request.
+* Verifies if sender is authorized to withdraw funds.
+* Checks if the pool is inactive.
+* Decreases the pool amount by the requested withdrawal amount.
+* Transfers the requested amount to the sender.
