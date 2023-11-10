@@ -2,6 +2,29 @@
 
 The `MicroGrantsStrategy` contract is a Solidity smart contract that implements a strategy for managing micro grants. It is designed to work with the `Allo` contract and extends the functionality of the `BaseStrategy` contract. The strategy involves allocating funds to recipients based on certain criteria and voting by allocators.
 
+## Table of Contents
+
+- [MicroGrantsStrategy](#micrograntsstrategy)
+  - [Table of Contents](#table-of-contents)
+  - [Sequence Diagram](#sequence-diagram)
+  - [Smart Contract Overview](#smart-contract-overview)
+    - [Structs](#structs)
+    - [Errors](#errors)
+    - [Events](#events)
+    - [Storage Variables](#storage-variables)
+    - [Modifiers](#modifiers)
+    - [Constructor](#constructor)
+    - [Initialize Function](#initialize-function)
+    - [Views](#views)
+    - [External/Custom Functions](#externalcustom-functions)
+    - [Internal Functions](#internal-functions)
+  - [User Flows](#user-flows)
+    - [Setting Allocators](#setting-allocators)
+    - [Registering a Recipient](#registering-a-recipient)
+    - [Allocating to a Recipient](#allocating-to-a-recipient)
+    - [Withdrawing Funds from Pool](#withdrawing-funds-from-pool)
+
+
 ## Sequence Diagram 
 
 ```mermaid

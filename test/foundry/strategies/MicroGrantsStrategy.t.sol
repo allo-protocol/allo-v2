@@ -20,7 +20,7 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
     event Allocated(address indexed recipientId, IStrategy.Status status, address sender);
 
     error AMOUNT_TOO_LOW();
-    error EXCEEDING_MAX_BID();
+    error EXCEEDING_MAX_AMOUNT();
 
     MicroGrantsStrategy strategy;
 
@@ -140,9 +140,9 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
         );
     }
 
-    function testRevert_registerRecipient_EXCEEDING_MAX_BID() public {
+    function testRevert_registerRecipient_EXCEEDING_MAX_AMOUNT() public {
         vm.prank(address(allo()));
-        vm.expectRevert(EXCEEDING_MAX_BID.selector);
+        vm.expectRevert(EXCEEDING_MAX_AMOUNT.selector);
 
         strategy.registerRecipient(
             abi.encode(profile1_anchor(), recipientAddress(), 1e19, Metadata({protocol: 1, pointer: "metadata"})),
@@ -155,32 +155,32 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
             abi.encode(profile1_anchor(), profile1_member1(), 0, Metadata({protocol: 1, pointer: "metadata"}));
 
         vm.startPrank(address(allo()));
-        strategy.registerRecipient(registrationData, profile1_member1());
+        address recipientId = strategy.registerRecipient(registrationData, profile1_member1());
         vm.stopPrank();
+
+        MicroGrantsStrategy.Recipient memory _recipient = strategy.getRecipient(recipientId);
+        assertEq(_recipient.requestedAmount, 1e18);
     }
 
     function test_registerRecipient_updated_registration() public {
         vm.startPrank(address(allo()));
+
+        bytes memory registrationData =
+            abi.encode(profile1_anchor(), profile1_member1(), 0, Metadata({protocol: 1, pointer: "metadata"}));
+
+        address recipientId = strategy.registerRecipient(registrationData, profile1_member1());
+
+        vm.expectEmit(true, true, true, false);
+        emit UpdatedRegistration(
+            recipientId,
+            abi.encode(profile1_anchor(), profile1_member1(), 1, Metadata({protocol: 1, pointer: "metadata"})),
+            profile1_member1()
+        );
         strategy.registerRecipient(
-            abi.encode(profile1_anchor(), profile1_member1(), 0, Metadata({protocol: 1, pointer: "metadata"})),
+            abi.encode(profile1_anchor(), profile1_member1(), 1, Metadata({protocol: 1, pointer: "metadata"})),
             profile1_member1()
         );
 
-        MicroGrantsStrategy.Recipient memory _recipient = strategy.getRecipient(profile1_member1());
-        assertEq(_recipient.requestedAmount, 0);
-
-        // when user is already registered
-        // fixme: this is failing
-        // vm.expectEmit(true, true, true, false);
-        // emit UpdatedRegistration(
-        //     profile1_member1(),
-        //     abi.encode(profile1_anchor(), profile1_member1(), 1e15, Metadata({protocol: 1, pointer: "metadata"})),
-        //     profile1_member1()
-        // );
-        // strategy.registerRecipient(
-        //     abi.encode(profile1_anchor(), profile1_member1(), 1e15, Metadata({protocol: 1, pointer: "metadata"})),
-        //     profile1_member1()
-        // );
         vm.stopPrank();
     }
 
@@ -193,31 +193,67 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
 
         IStrategy.PayoutSummary[] memory payouts = strategy.getPayouts(recipientIds, data);
 
+        assertEq(payouts[0].amount, 1e18);
+    }
+
+    function test_getPayout_accepted() public {
+        address[] memory recipientIds = new address[](1);
+        address recipientId = __registerRecipient();
+        recipientIds[0] = recipientId;
+
+        bytes memory allocationData = abi.encode(recipientId, IStrategy.Status.Accepted);
+
+        address[] memory _allocators = new address[](3);
+        _allocators[0] = profile1_member1();
+        _allocators[1] = profile1_member2();
+        _allocators[2] = profile2_member1();
+
+        bool[] memory allocatorValues = new bool[](3);
+        allocatorValues[0] = true;
+        allocatorValues[1] = true;
+        allocatorValues[2] = true;
+
+        vm.deal(pool_admin(), 1e19);
+        vm.prank(pool_admin());
+        allo().fundPool{value: 1e19}(poolId, 1e19);
+
+        vm.prank(pool_manager1());
+        strategy.batchSetAllocator(_allocators, allocatorValues);
+
+        for (uint256 i = 0; i < _allocators.length; i++) {
+            vm.prank(address(allo()));
+            strategy.allocate(allocationData, _allocators[i]);
+        }
+
+        bytes[] memory data = new bytes[](1);
+        data[0] = abi.encode(0);
+
+        IStrategy.PayoutSummary[] memory payouts = strategy.getPayouts(recipientIds, data);
+
         assertEq(payouts[0].amount, 0);
     }
 
-    // FIXME: this keeps failing...
-    // function test_getPayout_accepted() public {
-    //     address[] memory recipientIds = new address[](1);
-    //     address recipientId = __registerRecipient();
-    //     recipientIds[0] = recipientId;
+    function test_allocate_accepted() public {
 
-    //     bytes memory allocationData = abi.encode(recipientId, IStrategy.Status.Accepted);
+    }
 
-    //     vm.prank(pool_manager1());
-    //     strategy.setAllocator(makeAddr("chad"), true);
-    //     vm.prank(makeAddr("chad"));
-    //     strategy.allocate(allocationData, profile1_member1());
+    function test_allocate_rejected() public {
 
-    //     bytes[] memory dummyData = new bytes[](1);
-    //     dummyData[0] = abi.encode(0);
+    }
 
-    //     IStrategy.PayoutSummary[] memory payouts = strategy.getPayouts(recipientIds, dummyData);
+    function test_allocate_and_distribute() public {
 
-    //     assertEq(payouts[0].amount, 1e18);
-    // }
+    }
 
-    function test_allocate() public {}
+
+    function testRevert_allocate_RECIPIENT_ERROR_alreadyAllocated() public {
+
+    }
+
+    function testRevert_allocate_RECIPIENT_ERROR_statusAccepted() public {
+
+    }
+
 
     function testRevert_allocate_ALLOCATION_NOT_ACTIVE() public {
         address recipientId = __registerRecipient();
@@ -281,20 +317,6 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
 
     function test_isPoolActive() public {
         assertTrue(strategy.isPoolActive());
-        address recipientId = __registerRecipient();
-        __addAllocators();
-
-        vm.deal(pool_admin(), 1e19);
-        vm.prank(pool_admin());
-        allo().fundPool{value: 1e19}(poolId, 1e19);
-
-        vm.prank(profile1_member1());
-        allo().allocate(poolId, abi.encode(recipientId, IStrategy.Status.Accepted));
-        vm.prank(profile1_member2());
-        allo().allocate(poolId, abi.encode(recipientId, IStrategy.Status.Accepted));
-        vm.prank(profile2_member2());
-        allo().allocate(poolId, abi.encode(recipientId, IStrategy.Status.Accepted));
-        
         vm.warp(2 days);
         assertFalse(strategy.isPoolActive());
     }
@@ -360,14 +382,14 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
     }
 
     function test_withdraw() public {
-        _register_allocate();
+        _register_fundPool();
         vm.prank(pool_admin());
 
         strategy.withdraw(NATIVE);
     }
 
     function testRevert_withdraw_UNAUTHORIZED() public {
-        _register_allocate();
+        _register_fundPool();
         vm.prank(makeAddr("chad"));
 
         vm.expectRevert(UNAUTHORIZED.selector);
@@ -412,7 +434,7 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
         recipientId = strategy.registerRecipient(data, sender);
     }
 
-    function _register_allocate() internal returns (address recipientId) {
+    function _register_fundPool() internal returns (address recipientId) {
         recipientId = __registerRecipient();
         vm.deal(pool_admin(), 1e19);
 

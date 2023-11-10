@@ -212,7 +212,7 @@ contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
     function _getPayout(address _recipientId, bytes memory) internal view override returns (PayoutSummary memory) {
         Recipient memory recipient = _getRecipient(_recipientId);
         uint256 amount = recipient.requestedAmount;
-        if (recipient.recipientStatus != Status.Accepted) {
+        if (recipient.recipientStatus == Status.Accepted) {
             amount = 0;
         }
         return PayoutSummary(recipient.recipientAddress, amount);
@@ -370,10 +370,11 @@ contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
     /// @dev This will return true if the allocationEndTime is greater than the current block timestamp.
     /// @return 'true' if pool is active, otherwise 'false'
     function _isPoolActive() internal view override returns (bool) {
-        if (allocationStartTime <= block.timestamp || block.timestamp <= allocationEndTime) {
-            return true;
+        if (allocationStartTime > block.timestamp || block.timestamp > allocationEndTime) {
+            return false;
         }
-        return false;
+
+        return true;
     }
 
     /// @notice Register a recipient
