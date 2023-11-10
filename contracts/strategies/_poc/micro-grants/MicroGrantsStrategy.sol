@@ -136,12 +136,13 @@ contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
         _;
     }
 
+    // NOTE: This is not used so far
     /// @notice Modifier to check if the allocation has started
     /// @dev This will revert if the allocation has started.
-    modifier onlyBeforeAllocationStarts() {
-        _checkonlyBeforeAllocationStarts();
-        _;
-    }
+    // modifier onlyBeforeAllocationStarts() {
+    //     _checkonlyBeforeAllocationStarts();
+    //     _;
+    // }
 
     /// ===============================
     /// ======== Constructor ==========
