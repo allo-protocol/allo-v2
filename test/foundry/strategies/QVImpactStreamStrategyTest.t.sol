@@ -27,8 +27,6 @@ import {MockERC20} from "../../utils/MockERC20.sol";
 contract QVImpactStreamStrategyTest is Test, AlloSetup, RegistrySetupFull, StrategySetup, EventSetup, Errors, Native {
     event AllocatorAdded(address indexed allocator, address sender);
     event AllocatorRemoved(address indexed allocator, address sender);
-    event UpdatedRegistration(address indexed recipientId, bytes data, address sender);
-    // event TimestampsUpdated(uint64 allocationStartTime, uint64 allocationEndTime, address sender);
     event Allocated(address indexed recipientId, uint256 votes, address allocator);
     event PayoutSet(QVImpactStreamStrategy.Payout[] payouts, address sender);
 
