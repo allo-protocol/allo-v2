@@ -116,7 +116,7 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
     }
 
     function test_getRecipient() public {
-        address recipientId = __register_recipient();
+        address recipientId = __registerRecipient();
         MicroGrantsStrategy.Recipient memory _recipient = strategy.getRecipient(recipientId);
 
         assertEq(_recipient.useRegistryAnchor, useRegistryAnchor);
@@ -125,12 +125,12 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
     }
 
     function test_getRecipientStatus() public {
-        address recipientId = __register_recipient();
+        address recipientId = __registerRecipient();
         IStrategy.Status recipientStatus = strategy.getRecipientStatus(recipientId);
         assertEq(uint8(recipientStatus), uint8(IStrategy.Status.Pending));
     }
 
-    function testRevert_register_recipient_INVALID_METADATA() public {
+    function testRevert_registerRecipient_INVALID_METADATA() public {
         vm.prank(address(allo()));
         vm.expectRevert(INVALID_METADATA.selector);
 
@@ -140,7 +140,7 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
         );
     }
 
-    function testRevert_register_recipient_EXCEEDING_MAX_BID() public {
+    function testRevert_registerRecipient_EXCEEDING_MAX_BID() public {
         vm.prank(address(allo()));
         vm.expectRevert(EXCEEDING_MAX_BID.selector);
 
@@ -150,7 +150,7 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
         );
     }
 
-    function test_register_recipient_ZERO_AMOUNT() public {
+    function test_registerRecipient_ZERO_AMOUNT() public {
         bytes memory registrationData =
             abi.encode(profile1_anchor(), profile1_member1(), 0, Metadata({protocol: 1, pointer: "metadata"}));
 
@@ -159,7 +159,7 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
         vm.stopPrank();
     }
 
-    function test_register_recipient_updated_registration() public {
+    function test_registerRecipient_updated_registration() public {
         vm.startPrank(address(allo()));
         strategy.registerRecipient(
             abi.encode(profile1_anchor(), profile1_member1(), 0, Metadata({protocol: 1, pointer: "metadata"})),
@@ -186,7 +186,7 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
 
     function test_getPayout_not_accepted() public {
         address[] memory recipientIds = new address[](1);
-        address recipientId = __register_recipient();
+        address recipientId = __registerRecipient();
         recipientIds[0] = recipientId;
         bytes[] memory data = new bytes[](1);
         data[0] = abi.encode(recipientId, 1e18);
@@ -199,7 +199,7 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
     // FIXME: this keeps failing...
     // function test_getPayout_accepted() public {
     //     address[] memory recipientIds = new address[](1);
-    //     address recipientId = __register_recipient();
+    //     address recipientId = __registerRecipient();
     //     recipientIds[0] = recipientId;
 
     //     bytes memory allocationData = abi.encode(recipientId, IStrategy.Status.Accepted);
@@ -220,7 +220,7 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
     function test_allocate() public {}
 
     function testRevert_allocate_ALLOCATION_NOT_ACTIVE() public {
-        address recipientId = __register_recipient();
+        address recipientId = __registerRecipient();
         // decoded data => (address recipientId, Status status)
         bytes memory allocationData = abi.encode(recipientId, IStrategy.Status.Accepted);
 
@@ -235,7 +235,7 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
 
     function testRevert_allocate_UNAUTHORIZED() public {
         address[] memory recipientIds = new address[](1);
-        address recipientId = __register_recipient();
+        address recipientId = __registerRecipient();
         recipientIds[0] = recipientId;
 
         bytes memory allocationData = abi.encode(recipientId, IStrategy.Status.Accepted);
@@ -281,7 +281,7 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
 
     function test_isPoolActive() public {
         assertTrue(strategy.isPoolActive());
-        address recipientId = __register_recipient();
+        address recipientId = __registerRecipient();
         __addAllocators();
 
         vm.deal(pool_admin(), 1e19);
@@ -300,7 +300,7 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
     }
 
     function test_onlyActiveAllocation() public {
-        address recipientId = __register_recipient();
+        address recipientId = __registerRecipient();
         // decoded data => (address recipientId, Status status)
         bytes memory allocationData = abi.encode(recipientId, IStrategy.Status.Accepted);
 
@@ -376,7 +376,7 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
 
     function testRevert_distribute() public {
         address[] memory recipientIds = new address[](1);
-        address recipientId = __register_recipient();
+        address recipientId = __registerRecipient();
         recipientIds[0] = recipientId;
 
         bytes memory data = abi.encode(recipientId, 1e18);
@@ -403,7 +403,7 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
         vm.stopPrank();
     }
 
-    function __register_recipient() internal returns (address recipientId) {
+    function __registerRecipient() internal returns (address recipientId) {
         address sender = profile1_member1();
         Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
 
@@ -413,7 +413,7 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
     }
 
     function _register_allocate() internal returns (address recipientId) {
-        recipientId = __register_recipient();
+        recipientId = __registerRecipient();
         vm.deal(pool_admin(), 1e19);
 
         vm.prank(pool_admin());
