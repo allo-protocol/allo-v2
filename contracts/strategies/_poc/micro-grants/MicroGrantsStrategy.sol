@@ -466,6 +466,8 @@ contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
 
         recipientAllocations[recipientId][status] += 1;
 
+        emit Allocated(recipientId, status, _sender);
+
         if (recipientAllocations[recipientId][Status.Accepted] == approvalThreshold) {
             recipient.recipientStatus = Status.Accepted;
 
@@ -478,8 +480,6 @@ contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
 
             emit Distributed(recipientId, recipient.recipientAddress, recipient.requestedAmount, _sender);
         }
-
-        emit Allocated(recipientId, status, _sender);
     }
 
     /// @notice Not implemented
