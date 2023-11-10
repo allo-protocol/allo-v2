@@ -55,7 +55,9 @@ contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Thrown when the pool manager attempts to the lower the requested amount
     error AMOUNT_TOO_LOW();
-    error EXCEEDING_MAX_BID();
+
+    /// @notice Thrown when the pool manager attempts to the increase the requested amount
+    error EXCEEDING_MAX_AMOUNT();
 
     /// ===============================
     /// ========== Events =============
@@ -116,15 +118,17 @@ contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
     mapping(address => Recipient) internal _recipients;
 
     /// @notice This maps the recipient to their approval status
-    /// @dev 'allocator address' to 'bool'
+    /// @dev 'allocator' => 'bool'
     mapping(address => bool) public allocators;
 
-    /// @notice This maps the allocator to the recipient to their approval status
-    /// @dev 'allocator address' to 'recipient address' to 'bool'
+    /// @notice Mapping to track if an allocator has voted/allocated to a recipient
+    /// @dev 'allocator' => 'recipient Id' => 'bool'
     mapping(address => mapping(address => bool)) public allocated;
 
-    /// @notice This maps the recipientId to the Status to the number of allocations
+    /// @notice This maps the recipientId to the Status to the number of votes/allocations
+    /// @dev 'recipientId' => 'Status' => 'uint256'
     mapping(address => mapping(Status => uint256)) public recipientAllocations;
+
     /// ================================
     /// ========== Modifier ============
     /// ================================
@@ -140,7 +144,7 @@ contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Modifier to check if the allocation has started
     /// @dev This will revert if the allocation has started.
     // modifier onlyBeforeAllocationStarts() {
-    //     _checkonlyBeforeAllocationStarts();
+    //     _checkOnlyBeforeAllocationStarts();
     //     _;
     // }
 
@@ -222,7 +226,7 @@ contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
     /// @dev 'msg.sender' must be a pool manager to update the max requested amount.
     /// @param _maxRequestedAmount The max requested amount to be set
     function increaseMaxRequestedAmount(uint256 _maxRequestedAmount) external onlyPoolManager(msg.sender) {
-        _increaseMaxRequestedAmount(_maxRequestedAmount); // todo: we could use setMaxRequestedAmount instead and "overwriting" te requestAmount if its to high
+        _increaseMaxRequestedAmount(_maxRequestedAmount);
     }
 
     /// @notice Update the approval threshold for recipient to be accepted
@@ -292,13 +296,13 @@ contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
         }
     }
 
-    /// @notice Checks if the allocation has not ended and reverts if it has.
-    /// @dev This will revert if the allocation has ended.
-    function _checkonlyBeforeAllocationStarts() internal view {
-        if (block.timestamp < allocationStartTime) {
-            revert ALLOCATION_ACTIVE();
-        }
-    }
+    // /// @notice Checks if the allocation has not ended and reverts if it has.
+    // /// @dev This will revert if the allocation has ended.
+    // function _checkOnlyBeforeAllocationStarts() internal view {
+    //     if (block.timestamp < allocationStartTime) {
+    //         revert ALLOCATION_ACTIVE();
+    //     }
+    // }
 
     /// @notice Checks if address is valid allocator.
     /// @param _allocator The allocator address
@@ -372,6 +376,11 @@ contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
         return false;
     }
 
+    /// @notice Register a recipient
+    /// @param _data The data to be decoded
+    /// @custom:data (address registryAnchor, address recipientAddress, uint256 requestedAmount, Metadata metadata)
+    /// @param _sender The sender of the transaction
+    /// @return recipientId Returns the recipient id
     function _registerRecipient(bytes memory _data, address _sender)
         internal
         virtual
@@ -384,7 +393,7 @@ contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
         uint256 requestedAmount;
         Metadata memory metadata;
 
-        //  @custom:data (address registryAnchor, address recipientAddress, uint256 proposalBid, Metadata metadata)
+        //  @custom:data (address registryAnchor, address recipientAddress, uint256 requestedAmount, Metadata metadata)
         (registryAnchor, recipientAddress, requestedAmount, metadata) =
             abi.decode(_data, (address, address, uint256, Metadata));
 
@@ -404,7 +413,7 @@ contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
 
         if (requestedAmount > maxRequestedAmount) {
             // If the requested amount is greater than the max requested amount, revert
-            revert EXCEEDING_MAX_BID();
+            revert EXCEEDING_MAX_AMOUNT();
         } else if (requestedAmount == 0) {
             // If the requested amount is 0, set requested amount to the max requested amount
             requestedAmount = maxRequestedAmount;
@@ -439,15 +448,16 @@ contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
     }
 
     /// @notice Allocate votes to a recipient
-    /// @param _data The data
+    /// @param _data The data to be decoded
+    /// @custom:data (address recipientId, Status status)
     /// @param _sender The sender of the transaction
-    /// @dev Only the pool manager(s) can call this function
     function _allocate(bytes memory _data, address _sender) internal virtual override onlyActiveAllocation {
         if (!allocators[_sender]) revert UNAUTHORIZED();
 
         (address recipientId, Status status) = abi.decode(_data, (address, Status));
         Recipient storage recipient = _recipients[recipientId];
 
+        // Revert if allocator has already allocated to recipient or if recipient has already been accepted
         if (allocated[_sender][recipientId] || recipient.recipientStatus == Status.Accepted) {
             revert RECIPIENT_ERROR(recipientId);
         }
