@@ -130,12 +130,59 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
         assertEq(uint8(recipientStatus), uint8(IStrategy.Status.Pending));
     }
 
+    function test_getRecipient_after_allocation_ended_not_accepted() public {
+        address recipientId = __registerRecipient();
+        vm.warp(365 days);
+        MicroGrantsStrategy.Recipient memory _recipient = strategy.getRecipient(recipientId);
+
+        assertEq(uint8(_recipient.recipientStatus), uint8(IStrategy.Status.Rejected));
+    }
+
+    function test_getRecipient_after_allocation_ended_accepted() public {
+        address recipientId = __register_allocate_accept();
+        vm.warp(365 days);
+        MicroGrantsStrategy.Recipient memory _recipient = strategy.getRecipient(recipientId);
+
+        assertEq(uint8(_recipient.recipientStatus), uint8(IStrategy.Status.Accepted));
+    }
+
     function testRevert_registerRecipient_INVALID_METADATA() public {
         vm.prank(address(allo()));
         vm.expectRevert(INVALID_METADATA.selector);
 
         strategy.registerRecipient(
             abi.encode(profile1_anchor(), recipientAddress(), 1e18, Metadata({protocol: 0, pointer: "metadata"})),
+            profile1_member1()
+        );
+    }
+
+    function testRevert_registerRecipient_UNAUTHORIZED_no_registry_member() public {
+        vm.prank(address(allo()));
+        vm.expectRevert(UNAUTHORIZED.selector);
+
+        strategy.registerRecipient(
+            abi.encode(profile1_anchor(), recipientAddress(), 1e18, Metadata({protocol: 1, pointer: "metadata"})),
+            randomAddress()
+        );
+    }
+
+    function testRevert_registerRecipient_UNAUTHORIZED_already_allocated() public {
+        __register_allocate_accept();
+        vm.prank(address(allo()));
+        vm.expectRevert(UNAUTHORIZED.selector);
+
+        strategy.registerRecipient(
+            abi.encode(profile1_anchor(), recipientAddress(), 1e18, Metadata({protocol: 1, pointer: "metadata"})),
+            profile1_member1()
+        );
+    }
+
+    function testRevert_registerRecipient_RECIPIENT_ERROR_zero_recipientAddress() public {
+        vm.prank(address(allo()));
+        vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, profile1_anchor()));
+
+        strategy.registerRecipient(
+            abi.encode(profile1_anchor(), address(0), 1e18, Metadata({protocol: 1, pointer: "metadata"})),
             profile1_member1()
         );
     }
@@ -198,32 +245,8 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
 
     function test_getPayout_accepted() public {
         address[] memory recipientIds = new address[](1);
-        address recipientId = __registerRecipient();
+        address recipientId = __register_allocate_accept();
         recipientIds[0] = recipientId;
-
-        bytes memory allocationData = abi.encode(recipientId, IStrategy.Status.Accepted);
-
-        address[] memory _allocators = new address[](3);
-        _allocators[0] = profile1_member1();
-        _allocators[1] = profile1_member2();
-        _allocators[2] = profile2_member1();
-
-        bool[] memory allocatorValues = new bool[](3);
-        allocatorValues[0] = true;
-        allocatorValues[1] = true;
-        allocatorValues[2] = true;
-
-        vm.deal(pool_admin(), 1e19);
-        vm.prank(pool_admin());
-        allo().fundPool{value: 1e19}(poolId, 1e19);
-
-        vm.prank(pool_manager1());
-        strategy.batchSetAllocator(_allocators, allocatorValues);
-
-        for (uint256 i = 0; i < _allocators.length; i++) {
-            vm.prank(address(allo()));
-            strategy.allocate(allocationData, _allocators[i]);
-        }
 
         bytes[] memory data = new bytes[](1);
         data[0] = abi.encode(0);
@@ -234,26 +257,66 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
     }
 
     function test_allocate_accepted() public {
+        address recipientId = __registerRecipient();
+        // decoded data => (address recipientId, Status status)
+        bytes memory allocationData = abi.encode(recipientId, IStrategy.Status.Accepted);
 
+        vm.prank(pool_admin());
+        strategy.setAllocator(profile1_member1(), true);
+
+        vm.prank(profile1_member1());
+        allo().allocate(poolId, allocationData);
+
+        assertTrue(strategy.allocated(profile1_member1(), recipientId));
+        assertEq(strategy.recipientAllocations(recipientId, IStrategy.Status.Accepted), 1);
     }
 
     function test_allocate_rejected() public {
+        address recipientId = __registerRecipient();
+        // decoded data => (address recipientId, Status status)
+        bytes memory allocationData = abi.encode(recipientId, IStrategy.Status.Rejected);
 
+        vm.prank(pool_admin());
+        strategy.setAllocator(profile1_member1(), true);
+
+        vm.prank(profile1_member1());
+        allo().allocate(poolId, allocationData);
+
+        assertTrue(strategy.allocated(profile1_member1(), recipientId));
+        assertEq(strategy.recipientAllocations(recipientId, IStrategy.Status.Rejected), 1);
     }
 
     function test_allocate_and_distribute() public {
+        uint256 recipientBalanceBefore = address(recipientAddress()).balance;
+        address recipientId = __register_allocate_accept();
 
+        uint256 recipientBalanceAfter = address(recipientAddress()).balance;
+        assertEq(recipientBalanceAfter - recipientBalanceBefore, 1e18);
+        assertEq(uint8(strategy.getRecipient(recipientId).recipientStatus), uint8(IStrategy.Status.Accepted));
     }
 
-
     function testRevert_allocate_RECIPIENT_ERROR_alreadyAllocated() public {
+        address recipientId = __register_allocate_accept();
+        // decoded data => (address recipientId, Status status)
+        bytes memory allocationData = abi.encode(recipientId, IStrategy.Status.Accepted);
 
+        vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, recipientId));
+        vm.prank(profile1_member1());
+        allo().allocate(poolId, allocationData);
     }
 
     function testRevert_allocate_RECIPIENT_ERROR_statusAccepted() public {
+        address recipientId = __register_allocate_accept();
+        // decoded data => (address recipientId, Status status)
+        bytes memory allocationData = abi.encode(recipientId, IStrategy.Status.Accepted);
 
+        vm.prank(pool_admin());
+        strategy.setAllocator(makeAddr("newAllocator"), true);
+
+        vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, recipientId));
+        vm.prank(makeAddr("newAllocator"));
+        allo().allocate(poolId, allocationData);
     }
-
 
     function testRevert_allocate_ALLOCATION_NOT_ACTIVE() public {
         address recipientId = __registerRecipient();
@@ -277,6 +340,7 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
         bytes memory allocationData = abi.encode(recipientId, IStrategy.Status.Accepted);
 
         vm.expectRevert(UNAUTHORIZED.selector);
+        vm.prank(address(allo()));
         strategy.allocate(allocationData, profile1_member1());
     }
 
@@ -440,5 +504,50 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
 
         vm.prank(pool_admin());
         allo().fundPool{value: 1e19}(poolId, 1e19);
+    }
+
+    function __register_allocate_accept() internal returns (address) {
+        address recipientId = __registerRecipient();
+
+        bytes memory allocationData = abi.encode(recipientId, IStrategy.Status.Accepted);
+
+        address[] memory _allocators = new address[](3);
+        _allocators[0] = profile1_member1();
+        _allocators[1] = profile1_member2();
+        _allocators[2] = profile2_member1();
+
+        bool[] memory allocatorValues = new bool[](3);
+        allocatorValues[0] = true;
+        allocatorValues[1] = true;
+        allocatorValues[2] = true;
+
+        vm.deal(pool_admin(), 1e19);
+        vm.prank(pool_admin());
+        allo().fundPool{value: 1e19}(poolId, 1e19);
+
+        vm.prank(pool_manager1());
+        strategy.batchSetAllocator(_allocators, allocatorValues);
+
+        uint256 poolAmountBefore = strategy.getPoolAmount();
+
+        for (uint256 i = 0; i < _allocators.length - 1; i++) {
+            vm.prank(address(allo()));
+            strategy.allocate(allocationData, _allocators[i]);
+            assertEq(strategy.recipientAllocations(recipientId, IStrategy.Status.Accepted), i + 1);
+        }
+
+        vm.prank(address(allo()));
+        vm.expectEmit(true, true, true, true);
+
+        emit Distributed(recipientId, recipientAddress(), 1e18, _allocators[2]);
+        strategy.allocate(allocationData, _allocators[2]);
+
+        assertEq(strategy.recipientAllocations(recipientId, IStrategy.Status.Accepted), 3);
+
+        uint256 poolAmountAfter = strategy.getPoolAmount();
+
+        assertEq(poolAmountBefore - poolAmountAfter, 1e18);
+
+        return recipientId;
     }
 }

@@ -503,7 +503,7 @@ contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
     function _getRecipient(address _recipientId) internal view returns (Recipient memory recipient) {
         recipient = _recipients[_recipientId];
 
-        if (!_isPoolActive() && recipient.recipientStatus != Status.Accepted) {
+        if (block.timestamp > allocationEndTime && recipient.recipientStatus != Status.Accepted) {
             recipient.recipientStatus = Status.Rejected;
         }
     }
