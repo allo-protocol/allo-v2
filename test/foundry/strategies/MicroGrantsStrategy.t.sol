@@ -29,7 +29,7 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
     uint64 public allocationStartTime;
     uint64 public allocationEndTime;
 
-    uint256 public maxRequestedAmount;
+    uint256 public maxRequestedAmountAllowed;
     uint256 public approvalThreshold;
 
     Metadata public poolMetadata;
@@ -47,7 +47,7 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
         useRegistryAnchor = true;
         allocationStartTime = uint64(block.timestamp);
         allocationEndTime = uint64(block.timestamp + 1 days);
-        maxRequestedAmount = 1e18;
+        maxRequestedAmountAllowed = 1e18;
         approvalThreshold = 3;
 
         strategy = new MicroGrantsStrategy(address(allo()), "MicroGrantsStrategy");
@@ -58,7 +58,7 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
         poolId = allo().createPoolWithCustomStrategy(
             poolProfile_id(),
             address(strategy),
-            abi.encode(useRegistryAnchor, allocationStartTime, allocationEndTime, approvalThreshold, maxRequestedAmount),
+            abi.encode(useRegistryAnchor, allocationStartTime, allocationEndTime, approvalThreshold, maxRequestedAmountAllowed),
             NATIVE,
             0,
             poolMetadata,
@@ -80,12 +80,12 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
 
         strategy_.initialize(
             420,
-            abi.encode(useRegistryAnchor, allocationStartTime, allocationEndTime, approvalThreshold, maxRequestedAmount)
+            abi.encode(useRegistryAnchor, allocationStartTime, allocationEndTime, approvalThreshold, maxRequestedAmountAllowed)
         );
 
         assertEq(strategy_.getPoolId(), 420);
         assertEq(strategy_.useRegistryAnchor(), useRegistryAnchor);
-        assertEq(strategy_.maxRequestedAmount(), maxRequestedAmount);
+        assertEq(strategy_.maxRequestedAmountAllowed(), maxRequestedAmountAllowed);
         assertEq(strategy_.approvalThreshold(), approvalThreshold);
     }
 
@@ -94,13 +94,13 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
         vm.startPrank(address(allo()));
         strategy_.initialize(
             420,
-            abi.encode(useRegistryAnchor, allocationStartTime, allocationEndTime, approvalThreshold, maxRequestedAmount)
+            abi.encode(useRegistryAnchor, allocationStartTime, allocationEndTime, approvalThreshold, maxRequestedAmountAllowed)
         );
 
         vm.expectRevert(ALREADY_INITIALIZED.selector);
         strategy_.initialize(
             420,
-            abi.encode(useRegistryAnchor, allocationStartTime, allocationEndTime, approvalThreshold, maxRequestedAmount)
+            abi.encode(useRegistryAnchor, allocationStartTime, allocationEndTime, approvalThreshold, maxRequestedAmountAllowed)
         );
         vm.stopPrank();
     }
@@ -111,7 +111,7 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
         vm.expectRevert(UNAUTHORIZED.selector);
         strategy_.initialize(
             420,
-            abi.encode(useRegistryAnchor, allocationStartTime, allocationEndTime, approvalThreshold, maxRequestedAmount)
+            abi.encode(useRegistryAnchor, allocationStartTime, allocationEndTime, approvalThreshold, maxRequestedAmountAllowed)
         );
     }
 
@@ -348,7 +348,7 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
         vm.prank(pool_manager1());
         strategy.increaseMaxRequestedAmount(5e18);
 
-        assertEq(strategy.maxRequestedAmount(), 5e18);
+        assertEq(strategy.maxRequestedAmountAllowed(), 5e18);
     }
 
     function testRevert_increaseMaxRequestedAmount_UNAUTHORIZED() public {

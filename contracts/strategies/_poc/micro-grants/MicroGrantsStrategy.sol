@@ -46,7 +46,7 @@ contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
         uint64 allocationStartTime;
         uint64 allocationEndTime;
         uint256 approvalThreshold;
-        uint256 maxRequestedAmount;
+        uint256 maxRequestedAmountAllowed;
     }
 
     /// ===============================
@@ -69,8 +69,8 @@ contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
     event AllocatorSet(address indexed allocator, bool indexed _flag, address sender);
 
     /// @notice Emitted when the max requested amount is increased.
-    /// @param maxRequestedAmount The new max requested amount
-    event MaxRequestedAmountIncreased(uint256 maxRequestedAmount);
+    /// @param maxRequestedAmountAllowed The new max requested amount
+    event MaxRequestedAmountIncreased(uint256 maxRequestedAmountAllowed);
 
     /// @notice Emitted when the approval threshold is updated.
     /// @param approvalThreshold The new approval threshold
@@ -109,7 +109,7 @@ contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
     uint64 public allocationEndTime;
 
     /// @notice The max amount that can be requested by a recipient.
-    uint256 public maxRequestedAmount;
+    uint256 public maxRequestedAmountAllowed;
 
     /// @notice The approval threshold for a recipient to be accepted.
     uint256 public approvalThreshold;
@@ -166,7 +166,7 @@ contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _poolId ID of the pool
     /// @param _data The data to be decoded
     /// @custom:data (bool useRegistryAnchor; uint64 allocationStartTime,
-    ///    uint64 allocationEndTime, uint256 approvalThreshold, uint256 maxRequestedAmount)
+    ///    uint64 allocationEndTime, uint256 approvalThreshold, uint256 maxRequestedAmountAllowed)
     function initialize(uint256 _poolId, bytes memory _data) external virtual override {
         (InitializeParams memory initializeParams) = abi.decode(_data, (InitializeParams));
         __MicroGrants_init(_poolId, initializeParams);
@@ -185,7 +185,7 @@ contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
         _registry = allo.getRegistry();
 
         _updatePoolTimestamps(_initializeParams.allocationStartTime, _initializeParams.allocationEndTime);
-        _increaseMaxRequestedAmount(_initializeParams.maxRequestedAmount);
+        _increaseMaxRequestedAmount(_initializeParams.maxRequestedAmountAllowed);
         _setApprovalThreshold(_initializeParams.approvalThreshold);
     }
 
@@ -352,11 +352,11 @@ contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Update max requested amount
     /// @param _maxRequestedAmount The max requested amount to be set
     function _increaseMaxRequestedAmount(uint256 _maxRequestedAmount) internal {
-        if (_maxRequestedAmount < maxRequestedAmount) {
+        if (_maxRequestedAmount < maxRequestedAmountAllowed) {
             revert AMOUNT_TOO_LOW();
         }
-        maxRequestedAmount = _maxRequestedAmount;
-        emit MaxRequestedAmountIncreased(maxRequestedAmount);
+        maxRequestedAmountAllowed = _maxRequestedAmount;
+        emit MaxRequestedAmountIncreased(maxRequestedAmountAllowed);
     }
 
     /// @notice Sets the approval threshold for recipient to be accepted
@@ -412,12 +412,12 @@ contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
             revert INVALID_METADATA();
         }
 
-        if (requestedAmount > maxRequestedAmount) {
+        if (requestedAmount > maxRequestedAmountAllowed) {
             // If the requested amount is greater than the max requested amount, revert
             revert EXCEEDING_MAX_AMOUNT();
         } else if (requestedAmount == 0) {
             // If the requested amount is 0, set requested amount to the max requested amount
-            requestedAmount = maxRequestedAmount;
+            requestedAmount = maxRequestedAmountAllowed;
         }
 
         // If the recipient address is the zero address this will revert
