@@ -6,7 +6,7 @@ import "forge-std/Test.sol";
 // Interfaces
 import {IStrategy} from "../../../contracts/core/interfaces/IStrategy.sol";
 // Strategy contracts
-import {MicroGrantsStrategy} from "../../../contracts/strategies/_poc/micro-grants/MicroGrantsStrategy.sol";
+import {SeaGrantsStrategy} from "../../../contracts/strategies/_poc/seagrants/SeaGrantsStrategy.sol";
 // Internal libraries
 import {Errors} from "../../../contracts/core/libraries/Errors.sol";
 import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
@@ -16,13 +16,13 @@ import {AlloSetup} from "../shared/AlloSetup.sol";
 import {RegistrySetupFull} from "../shared/RegistrySetup.sol";
 import {EventSetup} from "../shared/EventSetup.sol";
 
-contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, EventSetup, Errors {
+contract SeaGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, EventSetup, Errors {
     event Allocated(address indexed recipientId, IStrategy.Status status, address sender);
 
     error AMOUNT_TOO_LOW();
     error EXCEEDING_MAX_AMOUNT();
 
-    MicroGrantsStrategy strategy;
+    SeaGrantsStrategy strategy;
 
     bool public useRegistryAnchor;
 
@@ -35,7 +35,7 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
     Metadata public poolMetadata;
     uint256 public poolId;
 
-    mapping(address => MicroGrantsStrategy.Recipient) internal _recipients;
+    mapping(address => SeaGrantsStrategy.Recipient) internal _recipients;
     mapping(address => bool) public allocators;
     mapping(address => mapping(address => bool)) public allocated;
     mapping(address => mapping(IStrategy.Status => uint256)) public recipientAllocations;
@@ -50,7 +50,7 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
         maxRequestedAmount = 1e18;
         approvalThreshold = 3;
 
-        strategy = new MicroGrantsStrategy(address(allo()), "MicroGrantsStrategy");
+        strategy = new SeaGrantsStrategy(address(allo()), "SeaGrantsStrategy");
 
         poolMetadata = Metadata({protocol: 1, pointer: "PoolMetadata"});
 
@@ -67,15 +67,15 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
     }
 
     function test_deployment() public {
-        MicroGrantsStrategy strategy_ = new MicroGrantsStrategy(address(allo()), "MicroGrantsStrategy");
+        SeaGrantsStrategy strategy_ = new SeaGrantsStrategy(address(allo()), "SeaGrantsStrategy");
 
         assertTrue(address(strategy_) != address(0));
         assertTrue(address(strategy_.getAllo()) == address(allo()));
-        assertTrue(strategy_.getStrategyId() == keccak256(abi.encode("MicroGrantsStrategy")));
+        assertTrue(strategy_.getStrategyId() == keccak256(abi.encode("SeaGrantsStrategy")));
     }
 
     function test_initialize() public {
-        MicroGrantsStrategy strategy_ = new MicroGrantsStrategy(address(allo()), "MicroGrantsStrategy");
+        SeaGrantsStrategy strategy_ = new SeaGrantsStrategy(address(allo()), "SeaGrantsStrategy");
         vm.prank(address(allo()));
 
         strategy_.initialize(
@@ -90,7 +90,7 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
     }
 
     function testRevert_initialize_ALREADY_INITIALIZED() public {
-        MicroGrantsStrategy strategy_ = new MicroGrantsStrategy(address(allo()), "MicroGrantsStrategy");
+        SeaGrantsStrategy strategy_ = new SeaGrantsStrategy(address(allo()), "SeaGrantsStrategy");
         vm.startPrank(address(allo()));
         strategy_.initialize(
             420,
@@ -106,7 +106,7 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
     }
 
     function testRevert_initialize_UNAUTHORIZED() public {
-        MicroGrantsStrategy strategy_ = new MicroGrantsStrategy(address(allo()), "MicroGrantsStrategy");
+        SeaGrantsStrategy strategy_ = new SeaGrantsStrategy(address(allo()), "SeaGrantsStrategy");
 
         vm.expectRevert(UNAUTHORIZED.selector);
         strategy_.initialize(
@@ -117,7 +117,7 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
 
     function test_getRecipient() public {
         address recipientId = __registerRecipient();
-        MicroGrantsStrategy.Recipient memory _recipient = strategy.getRecipient(recipientId);
+        SeaGrantsStrategy.Recipient memory _recipient = strategy.getRecipient(recipientId);
 
         assertEq(_recipient.useRegistryAnchor, useRegistryAnchor);
         assertEq(uint8(_recipient.recipientStatus), uint8(IStrategy.Status.Pending));
@@ -133,7 +133,7 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
     function test_getRecipient_after_allocation_ended_not_accepted() public {
         address recipientId = __registerRecipient();
         vm.warp(365 days);
-        MicroGrantsStrategy.Recipient memory _recipient = strategy.getRecipient(recipientId);
+        SeaGrantsStrategy.Recipient memory _recipient = strategy.getRecipient(recipientId);
 
         assertEq(uint8(_recipient.recipientStatus), uint8(IStrategy.Status.Rejected));
     }
@@ -141,7 +141,7 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
     function test_getRecipient_after_allocation_ended_accepted() public {
         address recipientId = __register_allocate_accept();
         vm.warp(365 days);
-        MicroGrantsStrategy.Recipient memory _recipient = strategy.getRecipient(recipientId);
+        SeaGrantsStrategy.Recipient memory _recipient = strategy.getRecipient(recipientId);
 
         assertEq(uint8(_recipient.recipientStatus), uint8(IStrategy.Status.Accepted));
     }
@@ -205,7 +205,7 @@ contract MicroGrantsStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, 
         address recipientId = strategy.registerRecipient(registrationData, profile1_member1());
         vm.stopPrank();
 
-        MicroGrantsStrategy.Recipient memory _recipient = strategy.getRecipient(recipientId);
+        SeaGrantsStrategy.Recipient memory _recipient = strategy.getRecipient(recipientId);
         assertEq(_recipient.requestedAmount, 1e18);
     }
 

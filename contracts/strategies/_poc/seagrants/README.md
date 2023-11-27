@@ -1,10 +1,10 @@
-# MicroGrantsStrategy 
+# SeaGrantsStrategy 
 
-The `MicroGrantsStrategy` contract is a Solidity smart contract that implements a strategy for managing micro grants. It is designed to work with the `Allo` contract and extends the functionality of the `BaseStrategy` contract. The strategy involves allocating funds to recipients based on certain criteria and voting by allocators.
+The `SeaGrantsStrategy` contract is a Solidity smart contract that implements a strategy for managing grants on SeaGrants. It is designed to work with the `Allo` contract and extends the functionality of the `BaseStrategy` contract. The strategy involves allocating funds to recipients based on certain criteria and voting by allocators.
 
 ## Table of Contents
 
-- [MicroGrantsStrategy](#micrograntsstrategy)
+- [SeaGrantsStrategy](#seagrantsstrategy)
   - [Table of Contents](#table-of-contents)
   - [Sequence Diagram](#sequence-diagram)
   - [Smart Contract Overview](#smart-contract-overview)
@@ -33,18 +33,18 @@ sequenceDiagram
     participant Allocator
     participant PoolManager
     participant Allo
-    participant MicroGrantsStrategy
+    participant SeaGrantsStrategy
 
-    PoolManager->>Allo: createPool() with MicroGrantsStrategy (set max amount + approval threshold)
+    PoolManager->>Allo: createPool() with SeaGrantsStrategy (set max amount + approval threshold)
     Allo-->>PoolManager: poolId
-    PoolManager->>MicroGrantsStrategy: batchAddAllocator/batchRemoveAllocators()
+    PoolManager->>SeaGrantsStrategy: batchAddAllocator/batchRemoveAllocators()
     Alice->>+Allo: registerRecipient()
-    Allo->>MicroGrantsStrategy: registerRecipient()
-    MicroGrantsStrategy-->>Allo: recipient1
+    Allo->>SeaGrantsStrategy: registerRecipient()
+    SeaGrantsStrategy-->>Allo: recipient1
     Allo-->>-Alice: recipientId1
     Allocator->>+Allo: allocate() (accepts a recipient and allocation amount)
-    Allo-->>-MicroGrantsStrategy: allocate() 
-    MicroGrantsStrategy-->>Alice: distribute funds if recipiend has enough approvals
+    Allo-->>-SeaGrantsStrategy: allocate() 
+    SeaGrantsStrategy-->>Alice: distribute funds if recipiend has enough approvals
 ```
 
 ## Smart Contract Overview
@@ -104,7 +104,7 @@ sequenceDiagram
 
 ### Constructor
 
-The constructor initializes the `MicroGrantsStrategy` contract by setting the `Allo` contract address and the strategy name.
+The constructor initializes the `SeaGrantsStrategy` contract by setting the `Allo` contract address and the strategy name.
 
 ### Initialize Function
 

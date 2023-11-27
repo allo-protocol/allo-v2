@@ -26,7 +26,7 @@ import {Metadata} from "../../../core/libraries/Metadata.sol";
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⠙⠋⠛⠙⠋⠛⠙⠋⠛⠙⠋⠃⠀⠀⠀⠀⠀⠀⠀⠀⠠⠿⠻⠟⠿⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⠟⠿⠟⠿⠆⠀⠸⠿⠿⠟⠯⠀⠀⠀⠸⠿⠿⠿⠏⠀⠀⠀⠀⠀⠈⠉⠻⠻⡿⣿⢿⡿⡿⠿⠛⠁⠀⠀⠀⠀⠀⠀
 //                    allo.gitcoin.co
 
-contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
+contract SeaGrantsStrategy is BaseStrategy, ReentrancyGuard {
     /// ================================
     /// ========== Struct ==============
     /// ================================
@@ -152,7 +152,7 @@ contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
     /// ======== Constructor ==========
     /// ===============================
 
-    /// @notice Constructor for the Micro Grants Strategy
+    /// @notice Constructor for the Sea Grants Strategy
     /// @param _allo The 'Allo' contract
     /// @param _name The name of the strategy
     constructor(address _allo, string memory _name) BaseStrategy(_allo, _name) {}
@@ -169,14 +169,14 @@ contract MicroGrantsStrategy is BaseStrategy, ReentrancyGuard {
     ///    uint64 allocationEndTime, uint256 approvalThreshold, uint256 maxRequestedAmount)
     function initialize(uint256 _poolId, bytes memory _data) external virtual override {
         (InitializeParams memory initializeParams) = abi.decode(_data, (InitializeParams));
-        __MicroGrants_init(_poolId, initializeParams);
+        __SeaGrants_init(_poolId, initializeParams);
         emit Initialized(_poolId, _data);
     }
 
     /// @notice This initializes the BaseStrategy
     /// @dev You only need to pass the 'poolId' to initialize the BaseStrategy and the rest is specific to the strategy
     /// @param _initializeParams The initialize params
-    function __MicroGrants_init(uint256 _poolId, InitializeParams memory _initializeParams) internal {
+    function __SeaGrants_init(uint256 _poolId, InitializeParams memory _initializeParams) internal {
         // Initialize the BaseStrategy with the '_poolId'
         __BaseStrategy_init(_poolId);
 
