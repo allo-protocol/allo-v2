@@ -22,6 +22,12 @@ import {MicroGrantsBaseStrategy} from "./MicroGrantsBaseStrategy.sol";
 //                    allo.gitcoin.co
 
 contract MicroGrantsGovStrategy is MicroGrantsBaseStrategy {
+    enum GovType {
+        None,
+        PriorVotes,
+        PastVotes
+    }
+
     /// ================================
     /// ========== Storage =============
     /// ================================
@@ -32,6 +38,8 @@ contract MicroGrantsGovStrategy is MicroGrantsBaseStrategy {
     uint256 public snapshotReference;
     // @notice the minVotePower is the minimum amount of voting power required to be an allocator
     uint256 public minVotePower;
+
+    GovType public govType;
 
     /// ===============================
     /// ======== Constructor ==========
@@ -59,13 +67,11 @@ contract MicroGrantsGovStrategy is MicroGrantsBaseStrategy {
         __MicroGrants_init(_poolId, initializeParams);
 
         // sanity check if gov token is a supported token
-        try _gov.getPriorVotes(address(1234), block.number - 10) returns (uint96 votingPower) {
-            votingPower;
-            // pass
+        try _gov.getPriorVotes(address(1234), block.number - 10) returns (uint96) {
+            govType = GovType.PriorVotes;
         } catch {
-            try _gov.getPastVotes(address(1234), block.timestamp - 1 days) returns (uint256 votingPower) {
-                votingPower;
-                // pass
+            try _gov.getPastVotes(address(1234), block.timestamp - 1 days) returns (uint256) {
+                govType = GovType.PastVotes;
             } catch {
                 revert INVALID_ADDRESS();
             }
@@ -90,14 +96,11 @@ contract MicroGrantsGovStrategy is MicroGrantsBaseStrategy {
     /// @return Returns true if address has enough voting power
     function _isValidAllocator(address _allocator) internal view override returns (bool) {
         uint256 votes;
-        try gov.getPriorVotes(_allocator, snapshotReference) returns (uint96 votingPower) {
-            votes = uint256(votingPower);
-        } catch {
-            try gov.getPastVotes(_allocator, snapshotReference) returns (uint256 votingPower) {
-                votes = votingPower;
-            } catch {
-                return false;
-            }
+
+        if (govType == GovType.PriorVotes) {
+            votes = uint256(gov.getPriorVotes(_allocator, snapshotReference));
+        } else if (govType == GovType.PastVotes) {
+            votes = gov.getPastVotes(_allocator, snapshotReference);
         }
 
         return votes >= minVotePower;
