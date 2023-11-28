@@ -58,10 +58,7 @@ contract QVImpactStreamStrategyTest is Test, AlloSetup, RegistrySetupFull, Strat
         allocationEndTime = uint64(weekAfterNext());
         maxVoiceCreditsPerAllocator = 10;
 
-        strategyImplementation = new QVImpactStreamStrategy(
-            address(allo()),
-            "QVImpactStreamStrategy"
-        );
+        strategyImplementation = new QVImpactStreamStrategy(address(allo()), "QVImpactStreamStrategy");
 
         vm.deal(pool_admin(), 100 * 1e18);
         vm.startPrank(pool_admin());
@@ -91,9 +88,7 @@ contract QVImpactStreamStrategyTest is Test, AlloSetup, RegistrySetupFull, Strat
     }
 
     function test_initialize() public virtual {
-        QVImpactStreamStrategy newStrategy = new QVImpactStreamStrategy(
-          address(allo()),
-          "QVImpactStreamStrategy");
+        QVImpactStreamStrategy newStrategy = new QVImpactStreamStrategy(address(allo()), "QVImpactStreamStrategy");
 
         vm.prank(address(allo()));
         newStrategy.initialize(
@@ -120,9 +115,7 @@ contract QVImpactStreamStrategyTest is Test, AlloSetup, RegistrySetupFull, Strat
     }
 
     function test_initialize_Revert_UNAUTHORIZED() public virtual {
-        QVImpactStreamStrategy newStrategy = new QVImpactStreamStrategy(
-          address(allo()),
-          "QVImpactStreamStrategy");
+        QVImpactStreamStrategy newStrategy = new QVImpactStreamStrategy(address(allo()), "QVImpactStreamStrategy");
 
         vm.expectRevert(UNAUTHORIZED.selector);
         newStrategy.initialize(
@@ -134,9 +127,7 @@ contract QVImpactStreamStrategyTest is Test, AlloSetup, RegistrySetupFull, Strat
     }
 
     function test_initialize_Revert_INVALID() public virtual {
-        QVImpactStreamStrategy newStrategy = new QVImpactStreamStrategy(
-          address(allo()),
-          "QVImpactStreamStrategy");
+        QVImpactStreamStrategy newStrategy = new QVImpactStreamStrategy(address(allo()), "QVImpactStreamStrategy");
         vm.startPrank(address(allo()));
         vm.warp(7 days);
 
@@ -185,9 +176,7 @@ contract QVImpactStreamStrategyTest is Test, AlloSetup, RegistrySetupFull, Strat
     }
 
     function testRevert_registerRecipient_RECIPIENT_ERROR_no_recipientAddress() public virtual {
-        QVImpactStreamStrategy newStrategy = new QVImpactStreamStrategy(
-          address(allo()),
-          "QVImpactStreamStrategy");
+        QVImpactStreamStrategy newStrategy = new QVImpactStreamStrategy(address(allo()), "QVImpactStreamStrategy");
 
         vm.deal(pool_manager1(), 100 * 1e18);
         vm.startPrank(pool_manager1());

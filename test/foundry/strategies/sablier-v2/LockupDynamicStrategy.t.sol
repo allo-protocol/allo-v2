@@ -27,7 +27,7 @@ contract LockupDynamicStrategyTest is LockupBase_Test, Errors {
         LockupBase_Test.setUp();
 
         vm.startPrank(pool_manager1());
-        strategy = new LockupDynamicStrategy(lockupDynamic, address(allo()),"LockupDynamicStrategy");
+        strategy = new LockupDynamicStrategy(lockupDynamic, address(allo()), "LockupDynamicStrategy");
         poolId = __StrategySetup(address(strategy), setUpData);
 
         vm.label(address(lockupDynamic), "LockupDynamic");
@@ -245,11 +245,8 @@ contract LockupDynamicStrategyTest is LockupBase_Test, Errors {
     }
 
     function test_isPoolActiv() public {
-        LockupDynamicStrategy _strategy = new LockupDynamicStrategy(
-            lockupDynamic,
-            address(allo()),
-            "LockupDynamicStrategy"
-        );
+        LockupDynamicStrategy _strategy =
+            new LockupDynamicStrategy(lockupDynamic, address(allo()), "LockupDynamicStrategy");
         assertFalse(_strategy.isPoolActive());
         __StrategySetup(address(_strategy), setUpData);
         assertTrue(_strategy.isPoolActive());
@@ -272,11 +269,8 @@ contract LockupDynamicStrategyTest is LockupBase_Test, Errors {
 
     function testRevert_registerRecipient_UNAUTHORIZED_REGISTRY_GATING() public {
         bool _registryGating = true;
-        LockupDynamicStrategy _strategy = new LockupDynamicStrategy(
-            lockupDynamic,
-            address(allo()),
-            "LockupDynamicStrategy"
-        );
+        LockupDynamicStrategy _strategy =
+            new LockupDynamicStrategy(lockupDynamic, address(allo()), "LockupDynamicStrategy");
         bytes memory _setUpData = abi.encode(_registryGating, metadataRequired, grantAmountRequired);
         uint256 _poolId = __StrategySetup(address(_strategy), _setUpData);
 

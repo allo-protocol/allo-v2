@@ -455,9 +455,6 @@ contract ProportionalPayoutStrategyTest is Test, Native, Accounts, RegistrySetup
     }
 
     function __createTestStrategy() internal returns (ProportionalPayoutStrategy testStrategy) {
-        testStrategy = new ProportionalPayoutStrategy(
-            address(allo()),
-            "ProportionalPayoutStrategy"
-        );
+        testStrategy = new ProportionalPayoutStrategy(address(allo()), "ProportionalPayoutStrategy");
     }
 }

@@ -124,9 +124,7 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         return payable(
             address(
                 new DonationVotingMerkleDistributionBaseMock(
-                address(allo()),
-                "DonationVotingMerkleDistributionBaseMock", 
-                permit2
+                    address(allo()), "DonationVotingMerkleDistributionBaseMock", permit2
                 )
             )
         );
@@ -149,8 +147,9 @@ contract DonationVotingMerkleDistributionBaseMockTest is
     }
 
     function testRevert_initialize_withNoAllowedToken() public {
-        strategy =
-        new DonationVotingMerkleDistributionBaseMock(address(allo()), "DonationVotingMerkleDistributionBaseMock", permit2);
+        strategy = new DonationVotingMerkleDistributionBaseMock(
+            address(allo()), "DonationVotingMerkleDistributionBaseMock", permit2
+        );
         vm.prank(address(allo()));
         strategy.initialize(
             poolId,
@@ -170,8 +169,9 @@ contract DonationVotingMerkleDistributionBaseMockTest is
     }
 
     function testRevert_initialize_withNotAllowedToken() public {
-        DonationVotingMerkleDistributionBaseMock testSrategy =
-        new DonationVotingMerkleDistributionBaseMock(address(allo()), "DonationVotingMerkleDistributionBaseMock", permit2);
+        DonationVotingMerkleDistributionBaseMock testSrategy = new DonationVotingMerkleDistributionBaseMock(
+            address(allo()), "DonationVotingMerkleDistributionBaseMock", permit2
+        );
         address[] memory tokensAllowed = new address[](1);
         tokensAllowed[0] = makeAddr("token");
         vm.prank(address(allo()));
@@ -233,8 +233,9 @@ contract DonationVotingMerkleDistributionBaseMockTest is
     }
 
     function testRevert_initialize_INVALID() public {
-        strategy =
-        new DonationVotingMerkleDistributionBaseMock(address(allo()), "DonationVotingMerkleDistributionBaseMock", permit2);
+        strategy = new DonationVotingMerkleDistributionBaseMock(
+            address(allo()), "DonationVotingMerkleDistributionBaseMock", permit2
+        );
         // when _registrationStartTime is in past
         vm.expectRevert(INVALID.selector);
         vm.prank(address(allo()));
