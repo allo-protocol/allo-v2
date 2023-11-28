@@ -48,7 +48,7 @@ sequenceDiagram
     Allo-->>-Alice: recipientId1
     Allocator->>+Allo: allocate() (accepts a recipient and allocation amount)
     Allo-->>-MicroGrantsStrategy: allocate() 
-    MicroGrantsStrategy-->>Alice: distribute funds if recipiend has enough approvals
+    MicroGrantsStrategy-->>Alice: distribute funds if recipient has enough approvals
 ```
 
 Only in `MicroGrantsStrategy.sol`:
