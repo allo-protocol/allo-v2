@@ -71,6 +71,6 @@ contract MicroGrantsHatsStrategy is MicroGrantsBaseStrategy {
     /// @notice Hook called before allocation to check if the sender is an allocator
     /// @param _sender The sender of the transaction
     function _beforeAllocate(bytes memory, address _sender) internal view override {
-        if (!HATS_PROTOCOL.isWearerOfHat(_sender, hatId)) revert UNAUTHORIZED();
+        if (!_isValidAllocator(_sender)) revert UNAUTHORIZED();
     }
 }
