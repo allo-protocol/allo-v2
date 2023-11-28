@@ -51,7 +51,7 @@ contract MicroGrantsGovStrategy is MicroGrantsBaseStrategy {
     /// @param _poolId ID of the pool
     /// @param _data The data to be decoded
     /// @custom:data (bool useRegistryAnchor; uint64 allocationStartTime,
-    ///    uint64 allocationEndTime, uint256 approvalThreshold, uint256 maxRequestedAmount), 
+    ///    uint64 allocationEndTime, uint256 approvalThreshold, uint256 maxRequestedAmount),
     ///    UniversalGov gov token, uint256 snapshotReference, uint256 minVotePower
     function initialize(uint256 _poolId, bytes memory _data) external virtual override {
         (InitializeParams memory initializeParams, UniversalGov _gov, uint256 _snapshotReference, uint256 _minVotePower)
