@@ -28,7 +28,6 @@ import {Metadata} from "../../../core/libraries/Metadata.sol";
 //                    allo.gitcoin.co
 
 contract MicroGrantsStrategy is MicroGrantsBaseStrategy {
-
     /// ===============================
     /// ========== Events =============
     /// ===============================
@@ -46,7 +45,6 @@ contract MicroGrantsStrategy is MicroGrantsBaseStrategy {
     /// @dev 'allocator' => 'bool'
     mapping(address => bool) public allocators;
 
-
     /// ===============================
     /// ======== Constructor ==========
     /// ===============================
@@ -54,9 +52,7 @@ contract MicroGrantsStrategy is MicroGrantsBaseStrategy {
     /// @notice Constructor for the Donation Voting Merkle Distribution Strategy
     /// @param _allo The 'Allo' contract
     /// @param _name The name of the strategy
-    constructor(address _allo, string memory _name)
-        MicroGrantsBaseStrategy(_allo, _name)
-    {}
+    constructor(address _allo, string memory _name) MicroGrantsBaseStrategy(_allo, _name) {}
 
     /// ===============================
     /// ======= External/Custom =======

@@ -2,16 +2,10 @@
 pragma solidity 0.8.19;
 
 // External Libraries
-import {ReentrancyGuard} from "openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
-import {IHats} from "hats-protocol/interfaces/IHats.sol";
-// Interfaces
-import {IRegistry} from "../../../core/interfaces/IRegistry.sol";
-import {IAllo} from "../../../core/interfaces/IAllo.sol";
-// Core Contracts
-import {BaseStrategy} from "../../BaseStrategy.sol";
+import {IHats} from "hats-protocol/Interfaces/IHats.sol";
+
 // Internal Libraries
 import {MicroGrantsBaseStrategy} from "./MicroGrantsBaseStrategy.sol";
-import {Metadata} from "../../../core/libraries/Metadata.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⣿⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -29,14 +23,13 @@ import {Metadata} from "../../../core/libraries/Metadata.sol";
 //                    allo.gitcoin.co
 
 contract MicroGrantsHatsStrategy is MicroGrantsBaseStrategy {
-
     /// ================================
     /// ========== Storage =============
     /// ================================
 
-    IHATs public constant HATS_PROTOCOL = IHATs(0x3bc1A0Ad72417f2d411118085256fC53CBdDd137);
+    IHats public constant HATS_PROTOCOL = IHats(0x3bc1A0Ad72417f2d411118085256fC53CBdDd137);
 
-    uint256 public immutable hatId;
+    uint256 public hatId;
 
     /// ===============================
     /// ======== Constructor ==========
@@ -45,9 +38,7 @@ contract MicroGrantsHatsStrategy is MicroGrantsBaseStrategy {
     /// @notice Constructor for the Donation Voting Merkle Distribution Strategy
     /// @param _allo The 'Allo' contract
     /// @param _name The name of the strategy
-    constructor(address _allo, string memory _name)
-        MicroGrantsBaseStrategy(_allo, _name)
-    {}
+    constructor(address _allo, string memory _name) MicroGrantsBaseStrategy(_allo, _name) {}
 
     /// ===============================
     /// ========= Initialize ==========
@@ -74,12 +65,12 @@ contract MicroGrantsHatsStrategy is MicroGrantsBaseStrategy {
     /// @param _allocator The allocator address
     /// @return Returns true if address is wearer of hatId
     function _isValidAllocator(address _allocator) internal view override returns (bool) {
-        return HATS_PROTOCOL.isWearerOfHat(hatId);
+        return HATS_PROTOCOL.isWearerOfHat(_allocator, hatId);
     }
 
     /// @notice Hook called before allocation to check if the sender is an allocator
     /// @param _sender The sender of the transaction
     function _beforeAllocate(bytes memory, address _sender) internal view override {
-        if (!HATS_PROTOCOL.isWearerOfHat(hatId)) revert UNAUTHORIZED();
+        if (!HATS_PROTOCOL.isWearerOfHat(_sender, hatId)) revert UNAUTHORIZED();
     }
 }

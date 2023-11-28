@@ -387,7 +387,6 @@ abstract contract MicroGrantsBaseStrategy is BaseStrategy, ReentrancyGuard {
     /// @custom:data (address recipientId, Status status)
     /// @param _sender The sender of the transaction
     function _allocate(bytes memory _data, address _sender) internal virtual override onlyActiveAllocation {
-
         (address recipientId, Status status) = abi.decode(_data, (address, Status));
         Recipient storage recipient = _recipients[recipientId];
 
