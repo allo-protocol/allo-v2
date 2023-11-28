@@ -4,21 +4,16 @@ pragma solidity ^0.8.19;
 import {IStrategy} from "../../../contracts/core/interfaces/IStrategy.sol";
 
 import {MicroGrantsBaseStrategyTest} from "./MicroGrantsBaseStrategy.t.sol";
-import {MicroGrantsStrategy} from "../../../contracts/strategies/_poc/micro-grants/MicroGrantsStrategy.sol";
+import {MicroGrantsHatsStrategy} from "../../../contracts/strategies/_poc/micro-grants/MicroGrantsHatsStrategy.sol";
 import {MicroGrantsBaseStrategy} from "../../../contracts/strategies/_poc/micro-grants/MicroGrantsBaseStrategy.sol";
+import {MockHats} from "../../utils/MockHats.sol";
 
-contract MicroGrantsStrategyTest is MicroGrantsBaseStrategyTest {
-    function test_batchSetAllocator() public {
-        address[] memory allocatorAddresses = new address[](2);
-        allocatorAddresses[0] = profile1_member1();
-        allocatorAddresses[1] = profile1_member2();
+contract MicroGrantsHatsStrategyTest is MicroGrantsBaseStrategyTest {
+    MockHats public HAT;
 
-        bool[] memory allocatorValues = new bool[](2);
-        allocatorValues[0] = true;
-        allocatorValues[1] = true;
-
-        vm.prank(pool_admin());
-        MicroGrantsStrategy(_strategy).batchSetAllocator(allocatorAddresses, allocatorValues);
+    function setUp() public override {
+        HAT = new MockHats();
+        super.setUp();
     }
 
     function __addAllocators() internal virtual override {
@@ -30,14 +25,45 @@ contract MicroGrantsStrategyTest is MicroGrantsBaseStrategyTest {
 
     function __setAllocator(address allocator, bool value) internal override {
         vm.prank(pool_admin());
-        MicroGrantsStrategy(_strategy).setAllocator(allocator, value);
+        HAT.addHat(allocator, value);
+    }
+
+    function testRevert_initialize_ZERO_ADDRESS() public {
+        address payable newStrategy = _createStrategy();
+        vm.prank(pool_admin());
+        vm.expectRevert(ZERO_ADDRESS.selector);
+        allo().createPoolWithCustomStrategy(
+            poolProfile_id(),
+            address(newStrategy),
+            abi.encode(
+                useRegistryAnchor,
+                allocationStartTime,
+                allocationEndTime,
+                approvalThreshold,
+                maxRequestedAmount,
+                address(0),
+                123
+            ),
+            NATIVE,
+            0,
+            poolMetadata,
+            pool_managers()
+        );
     }
 
     function _createPoolWithCustomStrategy() internal virtual override {
         poolId = allo().createPoolWithCustomStrategy(
             poolProfile_id(),
             address(_strategy),
-            abi.encode(useRegistryAnchor, allocationStartTime, allocationEndTime, approvalThreshold, maxRequestedAmount),
+            abi.encode(
+                useRegistryAnchor,
+                allocationStartTime,
+                allocationEndTime,
+                approvalThreshold,
+                maxRequestedAmount,
+                address(HAT),
+                123
+            ),
             NATIVE,
             0,
             poolMetadata,
@@ -46,17 +72,7 @@ contract MicroGrantsStrategyTest is MicroGrantsBaseStrategyTest {
     }
 
     function _createStrategy() internal virtual override returns (address payable) {
-        return payable(address(new MicroGrantsStrategy(address(allo()), "MicroGrantsStrategy")));
-    }
-
-    function test_setAllocator() public {
-        __addAllocators();
-    }
-
-    function testRevert_setAllocator_UNAUTHORIZED() public {
-        vm.expectRevert(UNAUTHORIZED.selector);
-        vm.prank(randomAddress());
-        MicroGrantsStrategy(_strategy).setAllocator(profile1_member1(), false);
+        return payable(address(new MicroGrantsHatsStrategy(address(allo()), "MicroGrantsStrategy")));
     }
 
     function testRevert_allocate_UNAUTHORIZED() public override {

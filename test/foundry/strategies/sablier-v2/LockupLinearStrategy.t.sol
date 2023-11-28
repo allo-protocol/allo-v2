@@ -27,11 +27,7 @@ contract LockupLinearStrategyTest is LockupBase_Test, Errors {
         LockupBase_Test.setUp();
 
         vm.startPrank(pool_manager1());
-        strategy = new LockupLinearStrategy(
-            lockupLinear,
-            address(allo()),
-            "LockupLinearStrategy"
-        );
+        strategy = new LockupLinearStrategy(lockupLinear, address(allo()), "LockupLinearStrategy");
         poolId = __StrategySetup(address(strategy), setUpData);
 
         vm.label(address(lockupLinear), "LockupLinear");
@@ -231,11 +227,7 @@ contract LockupLinearStrategyTest is LockupBase_Test, Errors {
     }
 
     function test_isPoolActiv() public {
-        LockupLinearStrategy _strategy = new LockupLinearStrategy(
-            lockupLinear,
-            address(allo()),
-            "LockupLinearStrategy"
-        );
+        LockupLinearStrategy _strategy = new LockupLinearStrategy(lockupLinear, address(allo()), "LockupLinearStrategy");
         assertFalse(_strategy.isPoolActive());
         __StrategySetup(address(_strategy), setUpData);
         assertTrue(_strategy.isPoolActive());
@@ -258,11 +250,7 @@ contract LockupLinearStrategyTest is LockupBase_Test, Errors {
 
     function testRevert_registerRecipient_UNAUTHORIZED_REGISTRY_GATING() public {
         bool _registryGating = true;
-        LockupLinearStrategy _strategy = new LockupLinearStrategy(
-            lockupLinear,
-            address(allo()),
-            "LockupLinearStrategy"
-        );
+        LockupLinearStrategy _strategy = new LockupLinearStrategy(lockupLinear, address(allo()), "LockupLinearStrategy");
         bytes memory _setUpData = abi.encode(_registryGating, metadataRequired, grantAmountRequired);
         uint256 _poolId = __StrategySetup(address(_strategy), _setUpData);
 

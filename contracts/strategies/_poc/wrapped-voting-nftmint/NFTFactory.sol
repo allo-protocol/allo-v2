@@ -12,12 +12,7 @@ contract NFTFactory {
         external
         returns (address payable)
     {
-        NFT nft = new NFT(
-            _name,
-            _symbol,
-            _price,
-            _owner
-        );
+        NFT nft = new NFT(_name, _symbol, _price, _owner);
 
         isNFTContract[address(nft)] = true;
 

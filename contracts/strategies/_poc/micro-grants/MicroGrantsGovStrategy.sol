@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
-// Internal Libraries
 
+// Interfaces
+import {UniversalGov} from "./interfaces/UniversalGov.sol";
+// Internal Libraries
 import {MicroGrantsBaseStrategy} from "./MicroGrantsBaseStrategy.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -19,23 +21,25 @@ import {MicroGrantsBaseStrategy} from "./MicroGrantsBaseStrategy.sol";
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⠙⠋⠛⠙⠋⠛⠙⠋⠛⠙⠋⠃⠀⠀⠀⠀⠀⠀⠀⠀⠠⠿⠻⠟⠿⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⠟⠿⠟⠿⠆⠀⠸⠿⠿⠟⠯⠀⠀⠀⠸⠿⠿⠿⠏⠀⠀⠀⠀⠀⠈⠉⠻⠻⡿⣿⢿⡿⡿⠿⠛⠁⠀⠀⠀⠀⠀⠀
 //                    allo.gitcoin.co
 
-contract MicroGrantsStrategy is MicroGrantsBaseStrategy {
-    /// ===============================
-    /// ========== Events =============
-    /// ===============================
-
-    /// @notice Emitted when an allocator is added
-    /// @param allocator The allocator address
-    /// @param sender The sender of the transaction
-    event AllocatorSet(address indexed allocator, bool indexed _flag, address sender);
+contract MicroGrantsGovStrategy is MicroGrantsBaseStrategy {
+    enum GovType {
+        None,
+        PriorVotes,
+        PastVotes
+    }
 
     /// ================================
     /// ========== Storage =============
     /// ================================
 
-    /// @notice This maps the recipient to their approval status
-    /// @dev 'allocator' => 'bool'
-    mapping(address => bool) public allocators;
+    /// @notice Represents the governance token
+    UniversalGov public gov;
+    // @notice timestamp or block number, based on the gov implementation
+    uint256 public snapshotReference;
+    // @notice the minVotePower is the minimum amount of voting power required to be an allocator
+    uint256 public minVotePower;
+
+    GovType public govType;
 
     /// ===============================
     /// ======== Constructor ==========
@@ -47,33 +51,40 @@ contract MicroGrantsStrategy is MicroGrantsBaseStrategy {
     constructor(address _allo, string memory _name) MicroGrantsBaseStrategy(_allo, _name) {}
 
     /// ===============================
-    /// ======= External/Custom =======
+    /// ========= Initialize ==========
     /// ===============================
 
-    /// @notice Add allocator array
-    /// @dev Only the pool manager(s) can call this function and emits an `AllocatorAdded` event
-    /// @param _allocators The allocator address array
-    /// @param _flags The flag array to set
-    function batchSetAllocator(address[] memory _allocators, bool[] memory _flags)
-        external
-        onlyPoolManager(msg.sender)
-    {
-        uint256 length = _allocators.length;
-        for (uint256 i = 0; i < length;) {
-            _setAllocator(_allocators[i], _flags[i]);
+    // @notice Initialize the strategy
+    /// @dev This will revert if the strategy is already initialized and 'msg.sender' is not the 'Allo' contract.
+    /// @param _poolId ID of the pool
+    /// @param _data The data to be decoded
+    /// @custom:data (bool useRegistryAnchor; uint64 allocationStartTime,
+    ///    uint64 allocationEndTime, uint256 approvalThreshold, uint256 maxRequestedAmount),
+    ///    UniversalGov gov token, uint256 snapshotReference, uint256 minVotePower
+    function initialize(uint256 _poolId, bytes memory _data) external virtual override {
+        (InitializeParams memory initializeParams, UniversalGov _gov, uint256 _snapshotReference, uint256 _minVotePower)
+        = abi.decode(_data, (InitializeParams, UniversalGov, uint256, uint256));
+        __MicroGrants_init(_poolId, initializeParams);
 
-            unchecked {
-                ++i;
+        // sanity check if gov token is a supported token
+        try _gov.getPriorVotes(address(1234), block.number - 10) returns (uint96) {
+            govType = GovType.PriorVotes;
+        } catch {
+            try _gov.getPastVotes(address(1234), block.timestamp - 1 days) returns (uint256) {
+                govType = GovType.PastVotes;
+            } catch {
+                revert INVALID_ADDRESS();
             }
         }
-    }
 
-    /// @notice Set allocator
-    /// @dev Only the pool manager(s) can call this function and emits an `AllocatorSet` event
-    /// @param _allocator The allocators address
-    /// @param _flag The flag to set
-    function setAllocator(address _allocator, bool _flag) external onlyPoolManager(msg.sender) {
-        _setAllocator(_allocator, _flag);
+        gov = _gov;
+
+        if (_snapshotReference == 0 || _minVotePower == 0) revert INVALID();
+
+        snapshotReference = _snapshotReference;
+        minVotePower = _minVotePower;
+
+        emit Initialized(_poolId, _data);
     }
 
     /// ====================================
@@ -82,22 +93,22 @@ contract MicroGrantsStrategy is MicroGrantsBaseStrategy {
 
     /// @notice Checks if address is valid allocator.
     /// @param _allocator The allocator address
-    /// @return Returns true is allocator is in mapping
+    /// @return Returns true if address has enough voting power
     function _isValidAllocator(address _allocator) internal view override returns (bool) {
-        return allocators[_allocator];
-    }
+        uint256 votes;
 
-    /// @notice Remove allocator
-    /// @dev Only the pool manager(s) can call this function and emits an `AllocatorSet` event
-    /// @param _allocator The allocator address
-    function _setAllocator(address _allocator, bool _flag) internal {
-        allocators[_allocator] = _flag;
-        emit AllocatorSet(_allocator, _flag, msg.sender);
+        if (govType == GovType.PriorVotes) {
+            votes = uint256(gov.getPriorVotes(_allocator, snapshotReference));
+        } else if (govType == GovType.PastVotes) {
+            votes = gov.getPastVotes(_allocator, snapshotReference);
+        }
+
+        return votes >= minVotePower;
     }
 
     /// @notice Hook called before allocation to check if the sender is an allocator
     /// @param _sender The sender of the transaction
     function _beforeAllocate(bytes memory, address _sender) internal view override {
-        if (!allocators[_sender]) revert UNAUTHORIZED();
+        if (!_isValidAllocator(_sender)) revert UNAUTHORIZED();
     }
 }

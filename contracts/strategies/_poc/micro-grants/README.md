@@ -2,6 +2,11 @@
 
 The `MicroGrantsStrategy` contract is a Solidity smart contract that implements a strategy for managing micro grants. It is designed to work with the `Allo` contract and extends the functionality of the `BaseStrategy` contract. The strategy involves allocating funds to recipients based on certain criteria and voting by allocators.
 
+They are 3 different versions of the MicroGrants implementation.
+- `MicroGrantsStrategy.sol`: uses a whitelist of allocators to determine if an allocator is valid or not.
+- `MicroGrantsHatsStrategy.sol`: utilizes Hats protocol for the allocator eligibility.
+- `MicroGrantsGovStrategy.sol`: validates an allocator based on the governance token balance at a pre-defined timestamp or block number. It supports both token with `getPriorVotes(sender, blocknumber)` and `getPastVotes(sender, timestamp)`.
+
 ## Table of Contents
 
 - [MicroGrantsStrategy](#micrograntsstrategy)
@@ -37,14 +42,23 @@ sequenceDiagram
 
     PoolManager->>Allo: createPool() with MicroGrantsStrategy (set max amount + approval threshold)
     Allo-->>PoolManager: poolId
-    PoolManager->>MicroGrantsStrategy: batchAddAllocator/batchRemoveAllocators()
     Alice->>+Allo: registerRecipient()
     Allo->>MicroGrantsStrategy: registerRecipient()
     MicroGrantsStrategy-->>Allo: recipient1
     Allo-->>-Alice: recipientId1
     Allocator->>+Allo: allocate() (accepts a recipient and allocation amount)
     Allo-->>-MicroGrantsStrategy: allocate() 
-    MicroGrantsStrategy-->>Alice: distribute funds if recipiend has enough approvals
+    MicroGrantsStrategy-->>Alice: distribute funds if recipient has enough approvals
+```
+
+Only in `MicroGrantsStrategy.sol`:
+
+```mermaid
+sequenceDiagram
+    participant PoolManager
+    participant MicroGrantsStrategy
+
+    PoolManager->>MicroGrantsStrategy: setAllocator / batchSetAllocator()
 ```
 
 ## Smart Contract Overview
@@ -110,6 +124,10 @@ The constructor initializes the `MicroGrantsStrategy` contract by setting the `A
 
 The `initialize` function initializes the strategy with specific parameters, including timestamps, approval threshold, and max requested amount.
 
+Depending on the MicroGrants strategy, you also need to pass:
+- `MicroGrantsHatsStrategy.sol`: Hats address and HatId
+- `MicroGrantsGovStrategy.sol`: Gov token address, block number or time stamp and token amount threshold
+
 ### Views
 
 - `getRecipient`: Retrieves information about a specific recipient.
@@ -121,16 +139,18 @@ The `initialize` function initializes the strategy with specific parameters, inc
 - `increaseMaxRequestedAmount`: Allows the pool manager to increase the max requested amount.
 - `setApprovalThreshold`: Allows the pool manager to set the approval threshold.
 - `updatePoolTimestamps`: Allows the pool manager to update allocation start and end timestamps.
+- `withdraw`: Allows the pool manager to withdraw tokens from the pool.
+  
+Function specific to `MicroGrantsStrategy.sol`:
+
 - `batchSetAllocator`: Allows the pool manager to batch set allocator addresses.
 - `setAllocator`: Allows the pool manager to set an allocator address.
-- `withdraw`: Allows the pool manager to withdraw tokens from the pool.
 
 ### Internal Functions
 
 - `_checkOnlyActiveAllocation`: Internal function to check if the allocation is active.
 - `_updatePoolTimestamps`: Internal function to update allocation start and end timestamps.
 - `_isPoolTimestampValid`: Internal function to check if timestamps are valid.
-- `_setAllocator`: Internal function to set an allocator.
 - `_increaseMaxRequestedAmount`: Internal function to increase the max requested amount.
 - `_setApprovalThreshold`: Internal function to set the approval threshold.
 - `_isPoolActive`: Internal view function to check if the pool is active.
@@ -138,11 +158,13 @@ The `initialize` function initializes the strategy with specific parameters, inc
 - `_allocate`: Internal function to allocate votes to a recipient.
 - `_distribute`: Internal function (not implemented).
 
-
 ## User Flows
 
 ### Setting Allocators
-* Pool Managers can use `batchAddAllocators`, `batchRemoveAllocators` to update list of addresse who are allowed to allocate
+
+Only in `MicroGrantsStrategy.sol`:
+
+* Pool Managers can use `batchSetAllocators` to update list of addresses who are allowed to allocate
 
 ### Registering a Recipient
 
