@@ -27,7 +27,7 @@ contract MicroGrantsHatsStrategy is MicroGrantsBaseStrategy {
     /// ========== Storage =============
     /// ================================
 
-    IHats public constant HATS_PROTOCOL = IHats(0x3bc1A0Ad72417f2d411118085256fC53CBdDd137);
+    IHats public HATS_PROTOCOL;
 
     uint256 public hatId;
 
@@ -51,8 +51,12 @@ contract MicroGrantsHatsStrategy is MicroGrantsBaseStrategy {
     /// @custom:data (bool useRegistryAnchor; uint64 allocationStartTime,
     ///    uint64 allocationEndTime, uint256 approvalThreshold, uint256 maxRequestedAmount), uint256 _hatId
     function initialize(uint256 _poolId, bytes memory _data) external virtual override {
-        (InitializeParams memory initializeParams, uint256 _hatId) = abi.decode(_data, (InitializeParams, uint256));
+        (InitializeParams memory initializeParams, address _hats, uint256 _hatId) =
+            abi.decode(_data, (InitializeParams, address, uint256));
         __MicroGrants_init(_poolId, initializeParams);
+
+        if (_hats == address(0)) revert ZERO_ADDRESS();
+        HATS_PROTOCOL = IHats(_hats);
         hatId = _hatId;
         emit Initialized(_poolId, _data);
     }
