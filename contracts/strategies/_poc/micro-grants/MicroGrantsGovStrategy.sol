@@ -67,10 +67,10 @@ contract MicroGrantsGovStrategy is MicroGrantsBaseStrategy {
         __MicroGrants_init(_poolId, initializeParams);
 
         // sanity check if gov token is a supported token
-        try _gov.getPriorVotes(address(1234), block.number - 10) returns (uint96) {
+        try _gov.getPriorVotes(address(1234), 0) returns (uint96) {
             govType = GovType.PriorVotes;
         } catch {
-            try _gov.getPastVotes(address(1234), block.timestamp - 1 days) returns (uint256) {
+            try _gov.getPastVotes(address(1234), 0) returns (uint256) {
                 govType = GovType.PastVotes;
             } catch {
                 revert INVALID_ADDRESS();
