@@ -27,8 +27,10 @@ contract MicroGrantsHatsStrategy is MicroGrantsBaseStrategy {
     /// ========== Storage =============
     /// ================================
 
-    IHats public HATS_PROTOCOL;
+    /// @notice Hats protocol contract
+    IHats public hats;
 
+    /// @notice Wearer of HatId is allowed to allocate
     uint256 public hatId;
 
     /// ===============================
@@ -56,7 +58,7 @@ contract MicroGrantsHatsStrategy is MicroGrantsBaseStrategy {
         __MicroGrants_init(_poolId, initializeParams);
 
         if (_hats == address(0)) revert ZERO_ADDRESS();
-        HATS_PROTOCOL = IHats(_hats);
+        hats = IHats(_hats);
         hatId = _hatId;
         emit Initialized(_poolId, _data);
     }
@@ -69,7 +71,7 @@ contract MicroGrantsHatsStrategy is MicroGrantsBaseStrategy {
     /// @param _allocator The allocator address
     /// @return Returns true if address is wearer of hatId
     function _isValidAllocator(address _allocator) internal view override returns (bool) {
-        return HATS_PROTOCOL.isWearerOfHat(_allocator, hatId);
+        return hats.isWearerOfHat(_allocator, hatId);
     }
 
     /// @notice Hook called before allocation to check if the sender is an allocator
