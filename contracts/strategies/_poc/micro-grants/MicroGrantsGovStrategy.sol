@@ -66,15 +66,17 @@ contract MicroGrantsGovStrategy is MicroGrantsBaseStrategy {
         = abi.decode(_data, (InitializeParams, UniversalGov, uint256, uint256));
         __MicroGrants_init(_poolId, initializeParams);
 
-        bytes memory prior = abi.encodeWithSelector(_gov.getPriorVotes.selector, abi.encodePacked(address(123),uint256(0)));
-        bytes memory past = abi.encodeWithSelector(_gov.getPastVotes.selector, abi.encodePacked(address(123),uint256(0)));
+        bytes memory prior =
+            abi.encodeWithSelector(_gov.getPriorVotes.selector, abi.encodePacked(address(123), uint256(0)));
+        bytes memory past =
+            abi.encodeWithSelector(_gov.getPastVotes.selector, abi.encodePacked(address(123), uint256(0)));
 
-        (bool successPrior, ) = address(_gov).call(prior);
-        (bool successPast, ) = address(_gov).call(past);
+        (bool successPrior,) = address(_gov).call(prior);
+        (bool successPast,) = address(_gov).call(past);
 
-        if(successPrior) {
+        if (successPrior) {
             govType = GovType.PriorVotes;
-        } else if(successPast) {
+        } else if (successPast) {
             govType = GovType.PastVotes;
         } else {
             revert INVALID_ADDRESS();
