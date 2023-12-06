@@ -1,7 +1,7 @@
 import { hexValue } from "@ethersproject/bytes";
 import { parseEther } from "@ethersproject/units";
-import { AbiCoder, ethers } from "ethers";
-import hre, { network } from "hardhat";
+import { AbiCoder } from "ethers";
+import hre, { ethers, network } from "hardhat";
 
 const HOST_ADDR = "0x4E583d9390082B65Bef884b629DFA426114CED6d"; // mainnet host addr
 const HOST_ABI = ["function getGovernance() external view returns (address)"];

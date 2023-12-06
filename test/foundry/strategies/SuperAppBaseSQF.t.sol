@@ -39,8 +39,10 @@ contract SuperAppBaseSQFTest is Test, RegistrySetupFull, AlloSetup, Native, Even
         // todo: setup
         vm.createSelectFork({blockNumber: 17_787_058, urlOrAlias: "mainnet"});
 
-        // todo: need proper address for this - will have to fork test this.
-        // HOST = ISuperfluid(0x22ff293e14F1EC3A09B137e9e06084AFd63adDF9);
+        // NOTE: this is mainnet HOST
+        // reference: https://console.superfluid.finance/ethereum/protocol
+
+        // HOST = ISuperfluid(0x4E583d9390082B65Bef884b629DFA426114CED6d);
 
         // uint256 callBackDefinitions =
         //     SuperAppDefinitions.APP_LEVEL_FINAL | SuperAppDefinitions.BEFORE_AGREEMENT_CREATED_NOOP;
