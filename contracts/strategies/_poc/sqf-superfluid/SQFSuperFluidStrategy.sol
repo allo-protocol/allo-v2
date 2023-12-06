@@ -165,7 +165,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Submit application to pool
     /// @dev The '_data' parameter is encoded as follows:
-    ///     - If registryGating is true, then the data is encoded as (address recipientId, address recipientAddress, Metadata metadata)
+    ///     - If registryGating is true, then the data is encoded as (address recipientId, Metadata metadata)
     ///     - If registryGating is false, then the data is encoded as (address recipientAddress, address registryAnchor, Metadata metadata)
     /// @param _data The data to be decoded
     /// @param _sender The sender of the transaction
@@ -185,8 +185,10 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
 
         // decode data custom to this strategy
         if (registryGating) {
-            (recipientId, recipientAddress, metadata) = abi.decode(_data, (address, address, Metadata));
+            (recipientId, metadata) = abi.decode(_data, (address, Metadata));
 
+            // The profile’s anchor address should be used to receive funds
+            recipientAddress = recipientId;
             // when registry gating is enabled, the recipientId must be a profile member
             if (!_isProfileMember(recipientId, _sender)) revert UNAUTHORIZED();
         } else {
@@ -237,15 +239,26 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _data Data required will depend on the strategy implementation
     /// @param _sender The address of the sender
     function _distribute(address[] memory _recipientIds, bytes memory _data, address _sender) internal override {
-        // todo
+        // // todo
+        // The application and review period is finished, 
+        // the program managers will call distribute(), 
+        // which will create the GDA and start distributing 
+        // to all approved recipients.
+
+        // If at that time, no CFAs have been created through allocate(), 
+        // then the GDA will be distributed evenly among all approved recipients
     }
 
     /// @notice This will allocate to a recipient.
     /// @dev The encoded '_data' will be determined by the strategy implementation.
     /// @param _data The data to use to allocate to the recipient
     /// @param _sender The address of the sender
-    function _allocate(bytes memory _data, address _sender) internal override onlyActiveAllocation{
+    function _allocate(bytes memory _data, address _sender) internal override onlyActiveAllocation {
         // todo
+        // only accepted recipients can be allocated to
+        // only isValidAllocator
+        // creates a CFA and updates the GDA
+        // Each recipient-allocator pair is its own CFA, which will start to stream tokens to that recipient. 
     }
 
     /// @notice This will get the payout summary for a recipient.
@@ -260,6 +273,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         returns (PayoutSummary memory)
     {
         // todo
+        // discuss what to return here
     }
 
     /// @notice Set the start and end dates for the pool
@@ -285,7 +299,6 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         return true;
     }
 
-
     /// @notice Review recipient(s) application(s)
     /// @dev You can review multiple recipients at once or just one. This can only be called by a pool manager and
     ///      only during active registration.
@@ -306,13 +319,22 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
             address recipientId = _recipientIds[i];
             Recipient storage recipient = recipients[recipientId];
 
-            // if the status is none or appealed then revert
-            if (recipientStatus != Status.None) {
+            // only pending applications can be updated
+            // and the new status can only be Accepted or Rejected
+            if (
+                recipient.recipientStatus != Status.Pending
+                    && (recipientStatus != Status.Accepted && recipientStatus != Status.Rejected)
+            ) {
                 revert RECIPIENT_ERROR(recipientId);
             }
             recipient.recipientStatus = recipientStatus;
 
             emit Reviewed(recipientId, recipientStatus, msg.sender);
+
+            if (recipientStatus == Status.Accepted) {
+                //todo: create Super App
+                // allocate 1 unit
+            }
 
             unchecked {
                 ++i;
@@ -339,6 +361,8 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
             }
 
             recipient.recipientStatus = Status.Canceled;
+
+            // todo: update/remove from GDA
 
             emit Canceled(recipientId, msg.sender);
 
