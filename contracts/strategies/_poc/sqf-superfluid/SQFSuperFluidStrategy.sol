@@ -240,12 +240,12 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _sender The address of the sender
     function _distribute(address[] memory _recipientIds, bytes memory _data, address _sender) internal override {
         // // todo
-        // The application and review period is finished, 
-        // the program managers will call distribute(), 
-        // which will create the GDA and start distributing 
+        // The application and review period is finished,
+        // the program managers will call distribute(),
+        // which will create the GDA and start distributing
         // to all approved recipients.
 
-        // If at that time, no CFAs have been created through allocate(), 
+        // If at that time, no CFAs have been created through allocate(),
         // then the GDA will be distributed evenly among all approved recipients
     }
 
@@ -258,7 +258,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         // only accepted recipients can be allocated to
         // only isValidAllocator
         // creates a CFA and updates the GDA
-        // Each recipient-allocator pair is its own CFA, which will start to stream tokens to that recipient. 
+        // Each recipient-allocator pair is its own CFA, which will start to stream tokens to that recipient.
     }
 
     /// @notice This will get the payout summary for a recipient.
