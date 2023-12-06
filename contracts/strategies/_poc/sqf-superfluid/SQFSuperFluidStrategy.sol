@@ -11,6 +11,8 @@ import {BaseStrategy} from "../../BaseStrategy.sol";
 // Internal Libraries
 import {Metadata} from "../../../core/libraries/Metadata.sol";
 
+import {RecipientSuperApp} from "./RecipientSuperApp.sol";
+
 contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     /// ======================
     /// ======= Events =======
@@ -54,6 +56,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         address recipientAddress;
         Status recipientStatus;
         Metadata metadata;
+        RecipientSuperApp superApp;
     }
 
     /// @notice The parameters used to initialize the strategy
@@ -61,6 +64,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         bool registryGating;
         bool metadataRequired;
         address superToken;
+        address superfluidHost;
         uint64 registrationStartTime;
         uint64 registrationEndTime;
         uint64 allocationStartTime;
@@ -68,6 +72,9 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     }
 
     address public superToken;
+
+    // can be found on https://console.superfluid.finance/
+    address public superfluidHost;
 
     /// @notice The start and end times for registrations and allocations
     /// @dev The values will be in milliseconds since the epoch
@@ -88,6 +95,10 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice The details of the recipient are returned using their ID
     /// @dev recipientId => Recipient
     mapping(address => Recipient) public recipients;
+
+    /// @notice stores the recipienId of each superApp
+    /// @dev superApp => recipientId
+    mapping(address => address) public superApps;
 
     /// ================================
     /// ========== Modifier ============
@@ -148,8 +159,9 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         metadataRequired = params.metadataRequired;
         _registry = allo.getRegistry();
 
-        if (params.superToken == address(0)) revert ZERO_ADDRESS();
+        if (params.superToken == address(0) || params.superfluidHost == address(0)) revert ZERO_ADDRESS();
         superToken = params.superToken;
+        superfluidHost = params.superfluidHost;
 
         _updatePoolTimestamps(
             params.registrationStartTime,
@@ -332,7 +344,18 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
             emit Reviewed(recipientId, recipientStatus, msg.sender);
 
             if (recipientStatus == Status.Accepted) {
-                //todo: create Super App
+                //todo: think about creating a clone instead
+                RecipientSuperApp superApp = new RecipientSuperApp(
+                    address(this),
+                    superfluidHost,
+                    true,
+                    true,
+                    true,
+                    "TheRegistrationKey" // todo
+                );
+
+                superApps[address(superApp)] = recipientId;
+                recipient.superApp = superApp;
                 // allocate 1 unit
             }
 
@@ -362,6 +385,11 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
 
             recipient.recipientStatus = Status.Canceled;
 
+            RecipientSuperApp recipientSuperApp = recipient.superApp;
+
+            delete recipient.superApp;
+            delete superApps[address(recipientSuperApp)];
+
             // todo: update/remove from GDA
 
             emit Canceled(recipientId, msg.sender);
@@ -370,6 +398,13 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
                 ++i;
             }
         }
+    }
+
+    function adjustWeightings(int96 _previousFlowrate, int96 _newFlowRate) external virtual {
+        if (superApps[msg.sender] == address(0)) revert UNAUTHORIZED();
+
+        _previousFlowrate;
+        _newFlowRate;
     }
 
     /// =========================
@@ -381,6 +416,20 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     /// @return The recipient
     function getRecipient(address _recipientId) external view returns (Recipient memory) {
         return _getRecipient(_recipientId);
+    }
+
+    /// @notice Get the recipientId of a super app
+    /// @param _superApp The super app
+    /// @return The recipientId
+    function getRecipientId(address _superApp) external view returns (address) {
+        return superApps[_superApp];
+    }
+
+    /// @notice Get the super app of a recipient
+    /// @param _recipientId The ID of the recipient
+    /// @return The super app
+    function getSuperApp(address _recipientId) external view returns (RecipientSuperApp) {
+        return recipients[_recipientId].superApp;
     }
 
     /// ====================================
