@@ -35,9 +35,18 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     /// @param data The encoded data - (address recipientId, address recipientAddress, Metadata metadata)
     /// @param sender The sender of the transaction
     /// @param status The updated status of the recipient
-    event UpdatedRegistration(
-        address indexed recipientId, bytes data, address sender, Status status
-    );
+    event UpdatedRegistration(address indexed recipientId, bytes data, address sender, Status status);
+
+    /// @notice Emitted when a recipient is reviewed
+    /// @param recipientId ID of the recipient
+    /// @param status The status of the recipient
+    /// @param sender The sender of the transaction
+    event Reviewed(address indexed recipientId, Status status, address sender);
+
+    /// @notice Emitted when a recipient is canceled
+    /// @param recipientId ID of the recipient
+    /// @param sender The sender of the transaction
+    event Canceled(address indexed recipientId, address sender);
 
     /// @notice Stores the details of the recipients.
     struct Recipient {
@@ -214,13 +223,43 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
             if (currentStatus == Status.Pending) {
                 // emit the new status with the '_data' that was passed in
                 // todo: do we need the updated event? do we need the status?
-                emit UpdatedRegistration(
-                    recipientId, _data, _sender, recipient.recipientStatus
-                );
+                emit UpdatedRegistration(recipientId, _data, _sender, recipient.recipientStatus);
             } else {
                 revert INVALID();
             }
         }
+    }
+
+    /// @notice This will distribute funds (tokens) to recipients.
+    /// @dev most strategies will track a TOTAL amount per recipient, and a PAID amount, and pay the difference
+    /// this contract will need to track the amount paid already, so that it doesn't double pay.
+    /// @param _recipientIds The ids of the recipients to distribute to
+    /// @param _data Data required will depend on the strategy implementation
+    /// @param _sender The address of the sender
+    function _distribute(address[] memory _recipientIds, bytes memory _data, address _sender) internal override {
+        // todo
+    }
+
+    /// @notice This will allocate to a recipient.
+    /// @dev The encoded '_data' will be determined by the strategy implementation.
+    /// @param _data The data to use to allocate to the recipient
+    /// @param _sender The address of the sender
+    function _allocate(bytes memory _data, address _sender) internal override onlyActiveAllocation{
+        // todo
+    }
+
+    /// @notice This will get the payout summary for a recipient.
+    /// @dev The encoded '_data' will be determined by the strategy implementation.
+    /// @param _recipientId The ID of the recipient
+    /// @param _data The data to use to get the payout summary for the recipient
+    /// @return The payout summary for the recipient
+    function _getPayout(address _recipientId, bytes memory _data)
+        internal
+        view
+        override
+        returns (PayoutSummary memory)
+    {
+        // todo
     }
 
     /// @notice Set the start and end dates for the pool
@@ -237,9 +276,114 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         _updatePoolTimestamps(_registrationStartTime, _registrationEndTime, _allocationStartTime, _allocationEndTime);
     }
 
+    /// @notice Checks if the allocator is valid
+    /// @param _allocator The allocator address
+    /// @return 'true' if the allocator is valid, otherwise 'false'
+    function _isValidAllocator(address _allocator) internal view override returns (bool) {
+        // todo: check passport
+        _allocator;
+        return true;
+    }
+
+
+    /// @notice Review recipient(s) application(s)
+    /// @dev You can review multiple recipients at once or just one. This can only be called by a pool manager and
+    ///      only during active registration.
+    /// @param _recipientIds Ids of the recipients
+    /// @param _recipientStatuses Statuses of the recipients
+    function reviewRecipients(address[] calldata _recipientIds, Status[] calldata _recipientStatuses)
+        external
+        virtual
+        onlyPoolManager(msg.sender)
+        onlyBeforeAllocationEnds
+    {
+        // make sure the arrays are the same length
+        uint256 recipientLength = _recipientIds.length;
+        if (recipientLength != _recipientStatuses.length) revert INVALID();
+
+        for (uint256 i; i < recipientLength;) {
+            Status recipientStatus = _recipientStatuses[i];
+            address recipientId = _recipientIds[i];
+            Recipient storage recipient = recipients[recipientId];
+
+            // if the status is none or appealed then revert
+            if (recipientStatus != Status.None) {
+                revert RECIPIENT_ERROR(recipientId);
+            }
+            recipient.recipientStatus = recipientStatus;
+
+            emit Reviewed(recipientId, recipientStatus, msg.sender);
+
+            unchecked {
+                ++i;
+            }
+        }
+    }
+
+    /// @notice Cancel (remove) recipient(s) application(s)
+    /// @dev You can remove multiple recipients at once or just one.
+    /// @param _recipientIds Ids of the recipients
+    function cancelRecipients(address[] calldata _recipientIds)
+        external
+        virtual
+        onlyPoolManager(msg.sender)
+        onlyBeforeAllocationEnds
+    {
+        for (uint256 i; i < _recipientIds.length;) {
+            address recipientId = _recipientIds[i];
+            Recipient storage recipient = recipients[recipientId];
+
+            // if the status is none or appealed then revert
+            if (recipient.recipientStatus == Status.None) {
+                revert RECIPIENT_ERROR(recipientId);
+            }
+
+            recipient.recipientStatus = Status.Canceled;
+
+            emit Canceled(recipientId, msg.sender);
+
+            unchecked {
+                ++i;
+            }
+        }
+    }
+
+    /// =========================
+    /// ==== View Functions =====
+    /// =========================
+
+    /// @notice Get the recipient
+    /// @param _recipientId ID of the recipient
+    /// @return The recipient
+    function getRecipient(address _recipientId) external view returns (Recipient memory) {
+        return _getRecipient(_recipientId);
+    }
+
     /// ====================================
     /// ============ Internal ==============
     /// ====================================
+
+    /// @notice Getter for a recipient using the ID
+    /// @param _recipientId ID of the recipient
+    /// @return The recipient
+    function _getRecipient(address _recipientId) internal view returns (Recipient memory) {
+        return recipients[_recipientId];
+    }
+
+    /// @notice Get recipient status
+    /// @param _recipientId Id of the recipient
+    function _getRecipientStatus(address _recipientId) internal view virtual override returns (Status) {
+        return _getRecipient(_recipientId).recipientStatus;
+    }
+
+    /// @notice Checks if a pool is active or not
+    /// @return Whether the pool is active or not
+    function _isPoolActive() internal view virtual override returns (bool) {
+        if (registrationStartTime <= block.timestamp && block.timestamp <= registrationEndTime) {
+            return true;
+        }
+        return false;
+    }
 
     /// @notice Check if the registration is active
     /// @dev Reverts if the registration is not active
