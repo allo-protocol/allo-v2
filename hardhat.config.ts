@@ -285,7 +285,7 @@ const config: HardhatUserConfig = {
         network: "celo-mainnet",
         chainId: chainIds["celo-mainnet"],
         urls: {
-          apiURL: "https://celoscan.io/api",
+          apiURL: "https://api.celoscan.io/api",
           browserURL: "https://celoscan.io",
         },
       },
