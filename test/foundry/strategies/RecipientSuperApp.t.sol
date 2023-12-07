@@ -5,27 +5,47 @@ import "forge-std/Test.sol";
 
 import {ISuperfluid, ISuperToken} from "@superfluid-finance/interfaces/superfluid/ISuperfluid.sol";
 import {SuperfluidFrameworkDeployer} from "@superfluid-finance/utils/SuperfluidFrameworkDeployer.sol";
+import {RecipientSuperApp} from "../../../contracts/strategies/_poc/sqf-superfluid/RecipientSuperApp.sol";
+import {SQFSuperFluidStrategy} from "../../../contracts/strategies/_poc/sqf-superfluid/SQFSuperFluidStrategy.sol";
+import {Errors} from "../../../contracts/core/libraries/Errors.sol";
+import {AlloSetup} from "../shared/AlloSetup.sol";
 
-contract RecipientSuperAppTest is Test {
-    error ZERO_ADDRESS();
-
-    SuperfluidFrameworkDeployer.Framework sf;
-    address public owner;
+contract RecipientSuperAppTest is Test, Errors, AlloSetup {
+    RecipientSuperApp recipientSuperApp;
+    SQFSuperFluidStrategy strategy;
+    ISuperfluid host;
 
     function setUp() public {
-        //DEPLOYING THE FRAMEWORK
-        // SuperfluidFrameworkDeployer sfDeployer = new SuperfluidFrameworkDeployer();
-        // sf = sfDeployer.getFramework();
+        // Mock the dependencies
+        // We need to create mock contracts for SQFSuperFluidStrategy and ISuperfluid
+        // or use existing ones if available
 
-        // DEPLOYING DAI and DAI wrapper super token
+        // todo: setup
+        // strategy = new SQFSuperFluidStrategyMock();
+        // host = new ISuperfluidMock();
 
-        // vm.prank(owner);
-        // ISuperToken daix = sfDeployer.deployWrapperToken("Fake DAI", "DAI", 18, 10000000000000);
+        // Instantiate the recipient super app contract
+        // recipientSuperApp = new RecipientSuperApp(
+        //     address(strategy),
+        //     address(host),
+        //     true, // activateOnCreated
+        //     true, // activateOnUpdated
+        //     true, // activateOnDeleted
+        //     "registrationKey"
+        // );
     }
 
-    function test_deploy() public {}
+    function test_constructor() public {
+        // Test constructor logic
+        // For example, check if the strategy address is set correctly
+        // assertEq(address(recipientSuperApp.strategy()), address(strategy));
+    }
 
-    function testRevert_deploy_ZERO_ADDRESS() public {}
+    function test_onFlowUpdated() public {
+        // Test the onFlowUpdated function
+        // We'll need to simulate different scenarios for flow rate changes
+        // and verify the strategy.adjustWeightings function is called correctly
+    }
 
-    function test_onFlowUpdated() public {}
+    // Add more tests as needed
 }
