@@ -8,6 +8,8 @@ import {
     SuperAppDefinitions
 } from "@superfluid-finance/interfaces/superfluid/ISuperfluid.sol";
 import {SuperTokenV1Library} from "@superfluid-finance/apps/SuperTokenV1Library.sol";
+import {IInstantDistributionAgreementV1} from
+    "@superfluid-finance/interfaces/agreements/IInstantDistributionAgreementV1.sol";
 
 // todo: clean up
 abstract contract SuperAppBaseSQF is ISuperApp {
@@ -16,6 +18,11 @@ abstract contract SuperAppBaseSQF is ISuperApp {
     bytes32 public constant CFAV1_TYPE = keccak256("org.superfluid-finance.agreements.ConstantFlowAgreement.v1");
 
     ISuperfluid public immutable HOST;
+
+    // ISuperToken public superToken;
+
+    /// @notice Index ID. Never changes.
+    uint32 public constant INDEX_ID = 0;
 
     /// @dev Thrown when the callback caller is not the host.
     error UnauthorizedHost();

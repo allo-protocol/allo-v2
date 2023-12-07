@@ -10,10 +10,18 @@ import {IAllo} from "../../../core/interfaces/IAllo.sol";
 import {BaseStrategy} from "../../BaseStrategy.sol";
 // Internal Libraries
 import {Metadata} from "../../../core/libraries/Metadata.sol";
-
+import {SuperAppBaseSQF} from "./SuperAppBaseSQF.sol";
 import {RecipientSuperApp} from "./RecipientSuperApp.sol";
+import {
+    ISuperfluid,
+    ISuperToken,
+    ISuperApp,
+    SuperAppDefinitions
+} from "@superfluid-finance/interfaces/superfluid/ISuperfluid.sol";
 
 contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
+    error INSUFFICIENT_FUNDS();
+
     /// ======================
     /// ======= Events =======
     /// ======================
@@ -63,7 +71,6 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     struct InitializeParams {
         bool registryGating;
         bool metadataRequired;
-        address superToken;
         address superfluidHost;
         uint64 registrationStartTime;
         uint64 registrationEndTime;
@@ -71,10 +78,8 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         uint64 allocationEndTime;
     }
 
-    address public superToken;
-
     // can be found on https://console.superfluid.finance/
-    address public superfluidHost;
+    // address public superfluidHost;
 
     /// @notice The start and end times for registrations and allocations
     /// @dev The values will be in milliseconds since the epoch
@@ -91,6 +96,8 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice The registry contract
     IRegistry private _registry;
+
+    address superfluidHost;
 
     /// @notice The details of the recipient are returned using their ID
     /// @dev recipientId => Recipient
@@ -139,7 +146,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Constructor for the Micro Grants Strategy
     /// @param _allo The 'Allo' contract
     /// @param _name The name of the strategy
-    constructor(address _allo, string memory _name) BaseStrategy(_allo, _name) {}
+    constructor(address _allo, string memory _name, ISuperfluid _host) BaseStrategy(_allo, _name) {}
 
     /// ===============================
     /// ========= Initialize ==========
@@ -157,11 +164,10 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
 
         registryGating = params.registryGating;
         metadataRequired = params.metadataRequired;
+        superfluidHost = params.superfluidHost;
         _registry = allo.getRegistry();
 
-        if (params.superToken == address(0) || params.superfluidHost == address(0)) revert ZERO_ADDRESS();
-        superToken = params.superToken;
-        superfluidHost = params.superfluidHost;
+        // if (address(params.superToken) == address(0) || params.superfluidHost == address(0)) revert ZERO_ADDRESS();
 
         _updatePoolTimestamps(
             params.registrationStartTime,
@@ -250,11 +256,27 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _recipientIds The ids of the recipients to distribute to
     /// @param _data Data required will depend on the strategy implementation
     /// @param _sender The address of the sender
-    function _distribute(address[] memory _recipientIds, bytes memory _data, address _sender) internal override {
-        // // todo
-        // The application and review period is finished,
+    function _distribute(address[] memory _recipientIds, bytes memory _data, address _sender)
+        internal
+        override
+        onlyAfterAllocation
+    {
+        // todo:
+        // decode the data ()?
+        (ISuperToken _superToken) = abi.decode(_data, (ISuperToken));
+        uint256 superTokenBalance = _superToken.balanceOf(address(this));
+
+        // (uint256 actualDistributionAmount,) =
+        //     superToken.calculateDistribution(address(this), INDEX_ID, superTokenBalance);
+
+        // superToken.distribute(INDEX_ID, 1);
+
+        // check if the pool has enough funds to distribute
+        // if (allo.getPoolBalance(poolId) < totalAmount) revert INSUFFICIENT_FUNDS();
+
         // the program managers will call distribute(),
         // which will create the GDA and start distributing
+
         // to all approved recipients.
 
         // If at that time, no CFAs have been created through allocate(),
@@ -266,10 +288,21 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _data The data to use to allocate to the recipient
     /// @param _sender The address of the sender
     function _allocate(bytes memory _data, address _sender) internal override onlyActiveAllocation {
-        // todo
+        // decode the _data (recipientId, allocator)
+        (address _recipientId, ISuperToken _superToken) = abi.decode(_data, (address, ISuperToken));
+
         // only accepted recipients can be allocated to
-        // only isValidAllocator
+        if (_getRecipientStatus(_recipientId) != Status.Accepted) {
+            revert RECIPIENT_ERROR(_recipientId);
+        }
+
+        // check if the allocator is valid
+        if (!_isValidAllocator(_sender)) revert UNAUTHORIZED();
+
+        // todo:
+        // Question: are all streams going to be 1-1 or is there a possibility of 1-many?
         // creates a CFA and updates the GDA
+
         // Each recipient-allocator pair is its own CFA, which will start to stream tokens to that recipient.
     }
 
@@ -527,5 +560,83 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     function _isProfileMember(address _anchor, address _sender) internal view returns (bool) {
         IRegistry.Profile memory profile = _registry.getProfileByAnchor(_anchor);
         return _registry.isOwnerOrMemberOfProfile(profile.id, _sender);
+    }
+
+    // todo: remove these helpers if they don't seem productive...
+
+    /// @notice Send a lump sum of super tokens into the contract.
+    /// @dev This requires a super token ERC20 approval.
+    /// @param token Super Token to transfer.
+    /// @param amount Amount to transfer.
+    function sendLumpSumToContract(ISuperToken token, uint256 amount) internal {
+        // if (!recipients[msg.sender]) revert UNAUTHORIZED();
+
+        token.transferFrom(msg.sender, address(this), amount);
+    }
+
+    /// @notice Create a stream into the contract.
+    /// @dev This requires the contract to be a flowOperator for the msg sender.
+    /// @param token Token to stream.
+    /// @param flowRate Flow rate per second to stream.
+    function createFlowIntoContract(ISuperToken token, int96 flowRate) internal {
+        // if (!recipients[msg.sender]) revert UNAUTHORIZED();
+
+        // token.createFlowFrom(msg.sender, address(this), flowRate);
+    }
+
+    /// @notice Update an existing stream being sent into the contract by msg sender.
+    /// @dev This requires the contract to be a flowOperator for the msg sender.
+    /// @param token Token to stream.
+    /// @param flowRate Flow rate per second to stream.
+    function updateFlowIntoContract(ISuperToken token, int96 flowRate) internal {
+        // if (!recipients[msg.sender]) revert UNAUTHORIZED();
+
+        // token.updateFlowFrom(msg.sender, address(this), flowRate);
+    }
+
+    /// @notice Delete a stream that the msg.sender has open into the contract.
+    /// @param token Token to quit streaming.
+    function deleteFlowIntoContract(ISuperToken token) internal {
+        // if (!recipients[msg.sender]) revert UNAUTHORIZED();
+
+        // token.deleteFlow(msg.sender, address(this));
+    }
+
+    /// @notice Withdraw funds from the contract.
+    /// @param token Token to withdraw.
+    /// @param amount Amount to withdraw.
+    function withdrawFunds(ISuperToken token, uint256 amount) internal {
+        // if (!recipients[msg.sender]) revert UNAUTHORIZED();
+
+        token.transfer(msg.sender, amount);
+    }
+
+    /// @notice Create flow from contract to specified address.
+    /// @param token Token to stream.
+    /// @param receiver Receiver of stream.
+    /// @param flowRate Flow rate per second to stream.
+    function createFlowFromContract(ISuperToken token, address receiver, int96 flowRate) internal {
+        // if (!recipients[msg.sender]) revert UNAUTHORIZED();
+
+        // token.createFlow(receiver, flowRate);
+    }
+
+    /// @notice Update flow from contract to specified address.
+    /// @param token Token to stream.
+    /// @param receiver Receiver of stream.
+    /// @param flowRate Flow rate per second to stream.
+    function updateFlowFromContract(ISuperToken token, address receiver, int96 flowRate) internal {
+        // if (!recipients[msg.sender]) revert UNAUTHORIZED();
+
+        // token.updateFlow(receiver, flowRate);
+    }
+
+    /// @notice Delete flow from contract to specified address.
+    /// @param token Token to stop streaming.
+    /// @param receiver Receiver of stream.
+    function deleteFlowFromContract(ISuperToken token, address receiver) internal {
+        // if (!recipients[msg.sender]) revert UNAUTHORIZED();
+
+        // token.deleteFlow(address(this), receiver);
     }
 }
