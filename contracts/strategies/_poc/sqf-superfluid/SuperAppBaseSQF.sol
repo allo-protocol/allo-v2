@@ -70,6 +70,7 @@ abstract contract SuperAppBaseSQF is ISuperApp {
      *      Can be overridden by the SuperApp in order to apply arbitrary filters.
      */
     function isAcceptedSuperToken(ISuperToken /*superToken*/ ) public view virtual returns (bool) {
+        // todo: implement
         return true;
     }
 

@@ -3,6 +3,12 @@ pragma solidity 0.8.19;
 
 // External Libraries
 import {ReentrancyGuard} from "openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
+import {
+    // ISuperfluid,
+    ISuperToken,
+    // ISuperApp,
+    // SuperAppDefinitions GeneralDistributionAgreementV1
+} from "@superfluid-finance/interfaces/superfluid/ISuperfluid.sol";
 // Interfaces
 import {IRegistry} from "../../../core/interfaces/IRegistry.sol";
 import {IAllo} from "../../../core/interfaces/IAllo.sol";
@@ -12,12 +18,7 @@ import {BaseStrategy} from "../../BaseStrategy.sol";
 import {Metadata} from "../../../core/libraries/Metadata.sol";
 import {SuperAppBaseSQF} from "./SuperAppBaseSQF.sol";
 import {RecipientSuperApp} from "./RecipientSuperApp.sol";
-import {
-    ISuperfluid,
-    ISuperToken,
-    ISuperApp,
-    SuperAppDefinitions
-} from "@superfluid-finance/interfaces/superfluid/ISuperfluid.sol";
+
 
 contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     error INSUFFICIENT_FUNDS();
@@ -78,8 +79,11 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         uint64 allocationEndTime;
     }
 
+    ISuperToken public superToken;
+
     // can be found on https://console.superfluid.finance/
-    // address public superfluidHost;
+    address public superfluidHost;
+    address public GDA;
 
     /// @notice The start and end times for registrations and allocations
     /// @dev The values will be in milliseconds since the epoch
@@ -167,7 +171,11 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         superfluidHost = params.superfluidHost;
         _registry = allo.getRegistry();
 
-        // if (address(params.superToken) == address(0) || params.superfluidHost == address(0)) revert ZERO_ADDRESS();
+        if (params.superfluidHost == address(0)) revert ZERO_ADDRESS();
+        superfluidHost = params.superfluidHost;
+
+        superToken = ISuperToken(allo.getPool(_poolId).token);
+        //todo: check if token is a super token
 
         _updatePoolTimestamps(
             params.registrationStartTime,
@@ -288,22 +296,25 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _data The data to use to allocate to the recipient
     /// @param _sender The address of the sender
     function _allocate(bytes memory _data, address _sender) internal override onlyActiveAllocation {
-        // decode the _data (recipientId, allocator)
-        (address _recipientId, ISuperToken _superToken) = abi.decode(_data, (address, ISuperToken));
+        (address recipientId, int96 flowRate) = abi.decode(_data, (address, int96));
 
-        // only accepted recipients can be allocated to
-        if (_getRecipientStatus(_recipientId) != Status.Accepted) {
-            revert RECIPIENT_ERROR(_recipientId);
+        Recipient storage recipient = recipients[recipientId];
+
+        if (recipient.recipientStatus != Status.Accepted || address(recipient.superApp) == address(0)) {
+            revert RECIPIENT_ERROR(recipientId);
         }
 
-        // check if the allocator is valid
-        if (!_isValidAllocator(_sender)) revert UNAUTHORIZED();
+        address superApp = address(recipient.superApp);
+        (uint256 lastUpdated, int96 flowRate,,) = superToken.getFlowInfo(_sender, superApp);
 
-        // todo:
-        // Question: are all streams going to be 1-1 or is there a possibility of 1-many?
-        // creates a CFA and updates the GDA
-
-        // Each recipient-allocator pair is its own CFA, which will start to stream tokens to that recipient.
+        // if the flowRate or lastUpdated is 0, then this is a new flow
+        if (flowRate == 0 || lastUpdated == 0) {
+            superToken.createFlowFrom(_sender, superApp, flowRate);
+        
+        } else {
+            // this is an update to an existing flow
+            superToken.updateFlowFrom(_sender, superApp, flowRate);
+        }
     }
 
     /// @notice This will get the payout summary for a recipient.
