@@ -3,12 +3,14 @@ pragma solidity 0.8.19;
 
 // External Libraries
 import {ReentrancyGuard} from "openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
-import {
-    // ISuperfluid,
-    ISuperToken,
-    // ISuperApp,
-    // SuperAppDefinitions GeneralDistributionAgreementV1
-} from "@superfluid-finance/interfaces/superfluid/ISuperfluid.sol";
+import
+// ISuperfluid,
+{ISuperToken} from
+// ISuperApp,
+// SuperAppDefinitions GeneralDistributionAgreementV1
+"@superfluid-finance/interfaces/superfluid/ISuperfluid.sol";
+import {SuperTokenV1Library} from "@superfluid-finance/apps/SuperTokenV1Library.sol";
+
 // Interfaces
 import {IRegistry} from "../../../core/interfaces/IRegistry.sol";
 import {IAllo} from "../../../core/interfaces/IAllo.sol";
@@ -19,8 +21,9 @@ import {Metadata} from "../../../core/libraries/Metadata.sol";
 import {SuperAppBaseSQF} from "./SuperAppBaseSQF.sol";
 import {RecipientSuperApp} from "./RecipientSuperApp.sol";
 
-
 contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
+    using SuperTokenV1Library for ISuperToken;
+
     error INSUFFICIENT_FUNDS();
 
     /// ======================
@@ -101,8 +104,6 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice The registry contract
     IRegistry private _registry;
 
-    address superfluidHost;
-
     /// @notice The details of the recipient are returned using their ID
     /// @dev recipientId => Recipient
     mapping(address => Recipient) public recipients;
@@ -150,7 +151,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Constructor for the Micro Grants Strategy
     /// @param _allo The 'Allo' contract
     /// @param _name The name of the strategy
-    constructor(address _allo, string memory _name, ISuperfluid _host) BaseStrategy(_allo, _name) {}
+    constructor(address _allo, string memory _name) BaseStrategy(_allo, _name) {}
 
     /// ===============================
     /// ========= Initialize ==========
@@ -305,12 +306,11 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         }
 
         address superApp = address(recipient.superApp);
-        (uint256 lastUpdated, int96 flowRate,,) = superToken.getFlowInfo(_sender, superApp);
+        (uint256 lastUpdated, int96 currentFlowRate,,) = superToken.getFlowInfo(_sender, superApp);
 
         // if the flowRate or lastUpdated is 0, then this is a new flow
-        if (flowRate == 0 || lastUpdated == 0) {
+        if (currentFlowRate == 0 || lastUpdated == 0) {
             superToken.createFlowFrom(_sender, superApp, flowRate);
-        
         } else {
             // this is an update to an existing flow
             superToken.updateFlowFrom(_sender, superApp, flowRate);
