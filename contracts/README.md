@@ -4,6 +4,27 @@
 
 > 🤚 The following contract addresses are the same across all supported networks 🤚
 
+## Supported Networks
+
+| Network         | Chain ID |
+| --------------- | -------- |
+| Mainnet         | 1        |
+| Goerli          | 5        |
+| Sepolia         | 11155111 |
+| Base            | 8453     |
+| Base Goerli     | 84531    |
+| Optimism        | 10       |
+| Optimism Goerli | 420      |
+| Celo            | 42220    |
+| Celo Alfajores  | 44787    |
+| Arbitrum        | 42161    |
+| Arbitrum Goerli | 4216134  |
+
+🚨 Coming Soon zkSync era and zkSync era testnet 🚨
+
+
+## Deployed Contracts
+
 <table>
 <thead>
     <tr>
