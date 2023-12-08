@@ -81,7 +81,7 @@ sequenceDiagram
 
 ### Storage Variables
 
-1. `registryGating`: A flag indicating whether registry gating is enabled (recipients need to be registred on the Registry.sol to be register to the pool).
+1. `registryGating`: A flag indicating whether registry gating is enabled (recipients need to be registered on the Registry.sol to be register to the pool).
 2. `metadataRequired`: A flag indicating whether metadata is required for recipient registration.
 3. `grantAmountRequired`: A flag indicating whether a grant amount can be proposed by recipient during registration.
 4. `allocatedGrantAmount`: The total grant amount allocated across recipients by the pool managers.
