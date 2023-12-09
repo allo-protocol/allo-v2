@@ -20,7 +20,6 @@
 | Arbitrum        | 42161    |
 | Arbitrum Goerli | 4216134  |
 
-🚨 Coming Soon zkSync era and zkSync era testnet 🚨
 
 
 ## Deployed Contracts
