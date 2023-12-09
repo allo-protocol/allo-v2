@@ -14,7 +14,7 @@
 - [ ] Check verification keys for each network.
 - [ ] Setup new deployer wallet (we want the nonce to start at 0 for each network).
 - [ ] Fund the deployer wallet for each network (see Fund Deployer Wallet checklist).
-- [ ] Set up the treasury address for each network suported. We would like to have the same SAFE address across all networks.
+- [ ] Set up the treasury address for each network supported. We would like to have the same SAFE address across all networks.
 - [ ] Add the treasury address to the `allo.config.ts` file.
 - [ ] Initial Fee's will be set to zero (0) i.e. `percentFee` and `baseFee`.
 - [ ] Add the initial owner to the `registry.config.ts` file.

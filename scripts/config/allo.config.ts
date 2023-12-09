@@ -9,7 +9,7 @@ type AlloConfig = {
 
 type DeployParams = Record<number, AlloConfig>;
 
-// NOTE: This will be the owner address for each registy on each network.
+// NOTE: This will be the owner address for each registry on each network.
 export const alloConfig: DeployParams = {
   // Mainnet
   1: {
