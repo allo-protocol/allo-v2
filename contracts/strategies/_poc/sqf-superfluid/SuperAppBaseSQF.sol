@@ -6,10 +6,10 @@ import {
     ISuperToken,
     ISuperApp,
     SuperAppDefinitions
-} from "@superfluid-finance/interfaces/superfluid/ISuperfluid.sol";
-import {SuperTokenV1Library} from "@superfluid-finance/apps/SuperTokenV1Library.sol";
+} from "@superfluid-contracts/interfaces/superfluid/ISuperfluid.sol";
+import {SuperTokenV1Library} from "@superfluid-contracts/apps/SuperTokenV1Library.sol";
 import {IInstantDistributionAgreementV1} from
-    "@superfluid-finance/interfaces/agreements/IInstantDistributionAgreementV1.sol";
+    "@superfluid-contracts/interfaces/agreements/IInstantDistributionAgreementV1.sol";
 
 // todo: clean up
 abstract contract SuperAppBaseSQF is ISuperApp {

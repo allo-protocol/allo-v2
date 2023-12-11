@@ -20,8 +20,8 @@ import {
     ISuperToken,
     ISuperApp,
     SuperAppDefinitions
-} from "@superfluid-finance/interfaces/superfluid/ISuperfluid.sol";
-import {SuperTokenV1Library} from "@superfluid-finance/apps/SuperTokenV1Library.sol";
+} from "@superfluid-contracts/interfaces/superfluid/ISuperfluid.sol";
+import {SuperTokenV1Library} from "@superfluid-contracts/apps/SuperTokenV1Library.sol";
 
 contract SuperAppBaseSQFTest is Test, RegistrySetupFull, AlloSetup, Native, EventSetup, Errors {
     using SuperTokenV1Library for ISuperToken;

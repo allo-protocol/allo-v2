@@ -8,8 +8,8 @@ import
 {ISuperToken} from
 // ISuperApp,
 // SuperAppDefinitions GeneralDistributionAgreementV1
-"@superfluid-finance/interfaces/superfluid/ISuperfluid.sol";
-import {SuperTokenV1Library} from "@superfluid-finance/apps/SuperTokenV1Library.sol";
+"@superfluid-contracts/interfaces/superfluid/ISuperfluid.sol";
+import {SuperTokenV1Library} from "@superfluid-contracts/apps/SuperTokenV1Library.sol";
 
 // Interfaces
 import {IRegistry} from "../../../core/interfaces/IRegistry.sol";

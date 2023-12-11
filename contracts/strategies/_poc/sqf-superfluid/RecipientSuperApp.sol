@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import {SuperAppBaseFlow} from "@superfluid-finance/apps/SuperAppBaseFlow.sol";
-import {ISuperfluid} from "@superfluid-finance/interfaces/superfluid/ISuperfluid.sol";
-import {ISuperToken} from "@superfluid-finance/interfaces/superfluid/ISuperToken.sol";
+import {SuperAppBaseFlow} from "@superfluid-contracts/apps/SuperAppBaseFlow.sol";
+import {ISuperfluid} from "@superfluid-contracts/interfaces/superfluid/ISuperfluid.sol";
+import {ISuperToken} from "@superfluid-contracts/interfaces/superfluid/ISuperToken.sol";
 import {SQFSuperFluidStrategy} from "./SQFSuperFluidStrategy.sol";
 
 contract RecipientSuperApp is SuperAppBaseFlow {
