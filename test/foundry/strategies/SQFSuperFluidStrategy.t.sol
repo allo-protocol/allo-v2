@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.19;
 
-import {SuperAppBaseSQF} from "./SuperAppBaseSQF.t.sol";
+import {SQFSuperFluidStrategy} from "../../../contracts/strategies/_poc/sqf-superfluid/SQFSuperFluidStrategy.sol";
 import {Native} from "../../../contracts/core/libraries/Native.sol";
 import {Errors} from "../../../contracts/core/libraries/Errors.sol";
 // Test libraries
@@ -10,7 +10,7 @@ import {RegistrySetupFull} from "../shared/RegistrySetup.sol";
 import {EventSetup} from "../shared/EventSetup.sol";
 
 contract SQFSuperFluidStrategyTest is RegistrySetupFull, AlloSetup, Native, EventSetup, Errors {
-    SuperAppBaseSQF _strategy;
+    SQFSuperFluidStrategy _strategy;
 
     function setUp() public {
         __RegistrySetupFull();

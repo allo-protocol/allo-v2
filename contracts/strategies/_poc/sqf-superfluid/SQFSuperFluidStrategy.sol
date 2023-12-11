@@ -18,7 +18,6 @@ import {IAllo} from "../../../core/interfaces/IAllo.sol";
 import {BaseStrategy} from "../../BaseStrategy.sol";
 // Internal Libraries
 import {Metadata} from "../../../core/libraries/Metadata.sol";
-import {SuperAppBaseSQF} from "./SuperAppBaseSQF.sol";
 import {RecipientSuperApp} from "./RecipientSuperApp.sol";
 
 contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
@@ -272,8 +271,8 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     {
         // todo:
         // decode the data ()?
-        (ISuperToken _superToken) = abi.decode(_data, (ISuperToken));
-        uint256 superTokenBalance = _superToken.balanceOf(address(this));
+        // (ISuperToken _superToken) = abi.decode(_data, (ISuperToken));
+        // uint256 superTokenBalance = _superToken.balanceOf(address(this));
 
         // (uint256 actualDistributionAmount,) =
         //     superToken.calculateDistribution(address(this), INDEX_ID, superTokenBalance);
