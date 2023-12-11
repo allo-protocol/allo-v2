@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import {SuperAppBaseFlow} from "@superfluid-contracts/apps/SuperAppBaseFlow.sol";
+import {SuperAppBaseSQF} from "./SuperAppBaseSQF.sol";
 import {ISuperfluid} from "@superfluid-contracts/interfaces/superfluid/ISuperfluid.sol";
 import {ISuperToken} from "@superfluid-contracts/interfaces/superfluid/ISuperToken.sol";
 import {SQFSuperFluidStrategy} from "./SQFSuperFluidStrategy.sol";
 
-contract RecipientSuperApp is SuperAppBaseFlow {
+contract RecipientSuperApp is SuperAppBaseSQF {
     error ZERO_ADDRESS();
 
     SQFSuperFluidStrategy public immutable strategy;
@@ -19,7 +19,7 @@ contract RecipientSuperApp is SuperAppBaseFlow {
         bool _activateOnDeleted,
         string memory _registrationKey
     )
-        SuperAppBaseFlow(ISuperfluid(_host), _activateOnCreated, _activateOnUpdated, _activateOnDeleted, _registrationKey)
+        SuperAppBaseSQF(ISuperfluid(_host), _activateOnCreated, _activateOnUpdated, _activateOnDeleted, _registrationKey)
     {
         if (address(_strategy) == address(0)) {
             revert ZERO_ADDRESS();
@@ -37,7 +37,7 @@ contract RecipientSuperApp is SuperAppBaseFlow {
         int96 newFlowRate,
         uint256, /*lastUpdated*/
         bytes calldata ctx
-    ) internal virtual returns (bytes memory /*newCtx*/ ) {
+    ) internal override returns (bytes memory /*newCtx*/ ) {
         // todo: clean function params
         // userData can be acquired with `host.decodeCtx(ctx).userData`
 
