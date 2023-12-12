@@ -23,8 +23,6 @@ import {RecipientSuperApp} from "./RecipientSuperApp.sol";
 contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     using SuperTokenV1Library for ISuperToken;
 
-    error INSUFFICIENT_FUNDS();
-
     /// ======================
     /// ======= Events =======
     /// ======================
@@ -83,11 +81,11 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
 
     ISuperToken public superToken;
 
-    // can be found on https://console.superfluid.finance/
+    /// @dev Available at https://console.superfluid.finance/
     address public superfluidHost;
     address public GDA;
 
-    /// @notice The start and end times for registrations and allocations
+    /// @notice The start and end times for registration and allocation
     /// @dev The values will be in milliseconds since the epoch
     uint64 public registrationStartTime;
     uint64 public registrationEndTime;
@@ -189,7 +187,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     /// ============== Main ================
     /// ====================================
 
-    /// @notice Submit application to pool
+    /// @notice Register Recipient to the pool
     /// @dev The '_data' parameter is encoded as follows:
     ///     - If registryGating is true, then the data is encoded as (address recipientId, Metadata metadata)
     ///     - If registryGating is false, then the data is encoded as (address recipientAddress, address registryAnchor, Metadata metadata)
@@ -280,7 +278,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         // superToken.distribute(INDEX_ID, 1);
 
         // check if the pool has enough funds to distribute
-        // if (allo.getPoolBalance(poolId) < totalAmount) revert INSUFFICIENT_FUNDS();
+        // if (allo.getPoolBalance(poolId) < totalAmount) revert NOT_ENOUGH_FUNDS();
 
         // the program managers will call distribute(),
         // which will create the GDA and start distributing
