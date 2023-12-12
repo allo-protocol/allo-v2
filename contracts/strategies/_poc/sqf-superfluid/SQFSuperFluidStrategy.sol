@@ -9,12 +9,11 @@ import
 // ISuperApp,
 // SuperAppDefinitions,
 "@superfluid-contracts/interfaces/superfluid/ISuperfluid.sol";
-import {
-    PoolConfig
-} from "@superfluid-contracts/interfaces/agreements/gdav1/IGeneralDistributionAgreementV1.sol";
+import {PoolConfig} from "@superfluid-contracts/interfaces/agreements/gdav1/IGeneralDistributionAgreementV1.sol";
 import {SuperTokenV1Library} from "@superfluid-contracts/apps/SuperTokenV1Library.sol";
 import {Score} from "@eas-proxy/IGitcoinPassportDecoder.sol";
 import {GitcoinPassportDecoder} from "@eas-proxy/GitcoinPassportDecoder.sol";
+import {FixedPointMathLib} from "solady/src/utils/FixedPointMathLib.sol";
 
 // Interfaces
 import {IRegistry} from "../../../core/interfaces/IRegistry.sol";
@@ -27,6 +26,7 @@ import {RecipientSuperApp} from "./RecipientSuperApp.sol";
 
 contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     using SuperTokenV1Library for ISuperToken;
+    using FixedPointMathLib for uint256;
 
     /// ======================
     /// ======= Events =======
@@ -74,6 +74,9 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     // @param flowRate The flow rate
     event Distributed(address indexed sender, uint256 flowRate);
 
+    /// @notice Thrown when registration is not active.
+    error REGISTRATION_ACTIVE();
+
     /// @notice Stores the details of the recipients.
     struct Recipient {
         bool useRegistryAnchor;
@@ -99,7 +102,6 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @dev Available at https://console.superfluid.finance/
     address public superfluidHost;
-    IGeneralDistributionAgreementV1 public GDA;
     ISuperToken public superToken;
 
     ISuperfluidPool public gdaPool;
@@ -131,6 +133,14 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice stores the recipienId of each superApp
     /// @dev superApp => recipientId
     mapping(address => address) public superApps;
+
+    /// @notice stores the units for each recipient
+    /// @dev recipientId => allocator => units
+    mapping(address => mapping(address => uint256)) public recipientAllocatorUnits;
+
+    /// @notice stores the total units for each recipient
+    /// @dev recipientId => units
+    mapping(address => uint256) public totalUnitsByRecipient;
 
     /// ================================
     /// ========== Modifier ============
@@ -209,12 +219,13 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
                     false,
                     /// @dev if true, anyone can execute distributions via the pool
                     /// else, only the pool admin can execute distributions via the pool
-                    true
+                    false
                 )
             )
         );
 
         //todo: check if token is a super token
+        superToken.getUnderlyingToken();
 
         _updatePoolTimestamps(
             params.registrationStartTime,
@@ -306,8 +317,9 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     function _distribute(address[] memory, bytes memory _data, address _sender)
         internal
         override
-        onlyAfterAllocation
+        onlyPoolManager(_sender)
     {
+        _checkOnlyActiveRegistration();
 
         (uint256 flowRate) = abi.decode(_data, (uint256));
         superToken.distributeFlow(superToken, _sender, gdaPool, flowRate, "0x");
@@ -376,6 +388,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     {
         // todo
         // discuss what to return here
+        // get actual flowRate?
     }
 
     /// @notice Set the start and end dates for the pool
@@ -454,6 +467,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
                 );
 
                 // add the recipient to the GDA with 1 unit assigned to
+                // todo: discuss recipient
                 superToken.updateMemberUnits(superToken, gdaPool, recipientId, 1);
 
                 superApps[address(superApp)] = recipientId;
@@ -491,6 +505,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
 
             delete recipient.superApp;
             delete superApps[address(recipientSuperApp)];
+            superToken.updateMemberUnits(superToken, gdaPool, recipientId, 0);
 
             // todo: update/remove from GDA
 
@@ -502,18 +517,31 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         }
     }
 
-    function adjustWeightings(int96 _previousFlowrate, int96 _newFlowRate) external virtual {
-        if (superApps[msg.sender] == address(0)) revert UNAUTHORIZED();
+    function adjustWeightings(int96 _previousFlowrate, int96 _newFlowRate, address _allocator) external virtual {
+        address recipientId = superApps[msg.sender];
 
-        // totalFlowrate = pool amount
-        // unitsForRecipient = (sqrt(unitsForRecipientBeforeUpdate) + sqrt(_newFlowRate) - sqrt(_previousFlowrate)) * 2
-        // totalUnits = totalUnitsBeforeUpdate + unitsForRecipient - unitsForRecipientBeforeUpdate
-        // flowRateForRecipient = unitsForRecipient / (totalUnits * totalFlowrate)
+        if (recipientId == address(0)) revert UNAUTHORIZED();
 
-        // Given that we know flowRateForRecipient, do we simply invoke GDA.updateFlowrate ?
+        uint256 units;
+        uint256 unitsBefore = recipientAllocatorUnits[recipientId][_allocator];
 
-        _previousFlowrate;
-        _newFlowRate;
+        if (_previousFlowrate == 0) {
+            // created a new flow
+            units = _newFlowRate;
+        } else if (_newFlowRate == 0) {
+            // canceled a flow
+            units = 0;
+        } else {
+            units = (unitsBefore.sqrt() + uint256(_newFlowRate).sqrt() - uint256(_previousFlowrate).sqrt()).pow(2);
+        }
+
+        uint256 recipientTotalUnits = totalUnitsByRecipient[recipientId];
+        recipientTotalUnits += units - unitsBefore;
+
+        superToken.updateMemberUnits(superToken, gdaPool, recipientId, recipientTotalUnits);
+
+        recipientAllocatorUnits[recipientId][_allocator] = units;
+        totalUnitsByRecipient[recipientId] = recipientTotalUnits;
     }
 
     /// @notice Withdraw funds from the contract.
@@ -582,6 +610,14 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         }
     }
 
+    /// @notice Check if the registration is active
+    /// @dev Reverts if the registration is not active
+    function _checkOnlyAfterRegistration() internal view virtual {
+        if (block.timestamp < registrationEndTime) {
+            revert REGISTRATION_ACTIVE();
+        }
+    }
+
     /// @notice Check if the allocation is active
     /// @dev Reverts if the allocation is not active
     function _checkOnlyActiveAllocation() internal view virtual {
@@ -644,73 +680,4 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         IRegistry.Profile memory profile = _registry.getProfileByAnchor(_anchor);
         return _registry.isOwnerOrMemberOfProfile(profile.id, _sender);
     }
-
-    // todo: remove these helpers if they don't seem productive...
-
-    /// @notice Send a lump sum of super tokens into the contract.
-    /// @dev This requires a super token ERC20 approval.
-    /// @param token Super Token to transfer.
-    /// @param amount Amount to transfer.
-    // function sendLumpSumToContract(ISuperToken token, uint256 amount) internal {
-    //     // if (!recipients[msg.sender]) revert UNAUTHORIZED();
-
-    //     token.transferFrom(msg.sender, address(this), amount);
-    // }
-
-    /// @notice Create a stream into the contract.
-    /// @dev This requires the contract to be a flowOperator for the msg sender.
-    /// @param token Token to stream.
-    // /// @param flowRate Flow rate per second to stream.
-    // function createFlowIntoContract(ISuperToken token, int96 flowRate) internal {
-    //     // if (!recipients[msg.sender]) revert UNAUTHORIZED();
-
-    //     // token.createFlowFrom(msg.sender, address(this), flowRate);
-    // }
-
-    /// @notice Update an existing stream being sent into the contract by msg sender.
-    /// @dev This requires the contract to be a flowOperator for the msg sender.
-    /// @param token Token to stream.
-    /// @param flowRate Flow rate per second to stream.
-    // function updateFlowIntoContract(ISuperToken token, int96 flowRate) internal {
-    //     // if (!recipients[msg.sender]) revert UNAUTHORIZED();
-
-    //     // token.updateFlowFrom(msg.sender, address(this), flowRate);
-    // }
-
-    /// @notice Delete a stream that the msg.sender has open into the contract.
-    /// @param token Token to quit streaming.
-    // function deleteFlowIntoContract(ISuperToken token) internal {
-    //     // if (!recipients[msg.sender]) revert UNAUTHORIZED();
-
-    //     // token.deleteFlow(msg.sender, address(this));
-    // }
-
-    // /// @notice Create flow from contract to specified address.
-    // /// @param token Token to stream.
-    // /// @param receiver Receiver of stream.
-    // /// @param flowRate Flow rate per second to stream.
-    // function createFlowFromContract(ISuperToken token, address receiver, int96 flowRate) internal {
-    //     // if (!recipients[msg.sender]) revert UNAUTHORIZED();
-
-    //     // token.createFlow(receiver, flowRate);
-    // }
-
-    // /// @notice Update flow from contract to specified address.
-    // /// @param token Token to stream.
-    // /// @param receiver Receiver of stream.
-    // /// @param flowRate Flow rate per second to stream.
-    // function updateFlowFromContract(ISuperToken token, address receiver, int96 flowRate) internal {
-    //     // if (!recipients[msg.sender]) revert UNAUTHORIZED();
-
-    //     // token.updateFlow(receiver, flowRate);
-    // }
-
-    // /// @notice Delete flow from contract to specified address.
-    // /// @param token Token to stop streaming.
-    // /// @param receiver Receiver of stream.
-    // function deleteFlowFromContract(ISuperToken token, address receiver) internal {
-    //     // if (!recipients[msg.sender]) revert UNAUTHORIZED();
-
-    //     // token.deleteFlow(address(this), receiver);
-    // }
 }

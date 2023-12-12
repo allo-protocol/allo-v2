@@ -85,7 +85,7 @@ contract RecipientSuperApp is ISuperApp {
     ///      to it is updated (flowrate change).
     function onFlowUpdated(
         ISuperToken, /*superToken*/
-        address, /* sender */
+        address sender,
         int96 previousFlowRate,
         int96 newFlowRate,
         bytes calldata ctx
@@ -94,7 +94,7 @@ contract RecipientSuperApp is ISuperApp {
         // receiver is address(this)
         // userData can be acquired with `host.decodeCtx(ctx).userData`
 
-        strategy.adjustWeightings(previousFlowRate, newFlowRate);
+        strategy.adjustWeightings(previousFlowRate, newFlowRate, sender);
         return ctx;
     }
 
