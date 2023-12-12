@@ -10,7 +10,6 @@ import
 // SuperAppDefinitions,
 "@superfluid-contracts/interfaces/superfluid/ISuperfluid.sol";
 import {
-    IGeneralDistributionAgreementV1,
     PoolConfig
 } from "@superfluid-contracts/interfaces/agreements/gdav1/IGeneralDistributionAgreementV1.sol";
 import {SuperTokenV1Library} from "@superfluid-contracts/apps/SuperTokenV1Library.sol";
@@ -69,6 +68,11 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     /// @param minPassportScore The new min passport score
     /// @param sender The sender of the transaction
     event MinPassportScoreUpdated(uint256 minPassportScore, address sender);
+
+    // @notice Emitted when distribute is called
+    // @param sender The sender of the transaction
+    // @param flowRate The flow rate
+    event Distributed(address indexed sender, uint256 flowRate);
 
     /// @notice Stores the details of the recipients.
     struct Recipient {
@@ -194,9 +198,8 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         superToken = ISuperToken(allo.getPool(_poolId).token);
         superfluidHost = params.superfluidHost;
         passportDecoder = GitcoinPassportDecoder(params.passportDecoder);
-        GDA = IGeneralDistributionAgreementV1(params.gda);
         gdaPool = ISuperfluidPool(
-            GDA.createPool(
+            SuperTokenV1Library.createPool(
                 superToken,
                 address(this), // admin
                 // todo: discuss pool conifg
@@ -300,11 +303,17 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _recipientIds The ids of the recipients to distribute to
     /// @param _data Data required will depend on the strategy implementation
     /// @param _sender The address of the sender
-    function _distribute(address[] memory _recipientIds, bytes memory _data, address _sender)
+    function _distribute(address[] memory, bytes memory _data, address _sender)
         internal
         override
         onlyAfterAllocation
     {
+
+        (uint256 flowRate) = abi.decode(_data, (uint256));
+        superToken.distributeFlow(superToken, _sender, gdaPool, flowRate, "0x");
+
+        emit Distributed(_sender, flowRate);
+
         // todo:
         // decode the data ()?
         // (ISuperToken _superToken) = abi.decode(_data, (ISuperToken));
@@ -443,6 +452,9 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
                     true,
                     "TheRegistrationKey" // todo
                 );
+
+                // add the recipient to the GDA with 1 unit assigned to
+                superToken.updateMemberUnits(superToken, gdaPool, recipientId, 1);
 
                 superApps[address(superApp)] = recipientId;
                 recipient.superApp = superApp;
