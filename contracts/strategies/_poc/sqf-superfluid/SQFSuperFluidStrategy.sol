@@ -5,12 +5,18 @@ pragma solidity 0.8.19;
 import {ReentrancyGuard} from "openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
 import
 // ISuperfluid,
-{ISuperToken} from
+{ISuperToken, ISuperfluidPool} from
 // ISuperApp,
-// SuperAppDefinitions GeneralDistributionAgreementV1
+// SuperAppDefinitions,
 "@superfluid-contracts/interfaces/superfluid/ISuperfluid.sol";
+import {
+    IGeneralDistributionAgreementV1,
+    PoolConfig
+} from "@superfluid-contracts/interfaces/agreements/gdav1/IGeneralDistributionAgreementV1.sol";
 import {SuperTokenV1Library} from "@superfluid-contracts/apps/SuperTokenV1Library.sol";
-import { IGitcoinPassportDecoder } from "@eas-proxy/IGitcoinPassportDecoder.sol";
+import {Score} from "@eas-proxy/IGitcoinPassportDecoder.sol";
+import {GitcoinPassportDecoder} from "@eas-proxy/GitcoinPassportDecoder.sol";
+
 // Interfaces
 import {IRegistry} from "../../../core/interfaces/IRegistry.sol";
 import {IAllo} from "../../../core/interfaces/IAllo.sol";
@@ -79,6 +85,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         bool metadataRequired;
         address passportDecoder;
         address superfluidHost;
+        address gda;
         uint64 registrationStartTime;
         uint64 registrationEndTime;
         uint64 allocationStartTime;
@@ -86,15 +93,16 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         uint256 minPassportScore;
     }
 
-    ISuperToken public superToken;
-
-    IGitcoinPassportDecoder public passportDecoder;
-
-    uint256 public minPassportScore;
-
     /// @dev Available at https://console.superfluid.finance/
     address public superfluidHost;
-    address public GDA;
+    IGeneralDistributionAgreementV1 public GDA;
+    ISuperToken public superToken;
+
+    ISuperfluidPool public gdaPool;
+
+    GitcoinPassportDecoder public passportDecoder;
+
+    uint256 public minPassportScore;
 
     /// @notice The start and end times for registration and allocation
     /// @dev The values will be in milliseconds since the epoch
@@ -182,9 +190,27 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         _registry = allo.getRegistry();
 
         if (params.superfluidHost == address(0)) revert ZERO_ADDRESS();
-        superfluidHost = params.superfluidHost;
 
         superToken = ISuperToken(allo.getPool(_poolId).token);
+        superfluidHost = params.superfluidHost;
+        passportDecoder = GitcoinPassportDecoder(params.passportDecoder);
+        GDA = IGeneralDistributionAgreementV1(params.gda);
+        gdaPool = ISuperfluidPool(
+            GDA.createPool(
+                superToken,
+                address(this), // admin
+                // todo: discuss pool conifg
+                PoolConfig(
+                    /// @dev if true, the pool members can transfer their owned units
+                    /// else, only the pool admin can manipulate the units for pool members
+                    false,
+                    /// @dev if true, anyone can execute distributions via the pool
+                    /// else, only the pool admin can execute distributions via the pool
+                    true
+                )
+            )
+        );
+
         //todo: check if token is a super token
 
         _updatePoolTimestamps(
@@ -306,7 +332,6 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _data The data to use to allocate to the recipient
     /// @param _sender The address of the sender
     function _allocate(bytes memory _data, address _sender) internal override onlyActiveAllocation {
-
         if (!_isValidAllocator(_sender)) revert UNAUTHORIZED();
 
         (address recipientId, int96 flowRate) = abi.decode(_data, (address, int96));
@@ -369,7 +394,8 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _allocator The allocator address
     /// @return 'true' if the allocator is valid, otherwise 'false'
     function _isValidAllocator(address _allocator) internal view override returns (bool) {
-        if (passportDecoder.getScore(_allocator) >= minPassportScore) {
+        Score memory allocatorScore = passportDecoder.getScore(_allocator);
+        if (allocatorScore.score >= minPassportScore) {
             return true;
         }
         return false;
@@ -466,7 +492,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
 
     function adjustWeightings(int96 _previousFlowrate, int96 _newFlowRate) external virtual {
         if (superApps[msg.sender] == address(0)) revert UNAUTHORIZED();
-        
+
         // totalFlowrate = pool amount
         // unitsForRecipient = (sqrt(unitsForRecipientBeforeUpdate) + sqrt(_newFlowRate) - sqrt(_previousFlowrate)) * 2
         // totalUnits = totalUnitsBeforeUpdate + unitsForRecipient - unitsForRecipientBeforeUpdate
@@ -474,19 +500,16 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
 
         // Given that we know flowRateForRecipient, do we simply invoke GDA.updateFlowrate ?
 
-
-
         _previousFlowrate;
         _newFlowRate;
     }
 
     /// @notice Withdraw funds from the contract.
-    /// @param token Token to withdraw.
-    /// @param amount Amount to withdraw.
-    function withdraw(ISuperToken token, uint256 amount) external onlyPoolManager(msg.sender) {
-        _transferAmount(_token, msg.sender, amount);
+    /// @param _token Token to withdraw.
+    /// @param _amount Amount to withdraw.
+    function withdraw(address _token, uint256 _amount) external onlyPoolManager(msg.sender) {
+        _transferAmount(_token, msg.sender, _amount);
     }
-
 
     /// =========================
     /// ==== View Functions =====
@@ -649,7 +672,6 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
 
     //     // token.deleteFlow(msg.sender, address(this));
     // }
-
 
     // /// @notice Create flow from contract to specified address.
     // /// @param token Token to stream.
