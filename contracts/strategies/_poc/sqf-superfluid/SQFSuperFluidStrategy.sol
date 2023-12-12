@@ -466,10 +466,27 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
 
     function adjustWeightings(int96 _previousFlowrate, int96 _newFlowRate) external virtual {
         if (superApps[msg.sender] == address(0)) revert UNAUTHORIZED();
+        
+        // totalFlowrate = pool amount
+        // unitsForRecipient = (sqrt(unitsForRecipientBeforeUpdate) + sqrt(_newFlowRate) - sqrt(_previousFlowrate)) * 2
+        // totalUnits = totalUnitsBeforeUpdate + unitsForRecipient - unitsForRecipientBeforeUpdate
+        // flowRateForRecipient = unitsForRecipient / (totalUnits * totalFlowrate)
+
+        // Given that we know flowRateForRecipient, do we simply invoke GDA.updateFlowrate ?
+
+
 
         _previousFlowrate;
         _newFlowRate;
     }
+
+    /// @notice Withdraw funds from the contract.
+    /// @param token Token to withdraw.
+    /// @param amount Amount to withdraw.
+    function withdraw(ISuperToken token, uint256 amount) external onlyPoolManager(msg.sender) {
+        _transferAmount(_token, msg.sender, amount);
+    }
+
 
     /// =========================
     /// ==== View Functions =====
@@ -599,75 +616,67 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     /// @dev This requires a super token ERC20 approval.
     /// @param token Super Token to transfer.
     /// @param amount Amount to transfer.
-    function sendLumpSumToContract(ISuperToken token, uint256 amount) internal {
-        // if (!recipients[msg.sender]) revert UNAUTHORIZED();
+    // function sendLumpSumToContract(ISuperToken token, uint256 amount) internal {
+    //     // if (!recipients[msg.sender]) revert UNAUTHORIZED();
 
-        token.transferFrom(msg.sender, address(this), amount);
-    }
+    //     token.transferFrom(msg.sender, address(this), amount);
+    // }
 
     /// @notice Create a stream into the contract.
     /// @dev This requires the contract to be a flowOperator for the msg sender.
     /// @param token Token to stream.
-    /// @param flowRate Flow rate per second to stream.
-    function createFlowIntoContract(ISuperToken token, int96 flowRate) internal {
-        // if (!recipients[msg.sender]) revert UNAUTHORIZED();
+    // /// @param flowRate Flow rate per second to stream.
+    // function createFlowIntoContract(ISuperToken token, int96 flowRate) internal {
+    //     // if (!recipients[msg.sender]) revert UNAUTHORIZED();
 
-        // token.createFlowFrom(msg.sender, address(this), flowRate);
-    }
+    //     // token.createFlowFrom(msg.sender, address(this), flowRate);
+    // }
 
     /// @notice Update an existing stream being sent into the contract by msg sender.
     /// @dev This requires the contract to be a flowOperator for the msg sender.
     /// @param token Token to stream.
     /// @param flowRate Flow rate per second to stream.
-    function updateFlowIntoContract(ISuperToken token, int96 flowRate) internal {
-        // if (!recipients[msg.sender]) revert UNAUTHORIZED();
+    // function updateFlowIntoContract(ISuperToken token, int96 flowRate) internal {
+    //     // if (!recipients[msg.sender]) revert UNAUTHORIZED();
 
-        // token.updateFlowFrom(msg.sender, address(this), flowRate);
-    }
+    //     // token.updateFlowFrom(msg.sender, address(this), flowRate);
+    // }
 
     /// @notice Delete a stream that the msg.sender has open into the contract.
     /// @param token Token to quit streaming.
-    function deleteFlowIntoContract(ISuperToken token) internal {
-        // if (!recipients[msg.sender]) revert UNAUTHORIZED();
+    // function deleteFlowIntoContract(ISuperToken token) internal {
+    //     // if (!recipients[msg.sender]) revert UNAUTHORIZED();
 
-        // token.deleteFlow(msg.sender, address(this));
-    }
+    //     // token.deleteFlow(msg.sender, address(this));
+    // }
 
-    /// @notice Withdraw funds from the contract.
-    /// @param token Token to withdraw.
-    /// @param amount Amount to withdraw.
-    function withdrawFunds(ISuperToken token, uint256 amount) internal {
-        // if (!recipients[msg.sender]) revert UNAUTHORIZED();
 
-        token.transfer(msg.sender, amount);
-    }
+    // /// @notice Create flow from contract to specified address.
+    // /// @param token Token to stream.
+    // /// @param receiver Receiver of stream.
+    // /// @param flowRate Flow rate per second to stream.
+    // function createFlowFromContract(ISuperToken token, address receiver, int96 flowRate) internal {
+    //     // if (!recipients[msg.sender]) revert UNAUTHORIZED();
 
-    /// @notice Create flow from contract to specified address.
-    /// @param token Token to stream.
-    /// @param receiver Receiver of stream.
-    /// @param flowRate Flow rate per second to stream.
-    function createFlowFromContract(ISuperToken token, address receiver, int96 flowRate) internal {
-        // if (!recipients[msg.sender]) revert UNAUTHORIZED();
+    //     // token.createFlow(receiver, flowRate);
+    // }
 
-        // token.createFlow(receiver, flowRate);
-    }
+    // /// @notice Update flow from contract to specified address.
+    // /// @param token Token to stream.
+    // /// @param receiver Receiver of stream.
+    // /// @param flowRate Flow rate per second to stream.
+    // function updateFlowFromContract(ISuperToken token, address receiver, int96 flowRate) internal {
+    //     // if (!recipients[msg.sender]) revert UNAUTHORIZED();
 
-    /// @notice Update flow from contract to specified address.
-    /// @param token Token to stream.
-    /// @param receiver Receiver of stream.
-    /// @param flowRate Flow rate per second to stream.
-    function updateFlowFromContract(ISuperToken token, address receiver, int96 flowRate) internal {
-        // if (!recipients[msg.sender]) revert UNAUTHORIZED();
+    //     // token.updateFlow(receiver, flowRate);
+    // }
 
-        // token.updateFlow(receiver, flowRate);
-    }
+    // /// @notice Delete flow from contract to specified address.
+    // /// @param token Token to stop streaming.
+    // /// @param receiver Receiver of stream.
+    // function deleteFlowFromContract(ISuperToken token, address receiver) internal {
+    //     // if (!recipients[msg.sender]) revert UNAUTHORIZED();
 
-    /// @notice Delete flow from contract to specified address.
-    /// @param token Token to stop streaming.
-    /// @param receiver Receiver of stream.
-    function deleteFlowFromContract(ISuperToken token, address receiver) internal {
-        // if (!recipients[msg.sender]) revert UNAUTHORIZED();
-
-        // token.deleteFlow(address(this), receiver);
-    }
+    //     // token.deleteFlow(address(this), receiver);
+    // }
 }
