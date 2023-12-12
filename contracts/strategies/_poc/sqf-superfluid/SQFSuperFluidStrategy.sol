@@ -10,7 +10,7 @@ import
 // SuperAppDefinitions GeneralDistributionAgreementV1
 "@superfluid-contracts/interfaces/superfluid/ISuperfluid.sol";
 import {SuperTokenV1Library} from "@superfluid-contracts/apps/SuperTokenV1Library.sol";
-
+import { IGitcoinPassportDecoder } from "@eas-proxy/IGitcoinPassportDecoder.sol";
 // Interfaces
 import {IRegistry} from "../../../core/interfaces/IRegistry.sol";
 import {IAllo} from "../../../core/interfaces/IAllo.sol";
@@ -59,6 +59,11 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     /// @param sender The sender of the transaction
     event Canceled(address indexed recipientId, address sender);
 
+    /// @notice Emitted when a minimum passport score is updated
+    /// @param minPassportScore The new min passport score
+    /// @param sender The sender of the transaction
+    event MinPassportScoreUpdated(uint256 minPassportScore, address sender);
+
     /// @notice Stores the details of the recipients.
     struct Recipient {
         bool useRegistryAnchor;
@@ -72,14 +77,20 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     struct InitializeParams {
         bool registryGating;
         bool metadataRequired;
+        address passportDecoder;
         address superfluidHost;
         uint64 registrationStartTime;
         uint64 registrationEndTime;
         uint64 allocationStartTime;
         uint64 allocationEndTime;
+        uint256 minPassportScore;
     }
 
     ISuperToken public superToken;
+
+    IGitcoinPassportDecoder public passportDecoder;
+
+    uint256 public minPassportScore;
 
     /// @dev Available at https://console.superfluid.finance/
     address public superfluidHost;
@@ -167,6 +178,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         registryGating = params.registryGating;
         metadataRequired = params.metadataRequired;
         superfluidHost = params.superfluidHost;
+        minPassportScore = params.minPassportScore;
         _registry = allo.getRegistry();
 
         if (params.superfluidHost == address(0)) revert ZERO_ADDRESS();
@@ -343,13 +355,21 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         _updatePoolTimestamps(_registrationStartTime, _registrationEndTime, _allocationStartTime, _allocationEndTime);
     }
 
+    /// @notice Update the min passport score
+    /// @param _minPassportScore The new min passport score
+    function updateMinPassportScore(uint256 _minPassportScore) external onlyPoolManager(msg.sender) {
+        minPassportScore = _minPassportScore;
+        emit MinPassportScoreUpdated(_minPassportScore, msg.sender);
+    }
+
     /// @notice Checks if the allocator is valid
     /// @param _allocator The allocator address
     /// @return 'true' if the allocator is valid, otherwise 'false'
     function _isValidAllocator(address _allocator) internal view override returns (bool) {
-        // todo: check passport
-        _allocator;
-        return true;
+        if (passportDecoder.getScore(_allocator) >= minPassportScore) {
+            return true;
+        }
+        return false;
     }
 
     /// @notice Review recipient(s) application(s)
