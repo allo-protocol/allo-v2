@@ -306,6 +306,9 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _data The data to use to allocate to the recipient
     /// @param _sender The address of the sender
     function _allocate(bytes memory _data, address _sender) internal override onlyActiveAllocation {
+
+        if (!_isValidAllocator(_sender)) revert UNAUTHORIZED();
+
         (address recipientId, int96 flowRate) = abi.decode(_data, (address, int96));
 
         Recipient storage recipient = recipients[recipientId];
