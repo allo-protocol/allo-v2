@@ -48,6 +48,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         uint64 allocationStartTime;
         uint64 allocationEndTime;
         uint256 minPassportScore;
+        uint256 initialSuperAppBalance;
     }
 
     /// ======================
@@ -99,6 +100,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     /// ========== Storage =============
     /// ================================
 
+    uint256 public initialSuperAppBalance;
     /// @dev Available at https://console.superfluid.finance/
     /// @notice The host contract for the superfluid protocol
     address public superfluidHost;
@@ -218,9 +220,13 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
                 || params.superfluidHost == address(0) || params.passportDecoder == address(0)
         ) revert ZERO_ADDRESS();
 
+        if (params.initialSuperAppBalance == 0) revert INVALID();
+
         allocationSuperToken = ISuperToken(params.allocationSuperToken);
         poolSuperToken = allo.getPool(poolId).token;
         allocationSuperToken.getUnderlyingToken();
+
+        initialSuperAppBalance = params.initialSuperAppBalance;
 
         passportDecoder = GitcoinPassportDecoder(params.passportDecoder);
         gdaPool = SuperTokenV1Library.createPool(
@@ -232,7 +238,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
                 false,
                 /// @dev if true, anyone can execute distributions via the pool
                 /// else, only the pool admin can execute distributions via the pool
-                false // check: set it to true to allow anyone can fund the pool
+                false
             )
         );
 
@@ -353,8 +359,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
 
         if (currentFlowRate == 0 || lastUpdated == 0) {
             // create the flow
-            // note: make sure this contract has permission to createFlow
-            // note: explore making a factory which would be approved by allocator only once
+            // enhancement: explore making a factory which would be approved by allocator only once
             allocationSuperToken.createFlowFrom(_sender, superApp, flowRate);
         } else {
             // update the flow
@@ -368,7 +373,6 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _data The data to use to get the payout summary for the recipient
     /// @return The payout summary for the recipient
     function _getPayout(address _recipientId, bytes memory) internal view override returns (PayoutSummary memory) {
-        // todo:sf: can we get the flow rate from GDA pool instad of storing it here ?
         return PayoutSummary(_recipients[_recipientId].recipientAddress, uint256(recipientFlowRate[_recipientId]));
     }
 
@@ -443,8 +447,10 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
                     true,
                     true,
                     true,
-                    "TheRegistrationKey" // todo:sf // note: will have to whitelist. Explore superAppFactory which would be whitelisted by SF
+                    "" // regsitrationKey - for future create a superApp factory
                 );
+
+                allocationSuperToken.transfer(address(superApp), initialSuperAppBalance);
 
                 // Add recipientAddress as member of the GDA with 1 unit
                 poolSuperToken.updateMemberUnits(gdaPool, recipient.recipientAddress, 1);
@@ -475,7 +481,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
             Recipient storage recipient = recipients[recipientId];
 
             // if the status is none or appealed then revert
-            if (recipient.recipientStatus == Status.None) {
+            if (recipient.recipientStatus == Status.None || recipient.recipientStatus == Status.Canceled) {
                 revert RECIPIENT_ERROR(recipientId);
             }
 
@@ -498,8 +504,6 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
             }
         }
     }
-
-    // note: add updateOutflow to adjust flow rate when funds are added / withdrawn partially
 
     /// @notice Adjust the weightings of the recipients
     /// @dev This can only be called by the super app callback onFlowUpdated
@@ -540,8 +544,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _token Token to withdraw.
     /// @param _amount Amount to withdraw.
     function withdraw(address _token, uint256 _amount) external onlyPoolManager(msg.sender) {
-        // note: close streams before withdrawing. if token is pool super token
-        if(_token == address(poolSuperToken)) {
+        if (_token == address(poolSuperToken)) {
             revert INVALID();
         }
         _transferAmount(_token, msg.sender, _amount);
