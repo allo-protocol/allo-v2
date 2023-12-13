@@ -78,16 +78,12 @@ contract RecipientSuperApp is ISuperApp {
     /// @notice This is the main callback function called by the host
     ///      to notify the app about the callback context.
     function onFlowUpdated(
-        ISuperToken, /*superToken*/
         address sender,
         int96 previousFlowRate,
         int96 newFlowRate,
         bytes calldata ctx
     ) internal returns (bytes memory /*newCtx*/ ) {
-        // todo: clean function params
-        // receiver is address(this)
         // userData can be acquired with `host.decodeCtx(ctx).userData`
-
         strategy.adjustWeightings(previousFlowRate, newFlowRate, sender);
         return ctx;
     }
@@ -127,7 +123,6 @@ contract RecipientSuperApp is ISuperApp {
         (, int96 flowRate,,) = superToken.getFlowInfo(sender, address(this));
 
         return onFlowUpdated(
-            superToken,
             sender,
             0,
             flowRate,
@@ -164,7 +159,6 @@ contract RecipientSuperApp is ISuperApp {
         (, int96 flowRate,,) = superToken.getFlowInfo(sender, address(this));
 
         return onFlowUpdated(
-            superToken,
             sender,
             previousFlowRate,
             flowRate,
@@ -200,7 +194,7 @@ contract RecipientSuperApp is ISuperApp {
         (, int96 previousFlowRate) = abi.decode(cbdata, (uint256, int96));
         (, int96 flowRate,,) = superToken.getFlowInfo(sender, address(this));
 
-        return onFlowUpdated(superToken, sender, previousFlowRate, flowRate, ctx);
+        return onFlowUpdated(sender, previousFlowRate, flowRate, ctx);
     }
 
 
