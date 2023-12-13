@@ -70,7 +70,7 @@ contract RecipientSuperApp is ISuperApp {
     }
 
     /// @dev Accepts all super tokens
-    // TODO: do we need this ?
+    // todo:sf: do we need this ?
     // function isAcceptedSuperToken(ISuperToken) public view virtual returns (bool) {
     //     return true;
     // }

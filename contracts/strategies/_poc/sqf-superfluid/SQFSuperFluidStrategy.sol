@@ -224,7 +224,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
             SuperTokenV1Library.createPool(
                 superToken,
                 address(this), // pool admin
-                // todo: discuss pool conifg
+                // todo:sf: discuss pool conifg
                 PoolConfig(
                     /// @dev if true, the pool members can transfer their owned units
                     /// else, only the pool admin can manipulate the units for pool members
@@ -449,7 +449,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
                     true,
                     true,
                     true,
-                    "TheRegistrationKey" // todo
+                    "TheRegistrationKey" // todo:sf
                 );
 
                 // Add recipientAddress as member of the GDA with 1 unit
@@ -497,7 +497,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
             // Set recipient units to 0 to stop streaming from GDA
             superToken.updateMemberUnits(superToken, gdaPool, recipientId, 0);
 
-            // todo: update/remove from GDA
+            // todo:sf: update/remove from GDA
 
             emit Canceled(recipientId, msg.sender);
 
