@@ -71,6 +71,7 @@ contract RecipientSuperApp is ISuperApp {
 
     /// @dev Accepts all super tokens
     // todo:sf: do we need this ?
+    //  note: support 2 tokens. 
     // function isAcceptedSuperToken(ISuperToken) public view virtual returns (bool) {
     //     return true;
     // }
@@ -84,6 +85,10 @@ contract RecipientSuperApp is ISuperApp {
         bytes calldata ctx
     ) internal returns (bytes memory /*newCtx*/ ) {
         // userData can be acquired with `host.decodeCtx(ctx).userData`
+        // note: check if ctx needs to be updated. error: context not clean
+        // note: fetch recipient and stream funds to recipient. if newFlow 
+        // https://github.com/superfluid-finance/super-examples/blob/main/projects/tradeable-cashflow/contracts/RedirectAll.sol#L163
+    
         strategy.adjustWeightings(previousFlowRate, newFlowRate, sender);
         return ctx;
     }
@@ -192,9 +197,9 @@ contract RecipientSuperApp is ISuperApp {
 
         (address sender,) = abi.decode(agreementData, (address, address));
         (, int96 previousFlowRate) = abi.decode(cbdata, (uint256, int96));
-        (, int96 flowRate,,) = superToken.getFlowInfo(sender, address(this));
-
-        return onFlowUpdated(sender, previousFlowRate, flowRate, ctx);
+        // (, int96 flowRate,,) = superToken.getFlowInfo(sender, address(this));
+        // note: check what code we deleted. check out example  BaseFlowAgreementV1.sol
+        return onFlowUpdated(sender, previousFlowRate, 0, ctx);
     }
 
 

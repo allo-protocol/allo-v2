@@ -220,19 +220,16 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
 
         superfluidHost = params.superfluidHost;
         passportDecoder = GitcoinPassportDecoder(params.passportDecoder);
-        gdaPool = ISuperfluidPool(
-            SuperTokenV1Library.createPool(
-                superToken,
-                address(this), // pool admin
-                // todo:sf: discuss pool conifg
-                PoolConfig(
-                    /// @dev if true, the pool members can transfer their owned units
-                    /// else, only the pool admin can manipulate the units for pool members
-                    false,
-                    /// @dev if true, anyone can execute distributions via the pool
-                    /// else, only the pool admin can execute distributions via the pool
-                    false
-                )
+        gdaPool = SuperTokenV1Library.createPool(
+            superToken,
+            address(this), // pool admin
+            PoolConfig(
+                /// @dev if true, the pool members can transfer their owned units
+                /// else, only the pool admin can manipulate the units for pool members
+                false,
+                /// @dev if true, anyone can execute distributions via the pool
+                /// else, only the pool admin can execute distributions via the pool
+                false // check: set it to true to allow anyone can fund the pool
             )
         );
 
@@ -328,7 +325,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         _checkOnlyActiveRegistration();
 
         (uint256 flowRate) = abi.decode(_data, (uint256));
-        superToken.distributeFlow(superToken, _sender, gdaPool, flowRate, "0x");
+        superToken.distributeFlow(_sender, gdaPool, flowRate, "0x");
 
         emit Distributed(_sender, flowRate);
     }
@@ -353,6 +350,8 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
 
         if (currentFlowRate == 0 || lastUpdated == 0) {
             // create the flow
+            // note: make sure this contract has permission to createFlow
+            // note: explore making a factory which would be approved by allocator only once
             superToken.createFlowFrom(_sender, superApp, flowRate);
         } else {
             // update the flow
@@ -371,6 +370,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         override
         returns (PayoutSummary memory)
     {
+        // todo:sf: can we get the flow rate from GDA pool instad of storing it here ?
         return PayoutSummary(
             _recipients[_recipientId].recipientAddress,
             uint256(recipientFlowRate[_recipientId])
@@ -449,11 +449,11 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
                     true,
                     true,
                     true,
-                    "TheRegistrationKey" // todo:sf
+                    "TheRegistrationKey" // todo:sf // note: will have to whitelist. Explore superAppFactory which would be whitelisted by SF
                 );
 
                 // Add recipientAddress as member of the GDA with 1 unit
-                superToken.updateMemberUnits(superToken, gdaPool, recipient.recipientAddress, 1);
+                superToken.updateMemberUnits(gdaPool, recipient.recipientAddress, 1);
 
                 superApps[address(superApp)] = recipientId;
                 recipient.superApp = superApp;
@@ -495,9 +495,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
             delete recipientFlowRate[recipientId];
 
             // Set recipient units to 0 to stop streaming from GDA
-            superToken.updateMemberUnits(superToken, gdaPool, recipientId, 0);
-
-            // todo:sf: update/remove from GDA
+            superToken.updateMemberUnits(gdaPool, recipientId, 0);
 
             emit Canceled(recipientId, msg.sender);
 
@@ -506,6 +504,8 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
             }
         }
     }
+
+    // note: add updateOutflow to adjust flow rate when funds are added / withdrawn partially
 
     /// @notice Adjust the weightings of the recipients
     /// @dev This can only be called by the super app callback onFlowUpdated
@@ -545,6 +545,8 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _token Token to withdraw.
     /// @param _amount Amount to withdraw.
     function withdraw(address _token, uint256 _amount) external onlyPoolManager(msg.sender) {
+        // note: close streams before withdrawing. if token is pool super token
+        // superToken.distributeFlow(_sender, gdaPool, 0, "0x");
         _transferAmount(_token, msg.sender, _amount);
     }
 
