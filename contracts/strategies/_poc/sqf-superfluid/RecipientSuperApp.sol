@@ -20,8 +20,6 @@ contract RecipientSuperApp is ISuperApp {
 
     ISuperfluid public immutable HOST;
 
-    // ISuperToken public superToken;
-
     /// @notice Index ID. Never changes.
     uint32 public constant INDEX_ID = 0;
 
@@ -71,18 +69,14 @@ contract RecipientSuperApp is ISuperApp {
         strategy = SQFSuperFluidStrategy(_strategy);
     }
 
-    /**
-     * @dev Optional (positive) filter for accepting only specific SuperTokens.
-     *      The default implementation accepts all SuperTokens.
-     *      Can be overridden by the SuperApp in order to apply arbitrary filters.
-     */
-    function isAcceptedSuperToken(ISuperToken /*superToken*/ ) public view virtual returns (bool) {
-        // todo: implement
-        return true;
-    }
+    /// @dev Accepts all super tokens
+    // TODO: do we need this ?
+    // function isAcceptedSuperToken(ISuperToken) public view virtual returns (bool) {
+    //     return true;
+    // }
 
-    /// @dev override if the SuperApp shall have custom logic invoked when an existing flow
-    ///      to it is updated (flowrate change).
+    /// @notice This is the main callback function called by the host
+    ///      to notify the app about the callback context.
     function onFlowUpdated(
         ISuperToken, /*superToken*/
         address sender,
@@ -98,15 +92,17 @@ contract RecipientSuperApp is ISuperApp {
         return ctx;
     }
 
-    // ---------------------------------------------------------------------------------------------
-    // Low-level callbacks
-    // Shall NOT be overriden by SuperApps when inheriting from this contract.
-    // The before-callbacks are implemented to forward data (flowrate, timestamp),
-    // the after-callbacks invoke the CFA specific specific convenience callbacks.
+    function _checkHookParam(address _agreementClass, ISuperToken _superToken) internal view {
+        if (msg.sender != address(HOST)) revert UnauthorizedHost();
+        if (!isAcceptedAgreement(_agreementClass)) revert NotImplemented();
+        if (!isAcceptedSuperToken(_superToken)) revert NotAcceptedSuperToken();
+    }
+ 
 
-    // CREATED callback
+    /// ================================
+    /// ===== CREATED callbacks ========
+    /// ================================
 
-    // Empty implementation to fulfill the interface - is never called because disabled in the app manifest.
     function beforeAgreementCreated(
         ISuperToken, /*superToken*/
         address, /*agreementClass*/
@@ -115,12 +111,6 @@ contract RecipientSuperApp is ISuperApp {
         bytes calldata /*ctx*/
     ) external pure override returns (bytes memory /*beforeData*/ ) {
         return "0x";
-    }
-
-    function _checkHookParam(address _agreementClass, ISuperToken _superToken) internal view {
-        if (msg.sender != address(HOST)) revert UnauthorizedHost();
-        if (!isAcceptedAgreement(_agreementClass)) revert NotImplemented();
-        if (!isAcceptedSuperToken(_superToken)) revert NotAcceptedSuperToken();
     }
 
     function afterAgreementCreated(
@@ -145,7 +135,9 @@ contract RecipientSuperApp is ISuperApp {
         );
     }
 
-    // UPDATED callbacks
+    /// ================================
+    /// ===== UPDATED callbacks ========
+    /// ================================
 
     function beforeAgreementUpdated(
         ISuperToken, /*superToken*/
@@ -154,17 +146,6 @@ contract RecipientSuperApp is ISuperApp {
         bytes calldata, /*agreementData*/
         bytes calldata /*ctx*/
     ) external pure override returns (bytes memory /*beforeData*/ ) {
-        // if (msg.sender != address(HOST)) revert UnauthorizedHost();
-        // if (!isAcceptedAgreement(agreementClass)) return "0x";
-        // if (!isAcceptedSuperToken(superToken)) revert NotAcceptedSuperToken();
-
-        // (address sender, ) = abi.decode(agreementData, (address, address));
-        // (uint256 lastUpdated, int96 flowRate,,) = superToken.getFlowInfo(sender, address(this));
-
-        // return abi.encode(
-        //     flowRate,
-        //     lastUpdated
-        // );
         return "0x";
     }
 
@@ -191,7 +172,9 @@ contract RecipientSuperApp is ISuperApp {
         );
     }
 
-    // DELETED callbacks
+    /// ================================
+    /// ===== DELETED callbacks ========
+    /// ================================
 
     function beforeAgreementTerminated(
         ISuperToken, /*superToken*/
@@ -200,22 +183,6 @@ contract RecipientSuperApp is ISuperApp {
         bytes calldata, /*agreementData*/
         bytes calldata /*ctx*/
     ) external pure override returns (bytes memory /*beforeData*/ ) {
-        // we're not allowed to revert in this callback, thus just return empty beforeData on failing checks
-        // if (msg.sender != address(HOST)
-        //     || !isAcceptedAgreement(agreementClass)
-        //     || !isAcceptedSuperToken(superToken))
-        // {
-        //     return "0x";
-        // }
-
-        // (address sender, address receiver) = abi.decode(agreementData, (address, address));
-        // (uint256 lastUpdated, int96 flowRate,,) = superToken.getFlowInfo(sender, receiver);
-
-        // return abi.encode(
-        //     lastUpdated,
-        //     flowRate
-        // );
-
         return "0x";
     }
 
@@ -236,8 +203,10 @@ contract RecipientSuperApp is ISuperApp {
         return onFlowUpdated(superToken, sender, previousFlowRate, flowRate, ctx);
     }
 
-    // ---------------------------------------------------------------------------------------------
-    // HELPERS
+
+    /// ================================
+    /// ========== Helpers =============
+    /// ================================
 
     /**
      * @dev Expect Super Agreement involved in callback to be an accepted one
