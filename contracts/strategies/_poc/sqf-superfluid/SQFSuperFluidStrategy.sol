@@ -20,7 +20,6 @@ import {Metadata} from "../../../core/libraries/Metadata.sol";
 import {RecipientSuperApp} from "./RecipientSuperApp.sol";
 
 contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
-
     using SuperTokenV1Library for ISuperToken;
     using FixedPointMathLib for uint256;
 
@@ -43,7 +42,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         bool metadataRequired;
         address passportDecoder;
         address superfluidHost;
-        address gda;
+        address allocationSuperToken;
         uint64 registrationStartTime;
         uint64 registrationEndTime;
         uint64 allocationStartTime;
@@ -105,7 +104,8 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     address public superfluidHost;
 
     /// @notice The pool super token
-    ISuperToken public superToken;
+    ISuperToken public allocationSuperToken;
+    ISuperToken public poolSuperToken;
 
     /// @notice The GDA pool which streams pool tokens to recipients
     ISuperfluidPool public gdaPool;
@@ -213,15 +213,18 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         minPassportScore = params.minPassportScore;
         _registry = allo.getRegistry();
 
-        if (params.superfluidHost == address(0)) revert ZERO_ADDRESS();
+        if (
+            params.superfluidHost == address(0) || params.acceptedSuperToen == address(0)
+                || params.superfluidHost == address(0) || params.passportDecoder == address(0)
+        ) revert ZERO_ADDRESS();
 
-        superToken = ISuperToken(allo.getPool(_poolId).token);
-        superToken.getUnderlyingToken();
+        allocationSuperToken = ISuperToken(params.allocationSuperToken);
+        poolSuperToken = allo.getPool(poolId).token;
+        allocationSuperToken.getUnderlyingToken();
 
-        superfluidHost = params.superfluidHost;
         passportDecoder = GitcoinPassportDecoder(params.passportDecoder);
         gdaPool = SuperTokenV1Library.createPool(
-            superToken,
+            poolSuperToken,
             address(this), // pool admin
             PoolConfig(
                 /// @dev if true, the pool members can transfer their owned units
@@ -306,7 +309,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         } else if (currentStatus == Status.Pending) {
             // emit the new status with the '_data' that was passed in
             emit UpdatedRegistration(recipientId, _data, _sender);
-        } else { 
+        } else {
             revert INVALID();
         }
     }
@@ -325,7 +328,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         _checkOnlyActiveRegistration();
 
         (uint256 flowRate) = abi.decode(_data, (uint256));
-        superToken.distributeFlow(_sender, gdaPool, flowRate, "0x");
+        poolSuperToken.distributeFlow(_sender, gdaPool, flowRate, "0x");
 
         emit Distributed(_sender, flowRate);
     }
@@ -346,16 +349,16 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         }
 
         address superApp = address(recipient.superApp);
-        (uint256 lastUpdated, int96 currentFlowRate,,) = superToken.getFlowInfo(_sender, superApp);
+        (uint256 lastUpdated, int96 currentFlowRate,,) = allocationSuperToken.getFlowInfo(_sender, superApp);
 
         if (currentFlowRate == 0 || lastUpdated == 0) {
             // create the flow
             // note: make sure this contract has permission to createFlow
             // note: explore making a factory which would be approved by allocator only once
-            superToken.createFlowFrom(_sender, superApp, flowRate);
+            allocationSuperToken.createFlowFrom(_sender, superApp, flowRate);
         } else {
             // update the flow
-            superToken.updateFlowFrom(_sender, superApp, flowRate);
+            allocationSuperToken.updateFlowFrom(_sender, superApp, flowRate);
         }
     }
 
@@ -364,17 +367,9 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _recipientId The ID of the recipient
     /// @param _data The data to use to get the payout summary for the recipient
     /// @return The payout summary for the recipient
-    function _getPayout(address _recipientId, bytes memory)
-        internal
-        view
-        override
-        returns (PayoutSummary memory)
-    {
+    function _getPayout(address _recipientId, bytes memory) internal view override returns (PayoutSummary memory) {
         // todo:sf: can we get the flow rate from GDA pool instad of storing it here ?
-        return PayoutSummary(
-            _recipients[_recipientId].recipientAddress,
-            uint256(recipientFlowRate[_recipientId])
-        );
+        return PayoutSummary(_recipients[_recipientId].recipientAddress, uint256(recipientFlowRate[_recipientId]));
     }
 
     /// @notice Set the start and end dates for the pool
@@ -442,7 +437,6 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
             emit Reviewed(recipientId, recipientStatus, msg.sender);
 
             if (recipientStatus == Status.Accepted) {
-
                 RecipientSuperApp superApp = new RecipientSuperApp(
                     address(this),
                     superfluidHost,
@@ -453,7 +447,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
                 );
 
                 // Add recipientAddress as member of the GDA with 1 unit
-                superToken.updateMemberUnits(gdaPool, recipient.recipientAddress, 1);
+                poolSuperToken.updateMemberUnits(gdaPool, recipient.recipientAddress, 1);
 
                 superApps[address(superApp)] = recipientId;
                 recipient.superApp = superApp;
@@ -495,7 +489,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
             delete recipientFlowRate[recipientId];
 
             // Set recipient units to 0 to stop streaming from GDA
-            superToken.updateMemberUnits(gdaPool, recipientId, 0);
+            poolSuperToken.updateMemberUnits(gdaPool, recipientId, 0);
 
             emit Canceled(recipientId, msg.sender);
 
@@ -528,13 +522,14 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
             unitsAfterAllocation = 0;
         } else {
             // updated a flow
-            unitsAfterAllocation = (unitsBeforeAllocation.sqrt() + uint256(_newFlowRate).sqrt() - uint256(_previousFlowrate).sqrt()).pow(2);
+            unitsAfterAllocation =
+                (unitsBeforeAllocation.sqrt() + uint256(_newFlowRate).sqrt() - uint256(_previousFlowrate).sqrt()).pow(2);
         }
 
         uint256 recipientTotalUnits = totalUnitsByRecipient[recipientId];
         recipientTotalUnits += unitsAfterAllocation - unitsBeforeAllocation;
 
-        superToken.updateMemberUnits(superToken, gdaPool, recipientId, recipientTotalUnits);
+        poolSuperToken.updateMemberUnits(gdaPool, recipientId, recipientTotalUnits);
 
         recipientAllocatorUnits[recipientId][_allocator] = unitsAfterAllocation;
         totalUnitsByRecipient[recipientId] = recipientTotalUnits;
@@ -546,8 +541,16 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _amount Amount to withdraw.
     function withdraw(address _token, uint256 _amount) external onlyPoolManager(msg.sender) {
         // note: close streams before withdrawing. if token is pool super token
-        // superToken.distributeFlow(_sender, gdaPool, 0, "0x");
+        if(_token == address(poolSuperToken)) {
+            revert INVALID();
+        }
         _transferAmount(_token, msg.sender, _amount);
+    }
+
+    /// @notice Close the stream
+    function closeStream() external onlyPoolManager(msg.sender) {
+        poolSuperToken.distributeFlow(msg.sender, gdaPool, 0, "0x");
+        _transferAmount(address(poolSuperToken), msg.sender, poolSuperToken.balanceOf(address(this)));
     }
 
     /// =========================
