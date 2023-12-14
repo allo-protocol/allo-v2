@@ -95,6 +95,11 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     // @param flowRate The flow rate
     event Distributed(address indexed sender, int96 flowRate);
 
+    /// @notice Emitted when the total units are updated
+    /// @param recipientId ID of the recipient
+    /// @param totalUnits The total units
+    event TotalUnitsUpdated(address indexed recipientId, uint256 totalUnits);
+
     /// ================================
     /// ========== Storage =============
     /// ================================
@@ -538,6 +543,8 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         recipientAllocatorUnits[recipientId][_allocator] = unitsAfterAllocation;
         totalUnitsByRecipient[recipientId] = recipientTotalUnits;
         recipientFlowRate[recipientId] = _newFlowRate;
+
+        emit TotalUnitsUpdated(recipientId, recipientTotalUnits);
     }
 
     /// @notice Withdraw funds from the contract.

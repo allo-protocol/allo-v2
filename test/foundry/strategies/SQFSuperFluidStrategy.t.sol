@@ -23,6 +23,7 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
     event Canceled(address indexed recipientId, address sender);
     event MinPassportScoreUpdated(uint256 minPassportScore, address sender);
     event Distributed(address indexed sender, int96 flowRate);
+    event TotalUnitsUpdated(address indexed recipientId, uint256 totalUnits);
 
     SQFSuperFluidStrategy _strategy;
 
