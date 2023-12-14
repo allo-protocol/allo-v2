@@ -14,6 +14,7 @@ import {AlloSetup} from "../shared/AlloSetup.sol";
 import {RegistrySetupFullLive} from "../shared/RegistrySetup.sol";
 import {EventSetup} from "../shared/EventSetup.sol";
 
+import {SuperTokenV1Library} from "@superfluid-contracts/apps/SuperTokenV1Library.sol";
 import {SuperfluidGovernanceII} from "@superfluid-contracts/gov/SuperfluidGovernanceII.sol";
 import {ISuperfluid} from "@superfluid-contracts/interfaces/superfluid/ISuperfluid.sol";
 import {ISuperToken} from "@superfluid-contracts/interfaces/superfluid/ISuperToken.sol";
@@ -21,6 +22,8 @@ import {ISuperToken} from "@superfluid-contracts/interfaces/superfluid/ISuperTok
 import {MockPassportDecoder} from "test/utils/MockPassportDecoder.sol";
 
 contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, EventSetup, Errors {
+    using SuperTokenV1Library for ISuperToken;
+
     event Reviewed(address indexed recipientId, IStrategy.Status status, address sender);
     event Canceled(address indexed recipientId, address sender);
     event MinPassportScoreUpdated(uint256 minPassportScore, address sender);
@@ -57,6 +60,7 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
 
         _passportDecoder = new MockPassportDecoder();
         _strategy = __deploy_strategy();
+
         // get some super fake dai
         vm.prank(superFakeDaiWhale);
         superFakeDai.transfer(address(this), 420 * 1e19);
@@ -140,6 +144,29 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
         assertEq(address(superApp.acceptedToken()), address(superFakeDai));
 
         assertEq(superFakeDai.balanceOf(address(superApp)), initialSuperAppBalance);
+    }
+
+    function test_allocate() public {
+        address recipientId = __register_approve_recipient();
+
+        vm.warp(uint256(allocationStartTime) + 1);
+
+        _passportDecoder.setScore(address(this), 70);
+        // unlimited allowance
+        superFakeDai.increaseFlowRateAllowanceWithPermissions(address(_strategy), 7, type(int96).max);
+        allo().allocate(
+            poolId,
+            abi.encode(
+                recipientId,
+                10 // super small flowRate
+            )
+        );
+
+        // get recipient
+        SQFSuperFluidStrategy.Recipient memory recipient = _strategy.getRecipient(recipientId);
+
+        assertEq(_strategy.totalUnitsByRecipient(recipientId), 10);
+        assertEq(_strategy.recipientFlowRate(recipientId), 10);
     }
 
     function test_getRecipient() public {}
