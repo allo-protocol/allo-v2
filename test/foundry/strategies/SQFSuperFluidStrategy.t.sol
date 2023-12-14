@@ -5,14 +5,28 @@ import {SQFSuperFluidStrategy} from "../../../contracts/strategies/_poc/sqf-supe
 import {Native} from "../../../contracts/core/libraries/Native.sol";
 import {Errors} from "../../../contracts/core/libraries/Errors.sol";
 import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
+import {IStrategy} from "../../../contracts/core/interfaces/IStrategy.sol";
 
 // Test libraries
 import {AlloSetup} from "../shared/AlloSetup.sol";
 import {RegistrySetupFullLive} from "../shared/RegistrySetup.sol";
 import {EventSetup} from "../shared/EventSetup.sol";
 
+import {SuperfluidGovernanceII} from "@superfluid-contracts/gov/SuperfluidGovernanceII.sol";
+import {ISuperfluid} from "@superfluid-contracts/interfaces/superfluid/ISuperfluid.sol";
+import {ISuperToken} from "@superfluid-contracts/interfaces/superfluid/ISuperToken.sol";
+
+// import {IERC20} from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
+
 contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, EventSetup, Errors {
+    event Reviewed(address indexed recipientId, IStrategy.Status status, address sender);
+    event Canceled(address indexed recipientId, address sender);
+    event MinPassportScoreUpdated(uint256 minPassportScore, address sender);
+    event Distributed(address indexed sender, int96 flowRate);
+
     SQFSuperFluidStrategy _strategy;
+
+    uint256 poolId;
 
     bool useRegistryAnchor;
     bool metadataRequired;
@@ -26,7 +40,11 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
     uint256 minPassportScore;
     uint256 initialSuperAppBalance;
 
-    address superFakeDai = 0xaC7A5cf2E0A6DB31456572871Ee33eb6212014a9;
+    ISuperToken superFakeDai = ISuperToken(0xaC7A5cf2E0A6DB31456572871Ee33eb6212014a9);
+    address superFakeDaiWhale = 0x301933aEf6bB308f090087e9075ed5bFcBd3e0B3;
+
+    SuperfluidGovernanceII superfluidGov = SuperfluidGovernanceII(0x25382FdC6a862809EeFE918D065339cFA9227b9E);
+    address superfluidOwner = 0xd15D5d0f5b1b56A4daEF75CfE108Cb825E97d015;
 
     function setUp() public {
         vm.createSelectFork({blockNumber: 18_562_300, urlOrAlias: "opgoerli"});
@@ -34,18 +52,30 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
         __AlloSetupLive();
 
         _strategy = __deploy_strategy();
+        // get some super fake dai
+        vm.prank(superFakeDaiWhale);
+        superFakeDai.transfer(address(this), 420 * 1e19);
+        superFakeDai.transfer(address(_strategy), 420 * 1e6);
 
         useRegistryAnchor = true;
         metadataRequired = true;
         passportDecoder = address(1);
         superfluidHost = address(0xE40983C2476032A0915600b9472B3141aA5B5Ba9);
-        allocationSuperToken = address(0xE01F8743677Da897F4e7De9073b57Bf034FC2433); // Super ETH
-        registrationStartTime = uint64(block.timestamp) + 60;
+        allocationSuperToken = address(superFakeDai);
+        registrationStartTime = uint64(block.timestamp);
         registrationEndTime = uint64(block.timestamp) + uint64(1 days);
         allocationStartTime = uint64(block.timestamp) + 120;
         allocationEndTime = uint64(block.timestamp) + uint64(2 days);
         minPassportScore = 69;
         initialSuperAppBalance = 420 * 1e5;
+
+        // set empty app RegistrationKey
+        vm.prank(superfluidOwner);
+        superfluidGov.setAppRegistrationKey(
+            ISuperfluid(superfluidHost), address(_strategy), "", block.timestamp + 60 days
+        );
+
+        poolId = __createPool(address(_strategy));
     }
 
     function test_deployment() public {
@@ -57,9 +87,9 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
     function test_initialize() public {
         SQFSuperFluidStrategy strategy_ = new SQFSuperFluidStrategy(address(allo()), "SQFSuperFluidStrategyv1");
 
-        uint256 poolId = __createPool(address(strategy_));
+        uint256 poolId_ = __createPool(address(strategy_));
 
-        assertEq(strategy_.getPoolId(), poolId);
+        assertEq(strategy_.getPoolId(), poolId_);
         assertEq(strategy_.useRegistryAnchor(), useRegistryAnchor);
         assertEq(strategy_.metadataRequired(), metadataRequired);
         assertEq(address(strategy_.passportDecoder()), passportDecoder);
@@ -71,6 +101,38 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
         assertEq(strategy_.allocationEndTime(), allocationEndTime);
         assertEq(strategy_.minPassportScore(), minPassportScore);
         assertEq(strategy_.initialSuperAppBalance(), initialSuperAppBalance);
+    }
+
+    function test_registerRecipient() public {
+        address recipientId = __register_recipient();
+
+        SQFSuperFluidStrategy.Recipient memory recipient = _strategy.getRecipient(recipientId);
+
+        assertEq(recipient.recipientAddress, profile1_member1());
+        assertEq(uint8(recipient.recipientStatus), uint8(1));
+        assertTrue(recipient.useRegistryAnchor);
+        assertEq(address(recipient.superApp), address(0));
+
+        Metadata memory metadata = recipient.metadata;
+
+        assertEq(metadata.protocol, 1);
+        assertEq(metadata.pointer, "test");
+    }
+
+    function test_reviewRecipient_Approve() internal {
+        address recipientId = __register_approve_recipient();
+
+        SQFSuperFluidStrategy.Recipient memory recipient = _strategy.getRecipient(recipientId);
+
+        // assertEq(recipient.recipientAddress, profile1_member1());
+        // assertEq(uint8(recipient.recipientStatus), uint8(2));
+        // assertTrue(recipient.useRegistryAnchor);
+        // assertEq(address(recipient.superApp), address(0));
+
+        // Metadata memory metadata = recipient.metadata;
+
+        // assertEq(metadata.protocol, 1);
+        // assertEq(metadata.pointer, "test");
     }
 
     function test_getRecipient() public {}
@@ -105,16 +167,44 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
         );
     }
 
-    function __createPool(address strategy) internal returns (uint256 poolId) {
+    function __createPool(address strategy) internal returns (uint256 _poolId) {
         vm.prank(pool_admin());
-        poolId = allo().createPoolWithCustomStrategy(
+        _poolId = allo().createPoolWithCustomStrategy(
             poolProfile_id(),
             strategy,
             __enocdeInitializeParams(),
-            superFakeDai,
+            address(superFakeDai),
             0,
             Metadata(1, "test"),
             pool_managers()
         );
+    }
+
+    function __register_recipient() internal returns (address recipientId) {
+        vm.expectEmit(true, true, true, false);
+        emit Registered(
+            profile1_anchor(),
+            abi.encode(profile1_anchor(), profile1_member1(), Metadata(1, "test")),
+            profile1_member1()
+        );
+
+        vm.prank(profile1_member1());
+        recipientId =
+            allo().registerRecipient(poolId, abi.encode(profile1_anchor(), profile1_member1(), Metadata(1, "test")));
+    }
+
+    function __register_approve_recipient() internal returns (address recipientId) {
+        recipientId = __register_recipient();
+
+        address[] memory recipients = new address[](1);
+        recipients[0] = recipientId;
+
+        IStrategy.Status[] memory statuses = new IStrategy.Status[](1);
+        statuses[0] = IStrategy.Status.Accepted;
+
+        vm.prank(pool_manager1());
+        vm.expectEmit(true, true, true, false);
+        emit Reviewed(recipientId, IStrategy.Status.Accepted, pool_manager1());
+        _strategy.reviewRecipients(recipients, statuses);
     }
 }

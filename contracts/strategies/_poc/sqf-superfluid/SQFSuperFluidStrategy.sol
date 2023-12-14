@@ -327,7 +327,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         override
         onlyPoolManager(_sender)
     {
-        _checkOnlyActiveRegistration();
+        _checkOnlyAfterRegistration();
 
         (int96 flowRate) = abi.decode(_data, (int96));
         poolSuperToken.distributeFlow(_sender, gdaPool, flowRate);
@@ -361,6 +361,8 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
             // update the flow
             allocationSuperToken.updateFlowFrom(_sender, superApp, flowRate);
         }
+
+        emit Allocated(recipientId, uint256(flowRate), address(allocationSuperToken), _sender);
     }
 
     /// @notice This will get the flow rate for a recipient.
