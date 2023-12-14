@@ -96,27 +96,27 @@ contract RecipientSuperApp is ISuperApp {
     function _updateOutflow(bytes calldata ctx) private returns (bytes memory newCtx) {
         newCtx = ctx;
 
-        int96 netFlowRate = _acceptedToken.getNetFlowRate(address(this));
+        int96 netFlowRate = acceptedToken.getNetFlowRate(address(this));
 
-        int96 outFlowRate = _acceptedToken.getFlowRate(address(this), _receiver);
+        int96 outFlowRate = acceptedToken.getFlowRate(address(this), _receiver);
 
         int96 inFlowRate = netFlowRate + outFlowRate;
 
         if (inFlowRate == 0) {
             // The flow does exist and should be deleted.
-            newCtx = _acceptedToken.deleteFlowWithCtx(address(this), _receiver, ctx);
+            newCtx = acceptedToken.deleteFlowWithCtx(address(this), _receiver, ctx);
         } else if (outFlowRate != 0) {
             // The flow does exist and needs to be updated.
-            newCtx = _acceptedToken.updateFlowWithCtx(_receiver, inFlowRate, ctx);
+            newCtx = acceptedToken.updateFlowWithCtx(_receiver, inFlowRate, ctx);
         } else {
             // The flow does not exist but should be created.
-            newCtx = _acceptedToken.createFlowWithCtx(_receiver, inFlowRate, ctx);
+            newCtx = acceptedToken.createFlowWithCtx(_receiver, inFlowRate, ctx);
         }
     }
 
     function _createCbData(bytes calldata _agreementData) internal pure returns (bytes memory) {
-        (address sender,) = abi.decode(agreementData, (address, address));
-        (uint256 lastUpdated, int96 flowRate,,) = superToken.getFlowInfo(sender, address(this));
+        (address sender,) = abi.decode(_agreementData, (address, address));
+        (uint256 lastUpdated, int96 flowRate,,) = acceptedToken.getFlowInfo(sender, address(this));
 
         return abi.encode(flowRate, lastUpdated);
     }

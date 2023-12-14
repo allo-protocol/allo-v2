@@ -322,7 +322,6 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice This will distribute funds (tokens) to recipients.
     /// @dev most strategies will track a TOTAL amount per recipient, and a PAID amount, and pay the difference
     /// this contract will need to track the amount paid already, so that it doesn't double pay.
-    /// @param _recipientIds The ids of the recipients to distribute to
     /// @param _data Data required will depend on the strategy implementation
     /// @param _sender The address of the sender
     function _distribute(address[] memory, bytes memory _data, address _sender)
@@ -369,10 +368,9 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice This will get the flow rate for a recipient.
     /// @dev The encoded '_data' will be determined by the strategy implementation.
     /// @param _recipientId The ID of the recipient
-    /// @param _data The data to use to get the payout summary for the recipient
     /// @return The payout summary for the recipient
     function _getPayout(address _recipientId, bytes memory) internal view override returns (PayoutSummary memory) {
-        return PayoutSummary(_recipients[_recipientId].recipientAddress, uint256(recipientFlowRate[_recipientId]));
+        return PayoutSummary(recipients[_recipientId].recipientAddress, uint256(recipientFlowRate[_recipientId]));
     }
 
     /// @notice Set the start and end dates for the pool
