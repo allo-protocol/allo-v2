@@ -6,7 +6,6 @@ import {ReentrancyGuard} from "openzeppelin-contracts/contracts/security/Reentra
 import {ISuperToken, ISuperfluidPool} from "@superfluid-contracts/interfaces/superfluid/ISuperfluid.sol";
 import {PoolConfig} from "@superfluid-contracts/interfaces/agreements/gdav1/IGeneralDistributionAgreementV1.sol";
 import {SuperTokenV1Library} from "@superfluid-contracts/apps/SuperTokenV1Library.sol";
-import {Score} from "@eas-proxy/IGitcoinPassportDecoder.sol";
 import {GitcoinPassportDecoder} from "@eas-proxy/GitcoinPassportDecoder.sol";
 import {FixedPointMathLib} from "solady/src/utils/FixedPointMathLib.sol";
 
@@ -401,8 +400,8 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _allocator The allocator address
     /// @return 'true' if the allocator is valid, otherwise 'false'
     function _isValidAllocator(address _allocator) internal view override returns (bool) {
-        Score memory allocatorScore = passportDecoder.getScore(_allocator);
-        if (allocatorScore.score >= minPassportScore) {
+        uint256 allocatorScore = passportDecoder.getScore(_allocator);
+        if (allocatorScore >= minPassportScore) {
             return true;
         }
         return false;
