@@ -337,33 +337,6 @@ export const strategyConfig: DeployParams = {
       version: "v1.0",
     },
   },
-  // Arbitrum Goerli
-  421613: {
-    "rfp-simple": {
-      name: "RFPSimpleStrategy",
-      version: "v1.0",
-    },
-    "rfp-committee": {
-      name: "RFPCommitteeStrategy",
-      version: "v1.0",
-    },
-    "qv-simple": {
-      name: "QVSimpleStrategy",
-      version: "v1.0",
-    },
-    "donation-voting-merkle-distribution-direct": {
-      name: "DonationVotingMerkleDistributionDirectTransferStrategy",
-      version: "v1.0",
-    },
-    "donation-voting-merkle-distribution-vault": {
-      name: "DonationVotingMerkleDistributionVaultStrategy",
-      version: "v1.0a",
-    },
-    "qv-impact-stream": {
-      name: "QVImpactStreamStrategy",
-      version: "v1.0",
-    },
-  },
   // Arbitrum Sepolia
   421614: {
     "rfp-simple": {

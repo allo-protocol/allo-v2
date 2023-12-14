@@ -18,7 +18,7 @@
 | Celo            | 42220    |
 | Celo Alfajores  | 44787    |
 | Arbitrum        | 42161    |
-| Arbitrum Goerli | 4216134  |
+| Arbitrum Sepolia| 421614   |
 
 
 

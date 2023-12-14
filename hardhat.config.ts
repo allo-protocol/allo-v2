@@ -27,7 +27,6 @@ const chainIds = {
   "fantom-testnet": 4002,
   "pgn-sepolia": 58008,
   "celo-testnet": 44787,
-  "arbitrum-goerli": 421613,
   "arbitrum-sepolia": 421614,
   "base-testnet": 84531,
   mumbai: 80001,
@@ -186,10 +185,6 @@ const config: HardhatUserConfig = {
       "sepolia",
       `https://eth-sepolia.g.alchemy.com/v2/${alchemyIdKey}`
     ),
-    "arbitrum-goerli": createTestnetConfig(
-      "arbitrum-goerli",
-      `https://arb-goerli.g.alchemy.com/v2/${alchemyIdKey}`
-    ),
     "arbitrum-sepolia": createTestnetConfig(
       "arbitrum-sepolia",
       `https://arb-sepolia.g.alchemy.com/v2/${alchemyIdKey}`
@@ -268,8 +263,6 @@ const config: HardhatUserConfig = {
       // @ts-ignore
       "arbitrum-mainnet": process.env.ARBITRUMSCAN_API_KEY,
       // @ts-ignore
-      "arbitrum-goerli": process.env.ARBITRUMSCAN_API_KEY,
-      // @ts-ignore
       "arbitrum-sepolia": process.env.ARBITRUMSCAN_API_KEY,
     },
     customChains: [
@@ -342,14 +335,6 @@ const config: HardhatUserConfig = {
         chainId: chainIds["arbitrum-mainnet"],
         urls: {
           apiURL: "https://api.arbiscan.io/api",
-          browserURL: "https://arbiscan.io",
-        },
-      },
-      {
-        network: "arbitrum-goerli",
-        chainId: chainIds["arbitrum-goerli"],
-        urls: {
-          apiURL: "https://api-goerli.arbiscan.io/api",
           browserURL: "https://arbiscan.io",
         },
       },

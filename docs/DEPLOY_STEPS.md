@@ -23,7 +23,6 @@ All the deploy scripts will expect network param to know which network the contr
 | `sepolia`          | `11155111`  | Sepolia PoS Testnet |
 | `base-testnet`          | `84531`  | Base Testnet  |
 | `polygon-mumbai`          | `80001`  | Polygon Mumbai Testnet |
-| `arbitrum-goerli` | `421613` | Arbitrum Goerli Testnet |
 | `arbitrum-sepolia`| `421614` | Arbitrum Sepolia Testnet |
 | `celo-alfajores`   | `44787` | Celo Alfajores Testnet   |
 | `optimism-goerli`   | `420` | Optimism Goerli Testnet  |

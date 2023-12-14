@@ -41,6 +41,7 @@ networks=(
 #   "mainnet"
 #   "pgn-sepolia"
 #   "pgn-mainnet"
+   "arbitrum-sepolia"
 )
 
 scripts=(
