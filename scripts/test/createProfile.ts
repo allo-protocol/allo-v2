@@ -1,5 +1,4 @@
 import hre, { ethers } from "hardhat";
-import { registryConfig } from "../config/registry.config";
 
 export async function createProfile() {
 
@@ -13,7 +12,7 @@ export async function createProfile() {
 
     const balance = await ethers.provider.getBalance(deployerAddress);
 
-    const registry = registryConfig[chainId].registryProxy;
+    const registry = "0x4AAcca72145e1dF2aeC137E1f3C5E3D75DB8b5f3";
 
     console.table({
         contract: "registry: create profile",
@@ -34,8 +33,8 @@ export async function createProfile() {
             protocol: 1,
             pointer: "bafybeia4khbew3r2mkflyn7nzlvfzcb3qpfeftz5ivpzfwn77ollj47gqi"
         }, // metadata
-        "0xB8cEF765721A6da910f14Be93e7684e9a3714123", // owner
-        ["0x5cdb35fADB8262A3f88863254c870c2e6A848CcA"] // members
+        "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C", // owner
+        ["0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C"] // members
     );
 
     console.log("profile created at:", instance.target);
