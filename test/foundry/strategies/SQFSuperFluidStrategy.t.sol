@@ -61,7 +61,7 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
         vm.prank(superFakeDaiWhale);
         superFakeDai.transfer(address(this), 420 * 1e19);
         superFakeDai.transfer(address(_strategy), 420 * 1e6);
-        superFakeDai.transfer(randomAddress(), 420 * 1e19);
+        superFakeDai.transfer(randomAddress(), 20 * 1e18);
 
         useRegistryAnchor = true;
         metadataRequired = true;
