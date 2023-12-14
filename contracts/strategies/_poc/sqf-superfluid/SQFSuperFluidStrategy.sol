@@ -458,6 +458,9 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
 
                 // Add recipientAddress as member of the GDA with 1 unit
                 poolSuperToken.updateMemberUnits(gdaPool, recipient.recipientAddress, 1);
+                totalUnitsByRecipient[recipientId] = 1;
+
+                emit TotalUnitsUpdated(recipientId, 1);
 
                 superApps[address(superApp)] = recipientId;
                 recipient.superApp = superApp;
