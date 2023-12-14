@@ -457,10 +457,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
                 allocationSuperToken.transfer(address(superApp), initialSuperAppBalance);
 
                 // Add recipientAddress as member of the GDA with 1 unit
-                poolSuperToken.updateMemberUnits(gdaPool, recipient.recipientAddress, 1);
-                totalUnitsByRecipient[recipientId] = 1;
-
-                emit TotalUnitsUpdated(recipientId, 1);
+                _updateMemberUnits(recipientId, recipient.recipientAddress, 1);
 
                 superApps[address(superApp)] = recipientId;
                 recipient.superApp = superApp;
@@ -502,7 +499,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
             delete recipientFlowRate[recipientId];
 
             // Set recipient units to 0 to stop streaming from GDA
-            poolSuperToken.updateMemberUnits(gdaPool, recipient.recipientAddress, 0);
+            _updateMemberUnits(recipientId, recipient.recipientAddress, 0);
 
             emit Canceled(recipientId, msg.sender);
 
@@ -541,7 +538,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         uint256 recipientTotalUnits = totalUnitsByRecipient[recipientId];
         recipientTotalUnits += unitsAfterAllocation - unitsBeforeAllocation;
 
-        poolSuperToken.updateMemberUnits(gdaPool, recipient.recipientAddress, uint128(recipientTotalUnits));
+        _updateMemberUnits(recipientId, recipient.recipientAddress, uint128(recipientTotalUnits));
 
         recipientAllocatorUnits[recipientId][_allocator] = unitsAfterAllocation;
         totalUnitsByRecipient[recipientId] = recipientTotalUnits;
@@ -694,5 +691,15 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     function _isProfileMember(address _anchor, address _sender) internal view returns (bool) {
         IRegistry.Profile memory profile = _registry.getProfileByAnchor(_anchor);
         return _registry.isOwnerOrMemberOfProfile(profile.id, _sender);
+    }
+
+    /// @notice Update the total units for a recipient
+    /// @param _recipientId ID of the recipient
+    /// @param _recipientAddress Address of the recipient
+    /// @param _units The units
+    function _updateMemberUnits(address _recipientId, address _recipientAddress, uint128 _units) internal {
+        poolSuperToken.updateMemberUnits(gdaPool, _recipientAddress, _units);
+        totalUnitsByRecipient[_recipientId] = _units;
+        emit TotalUnitsUpdated(_recipientId, _units);
     }
 }
