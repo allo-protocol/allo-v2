@@ -27,8 +27,8 @@ export const alloConfig: DeployParams = {
   },
   // Sepolia
   11155111: {
-    owner: "0xD5e7B9A4587a6760a308b9D6E7956a41023d7Bb2",
-    treasury: "0xD5e7B9A4587a6760a308b9D6E7956a41023d7Bb2",
+    owner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
+    treasury: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
     percentFee: 0,
     baseFee: 0,
   },
@@ -99,6 +99,13 @@ export const alloConfig: DeployParams = {
   421613: {
     owner: "0xE64c2171bB7c7412eb2ad3c4c027C499FEf345DC",
     treasury: "0xE64c2171bB7c7412eb2ad3c4c027C499FEf345DC",
+    percentFee: 0,
+    baseFee: 0,
+  },
+  // Arbitrum Sepolia
+  421614: {
+    owner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
+    treasury: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
     percentFee: 0,
     baseFee: 0,
   },

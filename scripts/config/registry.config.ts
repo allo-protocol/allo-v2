@@ -18,7 +18,7 @@ export const registryConfig: DeployParams = {
   },
   // Sepolia
   11155111: {
-    owner: "0xD5e7B9A4587a6760a308b9D6E7956a41023d7Bb2",
+    owner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
   },
   // PGN
   424: {
@@ -59,6 +59,10 @@ export const registryConfig: DeployParams = {
   // Arbitrum Goerli
   421613: {
     owner: "0xE64c2171bB7c7412eb2ad3c4c027C499FEf345DC",
+  },
+  // Arbitrum Sepolia
+  421614: {
+    owner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
   },
   // Base Mainnet
   8453: {

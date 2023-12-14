@@ -18,7 +18,7 @@ export const commonConfig: DeployParams = {
   },
   // Sepolia
   11155111: {
-    proxyAdminOwner: "0xD5e7B9A4587a6760a308b9D6E7956a41023d7Bb2",
+    proxyAdminOwner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
     permit2Address: "0x000000000022d473030f116ddee9f6b43ac78ba3",
   },
   // PGN
@@ -69,6 +69,11 @@ export const commonConfig: DeployParams = {
   // Arbitrum Goerli
   421613: {
     proxyAdminOwner: "0xE64c2171bB7c7412eb2ad3c4c027C499FEf345DC",
+    permit2Address: "0x000000000022d473030f116ddee9f6b43ac78ba3",
+  },
+  // Arbitrum Sepolia
+  421614: {
+    proxyAdminOwner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
     permit2Address: "0x000000000022d473030f116ddee9f6b43ac78ba3",
   },
   // Base Mainnet
