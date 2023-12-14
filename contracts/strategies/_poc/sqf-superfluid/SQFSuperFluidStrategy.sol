@@ -367,7 +367,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
             allocationSuperToken.updateFlowFrom(_sender, superApp, flowRate);
         }
 
-        emit Allocated(recipientId, uint256(flowRate), address(allocationSuperToken), _sender);
+        emit Allocated(recipientId, uint256(int256(flowRate)), address(allocationSuperToken), _sender);
     }
 
     /// @notice This will get the flow rate for a recipient.
