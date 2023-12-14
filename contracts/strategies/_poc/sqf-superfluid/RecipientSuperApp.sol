@@ -34,10 +34,12 @@ contract RecipientSuperApp is ISuperApp {
     /// @dev Thrown when SuperTokens not accepted by the SuperApp are streamed to it
     error NotAcceptedSuperToken();
 
+    address public recipient;
     SQFSuperFluidStrategy public immutable strategy;
     ISuperToken public immutable acceptedToken;
 
     constructor(
+        address _recipient,
         address _strategy,
         address _host,
         ISuperToken _acceptedToken,
@@ -56,11 +58,13 @@ contract RecipientSuperApp is ISuperApp {
         }
 
         if (!_activateOnUpdated) {
-            callBackDefinitions |= SuperAppDefinitions.AFTER_AGREEMENT_UPDATED_NOOP;
+            callBackDefinitions |=
+                SuperAppDefinitions.BEFORE_AGREEMENT_UPDATED_NOOP | SuperAppDefinitions.AFTER_AGREEMENT_UPDATED_NOOP;
         }
 
         if (!_activateOnDeleted) {
-            callBackDefinitions |= SuperAppDefinitions.AFTER_AGREEMENT_TERMINATED_NOOP;
+            callBackDefinitions |= SuperAppDefinitions.BEFORE_AGREEMENT_TERMINATED_NOOP
+                | SuperAppDefinitions.AFTER_AGREEMENT_TERMINATED_NOOP;
         }
 
         HOST.registerAppWithKey(callBackDefinitions, _registrationKey);
@@ -70,6 +74,7 @@ contract RecipientSuperApp is ISuperApp {
         }
         strategy = SQFSuperFluidStrategy(_strategy);
         acceptedToken = _acceptedToken;
+        recipient = _recipient;
     }
 
     /// @dev Accepts all super tokens
@@ -83,11 +88,11 @@ contract RecipientSuperApp is ISuperApp {
         internal
         returns (bytes memory)
     {
-        strategy.adjustWeightings(previousFlowRate, newFlowRate, sender);
+        strategy.adjustWeightings(uint256(int256(previousFlowRate)), uint256(int256(newFlowRate)), sender);
         return _updateOutflow(ctx);
     }
 
-    function _checkHookParam(address _agreementClass, ISuperToken _superToken) internal view {
+    function _checkHookParam(ISuperToken _superToken) internal view {
         if (msg.sender != address(HOST)) revert UnauthorizedHost();
         if (!isAcceptedSuperToken(_superToken)) revert NotAcceptedSuperToken();
     }
@@ -98,23 +103,23 @@ contract RecipientSuperApp is ISuperApp {
 
         int96 netFlowRate = acceptedToken.getNetFlowRate(address(this));
 
-        int96 outFlowRate = acceptedToken.getFlowRate(address(this), _receiver);
+        int96 outFlowRate = acceptedToken.getFlowRate(address(this), recipient);
 
         int96 inFlowRate = netFlowRate + outFlowRate;
 
         if (inFlowRate == 0) {
             // The flow does exist and should be deleted.
-            newCtx = acceptedToken.deleteFlowWithCtx(address(this), _receiver, ctx);
+            newCtx = acceptedToken.deleteFlowWithCtx(address(this), recipient, ctx);
         } else if (outFlowRate != 0) {
             // The flow does exist and needs to be updated.
-            newCtx = acceptedToken.updateFlowWithCtx(_receiver, inFlowRate, ctx);
+            newCtx = acceptedToken.updateFlowWithCtx(recipient, inFlowRate, ctx);
         } else {
             // The flow does not exist but should be created.
-            newCtx = acceptedToken.createFlowWithCtx(_receiver, inFlowRate, ctx);
+            newCtx = acceptedToken.createFlowWithCtx(recipient, inFlowRate, ctx);
         }
     }
 
-    function _createCbData(bytes calldata _agreementData) internal pure returns (bytes memory) {
+    function _createCbData(bytes calldata _agreementData) internal view returns (bytes memory) {
         (address sender,) = abi.decode(_agreementData, (address, address));
         (uint256 lastUpdated, int96 flowRate,,) = acceptedToken.getFlowInfo(sender, address(this));
 
@@ -143,7 +148,8 @@ contract RecipientSuperApp is ISuperApp {
         bytes calldata, /*cbdata*/
         bytes calldata ctx
     ) external override returns (bytes memory newCtx) {
-        _checkHookParam(agreementClass, superToken);
+        _checkHookParam(superToken);
+        if (!isAcceptedAgreement(agreementClass)) return ctx;
 
         (address sender,) = abi.decode(agreementData, (address, address));
         (, int96 flowRate,,) = superToken.getFlowInfo(sender, address(this));
@@ -166,8 +172,8 @@ contract RecipientSuperApp is ISuperApp {
         bytes32, /*agreementId*/
         bytes calldata agreementData,
         bytes calldata /*ctx*/
-    ) external pure override returns (bytes memory /*beforeData*/ ) {
-        _checkHookParam(agreementClass, superToken);
+    ) external view override returns (bytes memory /*beforeData*/ ) {
+        _checkHookParam(superToken);
         if (!isAcceptedAgreement(agreementClass)) return "0x";
 
         return _createCbData(agreementData);
@@ -181,7 +187,8 @@ contract RecipientSuperApp is ISuperApp {
         bytes calldata cbdata,
         bytes calldata ctx
     ) external override returns (bytes memory) {
-        _checkHookParam(agreementClass, superToken);
+        _checkHookParam(superToken);
+        if (!isAcceptedAgreement(agreementClass)) return ctx;
 
         (address sender,) = abi.decode(agreementData, (address, address));
         (int96 previousFlowRate,) = abi.decode(cbdata, (int96, uint256));
@@ -205,7 +212,7 @@ contract RecipientSuperApp is ISuperApp {
         bytes32, /*agreementId*/
         bytes calldata agreementData,
         bytes calldata /*ctx*/
-    ) external pure override returns (bytes memory /*beforeData*/ ) {
+    ) external view override returns (bytes memory /*beforeData*/ ) {
         if (msg.sender != address(HOST) || !isAcceptedAgreement(agreementClass) || !isAcceptedSuperToken(superToken)) {
             return "0x";
         }

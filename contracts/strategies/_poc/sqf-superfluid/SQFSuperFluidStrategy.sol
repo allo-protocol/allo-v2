@@ -93,7 +93,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     // @notice Emitted when distribute is called
     // @param sender The sender of the transaction
     // @param flowRate The flow rate
-    event Distributed(address indexed sender, uint256 flowRate);
+    event Distributed(address indexed sender, int96 flowRate);
 
     /// ================================
     /// ========== Storage =============
@@ -151,7 +151,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice stores the flow rate for each recipient
     /// @dev recipientId => flowRate
-    mapping(address => int96) public recipientFlowRate;
+    mapping(address => uint256) public recipientFlowRate;
 
     /// ================================
     /// ========== Modifier ============
@@ -215,14 +215,14 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         _registry = allo.getRegistry();
 
         if (
-            params.superfluidHost == address(0) || params.acceptedSuperToen == address(0)
+            params.superfluidHost == address(0) || params.allocationSuperToken == address(0)
                 || params.superfluidHost == address(0) || params.passportDecoder == address(0)
         ) revert ZERO_ADDRESS();
 
         if (params.initialSuperAppBalance == 0) revert INVALID();
 
         allocationSuperToken = ISuperToken(params.allocationSuperToken);
-        poolSuperToken = allo.getPool(poolId).token;
+        poolSuperToken = ISuperToken(allo.getPool(poolId).token);
         allocationSuperToken.getUnderlyingToken();
 
         initialSuperAppBalance = params.initialSuperAppBalance;
@@ -275,10 +275,8 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
 
         // decode data custom to this strategy
         if (registryGating) {
-            (recipientId, metadata) = abi.decode(_data, (address, Metadata));
+            (recipientId, recipientAddress, metadata) = abi.decode(_data, (address, address, Metadata));
 
-            // The profile’s anchor address should be used to receive funds
-            recipientAddress = recipientId;
             // when registry gating is enabled, the recipientId must be a profile member
             if (!_isProfileMember(recipientId, _sender)) revert UNAUTHORIZED();
         } else {
@@ -331,8 +329,8 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     {
         _checkOnlyActiveRegistration();
 
-        (uint256 flowRate) = abi.decode(_data, (uint256));
-        poolSuperToken.distributeFlow(_sender, gdaPool, flowRate, "0x");
+        (int96 flowRate) = abi.decode(_data, (int96));
+        poolSuperToken.distributeFlow(_sender, gdaPool, flowRate);
 
         emit Distributed(_sender, flowRate);
     }
@@ -439,8 +437,10 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
 
             if (recipientStatus == Status.Accepted) {
                 RecipientSuperApp superApp = new RecipientSuperApp(
+                    recipient.recipientAddress,
                     address(this),
                     superfluidHost,
+                    allocationSuperToken,
                     true,
                     true,
                     true,
@@ -492,7 +492,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
             delete recipientFlowRate[recipientId];
 
             // Set recipient units to 0 to stop streaming from GDA
-            poolSuperToken.updateMemberUnits(gdaPool, recipientId, 0);
+            poolSuperToken.updateMemberUnits(gdaPool, recipient.recipientAddress, 0);
 
             emit Canceled(recipientId, msg.sender);
 
@@ -507,7 +507,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _previousFlowrate The previous flow rate
     /// @param _newFlowRate The new flow rate
     /// @param _allocator The allocator address
-    function adjustWeightings(int96 _previousFlowrate, int96 _newFlowRate, address _allocator) external virtual {
+    function adjustWeightings(uint256 _previousFlowrate, uint256 _newFlowRate, address _allocator) external virtual {
         address recipientId = superApps[msg.sender];
 
         if (recipientId == address(0)) revert UNAUTHORIZED();
@@ -523,14 +523,15 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
             unitsAfterAllocation = 0;
         } else {
             // updated a flow
-            unitsAfterAllocation =
-                (unitsBeforeAllocation.sqrt() + uint256(_newFlowRate).sqrt() - uint256(_previousFlowrate).sqrt()).pow(2);
+            unitsAfterAllocation = (unitsBeforeAllocation.sqrt() + _newFlowRate.sqrt() - _previousFlowrate.sqrt()) ** 2;
         }
+
+        Recipient storage recipient = recipients[recipientId];
 
         uint256 recipientTotalUnits = totalUnitsByRecipient[recipientId];
         recipientTotalUnits += unitsAfterAllocation - unitsBeforeAllocation;
 
-        poolSuperToken.updateMemberUnits(gdaPool, recipientId, recipientTotalUnits);
+        poolSuperToken.updateMemberUnits(gdaPool, recipient.recipientAddress, uint128(recipientTotalUnits));
 
         recipientAllocatorUnits[recipientId][_allocator] = unitsAfterAllocation;
         totalUnitsByRecipient[recipientId] = recipientTotalUnits;
