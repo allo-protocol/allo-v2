@@ -37,7 +37,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Stores the details needed for initializing strategy
     struct InitializeParams {
-        bool registryGating;
+        bool useRegistryAnchor;
         bool metadataRequired;
         address passportDecoder;
         address superfluidHost;
@@ -125,7 +125,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     uint64 public allocationEndTime;
 
     /// @notice Whether or not the strategy is using registry gating
-    bool public registryGating;
+    bool public useRegistryAnchor;
 
     /// @notice Whether or not the strategy requires metadata
     bool public metadataRequired;
@@ -208,7 +208,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         // Initialize the BaseStrategy with the '_poolId'
         __BaseStrategy_init(_poolId);
 
-        registryGating = params.registryGating;
+        useRegistryAnchor = params.useRegistryAnchor;
         metadataRequired = params.metadataRequired;
         superfluidHost = params.superfluidHost;
         minPassportScore = params.minPassportScore;
@@ -255,8 +255,8 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Register Recipient to the pool
     /// @dev The '_data' parameter is encoded as follows:
-    ///     - If registryGating is true, then the data is encoded as (address recipientId, Metadata metadata)
-    ///     - If registryGating is false, then the data is encoded as (address recipientAddress, address registryAnchor, Metadata metadata)
+    ///     - If useRegistryAnchor is true, then the data is encoded as (address recipientId, Metadata metadata)
+    ///     - If useRegistryAnchor is false, then the data is encoded as (address recipientAddress, address registryAnchor, Metadata metadata)
     /// @param _data The data to be decoded
     /// @param _sender The sender of the transaction
     /// @return recipientId The ID of the recipient
@@ -274,7 +274,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         Metadata memory metadata;
 
         // decode data custom to this strategy
-        if (registryGating) {
+        if (useRegistryAnchor) {
             (recipientId, recipientAddress, metadata) = abi.decode(_data, (address, address, Metadata));
 
             // when registry gating is enabled, the recipientId must be a profile member
@@ -301,7 +301,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         // update the recipients data
         recipient.recipientAddress = recipientAddress;
         recipient.metadata = metadata;
-        recipient.useRegistryAnchor = registryGating ? true : isUsingRegistryAnchor;
+        recipient.useRegistryAnchor = useRegistryAnchor ? true : isUsingRegistryAnchor;
 
         Status currentStatus = recipient.recipientStatus;
 

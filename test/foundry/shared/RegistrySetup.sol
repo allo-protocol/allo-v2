@@ -36,7 +36,10 @@ contract RegistrySetupFull is RegistrySetup {
 
     function __RegistrySetupFull() internal {
         __RegistrySetup();
+        _createProfiles();
+    }
 
+    function _createProfiles() internal {
         vm.prank(pool_admin());
         _poolProfileId_ = _registry_.createProfile(
             0, "Pool Profile 1", Metadata({protocol: 1, pointer: "PoolProfile1"}), pool_admin(), pool_managers()
@@ -80,5 +83,12 @@ contract RegistrySetupFull is RegistrySetup {
     // Use ths anchor with Accounts.profile2_member1 or Accounts.profile2_member2
     function profile2_anchor() public view virtual returns (address) {
         return _profile2Anchor_;
+    }
+}
+
+contract RegistrySetupFullLive is RegistrySetupFull {
+    function __RegistrySetupFullLive() internal {
+        _registry_ = Registry(0x4AAcca72145e1dF2aeC137E1f3C5E3D75DB8b5f3);
+        _createProfiles();
     }
 }
