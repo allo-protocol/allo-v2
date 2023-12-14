@@ -6,6 +6,12 @@
 git clone https://github.com/allo-protocol/allo-v2
 ```
 
+### Install bun
+
+```bash
+npm install -g bun
+```
+
 ### Install Dependencies
 
 ```bash
@@ -13,20 +19,11 @@ git clone https://github.com/allo-protocol/allo-v2
 forge install
 
 # Install JS dependencies
-bun run install
+bun install
 ```
 
 > Make sure you have foundry installed globally. [Get it here](https://book.getfoundry.sh/getting-started/installation).
 
-### Update Foundry and Install Libs
-
-```bash
-# Update foundry, globally
-foundryup
-
-# Update dependencies managed by forge
-forge update
-```
 
 ### Compile
 
@@ -34,14 +31,14 @@ forge update
 bun run compile
 ```
 
+### Test
+
+```bash
+bun run test 
+```
+
 ### Format
 
 ```bash
 bun run fmt
-```
-
-### Storage Check
-
-```bash
-bun run storage-check
 ```
