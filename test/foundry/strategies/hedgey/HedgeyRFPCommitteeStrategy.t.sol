@@ -269,7 +269,6 @@ contract HedgeyRFPCommitteeStrategyTest is Test, RegistrySetupFull, AlloSetup, H
     }
 
     function test_withdraw() public {
-
         allo().fundPool(poolId, 1e18);
         vm.startPrank(pool_admin());
         strategy.setPoolActive(false);

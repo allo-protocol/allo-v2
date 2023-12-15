@@ -15,7 +15,7 @@ contract HedgeySetup is Test, Accounts {
     function __HedgeySetup() internal {
         vm.startPrank(allo_owner());
 
-        _vesting_ = new TokenVestingPlans('TokenVestingPlans', 'TVP');
+        _vesting_ = new TokenVestingPlans("TokenVestingPlans", "TVP");
         _batchPlanner_ = new BatchPlanner();
 
         vm.stopPrank();

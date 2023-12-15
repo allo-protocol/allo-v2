@@ -103,7 +103,7 @@ contract HedgeyRFPCommitteeStrategy is RFPCommitteeStrategy {
     /// @notice Withdraw the tokens from the pool
     /// @dev Callable by the pool manager
     /// @param _token The token to withdraw
-    function withdraw(address _token) override external virtual onlyPoolManager(msg.sender) onlyInactivePool {
+    function withdraw(address _token) external virtual override onlyPoolManager(msg.sender) onlyInactivePool {
         uint256 amount = _getBalance(_token, address(this));
 
         // Transfer the tokens to the 'msg.sender' (pool manager calling function)
