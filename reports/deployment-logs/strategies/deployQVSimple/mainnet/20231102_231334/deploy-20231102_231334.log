@@ -1,0 +1,33 @@
+WARNING: You are currently using Node.js v21.1.0, which is not supported by Hardhat. This can lead to unexpected behavior. See https://hardhat.org/nodejs-versions
+
+
+
+    ////////////////////////////////////////////////////
+      Deploys QVSimpleStrategy.sol on mainnet
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────┐
+│     (index)     │                    Values                    │
+├─────────────────┼──────────────────────────────────────────────┤
+│    contract     │            'QVSimpleStrategy.sol'            │
+│     chainId     │                      1                       │
+│     network     │                  'mainnet'                   │
+│ deployerAddress │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│     balance     │            '0.874889199274436607'            │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying QVSimpleStrategy.sol
+[35mContract QVSimpleStrategy deployed at address: 0xA9e9110fe3B4B169b2CA0e8825C7CE76EB0b9438[0m
+
+Verifying contract...
+Successfully submitted source code for contract
+contracts/strategies/qv-simple/QVSimpleStrategy.sol:QVSimpleStrategy at 0xA9e9110fe3B4B169b2CA0e8825C7CE76EB0b9438
+for verification on the block explorer. Waiting for verification result...
+
+Successfully verified contract QVSimpleStrategy on the block explorer.
+https://etherscan.io/address/0xA9e9110fe3B4B169b2CA0e8825C7CE76EB0b9438#code
+[90m
+	Validating getAllo() == 0x1133eA7Af70876e64665ecD07C0A0476d09465a1[0m
+[32m	✅ PASSED with Result: 0x1133eA7Af70876e64665ecD07C0A0476d09465a1[0m
+[90m
+	Validating getStrategyId() == 0x22d006e191d6dc5ff1a25bb0733f47f64a9c34860b6703df88dea7cb3987b4c3[0m
+[32m	✅ PASSED with Result: 0x22d006e191d6dc5ff1a25bb0733f47f64a9c34860b6703df88dea7cb3987b4c3[0m

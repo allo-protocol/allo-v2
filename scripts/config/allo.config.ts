@@ -1,118 +1,118 @@
 // NOTE: Update this file anytime a new allo is deployed.
 
 type AlloConfig = {
-	alloImplementation: string;
-	alloProxy: string,
-	treasury: string;
-	percentFee: number;
-	baseFee: number;
+  owner: string;
+  treasury: string;
+  percentFee: number;
+  baseFee: number;
 };
 
 type DeployParams = Record<number, AlloConfig>;
 
-// NOTE: This will be the owner address for each registy on each network.
+// NOTE: This will be the owner address for each registry on each network.
 export const alloConfig: DeployParams = {
   // Mainnet
   1: {
-    alloImplementation: "0x0",
-    alloProxy: "0x0",
-    treasury: "0x0",
+    owner: "0x34d82D1ED8B4fB6e6A569d6D086A39f9f734107E",
+    treasury: "0x34d82D1ED8B4fB6e6A569d6D086A39f9f734107E",
     percentFee: 0,
     baseFee: 0,
   },
   // Goerli
   5: {
-    alloImplementation: "0x8dde1922d5f772890f169714faceef9551791caf",
-    alloProxy: "0x79536CC062EE8FAFA7A19a5fa07783BD7F792206",
-    treasury: "0xBa0BBfB320486119f97Ea9C4671dE5e45441B2b7",
+    owner: "0x91AE7C39D43fbEA2E564E5128ac0469200e50da1",
+    treasury: "0x91AE7C39D43fbEA2E564E5128ac0469200e50da1",
     percentFee: 0,
     baseFee: 0,
   },
   // Sepolia
   11155111: {
-    alloImplementation: "0x8dde1922d5f772890f169714faceef9551791caf",
-    alloProxy: "0x79536CC062EE8FAFA7A19a5fa07783BD7F792206",
-    treasury: "0xBa0BBfB320486119f97Ea9C4671dE5e45441B2b7",
+    owner: "0xD5e7B9A4587a6760a308b9D6E7956a41023d7Bb2",
+    treasury: "0xD5e7B9A4587a6760a308b9D6E7956a41023d7Bb2",
     percentFee: 0,
     baseFee: 0,
   },
   // PGN
   424: {
-    alloImplementation: "0x0",
-    alloProxy: "0x0",
-    treasury: "0x0",
+    owner: "",
+    treasury: "",
     percentFee: 0,
     baseFee: 0,
   },
   // PGN Sepolia
   58008: {
-    alloImplementation: "0x8dde1922d5f772890f169714faceef9551791caf",
-    alloProxy: "0x79536CC062EE8FAFA7A19a5fa07783BD7F792206",
-    treasury: "0xBa0BBfB320486119f97Ea9C4671dE5e45441B2b7",
+    owner: "",
+    treasury: "",
     percentFee: 0,
     baseFee: 0,
   },
   // Optimism
   10: {
-    alloImplementation: "0x0",
-    alloProxy: "0x0",
-    treasury: "0x0",
+    owner: "0x791BB7b7e16982BDa029893077EEb4F77A2CD564",
+    treasury: "0x791BB7b7e16982BDa029893077EEb4F77A2CD564",
     percentFee: 0,
     baseFee: 0,
   },
   // Optimism Goerli
   420: {
-    alloImplementation: "0x8dde1922d5f772890f169714faceef9551791caf",
-    alloProxy: "0x79536CC062EE8FAFA7A19a5fa07783BD7F792206",
-    treasury: "0xBa0BBfB320486119f97Ea9C4671dE5e45441B2b7",
-    percentFee: 0,
-    baseFee: 0,
-  },
-  // Fantom
-  250: {
-    alloImplementation: "0x0",
-    alloProxy: "0x0",
-    treasury: "0x0",
-    percentFee: 0,
-    baseFee: 0,
-  },
-  // Fantom Testnet
-  4002: {
-    alloImplementation: "0x0",
-    alloProxy: "0x0",
-    treasury: "0xBa0BBfB320486119f97Ea9C4671dE5e45441B2b7",
+    owner: "0x2709Ec5Fbe9Ed9b985Bd9F2C9587E09A8Fa8af33",
+    treasury: "0x2709Ec5Fbe9Ed9b985Bd9F2C9587E09A8Fa8af33",
     percentFee: 0,
     baseFee: 0,
   },
   // Celo Mainnet
   42220: {
-    alloImplementation: "0x0",
-    alloProxy: "0x0",
-    treasury: "0X0",
+    owner: "0x8AA4514A31A69e3cba946F8f29899Bc189b01f2C",
+    treasury: "0x8AA4514A31A69e3cba946F8f29899Bc189b01f2C",
     percentFee: 0,
     baseFee: 0,
   },
   // Celo Testnet Alfajores
   44787: {
-    alloImplementation: "0x8dde1922d5f772890f169714faceef9551791caf",
-    alloProxy: "0x79536CC062EE8FAFA7A19a5fa07783BD7F792206",
-    treasury: "0xBa0BBfB320486119f97Ea9C4671dE5e45441B2b7",
+    owner: "0x0C08E6cA059907769a42F95274f0b2b9D96fA4D2",
+    treasury: "0x0C08E6cA059907769a42F95274f0b2b9D96fA4D2",
     percentFee: 0,
     baseFee: 0,
   },
-  // ZkSync Era Mainnet
-  324: {
-    alloImplementation: "0x0",
-    alloProxy: "0x0",
-    treasury: "0X0",
+  // Polygon Mainnet
+  137: {
+    owner: "0xc8c4F1b9980B583E3428F183BA44c65D78C15251",
+    treasury: "0xc8c4F1b9980B583E3428F183BA44c65D78C15251",
     percentFee: 0,
     baseFee: 0,
   },
-  // ZkSync Era Testnet
-  280: {
-    alloImplementation: "0x0",
-    alloProxy: "0x0",
-    treasury: "0xBa0BBfB320486119f97Ea9C4671dE5e45441B2b7",
+  // Mumbai
+  80001: {
+    owner: "0x00F06079089ca6F56D64682b8F3D4C6b067b612C",
+    treasury: "0x00F06079089ca6F56D64682b8F3D4C6b067b612C",
+    percentFee: 0,
+    baseFee: 0,
+  },
+  // Arbitrum One
+  42161: {
+    owner: "0xEfEAB1ea32A5d7c6B1DE6192ee531A2eF51198D9",
+    treasury: "0xEfEAB1ea32A5d7c6B1DE6192ee531A2eF51198D9",
+    percentFee: 0,
+    baseFee: 0,
+  },
+  // Arbitrum Goerli
+  421613: {
+    owner: "0xE64c2171bB7c7412eb2ad3c4c027C499FEf345DC",
+    treasury: "0xE64c2171bB7c7412eb2ad3c4c027C499FEf345DC",
+    percentFee: 0,
+    baseFee: 0,
+  },
+  // Base Mainnet
+  8453: {
+    owner: "0x850a5515123f49c298DdF33E581cA01bFF928FEf",
+    treasury: "0x850a5515123f49c298DdF33E581cA01bFF928FEf",
+    percentFee: 0,
+    baseFee: 0,
+  },
+  // Base Testnet Goerli
+  84531: {
+    owner: "0xB145b7742A5a082C4f334981247E148dB9dF0cb3",
+    treasury: "0xB145b7742A5a082C4f334981247E148dB9dF0cb3",
     percentFee: 0,
     baseFee: 0,
   },

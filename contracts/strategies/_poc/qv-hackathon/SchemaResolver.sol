@@ -7,6 +7,7 @@ pragma solidity 0.8.19;
 //  - updated import paths
 //  - updated _eas to make it mutable
 //  - replaced constructor  __SchemaResolver_init()
+//  - commented out receive() function
 // Reason for change:
 //  - wanted it to set when HackathonQVStrategy.initialize() is invoked
 import {IEAS, Attestation} from "eas-contracts/IEAS.sol";
@@ -59,11 +60,12 @@ abstract contract SchemaResolver is ISchemaResolver {
     /**
      * @dev ETH callback.
      */
-    receive() external payable virtual {
-        if (!isPayable()) {
-            revert NotPayable();
-        }
-    }
+    // TODO: Revisit this logic
+    // receive() external payable virtual {
+    //     if (!isPayable()) {
+    //         revert NotPayable();
+    //     }
+    // }
 
     /**
      * @inheritdoc ISchemaResolver

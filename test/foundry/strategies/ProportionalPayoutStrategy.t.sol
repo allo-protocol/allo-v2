@@ -11,6 +11,8 @@ import {ProportionalPayoutStrategy} from
 // Internal Libraries
 import {Errors} from "../../../contracts/core/libraries/Errors.sol";
 import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
+import {Native} from "../../../contracts/core/libraries/Native.sol";
+
 // Test Libraries
 import {Accounts} from "../shared/Accounts.sol";
 import {RegistrySetupFull} from "../shared/RegistrySetup.sol";
@@ -19,7 +21,7 @@ import {EventSetup} from "../shared/EventSetup.sol";
 // Mocks
 import {MockERC721} from "../../utils/MockERC721.sol";
 
-contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, AlloSetup, EventSetup, Errors {
+contract ProportionalPayoutStrategyTest is Test, Native, Accounts, RegistrySetupFull, AlloSetup, EventSetup, Errors {
     event AllocationTimeSet(uint256 startTime, uint256 endTime);
 
     /// @notice The maximum number of recipients allowed
@@ -81,7 +83,7 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
             poolProfile_id(),
             address(strategy),
             abi.encode(address(nft), 2, startTime, endTime),
-            address(0),
+            NATIVE,
             0,
             poolMetadata,
             pool_managers()
@@ -453,9 +455,6 @@ contract ProportionalPayoutStrategyTest is Test, Accounts, RegistrySetupFull, Al
     }
 
     function __createTestStrategy() internal returns (ProportionalPayoutStrategy testStrategy) {
-        testStrategy = new ProportionalPayoutStrategy(
-            address(allo()),
-            "ProportionalPayoutStrategy"
-        );
+        testStrategy = new ProportionalPayoutStrategy(address(allo()), "ProportionalPayoutStrategy");
     }
 }

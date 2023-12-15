@@ -34,14 +34,8 @@ contract DonationVotingCustomRegistryStrategyTest is Test, DonationVotingStrateg
 
         poolMetadata = Metadata({protocol: 1, pointer: "PoolMetadata"});
 
-        address payable _strategy = payable(
-            address(
-                new DonationVotingCustomRegistryStrategy(
-                address(allo()),
-                "DonationVotingStrategy"
-                )
-            )
-        );
+        address payable _strategy =
+            payable(address(new DonationVotingCustomRegistryStrategy(address(allo()), "DonationVotingStrategy")));
         strategy = DonationVotingStrategy(_strategy);
 
         allowedTokens = new address[](1);
@@ -213,14 +207,8 @@ contract DonationVotingCustomRegistryStrategyTest is Test, DonationVotingStrateg
         allowedTokens = new address[](1);
         allowedTokens[0] = makeAddr("token");
 
-        address payable _strategy = payable(
-            address(
-                new DonationVotingCustomRegistryStrategy(
-                address(allo()),
-                "DonationVotingStrategy"
-                )
-            )
-        );
+        address payable _strategy =
+            payable(address(new DonationVotingCustomRegistryStrategy(address(allo()), "DonationVotingStrategy")));
         strategy = DonationVotingStrategy(_strategy);
 
         vm.prank(address(allo()));

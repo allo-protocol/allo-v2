@@ -15,6 +15,7 @@ contract AlloSetup is Test, Accounts {
         _allo_ = new Allo();
 
         _allo_.initialize(
+            allo_owner(), // _owner
             _registry, // _registry
             allo_treasury(), // _treasury
             1e16, // _percentFee

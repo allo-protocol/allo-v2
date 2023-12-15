@@ -1,0 +1,35 @@
+WARNING: You are currently using Node.js v21.1.0, which is not supported by Hardhat. This can lead to unexpected behavior. See https://hardhat.org/nodejs-versions
+
+
+
+    ////////////////////////////////////////////////////
+        Deploys ContractFactory.sol on celo-mainnet
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────┐
+│     (index)     │                    Values                    │
+├─────────────────┼──────────────────────────────────────────────┤
+│    contract     │         'Deploy ContractFactory.sol'         │
+│     chainId     │                    42220                     │
+│     network     │                'celo-mainnet'                │
+│ deployerAddress │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│     balance     │                 '4.76348126'                 │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying ContractFactory.sol...
+ContractFactory deployed to: 0xE195743480D1591B79106FF9B296A0cD38aDa807
+
+Verifying contract...
+HardhatVerifyError: Invalid API URL endpoint, use https://api.celoscan.io
+    at Etherscan.verify (/home/kurt/git/allo/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/internal/etherscan.ts:173:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async SimpleTaskDefinition.action (/home/kurt/git/allo/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/index.ts:471:33)
+    at async Environment._runTaskDefinition (/home/kurt/git/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:358:14)
+    at async Environment.run (/home/kurt/git/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:191:14)
+    at async SimpleTaskDefinition.action (/home/kurt/git/allo/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/index.ts:298:9)
+    at async Environment._runTaskDefinition (/home/kurt/git/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:358:14)
+    at async hardhatVerify (/home/kurt/git/allo/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/verify-proxy.ts:118:12)
+    at async OverriddenTaskDefinition._action (/home/kurt/git/allo/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/index.ts:198:12)
+    at async Environment._runTaskDefinition (/home/kurt/git/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:358:14)
+[90m
+	Validating isDeployer(0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C) == true[0m
+[32m	✅ PASSED with Result: true[0m

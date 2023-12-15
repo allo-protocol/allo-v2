@@ -1,0 +1,26 @@
+WARNING: You are currently using Node.js v21.1.0, which is not supported by Hardhat. This can lead to unexpected behavior. See https://hardhat.org/nodejs-versions
+
+
+Current Proxy Admin Owner:  0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C
+
+        ////////////////////////////////////////////////////
+            TransferProxyAdminOwnership on arbitrum-goerli
+        ////////////////////////////////////////////////////
+      
+┌────────────────────┬──────────────────────────────────────────────┐
+│      (index)       │                    Values                    │
+├────────────────────┼──────────────────────────────────────────────┤
+│      contract      │        'TransferProxyAdminOwnership'         │
+│      chainId       │                    421613                    │
+│      network       │              'arbitrum-goerli'               │
+│        allo        │ '0x1133eA7Af70876e64665ecD07C0A0476d09465a1' │
+│      registry      │ '0x4AAcca72145e1dF2aeC137E1f3C5E3D75DB8b5f3' │
+│     proxyAdmin     │ '0x758b87af7fdB4783f848a1dDEa1F025dC48B9858' │
+│  deployerAddress   │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│ newProxyAdminOwner │ '0xE64c2171bB7c7412eb2ad3c4c027C499FEf345DC' │
+│      balance       │                '1.9953263626'                │
+└────────────────────┴──────────────────────────────────────────────┘
+Transfering ProxyAdminOwnership...
+✔ 0x4AAcca72145e1dF2aeC137E1f3C5E3D75DB8b5f3 (transparent) proxy ownership transfered through admin proxy
+✔ 0x1133eA7Af70876e64665ecD07C0A0476d09465a1 (transparent) proxy ownership transfered through admin proxy
+Proxy Admin Owner Transferred to:  0xE64c2171bB7c7412eb2ad3c4c027C499FEf345DC

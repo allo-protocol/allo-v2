@@ -48,7 +48,7 @@ flowchart
 <tbody>
   <tr>
     <td>Registry.sol</td>
-    <td>Registry of profile which offers profile management</td>
+    <td>Registry of profiles which offers profile management</td>
   </tr>
   <tr>
     <td>Anchor.sol</td>

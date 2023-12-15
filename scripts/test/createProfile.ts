@@ -1,6 +1,5 @@
 import hre, { ethers } from "hardhat";
 import { registryConfig } from "../config/registry.config";
-import { confirmContinue, prettyNum } from "../utils/scripts";
 
 export async function createProfile() {
 
@@ -16,13 +15,13 @@ export async function createProfile() {
 
     const registry = registryConfig[chainId].registryProxy;
 
-    await confirmContinue({
+    console.table({
         contract: "registry: create profile",
         chainId: chainId,
         network: networkName,
         deployerAddress: deployerAddress,
         registry: registry,
-        balance: prettyNum(balance.toString())
+        balance: ethers.formatEther(balance)
     });
 
     console.log("Creating profile...");

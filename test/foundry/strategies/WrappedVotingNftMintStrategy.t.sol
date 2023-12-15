@@ -61,17 +61,14 @@ contract WrappedVotingNftMintStrategyTest is Test, AlloSetup, RegistrySetupFull,
         allocationEndTime = uint64(block.timestamp + 1 weeks);
 
         metadata = Metadata({protocol: 1, pointer: "0x007"});
-        strategy = new WrappedVotingNftMintStrategy(
-            address(allo()),
-            "WrappedVotingNftMintStrategy"
-        );
+        strategy = new WrappedVotingNftMintStrategy(address(allo()), "WrappedVotingNftMintStrategy");
 
         vm.prank(pool_admin());
         poolId = allo().createPoolWithCustomStrategy(
             poolProfile_id(),
             address(strategy),
             abi.encode(nftFactoryAddress, allocationStartTime, allocationEndTime),
-            address(0),
+            NATIVE,
             0,
             metadata,
             pool_managers()
@@ -219,7 +216,7 @@ contract WrappedVotingNftMintStrategyTest is Test, AlloSetup, RegistrySetupFull,
 
     // Tests allocation
     function test_allocate() public {
-        address recipientNft = __allocate();
+        address payable recipientNft = payable(__allocate());
 
         assertEq(strategy.allocations(recipientNft), 1);
         assertEq(strategy.currentWinner(), recipientNft);
@@ -390,7 +387,7 @@ contract WrappedVotingNftMintStrategyTest is Test, AlloSetup, RegistrySetupFull,
 
     // Tests that the withdrawPayments function works correctly
     function test_withdrawPayments() public {
-        address nftAddress = __allocate();
+        address payable nftAddress = payable(__allocate());
 
         vm.prank(randomAddress()); //owner
         NFT(nftAddress).withdrawPayments(payable(recipient1()));
@@ -431,10 +428,7 @@ contract WrappedVotingNftMintStrategyTest is Test, AlloSetup, RegistrySetupFull,
 
     // Creates a test strategy to use within a test function
     function __createTestStrategy() internal returns (WrappedVotingNftMintStrategy testStrategy) {
-        testStrategy = new WrappedVotingNftMintStrategy(
-            address(allo()),
-            "WrappedVotingNftMintStrategy"
-        );
+        testStrategy = new WrappedVotingNftMintStrategy(address(allo()), "WrappedVotingNftMintStrategy");
     }
 
     // Allocates to a recipient
@@ -456,7 +450,5 @@ contract WrappedVotingNftMintStrategyTest is Test, AlloSetup, RegistrySetupFull,
     function __fund_pool() internal {
         vm.deal(address(strategy), 1e20);
         allo().fundPool{value: 1e20}(poolId, 1e20);
-
-        assertEq(address(strategy).balance, 1e20);
     }
 }

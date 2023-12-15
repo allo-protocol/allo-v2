@@ -90,7 +90,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     event MilestoneStatusChanged(address recipientId, uint256 milestoneId, Status status);
 
     /// @notice Emitted for the milestones set.
-    event MilestonesSet(address recipientId);
+    event MilestonesSet(address recipientId, uint256 milestonesLength);
     event MilestonesReviewed(address recipientId, Status status);
 
     /// ================================
@@ -147,6 +147,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     function initialize(uint256 _poolId, bytes memory _data) external virtual override {
         (InitializeData memory initData) = abi.decode(_data, (InitializeData));
         __DirectGrantsSimpleStrategy_init(_poolId, initData);
+        emit Initialized(_poolId, _data);
     }
 
     /// @notice This initializes the BaseStrategy
@@ -275,7 +276,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Submit milestone by the recipient.
     /// @dev 'msg.sender' must be the 'recipientId' (this depends on whether your using registry gating) and must be a member
-    ///      of a 'Profile' to sumbit a milestone and '_recipientId'.
+    ///      of a 'Profile' to submit a milestone and '_recipientId'.
     ///      must NOT be the same as 'msg.sender'. Emits a 'MilestonesSubmitted()' event.
     /// @param _recipientId ID of the recipient
     /// @param _metadata The proof of work
@@ -622,7 +623,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
             revert INVALID_MILESTONE();
         }
 
-        emit MilestonesSet(_recipientId);
+        emit MilestonesSet(_recipientId, milestonesLength);
     }
 
     /// @notice This contract should be able to receive native token

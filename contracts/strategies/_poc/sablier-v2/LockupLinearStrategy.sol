@@ -89,6 +89,7 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
     function initialize(uint256 _poolId, bytes memory _data) public virtual override {
         (InitializeParams memory initializeParams) = abi.decode(_data, (InitializeParams));
         __LockupLinearStrategy_init(_poolId, initializeParams);
+        emit Initialized(_poolId, _data);
     }
 
     function __LockupLinearStrategy_init(uint256 _poolId, InitializeParams memory _initializeParams) internal {

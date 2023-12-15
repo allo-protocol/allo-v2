@@ -56,27 +56,29 @@ contract RegistrySetupFull is RegistrySetup {
         _profile2Anchor_ = _registry_.getProfileById(_profile2Id_).anchor;
     }
 
-    function poolProfile_id() public view returns (bytes32) {
+    function poolProfile_id() public view virtual returns (bytes32) {
         return _poolProfileId_;
     }
 
-    function poolProfile_anchor() public view returns (address) {
+    function poolProfile_anchor() public view virtual returns (address) {
         return _poolProfileAnchor_;
     }
 
-    function profile1_id() public view returns (bytes32) {
+    function profile1_id() public view virtual returns (bytes32) {
         return _profile1Id_;
     }
 
-    function profile1_anchor() public view returns (address) {
+    // Use ths anchor with Accounts.profile1_member1 or Accounts.profile1_member2
+    function profile1_anchor() public view virtual returns (address) {
         return _profile1Anchor_;
     }
 
-    function profile2_id() public view returns (bytes32) {
+    function profile2_id() public view virtual returns (bytes32) {
         return _profile2Id_;
     }
 
-    function profile2_anchor() public view returns (address) {
+    // Use ths anchor with Accounts.profile2_member1 or Accounts.profile2_member2
+    function profile2_anchor() public view virtual returns (address) {
         return _profile2Anchor_;
     }
 }

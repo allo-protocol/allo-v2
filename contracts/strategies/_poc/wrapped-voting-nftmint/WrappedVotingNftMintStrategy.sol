@@ -91,6 +91,7 @@ contract WrappedVotingNftMintStrategy is Native, BaseStrategy, ReentrancyGuard {
     function initialize(uint256 _poolId, bytes memory _data) external override {
         (InitializeParams memory initializeParams) = abi.decode(_data, (InitializeParams));
         __WrappedVotingStrategy_init(_poolId, initializeParams);
+        emit Initialized(_poolId, _data);
     }
 
     /// ====================
@@ -117,7 +118,7 @@ contract WrappedVotingNftMintStrategy is Native, BaseStrategy, ReentrancyGuard {
 
     /// @notice Internal function to check if the allocation has ended
     function _checkOnlyAfterAllocation() internal view {
-        if (block.timestamp < allocationEndTime) {
+        if (block.timestamp <= allocationEndTime) {
             revert ALLOCATION_NOT_ENDED();
         }
     }
@@ -160,14 +161,15 @@ contract WrappedVotingNftMintStrategy is Native, BaseStrategy, ReentrancyGuard {
 
     /// @notice Internal function to register a recipient (reverts as it is not implemented)
     function _registerRecipient(bytes memory, address) internal pure override returns (address) {
-        revert();
+        assert(false);
+        return address(0);
     }
 
     /// @notice Internal function to allocate based on the given data.
     /// @param _data The data containing NFT information
     function _allocate(bytes memory _data, address _sender) internal override {
         // decode the data to get the NFT contract
-        (address nft) = abi.decode(_data, (address));
+        (address payable nft) = abi.decode(_data, (address));
         uint256 mintPrice = NFT(nft).MINT_PRICE();
         if (msg.value == 0 || msg.value < mintPrice) {
             revert INVALID();
@@ -241,4 +243,7 @@ contract WrappedVotingNftMintStrategy is Native, BaseStrategy, ReentrancyGuard {
     function _isValidAllocator(address) internal pure override returns (bool) {
         return true;
     }
+
+    /// @notice Receive function
+    receive() external payable {}
 }

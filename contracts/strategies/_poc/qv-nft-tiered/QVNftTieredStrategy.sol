@@ -61,6 +61,7 @@ contract QVNftTieredStrategy is QVBaseStrategy {
     function initialize(uint256 _poolId, bytes memory _data) external override {
         (InitializeParamsNft memory initializeParamsNft) = abi.decode(_data, (InitializeParamsNft));
         __QV_NFT_TieredStrategy_init(_poolId, initializeParamsNft);
+        emit Initialized(_poolId, _data);
     }
 
     /// @dev Internal initialize function that sets the poolId in the base strategy

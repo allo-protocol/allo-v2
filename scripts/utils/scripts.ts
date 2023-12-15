@@ -1,5 +1,7 @@
 import "dotenv/config";
-import { run } from "hardhat";
+import { Addressable } from "ethers";
+import fs from "fs";
+import hre, { upgrades } from "hardhat";
 import readline from "readline";
 
 // --- User verification ---
@@ -13,7 +15,7 @@ export async function waitForInput(query: string): Promise<unknown> {
     rl.question(query, (ans) => {
       rl.close();
       resolve(ans);
-    })
+    }),
   );
 }
 
@@ -27,30 +29,85 @@ export async function confirmContinue(params: Record<string, unknown>) {
   console.log("\n");
 }
 
-export const prettyNum = (_n: number | string) => {
-  const n = _n.toString();
-  let s = "";
-  for (let i = 0; i < n.length; i++) {
-    if (i != 0 && i % 3 == 0) {
-      s = "_" + s;
-    }
-
-    s = n[n.length - 1 - i] + s;
-  };
-
-  return s;
-}
-
-export const verifyContract = async (contract: string, verifyArgs: string[]) => {
-  console.log("Verifying contract...");
+export const verifyContract = async (
+  contractAddress: string | Addressable,
+  verifyArgs: string[],
+): Promise<boolean> => {
+  console.log("\nVerifying contract...");
+  await new Promise((r) => setTimeout(r, 20000));
   try {
-    await run("verify:verify", {
-      address: contract,
+    await hre.run("verify:verify", {
+      address: contractAddress.toString(),
       constructorArguments: verifyArgs,
     });
-
-    console.log("Contract verified!");
-  } catch (err) {
-    console.log(err);
+  } catch (e) {
+    console.log(e);
   }
+  return true;
 };
+
+export const getImplementationAddress = async (proxyAddress: string) => {
+  const implementationAddress = await upgrades.erc1967.getImplementationAddress(
+    proxyAddress,
+  );
+
+  return implementationAddress;
+};
+
+export class Deployments {
+  contractName: string;
+  path: string;
+  configObject: any;
+  chainId: number;
+
+  constructor(chainId: number, contractName: string) {
+    this.contractName = contractName;
+    this.chainId = chainId;
+    this.path = `scripts/deployments/${contractName}.deployment.json`;
+    this.configObject = this.readFile(this.contractName);
+  }
+
+  private readFile = (name: string) => {
+    let configFile;
+    const path = `scripts/deployments/${name}.deployment.json`;
+    try {
+      configFile = fs.readFileSync(path);
+    } catch {
+      configFile = "{}";
+    }
+    return JSON.parse(configFile.toString());
+  };
+
+  public write = (objToWrite: Object) => {
+    this.configObject[this.chainId] = objToWrite;
+
+    fs.writeFileSync(this.path, JSON.stringify(this.configObject, null, 2));
+  };
+
+  public get = (chainId: number) => {
+    return this.configObject[chainId];
+  };
+
+  public getRegistry = (): string => {
+    const obj = this.readFile("registry");
+    const registryAddress = obj[this.chainId].proxy ?? "";
+
+    return registryAddress;
+  };
+
+  public getAllo = (): string => {
+    const obj = this.readFile("allo");
+    const alloAddress = obj[this.chainId].proxy ?? "";
+
+    return alloAddress;
+  };
+
+  public getContractFactory = (): string => {
+    const obj = this.readFile("contractFactory");
+    const contractFactoryAddress = obj[this.chainId].address ?? "";
+
+    return contractFactoryAddress;
+  };
+}
+
+export const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));

@@ -91,6 +91,7 @@ contract LockupDynamicStrategy is BaseStrategy, ReentrancyGuard {
     function initialize(uint256 _poolId, bytes memory _data) public virtual override {
         (InitializeParams memory initializeParams) = abi.decode(_data, (InitializeParams));
         __LockupDynamicStrategy_init(_poolId, initializeParams);
+        emit Initialized(_poolId, _data);
     }
 
     function __LockupDynamicStrategy_init(uint256 _poolId, InitializeParams memory _initializeParams) internal {

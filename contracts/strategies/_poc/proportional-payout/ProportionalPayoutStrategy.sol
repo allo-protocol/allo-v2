@@ -101,6 +101,7 @@ contract ProportionalPayoutStrategy is BaseStrategy {
     function initialize(uint256 _poolId, bytes memory _data) external override onlyAllo {
         InitializeData memory initializeData = abi.decode(_data, (InitializeData));
         __ProtportionalPayoutStrategy_init(_poolId, initializeData);
+        emit Initialized(_poolId, _data);
     }
 
     function __ProtportionalPayoutStrategy_init(uint256 _poolId, InitializeData memory _initializeData) internal {
@@ -158,7 +159,7 @@ contract ProportionalPayoutStrategy is BaseStrategy {
     /// @notice Checks if the allocation has ended
     /// @dev Reverts if the allocation has not ended
     function _checkOnlyAfterAllocation() internal view {
-        if (block.timestamp < allocationEndTime) {
+        if (block.timestamp <= allocationEndTime) {
             revert ALLOCATION_NOT_ENDED();
         }
     }
@@ -301,4 +302,7 @@ contract ProportionalPayoutStrategy is BaseStrategy {
     function _getRecipient(address _recipientId) internal view returns (Recipient memory recipient) {
         recipient = recipients[_recipientId];
     }
+
+    /// @notice Receive function
+    receive() external payable {}
 }
