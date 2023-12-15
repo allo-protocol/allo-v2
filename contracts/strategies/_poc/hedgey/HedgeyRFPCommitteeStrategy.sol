@@ -100,15 +100,14 @@ contract HedgeyRFPCommitteeStrategy is RFPCommitteeStrategy {
         return _recipientLockupTerm[_recipient];
     }
 
-    /// @notice Withdraw funds from pool.
-    /// @dev 'msg.sender' must be a pool manager to withdraw funds.
-    /// @param _amount The amount to be withdrawn
-    function withdraw(uint256 _amount) external override onlyPoolManager(msg.sender) onlyInactivePool {
-        // Decrement the pool amount
-        poolAmount -= _amount;
+    /// @notice Withdraw the tokens from the pool
+    /// @dev Callable by the pool manager
+    /// @param _token The token to withdraw
+    function withdraw(address _token) override external virtual onlyPoolManager(msg.sender) onlyInactivePool {
+        uint256 amount = _getBalance(_token, address(this));
 
-        // Transfer the amount to the pool manager
-        super._transferAmount(allo.getPool(poolId).token, msg.sender, _amount);
+        // Transfer the tokens to the 'msg.sender' (pool manager calling function)
+        super._transferAmount(_token, msg.sender, amount);
     }
 
     /// ====================================
@@ -139,12 +138,7 @@ contract HedgeyRFPCommitteeStrategy is RFPCommitteeStrategy {
     function _afterRegisterRecipient(bytes memory _data, address) internal override {
         uint256 lockupTerm;
         address recipientAddress;
-
-        if (useRegistryAnchor) {
-            (recipientAddress,,, lockupTerm) = abi.decode(_data, (address, uint256, Metadata, uint256));
-        } else {
-            (recipientAddress,,,, lockupTerm) = abi.decode(_data, (address, address, uint256, Metadata, uint256));
-        }
+        (, recipientAddress,,, lockupTerm) = abi.decode(_data, (address, address, uint256, Metadata, uint256));
 
         _recipientLockupTerm[recipientAddress] = lockupTerm;
     }

@@ -280,8 +280,7 @@ contract HedgeyRFPCommitteeStrategyTest is Test, RegistrySetupFull, AlloSetup, H
     function __register_recipient() internal returns (address recipientId) {
         address sender = recipient();
         Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
-
-        bytes memory data = abi.encode(recipientAddress(), false, 1e18, metadata, ONE_MONTH_SECONDS);
+        bytes memory data = abi.encode(address(0), recipientAddress(), 1e18, metadata, ONE_MONTH_SECONDS);
         vm.prank(address(allo()));
         recipientId = strategy.registerRecipient(data, sender);
 
@@ -292,7 +291,7 @@ contract HedgeyRFPCommitteeStrategyTest is Test, RegistrySetupFull, AlloSetup, H
         address sender = makeAddr("recipient2");
         Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
 
-        bytes memory data = abi.encode(recipientAddress(), false, 1e18, metadata, ONE_MONTH_SECONDS * 2);
+        bytes memory data = abi.encode(address(0), recipientAddress(), 1e18, metadata, ONE_MONTH_SECONDS * 2);
         vm.prank(address(allo()));
         recipientId = strategy.registerRecipient(data, sender);
 
