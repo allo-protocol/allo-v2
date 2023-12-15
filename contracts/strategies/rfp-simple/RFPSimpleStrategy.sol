@@ -303,12 +303,11 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         emit MilestoneStatusChanged(_milestoneId, milestones[_milestoneId].milestoneStatus);
     }
 
-    /// @notice Withdraw funds from pool.
-    /// @dev 'msg.sender' must be a pool manager to withdraw funds.
-    /// @param _amount The amount to be withdrawn
-    function withdraw(uint256 _amount) external virtual onlyPoolManager(msg.sender) onlyInactivePool {
-        // Decrement the pool amount
-        poolAmount -= _amount;
+    /// @notice Withdraw the tokens from the pool
+    /// @dev Callable by the pool manager
+    /// @param _token The token to withdraw
+    function withdraw(address _token) external virtual onlyPoolManager(msg.sender) onlyInactivePool {
+        uint256 amount = _getBalance(_token, address(this));
 
         // Transfer the tokens to the 'msg.sender' (pool manager calling function)
         _transferAmount(_token, msg.sender, amount);
