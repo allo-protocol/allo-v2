@@ -1,0 +1,47 @@
+WARNING: You are currently using Node.js v21.1.0, which is not supported by Hardhat. This can lead to unexpected behavior. See https://hardhat.org/nodejs-versions
+
+
+
+    ////////////////////////////////////////////////////
+            Deploys Registry.sol on arbitrum-sepolia
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────┐
+│     (index)     │                    Values                    │
+├─────────────────┼──────────────────────────────────────────────┤
+│    contract     │                'Registry.sol'                │
+│     chainId     │                    421614                    │
+│     network     │              'arbitrum-sepolia'              │
+│ deployerAddress │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│  registryOwner  │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│     balance     │                    '3.0'                     │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying Registry...
+Registry proxy deployed to: 0x4AAcca72145e1dF2aeC137E1f3C5E3D75DB8b5f3
+Registry implementation deployed to: 0xA3Fd7042F83960398De6ceddbf513F8cac877cbE
+Proxy Admin:  0x758b87af7fdB4783f848a1dDEa1F025dC48B9858
+Proxy Admin Owner:  0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C
+
+Verifying contract...
+Verifying implementation: 0xA3Fd7042F83960398De6ceddbf513F8cac877cbE
+Successfully submitted source code for contract
+contracts/core/Registry.sol:Registry at 0xA3Fd7042F83960398De6ceddbf513F8cac877cbE
+for verification on the block explorer. Waiting for verification result...
+
+Successfully verified contract Registry on the block explorer.
+https://arbiscan.io/address/0xA3Fd7042F83960398De6ceddbf513F8cac877cbE#code
+Verifying proxy: 0x4AAcca72145e1dF2aeC137E1f3C5E3D75DB8b5f3
+Contract at 0x4AAcca72145e1dF2aeC137E1f3C5E3D75DB8b5f3 already verified.
+Linking proxy 0x4AAcca72145e1dF2aeC137E1f3C5E3D75DB8b5f3 with implementation
+Successfully linked proxy to implementation.
+Verifying proxy admin: 0x758b87af7fdB4783f848a1dDEa1F025dC48B9858
+Contract at 0x758b87af7fdB4783f848a1dDEa1F025dC48B9858 already verified.
+
+Proxy fully verified.
+
+Verifying contract...
+The contract 0xA3Fd7042F83960398De6ceddbf513F8cac877cbE has already been verified.
+https://arbiscan.io/address/0xA3Fd7042F83960398De6ceddbf513F8cac877cbE#code
+[90m
+	Validating hasRole(0x815b5a78dc333d344c7df9da23c04dbd432015cc701876ddb9ffe850e6882747,0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C) == true[0m
+[32m	✅ PASSED with Result: true[0m
