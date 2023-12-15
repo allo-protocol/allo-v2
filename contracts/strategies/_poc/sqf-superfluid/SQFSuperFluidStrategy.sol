@@ -11,7 +11,6 @@ import {FixedPointMathLib} from "solady/src/utils/FixedPointMathLib.sol";
 
 // Interfaces
 import {IRegistry} from "../../../core/interfaces/IRegistry.sol";
-import {IAllo} from "../../../core/interfaces/IAllo.sol";
 // Core Contracts
 import {BaseStrategy} from "../../BaseStrategy.sol";
 // Internal Libraries
