@@ -86,10 +86,10 @@ contract RecipientSuperApp is ISuperApp {
     ///      to notify the app about the callback context.
     function onFlowUpdated(address sender, int96 previousFlowRate, int96 newFlowRate, bytes calldata ctx)
         internal
-        returns (bytes memory)
+        returns (bytes memory newCtx)
     {
-        strategy.adjustWeightings(uint256(int256(previousFlowRate)), uint256(int256(newFlowRate)), sender);
-        return _updateOutflow(ctx);
+        newCtx = strategy.adjustWeightings(uint256(int256(previousFlowRate)), uint256(int256(newFlowRate)), sender, ctx);
+        // newCtx = _updateOutflow(newCtx);
     }
 
     function _checkHookParam(ISuperToken _superToken) internal view {
@@ -98,7 +98,7 @@ contract RecipientSuperApp is ISuperApp {
     }
 
     // https://github.com/superfluid-finance/super-examples/blob/main/projects/tradeable-cashflow/contracts/RedirectAll.sol#L163
-    function _updateOutflow(bytes calldata ctx) private returns (bytes memory newCtx) {
+    function _updateOutflow(bytes memory ctx) private returns (bytes memory newCtx) {
         newCtx = ctx;
 
         int96 netFlowRate = acceptedToken.getNetFlowRate(address(this));

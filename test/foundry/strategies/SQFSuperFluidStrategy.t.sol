@@ -129,6 +129,13 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
         assertEq(metadata.pointer, "test");
     }
 
+    function testRevert_registerRecipient_UNAUTHORIZED() public {
+        vm.prank(profile2_member1());
+
+        vm.expectRevert(UNAUTHORIZED.selector);
+        allo().registerRecipient(poolId, abi.encode(profile1_anchor(), recipient1(), Metadata(1, "test")));
+    }
+
     function test_reviewRecipient_Approve() public {
         address recipientId = __register_approve_recipient();
 
@@ -169,17 +176,15 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
         assertEq(_strategy.recipientFlowRate(recipientId), 10);
     }
 
-    function test_getRecipient() public {}
+    // function test_getRecipient() public {}
 
-    function test_getRecipientStatus() public {}
+    // function test_getRecipientStatus() public {}
 
-    function testRevert_registerRecipient_INVALID_METADATA() public {}
+    // function testRevert_registerRecipient_INVALID_METADATA() public {}
 
-    function testRevert_registerRecipient_UNAUTHORIZED() public {}
+    // function testRevert_registerRecipient_UNAUTHORIZED_already_allocated() public {}
 
-    function testRevert_registerRecipient_UNAUTHORIZED_already_allocated() public {}
-
-    function testRevert_registerRecipient_RECIPIENT_ERROR_zero_recipientAddress() public {}
+    // function testRevert_registerRecipient_RECIPIENT_ERROR_zero_recipientAddress() public {}
 
     function __deploy_strategy() internal returns (SQFSuperFluidStrategy) {
         return new SQFSuperFluidStrategy(address(allo()), "SQFSuperFluidStrategyv1");
