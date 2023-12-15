@@ -21,7 +21,6 @@ contract HedgeyRFPCommitteeStrategyTest is Test, RegistrySetupFull, AlloSetup, H
     // Events
     event Voted(address indexed recipientId, address voter);
     event PoolFunded(uint256 indexed poolId, uint256 amount, uint256 fee);
-    event MilstoneSubmitted(uint256 milestoneId);
     event PlanCreated(
         uint256 indexed id,
         address indexed recipient,
@@ -270,15 +269,12 @@ contract HedgeyRFPCommitteeStrategyTest is Test, RegistrySetupFull, AlloSetup, H
     }
 
     function test_withdraw() public {
+
         allo().fundPool(poolId, 1e18);
-
-        vm.startPrank(address(pool_admin()));
+        vm.startPrank(pool_admin());
         strategy.setPoolActive(false);
-
-        uint256 balanceBefore = token.balanceOf(address(pool_admin()));
-        strategy.withdraw(1e17);
-
-        assertEq(token.balanceOf(address(pool_admin())), balanceBefore + 1e17);
+        strategy.withdraw(address(token));
+        assertEq(address(allo()).balance, 0);
     }
 
     function __register_recipient() internal returns (address recipientId) {
