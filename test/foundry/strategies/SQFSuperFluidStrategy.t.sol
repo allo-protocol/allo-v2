@@ -334,30 +334,30 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
         vm.expectRevert(UNAUTHORIZED.selector);
         _strategy.withdraw(address(fakeDai), 1e5);
     }
-    // function test_allocate() public {
-    //     address recipientId = __register_accept_recipient();
+    function test_allocate() public {
+        address recipientId = __register_accept_recipient();
 
-    //     vm.warp(uint256(allocationStartTime) + 1);
+        vm.warp(uint256(allocationStartTime) + 1);
 
-    //     _passportDecoder.setScore(address(this), 70);
-    //     // unlimited allowance
-    //     superFakeDai.increaseFlowRateAllowanceWithPermissions(address(_strategy), 7, type(int96).max);
-    //     allo().allocate(
-    //         poolId,
-    //         abi.encode(
-    //             recipientId,
-    //             10 // super small flowRate
-    //         )
-    //     );
+        _passportDecoder.setScore(address(this), 70);
+        // unlimited allowance
+        superFakeDai.increaseFlowRateAllowanceWithPermissions(address(_strategy), 7, type(int96).max);
+        allo().allocate(
+            poolId,
+            abi.encode(
+                recipientId,
+                10 // super small flowRate
+            )
+        );
 
-    //     // get recipient
-    //     SQFSuperFluidStrategy.Recipient memory recipient = _strategy.getRecipient(recipientId);
+        // get recipient
+        SQFSuperFluidStrategy.Recipient memory recipient = _strategy.getRecipient(recipientId);
 
-    //     assertEq(_strategy.totalUnitsByRecipient(recipientId), 10);
-    //     assertEq(_strategy.recipientFlowRate(recipientId), 10);
-    // }
+        assertEq(_strategy.totalUnitsByRecipient(recipientId), 10);
+        assertEq(_strategy.recipientFlowRate(recipientId), 10);
+    }
 
-    // function testRevert_registerRecipient_UNAUTHORIZED_already_allocated() public {}
+    function testRevert_registerRecipient_UNAUTHORIZED_already_allocated() public {}
 
     function __deploy_strategy() internal returns (SQFSuperFluidStrategy) {
         return new SQFSuperFluidStrategy(address(allo()), "SQFSuperFluidStrategyv1");

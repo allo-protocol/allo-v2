@@ -456,7 +456,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
                 allocationSuperToken.transfer(address(superApp), initialSuperAppBalance);
 
                 // Add recipientAddress as member of the GDA with 1 unit
-                _updateMemberUnits(recipientId, recipient.recipientAddress, 1, new bytes(0));
+                _updateMemberUnits(recipientId, recipient.recipientAddress, 1);
 
                 superApps[address(superApp)] = recipientId;
                 recipient.superApp = superApp;
@@ -498,7 +498,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
             delete recipientFlowRate[recipientId];
 
             // Set recipient units to 0 to stop streaming from GDA
-            _updateMemberUnits(recipientId, recipient.recipientAddress, 0, "0x");
+            _updateMemberUnits(recipientId, recipient.recipientAddress, 0);
 
             emit Canceled(recipientId, msg.sender);
 
@@ -513,9 +513,8 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _previousFlowrate The previous flow rate
     /// @param _newFlowRate The new flow rate
     /// @param _allocator The allocator address
-    function adjustWeightings(uint256 _previousFlowrate, uint256 _newFlowRate, address _allocator, bytes calldata _ctx)
+    function adjustWeightings(uint256 _previousFlowrate, uint256 _newFlowRate, address _allocator)
         external
-        returns (bytes memory newCtx)
     {
         address recipientId = superApps[msg.sender];
 
@@ -540,15 +539,13 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         uint256 recipientTotalUnits = totalUnitsByRecipient[recipientId];
         recipientTotalUnits += unitsAfterAllocation - unitsBeforeAllocation;
 
-        newCtx = _updateMemberUnits(recipientId, recipient.recipientAddress, uint128(recipientTotalUnits), _ctx);
+        _updateMemberUnits(recipientId, recipient.recipientAddress, uint128(recipientTotalUnits));
 
         recipientAllocatorUnits[recipientId][_allocator] = unitsAfterAllocation;
         totalUnitsByRecipient[recipientId] = recipientTotalUnits;
         recipientFlowRate[recipientId] = _newFlowRate;
 
         emit TotalUnitsUpdated(recipientId, recipientTotalUnits);
-
-        return newCtx;
     }
 
     /// @notice Withdraw funds from the contract.
@@ -701,18 +698,11 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _recipientId ID of the recipient
     /// @param _recipientAddress Address of the recipient
     /// @param _units The units
-    function _updateMemberUnits(address _recipientId, address _recipientAddress, uint128 _units, bytes memory _ctx)
+    function _updateMemberUnits(address _recipientId, address _recipientAddress, uint128 _units)
         internal
-        returns (bytes memory newCtx)
     {
-        if (_ctx.length == 0) {
-            newCtx = _ctx;
-            poolSuperToken.updateMemberUnits(gdaPool, _recipientAddress, _units);
-        } else {
-            newCtx = poolSuperToken.updateMemberUnitsWithCtx(gdaPool, _recipientAddress, _units, _ctx);
-        }
+        gdaPool.updateMemberUnits(_recipientAddress, _units);
         totalUnitsByRecipient[_recipientId] = _units;
         emit TotalUnitsUpdated(_recipientId, _units);
-        return newCtx;
     }
 }

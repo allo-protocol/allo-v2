@@ -88,8 +88,8 @@ contract RecipientSuperApp is ISuperApp {
         internal
         returns (bytes memory newCtx)
     {
-        newCtx = strategy.adjustWeightings(uint256(int256(previousFlowRate)), uint256(int256(newFlowRate)), sender, ctx);
-        // newCtx = _updateOutflow(newCtx);
+        strategy.adjustWeightings(uint256(int256(previousFlowRate)), uint256(int256(newFlowRate)), sender);
+        newCtx = _updateOutflow(ctx);
     }
 
     function _checkHookParam(ISuperToken _superToken) internal view {
