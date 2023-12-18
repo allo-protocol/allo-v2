@@ -284,7 +284,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
             // when registry gating is enabled, the recipientId must be a profile member
             if (!_isProfileMember(recipientId, _sender)) revert UNAUTHORIZED();
         } else {
-            (recipientAddress, registryAnchor, metadata) = abi.decode(_data, (address, address, Metadata));
+            (registryAnchor, recipientAddress, metadata) = abi.decode(_data, (address, address, Metadata));
             isUsingRegistryAnchor = registryAnchor != address(0);
             recipientId = isUsingRegistryAnchor ? registryAnchor : _sender;
 
@@ -433,7 +433,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
             // and the new status can only be Accepted or Rejected
             if (
                 recipient.recipientStatus != Status.Pending
-                    && (recipientStatus != Status.Accepted && recipientStatus != Status.Rejected)
+                    || (recipientStatus != Status.Accepted && recipientStatus != Status.Rejected)
             ) {
                 revert RECIPIENT_ERROR(recipientId);
             }
@@ -560,7 +560,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Close the stream
     function closeStream() external onlyPoolManager(msg.sender) {
-        poolSuperToken.distributeFlow(msg.sender, gdaPool, 0, "0x");
+        poolSuperToken.distributeFlow(address(this), gdaPool, 0, "0x");
         _transferAmount(address(poolSuperToken), msg.sender, poolSuperToken.balanceOf(address(this)));
     }
 

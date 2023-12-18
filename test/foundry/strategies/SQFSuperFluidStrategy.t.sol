@@ -125,10 +125,66 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
         assertEq(strategy_.initialSuperAppBalance(), initialSuperAppBalance);
     }
 
+    function testRevert_initialize_INVALID() public {
+        SQFSuperFluidStrategy strategy_ = new SQFSuperFluidStrategy(address(allo()), "SQFSuperFluidStrategyv1");
+        initialSuperAppBalance = 0;
+
+        vm.expectRevert(INVALID.selector);
+        vm.prank(pool_admin());
+        allo().createPoolWithCustomStrategy(
+            poolProfile_id(),
+            address(strategy_),
+            __enocdeInitializeParams(),
+            address(superFakeDai),
+            0,
+            Metadata(1, "test"),
+            pool_managers()
+        );
+    }
+
+    function testRevert_initialize_ZERO_ADDRESS() public {
+        SQFSuperFluidStrategy strategy_ = new SQFSuperFluidStrategy(address(allo()), "SQFSuperFluidStrategyv1");
+        superfluidHost = address(0);
+
+        vm.expectRevert(ZERO_ADDRESS.selector);
+        vm.prank(pool_admin());
+        allo().createPoolWithCustomStrategy(
+            poolProfile_id(),
+            address(strategy_),
+            __enocdeInitializeParams(),
+            address(superFakeDai),
+            0,
+            Metadata(1, "test"),
+            pool_managers()
+        );
+    }
+
     function test_registerRecipient() public {
         address recipientId = __register_recipient();
 
         SQFSuperFluidStrategy.Recipient memory recipient = _strategy.getRecipient(recipientId);
+
+        assertEq(recipient.recipientAddress, recipient1());
+        assertEq(uint8(recipient.recipientStatus), uint8(1));
+        assertTrue(recipient.useRegistryAnchor);
+        assertEq(address(recipient.superApp), address(0));
+
+        Metadata memory metadata = recipient.metadata;
+
+        assertEq(metadata.protocol, 1);
+        assertEq(metadata.pointer, "test");
+    }
+
+    function test_registerRecipient_not_usingRegistryAnchor() public {
+        SQFSuperFluidStrategy strategy_ = new SQFSuperFluidStrategy(address(allo()), "SQFSuperFluidStrategyv1");
+
+        useRegistryAnchor = false;
+        uint256 poolId_ = __createPool(address(strategy_));
+
+        vm.prank(profile1_member1());
+        allo().registerRecipient(poolId_, abi.encode(profile1_anchor(), recipient1(), Metadata(1, "test")));
+
+        SQFSuperFluidStrategy.Recipient memory recipient = strategy_.getRecipient(profile1_anchor());
 
         assertEq(recipient.recipientAddress, recipient1());
         assertEq(uint8(recipient.recipientStatus), uint8(1));
@@ -162,13 +218,6 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
         assertEq(metadata.pointer, "update-test");
     }
 
-    function testRevert_registerRecipient_UNAUTHORIZED() public {
-        vm.prank(profile2_member1());
-
-        vm.expectRevert(UNAUTHORIZED.selector);
-        allo().registerRecipient(poolId, abi.encode(profile1_anchor(), recipient1(), Metadata(1, "test")));
-    }
-
     function testRevert_registerRecipient_accepted_INVALID() public {
         __register_accept_recipient();
 
@@ -199,7 +248,26 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
         allo().registerRecipient(poolId, abi.encode(profile1_anchor(), address(0), Metadata(1, "test")));
     }
 
-    function test_reviewRecipient_Approve() public {
+    function testRevert_registerRecipient_UNAUTHORIZED() public {
+        vm.prank(profile2_member1());
+
+        vm.expectRevert(UNAUTHORIZED.selector);
+        allo().registerRecipient(poolId, abi.encode(profile1_anchor(), recipient1(), Metadata(1, "test")));
+    }
+
+    function testRevert_registerRecipient_UNAUTHORIZED_not_usingRegistryAnchor() public {
+        SQFSuperFluidStrategy strategy_ = new SQFSuperFluidStrategy(address(allo()), "SQFSuperFluidStrategyv1");
+
+        useRegistryAnchor = false;
+        uint256 poolId_ = __createPool(address(strategy_));
+
+        vm.prank(profile2_member1());
+
+        vm.expectRevert(UNAUTHORIZED.selector);
+        allo().registerRecipient(poolId_, abi.encode(profile1_anchor(), recipient1(), Metadata(1, "test")));
+    }
+
+    function test_reviewRecipient_Accept() public {
         address recipientId = __register_accept_recipient();
 
         SQFSuperFluidStrategy.Recipient memory recipient = _strategy.getRecipient(recipientId);
@@ -236,18 +304,68 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
         assertTrue(address(recipient.superApp) == address(0));
     }
 
-    function test_fundPool_distribute() public {
-        // superFakeDai.approve(address(allo()), type(uint256).max);
-        // allo().fundPool(poolId, 1e17);
+    function testRevert_reviewRecipient_INVALID_array_mismatch() public {
+        address recipientId = __register_recipient();
 
-        // vm.warp(uint256(registrationEndTime) + 1);
+        address[] memory recipients = new address[](1);
+        recipients[0] = recipientId;
 
-        // vm.prank(pool_manager1());
+        IStrategy.Status[] memory statuses = new IStrategy.Status[](0);
 
-        // int96 flowRate = 1e5;
+        vm.prank(pool_manager1());
 
-        // FAIL. Reason: GDA_DISTRIBUTE_FOR_OTHERS_NOT_ALLOWED()
-        // allo().distribute(poolId, new address[](0), abi.encode(flowRate));
+        vm.expectRevert(INVALID.selector);
+        _strategy.reviewRecipients(recipients, statuses);
+    }
+
+    function testRevert_reviewRecipients_RECIPIENT_ERROR() public {
+        address recipientId = __register_accept_recipient();
+
+        address[] memory recipients = new address[](1);
+        recipients[0] = recipientId;
+
+        IStrategy.Status[] memory statuses = new IStrategy.Status[](1);
+        statuses[0] = IStrategy.Status.Rejected;
+
+        vm.prank(pool_manager1());
+        vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, recipientId));
+        _strategy.reviewRecipients(recipients, statuses);
+    }
+
+    function test_cancelRecipient() public {
+        address recipientId = __register_accept_recipient();
+
+        vm.expectEmit(true, true, true, false);
+        emit Canceled(recipientId, pool_manager1());
+
+        vm.prank(pool_manager1());
+
+        address[] memory recipients = new address[](1);
+        recipients[0] = recipientId;
+        _strategy.cancelRecipients(recipients);
+
+        SQFSuperFluidStrategy.Recipient memory recipient = _strategy.getRecipient(recipientId);
+
+        assertEq(uint8(recipient.recipientStatus), uint8(IStrategy.Status.Canceled));
+        assertTrue(address(recipient.superApp) == address(0));
+        assertEq(_strategy.totalUnitsByRecipient(recipientId), 0);
+        assertEq(_strategy.recipientFlowRate(recipientId), 0);
+    }
+
+    function testRevert_cancelRecipient_RECIPIENT_ERROR() public {
+        __register_accept_recipient();
+        vm.prank(pool_manager1());
+
+        address[] memory recipients = new address[](1);
+        recipients[0] = address(0);
+
+        vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, recipients[0]));
+        _strategy.cancelRecipients(recipients);
+    }
+
+    function testRevert_adjustWeigthings_UNAUTHORIZED() public {
+        vm.expectRevert(UNAUTHORIZED.selector);
+        _strategy.adjustWeightings(0, 1, randomAddress());
     }
 
     function test_updatePoolTimestamps() public {
@@ -340,6 +458,27 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
 
         vm.expectRevert(UNAUTHORIZED.selector);
         _strategy.withdraw(address(fakeDai), 1e5);
+    }
+
+    function testRevert_withdraw_pooltoken_INVALID() public {
+        superFakeDai.transfer(address(_strategy), 1e5);
+
+        vm.prank(pool_manager1());
+
+        vm.expectRevert(INVALID.selector);
+        _strategy.withdraw(address(superFakeDai), 1e5);
+    }
+
+    function test_closeStream() public {
+        test_distribute();
+
+        uint256 balanceBefore = superFakeDai.balanceOf(pool_manager1());
+        vm.prank(pool_manager1());
+        _strategy.closeStream();
+
+        uint256 balanceAfter = superFakeDai.balanceOf(pool_manager1());
+
+        assertTrue(balanceAfter > balanceBefore);
     }
 
     function test_allocate() public {
@@ -475,7 +614,97 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
         // check if the net flow rate is equal to the sum of the flow rates of the recipients based on their units
     }
 
-    function testRevert_registerRecipient_UNAUTHORIZED_already_allocated() public {}
+    function testRevert_allocate_UNATUTHORIZED() public {
+        address recipientId = __register_accept_recipient();
+
+        vm.warp(uint256(allocationStartTime) + 1);
+
+        vm.startPrank(makeAddr("not-allowed"));
+        // unlimited allowance
+        superFakeDai.increaseFlowRateAllowanceWithPermissions(address(_strategy), 7, type(int96).max);
+
+        vm.expectRevert(UNAUTHORIZED.selector);
+
+        allo().allocate(
+            poolId,
+            abi.encode(
+                recipientId,
+                9 // super small flowRate
+            )
+        );
+
+        vm.stopPrank();
+    }
+
+    function testRevert_allocate_RECIPIENT_ERROR() public {
+        address recipientId = __register_recipient();
+
+        vm.warp(uint256(allocationStartTime) + 1);
+
+        // unlimited allowance
+        superFakeDai.increaseFlowRateAllowanceWithPermissions(address(_strategy), 7, type(int96).max);
+
+        vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, recipientId));
+
+        allo().allocate(
+            poolId,
+            abi.encode(
+                recipientId,
+                0 // super small flowRate
+            )
+        );
+    }
+
+    function test_getPayout() public {
+        address recipientId = __register_accept_recipient();
+        superFakeDai.increaseFlowRateAllowanceWithPermissions(address(_strategy), 7, type(int96).max);
+
+        vm.warp(uint256(registrationEndTime) + 1);
+
+        allo().allocate(
+            poolId,
+            abi.encode(
+                recipientId,
+                10 // super small flowRate
+            )
+        );
+
+        address[] memory recipients = new address[](1);
+        recipients[0] = recipientId;
+
+        bytes[] memory data = new bytes[](1);
+        data[0] = "";
+
+        IStrategy.PayoutSummary[] memory payout = _strategy.getPayouts(recipients, data);
+
+        assertEq(payout[0].recipientAddress, recipient1());
+        assertEq(payout[0].amount, 10);
+    }
+
+    function test_distribute() public {
+        __register_accept_recipient();
+        vm.warp(uint256(registrationEndTime) + 1);
+
+        vm.prank(pool_manager1());
+        allo().distribute(poolId, new address[](0), abi.encode(1e10));
+
+        GeneralDistributionAgreementV1 gdaPool = GeneralDistributionAgreementV1(address(_strategy.gdaPool()));
+        int96 netFlowGDA = superFakeDai.getNetFlowRate(address(gdaPool));
+
+        assertEq(netFlowGDA, 1e10);
+    }
+
+    function test_updateMinPassportScore() public {
+        uint256 newMinPassportScore = 420;
+
+        vm.expectEmit(true, true, true, false);
+        emit MinPassportScoreUpdated(newMinPassportScore, pool_manager1());
+
+        vm.prank(pool_manager1());
+        _strategy.updateMinPassportScore(newMinPassportScore);
+
+        assertEq(_strategy.minPassportScore(), newMinPassportScore);
+    }
 
     function __deploy_strategy() internal returns (SQFSuperFluidStrategy) {
         return new SQFSuperFluidStrategy(address(allo()), "SQFSuperFluidStrategyv1");
