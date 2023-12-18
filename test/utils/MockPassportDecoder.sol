@@ -14,7 +14,7 @@ contract MockPassportDecoder {
         scores[userAddress] = score;
     }
 
-    function getScore(address userAddress) external view returns (Score memory) {
-        return Score({score: scores[userAddress], scorerID: 0, decimals: 0});
+    function getScore(address userAddress) external view returns (uint256) {
+        return scores[userAddress];
     }
 }
