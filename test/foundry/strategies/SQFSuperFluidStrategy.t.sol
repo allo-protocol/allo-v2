@@ -465,11 +465,12 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
 
         int256 calcualtedFlowRate = int256(_strategy.recipientFlowRate(recipientId1) + _strategy.recipientFlowRate(recipientId2));
 
-        // assertEq(netFlowGDA, calcualtedFlowRate);
+        assertEq(netFlowGDA, calcualtedFlowRate);
 
-        // should fail
-        assertEq(superFakeDai.balanceOf(recipientId1), 0);
-        assertEq(superFakeDai.balanceOf(recipientId2), 0);
+        vm.warp(uint256(registrationEndTime) + 100);
+
+        assertNotEq(superFakeDai.balanceOf(recipient1()), 0);
+        assertNotEq(superFakeDai.balanceOf(recipient2()), 0);
 
         // check if the net flow rate is equal to the sum of the flow rates of the recipients based on their units
     }
