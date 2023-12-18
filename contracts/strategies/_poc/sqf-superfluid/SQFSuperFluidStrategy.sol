@@ -3,10 +3,16 @@ pragma solidity 0.8.19;
 
 // External Libraries
 import {ReentrancyGuard} from "openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
-import {ISuperToken, ISuperfluidPool} from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
-import {PoolConfig} from "@superfluid-finance/ethereum-contracts/contracts/interfaces/agreements/gdav1/IGeneralDistributionAgreementV1.sol";
-import {SuperTokenV1Library} from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
-import {GitcoinPassportDecoder} from "@eas-proxy/GitcoinPassportDecoder.sol";
+import {
+    ISuperToken,
+    ISuperfluidPool
+} from
+    "../../../../lib/superfluid-protocol-monorepo/packages/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
+import {PoolConfig} from
+    "../../../../lib/superfluid-protocol-monorepo/packages/ethereum-contracts/contracts/interfaces/agreements/gdav1/IGeneralDistributionAgreementV1.sol";
+import {SuperTokenV1Library} from
+    "../../../../lib/superfluid-protocol-monorepo/packages/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
+import {IGitcoinPassportDecoder} from "./lib/IGitcoinPassportDecoder.sol";
 import {FixedPointMathLib} from "solady/src/utils/FixedPointMathLib.sol";
 
 // Interfaces
@@ -116,7 +122,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     ISuperfluidPool public gdaPool;
 
     /// @notice The Gitcoin Passport Decoder
-    GitcoinPassportDecoder public passportDecoder;
+    IGitcoinPassportDecoder public passportDecoder;
 
     /// @notice The minimum passport score required to be an allocator
     uint256 public minPassportScore;
@@ -231,7 +237,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
 
         initialSuperAppBalance = params.initialSuperAppBalance;
 
-        passportDecoder = GitcoinPassportDecoder(params.passportDecoder);
+        passportDecoder = IGitcoinPassportDecoder(params.passportDecoder);
         gdaPool = SuperTokenV1Library.createPool(
             poolSuperToken,
             address(this), // pool admin

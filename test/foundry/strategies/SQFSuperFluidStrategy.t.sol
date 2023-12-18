@@ -14,11 +14,19 @@ import {AlloSetup} from "../shared/AlloSetup.sol";
 import {RegistrySetupFullLive} from "../shared/RegistrySetup.sol";
 import {EventSetup} from "../shared/EventSetup.sol";
 
-import {SuperTokenV1Library} from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
-import {SuperfluidGovernanceII} from "@superfluid-finance/ethereum-contracts/contracts/gov/SuperfluidGovernanceII.sol";
-import {ISuperfluid, ISuperfluidPool} from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
-import {ISuperToken} from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperToken.sol";
-import {GeneralDistributionAgreementV1} from "@superfluid-finance/ethereum-contracts/contracts/agreements/gdav1/GeneralDistributionAgreementV1.sol";
+import {SuperTokenV1Library} from
+    "../../../lib/superfluid-protocol-monorepo/packages/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
+import {SuperfluidGovernanceII} from
+    "../../../lib/superfluid-protocol-monorepo/packages/ethereum-contracts/contracts/gov/SuperfluidGovernanceII.sol";
+import {
+    ISuperfluid,
+    ISuperfluidPool
+} from
+    "../../../lib/superfluid-protocol-monorepo/packages/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
+import {ISuperToken} from
+    "../../../lib/superfluid-protocol-monorepo/packages/ethereum-contracts/contracts/interfaces/superfluid/ISuperToken.sol";
+import {GeneralDistributionAgreementV1} from
+    "../../../lib/superfluid-protocol-monorepo/packages/ethereum-contracts/contracts/agreements/gdav1/GeneralDistributionAgreementV1.sol";
 
 import {MockPassportDecoder} from "test/utils/MockPassportDecoder.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -613,7 +621,6 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
 
         assertNotEq(superFakeDai.balanceOf(recipient1()), 0);
         assertNotEq(superFakeDai.balanceOf(recipient2()), 0);
-
     }
 
     function testRevert_allocate_UNATUTHORIZED() public {
