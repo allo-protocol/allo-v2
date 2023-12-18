@@ -334,7 +334,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         _checkOnlyAfterRegistration();
 
         (int96 flowRate) = abi.decode(_data, (int96));
-        poolSuperToken.distributeFlow(_sender, gdaPool, flowRate);
+        poolSuperToken.distributeFlow(address(this), gdaPool, flowRate);
 
         emit Distributed(_sender, flowRate);
     }
@@ -513,9 +513,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _previousFlowrate The previous flow rate
     /// @param _newFlowRate The new flow rate
     /// @param _allocator The allocator address
-    function adjustWeightings(uint256 _previousFlowrate, uint256 _newFlowRate, address _allocator)
-        external
-    {
+    function adjustWeightings(uint256 _previousFlowrate, uint256 _newFlowRate, address _allocator) external {
         address recipientId = superApps[msg.sender];
 
         if (recipientId == address(0)) revert UNAUTHORIZED();
@@ -543,7 +541,9 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
 
         recipientAllocatorUnits[recipientId][_allocator] = unitsAfterAllocation;
         totalUnitsByRecipient[recipientId] = recipientTotalUnits;
-        recipientFlowRate[recipientId] = _newFlowRate;
+
+        uint256 currentFlowRate = recipientFlowRate[recipientId];
+        recipientFlowRate[recipientId] = currentFlowRate + _newFlowRate - _previousFlowrate;
 
         emit TotalUnitsUpdated(recipientId, recipientTotalUnits);
     }
@@ -698,9 +698,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _recipientId ID of the recipient
     /// @param _recipientAddress Address of the recipient
     /// @param _units The units
-    function _updateMemberUnits(address _recipientId, address _recipientAddress, uint128 _units)
-        internal
-    {
+    function _updateMemberUnits(address _recipientId, address _recipientAddress, uint128 _units) internal {
         gdaPool.updateMemberUnits(_recipientAddress, _units);
         totalUnitsByRecipient[_recipientId] = _units;
         emit TotalUnitsUpdated(_recipientId, _units);

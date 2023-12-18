@@ -18,6 +18,7 @@ import {SuperTokenV1Library} from "@superfluid-contracts/apps/SuperTokenV1Librar
 import {SuperfluidGovernanceII} from "@superfluid-contracts/gov/SuperfluidGovernanceII.sol";
 import {ISuperfluid} from "@superfluid-contracts/interfaces/superfluid/ISuperfluid.sol";
 import {ISuperToken} from "@superfluid-contracts/interfaces/superfluid/ISuperToken.sol";
+import {GeneralDistributionAgreementV1} from "@superfluid-contracts/agreements/gdav1/GeneralDistributionAgreementV1.sol";
 
 import {MockPassportDecoder} from "test/utils/MockPassportDecoder.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -48,6 +49,8 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
     uint256 minPassportScore;
     uint256 initialSuperAppBalance;
 
+    address secondAllocator = makeAddr("second");
+
     ISuperToken superFakeDai = ISuperToken(0xaC7A5cf2E0A6DB31456572871Ee33eb6212014a9);
     IERC20 fakeDai = IERC20(0xd0DE1486F69495D49c02D8f541B7dADf9Cf5CD91);
     address superFakeDaiWhale = 0x301933aEf6bB308f090087e9075ed5bFcBd3e0B3;
@@ -66,8 +69,9 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
         // get some super fake dai
         vm.startPrank(superFakeDaiWhale);
         superFakeDai.transfer(address(this), 420 * 1e19);
-        superFakeDai.transfer(address(_strategy), 420 * 1e6);
+        superFakeDai.transfer(address(_strategy), 420 * 1e16);
         superFakeDai.transfer(randomAddress(), 20 * 1e18);
+        superFakeDai.transfer(secondAllocator, 20 * 1e18);
 
         fakeDai.transfer(address(this), 420 * 1e19);
         vm.stopPrank();
@@ -91,6 +95,9 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
         );
 
         poolId = __createPool(address(_strategy));
+
+        _passportDecoder.setScore(address(this), 70);
+        _passportDecoder.setScore(secondAllocator, 70);
     }
 
     function test_deployment() public {
@@ -334,27 +341,126 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
         vm.expectRevert(UNAUTHORIZED.selector);
         _strategy.withdraw(address(fakeDai), 1e5);
     }
+
     function test_allocate() public {
         address recipientId = __register_accept_recipient();
 
         vm.warp(uint256(allocationStartTime) + 1);
 
-        _passportDecoder.setScore(address(this), 70);
         // unlimited allowance
         superFakeDai.increaseFlowRateAllowanceWithPermissions(address(_strategy), 7, type(int96).max);
         allo().allocate(
             poolId,
             abi.encode(
                 recipientId,
-                10 // super small flowRate
+                9 // super small flowRate
             )
         );
 
-        // get recipient
-        SQFSuperFluidStrategy.Recipient memory recipient = _strategy.getRecipient(recipientId);
-
         assertEq(_strategy.totalUnitsByRecipient(recipientId), 10);
-        assertEq(_strategy.recipientFlowRate(recipientId), 10);
+        assertEq(_strategy.recipientFlowRate(recipientId), 9);
+    }
+
+    function test_allocate_second_time_same_user() public {
+        test_allocate();
+        address recipientId = profile1_anchor();
+
+        allo().allocate(
+            poolId,
+            abi.encode(
+                recipientId,
+                16 // super small flowRate
+            )
+        );
+
+        assertEq(_strategy.totalUnitsByRecipient(recipientId), 17);
+        assertEq(_strategy.recipientFlowRate(recipientId), 16);
+    }
+
+    function test_allocate_second_time_different_user() public {
+        test_allocate();
+        address recipientId = profile1_anchor();
+
+        vm.startPrank(secondAllocator);
+        superFakeDai.increaseFlowRateAllowanceWithPermissions(address(_strategy), 7, type(int96).max);
+
+        allo().allocate(
+            poolId,
+            abi.encode(
+                recipientId,
+                16 // super small flowRate
+            )
+        );
+
+        vm.stopPrank();
+
+        assertEq(_strategy.totalUnitsByRecipient(recipientId), 26);
+        assertEq(_strategy.recipientFlowRate(recipientId), 25);
+    }
+
+    function test_allocate_multiple_recipients() public {
+        (address recipientId1, address recipientId2) = __register_accept_recipients();
+
+        vm.warp(uint256(registrationEndTime) + 1);
+
+        vm.prank(pool_manager1());
+        allo().distribute(poolId, new address[](0), abi.encode(1e10));
+
+        superFakeDai.increaseFlowRateAllowanceWithPermissions(address(_strategy), 7, type(int96).max);
+
+        allo().allocate(
+            poolId,
+            abi.encode(
+                recipientId1,
+                16 // super small flowRate
+            )
+        );
+
+        allo().allocate(
+            poolId,
+            abi.encode(
+                recipientId2,
+                25 // super small flowRate
+            )
+        );
+
+        assertEq(_strategy.totalUnitsByRecipient(recipientId1), 17);
+        assertEq(_strategy.recipientFlowRate(recipientId1), 16);
+
+        assertEq(_strategy.totalUnitsByRecipient(recipientId2), 26);
+        assertEq(_strategy.recipientFlowRate(recipientId2), 25);
+
+        vm.startPrank(secondAllocator);
+        superFakeDai.increaseFlowRateAllowanceWithPermissions(address(_strategy), 7, type(int96).max);
+
+        allo().allocate(
+            poolId,
+            abi.encode(
+                recipientId1,
+                9 // super small flowRate
+            )
+        );
+
+        allo().allocate(
+            poolId,
+            abi.encode(
+                recipientId2,
+                36 // super small flowRate
+            )
+        );
+
+        vm.stopPrank();
+
+        assertEq(_strategy.totalUnitsByRecipient(recipientId1), 26);
+        assertEq(_strategy.recipientFlowRate(recipientId1), 25);
+
+        assertEq(_strategy.totalUnitsByRecipient(recipientId2), 62);
+        assertEq(_strategy.recipientFlowRate(recipientId2), 61);
+
+        GeneralDistributionAgreementV1 gdaPool = GeneralDistributionAgreementV1(address(_strategy.gdaPool()));
+        int96 netFlowGDA = superFakeDai.getNetFlowRate(address(gdaPool));
+       
+        // check if the net flow rate is equal to the sum of the flow rates of the recipients based on their units
     }
 
     function testRevert_registerRecipient_UNAUTHORIZED_already_allocated() public {}
@@ -410,6 +516,26 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
 
         IStrategy.Status[] memory statuses = new IStrategy.Status[](1);
         statuses[0] = IStrategy.Status.Accepted;
+
+        vm.prank(pool_manager1());
+        vm.expectEmit(true, true, true, false);
+        emit Reviewed(recipientId, IStrategy.Status.Accepted, pool_manager1());
+        _strategy.reviewRecipients(recipients, statuses);
+    }
+
+    function __register_accept_recipients() internal returns (address recipientId, address recipientId2) {
+        recipientId = __register_recipient();
+        vm.prank(profile2_member1());
+        recipientId2 =
+            allo().registerRecipient(poolId, abi.encode(profile2_anchor(), recipient2(), Metadata(1, "test")));
+
+        address[] memory recipients = new address[](2);
+        recipients[0] = recipientId;
+        recipients[1] = recipientId2;
+
+        IStrategy.Status[] memory statuses = new IStrategy.Status[](2);
+        statuses[0] = IStrategy.Status.Accepted;
+        statuses[1] = IStrategy.Status.Accepted;
 
         vm.prank(pool_manager1());
         vm.expectEmit(true, true, true, false);
