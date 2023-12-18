@@ -3,8 +3,8 @@ pragma solidity ^0.8.19;
 
 import "forge-std/Test.sol";
 
-import {ISuperfluid, ISuperToken} from "@superfluid-contracts/interfaces/superfluid/ISuperfluid.sol";
-import {SuperfluidFrameworkDeployer} from "@superfluid-contracts/utils/SuperfluidFrameworkDeployer.sol";
+import {ISuperfluid, ISuperToken} from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
+import {SuperfluidFrameworkDeployer} from "@superfluid-finance/ethereum-contracts/contracts/utils/SuperfluidFrameworkDeployer.sol";
 import {RecipientSuperApp} from "../../../contracts/strategies/_poc/sqf-superfluid/RecipientSuperApp.sol";
 import {SQFSuperFluidStrategy} from "../../../contracts/strategies/_poc/sqf-superfluid/SQFSuperFluidStrategy.sol";
 import {Errors} from "../../../contracts/core/libraries/Errors.sol";

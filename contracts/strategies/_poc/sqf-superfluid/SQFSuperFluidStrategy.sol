@@ -3,9 +3,9 @@ pragma solidity 0.8.19;
 
 // External Libraries
 import {ReentrancyGuard} from "openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
-import {ISuperToken, ISuperfluidPool} from "@superfluid-contracts/interfaces/superfluid/ISuperfluid.sol";
-import {PoolConfig} from "@superfluid-contracts/interfaces/agreements/gdav1/IGeneralDistributionAgreementV1.sol";
-import {SuperTokenV1Library} from "@superfluid-contracts/apps/SuperTokenV1Library.sol";
+import {ISuperToken, ISuperfluidPool} from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
+import {PoolConfig} from "@superfluid-finance/ethereum-contracts/contracts/interfaces/agreements/gdav1/IGeneralDistributionAgreementV1.sol";
+import {SuperTokenV1Library} from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
 import {GitcoinPassportDecoder} from "@eas-proxy/GitcoinPassportDecoder.sol";
 import {FixedPointMathLib} from "solady/src/utils/FixedPointMathLib.sol";
 
