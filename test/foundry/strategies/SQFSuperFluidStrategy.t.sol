@@ -16,7 +16,7 @@ import {EventSetup} from "../shared/EventSetup.sol";
 
 import {SuperTokenV1Library} from "@superfluid-contracts/apps/SuperTokenV1Library.sol";
 import {SuperfluidGovernanceII} from "@superfluid-contracts/gov/SuperfluidGovernanceII.sol";
-import {ISuperfluid} from "@superfluid-contracts/interfaces/superfluid/ISuperfluid.sol";
+import {ISuperfluid, ISuperfluidPool} from "@superfluid-contracts/interfaces/superfluid/ISuperfluid.sol";
 import {ISuperToken} from "@superfluid-contracts/interfaces/superfluid/ISuperToken.sol";
 import {GeneralDistributionAgreementV1} from "@superfluid-contracts/agreements/gdav1/GeneralDistributionAgreementV1.sol";
 
@@ -457,9 +457,20 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
         assertEq(_strategy.totalUnitsByRecipient(recipientId2), 62);
         assertEq(_strategy.recipientFlowRate(recipientId2), 61);
 
-        GeneralDistributionAgreementV1 gdaPool = GeneralDistributionAgreementV1(address(_strategy.gdaPool()));
-        int96 netFlowGDA = superFakeDai.getNetFlowRate(address(gdaPool));
-       
+        vm.startPrank(recipientId1);
+        superFakeDai.connectPool(_strategy.gdaPool());
+        ISuperfluidPool gdaPool = ISuperfluidPool(address(_strategy.gdaPool()));
+        int256 netFlowGDA = int256(superFakeDai.getNetFlowRate(address(gdaPool)));
+        vm.stopPrank();
+
+        int256 calcualtedFlowRate = int256(_strategy.recipientFlowRate(recipientId1) + _strategy.recipientFlowRate(recipientId2));
+
+        // assertEq(netFlowGDA, calcualtedFlowRate);
+
+        // should fail
+        assertEq(superFakeDai.balanceOf(recipientId1), 0);
+        assertEq(superFakeDai.balanceOf(recipientId2), 0);
+
         // check if the net flow rate is equal to the sum of the flow rates of the recipients based on their units
     }
 
