@@ -24,6 +24,10 @@ contract AlloSetup is Test, Accounts {
         vm.stopPrank();
     }
 
+    function __AlloSetupLive() internal {
+        _allo_ = Allo(0x1133eA7Af70876e64665ecD07C0A0476d09465a1);
+    }
+
     function allo() public view returns (Allo) {
         return _allo_;
     }

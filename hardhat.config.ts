@@ -185,6 +185,10 @@ const config: HardhatUserConfig = {
       "sepolia",
       `https://eth-sepolia.g.alchemy.com/v2/${alchemyIdKey}`
     ),
+    "arbitrum-goerli": createTestnetConfig(
+      "arbitrum-goerli",
+      `https://arb-goerli.g.alchemy.com/v2/${alchemyIdKey}`
+    ),
     "arbitrum-sepolia": createTestnetConfig(
       "arbitrum-sepolia",
       `https://arb-sepolia.g.alchemy.com/v2/${alchemyIdKey}`
@@ -221,6 +225,16 @@ const config: HardhatUserConfig = {
 
     // Local Networks
     localhost: createTestnetConfig("localhost", "http://localhost:8545"),
+    hardhat: {
+      // forking: {
+      //   url: process.env.MAINNET,
+      //   blockNumber: 33317730,
+      // },
+      mining: {
+        auto: false,
+        interval: 1000,
+      },
+    },
   },
   gasReporter: {
     coinmarketcap: process.env.COINMARKETCAP_API_KEY,

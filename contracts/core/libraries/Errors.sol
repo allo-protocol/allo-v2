@@ -105,6 +105,9 @@ contract Errors {
     /// @notice Thrown when registration is not active.
     error REGISTRATION_NOT_ACTIVE();
 
+    /// @notice Thrown when registration is active.
+    error REGISTRATION_ACTIVE();
+
     /// @notice Thrown when there is an error in recipient.
     error RECIPIENT_ERROR(address recipientId);
 

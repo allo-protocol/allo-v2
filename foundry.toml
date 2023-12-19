@@ -21,6 +21,9 @@ gas_reports = [
   "DonationVotingMerkleDistributionDirectTransferStrategy",
   "DonationVotingMerkleDistributionVaultStrategy",
   "QVImpactStreamStrategy",
+  "RecipientSuperApp",
+  "SuperAppBaseSQF",
+  "SQFSuperFluidStrategy"
 ]
 gas_reports_ignore = [
   "TestStrategy",
@@ -40,3 +43,4 @@ ignore = ['contracts/strategies/_poc/qv-hackathon/SchemaResolver.sol']
 
 [rpc_endpoints]
 mainnet = "${MAINNET_RPC_URL}"
+opgoerli = "${OPGOERLI_RPC_URL}"
