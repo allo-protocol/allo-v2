@@ -27,7 +27,7 @@ const chainIds = {
   "fantom-testnet": 4002,
   "pgn-sepolia": 58008,
   "celo-testnet": 44787,
-  "arbitrum-goerli": 421613,
+  "arbitrum-sepolia": 421614,
   "base-testnet": 84531,
   mumbai: 80001,
 
@@ -189,6 +189,10 @@ const config: HardhatUserConfig = {
       "arbitrum-goerli",
       `https://arb-goerli.g.alchemy.com/v2/${alchemyIdKey}`
     ),
+    "arbitrum-sepolia": createTestnetConfig(
+      "arbitrum-sepolia",
+      `https://arb-sepolia.g.alchemy.com/v2/${alchemyIdKey}`
+    ),
     ftmTestnet: createTestnetConfig(
       "fantom-testnet",
       "https://rpc.testnet.fantom.network/"
@@ -273,7 +277,7 @@ const config: HardhatUserConfig = {
       // @ts-ignore
       "arbitrum-mainnet": process.env.ARBITRUMSCAN_API_KEY,
       // @ts-ignore
-      "arbitrum-goerli": process.env.ARBITRUMSCAN_API_KEY,
+      "arbitrum-sepolia": process.env.ARBITRUMSCAN_API_KEY,
     },
     customChains: [
       {
@@ -296,7 +300,7 @@ const config: HardhatUserConfig = {
         network: "celo-mainnet",
         chainId: chainIds["celo-mainnet"],
         urls: {
-          apiURL: "https://celoscan.io/api",
+          apiURL: "https://api.celoscan.io/api",
           browserURL: "https://celoscan.io",
         },
       },
@@ -349,10 +353,10 @@ const config: HardhatUserConfig = {
         },
       },
       {
-        network: "arbitrum-goerli",
-        chainId: chainIds["arbitrum-goerli"],
+        network: "arbitrum-sepolia",
+        chainId: chainIds["arbitrum-sepolia"],
         urls: {
-          apiURL: "https://api-goerli.arbiscan.io/api",
+          apiURL: "https://api-sepolia.arbiscan.io/api",
           browserURL: "https://arbiscan.io",
         },
       },
