@@ -86,11 +86,11 @@ contract RecipientSuperApp is ISuperApp {
 
     /// @notice This is the main callback function called by the host
     ///      to notify the app about the callback context.
-    function onFlowUpdated(address sender, int96 previousFlowRate, int96 newFlowRate, bytes calldata ctx)
+    function onFlowUpdated(int96 previousFlowRate, int96 newFlowRate, bytes calldata ctx)
         internal
         returns (bytes memory newCtx)
     {
-        strategy.adjustWeightings(uint256(int256(previousFlowRate)), uint256(int256(newFlowRate)), sender);
+        strategy.adjustWeightings(uint256(int256(previousFlowRate)), uint256(int256(newFlowRate)));
         newCtx = _updateOutflow(ctx);
     }
 
@@ -157,7 +157,6 @@ contract RecipientSuperApp is ISuperApp {
         (, int96 flowRate,,) = superToken.getFlowInfo(sender, address(this));
 
         return onFlowUpdated(
-            sender,
             0,
             flowRate,
             ctx // userData can be acquired with `host.decodeCtx(ctx).userData`
@@ -197,7 +196,6 @@ contract RecipientSuperApp is ISuperApp {
         (, int96 flowRate,,) = superToken.getFlowInfo(sender, address(this));
 
         return onFlowUpdated(
-            sender,
             previousFlowRate,
             flowRate,
             ctx // userData can be acquired with `host.decodeCtx(ctx).userData`
@@ -226,7 +224,7 @@ contract RecipientSuperApp is ISuperApp {
         ISuperToken superToken,
         address agreementClass,
         bytes32, /*agreementId*/
-        bytes calldata agreementData,
+        bytes calldata /*agreementData*/,
         bytes calldata cbdata,
         bytes calldata ctx
     ) external override returns (bytes memory) {
@@ -234,10 +232,8 @@ contract RecipientSuperApp is ISuperApp {
             return ctx;
         }
 
-        (address sender,) = abi.decode(agreementData, (address, address));
         (, int96 previousFlowRate) = abi.decode(cbdata, (uint256, int96));
-        // (, int96 flowRate,,) = superToken.getFlowInfo(sender, address(this));
-        return onFlowUpdated(sender, previousFlowRate, 0, ctx);
+        return onFlowUpdated(previousFlowRate, 0, ctx);
     }
 
     /// ================================
