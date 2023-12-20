@@ -568,7 +568,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
                 revert UNAUTHORIZED();
             }
         } else {
-            (recipientAddress, registryAnchor, metadata) = abi.decode(_data, (address, address, Metadata));
+            (registryAnchor, recipientAddress, metadata) = abi.decode(_data, (address, address, Metadata));
 
             // Set this to 'true' if the registry anchor is not the zero address
             isUsingRegistryAnchor = registryAnchor != address(0);
