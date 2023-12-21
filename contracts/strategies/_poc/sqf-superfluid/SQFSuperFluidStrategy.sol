@@ -519,7 +519,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
 
         if (recipientId == address(0)) revert UNAUTHORIZED();
 
-        uint256 recipientTotalUnits = totalUnitsByRecipient[recipientId];
+        uint256 recipientTotalUnits = totalUnitsByRecipient[recipientId] * 1000;
 
         if (_previousFlowrate == 0) {
             // created a new flow
@@ -532,12 +532,15 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
             recipientTotalUnits = (recipientTotalUnits.sqrt() + _newFlowRate.sqrt() - _previousFlowrate.sqrt()) ** 2;
         }
 
+        recipientTotalUnits /= 1000;
+
         Recipient storage recipient = recipients[recipientId];
 
         _updateMemberUnits(recipientId, recipient.recipientAddress, uint128(recipientTotalUnits));
 
         totalUnitsByRecipient[recipientId] = recipientTotalUnits;
 
+        // todo: do we still need the currentFlowRate?
         uint256 currentFlowRate = recipientFlowRate[recipientId];
         recipientFlowRate[recipientId] = currentFlowRate + _newFlowRate - _previousFlowrate;
 
