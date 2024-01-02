@@ -3,6 +3,7 @@ pragma solidity 0.8.19;
 
 // External Libraries
 import "solady/src/auth/Ownable.sol";
+import {console} from "forge-std/Test.sol"; //remove after testing
 import "openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/access/AccessControlUpgradeable.sol";
@@ -467,6 +468,9 @@ contract Allo is
         // initialize strategies
         // Initialization is expected to revert when invoked more than once with 'ALREADY_INITIALIZED()' error
         _strategy.initialize(poolId, _initStrategyData);
+
+        console.log("poolId: %s", poolId);
+        console.log("_strategy.getPoolId(): %s", _strategy.getPoolId());
 
         if (_strategy.getPoolId() != poolId || address(_strategy.getAllo()) != address(this)) revert MISMATCH();
 

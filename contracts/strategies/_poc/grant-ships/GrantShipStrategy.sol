@@ -17,7 +17,9 @@ import {Metadata} from "../../../core/libraries/Metadata.sol";
 contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     constructor(address _allo, string memory _name) BaseStrategy(_allo, _name) {}
 
-    function initialize(uint256 _poolId, bytes memory _data) external {}
+    function initialize(uint256 _poolId, bytes memory _data) external {
+        __GrantShip_init(_poolId, _data);
+    }
 
     function __GrantShip_init(uint256 _poolId, bytes memory _data) internal {
         __BaseStrategy_init(_poolId);
