@@ -5,6 +5,8 @@ import "forge-std/Test.sol";
 
 // External Libraries
 
+import {IHats} from "hats-protocol/Interfaces/IHats.sol";
+
 // Interfaces
 import {IStrategy} from "../../../../contracts/core/interfaces/IStrategy.sol";
 
@@ -18,10 +20,10 @@ import {Native} from "../../../../contracts/core/libraries/Native.sol";
 
 // Test libraries
 import {AlloSetup} from "../../shared/AlloSetup.sol";
-import {RegistrySetupFull} from "../../shared/RegistrySetup.sol";
+import {RegistrySetupFullLive} from "../../shared/RegistrySetup.sol";
 import {EventSetup} from "../../shared/EventSetup.sol";
 
-contract GrantShiptStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, EventSetup, Errors {
+contract GrantShiptStrategyTest is Test, RegistrySetupFullLive, AlloSetup, Native, EventSetup, Errors {
     Metadata public shipMetadata;
 
     GrantShipStrategy public strategyImplementation;
@@ -32,18 +34,14 @@ contract GrantShiptStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, E
 
     address[] poolAdminAsManager = new address[](1);
 
+    IHats public hats;
+
     function setUp() public {
-        __RegistrySetupFull();
-        __AlloSetup(address(registry()));
+        vm.createSelectFork({blockNumber: 18_562_300, urlOrAlias: "opgoerli"});
+        __RegistrySetupFullLive();
+        __AlloSetupLive();
 
-        strategyImplementation = new GrantShipStrategy(address(allo()), "GrantShipStrategy");
-
-        vm.startPrank(allo_owner());
-
-        allo().addToCloneableStrategies(address(strategyImplementation));
-        allo().updatePercentFee(0);
-
-        vm.stopPrank();
+        strategyImplementation = __setup_and_create_strategy();
 
         address payable strategyAddress;
         (poolId, strategyAddress) = _createPool(
@@ -55,7 +53,16 @@ contract GrantShiptStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, E
         strategy = GrantShipStrategy(strategyAddress);
     }
 
-    // ================= Helper ===================
+    // ================= Helpers ===================
+
+    function __setup_strategy() internal returns (GrantShipStrategy) {
+        return new GrantShipStrategy(address(allo()), "GrantShipStrategy");
+    }
+
+    function __setup_and_create_strategy() internal returns (GrantShipStrategy) {
+        strategyImplementation = __setup_strategy();
+        return strategyImplementation;
+    }
 
     function _createPool(bool _registryGating, bool _metadataRequired, bool _grantAmountRequired)
         internal
@@ -63,11 +70,10 @@ contract GrantShiptStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, E
     {
         vm.deal(pool_admin(), 30e18);
         poolAdminAsManager[0] = pool_admin();
-        console.log("pool_admin: %s", pool_admin());
 
         vm.startPrank(pool_admin());
 
-        newPoolId = allo().createPool{value: 30e18}(
+        newPoolId = allo().createPoolWithCustomStrategy{value: 30e18}(
             poolProfile_id(),
             address(strategyImplementation),
             abi.encode(_registryGating, _metadataRequired, _grantAmountRequired),
@@ -85,50 +91,67 @@ contract GrantShiptStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, E
         strategyClone = payable(address(allo().getPool(newPoolId).strategy));
     }
 
-    // function _createHatsTree() internal {
-    //     hats = new Hats("Test Name", "ipfs://");
-
-    //     _topHatId = hats.mintTopHat(_topHatWearer, "testTopHat", "https://wwww/tophat.com/");
-
-    //     vm.prank(_topHatWearer);
-
-    //     _facilitatorHatId = hats.createHat(_topHatId, "Facilitator Hat", 2, _eligibility, _toggle, true, "");
-
-    //     vm.prank(_topHatWearer);
-    //     hats.mintHat(_facilitatorHatId, _gameFacilitator);
-
-    //     for (uint32 i = 0; i < 3;) {
-    //         vm.prank(_topHatWearer);
-    //         _shipHatIds[i] = hats.createHat(
-    //             _topHatId, string.concat("Ship Hat ", vm.toString(i + 1)), 1, _eligibility, _toggle, true, ""
-    //         );
-
-    //         _shipAddresses[i] = address(uint160(50 + i));
-
-    //         vm.prank(_topHatWearer);
-    //         hats.mintHat(_shipHatIds[i], _shipAddresses[i]);
-
-    //         vm.prank(_shipAddresses[i]);
-    //         _operatorHatIds[i] = hats.createHat(
-    //             _shipHatIds[i],
-    //             string.concat("Ship Operator Hat ", vm.toString(i + 1)),
-    //             3,
-    //             address(555),
-    //             address(333),
-    //             true,
-    //             ""
-    //         );
-
-    //         _shipOperators[i] = address(uint160(10 + i));
-
-    //         vm.prank(_topHatWearer);
-    //         hats.mintHat(_operatorHatIds[i], _shipOperators[i]);
-
-    //         unchecked {
-    //             ++i;
-    //         }
-    //     }
+    // function __createPool(address strategy) internal returns (uint256 _poolId) {
+    //     vm.prank(pool_admin());
+    //     _poolId = allo().createPool(
+    //         poolProfile_id(),
+    //         strategy,
+    //         __enocdeInitializeParams(),
+    //         address(superFakeDai),
+    //         0,
+    //         Metadata(1, "test"),
+    //         pool_managers()
+    //     );
     // }
+
+    function _createHatsTree() internal {
+        // hats = new IHats(makeAddr("hats"));
+
+        // vm.startPrank(pool_admin());
+
+        // uint256 _topHatId = hats.mintTopHat(pool_admin(), "testTopHat", "https://wwww/tophat.com/");
+
+        // console.log("topHatId: %s", _topHatId);
+
+        // vm.prank(_topHatWearer);
+
+        // _facilitatorHatId = hats.createHat(_topHatId, "Facilitator Hat", 2, _eligibility, _toggle, true, "");
+
+        // vm.prank(_topHatWearer);
+        // hats.mintHat(_facilitatorHatId, _gameFacilitator);
+
+        // for (uint32 i = 0; i < 3;) {
+        //     vm.prank(_topHatWearer);
+        //     _shipHatIds[i] = hats.createHat(
+        //         _topHatId, string.concat("Ship Hat ", vm.toString(i + 1)), 1, _eligibility, _toggle, true, ""
+        //     );
+
+        //     _shipAddresses[i] = address(uint160(50 + i));
+
+        //     vm.prank(_topHatWearer);
+        //     hats.mintHat(_shipHatIds[i], _shipAddresses[i]);
+
+        //     vm.prank(_shipAddresses[i]);
+        //     _operatorHatIds[i] = hats.createHat(
+        //         _shipHatIds[i],
+        //         string.concat("Ship Operator Hat ", vm.toString(i + 1)),
+        //         3,
+        //         address(555),
+        //         address(333),
+        //         true,
+        //         ""
+        //     );
+
+        //     _shipOperators[i] = address(uint160(10 + i));
+
+        //     vm.prank(_topHatWearer);
+        //     hats.mintHat(_operatorHatIds[i], _shipOperators[i]);
+
+        //     unchecked {
+        //         ++i;
+        //     }
+        // }
+    }
 
     function testtest() public {
         console.log("poolId: %s", poolId);
