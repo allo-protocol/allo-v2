@@ -18,9 +18,10 @@ import {Native} from "../../../../contracts/core/libraries/Native.sol";
 // Test libraries
 import {AlloSetup} from "../../shared/AlloSetup.sol";
 import {RegistrySetupFullLive} from "../../shared/RegistrySetup.sol";
+import {HatsSetupLive} from "./HatsSetup.sol";
 import {EventSetup} from "../../shared/EventSetup.sol";
 
-contract GrantShiptStrategyTest is Test, RegistrySetupFullLive, AlloSetup, Native, EventSetup, Errors {
+contract GrantShiptStrategyTest is Test, RegistrySetupFullLive, AlloSetup, HatsSetupLive, Native, EventSetup, Errors {
     Metadata public shipMetadata;
 
     GrantShipStrategy public strategyImplementation;
@@ -35,7 +36,10 @@ contract GrantShiptStrategyTest is Test, RegistrySetupFullLive, AlloSetup, Nativ
         vm.createSelectFork({blockNumber: 166_807_779, urlOrAlias: "arbitrumOne"});
         __RegistrySetupFullLive();
         __AlloSetupLive();
+        __HatsSetupLive();
         __setup_strategy();
+
+        console.log("topHatId: %s", topHatId());
 
         address payable strategyAddress;
         (poolId, strategyAddress) = _createPool(

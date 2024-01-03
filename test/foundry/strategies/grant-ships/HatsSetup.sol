@@ -16,6 +16,8 @@ contract HatsSetupLive is Test, Accounts {
     IHats internal _hats_;
 
     uint256 internal _topHatId;
+    address internal _topHatHolder = makeAddr("topHatHolder");
+
     uint256 internal _facilitatorHatId;
 
     function __HatsSetupLive() internal {
@@ -23,9 +25,19 @@ contract HatsSetupLive is Test, Accounts {
         _createHats();
     }
 
-    function _createHats() internal {}
-
     function hats() public view returns (IHats) {
         return _hats_;
+    }
+
+    function topHatHolder() public view returns (address) {
+        return _topHatHolder;
+    }
+
+    function topHatId() public view returns (uint256) {
+        return _topHatId;
+    }
+
+    function _createHats() internal {
+        _topHatId = hats().mintTopHat(topHatHolder(), "Top Hat", "https://wwww/tophat.com/");
     }
 }
