@@ -1,11 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.19;
 
-import "forge-std/Test.sol";
-
 // External Libraries
-
-import {IHats} from "hats-protocol/Interfaces/IHats.sol";
+import "forge-std/Test.sol";
 
 // Interfaces
 import {IStrategy} from "../../../../contracts/core/interfaces/IStrategy.sol";
@@ -34,14 +31,11 @@ contract GrantShiptStrategyTest is Test, RegistrySetupFullLive, AlloSetup, Nativ
 
     address[] poolAdminAsManager = new address[](1);
 
-    IHats public hats;
-
     function setUp() public {
-        vm.createSelectFork({blockNumber: 18_562_300, urlOrAlias: "opgoerli"});
+        vm.createSelectFork({blockNumber: 166_807_779, urlOrAlias: "arbitrumOne"});
         __RegistrySetupFullLive();
         __AlloSetupLive();
-
-        strategyImplementation = __setup_and_create_strategy();
+        __setup_strategy();
 
         address payable strategyAddress;
         (poolId, strategyAddress) = _createPool(
@@ -56,12 +50,7 @@ contract GrantShiptStrategyTest is Test, RegistrySetupFullLive, AlloSetup, Nativ
     // ================= Helpers ===================
 
     function __setup_strategy() internal returns (GrantShipStrategy) {
-        return new GrantShipStrategy(address(allo()), "GrantShipStrategy");
-    }
-
-    function __setup_and_create_strategy() internal returns (GrantShipStrategy) {
-        strategyImplementation = __setup_strategy();
-        return strategyImplementation;
+        strategyImplementation = new GrantShipStrategy(address(allo()), "GrantShipStrategy");
     }
 
     function _createPool(bool _registryGating, bool _metadataRequired, bool _grantAmountRequired)
