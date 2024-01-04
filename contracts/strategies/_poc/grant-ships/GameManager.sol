@@ -42,6 +42,7 @@ contract GameManager is BaseStrategy, ReentrancyGuard {
     mapping(address => GrantShipRecipient) public grantShipRecipients;
 
     uint256 gameFacilitatorHatId;
+    address gameManager;
 
     /// ===============================
     /// ======== Constructor ==========
@@ -98,16 +99,43 @@ contract GameManager is BaseStrategy, ReentrancyGuard {
         // distributes funding to each grantship
     }
 
-    function _registerRecipient(bytes memory _data, address _sender) internal virtual override returns (address) {
-        // onlyFacilitator
-        // register each grantship
+    /// ====================================
+    /// ============ View ==================
+    /// ====================================
+
+    function isGameFacilitator(address _address) internal view returns (bool) {
+        return _hats.isWearerOfHat(_address, gameFacilitatorHatId);
     }
 
-    function _getRecipientStatus(address _recipientId) internal view virtual override returns (Status) {}
+    function isGameManager(address _address) internal view returns (bool) {
+        return _address == gameManager;
+    }
+
+    /// ====================================
+    /// ============ Internal ==============
+    /// ====================================
+
+    function _beforeRegisterRecipient(bytes memory, address _sender) internal view override {
+        if (!isGameFacilitator(_sender)) revert UNAUTHORIZED();
+    }
+
+    function _beforeAllocate(bytes memory, address _sender) internal view override {
+        if (!isGameManager(_sender)) revert UNAUTHORIZED();
+    }
+
+    function _beforeDistribute(address[] memory, bytes memory, address _sender) internal view override {
+        if (!isGameManager(_sender)) revert UNAUTHORIZED();
+    }
+
+    function _registerRecipient(bytes memory _data, address _sender) internal virtual override returns (address) {}
+
+    function _getRecipientStatus(address _recipientId) internal view virtual override returns (Status) {
+        GrantShipRecipient memory grantShipRecipient = grantShipRecipients[_recipientId];
+        return grantShipRecipient.recipientStatus;
+    }
 
     function _getGrantShipRecipient(address _recipientId) public view returns (GrantShipRecipient memory) {
         GrantShipRecipient memory grantShipRecipient = grantShipRecipients[_recipientId];
-
         return grantShipRecipient;
     }
 
@@ -117,7 +145,7 @@ contract GameManager is BaseStrategy, ReentrancyGuard {
     }
 
     function _isValidAllocator(address _allocator) internal view virtual override returns (bool) {
-        return _hats.isWearerOfHat(_allocator, gameFacilitatorHatId);
+        return isGameManager(_allocator);
     }
 
     /// @notice This contract should be able to receive native token
