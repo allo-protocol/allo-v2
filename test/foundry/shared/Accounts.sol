@@ -5,7 +5,7 @@ import "forge-std/StdCheats.sol";
 
 contract Accounts is StdCheats {
     // //////////////////////
-    // Protocol adresses
+    // Protocol addresses
     // //////////////////////
 
     function local() public view virtual returns (address) {
