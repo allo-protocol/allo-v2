@@ -7,6 +7,7 @@ import {ReentrancyGuard} from "openzeppelin-contracts/contracts/security/Reentra
 // Interfaces
 import {IAllo} from "../../../core/interfaces/IAllo.sol";
 import {IRegistry} from "../../../core/interfaces/IRegistry.sol";
+import {IHats} from "hats-protocol/Interfaces/IHats.sol";
 
 // Core Contracts
 import {BaseStrategy} from "../../BaseStrategy.sol";
@@ -16,7 +17,7 @@ import {Metadata} from "../../../core/libraries/Metadata.sol";
 
 contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// ================================
-    /// ========== Structs =============
+    /// ========== Models ==============
     /// ================================
 
     /// @notice Struct to hold details of an recipient
@@ -27,6 +28,29 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         Metadata metadata;
         Status recipientStatus;
         Status milestonesReviewStatus;
+    }
+
+    /// @notice Struct to hold milestone details
+    struct Milestone {
+        uint256 amountPercentage;
+        Metadata metadata;
+        Status milestoneStatus;
+    }
+
+    /// @notice FlagSeverity enumerator
+    /// Yellow: Warning, this Grant Ship has made an error or violated a rule.
+    /// Red: Danger, this Grant Ship appears to be operating in bad faith.
+    enum FlagSeverity {
+        Yellow,
+        Red
+    }
+
+    /// @notice Struct to hold flag details
+    struct Flag {
+        FlagSeverity severity;
+        string flagDescription;
+        bool isResolved;
+        string resolutionDescription;
     }
 
     /// ===============================
@@ -44,10 +68,6 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice The Ship Operator Hat ID for the pool
     uint256 public shipOperatorId;
 
-    /// @notice The address that controls aspects of this pool
-    // responsible for setting the pool active and inactive
-    address private _gameController;
-
     /// @notice Flag to check if registry gating is enabled.
     bool public registryGating;
 
@@ -59,6 +79,10 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice The 'Registry' contract interface.
     IRegistry private _registry;
+
+    /// @notice The 'Hats Protocol' contract interface.
+
+    IHats private _hats;
 
     /// @notice The total amount allocated to grant/recipient.
     uint256 public allocatedGrantAmount;
@@ -75,18 +99,47 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// @dev 'recipientId' to 'nextMilestone'
     mapping(address => uint256) public upcomingMilestone;
 
+    /// ===============================
+    /// ========== Game State =========
+    /// ===============================
+
+    /// @notice The Hats Id for the game controller role.
+    /// This role assigns the game state equally across all competing Grant Ships.
+    uint256 private _gameController;
+
+    /// @notice
+
     /// @notice This maps accepted recipients to their Grant Ship review rating
     /// @dev 'recipientId' to 'rating'
     mapping(address => uint256) public ratings;
+
     uint256 public totalRating;
 
     /// ===============================
     /// ======== Constructor ==========
     /// ===============================
+    constructor(address _allo, string memory _name) BaseStrategy(_allo, _name) {}
 
     /// ===============================
     /// ========= Initialize ==========
     /// ===============================
+
+    function initialize(uint256 _poolId, bytes memory _data) external {
+        __GrantShip_init(_poolId, _data);
+    }
+
+    function __GrantShip_init(uint256 _poolId, bytes memory _data) internal {
+        __BaseStrategy_init(_poolId);
+
+        (
+            bool _registryGating,
+            bool _metadataRequired,
+            bool _grantAmountRequired,
+            uint256 _shipOperatorId,
+            address _gameController,
+            address _registryAddress
+        ) = abi.decode(_data, (bool, bool, bool, uint256, address, address));
+    }
 
     /// ===============================
     /// ============ Views ============
@@ -99,25 +152,6 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// ===============================
     /// ============ Internal =========
     /// ===============================
-
-    /// @notice Flag to check if registry gating is enabled.
-    bool public registryGating;
-
-    /// @notice Flag to check if metadata is required.
-    bool public metadataRequired;
-
-    /// @notice Flag to check if grant amount is required.
-    bool public grantAmountRequired;
-
-    constructor(address _allo, string memory _name) BaseStrategy(_allo, _name) {}
-
-    function initialize(uint256 _poolId, bytes memory _data) external {
-        __GrantShip_init(_poolId, _data);
-    }
-
-    function __GrantShip_init(uint256 _poolId, bytes memory _data) internal {
-        __BaseStrategy_init(_poolId);
-    }
 
     function _allocate(bytes memory _data, address _sender) internal virtual override {}
     function _distribute(address[] memory _recipientIds, bytes memory _data, address _sender)
