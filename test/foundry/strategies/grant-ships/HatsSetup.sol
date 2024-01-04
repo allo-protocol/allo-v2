@@ -88,14 +88,6 @@ contract HatsSetupLive is Test, Accounts {
 
             vm.stopPrank();
 
-            // console.log("SHIP %s", vm.toString(i + 1));
-            // console.log("Address: %s", vm.toString(ship(i).wearer));
-            // console.log("HatId: %s", vm.toString(ship(i).id));
-
-            // console.log("OPERATOR %s", vm.toString(i + 1));
-            // console.log("Address: %s", vm.toString(shipOperator(i).wearer));
-            // console.log("HatId: %s", vm.toString(shipOperator(i).id));
-
             unchecked {
                 ++i;
             }

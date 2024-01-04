@@ -39,8 +39,6 @@ contract GrantShiptStrategyTest is Test, RegistrySetupFullLive, AlloSetup, HatsS
         __HatsSetupLive(pool_admin());
         __setup_strategy();
 
-        console.log("topHatId: %s", topHat().id);
-
         address payable strategyAddress;
         (poolId, strategyAddress) = _createPool(
             true, // registryGating
@@ -82,68 +80,6 @@ contract GrantShiptStrategyTest is Test, RegistrySetupFullLive, AlloSetup, HatsS
         vm.stopPrank();
 
         strategyClone = payable(address(allo().getPool(newPoolId).strategy));
-    }
-
-    // function __createPool(address strategy) internal returns (uint256 _poolId) {
-    //     vm.prank(pool_admin());
-    //     _poolId = allo().createPool(
-    //         poolProfile_id(),
-    //         strategy,
-    //         __enocdeInitializeParams(),
-    //         address(superFakeDai),
-    //         0,
-    //         Metadata(1, "test"),
-    //         pool_managers()
-    //     );
-    // }
-
-    function _createHatsTree() internal {
-        // hats = new IHats(makeAddr("hats"));
-
-        // vm.startPrank(pool_admin());
-
-        // uint256 _topHatId = hats.mintTopHat(pool_admin(), "testTopHat", "https://wwww/tophat.com/");
-
-        // console.log("topHatId: %s", _topHatId);
-
-        // vm.prank(_topHatWearer);
-
-        // _facilitatorHatId = hats.createHat(_topHatId, "Facilitator Hat", 2, _eligibility, _toggle, true, "");
-
-        // vm.prank(_topHatWearer);
-        // hats.mintHat(_facilitatorHatId, _gameFacilitator);
-
-        // for (uint32 i = 0; i < 3;) {
-        //     vm.prank(_topHatWearer);
-        //     _shipHatIds[i] = hats.createHat(
-        //         _topHatId, string.concat("Ship Hat ", vm.toString(i + 1)), 1, _eligibility, _toggle, true, ""
-        //     );
-
-        //     _shipAddresses[i] = address(uint160(50 + i));
-
-        //     vm.prank(_topHatWearer);
-        //     hats.mintHat(_shipHatIds[i], _shipAddresses[i]);
-
-        //     vm.prank(_shipAddresses[i]);
-        //     _operatorHatIds[i] = hats.createHat(
-        //         _shipHatIds[i],
-        //         string.concat("Ship Operator Hat ", vm.toString(i + 1)),
-        //         3,
-        //         address(555),
-        //         address(333),
-        //         true,
-        //         ""
-        //     );
-
-        //     _shipOperators[i] = address(uint160(10 + i));
-
-        //     vm.prank(_topHatWearer);
-        //     hats.mintHat(_operatorHatIds[i], _shipOperators[i]);
-
-        //     unchecked {
-        //         ++i;
-        //     }
-        // }
     }
 
     function testtest() public {
