@@ -94,7 +94,7 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
         allocationStartTime = uint64(block.timestamp) + 120;
         allocationEndTime = uint64(block.timestamp) + uint64(2 days);
         minPassportScore = 69;
-        initialSuperAppBalance = 420 * 1e5;
+        initialSuperAppBalance = 420 * 1e8;
 
         // set empty app RegistrationKey
         vm.prank(superfluidOwner);
