@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import {ERC721} from "solady/src/tokens/ERC721.sol";
+import {ERC721} from "solady/tokens/ERC721.sol";
 import {IAllo} from "./../../../core/interfaces/IAllo.sol";
 import {BaseStrategy} from "../../BaseStrategy.sol";
 import {Metadata} from "../../../core/libraries/Metadata.sol";

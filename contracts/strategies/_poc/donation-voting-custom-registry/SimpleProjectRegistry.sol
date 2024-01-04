@@ -15,7 +15,7 @@ pragma solidity 0.8.19;
  * registry.
  */
 
-import "solady/src/auth/Ownable.sol";
+import "solady/auth/Ownable.sol";
 
 /// @title Simple Project Registry
 /// @author @0xZakk <zakk@gitcoin.co>
