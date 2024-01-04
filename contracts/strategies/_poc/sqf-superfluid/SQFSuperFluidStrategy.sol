@@ -13,7 +13,7 @@ import {PoolConfig} from
 import {SuperTokenV1Library} from
     "../../../../lib/superfluid-protocol-monorepo/packages/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
 import {IGitcoinPassportDecoder} from "./lib/IGitcoinPassportDecoder.sol";
-import {FixedPointMathLib} from "solady/src/utils/FixedPointMathLib.sol";
+import {FixedPointMathLib} from "solady/utils/FixedPointMathLib.sol";
 
 // Interfaces
 import {IRegistry} from "../../../core/interfaces/IRegistry.sol";

@@ -6,7 +6,7 @@ import {IStrategy} from "../../../contracts/core/interfaces/IStrategy.sol";
 import {QVBaseStrategy} from "../../../contracts/strategies/qv-base/QVBaseStrategy.sol";
 
 // External Libraries
-import {ERC721} from "solady/src/tokens/ERC721.sol";
+import {ERC721} from "solady/tokens/ERC721.sol";
 
 // Test libraries
 import {QVBaseStrategyTest} from "./QVBaseStrategy.t.sol";

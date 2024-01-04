@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity ^0.8.19;
 
-import {ERC20} from "solady/src/tokens/ERC20.sol";
+import {ERC20} from "solady/tokens/ERC20.sol";
 
 /// @dev WARNING! This mock is strictly intended for testing purposes only.
 /// Do NOT copy anything here into production code unless you really know what you are doing.

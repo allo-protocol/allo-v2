@@ -4,7 +4,7 @@ pragma solidity 0.8.19;
 // External Libraries
 import "openzeppelin-contracts-upgradeable/contracts/access/AccessControlUpgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
-import {ERC20} from "solady/src/tokens/ERC20.sol";
+import {ERC20} from "solady/tokens/ERC20.sol";
 // Interfaces
 import "./interfaces/IRegistry.sol";
 // Internal Libraries
