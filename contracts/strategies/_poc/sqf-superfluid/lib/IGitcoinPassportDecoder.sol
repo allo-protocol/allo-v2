@@ -4,7 +4,6 @@ pragma solidity ^0.8.9;
 /**
  * @dev A struct storing a passpor credential
  */
-
 struct Credential {
     string provider;
     bytes32 hash;
