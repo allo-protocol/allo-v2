@@ -81,7 +81,6 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     IRegistry private _registry;
 
     /// @notice The 'Hats Protocol' contract interface.
-
     IHats private _hats;
 
     /// @notice The total amount allocated to grant/recipient.
