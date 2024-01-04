@@ -36,10 +36,10 @@ contract GrantShiptStrategyTest is Test, RegistrySetupFullLive, AlloSetup, HatsS
         vm.createSelectFork({blockNumber: 166_807_779, urlOrAlias: "arbitrumOne"});
         __RegistrySetupFullLive();
         __AlloSetupLive();
-        __HatsSetupLive();
+        __HatsSetupLive(pool_admin());
         __setup_strategy();
 
-        console.log("topHatId: %s", topHatId());
+        console.log("topHatId: %s", topHat().id);
 
         address payable strategyAddress;
         (poolId, strategyAddress) = _createPool(
@@ -53,7 +53,7 @@ contract GrantShiptStrategyTest is Test, RegistrySetupFullLive, AlloSetup, HatsS
 
     // ================= Helpers ===================
 
-    function __setup_strategy() internal returns (GrantShipStrategy) {
+    function __setup_strategy() internal {
         strategyImplementation = new GrantShipStrategy(address(allo()), "GrantShipStrategy");
     }
 
