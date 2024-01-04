@@ -14,7 +14,6 @@ import {AlloSetup} from "../shared/AlloSetup.sol";
 import {RegistrySetupFull} from "../shared/RegistrySetup.sol";
 
 import {EventSetup} from "../shared/EventSetup.sol";
-import {Hats} from "hats-protocol/Hats.sol";
 
 // Core Contracts
 import {DirectGrantsSimpleStrategy} from
