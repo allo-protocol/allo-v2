@@ -23,8 +23,6 @@ import {BaseStrategy} from "../../BaseStrategy.sol";
 import {Metadata} from "../../../core/libraries/Metadata.sol";
 import {RecipientSuperApp} from "./RecipientSuperApp.sol";
 
-import "forge-std/console.sol";
-
 contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     using SuperTokenV1Library for ISuperToken;
     using FixedPointMathLib for uint256;
