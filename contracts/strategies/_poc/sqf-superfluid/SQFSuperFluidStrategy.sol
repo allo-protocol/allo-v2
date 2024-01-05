@@ -23,6 +23,8 @@ import {BaseStrategy} from "../../BaseStrategy.sol";
 import {Metadata} from "../../../core/libraries/Metadata.sol";
 import {RecipientSuperApp} from "./RecipientSuperApp.sol";
 
+import "forge-std/console.sol";
+
 contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     using SuperTokenV1Library for ISuperToken;
     using FixedPointMathLib for uint256;
@@ -540,8 +542,8 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
 
         totalUnitsByRecipient[recipientId] = recipientTotalUnits;
 
-        // todo: do we still need the currentFlowRate?
         uint256 currentFlowRate = recipientFlowRate[recipientId];
+
         recipientFlowRate[recipientId] = currentFlowRate + _newFlowRate - _previousFlowrate;
 
         emit TotalUnitsUpdated(recipientId, recipientTotalUnits);

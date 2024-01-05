@@ -232,7 +232,7 @@ contract RecipientSuperApp is ISuperApp {
             return ctx;
         }
 
-        (, int96 previousFlowRate) = abi.decode(cbdata, (uint256, int96));
+        (int96 previousFlowRate,) = abi.decode(cbdata, (int96, uint256));
         return onFlowUpdated(previousFlowRate, 0, ctx);
     }
 
