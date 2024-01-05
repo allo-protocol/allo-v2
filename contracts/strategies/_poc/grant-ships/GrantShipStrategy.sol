@@ -130,14 +130,8 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     function __GrantShip_init(uint256 _poolId, bytes memory _data) internal {
         __BaseStrategy_init(_poolId);
 
-        (
-            bool _registryGating,
-            bool _metadataRequired,
-            bool _grantAmountRequired,
-            uint256 _shipOperatorId,
-            address _gameController,
-            address _registryAddress
-        ) = abi.decode(_data, (bool, bool, bool, uint256, address, address));
+        (bool _registryGating, bool _metadataRequired, bool _grantAmountRequired) =
+            abi.decode(_data, (bool, bool, bool));
     }
 
     /// ===============================

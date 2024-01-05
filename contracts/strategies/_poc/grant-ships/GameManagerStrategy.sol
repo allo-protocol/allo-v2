@@ -1,16 +1,20 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.19;
 
+import {console} from "forge-std/Test.sol"; //remove after testing
+
 // External Libraries
 import {ReentrancyGuard} from "openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
 
 // Interfaces
 import {IHats} from "hats-protocol/Interfaces/IHats.sol";
 import {IAllo} from "../../../core/interfaces/IAllo.sol";
+import {IRegistry} from "../../../core/interfaces/IRegistry.sol";
 
 // Core Contracts
 import {BaseStrategy} from "../../BaseStrategy.sol";
 import {Metadata} from "../../../core/libraries/Metadata.sol";
+import {Allo} from "../../../../contracts/core/Allo.sol";
 
 // SubStrategy Contracts
 import {GrantShipStrategy} from "./GrantShipStrategy.sol";
@@ -37,10 +41,11 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     Status public currentRoundStatus;
 
     address public token;
+    address public gameManager;
 
     /// @notice The 'Hats Protocol' contract interface.
     IHats private _hats;
-    IAllo private _allo;
+    Allo private _allo;
 
     mapping(address => GrantShipStrategy) public grantShips;
     mapping(address => GrantShipRecipient) public grantShipRecipients;
@@ -51,7 +56,9 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     /// ======== Constructor ==========
     /// ===============================
 
-    constructor(address _alloAddress, string memory _name) BaseStrategy(_alloAddress, _name) {}
+    constructor(address _alloAddress, string memory _name) BaseStrategy(_alloAddress, _name) {
+        _allo = Allo(_alloAddress);
+    }
 
     /// ===============================
     /// ======== Initialize ===========
@@ -63,20 +70,65 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         (bytes memory _gameParams, bytes[] memory _shipData) = abi.decode(_data, (bytes, bytes[]));
 
         __gameState_init(_gameParams);
-        // __grantShips_init(_shipData, strategyImpl);
+        __grantShips_init(_shipData);
     }
 
     function __gameState_init(bytes memory _gameParams) internal {
         // TODO: refactor if only 2 setup params
-        (uint256 _gameFacilitatorId, address _token, address _hatsAddress) =
-            abi.decode(_gameParams, (uint256, address, address));
+        (uint256 _gameFacilitatorId, address _token, address _hatsAddress, address _gameManager) =
+            abi.decode(_gameParams, (uint256, address, address, address));
 
         gameFacilitatorHatId = _gameFacilitatorId;
         token = _token;
         _hats = IHats(_hatsAddress);
+        gameManager = _gameManager;
     }
 
-    function __grantShips_init(bytes[] memory _shipData) internal {}
+    function __grantShips_init(bytes[] memory _shipData) internal {
+        IRegistry registry = _allo.getRegistry();
+
+        // registerShip
+
+        for (uint256 i = 0; i < _shipData.length; i++) {
+            (string memory _shipName, Metadata memory _shipMetadata, address _captainAddress) =
+                abi.decode(_shipData[i], (string, Metadata, address));
+
+            // Note:
+            // Would be nice to have the captain address as a manager
+            // but owner has to be msg.sender in order to create a manager.
+            // can always do it in a separate call later.
+
+            address[] memory profileManagers = new address[](2);
+            profileManagers[0] = _captainAddress;
+            profileManagers[1] = gameManager;
+
+            address[] memory poolAdminAsManager = new address[](1);
+            poolAdminAsManager[0] = gameManager;
+
+            bytes32 shipProfileId =
+                registry.createProfile(i + 1, _shipName, _shipMetadata, address(this), profileManagers);
+            GrantShipStrategy grantShip = new GrantShipStrategy(address(allo), "Grant Ship");
+
+            uint256 shipPoolId = _allo.createPoolWithCustomStrategy(
+                shipProfileId,
+                address(grantShip),
+                abi.encode(true, true, true),
+                token,
+                0,
+                _shipMetadata,
+                // pool manager/game facilitator role will be mediated through Hats Protocol
+                // pool_admin address will be the game_facilitator multisig
+                // using pool_admin as a single address for both roles
+                poolAdminAsManager
+            );
+
+            // console.log("shipPoolId: %s", shipPoolId);
+
+            unchecked {
+                i++;
+            }
+        }
+    }
 
     function acceptGrantShip(address _recipientId, bytes memory _data) external {
         // onlyFacilitator

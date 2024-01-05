@@ -109,12 +109,12 @@ contract GrantShiptStrategyTest is Test, RegistrySetupFullLive, AlloSetup, HatsS
         bytes[] memory _shipData = new bytes[](1);
         poolAdminAsManager[0] = pool_admin();
 
-        _shipData[0] = abi.encode(1234);
+        _shipData[0] = abi.encode("Grant Ship 1", Metadata(1, "grant-ship-1-data"));
 
         newPoolId = allo().createPoolWithCustomStrategy(
             poolProfile_id(),
             address(gameManager),
-            abi.encode(abi.encode(_gameFacilitatorId, _token, _hatsAddress), _shipData),
+            abi.encode(abi.encode(_gameFacilitatorId, _token, _hatsAddress, pool_admin()), _shipData),
             _token,
             90_000e18,
             Metadata(1, "game-controller-data"),
