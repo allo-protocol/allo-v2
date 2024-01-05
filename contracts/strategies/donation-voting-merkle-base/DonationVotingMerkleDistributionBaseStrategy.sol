@@ -545,7 +545,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     /// @notice Submit recipient to pool and set their status.
     /// @param _data The data to be decoded.
     /// @custom:data if 'useRegistryAnchor' is 'true' (address recipientId, address recipientAddress, Metadata metadata)
-    /// @custom:data if 'useRegistryAnchor' is 'false' (address recipientAddress, address registryAnchor, Metadata metadata)
+    /// @custom:data if 'useRegistryAnchor' is 'false' (address registryAnchor, address recipientAddress, Metadata metadata)
     /// @param _sender The sender of the transaction
     /// @return recipientId The ID of the recipient
     function _registerRecipient(bytes memory _data, address _sender)
