@@ -489,10 +489,6 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
         assertTrue(balanceAfter > balanceBefore);
     }
 
-    function test_shit() public {
-        test_allocate_second_time_same_user();
-    }
-
     function test_allocate() public {
         address recipientId = __register_accept_recipient();
 
