@@ -6,6 +6,7 @@ import {ReentrancyGuard} from "openzeppelin-contracts/contracts/security/Reentra
 
 // Interfaces
 import {IHats} from "hats-protocol/Interfaces/IHats.sol";
+import {IAllo} from "../../../core/interfaces/IAllo.sol";
 
 // Core Contracts
 import {BaseStrategy} from "../../BaseStrategy.sol";
@@ -14,7 +15,7 @@ import {Metadata} from "../../../core/libraries/Metadata.sol";
 // SubStrategy Contracts
 import {GrantShipStrategy} from "./GrantShipStrategy.sol";
 
-contract GameManager is BaseStrategy, ReentrancyGuard {
+contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     /// ================================
     /// ========== Models ==============
     /// ================================
@@ -33,10 +34,13 @@ contract GameManager is BaseStrategy, ReentrancyGuard {
     uint256 public currentRoundId;
     uint256 public currentRoundStartTime;
     uint256 public currentRoundEndTime;
+
     address token;
+    address alloAddress;
 
     /// @notice The 'Hats Protocol' contract interface.
     IHats private _hats;
+    IAllo private _allo;
 
     mapping(address => GrantShipStrategy) public grantShips;
     mapping(address => GrantShipRecipient) public grantShipRecipients;
@@ -48,7 +52,9 @@ contract GameManager is BaseStrategy, ReentrancyGuard {
     /// ======== Constructor ==========
     /// ===============================
 
-    constructor(address _allo, string memory _name) BaseStrategy(_allo, _name) {}
+    constructor(address _alloAddress, string memory _name) BaseStrategy(_alloAddress, _name) {
+        alloAddress = _alloAddress;
+    }
 
     /// ===============================
     /// ======== Initialize ===========
@@ -57,10 +63,11 @@ contract GameManager is BaseStrategy, ReentrancyGuard {
     function initialize(uint256 _poolId, bytes memory _data) external {
         __BaseStrategy_init(_poolId);
 
-        (bytes memory _gameParams, bytes[] memory _startingShips) = abi.decode(_data, (bytes, bytes[]));
+        (bytes memory _gameParams, bytes[] memory _shipData, address strategyImpl) =
+            abi.decode(_data, (bytes, bytes[], address));
 
         __gameState_init(_gameParams);
-        // __grantShips_init(_startingShips);
+        // __grantShips_init(_shipData, strategyImpl);
     }
 
     function __gameState_init(bytes memory _gameParams) internal {
@@ -71,12 +78,17 @@ contract GameManager is BaseStrategy, ReentrancyGuard {
         gameFacilitatorHatId = _gameFacilitatorId;
         token = _token;
         _hats = IHats(_hatsAddress);
+        // Todo check if I really need to instantiate this interface or if
+        // the inheritance pattern just lets me call allo directly.
+        _allo = IAllo(alloAddress);
     }
 
-    function __grantShips_init() internal {
-        // loop over grantship data
-        // create each grantship
-        // register each grantship?
+    function __grantShips_init(bytes[] memory _shipData) internal {}
+
+    function acceptGrantShip(address _recipientId, bytes memory _data) external {
+        // onlyFacilitator
+        // only if recipient is in pending status
+        // only
     }
 
     function _allocate(bytes memory _data, address _sender) internal virtual override {
@@ -115,9 +127,16 @@ contract GameManager is BaseStrategy, ReentrancyGuard {
     /// ============ Internal ==============
     /// ====================================
 
+    function _createGrantShipStrategy(address _strategyImpl, bytes memory _data, uint256 grantShipNumber)
+        internal
+        returns (address payable)
+    {}
+
     function _beforeRegisterRecipient(bytes memory, address _sender) internal view override {
         if (!isGameFacilitator(_sender)) revert UNAUTHORIZED();
     }
+
+    function _registerRecipient(bytes memory _data, address _sender) internal virtual override returns (address) {}
 
     function _beforeAllocate(bytes memory, address _sender) internal view override {
         if (!isGameManager(_sender)) revert UNAUTHORIZED();
@@ -126,8 +145,6 @@ contract GameManager is BaseStrategy, ReentrancyGuard {
     function _beforeDistribute(address[] memory, bytes memory, address _sender) internal view override {
         if (!isGameManager(_sender)) revert UNAUTHORIZED();
     }
-
-    function _registerRecipient(bytes memory _data, address _sender) internal virtual override returns (address) {}
 
     function _getRecipientStatus(address _recipientId) internal view virtual override returns (Status) {
         GrantShipRecipient memory grantShipRecipient = grantShipRecipients[_recipientId];
