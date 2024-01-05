@@ -2,14 +2,14 @@
 pragma solidity ^0.8.19;
 
 contract MockHats {
+    mapping(address => bool) public hats;
 
-  mapping(address => bool) public hats;
+    function addHat(address _hat, bool _flag) external {
+        hats[_hat] = _flag;
+    }
 
-  function addHat(address _hat, bool _flag) external {
-    hats[_hat] = _flag;
-  }
-  function isWearerOfHat(address _account, uint256 _id) external view returns (bool) {
-    _id;
-    return hats[_account];
-  }
+    function isWearerOfHat(address _account, uint256 _id) external view returns (bool) {
+        _id;
+        return hats[_account];
+    }
 }

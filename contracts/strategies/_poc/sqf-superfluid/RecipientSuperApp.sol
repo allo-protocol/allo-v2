@@ -224,7 +224,7 @@ contract RecipientSuperApp is ISuperApp {
         ISuperToken superToken,
         address agreementClass,
         bytes32, /*agreementId*/
-        bytes calldata /*agreementData*/,
+        bytes calldata, /*agreementData*/
         bytes calldata cbdata,
         bytes calldata ctx
     ) external override returns (bytes memory) {
