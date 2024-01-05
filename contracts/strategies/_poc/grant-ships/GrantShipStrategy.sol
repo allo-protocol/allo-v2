@@ -132,6 +132,10 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
 
         (bool _registryGating, bool _metadataRequired, bool _grantAmountRequired) =
             abi.decode(_data, (bool, bool, bool));
+
+        registryGating = _registryGating;
+        metadataRequired = _metadataRequired;
+        grantAmountRequired = _grantAmountRequired;
     }
 
     /// ===============================

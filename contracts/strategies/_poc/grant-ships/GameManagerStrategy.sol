@@ -24,11 +24,29 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     /// ========== Models ==============
     /// ================================
 
-    struct GrantShipRecipient {
-        address recipientAddress;
+    struct Recipient {
+        address teamAddress;
+        address payable recipientAddress;
+        uint256 shipPoolId;
         uint256 grantAmount;
         Metadata metadata;
         Status recipientStatus;
+    }
+
+    /// ===============================
+    /// ========== Errors =============
+    /// ===============================
+
+    /// @notice Throws when the milestone is invalid.
+    error INVALID_STATUS();
+
+    /// ===============================
+    /// ========== Modifiers ==========
+    /// ===============================
+
+    modifier onlyGameFacilitator(address _sender) {
+        _hats.isWearerOfHat(_sender, gameFacilitatorHatId);
+        _;
     }
 
     /// ===============================
@@ -47,8 +65,9 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     IHats private _hats;
     Allo private _allo;
 
-    mapping(address => GrantShipStrategy) public grantShips;
-    mapping(address => GrantShipRecipient) public grantShipRecipients;
+    ///@notice This maps the teamAddress to the recipient
+    ///@dev 'teamAddress' to 'Recipient'
+    mapping(address => Recipient) public grantShipRecipients;
 
     uint256 public gameFacilitatorHatId;
 
@@ -90,8 +109,8 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         // registerShip
 
         for (uint256 i = 0; i < _shipData.length; i++) {
-            (string memory _shipName, Metadata memory _shipMetadata, address _captainAddress) =
-                abi.decode(_shipData[i], (string, Metadata, address));
+            (string memory _shipName, Metadata memory _shipMetadata, address _teamAddress, uint256 _facilitatorId) =
+                abi.decode(_shipData[i], (string, Metadata, address, uint256));
 
             // Note:
             // Would be nice to have the captain address as a manager
@@ -99,7 +118,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
             // can always do it in a separate call later.
 
             address[] memory profileManagers = new address[](2);
-            profileManagers[0] = _captainAddress;
+            profileManagers[0] = _teamAddress;
             profileManagers[1] = gameManager;
 
             address[] memory poolAdminAsManager = new address[](1);
@@ -107,12 +126,14 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
 
             bytes32 shipProfileId =
                 registry.createProfile(i + 1, _shipName, _shipMetadata, address(this), profileManagers);
-            GrantShipStrategy grantShip = new GrantShipStrategy(address(allo), "Grant Ship");
+
+            GrantShipStrategy grantShip = new GrantShipStrategy(address(allo), "Grant Ship Strategy");
+            address payable strategyAddress = payable(address(grantShip));
 
             uint256 shipPoolId = _allo.createPoolWithCustomStrategy(
                 shipProfileId,
-                address(grantShip),
-                abi.encode(true, true, true),
+                strategyAddress,
+                abi.encode(true, true, true, _facilitatorId),
                 token,
                 0,
                 _shipMetadata,
@@ -122,18 +143,37 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
                 poolAdminAsManager
             );
 
-            // console.log("shipPoolId: %s", shipPoolId);
-
             unchecked {
                 i++;
             }
+
+            Recipient memory newShipRecipient =
+                Recipient(_teamAddress, strategyAddress, shipPoolId, 0, _shipMetadata, Status.Pending);
+
+            grantShipRecipients[_teamAddress] = newShipRecipient;
         }
     }
 
-    function acceptGrantShip(address _recipientId, bytes memory _data) external {
-        // onlyFacilitator
-        // only if recipient is in pending status
-        // only
+    function approveShips(address[] memory _shipAddresses) external onlyGameFacilitator(msg.sender) {
+        uint256 shipLength = _shipAddresses.length;
+        for (uint256 i = 0; i < shipLength; i++) {
+            Recipient storage shipRecipient = grantShipRecipients[_shipAddresses[i]];
+
+            if (shipRecipient.recipientStatus != Status.Pending) revert INVALID_STATUS();
+
+            shipRecipient.recipientStatus = Status.Accepted;
+        }
+    }
+
+    function rejectShips(address[] memory _shipAddresses) external onlyGameFacilitator(msg.sender) {
+        uint256 shipLength = _shipAddresses.length;
+        for (uint256 i = 0; i < shipLength; i++) {
+            Recipient storage shipRecipient = grantShipRecipients[_shipAddresses[i]];
+
+            if (shipRecipient.recipientStatus != Status.Pending) revert INVALID_STATUS();
+
+            shipRecipient.recipientStatus = Status.Rejected;
+        }
     }
 
     function _allocate(bytes memory _data, address _sender) internal virtual override {
@@ -160,8 +200,12 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     /// ============ View ==================
     /// ====================================
 
-    function isGameFacilitator(address _address) internal view returns (bool) {
+    function isGameFacilitator(address _address) public view returns (bool) {
         return _hats.isWearerOfHat(_address, gameFacilitatorHatId);
+    }
+
+    function getStrategyAddress(address _teamAddress) public view returns (address payable) {
+        return grantShipRecipients[_teamAddress].recipientAddress;
     }
 
     /// ====================================
@@ -188,17 +232,17 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     // }
 
     function _getRecipientStatus(address _recipientId) internal view virtual override returns (Status) {
-        GrantShipRecipient memory grantShipRecipient = grantShipRecipients[_recipientId];
+        Recipient memory grantShipRecipient = grantShipRecipients[_recipientId];
         return grantShipRecipient.recipientStatus;
     }
 
-    function _getGrantShipRecipient(address _recipientId) public view returns (GrantShipRecipient memory) {
-        GrantShipRecipient memory grantShipRecipient = grantShipRecipients[_recipientId];
+    function getGrantShipRecipient(address _recipientId) public view returns (Recipient memory) {
+        Recipient memory grantShipRecipient = grantShipRecipients[_recipientId];
         return grantShipRecipient;
     }
 
     function _getPayout(address _recipientId, bytes memory) internal view override returns (PayoutSummary memory) {
-        GrantShipRecipient memory shipRecipient = _getGrantShipRecipient(_recipientId);
+        Recipient memory shipRecipient = getGrantShipRecipient(_recipientId);
         return PayoutSummary(address(shipRecipient.recipientAddress), shipRecipient.grantAmount);
     }
 

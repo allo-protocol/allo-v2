@@ -36,7 +36,7 @@ contract GrantShiptStrategyTest is Test, RegistrySetupFullLive, AlloSetup, HatsS
     uint256 poolId;
     address token = NATIVE;
 
-    address[] poolAdminAsManager = new address[](1);
+    address[] noManagers = new address[](0);
 
     IERC20 arbToken = IERC20(0x912CE59144191C1204E64559FE8253a0e49E6548);
     // Binance Hot Wallet
@@ -64,69 +64,6 @@ contract GrantShiptStrategyTest is Test, RegistrySetupFullLive, AlloSetup, HatsS
 
     // ================= Helpers ===================
 
-    function __setup_strategies() internal {
-        shipStrategyImplementation = new GrantShipStrategy(address(allo()), "GrantShipStrategy");
-    }
-
-    function _createPool(bool _registryGating, bool _metadataRequired, bool _grantAmountRequired)
-        internal
-        returns (uint256 newPoolId, address payable strategyClone)
-    {
-        vm.deal(pool_admin(), 30e18);
-        poolAdminAsManager[0] = pool_admin();
-
-        vm.startPrank(pool_admin());
-
-        newPoolId = allo().createPoolWithCustomStrategy{value: 30e18}(
-            poolProfile_id(),
-            address(shipStrategyImplementation),
-            abi.encode(_registryGating, _metadataRequired, _grantAmountRequired),
-            token,
-            30e18,
-            Metadata(1, "grant-ship-data"),
-            // pool manager/game facilitator role will be mediated through Hats Protocol
-            // pool_admin address will be the game_facilitator multisig
-            // using pool_admin as a single address for both roles
-            poolAdminAsManager
-        );
-
-        vm.stopPrank();
-
-        strategyClone = payable(address(allo().getPool(newPoolId).strategy));
-    }
-
-    function __createGameManager(uint256 _gameFacilitatorId, address _token, address _hatsAddress)
-        internal
-        returns (uint256 newPoolId)
-    {
-        gameManager = new GameManagerStrategy(address(allo()), gameManagerStrategyId);
-
-        vm.prank(pool_admin());
-        arbToken.approve(address(allo()), 90_000e18);
-
-        vm.startPrank(pool_admin());
-
-        bytes[] memory _shipData = new bytes[](1);
-        poolAdminAsManager[0] = pool_admin();
-
-        _shipData[0] = abi.encode("Grant Ship 1", Metadata(1, "grant-ship-1-data"));
-
-        newPoolId = allo().createPoolWithCustomStrategy(
-            poolProfile_id(),
-            address(gameManager),
-            abi.encode(abi.encode(_gameFacilitatorId, _token, _hatsAddress, pool_admin()), _shipData),
-            _token,
-            90_000e18,
-            Metadata(1, "game-controller-data"),
-            // pool manager/game facilitator role will be mediated through Hats Protocol
-            // pool_admin address will be the game_facilitator multisig
-            // using pool_admin as a single address for both roles
-            poolAdminAsManager
-        );
-
-        vm.stopPrank();
-    }
-
     function test_deploy_manager() public {
         assertTrue(address(gameManager) != address(0));
         assertTrue(address(gameManager.getAllo()) == address(allo()));
@@ -140,5 +77,83 @@ contract GrantShiptStrategyTest is Test, RegistrySetupFullLive, AlloSetup, HatsS
         assertTrue(gameManager.currentRoundStatus() == IStrategy.Status.None);
         assertTrue(gameManager.token() == address(arbToken));
         assertTrue(gameManager.gameFacilitatorHatId() == facilitator().id);
+    }
+
+    function test_ship_created() public {
+        GrantShipStrategy ship1Strategy = _getShipStrategy(ship(1).wearer);
+
+        assertTrue(address(ship1Strategy.getAllo()) == address(allo()));
+        assertTrue(ship1Strategy.getStrategyId() == keccak256(abi.encode("Grant Ship Strategy")));
+        assertTrue(ship1Strategy.registryGating());
+        assertTrue(ship1Strategy.metadataRequired());
+        assertTrue(ship1Strategy.grantAmountRequired());
+    }
+
+    // function test_ship_recipient_created()  {}
+
+    function __createGameManager(uint256 _gameFacilitatorId, address _token, address _hatsAddress)
+        internal
+        returns (uint256 newPoolId)
+    {
+        gameManager = new GameManagerStrategy(address(allo()), gameManagerStrategyId);
+
+        vm.prank(pool_admin());
+        arbToken.approve(address(allo()), 90_000e18);
+
+        vm.startPrank(pool_admin());
+
+        bytes[] memory _shipData = new bytes[](1);
+
+        _shipData[0] = abi.encode("Grant Ship 1", Metadata(1, "grant-ship-1-data"), ship(1).wearer);
+
+        newPoolId = allo().createPoolWithCustomStrategy(
+            poolProfile_id(),
+            address(gameManager),
+            abi.encode(abi.encode(_gameFacilitatorId, _token, _hatsAddress, pool_admin()), _shipData),
+            _token,
+            90_000e18,
+            Metadata(1, "game-controller-data"),
+            // pool manager/game facilitator role will be mediated through Hats Protocol
+            // pool_admin address will be the game_facilitator multisig
+            // using pool_admin as a single address for both roles
+            noManagers
+        );
+
+        vm.stopPrank();
+    }
+
+    function __setup_strategies() internal {
+        shipStrategyImplementation = new GrantShipStrategy(address(allo()), "GrantShipStrategy");
+    }
+
+    function _createPool(bool _registryGating, bool _metadataRequired, bool _grantAmountRequired)
+        internal
+        returns (uint256 newPoolId, address payable strategyClone)
+    {
+        vm.deal(pool_admin(), 30e18);
+
+        vm.startPrank(pool_admin());
+
+        newPoolId = allo().createPoolWithCustomStrategy{value: 30e18}(
+            poolProfile_id(),
+            address(shipStrategyImplementation),
+            abi.encode(_registryGating, _metadataRequired, _grantAmountRequired),
+            token,
+            30e18,
+            Metadata(1, "grant-ship-data"),
+            // pool manager/game facilitator role will be mediated through Hats Protocol
+            // pool_admin address will be the game_facilitator multisig
+            // using pool_admin as a single address for both roles
+            noManagers
+        );
+
+        vm.stopPrank();
+
+        strategyClone = payable(address(allo().getPool(newPoolId).strategy));
+    }
+
+    function _getShipStrategy(address _teamAddress) internal returns (GrantShipStrategy) {
+        address payable strategyAddress = gameManager.getStrategyAddress(_teamAddress);
+        return GrantShipStrategy(strategyAddress);
     }
 }
