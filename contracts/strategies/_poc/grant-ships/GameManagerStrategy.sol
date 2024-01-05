@@ -34,9 +34,9 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     uint256 public currentRoundId;
     uint256 public currentRoundStartTime;
     uint256 public currentRoundEndTime;
+    Status public currentRoundStatus;
 
-    address token;
-    address alloAddress;
+    address public token;
 
     /// @notice The 'Hats Protocol' contract interface.
     IHats private _hats;
@@ -45,16 +45,13 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     mapping(address => GrantShipStrategy) public grantShips;
     mapping(address => GrantShipRecipient) public grantShipRecipients;
 
-    uint256 gameFacilitatorHatId;
-    address gameManager;
+    uint256 public gameFacilitatorHatId;
 
     /// ===============================
     /// ======== Constructor ==========
     /// ===============================
 
-    constructor(address _alloAddress, string memory _name) BaseStrategy(_alloAddress, _name) {
-        alloAddress = _alloAddress;
-    }
+    constructor(address _alloAddress, string memory _name) BaseStrategy(_alloAddress, _name) {}
 
     /// ===============================
     /// ======== Initialize ===========
@@ -63,8 +60,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     function initialize(uint256 _poolId, bytes memory _data) external {
         __BaseStrategy_init(_poolId);
 
-        (bytes memory _gameParams, bytes[] memory _shipData, address strategyImpl) =
-            abi.decode(_data, (bytes, bytes[], address));
+        (bytes memory _gameParams, bytes[] memory _shipData) = abi.decode(_data, (bytes, bytes[]));
 
         __gameState_init(_gameParams);
         // __grantShips_init(_shipData, strategyImpl);
@@ -78,9 +74,6 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         gameFacilitatorHatId = _gameFacilitatorId;
         token = _token;
         _hats = IHats(_hatsAddress);
-        // Todo check if I really need to instantiate this interface or if
-        // the inheritance pattern just lets me call allo directly.
-        _allo = IAllo(alloAddress);
     }
 
     function __grantShips_init(bytes[] memory _shipData) internal {}
@@ -119,10 +112,6 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         return _hats.isWearerOfHat(_address, gameFacilitatorHatId);
     }
 
-    function isGameManager(address _address) internal view returns (bool) {
-        return _address == gameManager;
-    }
-
     /// ====================================
     /// ============ Internal ==============
     /// ====================================
@@ -138,13 +127,13 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
 
     function _registerRecipient(bytes memory _data, address _sender) internal virtual override returns (address) {}
 
-    function _beforeAllocate(bytes memory, address _sender) internal view override {
-        if (!isGameManager(_sender)) revert UNAUTHORIZED();
-    }
+    // function _beforeAllocate(bytes memory, address _sender) internal view override {
+    //     if (!isGameManager(_sender)) revert UNAUTHORIZED();
+    // }
 
-    function _beforeDistribute(address[] memory, bytes memory, address _sender) internal view override {
-        if (!isGameManager(_sender)) revert UNAUTHORIZED();
-    }
+    // function _beforeDistribute(address[] memory, bytes memory, address _sender) internal view override {
+    //     if (!isGameManager(_sender)) revert UNAUTHORIZED();
+    // }
 
     function _getRecipientStatus(address _recipientId) internal view virtual override returns (Status) {
         GrantShipRecipient memory grantShipRecipient = grantShipRecipients[_recipientId];
@@ -162,7 +151,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     }
 
     function _isValidAllocator(address _allocator) internal view virtual override returns (bool) {
-        return isGameManager(_allocator);
+        // return isGameManager(_allocator);
     }
 
     /// @notice This contract should be able to receive native token

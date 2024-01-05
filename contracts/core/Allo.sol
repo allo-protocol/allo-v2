@@ -469,9 +469,6 @@ contract Allo is
         // Initialization is expected to revert when invoked more than once with 'ALREADY_INITIALIZED()' error
         _strategy.initialize(poolId, _initStrategyData);
 
-        console.log("poolId: %s", poolId);
-        console.log("_strategy.getPoolId(): %s", _strategy.getPoolId());
-
         if (_strategy.getPoolId() != poolId || address(_strategy.getAllo()) != address(this)) revert MISMATCH();
 
         // grant pool managers roles

@@ -7,6 +7,7 @@ import "forge-std/Test.sol";
 // Interfaces
 import {IStrategy} from "../../../../contracts/core/interfaces/IStrategy.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IStrategy} from "../../../../contracts/core/interfaces/IStrategy.sol";
 
 // Strategy contracts
 import {GrantShipStrategy} from "../../../../contracts/strategies/_poc/grant-ships/GrantShipStrategy.sol";
@@ -29,7 +30,8 @@ contract GrantShiptStrategyTest is Test, RegistrySetupFullLive, AlloSetup, HatsS
     GrantShipStrategy public shipStrategyImplementation;
     GrantShipStrategy public shipStrategy;
 
-    GameManagerStrategy public gameManagerImplementation;
+    GameManagerStrategy public gameManager;
+    string public gameManagerStrategyId = "GameManagerStrategy";
 
     uint256 poolId;
     address token = NATIVE;
@@ -51,8 +53,7 @@ contract GrantShiptStrategyTest is Test, RegistrySetupFullLive, AlloSetup, HatsS
         vm.prank(arbWhale);
         arbToken.transfer(pool_admin(), 90_000e18);
 
-        address payable strategyAddress;
-        (poolId, strategyAddress) = _createGameManager(facilitator().id, address(arbToken), address(hats()));
+        (poolId) = __createGameManager(facilitator().id, address(arbToken), address(hats()));
         // _createPool(
         //     true, // registryGating
         //     true, // metadataRequired
@@ -65,7 +66,6 @@ contract GrantShiptStrategyTest is Test, RegistrySetupFullLive, AlloSetup, HatsS
 
     function __setup_strategies() internal {
         shipStrategyImplementation = new GrantShipStrategy(address(allo()), "GrantShipStrategy");
-        gameManagerImplementation = new GameManagerStrategy(address(allo()), "GameManagerStrategy");
     }
 
     function _createPool(bool _registryGating, bool _metadataRequired, bool _grantAmountRequired)
@@ -95,35 +95,50 @@ contract GrantShiptStrategyTest is Test, RegistrySetupFullLive, AlloSetup, HatsS
         strategyClone = payable(address(allo().getPool(newPoolId).strategy));
     }
 
-    function _createGameManager(uint256 _gameFacilitatorId, address _token, address _hatsAddress)
+    function __createGameManager(uint256 _gameFacilitatorId, address _token, address _hatsAddress)
         internal
-        returns (uint256 newPoolId, address payable strategyClone)
+        returns (uint256 newPoolId)
     {
+        gameManager = new GameManagerStrategy(address(allo()), gameManagerStrategyId);
+
         vm.prank(pool_admin());
-        arbToken.approve(address(allo()), 30_000e18);
+        arbToken.approve(address(allo()), 90_000e18);
 
         vm.startPrank(pool_admin());
 
         bytes[] memory _shipData = new bytes[](1);
+        poolAdminAsManager[0] = pool_admin();
 
         _shipData[0] = abi.encode(1234);
 
-        poolAdminAsManager[0] = pool_admin();
-
         newPoolId = allo().createPoolWithCustomStrategy(
             poolProfile_id(),
-            address(gameManagerImplementation),
+            address(gameManager),
             abi.encode(abi.encode(_gameFacilitatorId, _token, _hatsAddress), _shipData),
             _token,
-            30_000e18,
+            90_000e18,
             Metadata(1, "game-controller-data"),
+            // pool manager/game facilitator role will be mediated through Hats Protocol
+            // pool_admin address will be the game_facilitator multisig
+            // using pool_admin as a single address for both roles
             poolAdminAsManager
         );
 
-        // strategyClone = payable(address(allo().getPool(newPoolId).strategy));
+        vm.stopPrank();
     }
 
-    function testtest() public {
-        console.log("poolId: %s", poolId);
+    function test_deploy_manager() public {
+        assertTrue(address(gameManager) != address(0));
+        assertTrue(address(gameManager.getAllo()) == address(allo()));
+        assertTrue(gameManager.getStrategyId() == keccak256(abi.encode(gameManagerStrategyId)));
+    }
+
+    function test_init_manager() public {
+        assertTrue(gameManager.currentRoundId() == 0);
+        assertTrue(gameManager.currentRoundStartTime() == 0);
+        assertTrue(gameManager.currentRoundEndTime() == 0);
+        assertTrue(gameManager.currentRoundStatus() == IStrategy.Status.None);
+        assertTrue(gameManager.token() == address(arbToken));
+        assertTrue(gameManager.gameFacilitatorHatId() == facilitator().id);
     }
 }
