@@ -40,7 +40,7 @@ contract HatsSetupLive is Test {
         return _facilitator;
     }
 
-    function ship(uint32 _index) public view returns (HatWearer memory) {
+    function team(uint32 _index) public view returns (HatWearer memory) {
         return _teamAccounts[_index];
     }
 
@@ -68,17 +68,17 @@ contract HatsSetupLive is Test {
                 topHat().id, string.concat("Ship Hat ", vm.toString(i + 1)), 1, _eligibility, _toggle, true, ""
             );
 
-            hats().mintHat(ship(i).id, ship(i).wearer);
+            hats().mintHat(team(i).id, team(i).wearer);
 
             vm.stopPrank();
 
-            vm.startPrank(ship(i).wearer);
+            vm.startPrank(team(i).wearer);
 
             HatWearer storage currentShipOperator = _shipOperators[i];
 
             currentShipOperator.wearer = makeAddr(string.concat("Ship Operator ", vm.toString(i + 1)));
             currentShipOperator.id = hats().createHat(
-                ship(i).id, string.concat("Ship Hat ", vm.toString(i + 1)), 1, _eligibility, _toggle, true, ""
+                team(i).id, string.concat("Ship Hat ", vm.toString(i + 1)), 1, _eligibility, _toggle, true, ""
             );
 
             hats().mintHat(shipOperator(i).id, shipOperator(i).wearer);

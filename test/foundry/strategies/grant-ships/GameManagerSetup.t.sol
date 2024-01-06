@@ -20,8 +20,9 @@ import {Accounts} from "../../shared/Accounts.sol";
 
 contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLive {
     /////////////////GAME MANAGER///////////////
-    GameManagerStrategy public gameManager;
-    uint256 gameManagerPoolId;
+    GameManagerStrategy internal _gameManager;
+    uint256 public gameManagerPoolId;
+
     string public gameManagerStrategyId = "GameManagerStrategy";
 
     ////////////////GRANT SHIPS/////////////////
@@ -44,6 +45,14 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
     // =========== Getters ================
     // ====================================
 
+    function gameManager() public view returns (GameManagerStrategy) {
+        return _gameManager;
+    }
+
+    function ship(uint256 _index) public view returns (GrantShipStrategy) {
+        return _ships[_index];
+    }
+
     // ====================================
     // =========== Setup ==================
     // ====================================
@@ -61,7 +70,7 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
             _shipSetupData[i] = abi.encode(
                 string.concat("Ship ", vm.toString(uint256(i))),
                 Metadata(1, string.concat("ipfs://grant-ships/ship.json/", vm.toString(i))),
-                ship(i).wearer
+                team(i).wearer
             );
             unchecked {
                 i++;
@@ -70,7 +79,7 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
     }
 
     function __initGameManager() internal {
-        gameManager = new GameManagerStrategy(address(allo()), gameManagerStrategyId);
+        _gameManager = new GameManagerStrategy(address(allo()), gameManagerStrategyId);
     }
 
     function __dealArb() internal {
@@ -85,7 +94,7 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
 
         gameManagerPoolId = allo().createPoolWithCustomStrategy(
             poolProfile_id(),
-            address(gameManager),
+            address(_gameManager),
             abi.encode(abi.encode(facilitator().id, address(arbToken), address(hats()), pool_admin()), _shipSetupData),
             address(arbToken),
             90_000e18,
@@ -99,7 +108,7 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
 
     function __storeShips() internal {
         for (uint32 i = 0; i < _ships.length;) {
-            address payable strategyAddress = gameManager.getStrategyAddress(ship(i).wearer);
+            address payable strategyAddress = _gameManager.getStrategyAddress(team(i).wearer);
             _ships[i] = GrantShipStrategy(strategyAddress);
             unchecked {
                 i++;

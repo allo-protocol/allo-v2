@@ -40,29 +40,27 @@ contract GrantShiptStrategyTest is Test, GameManagerSetup, Native, EventSetup, E
     // ================= Deployment & Init Tests =====================
 
     function test_deploy_manager() public {
-        assertTrue(address(gameManager) != address(0));
-        assertTrue(address(gameManager.getAllo()) == address(allo()));
-        assertTrue(gameManager.getStrategyId() == keccak256(abi.encode(gameManagerStrategyId)));
+        assertTrue(address(gameManager()) != address(0));
+        assertTrue(address(gameManager().getAllo()) == address(allo()));
+        assertTrue(gameManager().getStrategyId() == keccak256(abi.encode(gameManagerStrategyId)));
     }
 
     function test_init_manager() public {
-        assertTrue(gameManager.currentRoundId() == 0);
-        assertTrue(gameManager.currentRoundStartTime() == 0);
-        assertTrue(gameManager.currentRoundEndTime() == 0);
-        assertTrue(gameManager.currentRoundStatus() == IStrategy.Status.None);
-        assertTrue(gameManager.token() == address(arbToken));
-        assertTrue(gameManager.gameFacilitatorHatId() == facilitator().id);
+        assertTrue(gameManager().currentRoundId() == 0);
+        assertTrue(gameManager().currentRoundStartTime() == 0);
+        assertTrue(gameManager().currentRoundEndTime() == 0);
+        assertTrue(gameManager().currentRoundStatus() == IStrategy.Status.None);
+        assertTrue(gameManager().token() == address(arbToken));
+        assertTrue(gameManager().gameFacilitatorHatId() == facilitator().id);
     }
 
     function test_ships_created() public {
         //Todo add tests for other params once they are added to Ship Strategy
-        //Todo add tests for a second Grant Ship Strategy
-
         address[] memory _teamAddresses = new address[](3);
 
-        _teamAddresses[0] = ship(0).wearer;
-        _teamAddresses[1] = ship(1).wearer;
-        _teamAddresses[2] = ship(2).wearer;
+        _teamAddresses[0] = team(0).wearer;
+        _teamAddresses[1] = team(1).wearer;
+        _teamAddresses[2] = team(2).wearer;
 
         for (uint256 i = 0; i < _teamAddresses.length;) {
             _test_ship_created(_teamAddresses[i]);
@@ -70,40 +68,6 @@ contract GrantShiptStrategyTest is Test, GameManagerSetup, Native, EventSetup, E
                 i++;
             }
         }
-    }
-
-    // ================= Helpers ===================
-    function __createGameManager(uint256 _gameFacilitatorId, address _token, address _hatsAddress)
-        internal
-        returns (uint256 newPoolId)
-    {
-        //@Todo: Refactor to its own test contract
-        gameManager = new GameManagerStrategy(address(allo()), gameManagerStrategyId);
-
-        vm.prank(pool_admin());
-        arbToken.approve(address(allo()), 90_000e18);
-
-        bytes[] memory _shipData = new bytes[](3);
-
-        _shipData[0] = abi.encode("Grant Ship 1", Metadata(1, "grant-ship-1-data"), ship(0).wearer);
-        _shipData[1] = abi.encode("Grant Ship 2", Metadata(1, "grant-ship-2-data"), ship(1).wearer);
-        _shipData[2] = abi.encode("Grant Ship 3", Metadata(1, "grant-ship-2-data"), ship(2).wearer);
-
-        vm.startPrank(pool_admin());
-        newPoolId = allo().createPoolWithCustomStrategy(
-            poolProfile_id(),
-            address(gameManager),
-            abi.encode(abi.encode(_gameFacilitatorId, _token, _hatsAddress, pool_admin()), _shipData),
-            _token,
-            90_000e18,
-            Metadata(1, "game-controller-data"),
-            // pool manager/game facilitator role will be mediated through Hats Protocol
-            // pool_admin address will be the game_facilitator multisig
-            // using pool_admin as a single address for both roles
-            noManagers
-        );
-
-        vm.stopPrank();
     }
 
     function _test_ship_created(address _teamAddress) internal {
@@ -116,7 +80,7 @@ contract GrantShiptStrategyTest is Test, GameManagerSetup, Native, EventSetup, E
     }
 
     function _getShipStrategy(address _teamAddress) internal view returns (GrantShipStrategy) {
-        address payable strategyAddress = gameManager.getStrategyAddress(_teamAddress);
+        address payable strategyAddress = gameManager().getStrategyAddress(_teamAddress);
         return GrantShipStrategy(strategyAddress);
     }
 }
