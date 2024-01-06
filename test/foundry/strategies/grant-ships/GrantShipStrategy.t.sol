@@ -48,7 +48,6 @@ contract GrantShiptStrategyTest is Test, RegistrySetupFullLive, AlloSetup, HatsS
         __RegistrySetupFullLive();
         __AlloSetupLive();
         __HatsSetupLive(pool_admin());
-        __setup_strategies();
 
         vm.prank(arbWhale);
         arbToken.transfer(pool_admin(), 90_000e18);
