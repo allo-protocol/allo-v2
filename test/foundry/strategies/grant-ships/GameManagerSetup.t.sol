@@ -26,8 +26,6 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
     string public gameManagerStrategyId = "GameManagerStrategy";
 
     ////////////////GRANT SHIPS/////////////////
-    //Todo there will be more setup params once the strategy design is finalized
-
     bytes[] internal _shipSetupData = new bytes[](3);
     GrantShipStrategy[] internal _ships = new GrantShipStrategy[](3);
 
@@ -53,6 +51,10 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
         return _ships[_index];
     }
 
+    function shipSetupData(uint256 _index) public view returns (bytes memory) {
+        return _shipSetupData[_index];
+    }
+
     // ====================================
     // =========== Setup ==================
     // ====================================
@@ -67,6 +69,7 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
 
     function __generateShipData() internal {
         for (uint32 i = 0; i < _shipSetupData.length;) {
+            //Todo there will be more setup params once the strategy design is finalized
             _shipSetupData[i] = abi.encode(
                 string.concat("Ship ", vm.toString(uint256(i))),
                 Metadata(1, string.concat("ipfs://grant-ships/ship.json/", vm.toString(i))),
