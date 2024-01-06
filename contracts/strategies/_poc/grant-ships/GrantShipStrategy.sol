@@ -163,8 +163,10 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         __BaseStrategy_init(_poolId);
 
         GameManagerStrategy gameManager = GameManagerStrategy(_gameManagerAddress);
-        gameManager = _gameManager;
-        _hats = IHats(gameManager.hats());
+        _gameManager = gameManager;
+        // console.log("gameManager", _gameManagerAddress);
+
+        _hats = IHats(address(_gameManager.getHatsAddress()));
 
         // Set the strategy specific variables
         registryGating = _initData.registryGating;

@@ -43,6 +43,7 @@ contract GrantShiptStrategyTest is Test, GameManagerSetup, Native, EventSetup, E
         assertTrue(address(gameManager()) != address(0));
         assertTrue(address(gameManager().getAllo()) == address(allo()));
         assertTrue(gameManager().getStrategyId() == keccak256(abi.encode(gameManagerStrategyId)));
+        assertTrue(address(hats()) == gameManager().getHatsAddress());
     }
 
     function test_init_manager() public {
@@ -63,15 +64,19 @@ contract GrantShiptStrategyTest is Test, GameManagerSetup, Native, EventSetup, E
         }
     }
 
+    // function test_parent_call() public {
+    //     ship(0).getHatsAddress();
+    // }
+
     function _test_ship_created(uint256 _shipId) internal {
-        GrantShipStrategy shipStrategy = _getShipStrategy(_shipId);
+        // GrantShipStrategy shipStrategy = _getShipStrategy(_shipId);
         ShipInitData memory shipInitData = abi.decode(shipSetupData(_shipId), (ShipInitData));
-        assertTrue(address(shipStrategy.getAllo()) == address(allo()));
-        assertTrue(shipStrategy.getStrategyId() == keccak256(abi.encode(shipInitData.shipName)));
-        assertTrue(shipStrategy.registryGating());
-        assertTrue(shipStrategy.metadataRequired());
-        assertTrue(shipStrategy.grantAmountRequired());
-        assertTrue(shipInitData.operatorHatId == shipStrategy.operatorHatId());
+        assertTrue(address(ship(_shipId).getAllo()) == address(allo()));
+        assertTrue(ship(_shipId).getStrategyId() == keccak256(abi.encode(shipInitData.shipName)));
+        assertTrue(ship(_shipId).registryGating());
+        assertTrue(ship(_shipId).metadataRequired());
+        assertTrue(ship(_shipId).grantAmountRequired());
+        assertTrue(shipInitData.operatorHatId == ship(_shipId).operatorHatId());
         // Todo add tests for other params once they are added to Ship Strategy
     }
 

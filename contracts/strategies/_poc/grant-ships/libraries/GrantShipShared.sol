@@ -24,5 +24,4 @@ struct ShipInitData {
     Metadata shipMetadata;
     address teamAddress;
     uint256 operatorHatId;
-    address gameManager;
 }
