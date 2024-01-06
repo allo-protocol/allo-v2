@@ -108,7 +108,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
 
         // registerShip
 
-        for (uint256 i = 0; i < _shipData.length; i++) {
+        for (uint256 i = 0; i < _shipData.length;) {
             (string memory _shipName, Metadata memory _shipMetadata, address _teamAddress, uint256 _facilitatorId) =
                 abi.decode(_shipData[i], (string, Metadata, address, uint256));
 
@@ -130,6 +130,11 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
             GrantShipStrategy grantShip = new GrantShipStrategy(address(allo), "Grant Ship Strategy");
             address payable strategyAddress = payable(address(grantShip));
 
+            console.log("Create Loop");
+            console.log("------------");
+            console.log("index", i);
+            console.log("strategyAddress", strategyAddress);
+            console.log("allo", address(allo));
             uint256 shipPoolId = _allo.createPoolWithCustomStrategy(
                 shipProfileId,
                 strategyAddress,
@@ -143,14 +148,13 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
                 poolAdminAsManager
             );
 
-            unchecked {
-                i++;
-            }
-
             Recipient memory newShipRecipient =
                 Recipient(_teamAddress, strategyAddress, shipPoolId, 0, _shipMetadata, Status.Pending);
 
             grantShipRecipients[_teamAddress] = newShipRecipient;
+            unchecked {
+                i++;
+            }
         }
     }
 

@@ -62,7 +62,7 @@ contract GrantShiptStrategyTest is Test, RegistrySetupFullLive, AlloSetup, HatsS
         //  shipStrategy = GrantShipStrategy(strategyAddress);
     }
 
-    // ================= Helpers ===================
+    // ================= Deployment & Init Tests =====================
 
     function test_deploy_manager() public {
         assertTrue(address(gameManager) != address(0));
@@ -79,22 +79,31 @@ contract GrantShiptStrategyTest is Test, RegistrySetupFullLive, AlloSetup, HatsS
         assertTrue(gameManager.gameFacilitatorHatId() == facilitator().id);
     }
 
-    function test_ship_created() public {
-        GrantShipStrategy ship1Strategy = _getShipStrategy(ship(1).wearer);
+    function test_ships_created() public {
+        //Todo add tests for other params once they are added to Ship Strategy
+        //Todo add tests for a second Grant Ship Strategy
 
-        assertTrue(address(ship1Strategy.getAllo()) == address(allo()));
-        assertTrue(ship1Strategy.getStrategyId() == keccak256(abi.encode("Grant Ship Strategy")));
-        assertTrue(ship1Strategy.registryGating());
-        assertTrue(ship1Strategy.metadataRequired());
-        assertTrue(ship1Strategy.grantAmountRequired());
+        address[] memory _teamAddresses = new address[](3);
+
+        _teamAddresses[0] = ship(0).wearer;
+        _teamAddresses[1] = ship(1).wearer;
+        _teamAddresses[2] = ship(2).wearer;
+
+        for (uint256 i = 0; i < _teamAddresses.length;) {
+            _test_ship_created(_teamAddresses[i]);
+            unchecked {
+                i++;
+            }
+        }
     }
 
-    // function test_ship_recipient_created()  {}
+    // ================= Helpers ===================
 
     function __createGameManager(uint256 _gameFacilitatorId, address _token, address _hatsAddress)
         internal
         returns (uint256 newPoolId)
     {
+        //@Todo: Refactor to its own test contract
         gameManager = new GameManagerStrategy(address(allo()), gameManagerStrategyId);
 
         vm.prank(pool_admin());
@@ -102,9 +111,14 @@ contract GrantShiptStrategyTest is Test, RegistrySetupFullLive, AlloSetup, HatsS
 
         vm.startPrank(pool_admin());
 
-        bytes[] memory _shipData = new bytes[](1);
+        bytes[] memory _shipData = new bytes[](3);
 
-        _shipData[0] = abi.encode("Grant Ship 1", Metadata(1, "grant-ship-1-data"), ship(1).wearer);
+        console.log("ship(0).wearer", ship(0).wearer);
+
+        _shipData[0] = abi.encode("Grant Ship 1", Metadata(1, "grant-ship-1-data"), ship(0).wearer);
+        _shipData[1] = abi.encode("Grant Ship 2", Metadata(1, "grant-ship-2-data"), ship(1).wearer);
+        _shipData[2] = abi.encode("Grant Ship 3", Metadata(1, "grant-ship-2-data"), ship(2).wearer);
+        // _shipData[2] = abi.encode("Grant Ship 3", Metadata(1, "grant-ship-3-data"), ship(2).wearer);
 
         newPoolId = allo().createPoolWithCustomStrategy(
             poolProfile_id(),
@@ -152,7 +166,16 @@ contract GrantShiptStrategyTest is Test, RegistrySetupFullLive, AlloSetup, HatsS
         strategyClone = payable(address(allo().getPool(newPoolId).strategy));
     }
 
-    function _getShipStrategy(address _teamAddress) internal returns (GrantShipStrategy) {
+    function _test_ship_created(address _teamAddress) internal {
+        GrantShipStrategy ship1Strategy = _getShipStrategy(_teamAddress);
+        assertTrue(address(ship1Strategy.getAllo()) == address(allo()));
+        assertTrue(ship1Strategy.getStrategyId() == keccak256(abi.encode("Grant Ship Strategy")));
+        assertTrue(ship1Strategy.registryGating());
+        assertTrue(ship1Strategy.metadataRequired());
+        assertTrue(ship1Strategy.grantAmountRequired());
+    }
+
+    function _getShipStrategy(address _teamAddress) internal view returns (GrantShipStrategy) {
         address payable strategyAddress = gameManager.getStrategyAddress(_teamAddress);
         return GrantShipStrategy(strategyAddress);
     }
