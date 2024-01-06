@@ -112,8 +112,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         // registerShip
 
         for (uint256 i = 0; i < _shipData.length;) {
-            (string memory _shipName, Metadata memory _shipMetadata, address _teamAddress) =
-                abi.decode(_shipData[i], (string, Metadata, address));
+            (ShipInitData memory shipInitData) = abi.decode(_shipData[i], (ShipInitData));
 
             // Note:
             // Would be nice to have the captain address as a manager
@@ -121,7 +120,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
             // can always do it in a separate call later.
 
             address[] memory profileManagers = new address[](2);
-            profileManagers[0] = _teamAddress;
+            profileManagers[0] = shipInitData.teamAddress;
             profileManagers[1] = gameManager;
 
             address[] memory poolAdminAsManager = new address[](1);
@@ -129,11 +128,10 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
 
             GrantShipStrategy grantShip = new GrantShipStrategy(address(allo), "Grant Ship Strategy");
 
-            bytes32 shipProfileId =
-                registry.createProfile(i + 1, _shipName, _shipMetadata, address(this), profileManagers);
+            bytes32 shipProfileId = registry.createProfile(
+                i + 1, shipInitData.shipName, shipInitData.shipMetadata, address(this), profileManagers
+            );
             address payable strategyAddress = payable(address(grantShip));
-
-            ShipInitData memory shipInitData = ShipInitData(true, true, true);
 
             uint256 shipPoolId = _allo.createPoolWithCustomStrategy(
                 shipProfileId,
@@ -141,17 +139,18 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
                 abi.encode(shipInitData),
                 token,
                 0,
-                _shipMetadata,
+                shipInitData.shipMetadata,
                 // pool manager/game facilitator role will be mediated through Hats Protocol
                 // pool_admin address will be the game_facilitator multisig
                 // using pool_admin as a single address for both roles
                 poolAdminAsManager
             );
 
-            Recipient memory newShipRecipient =
-                Recipient(_teamAddress, strategyAddress, shipPoolId, 0, _shipMetadata, Status.Pending);
+            Recipient memory newShipRecipient = Recipient(
+                shipInitData.teamAddress, strategyAddress, shipPoolId, 0, shipInitData.shipMetadata, Status.Pending
+            );
 
-            grantShipRecipients[_teamAddress] = newShipRecipient;
+            grantShipRecipients[shipInitData.teamAddress] = newShipRecipient;
             unchecked {
                 i++;
             }

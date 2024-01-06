@@ -96,6 +96,9 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice The total amount allocated to grant/recipient.
     uint256 public allocatedGrantAmount;
 
+    /// @notice The total amount allocated to grant/recipient.
+    uint256 public facilitatorHatId;
+
     /// @notice Internal collection of accepted recipients able to submit milestones
     address[] private _acceptedRecipientIds;
 
@@ -150,6 +153,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         registryGating = _initData.registryGating;
         metadataRequired = _initData.metadataRequired;
         grantAmountRequired = _initData.grantAmountRequired;
+        facilitatorHatId = _initData.facilitatorHatId;
         _registry = allo.getRegistry();
 
         // Set the pool to active - this is required for the strategy to work and distribute funds

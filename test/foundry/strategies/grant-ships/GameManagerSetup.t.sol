@@ -17,6 +17,7 @@ import {GameManagerStrategy} from "../../../../contracts/strategies/_poc/grant-s
 import {Metadata} from "../../../../contracts/core/libraries/Metadata.sol";
 import {HatsSetupLive} from "./HatsSetup.sol";
 import {Accounts} from "../../shared/Accounts.sol";
+import {ShipInitData} from "../../../../contracts/strategies/_poc/grant-ships/libraries/GrantShipShared.sol";
 
 contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLive {
     /////////////////GAME MANAGER///////////////
@@ -69,12 +70,18 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
 
     function __generateShipData() internal {
         for (uint32 i = 0; i < _shipSetupData.length;) {
-            //Todo there will be more setup params once the strategy design is finalized
-            _shipSetupData[i] = abi.encode(
+            ShipInitData memory shipInitData = ShipInitData(
+                true,
+                true,
+                true,
                 string.concat("Ship ", vm.toString(uint256(i))),
                 Metadata(1, string.concat("ipfs://grant-ships/ship.json/", vm.toString(i))),
-                team(i).wearer
+                team(i).wearer,
+                shipOperator(i).id
             );
+
+            //Todo there will be more setup params once the strategy design is finalized
+            _shipSetupData[i] = abi.encode(shipInitData);
             unchecked {
                 i++;
             }

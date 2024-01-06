@@ -20,4 +20,8 @@ struct ShipInitData {
     bool registryGating;
     bool metadataRequired;
     bool grantAmountRequired;
+    string shipName;
+    Metadata shipMetadata;
+    address teamAddress;
+    uint256 facilitatorHatId;
 }
