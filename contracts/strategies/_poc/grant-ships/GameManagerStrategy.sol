@@ -19,6 +19,9 @@ import {Allo} from "../../../../contracts/core/Allo.sol";
 // SubStrategy Contracts
 import {GrantShipStrategy} from "./GrantShipStrategy.sol";
 
+//Internal Libraries
+import {ShipInitData} from "./libraries/GrantShipShared.sol";
+
 contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     /// ================================
     /// ========== Models ==============
@@ -109,8 +112,8 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         // registerShip
 
         for (uint256 i = 0; i < _shipData.length;) {
-            (string memory _shipName, Metadata memory _shipMetadata, address _teamAddress, uint256 _facilitatorId) =
-                abi.decode(_shipData[i], (string, Metadata, address, uint256));
+            (string memory _shipName, Metadata memory _shipMetadata, address _teamAddress) =
+                abi.decode(_shipData[i], (string, Metadata, address));
 
             // Note:
             // Would be nice to have the captain address as a manager
@@ -130,15 +133,12 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
                 registry.createProfile(i + 1, _shipName, _shipMetadata, address(this), profileManagers);
             address payable strategyAddress = payable(address(grantShip));
 
-            // console.log("Create Loop");
-            // console.log("------------");
-            // console.log("index", i);
-            // console.log("strategyAddress", strategyAddress);
-            // console.log("allo", address(allo));
+            ShipInitData memory shipInitData = ShipInitData(true, true, true);
+
             uint256 shipPoolId = _allo.createPoolWithCustomStrategy(
                 shipProfileId,
                 strategyAddress,
-                abi.encode(true, true, true, _facilitatorId),
+                abi.encode(shipInitData),
                 token,
                 0,
                 _shipMetadata,

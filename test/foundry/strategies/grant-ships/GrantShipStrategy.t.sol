@@ -16,7 +16,7 @@ import {GameManagerStrategy} from "../../../../contracts/strategies/_poc/grant-s
 import {Errors} from "../../../../contracts/core/libraries/Errors.sol";
 import {Metadata} from "../../../../contracts/core/libraries/Metadata.sol";
 import {Native} from "../../../../contracts/core/libraries/Native.sol";
-
+import {ShipInitData} from "../../../../contracts/strategies/_poc/grant-ships/libraries/GrantShipShared.sol";
 // Test libraries
 import {AlloSetup} from "../../shared/AlloSetup.sol";
 
