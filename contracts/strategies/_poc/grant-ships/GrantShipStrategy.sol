@@ -7,12 +7,14 @@ import "forge-std/Test.sol";
 import {ReentrancyGuard} from "openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
 // Intefaces
 import {IAllo} from "../../../core/interfaces/IAllo.sol";
+import {IHats} from "hats-protocol/Interfaces/IHats.sol";
 import {IRegistry} from "../../../core/interfaces/IRegistry.sol";
 // Core Contracts
 import {BaseStrategy} from "../../BaseStrategy.sol";
 // Internal Libraries
 import {Metadata} from "../../../core/libraries/Metadata.sol";
 import {Milestone, ShipInitData} from "./libraries/GrantShipShared.sol";
+import {GameManagerStrategy} from "./GameManagerStrategy.sol";
 
 /// @title Grant Ships Strategy.
 /// @author @jord<https://github.com/jordanlesich>, @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>, @0xZakk <zakk@gitcoin.co>, @nfrgosselin <nate@gitcoin.co>
@@ -78,6 +80,16 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     event MilestonesReviewed(address recipientId, Status status);
 
     /// ================================
+    /// ===== Game (Global) State ======
+    /// ================================
+
+    /// @notice Reference to the 'GameManager' contract interface.
+    GameManagerStrategy internal _gameManager;
+
+    /// @notice Reference to GameManager's 'Hats' contract interface.
+    IHats internal _hats;
+
+    /// ================================
     /// ========== Storage =============
     /// ================================
 
@@ -132,8 +144,9 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _data The data to be decoded
     /// @custom:data (bool registryGating, bool metadataRequired, bool grantAmountRequired)
     function initialize(uint256 _poolId, bytes memory _data) external virtual override {
-        (ShipInitData memory initData) = abi.decode(_data, (ShipInitData));
-        __DirectGrantsSimpleStrategy_init(_poolId, initData);
+        (ShipInitData memory shipInitData, address payable _gameManagerAddress) =
+            abi.decode(_data, (ShipInitData, address));
+        __GrantShipStrategy_init(_poolId, shipInitData, _gameManagerAddress);
         emit Initialized(_poolId, _data);
     }
 
@@ -141,9 +154,17 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// @dev You only need to pass the 'poolId' to initialize the BaseStrategy and the rest is specific to the strategy
     /// @param _poolId ID of the pool - required to initialize the BaseStrategy
     /// @param _initData The init params for the strategy (bool registryGating, bool metadataRequired, bool grantAmountRequired)
-    function __DirectGrantsSimpleStrategy_init(uint256 _poolId, ShipInitData memory _initData) internal {
+    function __GrantShipStrategy_init(
+        uint256 _poolId,
+        ShipInitData memory _initData,
+        address payable _gameManagerAddress
+    ) internal {
         // Initialize the BaseStrategy
         __BaseStrategy_init(_poolId);
+
+        GameManagerStrategy gameManager = GameManagerStrategy(_gameManagerAddress);
+        gameManager = _gameManager;
+        _hats = IHats(gameManager.hats());
 
         // Set the strategy specific variables
         registryGating = _initData.registryGating;
@@ -176,6 +197,8 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     function _getRecipientStatus(address _recipientId) internal view override returns (Status) {
         return _getRecipient(_recipientId).recipientStatus;
     }
+
+    //Todo: Valid Allocator should be the Game Facilitator
 
     /// @notice Checks if address is eligible allocator.
     /// @dev This is used to check if the allocator is a pool manager and able to allocate funds from the pool

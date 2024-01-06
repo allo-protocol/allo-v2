@@ -48,7 +48,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     /// ===============================
 
     modifier onlyGameFacilitator(address _sender) {
-        _hats.isWearerOfHat(_sender, gameFacilitatorHatId);
+        hats.isWearerOfHat(_sender, gameFacilitatorHatId);
         _;
     }
 
@@ -65,7 +65,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     address public gameManager;
 
     /// @notice The 'Hats Protocol' contract interface.
-    IHats private _hats;
+    IHats public hats;
     Allo private _allo;
 
     // ///@notice This maps the teamAddress to the recipient
@@ -106,7 +106,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
 
         gameFacilitatorHatId = _gameFacilitatorId;
         token = _token;
-        _hats = IHats(_hatsAddress);
+        hats = IHats(_hatsAddress);
         gameManager = _gameManager;
     }
 
@@ -140,7 +140,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
             uint256 shipPoolId = _allo.createPoolWithCustomStrategy(
                 shipProfileId,
                 strategyAddress,
-                abi.encode(shipInitData),
+                abi.encode(shipInitData, address(this)),
                 token,
                 0,
                 shipInitData.shipMetadata,
@@ -210,7 +210,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     /// ====================================
 
     function isGameFacilitator(address _address) public view returns (bool) {
-        return _hats.isWearerOfHat(_address, gameFacilitatorHatId);
+        return hats.isWearerOfHat(_address, gameFacilitatorHatId);
     }
 
     function getShipAddress(uint256 _shipId) public view returns (address payable) {
