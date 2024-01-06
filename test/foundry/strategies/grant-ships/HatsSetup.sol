@@ -21,7 +21,7 @@ contract HatsSetupLive is Test, Accounts {
     HatWearer internal _topHat;
     HatWearer internal _facilitator;
 
-    HatWearer[3] internal _ships;
+    HatWearer[3] internal _teamAccounts;
     HatWearer[3] internal _shipOperators;
 
     function __HatsSetupLive(address _facilitatorAddress) internal {
@@ -44,7 +44,7 @@ contract HatsSetupLive is Test, Accounts {
     }
 
     function ship(uint32 _index) public view returns (HatWearer memory) {
-        return _ships[_index];
+        return _teamAccounts[_index];
     }
 
     function shipOperator(uint32 _index) public view returns (HatWearer memory) {
@@ -64,7 +64,7 @@ contract HatsSetupLive is Test, Accounts {
         for (uint32 i = 0; i < 3;) {
             vm.startPrank(topHat().wearer);
 
-            HatWearer storage currentShip = _ships[i];
+            HatWearer storage currentShip = _teamAccounts[i];
 
             currentShip.wearer = makeAddr(string.concat("Ship ", vm.toString(i + 1)));
             currentShip.id = hats().createHat(

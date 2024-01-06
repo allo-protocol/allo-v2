@@ -7,7 +7,6 @@ import "forge-std/Test.sol";
 // Interfaces
 import {IStrategy} from "../../../../contracts/core/interfaces/IStrategy.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {IStrategy} from "../../../../contracts/core/interfaces/IStrategy.sol";
 
 // Strategy contracts
 import {GrantShipStrategy} from "../../../../contracts/strategies/_poc/grant-ships/GrantShipStrategy.sol";
@@ -20,45 +19,20 @@ import {Native} from "../../../../contracts/core/libraries/Native.sol";
 
 // Test libraries
 import {AlloSetup} from "../../shared/AlloSetup.sol";
-import {RegistrySetupFullLive} from "../../shared/RegistrySetup.sol";
+
+import {GameManagerSetup} from "./GameManagerSetup.t.sol";
 import {HatsSetupLive} from "./HatsSetup.sol";
 import {EventSetup} from "../../shared/EventSetup.sol";
 
-contract GrantShiptStrategyTest is Test, RegistrySetupFullLive, AlloSetup, HatsSetupLive, Native, EventSetup, Errors {
-    Metadata public shipMetadata;
-
-    GrantShipStrategy public shipStrategyImplementation;
-    GrantShipStrategy public shipStrategy;
-
-    GameManagerStrategy public gameManager;
-    string public gameManagerStrategyId = "GameManagerStrategy";
-
-    uint256 poolId;
-    address token = NATIVE;
-
-    address[] noManagers = new address[](0);
-
-    IERC20 arbToken = IERC20(0x912CE59144191C1204E64559FE8253a0e49E6548);
-    // Binance Hot Wallet
-    // Use for testing on Arbitrum state
-    address arbWhale = 0xB38e8c17e38363aF6EbdCb3dAE12e0243582891D;
-
+//Todo Test if each contract inherits a different version of the same contract
+// Is this contract getting the same address that others recieve.
+contract GrantShiptStrategyTest is Test, GameManagerSetup, Native, EventSetup, Errors {
     function setUp() public {
         vm.createSelectFork({blockNumber: 166_807_779, urlOrAlias: "arbitrumOne"});
         __RegistrySetupFullLive();
         __AlloSetupLive();
         __HatsSetupLive(pool_admin());
-
-        vm.prank(arbWhale);
-        arbToken.transfer(pool_admin(), 90_000e18);
-
-        (poolId) = __createGameManager(facilitator().id, address(arbToken), address(hats()));
-        // _createPool(
-        //     true, // registryGating
-        //     true, // metadataRequired
-        //     true // grantAmountRequired
-        // );
-        //  shipStrategy = GrantShipStrategy(strategyAddress);
+        __GameSetup();
     }
 
     // ================= Deployment & Init Tests =====================
@@ -97,7 +71,6 @@ contract GrantShiptStrategyTest is Test, RegistrySetupFullLive, AlloSetup, HatsS
     }
 
     // ================= Helpers ===================
-
     function __createGameManager(uint256 _gameFacilitatorId, address _token, address _hatsAddress)
         internal
         returns (uint256 newPoolId)
@@ -108,17 +81,13 @@ contract GrantShiptStrategyTest is Test, RegistrySetupFullLive, AlloSetup, HatsS
         vm.prank(pool_admin());
         arbToken.approve(address(allo()), 90_000e18);
 
-        vm.startPrank(pool_admin());
-
         bytes[] memory _shipData = new bytes[](3);
-
-        console.log("ship(0).wearer", ship(0).wearer);
 
         _shipData[0] = abi.encode("Grant Ship 1", Metadata(1, "grant-ship-1-data"), ship(0).wearer);
         _shipData[1] = abi.encode("Grant Ship 2", Metadata(1, "grant-ship-2-data"), ship(1).wearer);
         _shipData[2] = abi.encode("Grant Ship 3", Metadata(1, "grant-ship-2-data"), ship(2).wearer);
-        // _shipData[2] = abi.encode("Grant Ship 3", Metadata(1, "grant-ship-3-data"), ship(2).wearer);
 
+        vm.startPrank(pool_admin());
         newPoolId = allo().createPoolWithCustomStrategy(
             poolProfile_id(),
             address(gameManager),
@@ -133,36 +102,6 @@ contract GrantShiptStrategyTest is Test, RegistrySetupFullLive, AlloSetup, HatsS
         );
 
         vm.stopPrank();
-    }
-
-    function __setup_strategies() internal {
-        shipStrategyImplementation = new GrantShipStrategy(address(allo()), "GrantShipStrategy");
-    }
-
-    function _createPool(bool _registryGating, bool _metadataRequired, bool _grantAmountRequired)
-        internal
-        returns (uint256 newPoolId, address payable strategyClone)
-    {
-        vm.deal(pool_admin(), 30e18);
-
-        vm.startPrank(pool_admin());
-
-        newPoolId = allo().createPoolWithCustomStrategy{value: 30e18}(
-            poolProfile_id(),
-            address(shipStrategyImplementation),
-            abi.encode(_registryGating, _metadataRequired, _grantAmountRequired),
-            token,
-            30e18,
-            Metadata(1, "grant-ship-data"),
-            // pool manager/game facilitator role will be mediated through Hats Protocol
-            // pool_admin address will be the game_facilitator multisig
-            // using pool_admin as a single address for both roles
-            noManagers
-        );
-
-        vm.stopPrank();
-
-        strategyClone = payable(address(allo().getPool(newPoolId).strategy));
     }
 
     function _test_ship_created(address _teamAddress) internal {
