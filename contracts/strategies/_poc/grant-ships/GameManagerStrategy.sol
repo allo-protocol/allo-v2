@@ -124,10 +124,10 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
             address[] memory poolAdminAsManager = new address[](1);
             poolAdminAsManager[0] = gameManager;
 
+            GrantShipStrategy grantShip = new GrantShipStrategy(address(allo), "Grant Ship Strategy");
+
             bytes32 shipProfileId =
                 registry.createProfile(i + 1, _shipName, _shipMetadata, address(this), profileManagers);
-
-            GrantShipStrategy grantShip = new GrantShipStrategy(address(allo), "Grant Ship Strategy");
             address payable strategyAddress = payable(address(grantShip));
 
             console.log("Create Loop");
