@@ -53,6 +53,7 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
         __initGameManager();
         __dealArb();
         __createGameManager();
+        __storeShips();
     }
 
     function __generateShipData() internal {
@@ -94,5 +95,15 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
             // using pool_admin as a single address for both roles
             noManagers
         );
+    }
+
+    function __storeShips() internal {
+        for (uint32 i = 0; i < _ships.length;) {
+            address payable strategyAddress = gameManager.getStrategyAddress(ship(i).wearer);
+            _ships[i] = GrantShipStrategy(strategyAddress);
+            unchecked {
+                i++;
+            }
+        }
     }
 }

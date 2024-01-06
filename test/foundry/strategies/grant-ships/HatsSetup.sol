@@ -5,10 +5,7 @@ pragma solidity ^0.8.19;
 import "forge-std/Test.sol";
 import {IHats} from "hats-protocol/Interfaces/IHats.sol";
 
-// Internal Libraries
-import {Accounts} from "../../shared/Accounts.sol";
-
-contract HatsSetupLive is Test, Accounts {
+contract HatsSetupLive is Test {
     struct HatWearer {
         address wearer;
         uint256 id;

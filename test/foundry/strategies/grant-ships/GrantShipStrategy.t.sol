@@ -27,6 +27,8 @@ import {EventSetup} from "../../shared/EventSetup.sol";
 //Todo Test if each contract inherits a different version of the same contract
 // Is this contract getting the same address that others recieve.
 contract GrantShiptStrategyTest is Test, GameManagerSetup, Native, EventSetup, Errors {
+    // ================= Setup =====================
+
     function setUp() public {
         vm.createSelectFork({blockNumber: 166_807_779, urlOrAlias: "arbitrumOne"});
         __RegistrySetupFullLive();
