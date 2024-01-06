@@ -55,32 +55,28 @@ contract GrantShiptStrategyTest is Test, GameManagerSetup, Native, EventSetup, E
     }
 
     function test_ships_created() public {
-        //Todo add tests for other params once they are added to Ship Strategy
-        address[] memory _teamAddresses = new address[](3);
-
-        _teamAddresses[0] = team(0).wearer;
-        _teamAddresses[1] = team(1).wearer;
-        _teamAddresses[2] = team(2).wearer;
-
-        for (uint256 i = 0; i < _teamAddresses.length;) {
-            _test_ship_created(_teamAddresses[i]);
+        for (uint256 i = 0; i < 3;) {
+            _test_ship_created(i);
             unchecked {
                 i++;
             }
         }
     }
 
-    function _test_ship_created(address _teamAddress) internal {
-        GrantShipStrategy ship1Strategy = _getShipStrategy(_teamAddress);
-        assertTrue(address(ship1Strategy.getAllo()) == address(allo()));
-        assertTrue(ship1Strategy.getStrategyId() == keccak256(abi.encode("Grant Ship Strategy")));
-        assertTrue(ship1Strategy.registryGating());
-        assertTrue(ship1Strategy.metadataRequired());
-        assertTrue(ship1Strategy.grantAmountRequired());
+    function _test_ship_created(uint256 _shipId) internal {
+        GrantShipStrategy shipStrategy = _getShipStrategy(_shipId);
+        ShipInitData memory shipInitData = abi.decode(shipSetupData(_shipId), (ShipInitData));
+        assertTrue(address(shipStrategy.getAllo()) == address(allo()));
+        assertTrue(shipStrategy.getStrategyId() == keccak256(abi.encode(shipInitData.shipName)));
+        assertTrue(shipStrategy.registryGating());
+        assertTrue(shipStrategy.metadataRequired());
+        assertTrue(shipStrategy.grantAmountRequired());
+        assertTrue(shipInitData.operatorHatId == shipStrategy.operatorHatId());
+        // Todo add tests for other params once they are added to Ship Strategy
     }
 
-    function _getShipStrategy(address _teamAddress) internal view returns (GrantShipStrategy) {
-        address payable strategyAddress = gameManager().getStrategyAddress(_teamAddress);
+    function _getShipStrategy(uint256 _shipId) internal view returns (GrantShipStrategy) {
+        address payable strategyAddress = gameManager().getShipAddress(_shipId);
         return GrantShipStrategy(strategyAddress);
     }
 }

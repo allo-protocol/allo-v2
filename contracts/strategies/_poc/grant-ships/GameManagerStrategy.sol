@@ -68,9 +68,13 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     IHats private _hats;
     Allo private _allo;
 
-    ///@notice This maps the teamAddress to the recipient
-    ///@dev 'teamAddress' to 'Recipient'
-    mapping(address => Recipient) public grantShipRecipients;
+    // ///@notice This maps the teamAddress to the recipient
+    // ///@dev 'teamAddress' to 'Recipient'
+    // mapping(address => Recipient) public grantShipRecipients;
+
+    Recipient[] public grantShipRecipients;
+
+    uint256 internal _shipNonce;
 
     uint256 public gameFacilitatorHatId;
 
@@ -118,7 +122,6 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
             // Would be nice to have the captain address as a manager
             // but owner has to be msg.sender in order to create a manager.
             // can always do it in a separate call later.
-
             address[] memory profileManagers = new address[](2);
             profileManagers[0] = shipInitData.teamAddress;
             profileManagers[1] = gameManager;
@@ -126,11 +129,12 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
             address[] memory poolAdminAsManager = new address[](1);
             poolAdminAsManager[0] = gameManager;
 
-            GrantShipStrategy grantShip = new GrantShipStrategy(address(allo), "Grant Ship Strategy");
+            GrantShipStrategy grantShip = new GrantShipStrategy(address(allo), shipInitData.shipName);
 
             bytes32 shipProfileId = registry.createProfile(
-                i + 1, shipInitData.shipName, shipInitData.shipMetadata, address(this), profileManagers
+                i, shipInitData.shipName, shipInitData.shipMetadata, address(this), profileManagers
             );
+
             address payable strategyAddress = payable(address(grantShip));
 
             uint256 shipPoolId = _allo.createPoolWithCustomStrategy(
@@ -150,33 +154,35 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
                 shipInitData.teamAddress, strategyAddress, shipPoolId, 0, shipInitData.shipMetadata, Status.Pending
             );
 
-            grantShipRecipients[shipInitData.teamAddress] = newShipRecipient;
+            grantShipRecipients.push(newShipRecipient);
+
             unchecked {
                 i++;
+                _shipNonce++;
             }
         }
     }
 
     function approveShips(address[] memory _shipAddresses) external onlyGameFacilitator(msg.sender) {
-        uint256 shipLength = _shipAddresses.length;
-        for (uint256 i = 0; i < shipLength; i++) {
-            Recipient storage shipRecipient = grantShipRecipients[_shipAddresses[i]];
+        // uint256 shipLength = _shipAddresses.length;
+        // for (uint256 i = 0; i < shipLength; i++) {
+        //     Recipient storage shipRecipient = grantShipRecipients[_shipAddresses[i]];
 
-            if (shipRecipient.recipientStatus != Status.Pending) revert INVALID_STATUS();
+        //     if (shipRecipient.recipientStatus != Status.Pending) revert INVALID_STATUS();
 
-            shipRecipient.recipientStatus = Status.Accepted;
-        }
+        //     shipRecipient.recipientStatus = Status.Accepted;
+        // }
     }
 
     function rejectShips(address[] memory _shipAddresses) external onlyGameFacilitator(msg.sender) {
-        uint256 shipLength = _shipAddresses.length;
-        for (uint256 i = 0; i < shipLength; i++) {
-            Recipient storage shipRecipient = grantShipRecipients[_shipAddresses[i]];
+        // uint256 shipLength = _shipAddresses.length;
+        // for (uint256 i = 0; i < shipLength; i++) {
+        //     Recipient storage shipRecipient = grantShipRecipients[_shipAddresses[i]];
 
-            if (shipRecipient.recipientStatus != Status.Pending) revert INVALID_STATUS();
+        //     if (shipRecipient.recipientStatus != Status.Pending) revert INVALID_STATUS();
 
-            shipRecipient.recipientStatus = Status.Rejected;
-        }
+        //     shipRecipient.recipientStatus = Status.Rejected;
+        // }
     }
 
     function _allocate(bytes memory _data, address _sender) internal virtual override {
@@ -207,8 +213,8 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         return _hats.isWearerOfHat(_address, gameFacilitatorHatId);
     }
 
-    function getStrategyAddress(address _teamAddress) public view returns (address payable) {
-        return grantShipRecipients[_teamAddress].recipientAddress;
+    function getShipAddress(uint256 _shipId) public view returns (address payable) {
+        return grantShipRecipients[_shipId].recipientAddress;
     }
 
     /// ====================================
@@ -235,13 +241,13 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     // }
 
     function _getRecipientStatus(address _recipientId) internal view virtual override returns (Status) {
-        Recipient memory grantShipRecipient = grantShipRecipients[_recipientId];
-        return grantShipRecipient.recipientStatus;
+        // Recipient memory grantShipRecipient = grantShipRecipients[_recipientId];
+        // return grantShipRecipient.recipientStatus;
     }
 
     function getGrantShipRecipient(address _recipientId) public view returns (Recipient memory) {
-        Recipient memory grantShipRecipient = grantShipRecipients[_recipientId];
-        return grantShipRecipient;
+        // Recipient memory grantShipRecipient = grantShipRecipients[_recipientId];
+        // return grantShipRecipient;
     }
 
     function _getPayout(address _recipientId, bytes memory) internal view override returns (PayoutSummary memory) {

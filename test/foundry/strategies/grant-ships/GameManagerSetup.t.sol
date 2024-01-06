@@ -117,9 +117,9 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
     }
 
     function __storeShips() internal {
-        for (uint32 i = 0; i < _ships.length;) {
-            address payable strategyAddress = _gameManager.getStrategyAddress(team(i).wearer);
-            _ships[i] = GrantShipStrategy(strategyAddress);
+        for (uint32 i = 0; i < _shipSetupData.length;) {
+            address payable shipAddress = _gameManager.getShipAddress(i);
+            _ships[i] = GrantShipStrategy(shipAddress);
             unchecked {
                 i++;
             }

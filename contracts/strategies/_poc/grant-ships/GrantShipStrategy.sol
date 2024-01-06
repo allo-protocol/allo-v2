@@ -97,7 +97,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     uint256 public allocatedGrantAmount;
 
     /// @notice The total amount allocated to grant/recipient.
-    uint256 public facilitatorHatId;
+    uint256 public operatorHatId;
 
     /// @notice Internal collection of accepted recipients able to submit milestones
     address[] private _acceptedRecipientIds;
@@ -132,11 +132,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _data The data to be decoded
     /// @custom:data (bool registryGating, bool metadataRequired, bool grantAmountRequired)
     function initialize(uint256 _poolId, bytes memory _data) external virtual override {
-        console.log("GrantShipStrategy.initialize()");
         (ShipInitData memory initData) = abi.decode(_data, (ShipInitData));
-        console.log("initData.registryGating", initData.registryGating);
-        console.log("initData.metadataRequired", initData.metadataRequired);
-        console.log("initData.grantAmountRequired", initData.grantAmountRequired);
         __DirectGrantsSimpleStrategy_init(_poolId, initData);
         emit Initialized(_poolId, _data);
     }
@@ -153,7 +149,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         registryGating = _initData.registryGating;
         metadataRequired = _initData.metadataRequired;
         grantAmountRequired = _initData.grantAmountRequired;
-        facilitatorHatId = _initData.facilitatorHatId;
+        operatorHatId = _initData.operatorHatId;
         _registry = allo.getRegistry();
 
         // Set the pool to active - this is required for the strategy to work and distribute funds

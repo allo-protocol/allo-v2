@@ -23,5 +23,5 @@ struct ShipInitData {
     string shipName;
     Metadata shipMetadata;
     address teamAddress;
-    uint256 facilitatorHatId;
+    uint256 operatorHatId;
 }
