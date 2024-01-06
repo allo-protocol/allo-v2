@@ -130,11 +130,11 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
                 registry.createProfile(i + 1, _shipName, _shipMetadata, address(this), profileManagers);
             address payable strategyAddress = payable(address(grantShip));
 
-            console.log("Create Loop");
-            console.log("------------");
-            console.log("index", i);
-            console.log("strategyAddress", strategyAddress);
-            console.log("allo", address(allo));
+            // console.log("Create Loop");
+            // console.log("------------");
+            // console.log("index", i);
+            // console.log("strategyAddress", strategyAddress);
+            // console.log("allo", address(allo));
             uint256 shipPoolId = _allo.createPoolWithCustomStrategy(
                 shipProfileId,
                 strategyAddress,
