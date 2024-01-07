@@ -27,6 +27,9 @@ import {EventSetup} from "../../shared/EventSetup.sol";
 //Todo Test if each contract inherits a different version of the same contract
 // Is this contract getting the same address that others recieve.
 contract GrantShiptStrategyTest is Test, GameManagerSetup, Native, EventSetup, Errors {
+    // Events
+    event RecipientStatusChanged(address recipientId, GrantShipStrategy.Status status);
+
     // ================= Setup =====================
 
     function setUp() public {
@@ -93,6 +96,22 @@ contract GrantShiptStrategyTest is Test, GameManagerSetup, Native, EventSetup, E
         assertTrue(uint8(status) == uint8(IStrategy.Status.Pending));
     }
 
+    function testRevert_registerRecipient_UNAUTHORIZED() public {
+        address recipientId = profile1_anchor();
+        address recipientAddress = recipient1();
+        address sender = profile2_member1(); // wrong sender
+        uint256 grantAmount = 5e17; // 0.5 eth
+        Metadata memory metadata = Metadata(1, "recipient-data");
+
+        bytes memory data = abi.encode(recipientId, recipientAddress, grantAmount, metadata);
+        vm.startPrank(address(allo()));
+
+        vm.expectRevert(UNAUTHORIZED.selector);
+
+        ship(1).registerRecipient(data, sender);
+        vm.stopPrank();
+    }
+
     // ================= Helpers =====================
 
     function _test_ship_created(uint256 _shipId) internal {
@@ -132,5 +151,22 @@ contract GrantShiptStrategyTest is Test, GameManagerSetup, Native, EventSetup, E
 
     function _register_recipient() internal returns (address recipientId) {
         (recipientId,) = _register_recipient_return_data();
+    }
+
+    function _register_recipient_allocate_accept() internal returns (address recipientId) {
+        recipientId = _register_recipient();
+        GrantShipStrategy.Status recipientStatus = IStrategy.Status.Accepted;
+        uint256 grantAmount = 1_000e18;
+
+        bytes memory data = abi.encode(recipientId, recipientStatus, grantAmount);
+
+        vm.expectEmit(false, false, true, true);
+
+        emit RecipientStatusChanged(recipientId, recipientStatus);
+        emit Allocated(recipientId, grantAmount, address(ARB()), pool_manager1());
+
+        vm.startPrank(address(allo()));
+        ship(1).allocate(data, facilitator().wearer);
+        vm.stopPrank();
     }
 }

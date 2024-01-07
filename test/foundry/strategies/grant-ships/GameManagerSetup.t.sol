@@ -56,6 +56,10 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
         return _shipSetupData[_index];
     }
 
+    function ARB() public view returns (IERC20) {
+        return arbToken;
+    }
+
     // ====================================
     // =========== Setup ==================
     // ====================================

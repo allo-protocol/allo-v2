@@ -127,6 +127,17 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     mapping(address => uint256) public upcomingMilestone;
 
     /// ===============================
+    /// ======== Modifiers ============
+    /// ===============================
+
+    modifier onlyGameFacilitator(address _sender) {
+        if (!isGameFacilitator(_sender)) {
+            revert UNAUTHORIZED();
+        }
+        _;
+    }
+
+    /// ===============================
     /// ======== Constructor ==========
     /// ===============================
 
@@ -472,6 +483,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         emit Registered(recipientId, _data, _sender);
     }
 
+    /// Todo: Document changes: Facilitators can allocate funds to recipients, not pool managers
     /// @notice Allocate amount to recipent for GrantShips.
     /// @dev '_sender' must be a pool manager to allocate. Emits 'RecipientStatusChanged() and 'Allocated()' events.
     /// @param _data The data to be decoded
@@ -482,7 +494,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         virtual
         override
         nonReentrant
-        onlyPoolManager(_sender)
+        onlyGameFacilitator(msg.sender)
     {
         // Decode the '_data'
         (address recipientId, Status recipientStatus, uint256 grantAmount) =
