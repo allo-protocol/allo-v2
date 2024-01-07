@@ -494,7 +494,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         virtual
         override
         nonReentrant
-        onlyGameFacilitator(msg.sender)
+        onlyGameFacilitator(_sender)
     {
         // Decode the '_data'
         (address recipientId, Status recipientStatus, uint256 grantAmount) =

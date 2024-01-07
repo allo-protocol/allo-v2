@@ -53,7 +53,7 @@ contract HatsSetupLive is Test {
         _topHat.id = hats().mintTopHat(topHat().wearer, "Top Hat", "https://wwww/tophat.com/");
 
         vm.startPrank(topHat().wearer);
-
+        _facilitator.wearer = makeAddr("gameFacilitator");
         _facilitator.id = hats().createHat(topHat().id, "Facilitator Hat", 2, _eligibility, _toggle, true, "");
         hats().mintHat(facilitator().id, facilitator().wearer);
         vm.stopPrank();
