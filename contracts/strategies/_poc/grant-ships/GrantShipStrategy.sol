@@ -552,7 +552,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         internal
         virtual
         override
-        onlyPoolManager(_sender)
+        onlyGameFacilitator(_sender)
     {
         uint256 recipientLength = _recipientIds.length;
         for (uint256 i; i < recipientLength;) {

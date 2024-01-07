@@ -134,6 +134,14 @@ contract GrantShiptStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         _register_recipient_allocate_accept_set_milestones_by_recipient();
     }
 
+    function test_register_recipient_allocate_accept_set_and_submit_milestones() public {
+        _register_recipient_allocate_accept_set_and_submit_milestones();
+    }
+
+    function test_register_recipient_allocate_accept_set_and_submit_milestones_distribute() public {
+        _register_recipient_allocate_accept_set_and_submit_milestones_distribute();
+    }
+
     // ================= Helpers =====================
 
     function _test_ship_created(uint256 _shipId) internal {
@@ -276,6 +284,43 @@ contract GrantShiptStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
 
         vm.startPrank(profile1_member1());
         ship(1).setMilestones(recipientId, milestones);
+        vm.stopPrank();
+    }
+
+    function _register_recipient_allocate_accept_set_and_submit_milestones() internal returns (address recipientId) {
+        recipientId = _register_recipient_allocate_accept_set_milestones_by_recipient();
+
+        Metadata memory metadata1 = Metadata(1, "milestone-1");
+        Metadata memory metadata2 = Metadata(1, "milestone-2");
+
+        vm.expectEmit(true, true, true, true);
+        emit MilestoneSubmitted(recipientId, 0, metadata1);
+
+        vm.startPrank(profile1_member1());
+        ship(1).submitMilestone(recipientId, 0, metadata1);
+        ship(1).submitMilestone(recipientId, 1, metadata2);
+        vm.stopPrank();
+    }
+
+    function _register_recipient_allocate_accept_set_and_submit_milestones_distribute()
+        internal
+        returns (address recipientId)
+    {
+        recipientId = _register_recipient_allocate_accept_set_and_submit_milestones();
+
+        address[] memory recipients = new address[](2);
+
+        recipients[0] = recipientId;
+        recipients[1] = recipientId;
+
+        // vm.expectEmit(false, false, true, true);
+
+        // emit MilestoneStatusChanged(recipientId, 1, IStrategy.Status.Accepted);
+        // emit Distributed(recipientId, recipient1(), 0.7e18, facilitator().wearer);
+
+        vm.startPrank(facilitator().wearer);
+        allo().distribute(ship(1).getPoolId(), recipients, "");
+
         vm.stopPrank();
     }
 }
