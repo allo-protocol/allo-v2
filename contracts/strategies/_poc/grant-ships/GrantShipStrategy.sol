@@ -374,11 +374,16 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         // Emit event for the milestone rejection
         emit MilestoneStatusChanged(_recipientId, _milestoneId, Status.Rejected);
     }
-
+    /// Todo: update comment
     /// @notice Set the status of the recipient to 'InReview'
     /// @dev Emits a 'RecipientStatusChanged()' event
     /// @param _recipientIds IDs of the recipients
-    function setRecipientStatusToInReview(address[] calldata _recipientIds) external onlyPoolManager(msg.sender) {
+
+    function setRecipientStatusToInReview(address[] calldata _recipientIds) external {
+        if (!isShipOperator(msg.sender) && !isGameFacilitator(msg.sender)) {
+            revert UNAUTHORIZED();
+        }
+
         uint256 recipientLength = _recipientIds.length;
         for (uint256 i; i < recipientLength;) {
             address recipientId = _recipientIds[i];
@@ -395,7 +400,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Toggle the status between active and inactive.
     /// @dev 'msg.sender' must be a pool manager to close the pool. Emits a 'PoolActive()' event.
     /// @param _flag The flag to set the pool to active or inactive
-    function setPoolActive(bool _flag) external onlyPoolManager(msg.sender) {
+    function setPoolActive(bool _flag) external onlyGameFacilitator(msg.sender) {
         _setPoolActive(_flag);
         emit PoolActive(_flag);
     }
@@ -521,7 +526,6 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
             if (allocatedGrantAmount > poolAmount) {
                 revert ALLOCATION_EXCEEDS_POOL_AMOUNT();
             }
-            console.log("Accepted for some reason");
             recipient.grantAmount = grantAmount;
             recipient.recipientStatus = Status.Accepted;
 
