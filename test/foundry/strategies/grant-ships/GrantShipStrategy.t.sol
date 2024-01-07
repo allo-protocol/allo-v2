@@ -64,6 +64,18 @@ contract GrantShiptStrategyTest is Test, GameManagerSetup, Native, EventSetup, E
         }
     }
 
+    // ================= GrantShip Strategy =====================
+
+    function test_isValidAllocator() public {
+        assertTrue(ship(0).isValidAllocator(facilitator().wearer));
+        assertTrue(ship(1).isValidAllocator(facilitator().wearer));
+        assertTrue(ship(2).isValidAllocator(facilitator().wearer));
+
+        assertFalse(ship(0).isValidAllocator(randomAddress()));
+        assertFalse(ship(1).isValidAllocator(shipOperator(0).wearer));
+        assertFalse(ship(2).isValidAllocator(team(0).wearer));
+    }
+
     // function test_parent_call() public {
     //     ship(0).getHatsAddress();
     // }

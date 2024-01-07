@@ -164,7 +164,6 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
 
         GameManagerStrategy gameManager = GameManagerStrategy(_gameManagerAddress);
         _gameManager = gameManager;
-        // console.log("gameManager", _gameManagerAddress);
 
         _hats = IHats(address(_gameManager.getHatsAddress()));
 
@@ -200,14 +199,17 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         return _getRecipient(_recipientId).recipientStatus;
     }
 
-    //Todo: Valid Allocator should be the Game Facilitator
+    function isGameFacilitator(address _gameFacilitator) public view returns (bool) {
+        return _hats.isWearerOfHat(_gameFacilitator, _gameManager.gameFacilitatorHatId());
+    }
 
+    //Todo: update comment
     /// @notice Checks if address is eligible allocator.
     /// @dev This is used to check if the allocator is a pool manager and able to allocate funds from the pool
     /// @param _allocator Address of the allocator
     /// @return 'true' if the allocator is a pool manager, otherwise false
     function _isValidAllocator(address _allocator) internal view override returns (bool) {
-        return allo.isPoolManager(poolId, _allocator);
+        return isGameFacilitator(_allocator);
     }
 
     /// @notice Get the status of the milestone of an recipient.
