@@ -27,7 +27,7 @@ const chainIds = {
   "fantom-testnet": 4002,
   "pgn-sepolia": 58008,
   "celo-testnet": 44787,
-  "arbitrum-goerli": 421613,
+  "arbitrum-sepolia": 421614,
   "base-testnet": 84531,
   mumbai: 80001,
 
@@ -51,7 +51,8 @@ if (!deployPrivateKey) {
 const infuraIdKey = process.env.INFURA_RPC_ID as string;
 const alchemyIdKey = process.env.ALCHEMY_RPC_ID as string;
 const DEFENDER_TEAM_API_KEY = process.env.DEFENDER_TEAM_API_KEY as string;
-const DEFENDER_TEAM_API_SECRET_KEY = process.env.DEFENDER_TEAM_API_SECRET_KEY as string;
+const DEFENDER_TEAM_API_SECRET_KEY = process.env
+  .DEFENDER_TEAM_API_SECRET_KEY as string;
 
 /**
  * Reads the remappings.txt file and returns an array of arrays.
@@ -150,11 +151,11 @@ const config: HardhatUserConfig = {
     },
     "arbitrum-mainnet": createMainnetConfig(
       "arbitrum-mainnet",
-      `https://arb-mainnet.g.alchemy.com/v2/${alchemyIdKey}`,
+      `https://arb-mainnet.g.alchemy.com/v2/${alchemyIdKey}`
     ),
     "fantom-mainnet": createMainnetConfig(
       "fantom-mainnet",
-      "https://rpc.ftm.tools",
+      "https://rpc.ftm.tools"
     ),
     "pgn-mainnet": {
       ...createMainnetConfig("pgn-mainnet"),
@@ -178,19 +179,23 @@ const config: HardhatUserConfig = {
     // Test Networks
     goerli: createTestnetConfig(
       "goerli",
-      `https://eth-goerli.g.alchemy.com/v2/${alchemyIdKey}`,
+      `https://eth-goerli.g.alchemy.com/v2/${alchemyIdKey}`
     ),
     sepolia: createTestnetConfig(
       "sepolia",
-      `https://eth-sepolia.g.alchemy.com/v2/${alchemyIdKey}`,
+      `https://eth-sepolia.g.alchemy.com/v2/${alchemyIdKey}`
     ),
     "arbitrum-goerli": createTestnetConfig(
       "arbitrum-goerli",
-      `https://arb-goerli.g.alchemy.com/v2/${alchemyIdKey}`,
+      `https://arb-goerli.g.alchemy.com/v2/${alchemyIdKey}`
+    ),
+    "arbitrum-sepolia": createTestnetConfig(
+      "arbitrum-sepolia",
+      `https://arb-sepolia.g.alchemy.com/v2/${alchemyIdKey}`
     ),
     ftmTestnet: createTestnetConfig(
       "fantom-testnet",
-      "https://rpc.testnet.fantom.network/",
+      "https://rpc.testnet.fantom.network/"
     ),
     "optimism-goerli": {
       ...createTestnetConfig("optimism-goerli"),
@@ -220,6 +225,16 @@ const config: HardhatUserConfig = {
 
     // Local Networks
     localhost: createTestnetConfig("localhost", "http://localhost:8545"),
+    hardhat: {
+      // forking: {
+      //   url: process.env.MAINNET,
+      //   blockNumber: 33317730,
+      // },
+      mining: {
+        auto: false,
+        interval: 1000,
+      },
+    },
   },
   gasReporter: {
     coinmarketcap: process.env.COINMARKETCAP_API_KEY,
@@ -262,7 +277,7 @@ const config: HardhatUserConfig = {
       // @ts-ignore
       "arbitrum-mainnet": process.env.ARBITRUMSCAN_API_KEY,
       // @ts-ignore
-      "arbitrum-goerli": process.env.ARBITRUMSCAN_API_KEY,
+      "arbitrum-sepolia": process.env.ARBITRUMSCAN_API_KEY,
     },
     customChains: [
       {
@@ -338,10 +353,10 @@ const config: HardhatUserConfig = {
         },
       },
       {
-        network: "arbitrum-goerli",
-        chainId: chainIds["arbitrum-goerli"],
+        network: "arbitrum-sepolia",
+        chainId: chainIds["arbitrum-sepolia"],
         urls: {
-          apiURL: "https://api-goerli.arbiscan.io/api",
+          apiURL: "https://api-sepolia.arbiscan.io/api",
           browserURL: "https://arbiscan.io",
         },
       },

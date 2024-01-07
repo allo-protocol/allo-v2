@@ -337,8 +337,8 @@ export const strategyConfig: DeployParams = {
       version: "v1.0",
     },
   },
-  // Arbitrum Goerli
-  421613: {
+  // Arbitrum Sepolia
+  421614: {
     "rfp-simple": {
       name: "RFPSimpleStrategy",
       version: "v1.0",

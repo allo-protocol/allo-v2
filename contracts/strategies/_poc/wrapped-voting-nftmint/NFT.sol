@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import {ERC721} from "solady/src/tokens/ERC721.sol";
+import {ERC721} from "solady/tokens/ERC721.sol";
 import "openzeppelin-contracts/contracts/utils/Strings.sol";
-import "solady/src/auth/Ownable.sol";
+import "solady/auth/Ownable.sol";
 
 contract NFT is ERC721, Ownable {
     using Strings for uint256;

@@ -161,3 +161,21 @@
 20231106_123515 - Deployment finished with 0 error(s)
 20231106_123525 - Executing: bun hardhat run scripts/strategies/deployImpactStream.ts --no-compile --network celo-mainnet | tee ./reports/deployment-logs/strategies/deployImpactStream/celo-mainnet/20231106_123525/deploy-20231106_123525.log
 20231106_123619 - Deployment finished with 0 error(s)
+20231214_142629 - Executing: bun hardhat run scripts/core/deployRegistry.ts --no-compile --network arbitrum-sepolia | tee ./reports/deployment-logs/core/deployRegistry/arbitrum-sepolia/20231214_142629/deploy-20231214_142629.log
+20231214_142827 - Deployment finished with 0 error(s)
+20231214_142854 - Executing: bun hardhat run scripts/core/deployContractFactory.ts --no-compile --network arbitrum-sepolia | tee ./reports/deployment-logs/core/deployContractFactory/arbitrum-sepolia/20231214_142854/deploy-20231214_142854.log
+20231214_143021 - Deployment finished with 0 error(s)
+20231214_143055 - Executing: bun hardhat run scripts/core/deployAllo.ts --no-compile --network arbitrum-sepolia | tee ./reports/deployment-logs/core/deployAllo/arbitrum-sepolia/20231214_143055/deploy-20231214_143055.log
+20231214_143340 - Deployment finished with 0 error(s)
+20231214_143634 - Executing: bun hardhat run scripts/core/transferProxyAdminOwnership.ts --no-compile --network arbitrum-sepolia | tee ./reports/deployment-logs/core/transferProxyAdminOwnership/arbitrum-sepolia/20231214_143634/deploy-20231214_143634.log
+20231214_143637 - Deployment finished with 0 error(s)
+20231214_143646 - Executing: bun hardhat run scripts/strategies/deployDonationVotingMerkleDistributionDirect.ts --no-compile --network arbitrum-sepolia | tee ./reports/deployment-logs/strategies/deployDonationVotingMerkleDistributionDirect/arbitrum-sepolia/20231214_143646/deploy-20231214_143646.log
+20231214_143734 - Deployment finished with 0 error(s)
+20231214_143820 - Executing: bun hardhat run scripts/strategies/deployDonationVotingMerkleDistributionVault.ts --no-compile --network arbitrum-sepolia | tee ./reports/deployment-logs/strategies/deployDonationVotingMerkleDistributionVault/arbitrum-sepolia/20231214_143820/deploy-20231214_143820.log
+20231214_143902 - Deployment finished with 0 error(s)
+20231214_143957 - Executing: bun hardhat run scripts/strategies/deployRFPCommittee.ts --no-compile --network arbitrum-sepolia | tee ./reports/deployment-logs/strategies/deployRFPCommittee/arbitrum-sepolia/20231214_143957/deploy-20231214_143957.log
+20231214_144046 - Deployment finished with 0 error(s)
+20231214_144100 - Executing: bun hardhat run scripts/strategies/deployRFPSimple.ts --no-compile --network arbitrum-sepolia | tee ./reports/deployment-logs/strategies/deployRFPSimple/arbitrum-sepolia/20231214_144100/deploy-20231214_144100.log
+20231214_144149 - Deployment finished with 0 error(s)
+20231214_144933 - Executing: bun hardhat run scripts/strategies/deployQVSimple.ts --no-compile --network arbitrum-sepolia | tee ./reports/deployment-logs/strategies/deployQVSimple/arbitrum-sepolia/20231214_144933/deploy-20231214_144933.log
+20231214_145020 - Deployment finished with 0 error(s)

@@ -1,0 +1,50 @@
+WARNING: You are currently using Node.js v21.1.0, which is not supported by Hardhat. This can lead to unexpected behavior. See https://hardhat.org/nodejs-versions
+
+
+
+    ////////////////////////////////////////////////////
+      Deploys DonationVotingMerkleDistributionVaultStrategy.sol on arbitrum-sepolia
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬─────────────────────────────────────────────────────┐
+│     (index)     │                       Values                        │
+├─────────────────┼─────────────────────────────────────────────────────┤
+│    contract     │ 'DonationVotingMerkleDistributionVaultStrategy.sol' │
+│     chainId     │                       421614                        │
+│     network     │                 'arbitrum-sepolia'                  │
+│ deployerAddress │    '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C'     │
+│     balance     │                    '2.998917571'                    │
+└─────────────────┴─────────────────────────────────────────────────────┘
+Deploying DonationVotingMerkleDistributionVaultStrategy.sol
+[35mContract DonationVotingMerkleDistributionVaultStrategy deployed at address: 0x68d67bf72fcCf0E0f269C67b934b4050d2917F91[0m
+
+Verifying contract...
+ContractVerificationRequestError: Failed to send contract verification request.
+Endpoint URL: https://api-sepolia.arbiscan.io/api
+Reason: other side closed
+    at Etherscan.verify (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/internal/etherscan.ts:150:13)
+    at async SimpleTaskDefinition.action (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/index.ts:471:33)
+    at async Environment._runTaskDefinition (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:358:14)
+    at async Environment.run (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:191:14)
+    at async SimpleTaskDefinition.action (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/index.ts:298:9)
+    at async Environment._runTaskDefinition (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:358:14)
+    at async hardhatVerify (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/verify-proxy.ts:118:12)
+    at async OverriddenTaskDefinition._action (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/index.ts:198:12)
+    at async Environment._runTaskDefinition (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:358:14)
+    at async Environment.run (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:191:14)
+
+    Caused by: SocketError: other side closed
+        at TLSSocket.onSocketEnd (/Users/jaxcoder/Gitcoin/Allo/V2/allo-v2/node_modules/undici/lib/client.js:1129:22)
+        at TLSSocket.emit (node:events:527:35)
+        at TLSSocket.emit (node:domain:488:12)
+        at endReadableNT (node:internal/streams/readable:1589:12)
+        at processTicksAndRejections (node:internal/process/task_queues:82:21)
+[90m
+	Validating getAllo() == 0x1133eA7Af70876e64665ecD07C0A0476d09465a1[0m
+[32m	✅ PASSED with Result: 0x1133eA7Af70876e64665ecD07C0A0476d09465a1[0m
+[90m
+	Validating getStrategyId() == 0x7e75375f0a7cd9f7ea159c8b065976e4f764f9dcef1edf692f31dd1842f70c87[0m
+[32m	✅ PASSED with Result: 0x7e75375f0a7cd9f7ea159c8b065976e4f764f9dcef1edf692f31dd1842f70c87[0m
+[90m
+	Validating PERMIT2() == 0x000000000022d473030f116ddee9f6b43ac78ba3[0m
+[32m	✅ PASSED with Result: 0x000000000022d473030f116ddee9f6b43ac78ba3[0m

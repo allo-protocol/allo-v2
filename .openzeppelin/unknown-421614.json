@@ -2,24 +2,24 @@
   "manifestVersion": "3.2",
   "admin": {
     "address": "0x758b87af7fdB4783f848a1dDEa1F025dC48B9858",
-    "txHash": "0x9b9ce5caed01b0905473ced3aaaa6e4b5093c453866dd4b835849efbc9edbc78"
+    "txHash": "0xec8e0372c0f14b3794932dde9f3d9964fdaa541462734cdba52f49a9aacc8150"
   },
   "proxies": [
     {
       "address": "0x4AAcca72145e1dF2aeC137E1f3C5E3D75DB8b5f3",
-      "txHash": "0x125f95b4f24bea5f4cb2f9b25944fd1f7469a853c03665e0eb316bdd584f308d",
+      "txHash": "0x969679f626259c5e09b5e9f1e8b7ecad4c98f7ae60a452baef541b1656b75a60",
       "kind": "transparent"
     },
     {
       "address": "0x1133eA7Af70876e64665ecD07C0A0476d09465a1",
-      "txHash": "0xe4441c5d2979945326d17e472df30611fbf5ccb8e3f037617c16d4628a2c9af7",
+      "txHash": "0x67bc70f90351539484b84d70679f8e70f28966744a22727b60f4d4cffb9fdb9d",
       "kind": "transparent"
     }
   ],
   "impls": {
-    "c8a36c32648ffb1ecf549d2c1c13794cf3d75c72b0d5df6665048ff25d70df3d": {
+    "62af8c1a762b45e4ea55fa439b7ab16bd58ecd45aebe6136de7eb0ba20db7d0a": {
       "address": "0xA3Fd7042F83960398De6ceddbf513F8cac877cbE",
-      "txHash": "0xdde69c3a50e2035024fcb6040f3b1eb13d601d19bb3d60d79f74aae55201bc22",
+      "txHash": "0xf10eb03e1363ac8cd4cb023948e31bc9ca241f8e6de042e2fa51a17ae2dac97b",
       "layout": {
         "solcVersion": "0.8.19",
         "storage": [
@@ -60,7 +60,7 @@
             "label": "_roles",
             "offset": 0,
             "slot": "101",
-            "type": "t_mapping(t_bytes32,t_struct(RoleData)19425_storage)",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)21565_storage)",
             "contract": "AccessControlUpgradeable",
             "src": "lib/openzeppelin-contracts-upgradeable/contracts/access/AccessControlUpgradeable.sol:62"
           },
@@ -134,7 +134,7 @@
             "label": "mapping(bytes32 => struct IRegistry.Profile)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_bytes32,t_struct(RoleData)19425_storage)": {
+          "t_mapping(t_bytes32,t_struct(RoleData)21565_storage)": {
             "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)",
             "numberOfBytes": "32"
           },
@@ -142,7 +142,7 @@
             "label": "string",
             "numberOfBytes": "32"
           },
-          "t_struct(Metadata)3095_storage": {
+          "t_struct(Metadata)3098_storage": {
             "label": "struct Metadata",
             "members": [
               {
@@ -183,7 +183,7 @@
               },
               {
                 "label": "metadata",
-                "type": "t_struct(Metadata)3095_storage",
+                "type": "t_struct(Metadata)3098_storage",
                 "offset": 0,
                 "slot": "3"
               },
@@ -202,7 +202,7 @@
             ],
             "numberOfBytes": "224"
           },
-          "t_struct(RoleData)19425_storage": {
+          "t_struct(RoleData)21565_storage": {
             "label": "struct AccessControlUpgradeable.RoleData",
             "members": [
               {
@@ -234,7 +234,7 @@
     },
     "6451c555e01f2d700e5782c78ee5ddb2ebbcc880b492e7b87ea2a6dd2f0b92b4": {
       "address": "0xB087535DB0df98fC4327136e897A5985E5Cfbd66",
-      "txHash": "0x3959f42ab4bcccf13fbd55094bb14c8eadd5d5957d16ddaff6ec51aa01a00a06",
+      "txHash": "0x59279a32f00caeeee2ee9fffd68e6125e4e917010ec448ddcd93f1d8020d2910",
       "layout": {
         "solcVersion": "0.8.19",
         "storage": [
@@ -275,7 +275,7 @@
             "label": "_roles",
             "offset": 0,
             "slot": "101",
-            "type": "t_mapping(t_bytes32,t_struct(RoleData)19425_storage)",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)21565_storage)",
             "contract": "AccessControlUpgradeable",
             "src": "lib/openzeppelin-contracts-upgradeable/contracts/access/AccessControlUpgradeable.sol:62"
           },
@@ -409,7 +409,7 @@
             "label": "mapping(address => uint256)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_bytes32,t_struct(RoleData)19425_storage)": {
+          "t_mapping(t_bytes32,t_struct(RoleData)21565_storage)": {
             "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)",
             "numberOfBytes": "32"
           },
@@ -421,7 +421,7 @@
             "label": "string",
             "numberOfBytes": "32"
           },
-          "t_struct(Metadata)3095_storage": {
+          "t_struct(Metadata)3098_storage": {
             "label": "struct Metadata",
             "members": [
               {
@@ -462,7 +462,7 @@
               },
               {
                 "label": "metadata",
-                "type": "t_struct(Metadata)3095_storage",
+                "type": "t_struct(Metadata)3098_storage",
                 "offset": 0,
                 "slot": "3"
               },
@@ -481,7 +481,7 @@
             ],
             "numberOfBytes": "224"
           },
-          "t_struct(RoleData)19425_storage": {
+          "t_struct(RoleData)21565_storage": {
             "label": "struct AccessControlUpgradeable.RoleData",
             "members": [
               {
