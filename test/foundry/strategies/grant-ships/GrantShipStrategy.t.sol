@@ -76,9 +76,24 @@ contract GrantShiptStrategyTest is Test, GameManagerSetup, Native, EventSetup, E
         assertFalse(ship(2).isValidAllocator(team(0).wearer));
     }
 
-    // function test_parent_call() public {
-    //     ship(0).getHatsAddress();
-    // }
+    function test_registerRecipient() public {
+        address recipientId = _register_recipient();
+
+        GrantShipStrategy.Recipient memory recipient = ship(1).getRecipient(profile1_anchor());
+
+        assertTrue(recipient.recipientAddress == recipient1());
+        assertTrue(recipient.grantAmount == 1_000e18);
+        assertTrue(keccak256(abi.encode(recipient.metadata.pointer)) == keccak256(abi.encode("team recipient 1")));
+        assertTrue(recipient.metadata.protocol == 1);
+        assertTrue(recipient.recipientStatus == IStrategy.Status.Pending);
+        assertTrue(recipient.milestonesReviewStatus == IStrategy.Status.Pending);
+        assertTrue(recipient.useRegistryAnchor);
+
+        IStrategy.Status status = ship(1).getRecipientStatus(recipientId);
+        assertTrue(uint8(status) == uint8(IStrategy.Status.Pending));
+    }
+
+    // ================= Helpers =====================
 
     function _test_ship_created(uint256 _shipId) internal {
         // GrantShipStrategy shipStrategy = _getShipStrategy(_shipId);
@@ -95,5 +110,27 @@ contract GrantShiptStrategyTest is Test, GameManagerSetup, Native, EventSetup, E
     function _getShipStrategy(uint256 _shipId) internal view returns (GrantShipStrategy) {
         address payable strategyAddress = gameManager().getShipAddress(_shipId);
         return GrantShipStrategy(strategyAddress);
+    }
+
+    function _register_recipient_return_data() internal returns (address recipientId, bytes memory data) {
+        recipientId = profile1_anchor();
+        address recipientAddress = recipient1();
+        address sender = profile1_member1();
+        uint256 grantAmount = 1_000e18; //
+        Metadata memory metadata = Metadata(1, "team recipient 1");
+
+        data = abi.encode(recipientId, recipientAddress, grantAmount, metadata);
+
+        vm.startPrank(address(allo()));
+
+        vm.expectEmit(false, false, false, true);
+        emit Registered(recipientId, data, profile1_member1());
+
+        ship(1).registerRecipient(data, sender);
+        vm.stopPrank();
+    }
+
+    function _register_recipient() internal returns (address recipientId) {
+        (recipientId,) = _register_recipient_return_data();
     }
 }
