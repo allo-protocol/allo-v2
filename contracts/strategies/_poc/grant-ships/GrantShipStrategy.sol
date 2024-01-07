@@ -144,6 +144,13 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         _;
     }
 
+    modifier onlyShipOperator(address _sender) {
+        if (!isShipOperator(_sender)) {
+            revert UNAUTHORIZED();
+        }
+        _;
+    }
+
     /// ===============================
     /// ======== Constructor ==========
     /// ===============================
@@ -284,7 +291,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// @dev Emits a 'MilestonesReviewed()' event
     /// @param _recipientId ID of the recipient
     /// @param _status The status of the milestone review
-    function reviewSetMilestones(address _recipientId, Status _status) external onlyPoolManager(msg.sender) {
+    function reviewSetMilestones(address _recipientId, Status _status) external onlyShipOperator(msg.sender) {
         Recipient storage recipient = _recipients[_recipientId];
 
         // Check if the recipient has any milestones, otherwise revert
