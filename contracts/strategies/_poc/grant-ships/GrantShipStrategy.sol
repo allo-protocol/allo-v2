@@ -13,7 +13,7 @@ import {IRegistry} from "../../../core/interfaces/IRegistry.sol";
 import {BaseStrategy} from "../../BaseStrategy.sol";
 // Internal Libraries
 import {Metadata} from "../../../core/libraries/Metadata.sol";
-import {Milestone, ShipInitData} from "./libraries/GrantShipShared.sol";
+import {ShipInitData} from "./libraries/GrantShipShared.sol";
 import {GameManagerStrategy} from "./GameManagerStrategy.sol";
 
 /// @title Grant Ships Strategy.
@@ -35,6 +35,13 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// ================================
     /// ========== Structs =============
     /// ================================
+
+    /// @notice Struct to hold details about the milestone
+    struct Milestone {
+        uint256 amountPercentage;
+        Metadata metadata;
+        Status milestoneStatus;
+    }
 
     /// @notice Struct to hold details of an recipient
     struct Recipient {
@@ -214,6 +221,10 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         return _hats.isWearerOfHat(_gameFacilitator, _gameManager.gameFacilitatorHatId());
     }
 
+    function isShipOperator(address _shipOperator) public view returns (bool) {
+        return _hats.isWearerOfHat(_shipOperator, operatorHatId);
+    }
+
     //Todo: update comment
     /// @notice Checks if address is eligible allocator.
     /// @dev This is used to check if the allocator is a pool manager and able to allocate funds from the pool
@@ -243,14 +254,15 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// ======= External/Custom =======
     /// ===============================
 
+    /// Todo: update comment
     /// @notice Set milestones for recipient.
     /// @dev 'msg.sender' must be recipient creator or pool manager. Emits a 'MilestonesReviewed()' event.
     /// @param _recipientId ID of the recipient
     /// @param _milestones The milestones to be set
     function setMilestones(address _recipientId, Milestone[] memory _milestones) external {
         bool isRecipientCreator = (msg.sender == _recipientId) || _isProfileMember(_recipientId, msg.sender);
-        bool isPoolManager = allo.isPoolManager(poolId, msg.sender);
-        if (!isRecipientCreator && !isPoolManager) {
+
+        if (!isRecipientCreator && !isShipOperator(msg.sender)) {
             revert UNAUTHORIZED();
         }
 
@@ -266,11 +278,6 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         }
 
         _setMilestones(_recipientId, _milestones);
-
-        if (isPoolManager) {
-            recipient.milestonesReviewStatus = Status.Accepted;
-            emit MilestonesReviewed(_recipientId, Status.Accepted);
-        }
     }
 
     /// @notice Set milestones of the recipient
@@ -514,7 +521,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
             if (allocatedGrantAmount > poolAmount) {
                 revert ALLOCATION_EXCEEDS_POOL_AMOUNT();
             }
-
+            console.log("Accepted for some reason");
             recipient.grantAmount = grantAmount;
             recipient.recipientStatus = Status.Accepted;
 
@@ -528,6 +535,9 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
                 && recipientStatus == Status.Rejected
         ) {
             recipient.recipientStatus = Status.Rejected;
+            console.log("----------IN CONTACT----------");
+            console.log("recipientId: ", recipientId);
+            console.log("recipientStatus: ", uint8(recipient.recipientStatus));
 
             // Emit event for the rejection
             emit RecipientStatusChanged(recipientId, Status.Rejected);

@@ -8,13 +8,6 @@ import {IStrategy} from "../../../../core/interfaces/IStrategy.sol";
 /// ========== Structs =============
 /// ================================
 
-/// @notice Struct to hold details about the milestone
-struct Milestone {
-    uint256 amountPercentage;
-    Metadata metadata;
-    IStrategy.Status milestoneStatus;
-}
-
 /// @notice Struct to hold the init params for the strategy
 struct ShipInitData {
     bool registryGating;
