@@ -26,10 +26,10 @@ import {EventSetup} from "../../shared/EventSetup.sol";
 
 //Todo Test if each contract inherits a different version of the same contract
 // Is this contract getting the same address that others recieve.
-contract GrantShiptStrategyTest is Test, GameManagerSetup, Native, EventSetup, Errors {
+contract GrantShiptStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
     // Events
     event RecipientStatusChanged(address recipientId, GrantShipStrategy.Status status);
-
+    event PoolFunded(uint256 poolId, uint256 amountAfterFee, uint256 feeAmount);
     // ================= Setup =====================
 
     function setUp() public {
@@ -176,12 +176,12 @@ contract GrantShiptStrategyTest is Test, GameManagerSetup, Native, EventSetup, E
         uint256 grantAmount = 1_000e18;
 
         bytes memory data = abi.encode(recipientId, recipientStatus, grantAmount);
-
-        // vm.expectEmit(false, false, true, true);
-
-        // emit RecipientStatusChanged(recipientId, recipientStatus);
-        // emit Allocated(recipientId, grantAmount, address(ARB()), facilitator().wearer);
         _quick_fund_ship(1);
+
+        vm.expectEmit(false, false, true, true);
+        emit RecipientStatusChanged(recipientId, recipientStatus);
+        emit Allocated(recipientId, grantAmount, address(ARB()), facilitator().wearer);
+
         vm.startPrank(address(allo()));
         ship(1).allocate(data, facilitator().wearer);
         vm.stopPrank();
