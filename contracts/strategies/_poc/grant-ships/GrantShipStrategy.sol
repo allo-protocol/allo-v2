@@ -23,18 +23,33 @@ import {GameManagerStrategy} from "./GameManagerStrategy.sol";
 
 /// Just like the Direct Grants Strategy, this strategy is designed for recipients or grant managers to submit milestones for review and approval.
 /// a few notable differences are:
+
 /// Permissions: (Write permission changes here)
+
 /// Game Rules: (Explain how GameManager contract impacts this sub-strategy)
+
 /// Hats Protocol: (Explain how the hats protocol impacts this sub-strategy)
+
 /// GameFacilitators: (Explain that the game facilitators, not pool managers are in control of allocations)
+
 /// ShipOperators: (Explain how the ship operators are in control of reviewwing milestones and reviewing funds))
+
 /// Flagging: (Facilitators can flag this ship and pause allocation/distribution)
-/// GrantShipReviewScore: (Explain the process by which Recipients get to review the Grant Ship and give it a score, once all the milestones are completed)
+
+/// Posting: Each player in this game can post arbitrary data (mostly updates) to the game contract.
+/// This data is stored as event data to be indexed and viewed by the public.
 
 contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// ================================
     /// ========== Structs =============
     /// ================================
+
+    enum RoleType {
+        None,
+        Recipient,
+        GameFacilitator,
+        ShipOperator
+    }
 
     enum FlagType {
         None,
@@ -114,6 +129,8 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     event MilestonesReviewed(address recipientId, Status status);
 
     event PoolWithdraw(uint256 amount);
+
+    event UpdatePosted(string indexed tag, RoleType indexed role, address indexed recipientId, Metadata content);
 
     /// ================================
     /// ===== Game (Global) State ======
@@ -309,6 +326,20 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// ===============================
     /// ======= External/Custom =======
     /// ===============================
+
+    function postUpdate(string memory _tag, Metadata memory _content, address _recipientId) external {
+        bool isNotRecipient = _recipientId == address(0);
+
+        if (isGameFacilitator(msg.sender) && isNotRecipient) {
+            emit UpdatePosted(_tag, RoleType.GameFacilitator, _recipientId, _content);
+        } else if (isShipOperator(msg.sender) && isNotRecipient) {
+            emit UpdatePosted(_tag, RoleType.ShipOperator, _recipientId, _content);
+        } else if (_isProfileMember(_recipientId, msg.sender) && !isNotRecipient) {
+            emit UpdatePosted(_tag, RoleType.Recipient, _recipientId, _content);
+        } else {
+            revert UNAUTHORIZED();
+        }
+    }
 
     /// Todo: update comment
     /// @notice Set milestones for recipient.
