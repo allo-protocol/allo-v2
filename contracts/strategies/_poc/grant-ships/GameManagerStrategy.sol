@@ -27,9 +27,18 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     /// ========== Models ==============
     /// ================================
 
+    struct GameRound {
+        uint256 startTime;
+        uint256 endTime;
+        uint256 totalRoundAmount;
+        address roundToken;
+        Status roundStatus;
+    }
+
     struct Recipient {
         address teamAddress;
         address payable recipientAddress;
+        address payable previousAddress;
         uint256 shipPoolId;
         uint256 grantAmount;
         Metadata metadata;
@@ -151,7 +160,13 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
             );
 
             Recipient memory newShipRecipient = Recipient(
-                shipInitData.teamAddress, strategyAddress, shipPoolId, 0, shipInitData.shipMetadata, Status.Pending
+                shipInitData.teamAddress,
+                strategyAddress,
+                payable(address(0)),
+                shipPoolId,
+                0,
+                shipInitData.shipMetadata,
+                Status.Pending
             );
 
             grantShipRecipients.push(newShipRecipient);
