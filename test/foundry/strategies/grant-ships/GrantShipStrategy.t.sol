@@ -34,6 +34,9 @@ contract GrantShiptStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
     event MilestonesSet(address recipientId, uint256 milestonesLength);
     event MilestonesReviewed(address recipientId, IStrategy.Status status);
     event PoolFunded(uint256 poolId, uint256 amountAfterFee, uint256 feeAmount);
+    event PoolWithdraw(uint256 amount);
+    event FlagIssued(uint256 nonce, GrantShipStrategy.FlagType flagType, Metadata flagReason);
+    event FlagResolved(uint256 nonce, Metadata resolutionReason);
 
     // ================= State ===================
 
@@ -295,7 +298,6 @@ contract GrantShiptStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         assertEq(uint8(milestoneStatus2), uint8(IStrategy.Status.None));
 
         GrantShipStrategy.Recipient memory recipient = ship(1).getRecipient(profile1_anchor());
-        console.log("recipient.milestonesReviewStatus: ", uint8(recipient.milestonesReviewStatus));
         assertEq(uint8(recipient.milestonesReviewStatus), uint8(IStrategy.Status.Accepted));
     }
 
@@ -663,30 +665,201 @@ contract GrantShiptStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         _quick_fund_ship(1);
 
         vm.startPrank(facilitator().wearer);
+
         ship(1).setPoolActive(false);
-        ship(1).withdraw(_grantAmount);
+
+        vm.expectEmit(true, true, true, true);
+        emit PoolWithdraw(_poolAmount);
+
+        ship(1).withdraw(_poolAmount);
+
         vm.stopPrank();
 
-        assertEq(address(ship(1)).balance, 0);
+        assertEq(ARB().balanceOf(address(ship(1))), 0);
+        assertEq(ARB().balanceOf(address(gameManager())), _poolAmount + _manager_pool_amount);
     }
 
-    function test_register_recipient_allocate_accept_set_milestones_by_ship_operator() public {
-        _register_recipient_allocate_accept_set_milestones_by_ship_operator();
+    function testRevert_withdraw_UNAUTHORIZED() public {
+        _quick_fund_ship(1);
+
+        vm.expectRevert(UNAUTHORIZED.selector);
+
+        vm.startPrank(shipOperator(1).wearer);
+        ship(1).withdraw(_poolAmount);
+        vm.stopPrank();
     }
 
-    function test_register_recipient_allocate_accept_set_milestones_by_recipient() public {
-        _register_recipient_allocate_accept_set_milestones_by_recipient();
+    function testRevert_withdraw_POOL_ACTIVE() public {
+        _quick_fund_ship(1);
+
+        vm.expectRevert(POOL_ACTIVE.selector);
+
+        vm.startPrank(facilitator().wearer);
+        ship(1).withdraw(_poolAmount);
+        vm.stopPrank();
     }
 
-    function test_register_recipient_allocate_accept_set_and_submit_milestones() public {
-        _register_recipient_allocate_accept_set_and_submit_milestones();
+    function test_issueFlag() public {
+        _issue_flag(0, GrantShipStrategy.FlagType.Red);
+
+        GrantShipStrategy.Flag memory flag = ship(1).getFlag(0);
+
+        assertEq(ship(1).unresolvedRedFlags(), 1);
+        assertEq(uint8(flag.flagType), uint8(GrantShipStrategy.FlagType.Red));
+        assertEq(flag.flagReason.protocol, 1);
+        assertEq(flag.flagReason.pointer, "flag-reason");
+        assertFalse(flag.isResolved);
+        assertEq(flag.resolutionReason.protocol, 0);
+        assertEq(flag.resolutionReason.pointer, "");
+
+        _issue_flag(1, GrantShipStrategy.FlagType.Yellow);
+
+        assertEq(ship(1).unresolvedRedFlags(), 1);
     }
 
-    function test_register_recipient_allocate_accept_set_and_submit_milestones_distribute() public {
-        _register_recipient_allocate_accept_set_and_submit_milestones_distribute();
+    function testRevert_issueFlag_UNAUTHORIZED() public {
+        Metadata memory reason = Metadata(1, "flag-reason");
+        vm.expectRevert(UNAUTHORIZED.selector);
+
+        vm.startPrank(randomAddress());
+        ship(1).issueFlag(0, GrantShipStrategy.FlagType.Red, reason);
+        vm.stopPrank();
+    }
+
+    function testRevert_issueFlag_INVALID_FLAG() public {
+        Metadata memory reason = Metadata(1, "flag-reason");
+        vm.expectRevert(GrantShipStrategy.INVALID_FLAG.selector);
+
+        vm.startPrank(facilitator().wearer);
+        ship(1).issueFlag(0, GrantShipStrategy.FlagType.None, reason);
+        vm.stopPrank();
+    }
+
+    function testRevert_issueFlag_FLAG_ALREADY_EXISTS() public {
+        Metadata memory reason = Metadata(1, "flag-reason");
+        _issue_flag(0, GrantShipStrategy.FlagType.Red);
+
+        vm.expectRevert(GrantShipStrategy.FLAG_ALREADY_EXISTS.selector);
+
+        vm.startPrank(facilitator().wearer);
+        ship(1).issueFlag(0, GrantShipStrategy.FlagType.Red, reason);
+        vm.stopPrank();
+    }
+
+    function test_issueFlag_stops_allocation() public {
+        address recipientId = _register_recipient();
+
+        _issue_flag(0, GrantShipStrategy.FlagType.Red);
+        _quick_fund_ship(1);
+
+        GrantShipStrategy.Status recipientStatus = IStrategy.Status.Accepted;
+        uint256 grantAmount = _grantAmount;
+        bytes memory data = abi.encode(recipientId, recipientStatus, grantAmount);
+        uint256 poolId = ship(1).getPoolId();
+
+        vm.expectRevert(GrantShipStrategy.UNRESOLVED_RED_FLAGS.selector);
+
+        vm.startPrank(facilitator().wearer);
+        allo().allocate(poolId, data);
+        vm.stopPrank();
+
+        vm.startPrank(facilitator().wearer);
+        ship(1).resolveFlag(0, Metadata(1, "resolution-reason"));
+        vm.stopPrank();
+
+        vm.startPrank(facilitator().wearer);
+        allo().allocate(poolId, data);
+        vm.stopPrank();
+    }
+
+    function test_issueFlag_stops_distribution() public {
+        address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones();
+
+        _issue_flag(0, GrantShipStrategy.FlagType.Red);
+
+        address[] memory recipients = new address[](1);
+
+        recipients[0] = recipientId;
+        uint256 poolId = ship(1).getPoolId();
+
+        vm.expectRevert(GrantShipStrategy.UNRESOLVED_RED_FLAGS.selector);
+
+        vm.startPrank(shipOperator(1).wearer);
+        allo().distribute(poolId, recipients, "");
+        vm.stopPrank();
+
+        vm.startPrank(facilitator().wearer);
+        ship(1).resolveFlag(0, Metadata(1, "resolution-reason"));
+        vm.stopPrank();
+
+        vm.startPrank(shipOperator(1).wearer);
+        allo().distribute(poolId, recipients, "");
+        vm.stopPrank();
+    }
+
+    function test_resolveFlag() public {
+        _issue_flag(0, GrantShipStrategy.FlagType.Red);
+
+        GrantShipStrategy.Flag memory flag = ship(1).getFlag(0);
+
+        assertEq(ship(1).unresolvedRedFlags(), 1);
+        assertEq(uint8(flag.flagType), uint8(GrantShipStrategy.FlagType.Red));
+
+        _resolve_flag(0);
+
+        flag = ship(1).getFlag(0);
+
+        assertEq(ship(1).unresolvedRedFlags(), 0);
+        assertEq(uint8(flag.flagType), uint8(GrantShipStrategy.FlagType.Red));
+        assertEq(flag.flagReason.protocol, 1);
+        assertEq(flag.flagReason.pointer, "flag-reason");
+        assertTrue(flag.isResolved);
+        assertEq(flag.resolutionReason.protocol, 1);
+        assertEq(flag.resolutionReason.pointer, "resolution-reason");
+
+        _issue_flag(1, GrantShipStrategy.FlagType.Yellow);
+        GrantShipStrategy.Flag memory yellowFlag = ship(1).getFlag(1);
+
+        assertEq(ship(1).unresolvedRedFlags(), 0);
+
+        assertEq(uint8(yellowFlag.flagType), uint8(GrantShipStrategy.FlagType.Yellow));
+
+        _resolve_flag(1);
+
+        yellowFlag = ship(1).getFlag(1);
+
+        assertEq(ship(1).unresolvedRedFlags(), 0);
+        assertEq(uint8(yellowFlag.flagType), uint8(GrantShipStrategy.FlagType.Yellow));
+        assertEq(yellowFlag.flagReason.protocol, 1);
+        assertEq(yellowFlag.flagReason.pointer, "flag-reason");
+        assertTrue(yellowFlag.isResolved);
+        assertEq(yellowFlag.resolutionReason.protocol, 1);
+        assertEq(yellowFlag.resolutionReason.pointer, "resolution-reason");
     }
 
     // ================= Helpers =====================
+
+    function _issue_flag(uint256 _nonce, GrantShipStrategy.FlagType _flagType) internal {
+        vm.startPrank(facilitator().wearer);
+        Metadata memory reason = Metadata(1, "flag-reason");
+
+        vm.expectEmit(true, true, true, true);
+        emit FlagIssued(_nonce, _flagType, reason);
+
+        ship(1).issueFlag(_nonce, _flagType, reason);
+        vm.stopPrank();
+    }
+
+    function _resolve_flag(uint256 _nonce) internal {
+        vm.startPrank(facilitator().wearer);
+        Metadata memory reason = Metadata(1, "resolution-reason");
+
+        vm.expectEmit(true, true, true, true);
+        emit FlagResolved(_nonce, reason);
+
+        ship(1).resolveFlag(_nonce, reason);
+        vm.stopPrank();
+    }
 
     function _test_ship_created(uint256 _shipId) internal {
         // GrantShipStrategy shipStrategy = _getShipStrategy(_shipId);
@@ -862,7 +1035,6 @@ contract GrantShiptStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
 
         vm.startPrank(shipOperator(1).wearer);
         allo().distribute(ship(1).getPoolId(), recipients, "");
-
         vm.stopPrank();
     }
 }

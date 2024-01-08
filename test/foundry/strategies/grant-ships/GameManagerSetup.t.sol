@@ -32,6 +32,7 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
 
     /////////////////GAME TOKEN/////////////////
     IERC20 public arbToken = IERC20(0x912CE59144191C1204E64559FE8253a0e49E6548);
+    uint256 internal _manager_pool_amount = 90_000e18;
 
     // Binance Hot Wallet on Arbitrum.
     // EOA with lots of ARB for testing live
@@ -98,20 +99,20 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
 
     function __dealArb() internal {
         vm.prank(arbWhale);
-        arbToken.transfer(pool_admin(), 90_000e18);
+        arbToken.transfer(pool_admin(), _manager_pool_amount);
     }
 
     function __createGameManager() internal {
         vm.startPrank(pool_admin());
 
-        arbToken.approve(address(allo()), 90_000e18);
+        arbToken.approve(address(allo()), _manager_pool_amount);
 
         gameManagerPoolId = allo().createPoolWithCustomStrategy(
             poolProfile_id(),
             address(_gameManager),
             abi.encode(abi.encode(facilitator().id, address(arbToken), address(hats()), pool_admin()), _shipSetupData),
             address(arbToken),
-            90_000e18,
+            _manager_pool_amount,
             Metadata(1, "game-controller-data"),
             // pool manager/game facilitator role will be mediated through Hats Protocol
             // pool_admin address will be the game_facilitator multisig

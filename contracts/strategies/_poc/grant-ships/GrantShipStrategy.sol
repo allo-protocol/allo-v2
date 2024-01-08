@@ -106,7 +106,14 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Emitted for the milestones set.
     event MilestonesSet(address recipientId, uint256 milestonesLength);
+
+    event FlagIssued(uint256 nonce, FlagType flagType, Metadata flagReason);
+
+    event FlagResolved(uint256 nonce, Metadata resolutionReason);
+
     event MilestonesReviewed(address recipientId, Status status);
+
+    event PoolWithdraw(uint256 amount);
 
     /// ================================
     /// ===== Game (Global) State ======
@@ -141,7 +148,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     uint256 public operatorHatId;
 
     ///@notice
-    uint256 private unresolvedRedFlags;
+    uint256 public unresolvedRedFlags;
 
     /// @notice Flag to check if the Ship has been flagged for a violation
     mapping(uint256 nonce => Flag) public violationFlags;
@@ -181,7 +188,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
 
     modifier noUnresolvedRedFlags() {
         if (hasUnresolvedRedFlags()) {
-            revert UNAUTHORIZED();
+            revert UNRESOLVED_RED_FLAGS();
         }
         _;
     }
@@ -248,6 +255,10 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// @return Recipient Returns the recipient
     function getRecipient(address _recipientId) external view returns (Recipient memory) {
         return _getRecipient(_recipientId);
+    }
+
+    function getFlag(uint256 _nonce) external view returns (Flag memory) {
+        return violationFlags[_nonce];
     }
 
     /// @notice Get recipient status
@@ -432,12 +443,13 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     {
         Flag storage flag = violationFlags[_nonce];
 
-        if (_flagType == FlagType.None) {
-            revert FLAG_ALREADY_EXISTS();
-        }
-
+        // check for potential nonce collisions or overwrites
         if (flag.flagType != FlagType.None) {
             revert FLAG_ALREADY_EXISTS();
+        }
+        // check for correct flag type
+        if (_flagType != FlagType.Red && _flagType != FlagType.Yellow) {
+            revert INVALID_FLAG();
         }
 
         flag.flagType = _flagType;
@@ -446,6 +458,8 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         if (_flagType == FlagType.Red) {
             unresolvedRedFlags++;
         }
+
+        emit FlagIssued(_nonce, _flagType, _flagReason);
     }
 
     function resolveFlag(uint256 _nonce, Metadata calldata _resolutionReason)
@@ -468,6 +482,8 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         if (flag.flagType == FlagType.Red) {
             unresolvedRedFlags--;
         }
+
+        emit FlagResolved(_nonce, _resolutionReason);
     }
 
     /// Todo: update comment
@@ -514,6 +530,10 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
 
         // Transfer the amount to the pool manager
         _transferAmount(allo.getPool(poolId).token, address(_gameManager), _amount);
+
+        // Emit event for the withdrawal
+
+        emit PoolWithdraw(_amount);
     }
 
     /// ====================================
@@ -682,10 +702,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         Milestone storage milestone = recipientMilestones[milestoneToBeDistributed];
 
         // check if milestone is not rejected or already paid out
-        console.log("milestoneToBeDistributed", milestoneToBeDistributed);
-        console.log("recipientMilestones.length", recipientMilestones.length);
 
-        console.log("milestone.milestoneStatus", uint8(milestone.milestoneStatus));
         if (milestoneToBeDistributed > recipientMilestones.length || milestone.milestoneStatus != Status.Pending) {
             revert INVALID_MILESTONE();
         }
