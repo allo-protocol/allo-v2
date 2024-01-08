@@ -36,6 +36,19 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// ========== Structs =============
     /// ================================
 
+    enum FlagType {
+        None,
+        Yellow,
+        Red
+    }
+
+    struct Flag {
+        FlagType flagType;
+        Metadata flagReason;
+        bool isResolved;
+        Metadata resolutionReason;
+    }
+
     /// @notice Struct to hold details about the milestone
     struct Milestone {
         uint256 amountPercentage;
@@ -56,6 +69,15 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// ===============================
     /// ========== Errors =============
     /// ===============================
+
+    /// @notice Throws when there is collision with the Flag nonce
+    error FLAG_ALREADY_EXISTS();
+
+    /// @notice Throws when there is collision with the Flag nonce
+    error INVALID_FLAG();
+
+    /// @notice Throws when the ship still has unresolved red flags
+    error UNRESOLVED_RED_FLAGS();
 
     /// @notice Throws when the milestone is invalid.
     error INVALID_MILESTONE();
@@ -118,6 +140,12 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice The total amount allocated to grant/recipient.
     uint256 public operatorHatId;
 
+    ///@notice
+    uint256 private unresolvedRedFlags;
+
+    /// @notice Flag to check if the Ship has been flagged for a violation
+    mapping(uint256 nonce => Flag) public violationFlags;
+
     /// @notice Internal collection of accepted recipients able to submit milestones
     address[] private _acceptedRecipientIds;
 
@@ -146,6 +174,13 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
 
     modifier onlyShipOperator(address _sender) {
         if (!isShipOperator(_sender)) {
+            revert UNAUTHORIZED();
+        }
+        _;
+    }
+
+    modifier noUnresolvedRedFlags() {
+        if (unresolvedRedFlags > 0) {
             revert UNAUTHORIZED();
         }
         _;
@@ -386,11 +421,56 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         // Emit event for the milestone rejection
         emit MilestoneStatusChanged(_recipientId, _milestoneId, Status.Rejected);
     }
+    // Todo test if I can just send flagType(8) and see what happens
+
+    function issueFlag(uint256 _nonce, FlagType _flagType, Metadata calldata _flagReason)
+        external
+        onlyGameFacilitator(msg.sender)
+    {
+        Flag storage flag = violationFlags[_nonce];
+
+        if (_flagType == FlagType.None) {
+            revert FLAG_ALREADY_EXISTS();
+        }
+
+        if (flag.flagType != FlagType.None) {
+            revert FLAG_ALREADY_EXISTS();
+        }
+
+        flag.flagType = _flagType;
+        flag.flagReason = _flagReason;
+
+        if (_flagType == FlagType.Red) {
+            unresolvedRedFlags++;
+        }
+    }
+
+    function resolveFlag(uint256 _nonce, Metadata calldata _resolutionReason)
+        external
+        onlyGameFacilitator(msg.sender)
+    {
+        Flag storage flag = violationFlags[_nonce];
+
+        if (flag.flagType == FlagType.None) {
+            revert INVALID_FLAG();
+        }
+
+        if (flag.isResolved) {
+            revert INVALID_FLAG();
+        }
+
+        flag.isResolved = true;
+        flag.resolutionReason = _resolutionReason;
+
+        if (flag.flagType == FlagType.Red) {
+            unresolvedRedFlags--;
+        }
+    }
+
     /// Todo: update comment
     /// @notice Set the status of the recipient to 'InReview'
     /// @dev Emits a 'RecipientStatusChanged()' event
     /// @param _recipientIds IDs of the recipients
-
     function setRecipientStatusToInReview(address[] calldata _recipientIds) external {
         if (!isShipOperator(msg.sender) && !isGameFacilitator(msg.sender)) {
             revert UNAUTHORIZED();
@@ -596,7 +676,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
 
         console.log("milestone.milestoneStatus", uint8(milestone.milestoneStatus));
         if (milestoneToBeDistributed > recipientMilestones.length || milestone.milestoneStatus != Status.Pending) {
-            revert SHIT();
+            revert UNAUTHORIZED();
         }
 
         // Calculate the amount to be distributed for the milestone
