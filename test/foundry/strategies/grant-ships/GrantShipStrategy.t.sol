@@ -296,7 +296,7 @@ contract GrantShiptStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
 
         GrantShipStrategy.Recipient memory recipient = ship(1).getRecipient(profile1_anchor());
         console.log("recipient.milestonesReviewStatus: ", uint8(recipient.milestonesReviewStatus));
-        assertEq(uint8(recipient.milestonesReviewStatus), uint8(IStrategy.Status.Pending));
+        assertEq(uint8(recipient.milestonesReviewStatus), uint8(IStrategy.Status.Accepted));
     }
 
     function test_setMilestonesByRecipient() public {
@@ -378,10 +378,6 @@ contract GrantShiptStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
     function testRevert_reviewSetMilestones_MILESTONES_ALREADY_SET() public {
         address recipientId = _register_recipient_allocate_accept_set_milestones_by_ship_operator();
 
-        vm.startPrank(shipOperator(1).wearer);
-        ship(1).reviewSetMilestones(recipientId, IStrategy.Status.Accepted);
-        vm.stopPrank();
-
         vm.expectRevert(GrantShipStrategy.MILESTONES_ALREADY_SET.selector);
         vm.startPrank(shipOperator(1).wearer);
         ship(1).reviewSetMilestones(recipientId, IStrategy.Status.Rejected);
@@ -396,31 +392,29 @@ contract GrantShiptStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         vm.stopPrank();
     }
 
-    //Todo Debug with a clearer head.
+    function testRevert_setMilestones_MILESTONES_ALREADY_SET() public {
+        address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones_distribute();
 
-    // function testRevert_setMilestones_MILESTONES_ALREADY_SET() public {
-    //     address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones_distribute();
+        GrantShipStrategy.Milestone[] memory milestones = new GrantShipStrategy.Milestone[](2);
 
-    //     GrantShipStrategy.Milestone[] memory milestones = new GrantShipStrategy.Milestone[](2);
+        milestones[0] = GrantShipStrategy.Milestone({
+            amountPercentage: 0.3e18,
+            metadata: Metadata(1, "milestone-1"),
+            milestoneStatus: IStrategy.Status.None
+        });
 
-    //     milestones[0] = GrantShipStrategy.Milestone({
-    //         amountPercentage: 0.3e18,
-    //         metadata: Metadata(1, "milestone-1"),
-    //         milestoneStatus: IStrategy.Status.None
-    //     });
+        milestones[1] = GrantShipStrategy.Milestone({
+            amountPercentage: 0.7e18,
+            metadata: Metadata(1, "milestone-2"),
+            milestoneStatus: IStrategy.Status.None
+        });
 
-    //     milestones[1] = GrantShipStrategy.Milestone({
-    //         amountPercentage: 0.7e18,
-    //         metadata: Metadata(1, "milestone-2"),
-    //         milestoneStatus: IStrategy.Status.None
-    //     });
+        vm.expectRevert(GrantShipStrategy.MILESTONES_ALREADY_SET.selector);
 
-    //     vm.expectRevert(GrantShipStrategy.MILESTONES_ALREADY_SET.selector);
-
-    //     vm.startPrank(shipOperator(1).wearer);
-    //     ship(1).setMilestones(recipientId, milestones);
-    //     vm.stopPrank();
-    // }
+        vm.startPrank(shipOperator(1).wearer);
+        ship(1).setMilestones(recipientId, milestones);
+        vm.stopPrank();
+    }
 
     function testRevert_setMilestones_RECIPIENT_NOT_ACCEPTED() public {
         GrantShipStrategy.Milestone[] memory milestones = new GrantShipStrategy.Milestone[](2);
@@ -467,7 +461,214 @@ contract GrantShiptStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         vm.stopPrank();
     }
 
-    function test_register_recipient_allocate_accept_set_milestones_by_pool_manager() public {
+    function test_setMilestones_by_overriding_existing_milestones() public {
+        address recipientId = _register_recipient_allocate_accept();
+        GrantShipStrategy.Milestone[] memory milestones = new GrantShipStrategy.Milestone[](3);
+
+        milestones[0] = GrantShipStrategy.Milestone({
+            amountPercentage: 0.3e18,
+            metadata: Metadata(1, "milestone-1"),
+            milestoneStatus: IStrategy.Status.None
+        });
+
+        milestones[1] = GrantShipStrategy.Milestone({
+            amountPercentage: 0.3e18,
+            metadata: Metadata(1, "milestone-2"),
+            milestoneStatus: IStrategy.Status.None
+        });
+
+        milestones[2] = GrantShipStrategy.Milestone({
+            amountPercentage: 0.4e18,
+            metadata: Metadata(1, "milestone-3"),
+            milestoneStatus: IStrategy.Status.None
+        });
+
+        vm.startPrank(profile1_member1());
+
+        // set to 100%
+        ship(1).setMilestones(recipientId, milestones);
+
+        GrantShipStrategy.Milestone[] memory setMilestones = ship(1).getMilestones(recipientId);
+        assertEq(setMilestones.length, 3);
+
+        // Override with new milestones
+
+        GrantShipStrategy.Milestone[] memory anotherMilestones = new GrantShipStrategy.Milestone[](1);
+
+        anotherMilestones[0] = GrantShipStrategy.Milestone({
+            amountPercentage: 1e18,
+            metadata: Metadata(1, "milestone-1"),
+            milestoneStatus: IStrategy.Status.None
+        });
+
+        // set to 100% again => should override older setting
+        ship(1).setMilestones(recipientId, anotherMilestones);
+
+        // check if sum of milestones are equal to 100% (1e18)
+        setMilestones = ship(1).getMilestones(recipientId);
+
+        uint256 totalAllocated = 0;
+
+        for (uint256 i; i < setMilestones.length; i++) {
+            totalAllocated += setMilestones[i].amountPercentage;
+        }
+
+        assertEq(totalAllocated, 1e18);
+        assertEq(setMilestones.length, 1);
+
+        vm.stopPrank();
+    }
+
+    function testRevert_setMilestones_INVALID_MILESTONE_wrong_status() public {
+        address recipientId = _register_recipient_allocate_accept();
+        GrantShipStrategy.Milestone[] memory milestones = new GrantShipStrategy.Milestone[](2);
+
+        milestones[0] = GrantShipStrategy.Milestone({
+            amountPercentage: 0.3e18,
+            metadata: Metadata(1, "milestone-1"),
+            milestoneStatus: IStrategy.Status.None
+        });
+
+        milestones[1] = GrantShipStrategy.Milestone({
+            amountPercentage: 0.7e18,
+            metadata: Metadata(1, "milestone-2"),
+            milestoneStatus: IStrategy.Status.Accepted // wrong status
+        });
+
+        vm.expectRevert(GrantShipStrategy.INVALID_MILESTONE.selector);
+
+        vm.startPrank(shipOperator(1).wearer);
+        ship(1).setMilestones(recipientId, milestones);
+        vm.stopPrank();
+    }
+
+    function test_submitMilestones() public {
+        address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones();
+
+        GrantShipStrategy.Milestone[] memory milestones = ship(1).getMilestones(recipientId);
+
+        assertEq(uint8(milestones[0].milestoneStatus), uint8(IStrategy.Status.Pending));
+        assertEq(uint8(milestones[1].milestoneStatus), uint8(IStrategy.Status.Pending));
+    }
+
+    function testRever_submitMilestones_RECIPIENT_NOT_ACCEPTED() public {
+        address recipientId = _register_recipient_allocate_reject();
+
+        Metadata memory metadata2 = Metadata(1, "milestone-2");
+
+        vm.expectRevert(RECIPIENT_NOT_ACCEPTED.selector);
+        vm.startPrank(profile1_member1());
+        ship(1).submitMilestone(recipientId, 1, metadata2);
+        vm.stopPrank();
+    }
+
+    function testRevert_submitMilestone_UNAUTHORIZED() public {
+        address recipientId = _register_recipient_allocate_accept_set_milestones_by_ship_operator();
+
+        Metadata memory metadata = Metadata(1, "milestone-1");
+
+        vm.expectRevert(UNAUTHORIZED.selector);
+
+        vm.startPrank(randomAddress());
+        ship(1).submitMilestone(recipientId, 0, metadata);
+        vm.stopPrank();
+    }
+
+    function testRevert_submitMilestone_INVALID_MILESTONE() public {
+        address recipientId = _register_recipient_allocate_accept_set_milestones_by_ship_operator();
+
+        Metadata memory metadata = Metadata(3, "milestone-3");
+
+        vm.expectRevert(GrantShipStrategy.INVALID_MILESTONE.selector);
+
+        vm.startPrank(profile1_member1());
+        ship(1).submitMilestone(recipientId, 3, metadata);
+        vm.stopPrank();
+    }
+
+    function testRevert_submitMilestone_MILESTONE_ALREADY_ACCEPTED() public {
+        address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones_distribute();
+
+        Metadata memory metadata = Metadata(1, "milestone-1");
+
+        vm.expectRevert(GrantShipStrategy.MILESTONE_ALREADY_ACCEPTED.selector);
+
+        vm.startPrank(profile1_member1());
+        ship(1).submitMilestone(recipientId, 0, metadata);
+        vm.stopPrank();
+    }
+
+    function test_rejectMilestone() public {
+        address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones();
+
+        vm.startPrank(shipOperator(1).wearer);
+        ship(1).rejectMilestone(recipientId, 0);
+        vm.stopPrank();
+
+        GrantShipStrategy.Milestone[] memory milestones = ship(1).getMilestones(recipientId);
+
+        assertEq(uint8(milestones[0].milestoneStatus), uint8(IStrategy.Status.Rejected));
+        assertEq(uint8(milestones[1].milestoneStatus), uint8(IStrategy.Status.Pending));
+    }
+
+    function testRevert_rejectMilestone_MILESTONE_ALREADY_ACCEPTED() public {
+        address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones_distribute();
+
+        vm.expectRevert(GrantShipStrategy.MILESTONE_ALREADY_ACCEPTED.selector);
+
+        vm.startPrank(shipOperator(1).wearer);
+        ship(1).rejectMilestone(recipientId, 0);
+        vm.stopPrank();
+    }
+
+    function testRevert_rejectMilestones_INVALID_MILESTONE() public {
+        address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones();
+        vm.startPrank(shipOperator(1).wearer);
+        vm.expectRevert(GrantShipStrategy.INVALID_MILESTONE.selector);
+        ship(1).rejectMilestone(recipientId, 10);
+        vm.stopPrank();
+    }
+
+    function test_distribute() public {
+        address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones_distribute();
+
+        GrantShipStrategy.Milestone[] memory milestones = ship(1).getMilestones(recipientId);
+
+        assertEq(uint8(milestones[0].milestoneStatus), uint8(IStrategy.Status.Accepted));
+        assertEq(uint8(milestones[1].milestoneStatus), uint8(IStrategy.Status.Accepted));
+
+        assertEq(ARB().balanceOf(recipient1()), _grantAmount);
+        assertEq(address(ship(1)).balance, 0);
+    }
+
+    function testRevert_distribute_INVALID_MILESTONE() public {
+        address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones();
+
+        vm.startPrank(shipOperator(1).wearer);
+        ship(1).rejectMilestone(recipientId, 0);
+
+        address[] memory recipients = new address[](2);
+
+        recipients[0] = recipientId;
+        recipients[1] = recipientId;
+
+        uint256 poolId = ship(1).getPoolId();
+
+        vm.expectRevert(GrantShipStrategy.SHIT.selector);
+        allo().distribute(poolId, recipients, "");
+        vm.stopPrank();
+    }
+
+    function test_withdraw() public {
+        vm.startPrank(pool_manager1());
+        ship(1).setPoolActive(false);
+        ship(1).withdraw(_grantAmount);
+        vm.stopPrank();
+
+        assertEq(address(ship(1)).balance, 0);
+    }
+
+    function test_register_recipient_allocate_accept_set_milestones_by_ship_operator() public {
         _register_recipient_allocate_accept_set_milestones_by_ship_operator();
     }
 
@@ -629,7 +830,7 @@ contract GrantShiptStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
     }
 
     function _register_recipient_allocate_accept_set_and_submit_milestones() internal returns (address recipientId) {
-        recipientId = _register_recipient_allocate_accept_set_milestones_by_recipient();
+        recipientId = _register_recipient_allocate_accept_set_milestones_by_ship_operator();
 
         Metadata memory metadata1 = Metadata(1, "milestone-1");
         Metadata memory metadata2 = Metadata(1, "milestone-2");
@@ -659,7 +860,7 @@ contract GrantShiptStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         emit MilestoneStatusChanged(recipientId, 1, IStrategy.Status.Accepted);
         emit Distributed(recipientId, recipient1(), 0.7e18, facilitator().wearer);
 
-        vm.startPrank(facilitator().wearer);
+        vm.startPrank(shipOperator(1).wearer);
         allo().distribute(ship(1).getPoolId(), recipients, "");
 
         vm.stopPrank();

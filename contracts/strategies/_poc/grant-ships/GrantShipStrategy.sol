@@ -268,8 +268,8 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _milestones The milestones to be set
     function setMilestones(address _recipientId, Milestone[] memory _milestones) external {
         bool isRecipientCreator = (msg.sender == _recipientId) || _isProfileMember(_recipientId, msg.sender);
-
-        if (!isRecipientCreator && !isShipOperator(msg.sender)) {
+        bool isOperator = isShipOperator(msg.sender);
+        if (!isRecipientCreator && !isOperator) {
             revert UNAUTHORIZED();
         }
 
@@ -285,6 +285,11 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         }
 
         _setMilestones(_recipientId, _milestones);
+
+        if (isOperator) {
+            recipient.milestonesReviewStatus = Status.Accepted;
+            emit MilestonesReviewed(_recipientId, Status.Accepted);
+        }
     }
 
     /// @notice Set milestones of the recipient
@@ -360,7 +365,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// @dev 'msg.sender' must be a pool manager to reject a milestone. Emits a 'MilestonesStatusChanged()' event.
     /// @param _recipientId ID of the recipient
     /// @param _milestoneId ID of the milestone
-    function rejectMilestone(address _recipientId, uint256 _milestoneId) external onlyPoolManager(msg.sender) {
+    function rejectMilestone(address _recipientId, uint256 _milestoneId) external onlyShipOperator(msg.sender) {
         Milestone[] storage recipientMilestones = milestones[_recipientId];
 
         // Check if the milestone is the upcoming one
@@ -521,13 +526,19 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
 
         Recipient storage recipient = _recipients[recipientId];
 
+        // Todo: figure out why we need this check
+        // Most grant managers would like to see a project's milestones before allocating funds
         if (upcomingMilestone[recipientId] != 0) {
             revert MILESTONES_ALREADY_SET();
         }
 
         if (recipient.recipientStatus != Status.Accepted && recipientStatus == Status.Accepted) {
             IAllo.Pool memory pool = allo.getPool(poolId);
+
             allocatedGrantAmount += grantAmount;
+
+            // Todo: Maybe we should do this same check on register recipient?
+            // Not doing so might create issues where a there isn't enough funds to allocate to a recipient
 
             // Check if the allocated grant amount exceeds the pool amount and reverts if it does
             if (allocatedGrantAmount > poolAmount) {
@@ -541,14 +552,8 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
 
             // Emit event for the allocation
             emit Allocated(recipientId, recipient.grantAmount, pool.token, _sender);
-        } else if (
-            recipient.recipientStatus != Status.Rejected // no need to reject twice
-                && recipientStatus == Status.Rejected
-        ) {
+        } else if (recipient.recipientStatus != Status.Rejected && recipientStatus == Status.Rejected) {
             recipient.recipientStatus = Status.Rejected;
-            console.log("----------IN CONTACT----------");
-            console.log("recipientId: ", recipientId);
-            console.log("recipientStatus: ", uint8(recipient.recipientStatus));
 
             // Emit event for the rejection
             emit RecipientStatusChanged(recipientId, Status.Rejected);
@@ -563,7 +568,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         internal
         virtual
         override
-        onlyGameFacilitator(_sender)
+        onlyShipOperator(_sender)
     {
         uint256 recipientLength = _recipientIds.length;
         for (uint256 i; i < recipientLength;) {
@@ -586,8 +591,12 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         Milestone storage milestone = recipientMilestones[milestoneToBeDistributed];
 
         // check if milestone is not rejected or already paid out
+        console.log("milestoneToBeDistributed", milestoneToBeDistributed);
+        console.log("recipientMilestones.length", recipientMilestones.length);
+
+        console.log("milestone.milestoneStatus", uint8(milestone.milestoneStatus));
         if (milestoneToBeDistributed > recipientMilestones.length || milestone.milestoneStatus != Status.Pending) {
-            revert INVALID_MILESTONE();
+            revert SHIT();
         }
 
         // Calculate the amount to be distributed for the milestone
