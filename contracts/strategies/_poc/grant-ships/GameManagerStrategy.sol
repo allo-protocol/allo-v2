@@ -27,6 +27,16 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     /// ========== Models ==============
     /// ================================
 
+    enum ShipStatus {
+        None,
+        Pending,
+        Accepted,
+        Rejected
+        Active,
+        Completed, 
+        InReview,
+    }
+
     struct GameRound {
         uint256 startTime;
         uint256 endTime;
@@ -65,12 +75,6 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     /// ======== Game State ===========
     /// ===============================
 
-    uint256 public currentRoundId;
-    uint256 public currentRoundStartTime;
-    uint256 public currentRoundEndTime;
-    Status public currentRoundStatus;
-
-    address public token;
     address public gameManager;
 
     /// @notice The 'Hats Protocol' contract interface.
@@ -81,9 +85,15 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     // ///@dev 'teamAddress' to 'Recipient'
     // mapping(address => Recipient) public grantShipRecipients;
 
-    Recipient[] public grantShipRecipients;
+    ///@notice Mapping of all GrantShip Recipients
+    ///@dev 'shipAddress' to 'Recipient'
+    mapping(address => Recipient) public allGrantShipRecipients;
 
-    uint256 internal _shipNonce;
+    ///@notice Array of all Game Rounds
+    GameRound[] public gameRounds;
+
+    ///@notice index of the current game round
+    uint256 public currentRound;
 
     uint256 public gameFacilitatorHatId;
 
@@ -110,11 +120,10 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
 
     function __gameState_init(bytes memory _gameParams) internal {
         // TODO: refactor if only 2 setup params
-        (uint256 _gameFacilitatorId, address _token, address _hatsAddress, address _gameManager) =
+        (uint256 _gameFacilitatorId, address _hatsAddress, address _gameManager) =
             abi.decode(_gameParams, (uint256, address, address, address));
 
         gameFacilitatorHatId = _gameFacilitatorId;
-        token = _token;
         _hats = IHats(_hatsAddress);
         gameManager = _gameManager;
     }
