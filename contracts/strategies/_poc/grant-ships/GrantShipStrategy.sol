@@ -347,6 +347,10 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _recipientId ID of the recipient
     /// @param _milestones The milestones to be set
     function setMilestones(address _recipientId, Milestone[] memory _milestones) external {
+        // Todo: Do a deep dive on _recipientId. If this is anchor address, and the sender is not a member of the profile,
+        // then the person who created the profile and recipient is going to have to use Anchor.execute to call this
+        // which is infeasible for quickly building a frontend.
+
         bool isRecipientCreator = (msg.sender == _recipientId) || _isProfileMember(_recipientId, msg.sender);
         bool isOperator = isShipOperator(msg.sender);
         if (!isRecipientCreator && !isOperator) {
@@ -427,6 +431,9 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         }
 
         Milestone storage milestone = recipientMilestones[_milestoneId];
+
+        // Todo: Check we that this works in all cases.
+        // Seems like we should check for the statuses that we want instead of ruling out Accepted
 
         // Check if the milestone is accepted, otherwise revert
         if (milestone.milestoneStatus == Status.Accepted) {
@@ -517,7 +524,9 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         emit FlagResolved(_nonce, _resolutionReason);
     }
 
-    /// Todo: update comment
+    /// Todo: Make sure that the recipient is not 'stuck' at Status.InReview in all possible cases
+    /// Also make sure the UX of getting back in the flow is easy to implement and clear to the user
+
     /// @notice Set the status of the recipient to 'InReview'
     /// @dev Emits a 'RecipientStatusChanged()' event
     /// @param _recipientIds IDs of the recipients
@@ -710,6 +719,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         virtual
         override
         noUnresolvedRedFlags
+        nonReentrant
         onlyShipOperator(_sender)
     {
         uint256 recipientLength = _recipientIds.length;
@@ -745,10 +755,11 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         IAllo.Pool memory pool = allo.getPool(poolId);
 
         poolAmount -= amount;
+        milestone.milestoneStatus = Status.Accepted;
+
         _transferAmount(pool.token, recipient.recipientAddress, amount);
 
         // Set the milestone status to 'Accepted'
-        milestone.milestoneStatus = Status.Accepted;
 
         // Increment the upcoming milestone
         upcomingMilestone[_recipientId]++;
