@@ -37,6 +37,9 @@ contract GrantShiptStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
     event PoolWithdraw(uint256 amount);
     event FlagIssued(uint256 nonce, GrantShipStrategy.FlagType flagType, Metadata flagReason);
     event FlagResolved(uint256 nonce, Metadata resolutionReason);
+    event UpdatePosted(
+        string indexed tag, GrantShipStrategy.RoleType indexed role, address indexed recipientId, Metadata content
+    );
 
     // ================= State ===================
 
@@ -81,6 +84,79 @@ contract GrantShiptStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
     }
 
     // ================= GrantShip Strategy =====================
+
+    function test_postUpdate() public {
+        string memory tag = "test";
+        Metadata memory metadata = Metadata(1, "Posting Update!");
+
+        address notRecipientId = address(0);
+
+        // Game Facilitator posts an update
+
+        vm.expectEmit(true, true, true, true);
+        emit UpdatePosted(tag, GrantShipStrategy.RoleType.GameFacilitator, notRecipientId, metadata);
+
+        vm.startPrank(facilitator().wearer);
+        ship(1).postUpdate(tag, metadata, notRecipientId);
+        vm.stopPrank();
+
+        // Recipient posts an update
+
+        vm.expectEmit(true, true, true, true);
+        emit UpdatePosted(tag, GrantShipStrategy.RoleType.Recipient, profile1_anchor(), metadata);
+
+        vm.startPrank(profile1_member1());
+        ship(1).postUpdate(tag, metadata, profile1_anchor());
+        vm.stopPrank();
+
+        // Ship Operator posts an update
+
+        vm.expectEmit(true, true, true, true);
+        emit UpdatePosted(tag, GrantShipStrategy.RoleType.ShipOperator, notRecipientId, metadata);
+
+        vm.startPrank(shipOperator(1).wearer);
+        ship(1).postUpdate(tag, metadata, notRecipientId);
+        vm.stopPrank();
+    }
+
+    function testRevert_postUpdate_UNAUTHORIZED() public {
+        string memory tag = "test";
+        Metadata memory metadata = Metadata(1, "Posting Update!");
+
+        address notRecipientId = address(0);
+
+        // Random tries to post an update
+
+        vm.expectRevert(UNAUTHORIZED.selector);
+
+        vm.startPrank(randomAddress());
+        ship(1).postUpdate(tag, metadata, notRecipientId);
+        vm.stopPrank();
+
+        // Recipient tries to post an update for another recipient
+
+        vm.expectRevert(UNAUTHORIZED.selector);
+
+        vm.startPrank(profile1_member1());
+        ship(1).postUpdate(tag, metadata, profile2_anchor());
+        vm.stopPrank();
+
+        // Ship Operator tries to post an update for another recipient
+
+        vm.expectRevert(UNAUTHORIZED.selector);
+
+        vm.startPrank(shipOperator(1).wearer);
+        ship(1).postUpdate(tag, metadata, profile2_anchor());
+        vm.stopPrank();
+
+        // Ship Operator tries to post an update with a non-zero recipientId
+
+        vm.expectRevert(UNAUTHORIZED.selector);
+
+        vm.startPrank(shipOperator(1).wearer);
+        ship(1).postUpdate(tag, metadata, randomAddress());
+        vm.stopPrank();
+    }
 
     function test_isValidAllocator() public {
         assertTrue(ship(0).isValidAllocator(facilitator().wearer));
