@@ -180,7 +180,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     }
 
     modifier noUnresolvedRedFlags() {
-        if (unresolvedRedFlags > 0) {
+        if (hasUnresolvedRedFlags()) {
             revert UNAUTHORIZED();
         }
         _;
@@ -252,7 +252,6 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Get recipient status
     /// @dev The global 'Status' is used at the protocol level and most strategies will use this.
-    ///      todo: finish this
     /// @param _recipientId ID of the recipient
     /// @return Status Returns the global recipient status
     function _getRecipientStatus(address _recipientId) internal view override returns (Status) {
@@ -290,6 +289,10 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// @return Milestone[] Returns the milestones for a 'recipientId'
     function getMilestones(address _recipientId) external view returns (Milestone[] memory) {
         return milestones[_recipientId];
+    }
+
+    function hasUnresolvedRedFlags() public view returns (bool) {
+        return unresolvedRedFlags > 0;
     }
 
     /// ===============================
@@ -500,12 +503,17 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Withdraw funds from pool.
     /// @dev 'msg.sender' must be a pool manager to withdraw funds.
     /// @param _amount The amount to be withdrawn
-    function withdraw(uint256 _amount) external onlyPoolManager(msg.sender) onlyInactivePool {
-        // Decrement the pool amount
+    function withdraw(uint256 _amount) external onlyGameFacilitator(msg.sender) onlyInactivePool {
+        // Decrement the pool amount\
+
+        if (_amount > poolAmount) {
+            revert NOT_ENOUGH_FUNDS();
+        }
+
         poolAmount -= _amount;
 
         // Transfer the amount to the pool manager
-        _transferAmount(allo.getPool(poolId).token, msg.sender, _amount);
+        _transferAmount(allo.getPool(poolId).token, address(_gameManager), _amount);
     }
 
     /// ====================================
@@ -523,6 +531,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         internal
         override
         onlyActivePool
+        noUnresolvedRedFlags
         returns (address recipientId)
     {
         address recipientAddress;
@@ -598,6 +607,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         virtual
         override
         nonReentrant
+        noUnresolvedRedFlags
         onlyGameFacilitator(_sender)
     {
         // Decode the '_data'
@@ -648,6 +658,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         internal
         virtual
         override
+        noUnresolvedRedFlags
         onlyShipOperator(_sender)
     {
         uint256 recipientLength = _recipientIds.length;
@@ -676,7 +687,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
 
         console.log("milestone.milestoneStatus", uint8(milestone.milestoneStatus));
         if (milestoneToBeDistributed > recipientMilestones.length || milestone.milestoneStatus != Status.Pending) {
-            revert UNAUTHORIZED();
+            revert INVALID_MILESTONE();
         }
 
         // Calculate the amount to be distributed for the milestone

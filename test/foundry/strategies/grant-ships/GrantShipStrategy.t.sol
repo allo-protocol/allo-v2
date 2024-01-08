@@ -654,13 +654,15 @@ contract GrantShiptStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
 
         uint256 poolId = ship(1).getPoolId();
 
-        vm.expectRevert(GrantShipStrategy.SHIT.selector);
+        vm.expectRevert(GrantShipStrategy.INVALID_MILESTONE.selector);
         allo().distribute(poolId, recipients, "");
         vm.stopPrank();
     }
 
     function test_withdraw() public {
-        vm.startPrank(pool_manager1());
+        _quick_fund_ship(1);
+
+        vm.startPrank(facilitator().wearer);
         ship(1).setPoolActive(false);
         ship(1).withdraw(_grantAmount);
         vm.stopPrank();
@@ -726,15 +728,16 @@ contract GrantShiptStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
     }
 
     function _quick_fund_ship(uint256 _shipId) internal {
-        vm.prank(arbWhale);
-        ARB().transfer(facilitator().wearer, 30_000e18);
+        vm.startPrank(arbWhale);
+        ARB().transfer(facilitator().wearer, _poolAmount);
+        vm.stopPrank();
 
         uint256 poolId = ship(_shipId).getPoolId();
 
         vm.startPrank(facilitator().wearer);
-        ARB().approve(address(allo()), 30_000e18);
+        ARB().approve(address(allo()), _poolAmount);
 
-        allo().fundPool(poolId, 30_000e18);
+        allo().fundPool(poolId, _poolAmount);
 
         vm.stopPrank();
     }
@@ -764,9 +767,6 @@ contract GrantShiptStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         bytes memory data = abi.encode(recipientId, recipientStatus, grantAmount);
         _quick_fund_ship(1);
 
-        console.log("----------IN TEST----------");
-        console.log("recipientId: ", recipientId);
-        console.log("recipientStatus: ", uint8(recipientStatus));
         vm.expectEmit(false, false, false, false);
         emit RecipientStatusChanged(recipientId, recipientStatus);
 

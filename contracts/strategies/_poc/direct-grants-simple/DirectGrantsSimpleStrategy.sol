@@ -371,6 +371,12 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @dev 'msg.sender' must be a pool manager to withdraw funds.
     /// @param _amount The amount to be withdrawn
     function withdraw(uint256 _amount) external onlyPoolManager(msg.sender) onlyInactivePool {
+        // From Jord:
+        // Check pool amount to prevent overflow errors.
+        if (_amount > poolAmount) {
+            revert NOT_ENOUGH_FUNDS();
+        }
+
         // Decrement the pool amount
         poolAmount -= _amount;
 
