@@ -52,7 +52,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         uint256 shipPoolId;
         uint256 grantAmount;
         Metadata metadata;
-        ShipStatus recipientStatus;
+        ShipStatus shipStatus;
     }
 
     /// ===============================
@@ -74,14 +74,14 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     /// ===============================
     /// ======== Game State ===========
     /// ===============================
-    bool public constant registryGating = true;
-    bool public constant metadataRequired = true;
+    bool public registryGating;
 
     address public gameManager;
 
     /// @notice The 'Hats Protocol' contract interface.
     IHats private _hats;
     Allo private _allo;
+    IRegistry private _registry;
 
     // ///@notice This maps the recipientId to the recipient
     // ///@dev 'recipientId' to 'Recipient'
@@ -90,6 +90,10 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     ///@notice Mapping of all GrantShip Recipients
     ///@dev 'shipAddress' to 'Recipient'
     mapping(address => Recipient) public grantShips;
+
+    //@notice Mapping of all ship applications
+    ///@dev 'recipientAddress' to 'Metadata'
+    mapping(address => Metadata) public applications;
 
     ///@notice Array of all Game Rounds
     GameRound[] public gameRounds;
@@ -126,8 +130,10 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
             abi.decode(_gameParams, (uint256, address, address));
 
         gameFacilitatorHatId = _gameFacilitatorId;
-        _hats = IHats(_hatsAddress);
+
         gameManager = _gameManager;
+        _hats = IHats(_hatsAddress);
+        _registry = _allo.getRegistry();
     }
 
     // function __grantShips_init(bytes[] memory _shipData) internal {
@@ -257,18 +263,24 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     {}
 
     // Register to be a ship. This step does not create a ship, it just registers the address to be a ship.
-        ShipInitData memory shipInitData = abi.decode(_data, (ShipInitData));
-    function _registerRecipient(bytes memory _data, address _sender) internal virtual override returns (address) {
+    function _registerRecipient(bytes memory _data, address _sender)
+        internal
+        virtual
+        override
+        returns (address recipientId)
+    {
+        Metadata memory metadata;
+        bool isUsingRegistryAnchor;
+        address registryAnchor;
+
         if (registryGating) {
-            (recipientId, recipientAddress, grantAmount, metadata) =
-                abi.decode(_data, (address, address, uint256, Metadata));
+            (recipientId, metadata) = abi.decode(_data, (address, Metadata));
 
             if (!_isProfileMember(recipientId, _sender)) {
                 revert UNAUTHORIZED();
             }
-        }else{
-            (recipientAddress, registryAnchor, grantAmount, metadata) =
-                abi.decode(_data, (address, address, uint256, Metadata));
+        } else {
+            (registryAnchor, metadata) = abi.decode(_data, (address, Metadata));
 
             // Check if the registry anchor is valid so we know whether to use it or not
             isUsingRegistryAnchor = registryAnchor != address(0);
@@ -279,18 +291,16 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
                 revert UNAUTHORIZED();
             }
         }
-        
-        if (!_isProfileMember(shipInitData.recipientId, _sender)) {
+
+        if (!_isProfileMember(recipientId, _sender)) {
             revert UNAUTHORIZED();
         }
 
-        if(new)
+        if (metadata.protocol == 0) revert INVALID_METADATA();
 
-        Recipient memory newShipRecipient = Recipient(
-            shipInitData.recipientId, address(0), payable(address(0)), 0, 0, shipInitData.shipMetadata, Status.Pending
-        );
+        if (applications[recipientId].protocol == 0) revert INVALID_METADATA();
 
-        grantShipRecipients[recipientId] = newShipRecipient;
+        applications[recipientId] = metadata;
     }
 
     // function _beforeAllocate(bytes memory, address _sender) internal view override {
@@ -314,6 +324,11 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     function _getPayout(address _recipientId, bytes memory) internal view override returns (PayoutSummary memory) {
         Recipient memory shipRecipient = getGrantShipRecipient(_recipientId);
         return PayoutSummary(address(shipRecipient.shipAddress), shipRecipient.grantAmount);
+    }
+
+    function _isProfileMember(address _anchor, address _sender) internal view returns (bool) {
+        IRegistry.Profile memory profile = _registry.getProfileByAnchor(_anchor);
+        return _registry.isOwnerOrMemberOfProfile(profile.id, _sender);
     }
 
     function _isValidAllocator(address _allocator) internal view virtual override returns (bool) {
