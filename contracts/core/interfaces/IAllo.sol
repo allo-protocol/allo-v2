@@ -118,7 +118,7 @@ interface IAllo {
         uint256 _baseFee
     ) external;
 
-        /// @notice Creates a new pool (with a custom strategy)
+    /// @notice Creates a new pool (with a custom strategy)
     /// @dev 'msg.sender' must be a member or owner of a profile to create a pool with or without a custom strategy, The encoded data
     ///      will be specific to a given strategy requirements, reference the strategy implementation of 'initialize()'. The strategy
     ///      address passed must not be a cloneable strategy. The strategy address passed must not be the zero address. 'msg.sender' must
@@ -141,7 +141,7 @@ interface IAllo {
         address[] memory _managers
     ) external payable returns (uint256 poolId);
 
-        /// @notice Creates a new pool (by cloning a cloneable strategies).
+    /// @notice Creates a new pool (by cloning a cloneable strategies).
     /// @dev 'msg.sender' must be owner or member of the profile id passed as '_profileId'.
     /// @param _profileId The ID of the registry profile, used to check if 'msg.sender' is a member or owner of the profile
     /// @param _strategy The address of the strategy contract the pool will use.
@@ -160,7 +160,7 @@ interface IAllo {
         uint256 _amount,
         Metadata memory _metadata,
         address[] memory _managers
-    ) external payable nonReentrant returns (uint256 poolId) 
+    ) external payable returns (uint256 poolId);
 
     /// @notice Updates a pools metadata.
     /// @dev 'msg.sender' must be a pool admin.
