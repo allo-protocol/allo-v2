@@ -118,6 +118,50 @@ interface IAllo {
         uint256 _baseFee
     ) external;
 
+        /// @notice Creates a new pool (with a custom strategy)
+    /// @dev 'msg.sender' must be a member or owner of a profile to create a pool with or without a custom strategy, The encoded data
+    ///      will be specific to a given strategy requirements, reference the strategy implementation of 'initialize()'. The strategy
+    ///      address passed must not be a cloneable strategy. The strategy address passed must not be the zero address. 'msg.sender' must
+    ///      be a member or owner of the profile id passed as '_profileId'.
+    /// @param _profileId The 'profileId' of the registry profile, used to check if 'msg.sender' is a member or owner of the profile
+    /// @param _strategy The address of the deployed custom strategy
+    /// @param _initStrategyData The data to initialize the strategy
+    /// @param _token The address of the token you want to use in your pool
+    /// @param _amount The amount of the token you want to deposit into the pool on initialization
+    /// @param _metadata The 'Metadata' of the pool, this uses our 'Meatdata.sol' struct (consistent throughout the protocol)
+    /// @param _managers The managers of the pool, and can be added/removed later by the pool admin
+    /// @return poolId The ID of the pool
+    function createPoolWithCustomStrategy(
+        bytes32 _profileId,
+        address _strategy,
+        bytes memory _initStrategyData,
+        address _token,
+        uint256 _amount,
+        Metadata memory _metadata,
+        address[] memory _managers
+    ) external payable returns (uint256 poolId);
+
+        /// @notice Creates a new pool (by cloning a cloneable strategies).
+    /// @dev 'msg.sender' must be owner or member of the profile id passed as '_profileId'.
+    /// @param _profileId The ID of the registry profile, used to check if 'msg.sender' is a member or owner of the profile
+    /// @param _strategy The address of the strategy contract the pool will use.
+    /// @param _initStrategyData The data to initialize the strategy
+    /// @param _token The address of the token
+    /// @param _amount The amount of the token
+    /// @param _metadata The metadata of the pool
+    /// @param _managers The managers of the pool
+    /// @custom:initstrategydata The encoded data will be specific to a given strategy requirements,
+    ///    reference the strategy implementation of 'initialize()'
+    function createPool(
+        bytes32 _profileId,
+        address _strategy,
+        bytes memory _initStrategyData,
+        address _token,
+        uint256 _amount,
+        Metadata memory _metadata,
+        address[] memory _managers
+    ) external payable nonReentrant returns (uint256 poolId) 
+
     /// @notice Updates a pools metadata.
     /// @dev 'msg.sender' must be a pool admin.
     /// @param _poolId The ID of the pool to update
