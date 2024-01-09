@@ -15,6 +15,6 @@ struct ShipInitData {
     bool grantAmountRequired;
     string shipName;
     Metadata shipMetadata;
-    address teamAddress;
+    address recipientId;
     uint256 operatorHatId;
 }
