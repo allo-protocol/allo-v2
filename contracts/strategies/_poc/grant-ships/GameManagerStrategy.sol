@@ -9,6 +9,8 @@ import {ReentrancyGuard} from "openzeppelin-contracts/contracts/security/Reentra
 // Interfaces
 import {IHats} from "hats-protocol/Interfaces/IHats.sol";
 import {IAllo} from "../../../core/interfaces/IAllo.sol";
+import {IStrategy} from "../../../core/interfaces/IStrategy.sol";
+
 import {IRegistry} from "../../../core/interfaces/IRegistry.sol";
 
 // Core Contracts
@@ -45,6 +47,12 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         Status roundStatus;
     }
 
+    struct Applicant {
+        address applicantId;
+        Metadata metadata;
+        Status status;
+    }
+
     struct Recipient {
         address recipientId;
         address payable shipAddress;
@@ -75,6 +83,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     /// ======== Game State ===========
     /// ===============================
     bool public registryGating;
+    uint256 public metadataProtocol;
 
     address public gameManager;
 
@@ -93,7 +102,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
 
     //@notice Mapping of all ship applications
     ///@dev 'recipientAddress' to 'Metadata'
-    mapping(address => Metadata) public applications;
+    mapping(address => Applicant) public applications;
 
     ///@notice Array of all Game Rounds
     GameRound[] public gameRounds;
@@ -117,19 +126,21 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
 
     function initialize(uint256 _poolId, bytes memory _data) external {
         __BaseStrategy_init(_poolId);
-
-        (bytes memory _gameParams, bytes[] memory _shipData) = abi.decode(_data, (bytes, bytes[]));
-
-        __gameState_init(_gameParams);
-        // __grantShips_init(_shipData);
+        __gameState_init(_data);
     }
 
-    function __gameState_init(bytes memory _gameParams) internal {
-        // TODO: refactor if only 2 setup params
-        (uint256 _gameFacilitatorId, address _hatsAddress, address _gameManager) =
-            abi.decode(_gameParams, (uint256, address, address));
+    function __gameState_init(bytes memory _data) internal {
+        (
+            uint256 _gameFacilitatorId,
+            uint256 _metadataProtocol,
+            address _hatsAddress,
+            address _gameManager,
+            bool _registryGating
+        ) = abi.decode(_data, (uint256, uint256, address, address, bool));
 
         gameFacilitatorHatId = _gameFacilitatorId;
+        metadataProtocol = _metadataProtocol;
+        registryGating = _registryGating;
 
         gameManager = _gameManager;
         _hats = IHats(_hatsAddress);
@@ -263,44 +274,45 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     {}
 
     // Register to be a ship. This step does not create a ship, it just registers the address to be a ship.
+    // Users can re-register to update their metadata.
+
     function _registerRecipient(bytes memory _data, address _sender)
         internal
         virtual
         override
-        returns (address recipientId)
+        returns (address applicantId)
     {
         Metadata memory metadata;
-        bool isUsingRegistryAnchor;
         address registryAnchor;
 
         if (registryGating) {
-            (recipientId, metadata) = abi.decode(_data, (address, Metadata));
+            (applicantId, metadata) = abi.decode(_data, (address, Metadata));
 
-            if (!_isProfileMember(recipientId, _sender)) {
+            if (!_isProfileMember(applicantId, _sender)) {
                 revert UNAUTHORIZED();
             }
         } else {
             (registryAnchor, metadata) = abi.decode(_data, (address, Metadata));
-
             // Check if the registry anchor is valid so we know whether to use it or not
-            isUsingRegistryAnchor = registryAnchor != address(0);
-
+            bool isUsingRegistryAnchor = registryAnchor != address(0);
             // Ternerary to set the recipient id based on whether or not we are using the 'registryAnchor' or '_sender'
-            recipientId = isUsingRegistryAnchor ? registryAnchor : _sender;
-            if (isUsingRegistryAnchor && !_isProfileMember(recipientId, _sender)) {
+            applicantId = isUsingRegistryAnchor ? registryAnchor : _sender;
+
+            if (isUsingRegistryAnchor && !_isProfileMember(applicantId, _sender)) {
                 revert UNAUTHORIZED();
             }
         }
 
-        if (!_isProfileMember(recipientId, _sender)) {
-            revert UNAUTHORIZED();
+        // Check to ensure that the metadata protocol is correct
+        if (metadata.protocol != metadataProtocol || bytes(metadata.pointer).length == 0) {
+            revert INVALID_METADATA();
         }
+        // Check if the applicant has not already registered
 
-        if (metadata.protocol == 0) revert INVALID_METADATA();
-
-        if (applications[recipientId].protocol == 0) revert INVALID_METADATA();
-
-        applications[recipientId] = metadata;
+        Applicant memory applicant = Applicant(applicantId, metadata, Status.Pending);
+        applications[applicantId] = applicant;
+        emit Registered(applicantId, _data, _sender);
+        return applicantId;
     }
 
     // function _beforeAllocate(bytes memory, address _sender) internal view override {

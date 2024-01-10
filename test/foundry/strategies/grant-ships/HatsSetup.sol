@@ -23,8 +23,6 @@ contract HatsSetupLive is Test {
 
     function __HatsSetupLive(address _facilitatorAddress) internal {
         _hats_ = IHats(0x3bc1A0Ad72417f2d411118085256fC53CBdDd137);
-
-        facilitator().wearer = _facilitatorAddress;
         _createHats();
     }
 
@@ -53,6 +51,8 @@ contract HatsSetupLive is Test {
         _topHat.id = hats().mintTopHat(topHat().wearer, "Top Hat", "https://wwww/tophat.com/");
 
         vm.startPrank(topHat().wearer);
+        //Todo: make this a pool admin once tests are back up and running
+        console.log("_facilitator.wearer", _facilitator.wearer);
         _facilitator.wearer = makeAddr("gameFacilitator");
         _facilitator.id = hats().createHat(topHat().id, "Facilitator Hat", 2, _eligibility, _toggle, true, "");
         hats().mintHat(facilitator().id, facilitator().wearer);
