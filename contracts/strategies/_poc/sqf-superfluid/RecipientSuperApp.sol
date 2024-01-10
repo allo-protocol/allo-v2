@@ -16,6 +16,8 @@ import {IInstantDistributionAgreementV1} from
 import {SQFSuperFluidStrategy} from "./SQFSuperFluidStrategy.sol";
 
 contract RecipientSuperApp is ISuperApp {
+    error UNAUTHORIZED();
+
     using SuperTokenV1Library for ISuperToken;
 
     bytes32 public constant CFAV1_TYPE = keccak256("org.superfluid-finance.agreements.ConstantFlowAgreement.v1");
@@ -82,6 +84,16 @@ contract RecipientSuperApp is ISuperApp {
     /// @dev Accepts all super tokens
     function isAcceptedSuperToken(ISuperToken _superToken) public view virtual returns (bool) {
         return address(_superToken) == address(acceptedToken);
+    }
+
+    /// @notice This is the main callback function called by the host
+    ///      to notify the app about the callback context.
+    function onFlowCreated(int96 previousFlowRate, int96 newFlowRate, address sender, bytes calldata ctx)
+        internal
+        returns (bytes memory newCtx)
+    {
+        if (!strategy.isValidAllocator(sender)) revert UNAUTHORIZED();
+        newCtx = onFlowUpdated(previousFlowRate, newFlowRate, ctx);
     }
 
     /// @notice This is the main callback function called by the host
@@ -156,9 +168,10 @@ contract RecipientSuperApp is ISuperApp {
         (address sender,) = abi.decode(agreementData, (address, address));
         (, int96 flowRate,,) = superToken.getFlowInfo(sender, address(this));
 
-        return onFlowUpdated(
+        return onFlowCreated(
             0,
             flowRate,
+            sender,
             ctx // userData can be acquired with `host.decodeCtx(ctx).userData`
         );
     }
