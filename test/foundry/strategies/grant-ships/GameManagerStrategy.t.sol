@@ -34,6 +34,8 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
     uint256 internal constant _shipAmount = 30_000e18;
 
     GrantShipStrategy internal ship;
+    GrantShipStrategy internal ship2;
+    GrantShipStrategy internal ship3;
 
     function setUp() public {
         vm.createSelectFork({blockNumber: 166_807_779, urlOrAlias: "arbitrumOne"});
@@ -165,7 +167,7 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
     }
 
     function test_reviewApplicant_approve() public {
-        address recipientAddress = register_create_approve();
+        address recipientAddress = _register_create_approve();
 
         GameManagerStrategy.Recipient memory recipient = gameManager().getRecipient(recipientAddress);
 
@@ -204,7 +206,7 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
     }
 
     function test_reviewApplicant_reject() public {
-        address recipientAddress = register_create_reject();
+        address recipientAddress = _register_create_reject();
 
         GameManagerStrategy.Recipient memory recipient = gameManager().getRecipient(recipientAddress);
 
@@ -220,9 +222,86 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         assertEq(uint8(recipient.status), uint8(GameManagerStrategy.ShipStatus.Rejected));
     }
 
+    function test_allocate() public {
+        _register_create_accept_allocate();
+    }
+
     // ====================================
     // =========== Helpers ================
     // ====================================
+
+    function _register_create_accept_allocate() internal returns (address recipientAddress) {
+        recipientAddress = _register_create_approve();
+        _quick_fund_manager();
+
+        // Register recipient 2
+        address recipientAddress2 = profile2_anchor();
+        Metadata memory metadata2 = Metadata(1, "Ship 2");
+        bytes memory data2 = abi.encode(recipientAddress2, "Ship Name 2", metadata2);
+        vm.startPrank(profile2_owner());
+        allo().registerRecipient(gameManager().getPoolId(), data2);
+        vm.stopPrank();
+
+        // Register reciepient 3
+        address recipientAddress3 = poolProfile_anchor();
+        Metadata memory metadata3 = Metadata(1, "Ship 3");
+        bytes memory data3 = abi.encode(recipientAddress3, "Ship Name 3", metadata3);
+        vm.startPrank(pool_admin());
+        allo().registerRecipient(gameManager().getPoolId(), data3);
+        vm.stopPrank();
+
+        address[] memory contractAsManager = new address[](1);
+        contractAsManager[0] = address(gameManager());
+
+        // Review recipient 2
+        vm.startPrank(profile2_owner());
+        registry().addMembers(profile2_id(), contractAsManager);
+        vm.stopPrank();
+
+        vm.startPrank(facilitator().wearer);
+        address payable shipAddress2 = gameManager().reviewRecipient(
+            profile2_anchor(),
+            GameManagerStrategy.ShipStatus.Accepted,
+            ShipInitData(true, true, true, "Ship Name 2", Metadata(1, "Ship 2"), team(1).wearer, shipOperator(1).id)
+        );
+        vm.stopPrank();
+        // console.log("got here");
+        ship2 = GrantShipStrategy(shipAddress2);
+
+        // Review recipient 3
+        vm.startPrank(pool_admin());
+        registry().addMembers(poolProfile_id(), contractAsManager);
+        vm.stopPrank();
+
+        vm.startPrank(facilitator().wearer);
+        address payable shipAddress3 = gameManager().reviewRecipient(
+            poolProfile_anchor(),
+            GameManagerStrategy.ShipStatus.Accepted,
+            ShipInitData(true, true, true, "Ship Name 3", Metadata(1, "Ship 3"), team(1).wearer, shipOperator(2).id)
+        );
+        vm.stopPrank();
+
+        ship3 = GrantShipStrategy(shipAddress3);
+
+        // Finally, we allocate
+
+        address[] memory recipientAddresses = new address[](3);
+        recipientAddresses[0] = recipientAddress;
+        recipientAddresses[1] = recipientAddress2;
+        recipientAddresses[2] = recipientAddress3;
+
+        uint256[] memory amounts = new uint256[](3);
+        amounts[0] = 20_000e18;
+        amounts[1] = 40_000e18;
+        amounts[2] = 30_000e18;
+
+        // console.log("Got Here");
+        bytes memory data = abi.encode(recipientAddresses, amounts, _gameAmount);
+
+        vm.startPrank(facilitator().wearer);
+        allo().allocate(gameManager().getPoolId(), data);
+        vm.stopPrank();
+    }
 
     function _quick_fund_manager() internal {
         vm.startPrank(arbWhale);
@@ -239,7 +318,7 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         vm.stopPrank();
     }
 
-    function register_create_reject() internal returns (address applicantId) {
+    function _register_create_reject() internal returns (address applicantId) {
         applicantId = _register_create_round();
 
         address[] memory contractAsManager = new address[](1);
@@ -262,7 +341,7 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         vm.stopPrank();
     }
 
-    function register_create_approve() internal returns (address applicantId) {
+    function _register_create_approve() internal returns (address applicantId) {
         applicantId = _register_create_round();
 
         address[] memory contractAsManager = new address[](1);

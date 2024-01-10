@@ -176,7 +176,7 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
             abi.encode(facilitator().id, IPFS, address(hats()), pool_admin(), true),
             // Todo: Using native to test multi-token
             // write tests to confirm that this works, otherwise use ARB
-            NATIVE,
+            address(ARB()),
             0,
             Metadata(IPFS, "ipfs://grant-ships/about.json"),
             // pool manager/game facilitator role will be mediated through Hats Protocol

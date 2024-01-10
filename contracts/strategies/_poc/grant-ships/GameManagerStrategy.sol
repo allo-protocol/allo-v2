@@ -261,41 +261,42 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         (address[] memory _recipientIds, uint256[] memory _amounts, uint256 _total) =
             abi.decode(_data, (address[], uint256[], uint256));
 
-        bool hasFunds = poolAmount >= _total;
-
-        // checks that pool amount is the same as the total amount
-        if (!hasFunds) revert NOT_ENOUGH_FUNDS();
+        if (poolAmount < _total) revert NOT_ENOUGH_FUNDS();
 
         GameRound storage currentRound = gameRounds[currentRoundIndex];
-
         // checks that the current round is pending
         if (currentRound.roundStatus != RoundStatus.Pending) revert INVALID_STATUS();
-
+        // console.log("-- Round Data --");
+        // console.log("currentRoundIndex", currentRoundIndex);
+        // console.log("gameRounds.length", gameRounds.length);
+        // console.log("gameRounds[currentRoundIndex].roundStatus", uint8(gameRounds[currentRoundIndex].roundStatus));
         // checks that the arrays are the same length
         if (_recipientIds.length != _amounts.length) revert ARRAY_MISMATCH();
 
         uint256 totalAllocated;
 
-        for (uint32 i; _recipientIds.length > 0;) {
-            Recipient storage recipient = recipients[_recipientIds[_recipientIds.length - 1]];
-            address recipientAddress = _recipientIds[i];
-            uint256 grantAmount = _amounts[i];
-
+        for (uint32 i; i < _recipientIds.length;) {
+            Recipient storage recipient = recipients[_recipientIds[i]];
             // checks that the Recipient status is Accepted
             if (recipient.status != ShipStatus.Accepted) revert INVALID_STATUS();
 
-            // checks that the Recipient is not already allocated
-            if (recipient.grantAmount != 0) revert INVALID_STATUS();
+            address recipientAddress = _recipientIds[i];
+            uint256 grantAmount = _amounts[i];
 
+            console.log("--IN LOOP--");
+            console.log("i", i);
+            console.log("recipient.grantAmount", recipient.grantAmount);
+            console.log("grantAmount", grantAmount);
+            console.log("recipent", recipient.recipientAddress);
+
+            // checks that the Recipient is not already allocated
+            if (recipient.grantAmount != 0) revert MISMATCH();
             // check that there is enough in the pool
             if (poolAmount < grantAmount + totalAllocated) revert NOT_ENOUGH_FUNDS();
-
             // adds the grant amount to the total allocated
             totalAllocated += grantAmount;
-
             // sets the grant amount on the recipient
             recipient.grantAmount = grantAmount;
-
             // adds the recipient to the current round
             currentRound.ships.push(recipientAddress);
 
@@ -306,18 +307,17 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
 
         // checks that the total allocated is the same as the total amount
         if (totalAllocated != _total) revert MISMATCH();
-
         // assigns the amount to the total round amount
         currentRound.totalRoundAmount = totalAllocated;
-
         // sets the round status to active
-        currentRound.roundStatus = RoundStatus.Active;
+        currentRound.roundStatus = RoundStatus.Allocated;
     }
 
     function _distribute(address[] memory _recipientIds, bytes memory _data, address _sender)
         internal
         virtual
         override
+        onlyGameFacilitator(_sender)
     {
         // onlyFacilitator
         // transfer token amounts to each grantShip pool.
