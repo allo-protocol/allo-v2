@@ -224,6 +224,21 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
     // =========== Helpers ================
     // ====================================
 
+    function _quick_fund_manager() internal {
+        vm.startPrank(arbWhale);
+        ARB().transfer(facilitator().wearer, _gameAmount);
+        vm.stopPrank();
+
+        uint256 poolId = gameManager().getPoolId();
+
+        vm.startPrank(facilitator().wearer);
+        ARB().approve(address(allo()), _gameAmount);
+
+        allo().fundPool(poolId, _gameAmount);
+
+        vm.stopPrank();
+    }
+
     function register_create_reject() internal returns (address applicantId) {
         applicantId = _register_create_round();
 

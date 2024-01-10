@@ -42,6 +42,8 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     enum RoundStatus {
         None,
         Pending,
+        Allocated,
+        Funded,
         Active,
         Completed
     }
@@ -111,6 +113,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     uint256 public metadataProtocol;
 
     address public gameManager;
+    uint256 public allocatedAmount;
 
     /// @notice The 'Hats Protocol' contract interface.
     IHats private _hats;
@@ -254,13 +257,61 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         return strategyAddress;
     }
 
-    function _allocate(bytes memory _data, address _sender) internal virtual override onlyGameFacilitator(msg.sender) {
-        // onlyFacilitator
-        // takes an array of amounts
-        // checks if the amount of percentages is 100%
-        // checks if array of the percentages is the same length as the array of the ships
+    function _allocate(bytes memory _data, address _sender) internal virtual override onlyGameFacilitator(_sender) {
+        (address[] memory _recipientIds, uint256[] memory _amounts, uint256 _total) =
+            abi.decode(_data, (address[], uint256[], uint256));
 
-        // allocates funding to each grantship
+        bool hasFunds = poolAmount >= _total;
+
+        // checks that pool amount is the same as the total amount
+        if (!hasFunds) revert NOT_ENOUGH_FUNDS();
+
+        GameRound storage currentRound = gameRounds[currentRoundIndex];
+
+        // checks that the current round is pending
+        if (currentRound.roundStatus != RoundStatus.Pending) revert INVALID_STATUS();
+
+        // checks that the arrays are the same length
+        if (_recipientIds.length != _amounts.length) revert ARRAY_MISMATCH();
+
+        uint256 totalAllocated;
+
+        for (uint32 i; _recipientIds.length > 0;) {
+            Recipient storage recipient = recipients[_recipientIds[_recipientIds.length - 1]];
+            address recipientAddress = _recipientIds[i];
+            uint256 grantAmount = _amounts[i];
+
+            // checks that the Recipient status is Accepted
+            if (recipient.status != ShipStatus.Accepted) revert INVALID_STATUS();
+
+            // checks that the Recipient is not already allocated
+            if (recipient.grantAmount != 0) revert INVALID_STATUS();
+
+            // check that there is enough in the pool
+            if (poolAmount < grantAmount + totalAllocated) revert NOT_ENOUGH_FUNDS();
+
+            // adds the grant amount to the total allocated
+            totalAllocated += grantAmount;
+
+            // sets the grant amount on the recipient
+            recipient.grantAmount = grantAmount;
+
+            // adds the recipient to the current round
+            currentRound.ships.push(recipientAddress);
+
+            unchecked {
+                i++;
+            }
+        }
+
+        // checks that the total allocated is the same as the total amount
+        if (totalAllocated != _total) revert MISMATCH();
+
+        // assigns the amount to the total round amount
+        currentRound.totalRoundAmount = totalAllocated;
+
+        // sets the round status to active
+        currentRound.roundStatus = RoundStatus.Active;
     }
 
     function _distribute(address[] memory _recipientIds, bytes memory _data, address _sender)
@@ -302,15 +353,9 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     /// ============ Internal ==============
     /// ====================================
 
-    function _createGrantShipStrategy(address _strategyImpl, bytes memory _data, uint256 grantShipNumber)
-        internal
-        returns (address payable)
-    {}
-
     // Register to be a ship. This step does not create a ship, it just registers the address to be a ship.
     // Users can re-register to update their metadata.
     // All Ship Applicants MUST have registered profiles
-
     function _registerRecipient(bytes memory _data, address _sender) internal virtual override returns (address) {
         (address _anchorAddress, string memory _shipName, Metadata memory _metadata) =
             abi.decode(_data, (address, string, Metadata));
@@ -366,7 +411,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     }
 
     function _isValidAllocator(address _allocator) internal view virtual override returns (bool) {
-        // return isGameManager(_allocator);
+        return isGameFacilitator(_allocator);
     }
 
     /// @notice This contract should be able to receive native token

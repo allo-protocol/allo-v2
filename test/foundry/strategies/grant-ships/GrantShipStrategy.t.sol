@@ -975,20 +975,20 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
     //         (recipientId,) = _register_recipient_return_data();
     //     }
 
-    //     function _quick_fund_ship(uint256 _shipId) internal {
-    //         vm.startPrank(arbWhale);
-    //         ARB().transfer(facilitator().wearer, _poolAmount);
-    //         vm.stopPrank();
+    // function _quick_fund_ship(uint256 _shipId) internal {
+    //     vm.startPrank(arbWhale);
+    //     ARB().transfer(facilitator().wearer, _poolAmount);
+    //     vm.stopPrank();
 
-    //         uint256 poolId = ship(_shipId).getPoolId();
+    //     uint256 poolId = ship(_shipId).getPoolId();
 
-    //         vm.startPrank(facilitator().wearer);
-    //         ARB().approve(address(allo()), _poolAmount);
+    //     vm.startPrank(facilitator().wearer);
+    //     ARB().approve(address(allo()), _poolAmount);
 
-    //         allo().fundPool(poolId, _poolAmount);
+    //     allo().fundPool(poolId, _poolAmount);
 
-    //         vm.stopPrank();
-    //     }
+    //     vm.stopPrank();
+    // }
 
     //     function _register_recipient_allocate_accept() internal returns (address recipientId) {
     //         recipientId = _register_recipient();
