@@ -514,10 +514,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     /// @dev This can only be called by the super app callback onFlowUpdated
     /// @param _previousFlowrate The previous flow rate
     /// @param _newFlowRate The new flow rate
-    /// @param _sender The allocator address
-    function adjustWeightings(uint256 _previousFlowrate, uint256 _newFlowRate, address _sender) external {
-        if (!_isValidAllocator(_sender)) revert UNAUTHORIZED();
-
+    function adjustWeightings(uint256 _previousFlowrate, uint256 _newFlowRate) external {
         address recipientId = superApps[msg.sender];
 
         if (recipientId == address(0)) revert UNAUTHORIZED();
