@@ -213,14 +213,14 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     //     }
     // }
 
-    function reviewApplicant(address _applicantAddress, Status _approvalFlag, bytes memory shipInitData)
+    function reviewApplicant(address _applicantAddress, Status _approvalFlag, ShipInitData memory shipInitData)
         external
         onlyGameFacilitator(msg.sender)
     {
         Applicant storage applicant = applications[_applicantAddress];
         GameRound storage currentRound = gameRounds[currentRoundIndex];
 
-        if (currentRound.roundStatus != RoundStatus.Pending || currentRoundIndex == 0) revert INVALID_STATUS();
+        if (currentRound.roundStatus != RoundStatus.Pending) revert INVALID_STATUS();
 
         if (applicant.status != Status.Pending) revert INVALID_STATUS();
         if (_approvalFlag != Status.Accepted && _approvalFlag != Status.Rejected) revert INVALID_STATUS();
@@ -251,14 +251,16 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         return currentRoundIndex;
     }
 
-    function _createShip(Applicant memory _applicant, bytes memory _shipInitData, GameRound memory _currentRound)
+    function _createShip(Applicant memory _applicant, ShipInitData memory _shipInitData, GameRound memory _currentRound)
         internal
     {
+        // Deploy a new GrantShipStrategy contract
         GrantShipStrategy grantShip = new GrantShipStrategy(address(allo), _applicant.shipName);
 
         address payable strategyAddress = payable(address(grantShip));
         address[] memory noManagers = new address[](0);
 
+        // Create a new pool with the GrantShipStrategy contract
         uint256 shipPoolId = _allo.createPoolWithCustomStrategy(
             _applicant.profileId,
             strategyAddress,

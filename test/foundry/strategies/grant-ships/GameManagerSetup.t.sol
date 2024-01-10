@@ -95,8 +95,13 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
 
     function __registerShips(uint32 _shipAmount) internal {
         for (uint32 i = 0; i < _shipAmount;) {
-            address[] memory managers = new address[](1);
-            managers[0] = shipOperator(i).wearer;
+            address[] memory managers = new address[](2);
+            managers[0] = address(gameManager());
+
+            console.log("___In TEST___");
+            console.log("address(gameManager())", address(gameManager()));
+
+            managers[1] = shipOperator(i).wearer;
 
             vm.startPrank(team(i).wearer);
 

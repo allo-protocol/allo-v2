@@ -11,6 +11,7 @@ import {EventSetup} from "../../shared/EventSetup.sol";
 import {GameManagerStrategy} from "../../../../contracts/strategies/_poc/grant-ships/GameManagerStrategy.sol";
 import {GameManagerSetup} from "./GameManagerSetup.t.sol";
 import {IStrategy} from "../../../../contracts/core/interfaces/IStrategy.sol";
+import {ShipInitData} from "../../../../contracts/strategies/_poc/grant-ships/libraries/GrantShipShared.sol";
 
 contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
     /// ===============================
@@ -126,24 +127,42 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         vm.startPrank(facilitator().wearer);
         gameManager().createRound(_gameAmount, address(ARB()));
         vm.stopPrank();
+    }
 
-        // TODO: Add test to make sure we can't rewrite a round once the status changes
+    function testApproveApplicant() public {
+        address applicantId = register_create_approve();
+
+        GameManagerStrategy.Applicant memory applicant = gameManager().getApplicant(applicantId);
+
+        assertEq(uint8(applicant.status), uint8(IStrategy.Status.Accepted));
     }
 
     // ====================================
     // =========== Helpers ================
     // ====================================
 
-    // function _register_applicant_approve() internal returns (address applicantId) {
-    //     applicantId = _register_applicant();
+    function register_create_approve() internal returns (address applicantId) {
+        applicantId = _register_create_round();
 
-    //     vm.startPrank(profile1_member1());
-    //     gameManager().reviewApplicant(applicantId, IStrategy.Status.Accepted, );
-    //     vm.stopPrank();
-    // }
+        address[] memory contractAsManager = new address[](1);
+        contractAsManager[0] = address(gameManager());
+        bytes32 profileId = registry().getProfileByAnchor(profile1_anchor()).id;
 
-    function _register_create_round() internal {
-        _register_applicant();
+        vm.startPrank(profile1_owner());
+        registry().addMembers(profileId, contractAsManager);
+        vm.stopPrank();
+
+        vm.startPrank(facilitator().wearer);
+        gameManager().reviewApplicant(
+            applicantId,
+            IStrategy.Status.Accepted,
+            ShipInitData(true, true, true, "Ship Name", Metadata(1, "Ship 1"), team(0).wearer, shipOperator(0).id)
+        );
+        vm.stopPrank();
+    }
+
+    function _register_create_round() internal returns (address applicantId) {
+        applicantId = _register_applicant();
 
         address arbAddress = address(ARB());
 
