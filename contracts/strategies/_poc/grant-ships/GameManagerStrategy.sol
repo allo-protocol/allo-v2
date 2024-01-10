@@ -340,9 +340,13 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
             revert INVALID_METADATA();
         }
 
+        Applicant memory applicant = applications[_anchorAddress];
+
+        if (applicant.status == Status.Accepted) revert INVALID_STATUS();
+
         IRegistry.Profile memory profile = _registry.getProfileByAnchor(_anchorAddress);
-        Applicant memory applicant = Applicant(_anchorAddress, profile.id, _shipName, _metadata, Status.Pending);
-        applications[_anchorAddress] = applicant;
+        applications[_anchorAddress] = Applicant(_anchorAddress, profile.id, _shipName, _metadata, Status.Pending);
+
         emit Registered(_anchorAddress, _data, _sender);
         return _anchorAddress;
     }

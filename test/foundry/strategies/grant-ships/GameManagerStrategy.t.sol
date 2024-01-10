@@ -19,7 +19,7 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         __ManagerSetup();
     }
 
-    function test_RegisterRecipient() public {
+    function test_registerRecipient() public {
         (address recipientId, bytes memory data) = _register_recipient_return_data();
 
         GameManagerStrategy.Applicant memory applicant = gameManager().getApplicant(recipientId);
@@ -27,25 +27,78 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         assertEq(applicant.applicantId, profile1_anchor());
         assertEq(applicant.metadata.pointer, "Ship 1");
         assertEq(applicant.metadata.protocol, 1);
+        assertEq(applicant.shipName, "Ship Name");
 
         // Check data returned from helper function
         assertEq(uint8(applicant.status), uint8(IStrategy.Status.Pending));
         assertEq(data, abi.encode(recipientId, "Ship Name", Metadata(1, "Ship 1")));
     }
 
+    function testRevert_registerRecipient_UNAUTHORIZED() public {
+        address recipientId = profile1_anchor();
+
+        Metadata memory metadata = Metadata(1, "Ship 1");
+
+        bytes memory data = abi.encode(recipientId, "Ship Name", metadata);
+
+        uint256 poolId = gameManager().getPoolId();
+        address rando = randomAddress();
+
+        vm.expectRevert(UNAUTHORIZED.selector);
+        vm.startPrank(rando);
+        allo().registerRecipient(poolId, data);
+        vm.stopPrank();
+    }
+
+    function testRevert_registerRecipient_INVALID_METADATA() public {
+        address recipientId = profile1_anchor();
+
+        Metadata memory badMetadata = Metadata(1, "");
+
+        bytes memory data = abi.encode(recipientId, "Ship Name", badMetadata);
+
+        uint256 poolId = gameManager().getPoolId();
+
+        vm.expectRevert(INVALID_METADATA.selector);
+        vm.startPrank(profile1_member1());
+        allo().registerRecipient(poolId, data);
+        vm.stopPrank();
+    }
+
+    function testRevert_registerRecipient_UpdateProfile() public {
+        (address applicantId,) = _register_recipient_return_data();
+
+        Metadata memory metadata = Metadata(1, "Ship 1: Part 2");
+
+        bytes memory data = abi.encode(applicantId, "Ship Name: Part 2", metadata);
+
+        uint256 poolId = gameManager().getPoolId();
+
+        vm.startPrank(profile1_member1());
+        allo().registerRecipient(poolId, data);
+        vm.stopPrank();
+
+        GameManagerStrategy.Applicant memory newApplicant = gameManager().getApplicant(applicantId);
+
+        assertEq(newApplicant.metadata.pointer, "Ship 1: Part 2");
+        assertEq(newApplicant.metadata.protocol, 1);
+        assertEq(uint8(newApplicant.status), uint8(IStrategy.Status.Pending));
+        assertEq(newApplicant.shipName, "Ship Name: Part 2");
+    }
+
     // ====================================
     // =========== Helpers ================
     // ====================================
 
-    function _register_recipient_return_data() internal returns (address recipientId, bytes memory data) {
-        recipientId = profile1_anchor();
+    function _register_recipient_return_data() internal returns (address applicantId, bytes memory data) {
+        applicantId = profile1_anchor();
 
         Metadata memory metadata = Metadata(1, "Ship 1");
 
-        data = abi.encode(recipientId, "Ship Name", metadata);
+        data = abi.encode(applicantId, "Ship Name", metadata);
 
         vm.expectEmit(true, true, true, true);
-        emit Registered(recipientId, data, profile1_member1());
+        emit Registered(applicantId, data, profile1_member1());
         gameManager().getPoolId();
 
         vm.startPrank(profile1_member1());
