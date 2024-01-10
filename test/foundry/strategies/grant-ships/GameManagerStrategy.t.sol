@@ -23,11 +23,12 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         (address recipientId, bytes memory data) = _register_recipient_return_data();
 
         GameManagerStrategy.Applicant memory applicant = gameManager().getApplicant(recipientId);
-        Metadata memory metadata = Metadata(1, "Ship 1");
         // Check that the recipient was registered
         assertEq(applicant.applicantId, profile1_anchor());
         assertEq(applicant.metadata.pointer, "Ship 1");
         assertEq(applicant.metadata.protocol, 1);
+
+        // Check data returned from helper function
         assertEq(uint8(applicant.status), uint8(IStrategy.Status.Pending));
         assertEq(data, abi.encode(recipientId, Metadata(1, "Ship 1")));
     }

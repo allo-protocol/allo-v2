@@ -755,11 +755,11 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         IAllo.Pool memory pool = allo.getPool(poolId);
 
         poolAmount -= amount;
+
+        // Set the milestone status to 'Accepted'
         milestone.milestoneStatus = Status.Accepted;
 
         _transferAmount(pool.token, recipient.recipientAddress, amount);
-
-        // Set the milestone status to 'Accepted'
 
         // Increment the upcoming milestone
         upcomingMilestone[_recipientId]++;
