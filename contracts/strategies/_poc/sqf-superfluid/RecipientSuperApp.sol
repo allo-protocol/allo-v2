@@ -93,7 +93,7 @@ contract RecipientSuperApp is ISuperApp {
         returns (bytes memory newCtx)
     {
         if (!strategy.isValidAllocator(sender)) revert UNAUTHORIZED();
-        onFlowUpdated(previousFlowRate, newFlowRate, ctx);
+        newCtx = onFlowUpdated(previousFlowRate, newFlowRate, ctx);
     }
 
     /// @notice This is the main callback function called by the host
