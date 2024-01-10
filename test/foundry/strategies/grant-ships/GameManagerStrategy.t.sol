@@ -30,7 +30,7 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
 
         // Check data returned from helper function
         assertEq(uint8(applicant.status), uint8(IStrategy.Status.Pending));
-        assertEq(data, abi.encode(recipientId, Metadata(1, "Ship 1")));
+        assertEq(data, abi.encode(recipientId, "Ship Name", Metadata(1, "Ship 1")));
     }
 
     // ====================================
@@ -42,11 +42,11 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
 
         Metadata memory metadata = Metadata(1, "Ship 1");
 
-        data = abi.encode(recipientId, metadata);
+        data = abi.encode(recipientId, "Ship Name", metadata);
 
         vm.expectEmit(true, true, true, true);
         emit Registered(recipientId, data, profile1_member1());
-        uint256 poolId = gameManager().getPoolId();
+        gameManager().getPoolId();
 
         vm.startPrank(profile1_member1());
         allo().registerRecipient(gameManager().getPoolId(), data);

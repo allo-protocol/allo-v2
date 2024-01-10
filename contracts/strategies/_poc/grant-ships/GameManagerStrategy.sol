@@ -327,7 +327,8 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     // Users can re-register to update their metadata.
     // All Ship Applicants MUST have registered profiles
     function _registerRecipient(bytes memory _data, address _sender) internal virtual override returns (address) {
-        (address _anchorAddress, Metadata memory _metadata) = abi.decode(_data, (address, Metadata));
+        (address _anchorAddress, string memory _shipName, Metadata memory _metadata) =
+            abi.decode(_data, (address, string, Metadata));
 
         // Check to ensure that the caller is a member of the profile
         if (!_isProfileMember(_anchorAddress, _sender)) {
@@ -340,7 +341,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         }
 
         IRegistry.Profile memory profile = _registry.getProfileByAnchor(_anchorAddress);
-        Applicant memory applicant = Applicant(_anchorAddress, profile.id, "Poo", _metadata, Status.Pending);
+        Applicant memory applicant = Applicant(_anchorAddress, profile.id, _shipName, _metadata, Status.Pending);
         applications[_anchorAddress] = applicant;
         emit Registered(_anchorAddress, _data, _sender);
         return _anchorAddress;

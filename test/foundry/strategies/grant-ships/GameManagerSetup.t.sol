@@ -121,7 +121,10 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
                 Metadata(1, string.concat("ipfs://grant-ships/applicant/", vm.toString(i)));
 
             // Register Hats Branch/Profile as a recipient
-            allo().registerRecipient(_gameManager.getPoolId(), abi.encode(profileAnchor, applicantMetadata));
+            allo().registerRecipient(
+                _gameManager.getPoolId(),
+                abi.encode(profileAnchor, string.concat("Ship ", vm.toString(i)), applicantMetadata)
+            );
             vm.stopPrank();
 
             unchecked {
