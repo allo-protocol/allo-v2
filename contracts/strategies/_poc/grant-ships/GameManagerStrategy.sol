@@ -64,13 +64,15 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     }
 
     struct Recipient {
-        address applicantAddress;
+        address recipientAddress;
+        bytes32 profileId;
+        string shipName;
         address payable shipAddress;
         address payable previousAddress;
         uint256 shipPoolId;
         uint256 grantAmount;
         Metadata metadata;
-        ShipStatus shipStatus;
+        ShipStatus status;
     }
 
     /// ===============================
@@ -89,7 +91,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     event ShipLaunched(
         address shipAddress, uint256 shipPoolId, address applicantId, string shipName, Metadata metadata
     );
-    event ApplicationRejected(address applicantAddress);
+    event ApplicationRejected(address recipientAddress);
 
     /// ===============================
     /// ========== Modifiers ==========
@@ -120,12 +122,12 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     // mapping(address => Recipient) public grantShipRecipients;
 
     ///@notice Mapping of all GrantShip Recipients
-    ///@dev 'applicantAddress' to 'Recipient'
-    mapping(address => Recipient) public grantShips;
+    ///@dev 'recipientAddress' to 'Recipient'
+    mapping(address => Recipient) public recipients;
 
     //@notice Mapping of all ship applications
-    ///@dev 'applicantAddress' to 'Applicant'
-    mapping(address => Applicant) public applications;
+    ///@dev 'recipientAddress' to 'Applicant'
+    // mapping(address => Applicant) public applications;
 
     ///@notice Array of all Game Rounds
     GameRound[] public gameRounds;
@@ -171,71 +173,27 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         _registry = _allo.getRegistry();
     }
 
-    // function __grantShips_init(bytes[] memory _shipData) internal {
-    //     IRegistry registry = _allo.getRegistry();
-
-    //     // registerShip
-
-    //     for (uint256 i = 0; i < _shipData.length;) {
-    //         (ShipInitData memory shipInitData) = abi.decode(_shipData[i], (ShipInitData));
-
-    //         // Note:
-    //         // Would be nice to have the captain address as a manager
-    //         // but owner has to be msg.sender in order to create a manager.
-    //         // can always do it in a separate call later.
-    //         address[] memory profileManagers = new address[](2);
-    //         profileManagers[0] = shipInitData.recipientId;
-    //         profileManagers[1] = gameManager;
-
-    //         address[] memory poolAdminAsManager = new address[](1);
-    //         poolAdminAsManager[0] = gameManager;
-
-    //         bytes32 shipProfileId = registry.createProfile(
-    //             i, shipInitData.shipName, shipInitData.shipMetadata, address(this), profileManagers
-    //         );
-
-    //         address payable strategyAddress = payable(address(grantShip));
-
-    //         Recipient memory newShipRecipient = Recipient(
-    //             shipInitData.recipientId,
-    //             strategyAddress,
-    //             payable(address(0)),
-    //             shipPoolId,
-    //             0,
-    //             shipInitData.shipMetadata,
-    //             Status.Pending
-    //         );
-
-    //         grantShipRecipients.push(newShipRecipient);
-
-    //         unchecked {
-    //             i++;
-    //             _shipNonce++;
-    //         }
-    //     }
-    // }
-
-    function reviewApplicant(address _applicantAddress, Status _approvalFlag, ShipInitData memory shipInitData)
+    function reviewRecipient(address recipientAddress, ShipStatus _approvalFlag, ShipInitData memory shipInitData)
         external
         onlyGameFacilitator(msg.sender)
         returns (address payable)
     {
-        Applicant storage applicant = applications[_applicantAddress];
+        Recipient storage recipient = recipients[recipientAddress];
         GameRound storage currentRound = gameRounds[currentRoundIndex];
 
         if (currentRound.roundStatus != RoundStatus.Pending) revert INVALID_STATUS();
 
         // check if there is a current round. If not, revert
 
-        if (applicant.status != Status.Pending) revert INVALID_STATUS();
-        if (_approvalFlag != Status.Accepted && _approvalFlag != Status.Rejected) revert INVALID_STATUS();
+        if (recipient.status != ShipStatus.Pending) revert INVALID_STATUS();
+        if (_approvalFlag != ShipStatus.Accepted && _approvalFlag != ShipStatus.Rejected) revert INVALID_STATUS();
 
-        if (_approvalFlag == Status.Accepted) {
-            applicant.status = Status.Accepted;
-            return _createShip(applicant, shipInitData, currentRound);
+        if (_approvalFlag == ShipStatus.Accepted) {
+            recipient.status = ShipStatus.Accepted;
+            return _createShip(recipient, shipInitData, currentRound);
         } else {
-            applicant.status = Status.Rejected;
-            emit ApplicationRejected(_applicantAddress);
+            recipient.status = ShipStatus.Rejected;
+            emit ApplicationRejected(recipientAddress);
             return payable(address(0));
         }
     }
@@ -258,58 +216,45 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         return currentRoundIndex;
     }
 
-    function _createShip(Applicant memory _applicant, ShipInitData memory _shipInitData, GameRound memory _currentRound)
+    function _createShip(Recipient memory _recipient, ShipInitData memory _shipInitData, GameRound memory _currentRound)
         internal
         returns (address payable)
     {
         // Deploy a new GrantShipStrategy contract
-        GrantShipStrategy grantShip = new GrantShipStrategy(address(allo), _applicant.shipName);
+        GrantShipStrategy grantShip = new GrantShipStrategy(address(allo), _recipient.shipName);
 
         address payable strategyAddress = payable(address(grantShip));
         address[] memory noManagers = new address[](0);
 
         // Create a new pool with the GrantShipStrategy contract
         uint256 shipPoolId = _allo.createPoolWithCustomStrategy(
-            _applicant.profileId,
+            _recipient.profileId,
             strategyAddress,
             abi.encode(_shipInitData, address(this)),
             _currentRound.token,
             0,
-            _applicant.metadata,
+            _recipient.metadata,
             // No Managers: This strategy uses Hats Protocol for permissioning
             // Permissions remain composable and fully revokable by anyone up the Hats Tree
             noManagers
         );
 
-        Recipient memory newShipRecipient = Recipient(
-            _applicant.applicantId,
-            strategyAddress,
-            payable(address(0)),
-            shipPoolId,
-            0,
-            _applicant.metadata,
-            ShipStatus.Pending
+        // Update the recipient with the new poolId
+
+        Recipient storage recipient = recipients[_recipient.recipientAddress];
+
+        recipient.shipPoolId = shipPoolId;
+        recipient.shipAddress = strategyAddress;
+        recipient.status = ShipStatus.Accepted;
+
+        emit ShipLaunched(
+            strategyAddress, shipPoolId, _recipient.recipientAddress, _recipient.shipName, _recipient.metadata
         );
-
-        grantShips[_applicant.applicantId] = newShipRecipient;
-
-        emit ShipLaunched(strategyAddress, shipPoolId, _applicant.applicantId, _applicant.shipName, _applicant.metadata);
 
         return strategyAddress;
     }
 
-    function rejectShips(address[] memory _shipAddresses) external onlyGameFacilitator(msg.sender) {
-        // uint256 shipLength = _shipAddresses.length;
-        // for (uint256 i = 0; i < shipLength; i++) {
-        //     Recipient storage shipRecipient = grantShipRecipients[_shipAddresses[i]];
-
-        //     if (shipRecipient.recipientStatus != Status.Pending) revert INVALID_STATUS();
-
-        //     shipRecipient.recipientStatus = Status.Rejected;
-        // }
-    }
-
-    function _allocate(bytes memory _data, address _sender) internal virtual override {
+    function _allocate(bytes memory _data, address _sender) internal virtual override onlyGameFacilitator(msg.sender) {
         // onlyFacilitator
         // takes an array of amounts
         // checks if the amount of percentages is 100%
@@ -333,16 +278,12 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     /// ============ View ==================
     /// ====================================
 
-    function getApplicant(address _applicantAddress) public view returns (Applicant memory) {
-        return applications[_applicantAddress];
+    function getShipAddress(address _recipientAddress) public view returns (address payable) {
+        return getRecipient(_recipientAddress).shipAddress;
     }
 
-    function getShipAddress(address _applicantAddress) public view returns (address payable) {
-        return getRecipient(_applicantAddress).shipAddress;
-    }
-
-    function getRecipient(address _applicantAddress) public view returns (Recipient memory) {
-        return grantShips[_applicantAddress];
+    function getRecipient(address _recipientAddress) public view returns (Recipient memory) {
+        return recipients[_recipientAddress];
     }
 
     function getHatsAddress() public view returns (address) {
@@ -369,6 +310,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     // Register to be a ship. This step does not create a ship, it just registers the address to be a ship.
     // Users can re-register to update their metadata.
     // All Ship Applicants MUST have registered profiles
+
     function _registerRecipient(bytes memory _data, address _sender) internal virtual override returns (address) {
         (address _anchorAddress, string memory _shipName, Metadata memory _metadata) =
             abi.decode(_data, (address, string, Metadata));
@@ -383,12 +325,21 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
             revert INVALID_METADATA();
         }
 
-        Applicant memory applicant = applications[_anchorAddress];
+        Recipient memory recipient = recipients[_anchorAddress];
 
-        if (applicant.status == Status.Accepted) revert INVALID_STATUS();
+        if (recipient.status == ShipStatus.Accepted || recipient.status == ShipStatus.Accepted) revert INVALID_STATUS();
 
         IRegistry.Profile memory profile = _registry.getProfileByAnchor(_anchorAddress);
-        applications[_anchorAddress] = Applicant(_anchorAddress, profile.id, _shipName, _metadata, Status.Pending);
+
+        bool shipExists = recipient.shipAddress != address(0);
+        bool previousShipExists = recipient.previousAddress != address(0);
+
+        address payable _shipAddress = shipExists ? recipient.shipAddress : payable(address(0));
+        address payable _previousAddress = previousShipExists ? recipient.previousAddress : payable(address(0));
+
+        recipients[_anchorAddress] = Recipient(
+            _anchorAddress, profile.id, _shipName, _shipAddress, _previousAddress, 0, 0, _metadata, ShipStatus.Pending
+        );
 
         emit Registered(_anchorAddress, _data, _sender);
         return _anchorAddress;

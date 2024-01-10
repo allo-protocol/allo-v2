@@ -21,7 +21,7 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
     /// ===============================
 
     event RoundCreated(uint256 gameIndex, address token, uint256 totalRoundAmount);
-    event ApplicationRejected(address applicantAddress);
+    event ApplicationRejected(address recipientAddress);
     event ShipLaunched(
         address shipAddress, uint256 shipPoolId, address applicantId, string shipName, Metadata metadata
     );
@@ -42,15 +42,22 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
     }
 
     function test_registerRecipient() public {
-        address recipientId = _register_applicant();
+        address recipientId = _register_recipient();
 
-        GameManagerStrategy.Applicant memory applicant = gameManager().getApplicant(recipientId);
+        GameManagerStrategy.Recipient memory recipient = gameManager().getRecipient(recipientId);
+        bytes32 profileId = registry().getProfileByAnchor(profile1_anchor()).id;
+
         // Check that the recipient was registered
-        assertEq(applicant.applicantId, profile1_anchor());
-        assertEq(applicant.metadata.pointer, "Ship 1");
-        assertEq(applicant.metadata.protocol, 1);
-        assertEq(applicant.shipName, "Ship Name");
-        assertEq(uint8(applicant.status), uint8(IStrategy.Status.Pending));
+        assertEq(recipient.recipientAddress, profile1_anchor());
+        assertEq(recipient.profileId, profileId);
+        assertEq(recipient.shipName, "Ship Name");
+        assertEq(recipient.shipAddress, address(0));
+        assertEq(recipient.previousAddress, address(0));
+        assertEq(recipient.shipPoolId, 0);
+        assertEq(recipient.grantAmount, 0);
+        assertEq(recipient.metadata.pointer, "Ship 1");
+        assertEq(recipient.metadata.protocol, 1);
+        assertEq(uint8(recipient.status), uint8(IStrategy.Status.Pending));
     }
 
     function testRevert_registerRecipient_UNAUTHORIZED() public {
@@ -85,11 +92,25 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
     }
 
     function test_registerRecipient_UpdateApplication() public {
-        address applicantId = _register_applicant();
+        address recipientId = _register_recipient();
+
+        bytes32 profileId = registry().getProfileByAnchor(profile1_anchor()).id;
+        GameManagerStrategy.Recipient memory recipient = gameManager().getRecipient(recipientId);
+
+        assertEq(recipient.recipientAddress, profile1_anchor());
+        assertEq(recipient.profileId, profileId);
+        assertEq(recipient.shipName, "Ship Name");
+        assertEq(recipient.shipAddress, address(0));
+        assertEq(recipient.previousAddress, address(0));
+        assertEq(recipient.shipPoolId, 0);
+        assertEq(recipient.grantAmount, 0);
+        assertEq(recipient.metadata.pointer, "Ship 1");
+        assertEq(recipient.metadata.protocol, 1);
+        assertEq(uint8(recipient.status), uint8(IStrategy.Status.Pending));
 
         Metadata memory metadata = Metadata(1, "Ship 1: Part 2");
 
-        bytes memory data = abi.encode(applicantId, "Ship Name: Part 2", metadata);
+        bytes memory data = abi.encode(recipientId, "Ship Name: Part 2", metadata);
 
         uint256 poolId = gameManager().getPoolId();
 
@@ -97,12 +118,18 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         allo().registerRecipient(poolId, data);
         vm.stopPrank();
 
-        GameManagerStrategy.Applicant memory newApplicant = gameManager().getApplicant(applicantId);
-        assertEq(newApplicant.applicantId, profile1_anchor());
-        assertEq(newApplicant.metadata.pointer, "Ship 1: Part 2");
-        assertEq(newApplicant.metadata.protocol, 1);
-        assertEq(uint8(newApplicant.status), uint8(IStrategy.Status.Pending));
-        assertEq(newApplicant.shipName, "Ship Name: Part 2");
+        GameManagerStrategy.Recipient memory newRecipient = gameManager().getRecipient(recipientId);
+
+        assertEq(newRecipient.recipientAddress, profile1_anchor());
+        assertEq(newRecipient.profileId, profileId);
+        assertEq(newRecipient.shipName, "Ship Name: Part 2");
+        assertEq(newRecipient.shipAddress, address(0));
+        assertEq(newRecipient.previousAddress, address(0));
+        assertEq(newRecipient.shipPoolId, 0);
+        assertEq(newRecipient.grantAmount, 0);
+        assertEq(newRecipient.metadata.pointer, "Ship 1: Part 2");
+        assertEq(newRecipient.metadata.protocol, 1);
+        assertEq(uint8(newRecipient.status), uint8(IStrategy.Status.Pending));
     }
 
     function test_createRound() public {
@@ -138,26 +165,59 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
     }
 
     function test_reviewApplicant_approve() public {
-        address applicantId = register_create_approve();
+        address recipientAddress = register_create_approve();
 
-        GameManagerStrategy.Applicant memory applicant = gameManager().getApplicant(applicantId);
+        GameManagerStrategy.Recipient memory recipient = gameManager().getRecipient(recipientAddress);
 
-        // test applicant state
-        assertEq(uint8(applicant.status), uint8(IStrategy.Status.Accepted));
-
-        // test ship state
-
-        // test recipient state
-        GameManagerStrategy.Recipient memory recipient = gameManager().getRecipient(applicantId);
-
-        assertEq(recipient.applicantAddress, applicantId);
+        assertEq(recipient.recipientAddress, recipientAddress);
+        assertEq(recipient.profileId, registry().getProfileByAnchor(profile1_anchor()).id);
+        assertEq(recipient.shipName, "Ship Name");
         assertEq(recipient.shipAddress, address(ship));
+        assertEq(recipient.previousAddress, address(0));
         assertEq(recipient.shipPoolId, ship.getPoolId());
         assertEq(recipient.grantAmount, 0);
+        assertEq(recipient.metadata.pointer, "Ship 1");
+        assertEq(recipient.metadata.protocol, 1);
+        assertEq(uint8(recipient.status), uint8(GameManagerStrategy.ShipStatus.Accepted));
+    }
+
+    function testRevert_reviewApplicant_INVALID_STATUS() public {
+        address applicantId = _register_create_round();
+
+        address[] memory contractAsManager = new address[](1);
+        contractAsManager[0] = address(gameManager());
+        bytes32 profileId = registry().getProfileByAnchor(profile1_anchor()).id;
+
+        vm.startPrank(profile1_owner());
+        registry().addMembers(profileId, contractAsManager);
+        vm.stopPrank();
+
+        vm.expectRevert(GameManagerStrategy.INVALID_STATUS.selector);
+
+        vm.startPrank(facilitator().wearer);
+        gameManager().reviewRecipient(
+            applicantId,
+            GameManagerStrategy.ShipStatus.None,
+            ShipInitData(true, true, true, "Ship Name", Metadata(1, "Ship 1"), team(0).wearer, shipOperator(0).id)
+        );
+        vm.stopPrank();
     }
 
     function test_reviewApplicant_reject() public {
-        address applicantId = register_create_reject();
+        address recipientAddress = register_create_reject();
+
+        GameManagerStrategy.Recipient memory recipient = gameManager().getRecipient(recipientAddress);
+
+        assertEq(recipient.recipientAddress, recipientAddress);
+        assertEq(recipient.profileId, registry().getProfileByAnchor(profile1_anchor()).id);
+        assertEq(recipient.shipName, "Ship Name");
+        assertEq(recipient.shipAddress, address(0));
+        assertEq(recipient.previousAddress, address(0));
+        assertEq(recipient.shipPoolId, 0);
+        assertEq(recipient.grantAmount, 0);
+        assertEq(recipient.metadata.pointer, "Ship 1");
+        assertEq(recipient.metadata.protocol, 1);
+        assertEq(uint8(recipient.status), uint8(GameManagerStrategy.ShipStatus.Rejected));
     }
 
     // ====================================
@@ -179,9 +239,9 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         emit ApplicationRejected(applicantId);
 
         vm.startPrank(facilitator().wearer);
-        gameManager().reviewApplicant(
+        gameManager().reviewRecipient(
             applicantId,
-            IStrategy.Status.Rejected,
+            GameManagerStrategy.ShipStatus.Rejected,
             ShipInitData(true, true, true, "Ship Name", Metadata(1, "Ship 1"), team(0).wearer, shipOperator(0).id)
         );
         vm.stopPrank();
@@ -199,9 +259,9 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         vm.stopPrank();
 
         vm.startPrank(facilitator().wearer);
-        address payable shipAddress = gameManager().reviewApplicant(
+        address payable shipAddress = gameManager().reviewRecipient(
             applicantId,
-            IStrategy.Status.Accepted,
+            GameManagerStrategy.ShipStatus.Accepted,
             ShipInitData(true, true, true, "Ship Name", Metadata(1, "Ship 1"), team(0).wearer, shipOperator(0).id)
         );
         vm.stopPrank();
@@ -209,8 +269,8 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         ship = GrantShipStrategy(shipAddress);
     }
 
-    function _register_create_round() internal returns (address applicantId) {
-        applicantId = _register_applicant();
+    function _register_create_round() internal returns (address recipientId) {
+        recipientId = _register_recipient();
 
         address arbAddress = address(ARB());
 
@@ -221,29 +281,24 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
 
         gameManager().createRound(_gameAmount, arbAddress);
         vm.stopPrank();
-
-        GameManagerStrategy.GameRound memory round = gameManager().getGameRound(0);
-
-        assertEq(_gameAmount, round.totalRoundAmount);
-        assertEq(address(ARB()), round.token);
     }
 
-    function _register_applicant_return_data() internal returns (address applicantId, bytes memory data) {
-        applicantId = profile1_anchor();
+    function _register_recipient_return_data() internal returns (address recipientId, bytes memory data) {
+        recipientId = profile1_anchor();
 
         Metadata memory metadata = Metadata(1, "Ship 1");
 
-        data = abi.encode(applicantId, "Ship Name", metadata);
+        data = abi.encode(recipientId, "Ship Name", metadata);
 
         vm.expectEmit(true, true, true, true);
-        emit Registered(applicantId, data, profile1_member1());
+        emit Registered(recipientId, data, profile1_member1());
 
         vm.startPrank(profile1_member1());
         allo().registerRecipient(gameManager().getPoolId(), data);
         vm.stopPrank();
     }
 
-    function _register_applicant() internal returns (address applicantId) {
-        (applicantId,) = _register_applicant_return_data();
+    function _register_recipient() internal returns (address recipientId) {
+        (recipientId,) = _register_recipient_return_data();
     }
 }
