@@ -13,6 +13,19 @@ import {GameManagerSetup} from "./GameManagerSetup.t.sol";
 import {IStrategy} from "../../../../contracts/core/interfaces/IStrategy.sol";
 
 contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
+    /// ===============================
+    /// ========== Events =============
+    /// ===============================
+
+    event RoundCreated(uint256 gameIndex, address token, uint256 totalRoundAmount);
+
+    /// ===============================
+    /// ========== State ==============
+    /// ===============================
+
+    uint256 internal constant _gameAmount = 90_000e18;
+    uint256 internal constant _shipAmount = 30_000e18;
+
     function setUp() public {
         vm.createSelectFork({blockNumber: 166_807_779, urlOrAlias: "arbitrumOne"});
 
@@ -20,7 +33,7 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
     }
 
     function test_registerRecipient() public {
-        (address recipientId, bytes memory data) = _register_recipient_return_data();
+        address recipientId = _register_applicant();
 
         GameManagerStrategy.Applicant memory applicant = gameManager().getApplicant(recipientId);
         // Check that the recipient was registered
@@ -28,10 +41,7 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         assertEq(applicant.metadata.pointer, "Ship 1");
         assertEq(applicant.metadata.protocol, 1);
         assertEq(applicant.shipName, "Ship Name");
-
-        // Check data returned from helper function
         assertEq(uint8(applicant.status), uint8(IStrategy.Status.Pending));
-        assertEq(data, abi.encode(recipientId, "Ship Name", Metadata(1, "Ship 1")));
     }
 
     function testRevert_registerRecipient_UNAUTHORIZED() public {
@@ -65,8 +75,8 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         vm.stopPrank();
     }
 
-    function testRevert_registerRecipient_UpdateProfile() public {
-        (address applicantId,) = _register_recipient_return_data();
+    function test_registerRecipient_UpdateApplication() public {
+        address applicantId = _register_applicant();
 
         Metadata memory metadata = Metadata(1, "Ship 1: Part 2");
 
@@ -79,18 +89,79 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         vm.stopPrank();
 
         GameManagerStrategy.Applicant memory newApplicant = gameManager().getApplicant(applicantId);
-
+        assertEq(newApplicant.applicantId, profile1_anchor());
         assertEq(newApplicant.metadata.pointer, "Ship 1: Part 2");
         assertEq(newApplicant.metadata.protocol, 1);
         assertEq(uint8(newApplicant.status), uint8(IStrategy.Status.Pending));
         assertEq(newApplicant.shipName, "Ship Name: Part 2");
     }
 
+    function test_createRound() public {
+        _register_create_round();
+
+        GameManagerStrategy.GameRound memory round = gameManager().getGameRound(0);
+
+        assertEq(_gameAmount, round.totalRoundAmount);
+        assertEq(address(ARB()), round.token);
+        assertEq(uint8(round.roundStatus), uint8(GameManagerStrategy.RoundStatus.Pending));
+        assertEq(uint8(round.startTime), 0);
+        assertEq(uint8(round.endTime), 0);
+        assertEq(round.ships.length, 0);
+    }
+
+    function testRevert_createRound_UNAUTHORIZED() public {
+        _register_create_round();
+
+        vm.expectRevert(UNAUTHORIZED.selector);
+        vm.startPrank(randomAddress());
+        gameManager().createRound(_gameAmount, address(ARB()));
+        vm.stopPrank();
+    }
+
+    function testRevert_createRound_INVALID_STATUS() public {
+        _register_create_round();
+
+        vm.expectRevert(GameManagerStrategy.INVALID_STATUS.selector);
+
+        vm.startPrank(facilitator().wearer);
+        gameManager().createRound(_gameAmount, address(ARB()));
+        vm.stopPrank();
+
+        // TODO: Add test to make sure we can't rewrite a round once the status changes
+    }
+
     // ====================================
     // =========== Helpers ================
     // ====================================
 
-    function _register_recipient_return_data() internal returns (address applicantId, bytes memory data) {
+    // function _register_applicant_approve() internal returns (address applicantId) {
+    //     applicantId = _register_applicant();
+
+    //     vm.startPrank(profile1_member1());
+    //     gameManager().reviewApplicant(applicantId, IStrategy.Status.Accepted, );
+    //     vm.stopPrank();
+    // }
+
+    function _register_create_round() internal {
+        _register_applicant();
+
+        address arbAddress = address(ARB());
+
+        vm.startPrank(facilitator().wearer);
+
+        vm.expectEmit(false, false, false, false);
+        emit RoundCreated(0, arbAddress, _gameAmount);
+
+        gameManager().createRound(_gameAmount, arbAddress);
+        vm.stopPrank();
+
+        GameManagerStrategy.GameRound memory round = gameManager().getGameRound(0);
+
+        assertEq(_gameAmount, round.totalRoundAmount);
+        assertEq(address(ARB()), round.token);
+    }
+
+    function _register_applicant_return_data() internal returns (address applicantId, bytes memory data) {
         applicantId = profile1_anchor();
 
         Metadata memory metadata = Metadata(1, "Ship 1");
@@ -99,10 +170,13 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
 
         vm.expectEmit(true, true, true, true);
         emit Registered(applicantId, data, profile1_member1());
-        gameManager().getPoolId();
 
         vm.startPrank(profile1_member1());
         allo().registerRecipient(gameManager().getPoolId(), data);
         vm.stopPrank();
+    }
+
+    function _register_applicant() internal returns (address applicantId) {
+        (applicantId,) = _register_applicant_return_data();
     }
 }

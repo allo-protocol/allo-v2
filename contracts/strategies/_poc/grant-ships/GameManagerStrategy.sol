@@ -79,13 +79,24 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Throws when the milestone is invalid.
     error INVALID_STATUS();
+    error INVALID_TIME();
+
+    /// ===============================
+    /// ========== Events =============
+    /// ===============================
+
+    event RoundCreated(uint256 gameIndex, address token, uint256 totalRoundAmount);
+    event GrantShipApproved();
+    event GrantShipRejected();
 
     /// ===============================
     /// ========== Modifiers ==========
     /// ===============================
 
     modifier onlyGameFacilitator(address _sender) {
-        _hats.isWearerOfHat(_sender, gameFacilitatorHatId);
+        if (!_hats.isWearerOfHat(_sender, gameFacilitatorHatId)) {
+            revert UNAUTHORIZED();
+        }
         _;
     }
 
@@ -136,10 +147,10 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
 
     function initialize(uint256 _poolId, bytes memory _data) external {
         __BaseStrategy_init(_poolId);
-        __gameState_init(_data);
+        __GameManager_init(_data);
     }
 
-    function __gameState_init(bytes memory _data) internal {
+    function __GameManager_init(bytes memory _data) internal {
         (
             uint256 _gameFacilitatorId,
             uint256 _metadataProtocol,
@@ -222,12 +233,22 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         }
     }
 
-    function createRound(GameRound memory _gameRound) external onlyGameFacilitator(msg.sender) {
-        GameRound storage currentRound = gameRounds[currentRoundIndex];
+    function createRound(uint256 _totalRoundAmount, address _tokenAddress)
+        external
+        onlyGameFacilitator(msg.sender)
+        returns (uint256)
+    {
+        if (gameRounds.length > 0 && gameRounds[currentRoundIndex].roundStatus != RoundStatus.None) {
+            revert INVALID_STATUS();
+        }
 
-        if (currentRound.roundStatus != RoundStatus.None) revert INVALID_STATUS();
+        GameRound memory round =
+            GameRound(0, 0, _totalRoundAmount, _tokenAddress, RoundStatus.Pending, new address[](0));
 
-        gameRounds.push(_gameRound);
+        gameRounds.push(round);
+
+        emit RoundCreated(currentRoundIndex, _tokenAddress, _totalRoundAmount);
+        return currentRoundIndex;
     }
 
     function _createShip(Applicant memory _applicant, bytes memory _shipInitData, GameRound memory _currentRound)
@@ -304,6 +325,10 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
 
     function getHatsAddress() public view returns (address) {
         return address(_hats);
+    }
+
+    function getGameRound(uint256 _gameRoundIndex) public view returns (GameRound memory) {
+        return gameRounds[_gameRoundIndex];
     }
 
     function isGameFacilitator(address _address) public view returns (bool) {
