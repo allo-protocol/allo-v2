@@ -373,7 +373,7 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
 
     function testRevert_adjustWeigthings_UNAUTHORIZED() public {
         vm.expectRevert(UNAUTHORIZED.selector);
-        _strategy.adjustWeightings(0, 1);
+        _strategy.adjustWeightings(0, 1, address(0));
     }
 
     function test_updatePoolTimestamps() public {

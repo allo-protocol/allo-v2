@@ -346,6 +346,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _data The data to use to allocate to the recipient
     /// @param _sender The address of the sender
     function _allocate(bytes memory _data, address _sender) internal override onlyActiveAllocation {
+
         if (!_isValidAllocator(_sender)) revert UNAUTHORIZED();
 
         (address recipientId, int96 flowRate) = abi.decode(_data, (address, int96));
@@ -514,7 +515,11 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     /// @dev This can only be called by the super app callback onFlowUpdated
     /// @param _previousFlowrate The previous flow rate
     /// @param _newFlowRate The new flow rate
-    function adjustWeightings(uint256 _previousFlowrate, uint256 _newFlowRate) external {
+    /// @param _sender The allocator address
+    function adjustWeightings(uint256 _previousFlowrate, uint256 _newFlowRate, address _sender) external {
+
+        if (!_isValidAllocator(_sender)) revert UNAUTHORIZED();
+
         address recipientId = superApps[msg.sender];
 
         if (recipientId == address(0)) revert UNAUTHORIZED();
