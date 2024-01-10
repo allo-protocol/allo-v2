@@ -10,6 +10,8 @@ import {Errors} from "../../../../contracts/core/libraries/Errors.sol";
 import {EventSetup} from "../../shared/EventSetup.sol";
 import {GameManagerStrategy} from "../../../../contracts/strategies/_poc/grant-ships/GameManagerStrategy.sol";
 import {GameManagerSetup} from "./GameManagerSetup.t.sol";
+import {GrantShipStrategy} from "./GrantShipStrategy.t.sol";
+
 import {IStrategy} from "../../../../contracts/core/interfaces/IStrategy.sol";
 import {ShipInitData} from "../../../../contracts/strategies/_poc/grant-ships/libraries/GrantShipShared.sol";
 
@@ -19,6 +21,10 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
     /// ===============================
 
     event RoundCreated(uint256 gameIndex, address token, uint256 totalRoundAmount);
+    event ApplicationRejected(address applicantAddress);
+    event ShipLaunched(
+        address shipAddress, uint256 shipPoolId, address applicantId, string shipName, Metadata metadata
+    );
 
     /// ===============================
     /// ========== State ==============
@@ -26,6 +32,8 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
 
     uint256 internal constant _gameAmount = 90_000e18;
     uint256 internal constant _shipAmount = 30_000e18;
+
+    GrantShipStrategy internal ship;
 
     function setUp() public {
         vm.createSelectFork({blockNumber: 166_807_779, urlOrAlias: "arbitrumOne"});
@@ -129,17 +137,55 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         vm.stopPrank();
     }
 
-    function testApproveApplicant() public {
+    function test_reviewApplicant_approve() public {
         address applicantId = register_create_approve();
 
         GameManagerStrategy.Applicant memory applicant = gameManager().getApplicant(applicantId);
 
+        // test applicant state
         assertEq(uint8(applicant.status), uint8(IStrategy.Status.Accepted));
+
+        // test ship state
+
+        // test recipient state
+        GameManagerStrategy.Recipient memory recipient = gameManager().getRecipient(applicantId);
+
+        assertEq(recipient.applicantAddress, applicantId);
+        assertEq(recipient.shipAddress, address(ship));
+        assertEq(recipient.shipPoolId, ship.getPoolId());
+        assertEq(recipient.grantAmount, 0);
+    }
+
+    function test_reviewApplicant_reject() public {
+        address applicantId = register_create_reject();
     }
 
     // ====================================
     // =========== Helpers ================
     // ====================================
+
+    function register_create_reject() internal returns (address applicantId) {
+        applicantId = _register_create_round();
+
+        address[] memory contractAsManager = new address[](1);
+        contractAsManager[0] = address(gameManager());
+        bytes32 profileId = registry().getProfileByAnchor(profile1_anchor()).id;
+
+        vm.startPrank(profile1_owner());
+        registry().addMembers(profileId, contractAsManager);
+        vm.stopPrank();
+
+        vm.expectEmit(true, true, true, true);
+        emit ApplicationRejected(applicantId);
+
+        vm.startPrank(facilitator().wearer);
+        gameManager().reviewApplicant(
+            applicantId,
+            IStrategy.Status.Rejected,
+            ShipInitData(true, true, true, "Ship Name", Metadata(1, "Ship 1"), team(0).wearer, shipOperator(0).id)
+        );
+        vm.stopPrank();
+    }
 
     function register_create_approve() internal returns (address applicantId) {
         applicantId = _register_create_round();
@@ -153,12 +199,14 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         vm.stopPrank();
 
         vm.startPrank(facilitator().wearer);
-        gameManager().reviewApplicant(
+        address payable shipAddress = gameManager().reviewApplicant(
             applicantId,
             IStrategy.Status.Accepted,
             ShipInitData(true, true, true, "Ship Name", Metadata(1, "Ship 1"), team(0).wearer, shipOperator(0).id)
         );
         vm.stopPrank();
+
+        ship = GrantShipStrategy(shipAddress);
     }
 
     function _register_create_round() internal returns (address applicantId) {
@@ -168,7 +216,7 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
 
         vm.startPrank(facilitator().wearer);
 
-        vm.expectEmit(false, false, false, false);
+        vm.expectEmit(true, true, true, true);
         emit RoundCreated(0, arbAddress, _gameAmount);
 
         gameManager().createRound(_gameAmount, arbAddress);

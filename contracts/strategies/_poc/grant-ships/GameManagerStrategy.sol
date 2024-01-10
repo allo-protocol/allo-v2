@@ -64,7 +64,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     }
 
     struct Recipient {
-        address recipientId;
+        address applicantAddress;
         address payable shipAddress;
         address payable previousAddress;
         uint256 shipPoolId;
@@ -86,8 +86,10 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     /// ===============================
 
     event RoundCreated(uint256 gameIndex, address token, uint256 totalRoundAmount);
-    event GrantShipApproved();
-    event GrantShipRejected();
+    event ShipLaunched(
+        address shipAddress, uint256 shipPoolId, address applicantId, string shipName, Metadata metadata
+    );
+    event ApplicationRejected(address applicantAddress);
 
     /// ===============================
     /// ========== Modifiers ==========
@@ -118,11 +120,11 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     // mapping(address => Recipient) public grantShipRecipients;
 
     ///@notice Mapping of all GrantShip Recipients
-    ///@dev 'shipAddress' to 'Recipient'
+    ///@dev 'applicantAddress' to 'Recipient'
     mapping(address => Recipient) public grantShips;
 
     //@notice Mapping of all ship applications
-    ///@dev 'recipientAddress' to 'Metadata'
+    ///@dev 'applicantAddress' to 'Applicant'
     mapping(address => Applicant) public applications;
 
     ///@notice Array of all Game Rounds
@@ -216,20 +218,25 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     function reviewApplicant(address _applicantAddress, Status _approvalFlag, ShipInitData memory shipInitData)
         external
         onlyGameFacilitator(msg.sender)
+        returns (address payable)
     {
         Applicant storage applicant = applications[_applicantAddress];
         GameRound storage currentRound = gameRounds[currentRoundIndex];
 
         if (currentRound.roundStatus != RoundStatus.Pending) revert INVALID_STATUS();
 
+        // check if there is a current round. If not, revert
+
         if (applicant.status != Status.Pending) revert INVALID_STATUS();
         if (_approvalFlag != Status.Accepted && _approvalFlag != Status.Rejected) revert INVALID_STATUS();
 
         if (_approvalFlag == Status.Accepted) {
             applicant.status = Status.Accepted;
-            _createShip(applicant, shipInitData, currentRound);
+            return _createShip(applicant, shipInitData, currentRound);
         } else {
             applicant.status = Status.Rejected;
+            emit ApplicationRejected(_applicantAddress);
+            return payable(address(0));
         }
     }
 
@@ -253,6 +260,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
 
     function _createShip(Applicant memory _applicant, ShipInitData memory _shipInitData, GameRound memory _currentRound)
         internal
+        returns (address payable)
     {
         // Deploy a new GrantShipStrategy contract
         GrantShipStrategy grantShip = new GrantShipStrategy(address(allo), _applicant.shipName);
@@ -284,6 +292,10 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         );
 
         grantShips[_applicant.applicantId] = newShipRecipient;
+
+        emit ShipLaunched(strategyAddress, shipPoolId, _applicant.applicantId, _applicant.shipName, _applicant.metadata);
+
+        return strategyAddress;
     }
 
     function rejectShips(address[] memory _shipAddresses) external onlyGameFacilitator(msg.sender) {
@@ -321,8 +333,16 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     /// ============ View ==================
     /// ====================================
 
-    function getApplicant(address _applicantId) public view returns (Applicant memory) {
-        return applications[_applicantId];
+    function getApplicant(address _applicantAddress) public view returns (Applicant memory) {
+        return applications[_applicantAddress];
+    }
+
+    function getShipAddress(address _applicantAddress) public view returns (address payable) {
+        return getRecipient(_applicantAddress).shipAddress;
+    }
+
+    function getRecipient(address _applicantAddress) public view returns (Recipient memory) {
+        return grantShips[_applicantAddress];
     }
 
     function getHatsAddress() public view returns (address) {
@@ -335,10 +355,6 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
 
     function isGameFacilitator(address _address) public view returns (bool) {
         return _hats.isWearerOfHat(_address, gameFacilitatorHatId);
-    }
-
-    function getShipAddress(uint256 _shipId) public view returns (address payable) {
-        // return grantShipRecipients[_shipId].shipAddress;
     }
 
     /// ====================================
