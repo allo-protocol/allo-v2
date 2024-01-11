@@ -30,19 +30,11 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     /// ========== Models ==============
     /// ================================
 
-    enum ShipStatus {
+    enum GameStatus {
         None,
         Pending,
         Accepted,
         Rejected,
-        Allocated,
-        Active,
-        Completed
-    }
-
-    enum RoundStatus {
-        None,
-        Pending,
         Allocated,
         Funded,
         Active,
@@ -54,7 +46,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         uint256 endTime;
         uint256 totalRoundAmount;
         address token;
-        RoundStatus roundStatus;
+        GameStatus GameStatus;
         address[] ships;
     }
 
@@ -75,7 +67,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         uint256 shipPoolId;
         uint256 grantAmount;
         Metadata metadata;
-        ShipStatus status;
+        GameStatus status;
     }
 
     /// ===============================
@@ -166,7 +158,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         _registry = _allo.getRegistry();
     }
 
-    function reviewRecipient(address recipientAddress, ShipStatus _approvalFlag, ShipInitData memory shipInitData)
+    function reviewRecipient(address recipientAddress, GameStatus _approvalFlag, ShipInitData memory shipInitData)
         external
         onlyGameFacilitator(msg.sender)
         returns (address payable)
@@ -174,18 +166,18 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         Recipient storage recipient = recipients[recipientAddress];
         GameRound storage currentRound = gameRounds[currentRoundIndex];
 
-        if (currentRound.roundStatus != RoundStatus.Pending) revert INVALID_STATUS();
+        if (currentRound.GameStatus != GameStatus.Pending) revert INVALID_STATUS();
 
         // check if there is a current round. If not, revert
 
-        if (recipient.status != ShipStatus.Pending) revert INVALID_STATUS();
-        if (_approvalFlag != ShipStatus.Accepted && _approvalFlag != ShipStatus.Rejected) revert INVALID_STATUS();
+        if (recipient.status != GameStatus.Pending) revert INVALID_STATUS();
+        if (_approvalFlag != GameStatus.Accepted && _approvalFlag != GameStatus.Rejected) revert INVALID_STATUS();
 
-        if (_approvalFlag == ShipStatus.Accepted) {
-            recipient.status = ShipStatus.Accepted;
+        if (_approvalFlag == GameStatus.Accepted) {
+            recipient.status = GameStatus.Accepted;
             return _createShip(recipient, shipInitData, currentRound);
         } else {
-            recipient.status = ShipStatus.Rejected;
+            recipient.status = GameStatus.Rejected;
             emit ApplicationRejected(recipientAddress);
             return payable(address(0));
         }
@@ -196,12 +188,11 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         onlyGameFacilitator(msg.sender)
         returns (uint256)
     {
-        if (gameRounds.length > 0 && gameRounds[currentRoundIndex].roundStatus != RoundStatus.None) {
+        if (gameRounds.length > 0 && gameRounds[currentRoundIndex].GameStatus != GameStatus.None) {
             revert INVALID_STATUS();
         }
 
-        GameRound memory round =
-            GameRound(0, 0, _totalRoundAmount, _tokenAddress, RoundStatus.Pending, new address[](0));
+        GameRound memory round = GameRound(0, 0, _totalRoundAmount, _tokenAddress, GameStatus.Pending, new address[](0));
 
         gameRounds.push(round);
 
@@ -236,7 +227,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
 
         recipient.shipPoolId = shipPoolId;
         recipient.shipAddress = strategyAddress;
-        recipient.status = ShipStatus.Accepted;
+        recipient.status = GameStatus.Accepted;
 
         emit ShipLaunched(
             strategyAddress, shipPoolId, _recipient.recipientAddress, _recipient.shipName, _recipient.metadata
@@ -254,7 +245,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         if (gameRounds.length == 0) revert ARRAY_MISMATCH();
         GameRound storage currentRound = gameRounds[currentRoundIndex];
         // checks that the current round is pending
-        if (currentRound.roundStatus != RoundStatus.Pending) revert INVALID_STATUS();
+        if (currentRound.GameStatus != GameStatus.Pending) revert INVALID_STATUS();
 
         // checks that the arrays are the same length
         if (_recipientIds.length != _amounts.length) revert ARRAY_MISMATCH();
@@ -264,7 +255,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         for (uint32 i; i < _recipientIds.length;) {
             Recipient storage recipient = recipients[_recipientIds[i]];
             // checks that the Recipient status is Accepted
-            if (recipient.status != ShipStatus.Accepted) revert INVALID_STATUS();
+            if (recipient.status != GameStatus.Accepted) revert INVALID_STATUS();
 
             address recipientAddress = _recipientIds[i];
             uint256 grantAmount = _amounts[i];
@@ -278,7 +269,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
             // adds the recipient to the current round
             currentRound.ships.push(recipientAddress);
             // sets the recipient status to Allocated
-            recipient.status = ShipStatus.Allocated;
+            recipient.status = GameStatus.Allocated;
 
             emit Allocated(recipientAddress, grantAmount, currentRound.token, _sender);
 
@@ -292,7 +283,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         // assigns the amount to the round round amount
         currentRound.totalRoundAmount = totalAllocated;
         // sets the round status to active
-        currentRound.roundStatus = RoundStatus.Allocated;
+        currentRound.GameStatus = GameStatus.Allocated;
     }
 
     function _distribute(address[] memory _recipientIds, bytes memory _data, address _sender)
@@ -310,16 +301,16 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         // Ensure funds have been added to the pool
         if (poolAmount < currentRound.totalRoundAmount) revert NOT_ENOUGH_FUNDS();
         // checks that the current round is pending
-        if (currentRound.roundStatus != RoundStatus.Allocated) revert INVALID_STATUS();
+        if (currentRound.GameStatus != GameStatus.Allocated) revert INVALID_STATUS();
 
         for (uint32 i; i < _recipientIds.length;) {
             Recipient storage recipient = recipients[_recipientIds[i]];
             // checks that the Recipient status is Allocated
-            if (recipient.status != ShipStatus.Allocated) revert INVALID_STATUS();
+            if (recipient.status != GameStatus.Allocated) revert INVALID_STATUS();
 
             poolAmount -= recipient.grantAmount;
 
-            recipient.status = ShipStatus.Active;
+            recipient.status = GameStatus.Active;
 
             GrantShipStrategy grantShip = GrantShipStrategy(recipient.shipAddress);
 
@@ -332,13 +323,11 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
             emit Distributed(recipient.recipientAddress, recipient.shipAddress, recipient.grantAmount, _sender);
         }
 
-        console.log(0);
-
         (uint256 startTime, uint256 endTime) = abi.decode(_data, (uint256, uint256));
 
         currentRound.startTime = startTime;
         currentRound.endTime = endTime;
-        currentRound.roundStatus = RoundStatus.Funded;
+        currentRound.GameStatus = GameStatus.Funded;
     }
 
     /// ====================================
@@ -389,7 +378,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         Recipient memory recipient = recipients[_anchorAddress];
 
         // Todo check what other statuses should be guarded against here
-        if (recipient.status == ShipStatus.Accepted) revert INVALID_STATUS();
+        if (recipient.status == GameStatus.Accepted) revert INVALID_STATUS();
 
         IRegistry.Profile memory profile = _registry.getProfileByAnchor(_anchorAddress);
 
@@ -400,7 +389,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         address payable _previousAddress = previousShipExists ? recipient.previousAddress : payable(address(0));
 
         recipients[_anchorAddress] = Recipient(
-            _anchorAddress, profile.id, _shipName, _shipAddress, _previousAddress, 0, 0, _metadata, ShipStatus.Pending
+            _anchorAddress, profile.id, _shipName, _shipAddress, _previousAddress, 0, 0, _metadata, GameStatus.Pending
         );
 
         emit Registered(_anchorAddress, _data, _sender);
@@ -408,12 +397,14 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     }
 
     function _getRecipientStatus(address recipientAddress) internal view virtual override returns (Status) {
-        Recipient memory grantShipRecipient = grantShipRecipients[recipientAddress];
-        return grantShipRecipient.recipientStatus;
+        // Recipient memory recipient = recipients[recipientAddress];
+        // return recipient.status;
+
+        return Status.None;
     }
 
     function _getPayout(address _recipientId, bytes memory) internal view override returns (PayoutSummary memory) {
-        Recipient memory shipRecipient = getGrantShipRecipient(_recipientId);
+        Recipient memory shipRecipient = getRecipient(_recipientId);
         return PayoutSummary(address(shipRecipient.shipAddress), shipRecipient.grantAmount);
     }
 

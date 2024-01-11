@@ -138,7 +138,7 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
 
             vm.startPrank(facilitator().wearer);
             address payable shipAddress =
-                gameManager().reviewRecipient(profileAnchor, GameManagerStrategy.ShipStatus.Accepted, _shipSetupData[i]);
+                gameManager().reviewRecipient(profileAnchor, GameManagerStrategy.GameStatus.Accepted, _shipSetupData[i]);
             vm.stopPrank();
 
             _ships.push(GrantShipStrategy(shipAddress));

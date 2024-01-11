@@ -67,7 +67,7 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
     //         assertTrue(gameManager().currentRoundId() == 0);
     //         assertTrue(gameManager().currentRoundStartTime() == 0);
     //         assertTrue(gameManager().currentRoundEndTime() == 0);
-    //         assertTrue(gameManager().currentRoundStatus() == IStrategy.Status.None);
+    //         assertTrue(gameManager().currentGameStatus() == IStrategy.Status.None);
     //         assertTrue(gameManager().token() == address(arbToken));
     //         assertTrue(gameManager().gameFacilitatorHatId() == facilitator().id);
     //     }
