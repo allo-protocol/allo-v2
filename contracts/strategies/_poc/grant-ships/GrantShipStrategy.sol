@@ -571,8 +571,6 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// @dev 'msg.sender' must be a pool manager to withdraw funds.
     /// @param _amount The amount to be withdrawn
     function withdraw(uint256 _amount) external onlyGameFacilitator(msg.sender) onlyInactivePool {
-        // Decrement the pool amount\
-
         if (_amount > poolAmount) {
             revert NOT_ENOUGH_FUNDS();
         }
@@ -583,7 +581,6 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         _transferAmount(allo.getPool(poolId).token, address(_gameManager), _amount);
 
         // Emit event for the withdrawal
-
         emit PoolWithdraw(_amount);
     }
 

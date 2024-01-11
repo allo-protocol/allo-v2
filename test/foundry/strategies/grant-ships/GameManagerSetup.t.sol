@@ -38,7 +38,7 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
 
     /////////////////GAME TOKEN/////////////////
     IERC20 public arbToken = IERC20(0x912CE59144191C1204E64559FE8253a0e49E6548);
-    uint256 internal arbAmount = 90_000e18;
+    uint256 internal gameAmount = 90_000e18;
 
     // Binance Hot Wallet on Arbitrum.
     // EOA with lots of ARB for testing live
@@ -101,7 +101,7 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
 
     function __registerShips() internal {
         vm.startPrank(facilitator().wearer);
-        gameManager().createRound(arbAmount, address(ARB()));
+        gameManager().createRound(gameAmount, address(ARB()));
         vm.stopPrank();
 
         for (uint32 i = 0; i < 3;) {

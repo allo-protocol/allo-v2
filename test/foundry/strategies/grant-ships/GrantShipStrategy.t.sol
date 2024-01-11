@@ -83,857 +83,859 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
 
     //     // ================= GrantShip Strategy =====================
 
-    //     function test_postUpdate() public {
-    //         string memory tag = "test";
-    //         Metadata memory metadata = Metadata(1, "Posting Update!");
+    function test_postUpdate() public {
+        string memory tag = "test";
+        Metadata memory metadata = Metadata(1, "Posting Update!");
 
-    //         address notRecipientId = address(0);
+        address notRecipientId = address(0);
 
-    //         // Game Facilitator posts an update
+        // Game Facilitator posts an update
 
-    //         vm.expectEmit(true, true, true, true);
-    //         emit UpdatePosted(tag, GrantShipStrategy.RoleType.GameFacilitator, notRecipientId, metadata);
+        vm.expectEmit(true, true, true, true);
+        emit UpdatePosted(tag, GrantShipStrategy.RoleType.GameFacilitator, notRecipientId, metadata);
 
-    //         vm.startPrank(facilitator().wearer);
-    //         ship(1).postUpdate(tag, metadata, notRecipientId);
-    //         vm.stopPrank();
+        vm.startPrank(facilitator().wearer);
+        ship(1).postUpdate(tag, metadata, notRecipientId);
+        vm.stopPrank();
 
-    //         // Recipient posts an update
+        // Recipient posts an update
 
-    //         vm.expectEmit(true, true, true, true);
-    //         emit UpdatePosted(tag, GrantShipStrategy.RoleType.Recipient, profile1_anchor(), metadata);
+        vm.expectEmit(true, true, true, true);
+        emit UpdatePosted(tag, GrantShipStrategy.RoleType.Recipient, profile1_anchor(), metadata);
 
-    //         vm.startPrank(profile1_member1());
-    //         ship(1).postUpdate(tag, metadata, profile1_anchor());
-    //         vm.stopPrank();
+        vm.startPrank(profile1_member1());
+        ship(1).postUpdate(tag, metadata, profile1_anchor());
+        vm.stopPrank();
 
-    //         // Ship Operator posts an update
+        // Ship Operator posts an update
 
-    //         vm.expectEmit(true, true, true, true);
-    //         emit UpdatePosted(tag, GrantShipStrategy.RoleType.ShipOperator, notRecipientId, metadata);
+        vm.expectEmit(true, true, true, true);
+        emit UpdatePosted(tag, GrantShipStrategy.RoleType.ShipOperator, notRecipientId, metadata);
 
-    //         vm.startPrank(shipOperator(1).wearer);
-    //         ship(1).postUpdate(tag, metadata, notRecipientId);
-    //         vm.stopPrank();
-    //     }
+        vm.startPrank(shipOperator(1).wearer);
+        ship(1).postUpdate(tag, metadata, notRecipientId);
+        vm.stopPrank();
+    }
 
-    //     function testRevert_postUpdate_UNAUTHORIZED() public {
-    //         string memory tag = "test";
-    //         Metadata memory metadata = Metadata(1, "Posting Update!");
+    function testRevert_postUpdate_UNAUTHORIZED() public {
+        string memory tag = "test";
+        Metadata memory metadata = Metadata(1, "Posting Update!");
 
-    //         address notRecipientId = address(0);
+        address notRecipientId = address(0);
 
-    //         // Random tries to post an update
+        // Random tries to post an update
 
-    //         vm.expectRevert(UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
 
-    //         vm.startPrank(randomAddress());
-    //         ship(1).postUpdate(tag, metadata, notRecipientId);
-    //         vm.stopPrank();
+        vm.startPrank(randomAddress());
+        ship(1).postUpdate(tag, metadata, notRecipientId);
+        vm.stopPrank();
 
-    //         // Recipient tries to post an update for another recipient
+        // Recipient tries to post an update for another recipient
 
-    //         vm.expectRevert(UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
 
-    //         vm.startPrank(profile1_member1());
-    //         ship(1).postUpdate(tag, metadata, profile2_anchor());
-    //         vm.stopPrank();
+        vm.startPrank(profile1_member1());
+        ship(1).postUpdate(tag, metadata, profile2_anchor());
+        vm.stopPrank();
 
-    //         // Ship Operator tries to post an update for another recipient
+        // Ship Operator tries to post an update for another recipient
 
-    //         vm.expectRevert(UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
 
-    //         vm.startPrank(shipOperator(1).wearer);
-    //         ship(1).postUpdate(tag, metadata, profile2_anchor());
-    //         vm.stopPrank();
+        vm.startPrank(shipOperator(1).wearer);
+        ship(1).postUpdate(tag, metadata, profile2_anchor());
+        vm.stopPrank();
 
-    //         // Ship Operator tries to post an update with a non-zero recipientId
+        // Ship Operator tries to post an update with a non-zero recipientId
 
-    //         vm.expectRevert(UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
 
-    //         vm.startPrank(shipOperator(1).wearer);
-    //         ship(1).postUpdate(tag, metadata, randomAddress());
-    //         vm.stopPrank();
-    //     }
+        vm.startPrank(shipOperator(1).wearer);
+        ship(1).postUpdate(tag, metadata, randomAddress());
+        vm.stopPrank();
+    }
 
-    //     function test_isValidAllocator() public {
-    //         assertTrue(ship(0).isValidAllocator(facilitator().wearer));
-    //         assertTrue(ship(1).isValidAllocator(facilitator().wearer));
-    //         assertTrue(ship(2).isValidAllocator(facilitator().wearer));
+    function test_isValidAllocator() public {
+        assertTrue(ship(0).isValidAllocator(facilitator().wearer));
+        assertTrue(ship(1).isValidAllocator(facilitator().wearer));
+        assertTrue(ship(2).isValidAllocator(facilitator().wearer));
 
-    //         assertFalse(ship(0).isValidAllocator(randomAddress()));
-    //         assertFalse(ship(1).isValidAllocator(shipOperator(0).wearer));
-    //         assertFalse(ship(2).isValidAllocator(team(0).wearer));
-    //     }
+        assertFalse(ship(0).isValidAllocator(randomAddress()));
+        assertFalse(ship(1).isValidAllocator(shipOperator(0).wearer));
+        assertFalse(ship(2).isValidAllocator(team(0).wearer));
+    }
 
-    //     function test_registerRecipient() public {
-    //         address recipientId = _register_recipient();
+    function test_registerRecipient() public {
+        address recipientId = _register_recipient();
 
-    //         GrantShipStrategy.Recipient memory recipient = ship(1).getRecipient(profile1_anchor());
+        GrantShipStrategy.Recipient memory recipient = ship(1).getRecipient(profile1_anchor());
 
-    //         assertTrue(recipient.recipientAddress == recipient1());
-    //         assertTrue(recipient.grantAmount == _grantAmount);
-    //         assertTrue(keccak256(abi.encode(recipient.metadata.pointer)) == keccak256(abi.encode("team recipient 1")));
-    //         assertTrue(recipient.metadata.protocol == 1);
-    //         assertTrue(recipient.recipientStatus == IStrategy.Status.Pending);
-    //         assertTrue(recipient.milestonesReviewStatus == IStrategy.Status.Pending);
-    //         assertTrue(recipient.useRegistryAnchor);
+        assertTrue(recipient.recipientAddress == recipient1());
+        assertTrue(recipient.grantAmount == _grantAmount);
+        assertTrue(keccak256(abi.encode(recipient.metadata.pointer)) == keccak256(abi.encode("team recipient 1")));
+        assertTrue(recipient.metadata.protocol == 1);
+        assertTrue(recipient.recipientStatus == IStrategy.Status.Pending);
+        assertTrue(recipient.milestonesReviewStatus == IStrategy.Status.Pending);
+        assertTrue(recipient.useRegistryAnchor);
 
-    //         IStrategy.Status status = ship(1).getRecipientStatus(recipientId);
-    //         assertTrue(uint8(status) == uint8(IStrategy.Status.Pending));
-    //     }
+        IStrategy.Status status = ship(1).getRecipientStatus(recipientId);
+        assertTrue(uint8(status) == uint8(IStrategy.Status.Pending));
+    }
 
-    //     function testRevert_registerRecipient_UNAUTHORIZED() public {
-    //         address recipientId = profile1_anchor();
-    //         address recipientAddress = recipient1();
-    //         address sender = profile2_member1(); // wrong sender
-    //         uint256 grantAmount = _grantAmount;
-    //         Metadata memory metadata = Metadata(1, "recipient-data");
+    function testRevert_registerRecipient_UNAUTHORIZED() public {
+        address recipientId = profile1_anchor();
+        address recipientAddress = recipient1();
+        address sender = profile2_member1(); // wrong sender
+        uint256 grantAmount = _grantAmount;
+        Metadata memory metadata = Metadata(1, "recipient-data");
 
-    //         bytes memory data = abi.encode(recipientId, recipientAddress, grantAmount, metadata);
-    //         vm.startPrank(address(allo()));
+        bytes memory data = abi.encode(recipientId, recipientAddress, grantAmount, metadata);
+        vm.startPrank(address(allo()));
 
-    //         vm.expectRevert(UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
 
-    //         ship(1).registerRecipient(data, sender);
-    //         vm.stopPrank();
-    //     }
+        ship(1).registerRecipient(data, sender);
+        vm.stopPrank();
+    }
 
-    //     function testRevert_registerRecipient_RECIPIENT_ALREADY_ACCEPTED() public {
-    //         address recipientId = _register_recipient_allocate_accept();
-    //         recipientId = profile1_anchor();
-    //         address recipientAddress = recipient1();
-    //         address sender = profile1_member1();
-    //         uint256 grantAmount = _grantAmount;
-    //         Metadata memory metadata = Metadata(1, "recipient-data");
+    function testRevert_registerRecipient_RECIPIENT_ALREADY_ACCEPTED() public {
+        address recipientId = _register_recipient_allocate_accept();
+        recipientId = profile1_anchor();
+        address recipientAddress = recipient1();
+        address sender = profile1_member1();
+        uint256 grantAmount = _grantAmount;
+        Metadata memory metadata = Metadata(1, "recipient-data");
 
-    //         bytes memory data = abi.encode(recipientId, recipientAddress, grantAmount, metadata);
+        bytes memory data = abi.encode(recipientId, recipientAddress, grantAmount, metadata);
 
-    //         vm.startPrank(address(allo()));
+        vm.startPrank(address(allo()));
 
-    //         vm.expectRevert(RECIPIENT_ALREADY_ACCEPTED.selector);
+        vm.expectRevert(RECIPIENT_ALREADY_ACCEPTED.selector);
 
-    //         ship(1).registerRecipient(data, sender);
-    //         vm.stopPrank();
-    //     }
+        ship(1).registerRecipient(data, sender);
+        vm.stopPrank();
+    }
 
-    //     function test_getPayouts() public {
-    //         address recipientId = _register_recipient_allocate_accept();
-    //         address[] memory recipients = new address[](2);
-    //         recipients[0] = recipientId;
-    //         recipients[1] = randomAddress();
+    function test_getPayouts() public {
+        address recipientId = _register_recipient_allocate_accept();
+        address[] memory recipients = new address[](2);
+        recipients[0] = recipientId;
+        recipients[1] = randomAddress();
 
-    //         bytes[] memory data = new bytes[](2);
+        bytes[] memory data = new bytes[](2);
 
-    //         IStrategy.PayoutSummary[] memory payouts = ship(1).getPayouts(recipients, data);
-    //         assertTrue(payouts[0].amount == _grantAmount);
-    //         assertTrue(payouts[0].recipientAddress == recipient1());
+        IStrategy.PayoutSummary[] memory payouts = ship(1).getPayouts(recipients, data);
+        assertTrue(payouts[0].amount == _grantAmount);
+        assertTrue(payouts[0].recipientAddress == recipient1());
 
-    //         assertTrue(payouts[1].amount == 0);
-    //         assertTrue(payouts[1].recipientAddress == address(0));
-    //     }
+        assertTrue(payouts[1].amount == 0);
+        assertTrue(payouts[1].recipientAddress == address(0));
+    }
 
-    //     function test_setRecipientStatusToInReview_by_operator() public {
-    //         address recipientId = _register_recipient();
+    function test_setRecipientStatusToInReview_by_operator() public {
+        address recipientId = _register_recipient();
 
-    //         address[] memory recipients = new address[](1);
-    //         recipients[0] = recipientId;
+        address[] memory recipients = new address[](1);
+        recipients[0] = recipientId;
 
-    //         vm.expectEmit(true, true, true, true);
-    //         emit RecipientStatusChanged(recipientId, IStrategy.Status.InReview);
+        vm.expectEmit(true, true, true, true);
+        emit RecipientStatusChanged(recipientId, IStrategy.Status.InReview);
 
-    //         vm.startPrank(shipOperator(1).wearer);
-    //         ship(1).setRecipientStatusToInReview(recipients);
-    //         IStrategy.Status status = ship(1).getRecipientStatus(recipientId);
+        vm.startPrank(shipOperator(1).wearer);
+        ship(1).setRecipientStatusToInReview(recipients);
+        IStrategy.Status status = ship(1).getRecipientStatus(recipientId);
 
-    //         assertTrue(uint8(status) == uint8(IStrategy.Status.InReview));
+        assertTrue(uint8(status) == uint8(IStrategy.Status.InReview));
 
-    //         vm.stopPrank();
-    //     }
+        vm.stopPrank();
+    }
 
-    //     function test_setRecipientStatusToInReview_by_facilitator() public {
-    //         address recipientId = _register_recipient();
+    function test_setRecipientStatusToInReview_by_facilitator() public {
+        address recipientId = _register_recipient();
 
-    //         address[] memory recipients = new address[](1);
-    //         recipients[0] = recipientId;
+        address[] memory recipients = new address[](1);
+        recipients[0] = recipientId;
 
-    //         vm.expectEmit(true, true, true, true);
-    //         emit RecipientStatusChanged(recipientId, IStrategy.Status.InReview);
+        vm.expectEmit(true, true, true, true);
+        emit RecipientStatusChanged(recipientId, IStrategy.Status.InReview);
 
-    //         vm.startPrank(facilitator().wearer);
-    //         ship(1).setRecipientStatusToInReview(recipients);
-    //         IStrategy.Status status = ship(1).getRecipientStatus(recipientId);
+        vm.startPrank(facilitator().wearer);
+        ship(1).setRecipientStatusToInReview(recipients);
+        IStrategy.Status status = ship(1).getRecipientStatus(recipientId);
 
-    //         assertTrue(uint8(status) == uint8(IStrategy.Status.InReview));
+        assertTrue(uint8(status) == uint8(IStrategy.Status.InReview));
 
-    //         vm.stopPrank();
-    //     }
+        vm.stopPrank();
+    }
 
-    //     function testRevert_setRecipientStatusToInReview_UNAUTHORIZED() public {
-    //         address recipientId = _register_recipient();
+    function testRevert_setRecipientStatusToInReview_UNAUTHORIZED() public {
+        address recipientId = _register_recipient();
 
-    //         address[] memory recipients = new address[](1);
-    //         recipients[0] = recipientId;
+        address[] memory recipients = new address[](1);
+        recipients[0] = recipientId;
 
-    //         vm.expectRevert(UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
 
-    //         vm.startPrank(randomAddress());
-    //         ship(1).setRecipientStatusToInReview(recipients);
+        vm.startPrank(randomAddress());
+        ship(1).setRecipientStatusToInReview(recipients);
 
-    //         vm.stopPrank();
-    //     }
+        vm.stopPrank();
+    }
 
-    //     function test_setPoolActive() public {
-    //         vm.expectEmit(true, true, true, true);
-    //         emit PoolActive(true);
+    function test_setPoolActive() public {
+        vm.expectEmit(true, true, true, true);
+        emit PoolActive(true);
 
-    //         vm.startPrank(facilitator().wearer);
-    //         ship(1).setPoolActive(true);
-    //         assertTrue(ship(1).isPoolActive());
+        vm.startPrank(facilitator().wearer);
+        ship(1).setPoolActive(true);
+        assertTrue(ship(1).isPoolActive());
 
-    //         vm.expectEmit(true, true, true, true);
-    //         emit PoolActive(false);
+        vm.expectEmit(true, true, true, true);
+        emit PoolActive(false);
 
-    //         vm.startPrank(facilitator().wearer);
-    //         ship(1).setPoolActive(false);
-    //         assertFalse(ship(1).isPoolActive());
+        vm.startPrank(facilitator().wearer);
+        ship(1).setPoolActive(false);
+        assertFalse(ship(1).isPoolActive());
 
-    //         vm.stopPrank();
-    //     }
+        vm.stopPrank();
+    }
 
-    //     function testRevert_setPoolActive_UNAUTHORIZED() public {
-    //         vm.expectRevert(UNAUTHORIZED.selector);
+    function testRevert_setPoolActive_UNAUTHORIZED() public {
+        vm.expectRevert(UNAUTHORIZED.selector);
 
-    //         vm.startPrank(shipOperator(1).wearer);
-    //         ship(1).setPoolActive(true);
-    //         vm.stopPrank();
+        vm.startPrank(shipOperator(1).wearer);
+        ship(1).setPoolActive(true);
+        vm.stopPrank();
 
-    //         vm.expectRevert(UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
 
-    //         vm.startPrank(randomAddress());
-    //         ship(1).setPoolActive(false);
-    //         vm.stopPrank();
-    //     }
+        vm.startPrank(randomAddress());
+        ship(1).setPoolActive(false);
+        vm.stopPrank();
+    }
 
-    //     function test_allocate_accept() public {
-    //         address recipientId = _register_recipient_allocate_accept();
-    //         assertEq(ship(1).allocatedGrantAmount(), _grantAmount);
+    function test_allocate_accept() public {
+        address recipientId = _register_recipient_allocate_accept();
+        assertEq(ship(1).allocatedGrantAmount(), _grantAmount);
 
-    //         GrantShipStrategy.Recipient memory recipient = ship(1).getRecipient(recipientId);
+        GrantShipStrategy.Recipient memory recipient = ship(1).getRecipient(recipientId);
 
-    //         assertTrue(recipient.grantAmount == _grantAmount);
-    //         assertTrue(recipient.recipientStatus == IStrategy.Status.Accepted);
-    //     }
+        assertTrue(recipient.grantAmount == _grantAmount);
+        assertTrue(recipient.recipientStatus == IStrategy.Status.Accepted);
+    }
 
-    //     function test_allocate_reject() public {
-    //         address recipientId = _register_recipient_allocate_reject();
+    function test_allocate_reject() public {
+        address recipientId = _register_recipient_allocate_reject();
 
-    //         GrantShipStrategy.Status recipientStatus = ship(1).getRecipientStatus(recipientId);
+        GrantShipStrategy.Status recipientStatus = ship(1).getRecipientStatus(recipientId);
 
-    //         assertEq(uint8(recipientStatus), uint8(IStrategy.Status.Rejected));
-    //     }
+        assertEq(uint8(recipientStatus), uint8(IStrategy.Status.Rejected));
+    }
 
-    //     function testRevert_allocate_ALLOCATION_EXCEEDS_POOL_AMOUNT() public {
-    //         address recipientId = _register_recipient();
-    //         GrantShipStrategy.Status recipientStatus = IStrategy.Status.Accepted;
-    //         uint256 grantAmount = _poolAmount + 5_000e18;
+    function testRevert_allocate_ALLOCATION_EXCEEDS_POOL_AMOUNT() public {
+        address recipientId = _register_recipient();
+        GrantShipStrategy.Status recipientStatus = IStrategy.Status.Accepted;
+        uint256 grantAmount = _poolAmount + 5_000e18;
 
-    //         bytes memory data = abi.encode(recipientId, recipientStatus, grantAmount);
+        bytes memory data = abi.encode(recipientId, recipientStatus, grantAmount);
 
-    //         vm.expectRevert(GrantShipStrategy.ALLOCATION_EXCEEDS_POOL_AMOUNT.selector);
+        vm.expectRevert(GrantShipStrategy.ALLOCATION_EXCEEDS_POOL_AMOUNT.selector);
 
-    //         vm.startPrank(address(allo()));
-    //         ship(1).allocate(data, facilitator().wearer);
-    //         vm.stopPrank();
-    //     }
+        vm.startPrank(address(allo()));
+        ship(1).allocate(data, facilitator().wearer);
+        vm.stopPrank();
+    }
 
-    //     function testRevert_allocate_MILESTONES_ALREADY_SET() public {
-    //         address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones_distribute();
+    function testRevert_allocate_MILESTONES_ALREADY_SET() public {
+        address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones_distribute();
 
-    //         GrantShipStrategy.Status recipientStatus = IStrategy.Status.Accepted;
-    //         uint256 grantAmount = _grantAmount;
+        GrantShipStrategy.Status recipientStatus = IStrategy.Status.Accepted;
+        uint256 grantAmount = _grantAmount;
 
-    //         bytes memory data = abi.encode(recipientId, recipientStatus, grantAmount);
+        bytes memory data = abi.encode(recipientId, recipientStatus, grantAmount);
 
-    //         vm.expectRevert(GrantShipStrategy.MILESTONES_ALREADY_SET.selector);
+        vm.expectRevert(GrantShipStrategy.MILESTONES_ALREADY_SET.selector);
 
-    //         vm.startPrank(address(allo()));
-    //         ship(1).allocate(data, facilitator().wearer);
-    //         vm.stopPrank();
-    //     }
+        vm.startPrank(address(allo()));
+        ship(1).allocate(data, facilitator().wearer);
+        vm.stopPrank();
+    }
 
-    //     function test_setMilestonesByShipOperator() public {
-    //         address recipientId = _register_recipient_allocate_accept_set_milestones_by_ship_operator();
+    function test_setMilestonesByShipOperator() public {
+        address recipientId = _register_recipient_allocate_accept_set_milestones_by_ship_operator();
 
-    //         IStrategy.Status milestoneStatus1 = ship(1).getMilestoneStatus(recipientId, 0);
-    //         IStrategy.Status milestoneStatus2 = ship(1).getMilestoneStatus(recipientId, 1);
+        IStrategy.Status milestoneStatus1 = ship(1).getMilestoneStatus(recipientId, 0);
+        IStrategy.Status milestoneStatus2 = ship(1).getMilestoneStatus(recipientId, 1);
 
-    //         assertEq(uint8(milestoneStatus1), uint8(IStrategy.Status.None));
-    //         assertEq(uint8(milestoneStatus2), uint8(IStrategy.Status.None));
+        assertEq(uint8(milestoneStatus1), uint8(IStrategy.Status.None));
+        assertEq(uint8(milestoneStatus2), uint8(IStrategy.Status.None));
 
-    //         GrantShipStrategy.Recipient memory recipient = ship(1).getRecipient(profile1_anchor());
-    //         assertEq(uint8(recipient.milestonesReviewStatus), uint8(IStrategy.Status.Accepted));
-    //     }
+        GrantShipStrategy.Recipient memory recipient = ship(1).getRecipient(profile1_anchor());
+        assertEq(uint8(recipient.milestonesReviewStatus), uint8(IStrategy.Status.Accepted));
+    }
 
-    //     function test_setMilestonesByRecipient() public {
-    //         address recipientId = _register_recipient_allocate_accept_set_milestones_by_recipient();
+    function test_setMilestonesByRecipient() public {
+        address recipientId = _register_recipient_allocate_accept_set_milestones_by_recipient();
 
-    //         IStrategy.Status milestoneStatus1 = ship(1).getMilestoneStatus(recipientId, 0);
-    //         IStrategy.Status milestoneStatus2 = ship(1).getMilestoneStatus(recipientId, 1);
+        IStrategy.Status milestoneStatus1 = ship(1).getMilestoneStatus(recipientId, 0);
+        IStrategy.Status milestoneStatus2 = ship(1).getMilestoneStatus(recipientId, 1);
 
-    //         assertEq(uint8(milestoneStatus1), uint8(IStrategy.Status.None));
-    //         assertEq(uint8(milestoneStatus2), uint8(IStrategy.Status.None));
+        assertEq(uint8(milestoneStatus1), uint8(IStrategy.Status.None));
+        assertEq(uint8(milestoneStatus2), uint8(IStrategy.Status.None));
 
-    //         GrantShipStrategy.Recipient memory recipient = ship(1).getRecipient(profile1_anchor());
-    //         assertEq(uint8(recipient.milestonesReviewStatus), uint8(IStrategy.Status.Pending));
-    //     }
+        GrantShipStrategy.Recipient memory recipient = ship(1).getRecipient(profile1_anchor());
+        assertEq(uint8(recipient.milestonesReviewStatus), uint8(IStrategy.Status.Pending));
+    }
 
-    //     function testRevert_setMilestones_UNAUTHORIZED() public {
-    //         address recipientId = _register_recipient_allocate_accept();
-    //         GrantShipStrategy.Milestone[] memory milestones = new GrantShipStrategy.Milestone[](2);
-    //         milestones[0] = GrantShipStrategy.Milestone({
-    //             amountPercentage: 0.3e18,
-    //             metadata: Metadata(1, "milestone-1"),
-    //             milestoneStatus: IStrategy.Status.None
-    //         });
+    function testRevert_setMilestones_UNAUTHORIZED() public {
+        address recipientId = _register_recipient_allocate_accept();
+        GrantShipStrategy.Milestone[] memory milestones = new GrantShipStrategy.Milestone[](2);
+        milestones[0] = GrantShipStrategy.Milestone({
+            amountPercentage: 0.3e18,
+            metadata: Metadata(1, "milestone-1"),
+            milestoneStatus: IStrategy.Status.None
+        });
 
-    //         milestones[1] = GrantShipStrategy.Milestone({
-    //             amountPercentage: 0.7e18,
-    //             metadata: Metadata(1, "milestone-2"),
-    //             milestoneStatus: IStrategy.Status.None
-    //         });
+        milestones[1] = GrantShipStrategy.Milestone({
+            amountPercentage: 0.7e18,
+            metadata: Metadata(1, "milestone-2"),
+            milestoneStatus: IStrategy.Status.None
+        });
 
-    //         vm.expectRevert(UNAUTHORIZED.selector);
-    //         vm.startPrank(randomAddress());
-    //         ship(1).setMilestones(recipientId, milestones);
-    //         vm.stopPrank();
-    //     }
+        vm.expectRevert(UNAUTHORIZED.selector);
+        vm.startPrank(randomAddress());
+        ship(1).setMilestones(recipientId, milestones);
+        vm.stopPrank();
+    }
 
-    //     function test_reviewSetMilestones() public {
-    //         address recipientId = _register_recipient_allocate_accept_set_milestones_by_recipient();
-    //         GrantShipStrategy.Recipient memory recipient = ship(1).getRecipient(profile1_anchor());
+    function test_reviewSetMilestones() public {
+        address recipientId = _register_recipient_allocate_accept_set_milestones_by_recipient();
+        GrantShipStrategy.Recipient memory recipient = ship(1).getRecipient(profile1_anchor());
 
-    //         assertEq(uint8(recipient.milestonesReviewStatus), uint8(IStrategy.Status.Pending));
+        assertEq(uint8(recipient.milestonesReviewStatus), uint8(IStrategy.Status.Pending));
 
-    //         vm.expectEmit(true, true, true, true);
-    //         emit MilestonesReviewed(recipientId, IStrategy.Status.Rejected);
+        vm.expectEmit(true, true, true, true);
+        emit MilestonesReviewed(recipientId, IStrategy.Status.Rejected);
 
-    //         vm.startPrank(shipOperator(1).wearer);
-    //         ship(1).reviewSetMilestones(recipientId, IStrategy.Status.Rejected);
-    //         vm.stopPrank();
+        vm.startPrank(shipOperator(1).wearer);
+        ship(1).reviewSetMilestones(recipientId, IStrategy.Status.Rejected);
+        vm.stopPrank();
 
-    //         recipient = ship(1).getRecipient(profile1_anchor());
-    //         assertEq(uint8(recipient.milestonesReviewStatus), uint8(IStrategy.Status.Rejected));
+        recipient = ship(1).getRecipient(profile1_anchor());
+        assertEq(uint8(recipient.milestonesReviewStatus), uint8(IStrategy.Status.Rejected));
 
-    //         vm.startPrank(shipOperator(1).wearer);
+        vm.startPrank(shipOperator(1).wearer);
 
-    //         vm.expectEmit(true, true, true, true);
-    //         emit MilestonesReviewed(recipientId, IStrategy.Status.Accepted);
+        vm.expectEmit(true, true, true, true);
+        emit MilestonesReviewed(recipientId, IStrategy.Status.Accepted);
 
-    //         ship(1).reviewSetMilestones(recipientId, IStrategy.Status.Accepted);
-    //         vm.stopPrank();
+        ship(1).reviewSetMilestones(recipientId, IStrategy.Status.Accepted);
+        vm.stopPrank();
 
-    //         recipient = ship(1).getRecipient(profile1_anchor());
-    //         assertEq(uint8(recipient.milestonesReviewStatus), uint8(IStrategy.Status.Accepted));
-    //     }
+        recipient = ship(1).getRecipient(profile1_anchor());
+        assertEq(uint8(recipient.milestonesReviewStatus), uint8(IStrategy.Status.Accepted));
+    }
 
-    //     function testRevert_reviewSetMilestones_UNAUTHORIZED() public {
-    //         address recipientId = _register_recipient_allocate_accept_set_milestones_by_recipient();
+    function testRevert_reviewSetMilestones_UNAUTHORIZED() public {
+        address recipientId = _register_recipient_allocate_accept_set_milestones_by_recipient();
 
-    //         vm.startPrank(shipOperator(1).wearer);
-    //         ship(1).reviewSetMilestones(recipientId, IStrategy.Status.Accepted);
-    //         vm.stopPrank();
+        vm.startPrank(shipOperator(1).wearer);
+        ship(1).reviewSetMilestones(recipientId, IStrategy.Status.Accepted);
+        vm.stopPrank();
 
-    //         vm.expectRevert(UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
 
-    //         vm.startPrank(randomAddress());
-    //         ship(1).reviewSetMilestones(recipientId, IStrategy.Status.Rejected);
-    //         vm.stopPrank();
-    //     }
+        vm.startPrank(randomAddress());
+        ship(1).reviewSetMilestones(recipientId, IStrategy.Status.Rejected);
+        vm.stopPrank();
+    }
 
-    //     function testRevert_reviewSetMilestones_MILESTONES_ALREADY_SET() public {
-    //         address recipientId = _register_recipient_allocate_accept_set_milestones_by_ship_operator();
+    function testRevert_reviewSetMilestones_MILESTONES_ALREADY_SET() public {
+        address recipientId = _register_recipient_allocate_accept_set_milestones_by_ship_operator();
 
-    //         vm.expectRevert(GrantShipStrategy.MILESTONES_ALREADY_SET.selector);
-    //         vm.startPrank(shipOperator(1).wearer);
-    //         ship(1).reviewSetMilestones(recipientId, IStrategy.Status.Rejected);
-    //         vm.stopPrank();
-    //     }
+        vm.expectRevert(GrantShipStrategy.MILESTONES_ALREADY_SET.selector);
+        vm.startPrank(shipOperator(1).wearer);
+        ship(1).reviewSetMilestones(recipientId, IStrategy.Status.Rejected);
+        vm.stopPrank();
+    }
 
-    //     function testRevert_reviewSetMilestones_INVALID_MILESTONE() public {
-    //         address recipientId = _register_recipient_allocate_accept();
-    //         vm.startPrank(shipOperator(1).wearer);
-    //         vm.expectRevert(GrantShipStrategy.INVALID_MILESTONE.selector);
-    //         ship(1).reviewSetMilestones(recipientId, IStrategy.Status.Rejected);
-    //         vm.stopPrank();
-    //     }
+    function testRevert_reviewSetMilestones_INVALID_MILESTONE() public {
+        address recipientId = _register_recipient_allocate_accept();
+        vm.startPrank(shipOperator(1).wearer);
+        vm.expectRevert(GrantShipStrategy.INVALID_MILESTONE.selector);
+        ship(1).reviewSetMilestones(recipientId, IStrategy.Status.Rejected);
+        vm.stopPrank();
+    }
 
-    //     function testRevert_setMilestones_MILESTONES_ALREADY_SET() public {
-    //         address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones_distribute();
+    function testRevert_setMilestones_MILESTONES_ALREADY_SET() public {
+        address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones_distribute();
 
-    //         GrantShipStrategy.Milestone[] memory milestones = new GrantShipStrategy.Milestone[](2);
+        GrantShipStrategy.Milestone[] memory milestones = new GrantShipStrategy.Milestone[](2);
 
-    //         milestones[0] = GrantShipStrategy.Milestone({
-    //             amountPercentage: 0.3e18,
-    //             metadata: Metadata(1, "milestone-1"),
-    //             milestoneStatus: IStrategy.Status.None
-    //         });
+        milestones[0] = GrantShipStrategy.Milestone({
+            amountPercentage: 0.3e18,
+            metadata: Metadata(1, "milestone-1"),
+            milestoneStatus: IStrategy.Status.None
+        });
 
-    //         milestones[1] = GrantShipStrategy.Milestone({
-    //             amountPercentage: 0.7e18,
-    //             metadata: Metadata(1, "milestone-2"),
-    //             milestoneStatus: IStrategy.Status.None
-    //         });
+        milestones[1] = GrantShipStrategy.Milestone({
+            amountPercentage: 0.7e18,
+            metadata: Metadata(1, "milestone-2"),
+            milestoneStatus: IStrategy.Status.None
+        });
 
-    //         vm.expectRevert(GrantShipStrategy.MILESTONES_ALREADY_SET.selector);
+        vm.expectRevert(GrantShipStrategy.MILESTONES_ALREADY_SET.selector);
 
-    //         vm.startPrank(shipOperator(1).wearer);
-    //         ship(1).setMilestones(recipientId, milestones);
-    //         vm.stopPrank();
-    //     }
+        vm.startPrank(shipOperator(1).wearer);
+        ship(1).setMilestones(recipientId, milestones);
+        vm.stopPrank();
+    }
 
-    //     function testRevert_setMilestones_RECIPIENT_NOT_ACCEPTED() public {
-    //         GrantShipStrategy.Milestone[] memory milestones = new GrantShipStrategy.Milestone[](2);
+    function testRevert_setMilestones_RECIPIENT_NOT_ACCEPTED() public {
+        GrantShipStrategy.Milestone[] memory milestones = new GrantShipStrategy.Milestone[](2);
 
-    //         milestones[0] = GrantShipStrategy.Milestone({
-    //             amountPercentage: 0.3e18,
-    //             metadata: Metadata(1, "milestone-1"),
-    //             milestoneStatus: IStrategy.Status.None
-    //         });
+        milestones[0] = GrantShipStrategy.Milestone({
+            amountPercentage: 0.3e18,
+            metadata: Metadata(1, "milestone-1"),
+            milestoneStatus: IStrategy.Status.None
+        });
 
-    //         milestones[1] = GrantShipStrategy.Milestone({
-    //             amountPercentage: 0.7e18,
-    //             metadata: Metadata(1, "milestone-2"),
-    //             milestoneStatus: IStrategy.Status.None
-    //         });
+        milestones[1] = GrantShipStrategy.Milestone({
+            amountPercentage: 0.7e18,
+            metadata: Metadata(1, "milestone-2"),
+            milestoneStatus: IStrategy.Status.None
+        });
 
-    //         vm.expectRevert(RECIPIENT_NOT_ACCEPTED.selector);
+        vm.expectRevert(RECIPIENT_NOT_ACCEPTED.selector);
 
-    //         vm.startPrank(shipOperator(1).wearer);
-    //         ship(1).setMilestones(randomAddress(), milestones);
-    //         vm.stopPrank();
-    //     }
+        vm.startPrank(shipOperator(1).wearer);
+        ship(1).setMilestones(randomAddress(), milestones);
+        vm.stopPrank();
+    }
 
-    //     function testRevert_setMilestones_INVALID_MILESTONE_exceed_percentage() public {
-    //         address recipientId = _register_recipient_allocate_accept();
-    //         GrantShipStrategy.Milestone[] memory milestones = new GrantShipStrategy.Milestone[](2);
+    function testRevert_setMilestones_INVALID_MILESTONE_exceed_percentage() public {
+        address recipientId = _register_recipient_allocate_accept();
+        GrantShipStrategy.Milestone[] memory milestones = new GrantShipStrategy.Milestone[](2);
 
-    //         milestones[0] = GrantShipStrategy.Milestone({
-    //             amountPercentage: 0.7e18, // > 100%
-    //             metadata: Metadata(1, "milestone-1"),
-    //             milestoneStatus: IStrategy.Status.None
-    //         });
+        milestones[0] = GrantShipStrategy.Milestone({
+            amountPercentage: 0.7e18, // > 100%
+            metadata: Metadata(1, "milestone-1"),
+            milestoneStatus: IStrategy.Status.None
+        });
 
-    //         milestones[1] = GrantShipStrategy.Milestone({
-    //             amountPercentage: 0.7e18, // > 100%
-    //             metadata: Metadata(1, "milestone-2"),
-    //             milestoneStatus: IStrategy.Status.None
-    //         });
+        milestones[1] = GrantShipStrategy.Milestone({
+            amountPercentage: 0.7e18, // > 100%
+            metadata: Metadata(1, "milestone-2"),
+            milestoneStatus: IStrategy.Status.None
+        });
 
-    //         vm.expectRevert(GrantShipStrategy.INVALID_MILESTONE.selector);
+        vm.expectRevert(GrantShipStrategy.INVALID_MILESTONE.selector);
 
-    //         vm.startPrank(shipOperator(1).wearer);
-    //         ship(1).setMilestones(recipientId, milestones);
-    //         vm.stopPrank();
-    //     }
+        vm.startPrank(shipOperator(1).wearer);
+        ship(1).setMilestones(recipientId, milestones);
+        vm.stopPrank();
+    }
 
-    //     function test_setMilestones_by_overriding_existing_milestones() public {
-    //         address recipientId = _register_recipient_allocate_accept();
-    //         GrantShipStrategy.Milestone[] memory milestones = new GrantShipStrategy.Milestone[](3);
+    function test_setMilestones_by_overriding_existing_milestones() public {
+        address recipientId = _register_recipient_allocate_accept();
+        GrantShipStrategy.Milestone[] memory milestones = new GrantShipStrategy.Milestone[](3);
 
-    //         milestones[0] = GrantShipStrategy.Milestone({
-    //             amountPercentage: 0.3e18,
-    //             metadata: Metadata(1, "milestone-1"),
-    //             milestoneStatus: IStrategy.Status.None
-    //         });
+        milestones[0] = GrantShipStrategy.Milestone({
+            amountPercentage: 0.3e18,
+            metadata: Metadata(1, "milestone-1"),
+            milestoneStatus: IStrategy.Status.None
+        });
 
-    //         milestones[1] = GrantShipStrategy.Milestone({
-    //             amountPercentage: 0.3e18,
-    //             metadata: Metadata(1, "milestone-2"),
-    //             milestoneStatus: IStrategy.Status.None
-    //         });
+        milestones[1] = GrantShipStrategy.Milestone({
+            amountPercentage: 0.3e18,
+            metadata: Metadata(1, "milestone-2"),
+            milestoneStatus: IStrategy.Status.None
+        });
 
-    //         milestones[2] = GrantShipStrategy.Milestone({
-    //             amountPercentage: 0.4e18,
-    //             metadata: Metadata(1, "milestone-3"),
-    //             milestoneStatus: IStrategy.Status.None
-    //         });
+        milestones[2] = GrantShipStrategy.Milestone({
+            amountPercentage: 0.4e18,
+            metadata: Metadata(1, "milestone-3"),
+            milestoneStatus: IStrategy.Status.None
+        });
 
-    //         vm.startPrank(profile1_member1());
+        vm.startPrank(profile1_member1());
 
-    //         // set to 100%
-    //         ship(1).setMilestones(recipientId, milestones);
+        // set to 100%
+        ship(1).setMilestones(recipientId, milestones);
 
-    //         GrantShipStrategy.Milestone[] memory setMilestones = ship(1).getMilestones(recipientId);
-    //         assertEq(setMilestones.length, 3);
+        GrantShipStrategy.Milestone[] memory setMilestones = ship(1).getMilestones(recipientId);
+        assertEq(setMilestones.length, 3);
 
-    //         // Override with new milestones
+        // Override with new milestones
 
-    //         GrantShipStrategy.Milestone[] memory anotherMilestones = new GrantShipStrategy.Milestone[](1);
+        GrantShipStrategy.Milestone[] memory anotherMilestones = new GrantShipStrategy.Milestone[](1);
 
-    //         anotherMilestones[0] = GrantShipStrategy.Milestone({
-    //             amountPercentage: 1e18,
-    //             metadata: Metadata(1, "milestone-1"),
-    //             milestoneStatus: IStrategy.Status.None
-    //         });
+        anotherMilestones[0] = GrantShipStrategy.Milestone({
+            amountPercentage: 1e18,
+            metadata: Metadata(1, "milestone-1"),
+            milestoneStatus: IStrategy.Status.None
+        });
 
-    //         // set to 100% again => should override older setting
-    //         ship(1).setMilestones(recipientId, anotherMilestones);
+        // set to 100% again => should override older setting
+        ship(1).setMilestones(recipientId, anotherMilestones);
 
-    //         // check if sum of milestones are equal to 100% (1e18)
-    //         setMilestones = ship(1).getMilestones(recipientId);
+        // check if sum of milestones are equal to 100% (1e18)
+        setMilestones = ship(1).getMilestones(recipientId);
 
-    //         uint256 totalAllocated = 0;
+        uint256 totalAllocated = 0;
 
-    //         for (uint256 i; i < setMilestones.length; i++) {
-    //             totalAllocated += setMilestones[i].amountPercentage;
-    //         }
+        for (uint256 i; i < setMilestones.length; i++) {
+            totalAllocated += setMilestones[i].amountPercentage;
+        }
 
-    //         assertEq(totalAllocated, 1e18);
-    //         assertEq(setMilestones.length, 1);
+        assertEq(totalAllocated, 1e18);
+        assertEq(setMilestones.length, 1);
 
-    //         vm.stopPrank();
-    //     }
+        vm.stopPrank();
+    }
 
-    //     function testRevert_setMilestones_INVALID_MILESTONE_wrong_status() public {
-    //         address recipientId = _register_recipient_allocate_accept();
-    //         GrantShipStrategy.Milestone[] memory milestones = new GrantShipStrategy.Milestone[](2);
+    function testRevert_setMilestones_INVALID_MILESTONE_wrong_status() public {
+        address recipientId = _register_recipient_allocate_accept();
+        GrantShipStrategy.Milestone[] memory milestones = new GrantShipStrategy.Milestone[](2);
 
-    //         milestones[0] = GrantShipStrategy.Milestone({
-    //             amountPercentage: 0.3e18,
-    //             metadata: Metadata(1, "milestone-1"),
-    //             milestoneStatus: IStrategy.Status.None
-    //         });
+        milestones[0] = GrantShipStrategy.Milestone({
+            amountPercentage: 0.3e18,
+            metadata: Metadata(1, "milestone-1"),
+            milestoneStatus: IStrategy.Status.None
+        });
 
-    //         milestones[1] = GrantShipStrategy.Milestone({
-    //             amountPercentage: 0.7e18,
-    //             metadata: Metadata(1, "milestone-2"),
-    //             milestoneStatus: IStrategy.Status.Accepted // wrong status
-    //         });
+        milestones[1] = GrantShipStrategy.Milestone({
+            amountPercentage: 0.7e18,
+            metadata: Metadata(1, "milestone-2"),
+            milestoneStatus: IStrategy.Status.Accepted // wrong status
+        });
 
-    //         vm.expectRevert(GrantShipStrategy.INVALID_MILESTONE.selector);
+        vm.expectRevert(GrantShipStrategy.INVALID_MILESTONE.selector);
 
-    //         vm.startPrank(shipOperator(1).wearer);
-    //         ship(1).setMilestones(recipientId, milestones);
-    //         vm.stopPrank();
-    //     }
+        vm.startPrank(shipOperator(1).wearer);
+        ship(1).setMilestones(recipientId, milestones);
+        vm.stopPrank();
+    }
 
-    //     function test_submitMilestones() public {
-    //         address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones();
+    function test_submitMilestones() public {
+        address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones();
 
-    //         GrantShipStrategy.Milestone[] memory milestones = ship(1).getMilestones(recipientId);
+        GrantShipStrategy.Milestone[] memory milestones = ship(1).getMilestones(recipientId);
 
-    //         assertEq(uint8(milestones[0].milestoneStatus), uint8(IStrategy.Status.Pending));
-    //         assertEq(uint8(milestones[1].milestoneStatus), uint8(IStrategy.Status.Pending));
-    //     }
+        assertEq(uint8(milestones[0].milestoneStatus), uint8(IStrategy.Status.Pending));
+        assertEq(uint8(milestones[1].milestoneStatus), uint8(IStrategy.Status.Pending));
+    }
 
-    //     function testRever_submitMilestones_RECIPIENT_NOT_ACCEPTED() public {
-    //         address recipientId = _register_recipient_allocate_reject();
+    function testRever_submitMilestones_RECIPIENT_NOT_ACCEPTED() public {
+        address recipientId = _register_recipient_allocate_reject();
 
-    //         Metadata memory metadata2 = Metadata(1, "milestone-2");
+        Metadata memory metadata2 = Metadata(1, "milestone-2");
 
-    //         vm.expectRevert(RECIPIENT_NOT_ACCEPTED.selector);
-    //         vm.startPrank(profile1_member1());
-    //         ship(1).submitMilestone(recipientId, 1, metadata2);
-    //         vm.stopPrank();
-    //     }
+        vm.expectRevert(RECIPIENT_NOT_ACCEPTED.selector);
+        vm.startPrank(profile1_member1());
+        ship(1).submitMilestone(recipientId, 1, metadata2);
+        vm.stopPrank();
+    }
 
-    //     function testRevert_submitMilestone_UNAUTHORIZED() public {
-    //         address recipientId = _register_recipient_allocate_accept_set_milestones_by_ship_operator();
+    function testRevert_submitMilestone_UNAUTHORIZED() public {
+        address recipientId = _register_recipient_allocate_accept_set_milestones_by_ship_operator();
 
-    //         Metadata memory metadata = Metadata(1, "milestone-1");
+        Metadata memory metadata = Metadata(1, "milestone-1");
 
-    //         vm.expectRevert(UNAUTHORIZED.selector);
+        vm.expectRevert(UNAUTHORIZED.selector);
 
-    //         vm.startPrank(randomAddress());
-    //         ship(1).submitMilestone(recipientId, 0, metadata);
-    //         vm.stopPrank();
-    //     }
+        vm.startPrank(randomAddress());
+        ship(1).submitMilestone(recipientId, 0, metadata);
+        vm.stopPrank();
+    }
 
-    //     function testRevert_submitMilestone_INVALID_MILESTONE() public {
-    //         address recipientId = _register_recipient_allocate_accept_set_milestones_by_ship_operator();
+    function testRevert_submitMilestone_INVALID_MILESTONE() public {
+        address recipientId = _register_recipient_allocate_accept_set_milestones_by_ship_operator();
 
-    //         Metadata memory metadata = Metadata(3, "milestone-3");
+        Metadata memory metadata = Metadata(3, "milestone-3");
 
-    //         vm.expectRevert(GrantShipStrategy.INVALID_MILESTONE.selector);
+        vm.expectRevert(GrantShipStrategy.INVALID_MILESTONE.selector);
 
-    //         vm.startPrank(profile1_member1());
-    //         ship(1).submitMilestone(recipientId, 3, metadata);
-    //         vm.stopPrank();
-    //     }
+        vm.startPrank(profile1_member1());
+        ship(1).submitMilestone(recipientId, 3, metadata);
+        vm.stopPrank();
+    }
 
-    //     function testRevert_submitMilestone_MILESTONE_ALREADY_ACCEPTED() public {
-    //         address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones_distribute();
+    function testRevert_submitMilestone_MILESTONE_ALREADY_ACCEPTED() public {
+        address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones_distribute();
 
-    //         Metadata memory metadata = Metadata(1, "milestone-1");
+        Metadata memory metadata = Metadata(1, "milestone-1");
 
-    //         vm.expectRevert(GrantShipStrategy.MILESTONE_ALREADY_ACCEPTED.selector);
+        vm.expectRevert(GrantShipStrategy.MILESTONE_ALREADY_ACCEPTED.selector);
 
-    //         vm.startPrank(profile1_member1());
-    //         ship(1).submitMilestone(recipientId, 0, metadata);
-    //         vm.stopPrank();
-    //     }
+        vm.startPrank(profile1_member1());
+        ship(1).submitMilestone(recipientId, 0, metadata);
+        vm.stopPrank();
+    }
 
-    //     function test_rejectMilestone() public {
-    //         address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones();
+    function test_rejectMilestone() public {
+        address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones();
 
-    //         vm.startPrank(shipOperator(1).wearer);
-    //         ship(1).rejectMilestone(recipientId, 0);
-    //         vm.stopPrank();
+        vm.startPrank(shipOperator(1).wearer);
+        ship(1).rejectMilestone(recipientId, 0);
+        vm.stopPrank();
 
-    //         GrantShipStrategy.Milestone[] memory milestones = ship(1).getMilestones(recipientId);
+        GrantShipStrategy.Milestone[] memory milestones = ship(1).getMilestones(recipientId);
 
-    //         assertEq(uint8(milestones[0].milestoneStatus), uint8(IStrategy.Status.Rejected));
-    //         assertEq(uint8(milestones[1].milestoneStatus), uint8(IStrategy.Status.Pending));
-    //     }
+        assertEq(uint8(milestones[0].milestoneStatus), uint8(IStrategy.Status.Rejected));
+        assertEq(uint8(milestones[1].milestoneStatus), uint8(IStrategy.Status.Pending));
+    }
 
-    //     function testRevert_rejectMilestone_MILESTONE_ALREADY_ACCEPTED() public {
-    //         address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones_distribute();
+    function testRevert_rejectMilestone_MILESTONE_ALREADY_ACCEPTED() public {
+        address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones_distribute();
 
-    //         vm.expectRevert(GrantShipStrategy.MILESTONE_ALREADY_ACCEPTED.selector);
+        vm.expectRevert(GrantShipStrategy.MILESTONE_ALREADY_ACCEPTED.selector);
 
-    //         vm.startPrank(shipOperator(1).wearer);
-    //         ship(1).rejectMilestone(recipientId, 0);
-    //         vm.stopPrank();
-    //     }
+        vm.startPrank(shipOperator(1).wearer);
+        ship(1).rejectMilestone(recipientId, 0);
+        vm.stopPrank();
+    }
 
-    //     function testRevert_rejectMilestones_INVALID_MILESTONE() public {
-    //         address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones();
-    //         vm.startPrank(shipOperator(1).wearer);
-    //         vm.expectRevert(GrantShipStrategy.INVALID_MILESTONE.selector);
-    //         ship(1).rejectMilestone(recipientId, 10);
-    //         vm.stopPrank();
-    //     }
+    function testRevert_rejectMilestones_INVALID_MILESTONE() public {
+        address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones();
+        vm.startPrank(shipOperator(1).wearer);
+        vm.expectRevert(GrantShipStrategy.INVALID_MILESTONE.selector);
+        ship(1).rejectMilestone(recipientId, 10);
+        vm.stopPrank();
+    }
 
-    //     function test_distribute() public {
-    //         address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones_distribute();
+    function test_distribute() public {
+        address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones_distribute();
 
-    //         GrantShipStrategy.Milestone[] memory milestones = ship(1).getMilestones(recipientId);
+        GrantShipStrategy.Milestone[] memory milestones = ship(1).getMilestones(recipientId);
 
-    //         assertEq(uint8(milestones[0].milestoneStatus), uint8(IStrategy.Status.Accepted));
-    //         assertEq(uint8(milestones[1].milestoneStatus), uint8(IStrategy.Status.Accepted));
+        assertEq(uint8(milestones[0].milestoneStatus), uint8(IStrategy.Status.Accepted));
+        assertEq(uint8(milestones[1].milestoneStatus), uint8(IStrategy.Status.Accepted));
 
-    //         assertEq(ARB().balanceOf(recipient1()), _grantAmount);
-    //         assertEq(address(ship(1)).balance, 0);
-    //     }
+        assertEq(ARB().balanceOf(recipient1()), _grantAmount);
+        assertEq(address(ship(1)).balance, 0);
+    }
 
-    //     function testRevert_distribute_INVALID_MILESTONE() public {
-    //         address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones();
+    function testRevert_distribute_INVALID_MILESTONE() public {
+        address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones();
 
-    //         vm.startPrank(shipOperator(1).wearer);
-    //         ship(1).rejectMilestone(recipientId, 0);
+        vm.startPrank(shipOperator(1).wearer);
+        ship(1).rejectMilestone(recipientId, 0);
 
-    //         address[] memory recipients = new address[](2);
+        address[] memory recipients = new address[](2);
 
-    //         recipients[0] = recipientId;
-    //         recipients[1] = recipientId;
+        recipients[0] = recipientId;
+        recipients[1] = recipientId;
 
-    //         uint256 poolId = ship(1).getPoolId();
+        uint256 poolId = ship(1).getPoolId();
 
-    //         vm.expectRevert(GrantShipStrategy.INVALID_MILESTONE.selector);
-    //         allo().distribute(poolId, recipients, "");
-    //         vm.stopPrank();
-    //     }
+        vm.expectRevert(GrantShipStrategy.INVALID_MILESTONE.selector);
+        allo().distribute(poolId, recipients, "");
+        vm.stopPrank();
+    }
 
-    //     function test_withdraw() public {
-    //         _quick_fund_ship(1);
+    function test_withdraw() public {
+        _quick_fund_ship(1);
 
-    //         vm.startPrank(facilitator().wearer);
+        vm.startPrank(facilitator().wearer);
 
-    //         ship(1).setPoolActive(false);
+        ship(1).setPoolActive(false);
 
-    //         vm.expectEmit(true, true, true, true);
-    //         emit PoolWithdraw(_poolAmount);
+        vm.expectEmit(true, true, true, true);
+        emit PoolWithdraw(_poolAmount);
 
-    //         ship(1).withdraw(_poolAmount);
+        ship(1).withdraw(_poolAmount);
 
-    //         vm.stopPrank();
+        vm.stopPrank();
 
-    //         assertEq(ARB().balanceOf(address(ship(1))), 0);
-    //         assertEq(ARB().balanceOf(address(gameManager())), _poolAmount + _manager_pool_amount);
-    //     }
+        console.log(gameAmount);
 
-    //     function testRevert_withdraw_UNAUTHORIZED() public {
-    //         _quick_fund_ship(1);
+        assertEq(ARB().balanceOf(address(ship(1))), 0);
+        assertEq(ARB().balanceOf(address(gameManager())), _poolAmount);
+    }
 
-    //         vm.expectRevert(UNAUTHORIZED.selector);
+    function testRevert_withdraw_UNAUTHORIZED() public {
+        _quick_fund_ship(1);
 
-    //         vm.startPrank(shipOperator(1).wearer);
-    //         ship(1).withdraw(_poolAmount);
-    //         vm.stopPrank();
-    //     }
+        vm.expectRevert(UNAUTHORIZED.selector);
 
-    //     function testRevert_withdraw_POOL_ACTIVE() public {
-    //         _quick_fund_ship(1);
+        vm.startPrank(shipOperator(1).wearer);
+        ship(1).withdraw(_poolAmount);
+        vm.stopPrank();
+    }
 
-    //         vm.expectRevert(POOL_ACTIVE.selector);
+    function testRevert_withdraw_POOL_ACTIVE() public {
+        _quick_fund_ship(1);
 
-    //         vm.startPrank(facilitator().wearer);
-    //         ship(1).withdraw(_poolAmount);
-    //         vm.stopPrank();
-    //     }
+        vm.expectRevert(POOL_ACTIVE.selector);
 
-    //     function test_issueFlag() public {
-    //         _issue_flag(0, GrantShipStrategy.FlagType.Red);
+        vm.startPrank(facilitator().wearer);
+        ship(1).withdraw(_poolAmount);
+        vm.stopPrank();
+    }
 
-    //         GrantShipStrategy.Flag memory flag = ship(1).getFlag(0);
+    function test_issueFlag() public {
+        _issue_flag(0, GrantShipStrategy.FlagType.Red);
 
-    //         assertEq(ship(1).unresolvedRedFlags(), 1);
-    //         assertEq(uint8(flag.flagType), uint8(GrantShipStrategy.FlagType.Red));
-    //         assertEq(flag.flagReason.protocol, 1);
-    //         assertEq(flag.flagReason.pointer, "flag-reason");
-    //         assertFalse(flag.isResolved);
-    //         assertEq(flag.resolutionReason.protocol, 0);
-    //         assertEq(flag.resolutionReason.pointer, "");
+        GrantShipStrategy.Flag memory flag = ship(1).getFlag(0);
 
-    //         _issue_flag(1, GrantShipStrategy.FlagType.Yellow);
+        assertEq(ship(1).unresolvedRedFlags(), 1);
+        assertEq(uint8(flag.flagType), uint8(GrantShipStrategy.FlagType.Red));
+        assertEq(flag.flagReason.protocol, 1);
+        assertEq(flag.flagReason.pointer, "flag-reason");
+        assertFalse(flag.isResolved);
+        assertEq(flag.resolutionReason.protocol, 0);
+        assertEq(flag.resolutionReason.pointer, "");
 
-    //         assertEq(ship(1).unresolvedRedFlags(), 1);
-    //     }
+        _issue_flag(1, GrantShipStrategy.FlagType.Yellow);
 
-    //     function testRevert_issueFlag_UNAUTHORIZED() public {
-    //         Metadata memory reason = Metadata(1, "flag-reason");
-    //         vm.expectRevert(UNAUTHORIZED.selector);
+        assertEq(ship(1).unresolvedRedFlags(), 1);
+    }
 
-    //         vm.startPrank(randomAddress());
-    //         ship(1).issueFlag(0, GrantShipStrategy.FlagType.Red, reason);
-    //         vm.stopPrank();
-    //     }
+    function testRevert_issueFlag_UNAUTHORIZED() public {
+        Metadata memory reason = Metadata(1, "flag-reason");
+        vm.expectRevert(UNAUTHORIZED.selector);
 
-    //     function testRevert_issueFlag_INVALID_FLAG() public {
-    //         Metadata memory reason = Metadata(1, "flag-reason");
-    //         vm.expectRevert(GrantShipStrategy.INVALID_FLAG.selector);
+        vm.startPrank(randomAddress());
+        ship(1).issueFlag(0, GrantShipStrategy.FlagType.Red, reason);
+        vm.stopPrank();
+    }
 
-    //         vm.startPrank(facilitator().wearer);
-    //         ship(1).issueFlag(0, GrantShipStrategy.FlagType.None, reason);
-    //         vm.stopPrank();
-    //     }
+    function testRevert_issueFlag_INVALID_FLAG() public {
+        Metadata memory reason = Metadata(1, "flag-reason");
+        vm.expectRevert(GrantShipStrategy.INVALID_FLAG.selector);
 
-    //     function testRevert_issueFlag_FLAG_ALREADY_EXISTS() public {
-    //         Metadata memory reason = Metadata(1, "flag-reason");
-    //         _issue_flag(0, GrantShipStrategy.FlagType.Red);
+        vm.startPrank(facilitator().wearer);
+        ship(1).issueFlag(0, GrantShipStrategy.FlagType.None, reason);
+        vm.stopPrank();
+    }
 
-    //         vm.expectRevert(GrantShipStrategy.FLAG_ALREADY_EXISTS.selector);
+    function testRevert_issueFlag_FLAG_ALREADY_EXISTS() public {
+        Metadata memory reason = Metadata(1, "flag-reason");
+        _issue_flag(0, GrantShipStrategy.FlagType.Red);
 
-    //         vm.startPrank(facilitator().wearer);
-    //         ship(1).issueFlag(0, GrantShipStrategy.FlagType.Red, reason);
-    //         vm.stopPrank();
-    //     }
+        vm.expectRevert(GrantShipStrategy.FLAG_ALREADY_EXISTS.selector);
 
-    //     function test_issueFlag_stops_allocation() public {
-    //         address recipientId = _register_recipient();
+        vm.startPrank(facilitator().wearer);
+        ship(1).issueFlag(0, GrantShipStrategy.FlagType.Red, reason);
+        vm.stopPrank();
+    }
 
-    //         _issue_flag(0, GrantShipStrategy.FlagType.Red);
-    //         _quick_fund_ship(1);
+    function test_issueFlag_stops_allocation() public {
+        address recipientId = _register_recipient();
 
-    //         GrantShipStrategy.Status recipientStatus = IStrategy.Status.Accepted;
-    //         uint256 grantAmount = _grantAmount;
-    //         bytes memory data = abi.encode(recipientId, recipientStatus, grantAmount);
-    //         uint256 poolId = ship(1).getPoolId();
+        _issue_flag(0, GrantShipStrategy.FlagType.Red);
+        _quick_fund_ship(1);
 
-    //         vm.expectRevert(GrantShipStrategy.UNRESOLVED_RED_FLAGS.selector);
+        GrantShipStrategy.Status recipientStatus = IStrategy.Status.Accepted;
+        uint256 grantAmount = _grantAmount;
+        bytes memory data = abi.encode(recipientId, recipientStatus, grantAmount);
+        uint256 poolId = ship(1).getPoolId();
 
-    //         vm.startPrank(facilitator().wearer);
-    //         allo().allocate(poolId, data);
-    //         vm.stopPrank();
+        vm.expectRevert(GrantShipStrategy.UNRESOLVED_RED_FLAGS.selector);
 
-    //         vm.startPrank(facilitator().wearer);
-    //         ship(1).resolveFlag(0, Metadata(1, "resolution-reason"));
-    //         vm.stopPrank();
+        vm.startPrank(facilitator().wearer);
+        allo().allocate(poolId, data);
+        vm.stopPrank();
 
-    //         vm.startPrank(facilitator().wearer);
-    //         allo().allocate(poolId, data);
-    //         vm.stopPrank();
-    //     }
+        vm.startPrank(facilitator().wearer);
+        ship(1).resolveFlag(0, Metadata(1, "resolution-reason"));
+        vm.stopPrank();
 
-    //     function test_issueFlag_stops_distribution() public {
-    //         address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones();
+        vm.startPrank(facilitator().wearer);
+        allo().allocate(poolId, data);
+        vm.stopPrank();
+    }
 
-    //         _issue_flag(0, GrantShipStrategy.FlagType.Red);
+    function test_issueFlag_stops_distribution() public {
+        address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones();
 
-    //         address[] memory recipients = new address[](1);
+        _issue_flag(0, GrantShipStrategy.FlagType.Red);
 
-    //         recipients[0] = recipientId;
-    //         uint256 poolId = ship(1).getPoolId();
+        address[] memory recipients = new address[](1);
 
-    //         vm.expectRevert(GrantShipStrategy.UNRESOLVED_RED_FLAGS.selector);
+        recipients[0] = recipientId;
+        uint256 poolId = ship(1).getPoolId();
 
-    //         vm.startPrank(shipOperator(1).wearer);
-    //         allo().distribute(poolId, recipients, "");
-    //         vm.stopPrank();
+        vm.expectRevert(GrantShipStrategy.UNRESOLVED_RED_FLAGS.selector);
 
-    //         vm.startPrank(facilitator().wearer);
-    //         ship(1).resolveFlag(0, Metadata(1, "resolution-reason"));
-    //         vm.stopPrank();
+        vm.startPrank(shipOperator(1).wearer);
+        allo().distribute(poolId, recipients, "");
+        vm.stopPrank();
 
-    //         vm.startPrank(shipOperator(1).wearer);
-    //         allo().distribute(poolId, recipients, "");
-    //         vm.stopPrank();
-    //     }
+        vm.startPrank(facilitator().wearer);
+        ship(1).resolveFlag(0, Metadata(1, "resolution-reason"));
+        vm.stopPrank();
 
-    //     function test_resolveFlag() public {
-    //         _issue_flag(0, GrantShipStrategy.FlagType.Red);
+        vm.startPrank(shipOperator(1).wearer);
+        allo().distribute(poolId, recipients, "");
+        vm.stopPrank();
+    }
 
-    //         GrantShipStrategy.Flag memory flag = ship(1).getFlag(0);
+    function test_resolveFlag() public {
+        _issue_flag(0, GrantShipStrategy.FlagType.Red);
 
-    //         assertEq(ship(1).unresolvedRedFlags(), 1);
-    //         assertEq(uint8(flag.flagType), uint8(GrantShipStrategy.FlagType.Red));
+        GrantShipStrategy.Flag memory flag = ship(1).getFlag(0);
 
-    //         _resolve_flag(0);
+        assertEq(ship(1).unresolvedRedFlags(), 1);
+        assertEq(uint8(flag.flagType), uint8(GrantShipStrategy.FlagType.Red));
 
-    //         flag = ship(1).getFlag(0);
+        _resolve_flag(0);
 
-    //         assertEq(ship(1).unresolvedRedFlags(), 0);
-    //         assertEq(uint8(flag.flagType), uint8(GrantShipStrategy.FlagType.Red));
-    //         assertEq(flag.flagReason.protocol, 1);
-    //         assertEq(flag.flagReason.pointer, "flag-reason");
-    //         assertTrue(flag.isResolved);
-    //         assertEq(flag.resolutionReason.protocol, 1);
-    //         assertEq(flag.resolutionReason.pointer, "resolution-reason");
+        flag = ship(1).getFlag(0);
 
-    //         _issue_flag(1, GrantShipStrategy.FlagType.Yellow);
-    //         GrantShipStrategy.Flag memory yellowFlag = ship(1).getFlag(1);
+        assertEq(ship(1).unresolvedRedFlags(), 0);
+        assertEq(uint8(flag.flagType), uint8(GrantShipStrategy.FlagType.Red));
+        assertEq(flag.flagReason.protocol, 1);
+        assertEq(flag.flagReason.pointer, "flag-reason");
+        assertTrue(flag.isResolved);
+        assertEq(flag.resolutionReason.protocol, 1);
+        assertEq(flag.resolutionReason.pointer, "resolution-reason");
 
-    //         assertEq(ship(1).unresolvedRedFlags(), 0);
+        _issue_flag(1, GrantShipStrategy.FlagType.Yellow);
+        GrantShipStrategy.Flag memory yellowFlag = ship(1).getFlag(1);
 
-    //         assertEq(uint8(yellowFlag.flagType), uint8(GrantShipStrategy.FlagType.Yellow));
+        assertEq(ship(1).unresolvedRedFlags(), 0);
 
-    //         _resolve_flag(1);
+        assertEq(uint8(yellowFlag.flagType), uint8(GrantShipStrategy.FlagType.Yellow));
 
-    //         yellowFlag = ship(1).getFlag(1);
+        _resolve_flag(1);
 
-    //         assertEq(ship(1).unresolvedRedFlags(), 0);
-    //         assertEq(uint8(yellowFlag.flagType), uint8(GrantShipStrategy.FlagType.Yellow));
-    //         assertEq(yellowFlag.flagReason.protocol, 1);
-    //         assertEq(yellowFlag.flagReason.pointer, "flag-reason");
-    //         assertTrue(yellowFlag.isResolved);
-    //         assertEq(yellowFlag.resolutionReason.protocol, 1);
-    //         assertEq(yellowFlag.resolutionReason.pointer, "resolution-reason");
-    //     }
+        yellowFlag = ship(1).getFlag(1);
+
+        assertEq(ship(1).unresolvedRedFlags(), 0);
+        assertEq(uint8(yellowFlag.flagType), uint8(GrantShipStrategy.FlagType.Yellow));
+        assertEq(yellowFlag.flagReason.protocol, 1);
+        assertEq(yellowFlag.flagReason.pointer, "flag-reason");
+        assertTrue(yellowFlag.isResolved);
+        assertEq(yellowFlag.resolutionReason.protocol, 1);
+        assertEq(yellowFlag.resolutionReason.pointer, "resolution-reason");
+    }
 
     //     // ================= Helpers =====================
 
-    //     function _issue_flag(uint256 _nonce, GrantShipStrategy.FlagType _flagType) internal {
-    //         vm.startPrank(facilitator().wearer);
-    //         Metadata memory reason = Metadata(1, "flag-reason");
+    function _issue_flag(uint256 _nonce, GrantShipStrategy.FlagType _flagType) internal {
+        vm.startPrank(facilitator().wearer);
+        Metadata memory reason = Metadata(1, "flag-reason");
 
-    //         vm.expectEmit(true, true, true, true);
-    //         emit FlagIssued(_nonce, _flagType, reason);
+        vm.expectEmit(true, true, true, true);
+        emit FlagIssued(_nonce, _flagType, reason);
 
-    //         ship(1).issueFlag(_nonce, _flagType, reason);
-    //         vm.stopPrank();
-    //     }
+        ship(1).issueFlag(_nonce, _flagType, reason);
+        vm.stopPrank();
+    }
 
-    //     function _resolve_flag(uint256 _nonce) internal {
-    //         vm.startPrank(facilitator().wearer);
-    //         Metadata memory reason = Metadata(1, "resolution-reason");
+    function _resolve_flag(uint256 _nonce) internal {
+        vm.startPrank(facilitator().wearer);
+        Metadata memory reason = Metadata(1, "resolution-reason");
 
-    //         vm.expectEmit(true, true, true, true);
-    //         emit FlagResolved(_nonce, reason);
+        vm.expectEmit(true, true, true, true);
+        emit FlagResolved(_nonce, reason);
 
-    //         ship(1).resolveFlag(_nonce, reason);
-    //         vm.stopPrank();
-    //     }
+        ship(1).resolveFlag(_nonce, reason);
+        vm.stopPrank();
+    }
 
     function _test_ship_created(uint256 _shipId) internal {
         ShipInitData memory shipInitData = shipSetupData(_shipId);
@@ -944,11 +946,6 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         assertTrue(ship(_shipId).grantAmountRequired());
         assertTrue(shipInitData.operatorHatId == ship(_shipId).operatorHatId());
     }
-
-    // function _getShipStrategy(uint256 _shipId) internal view returns (GrantShipStrategy) {
-    //     address payable strategyAddress = gameManager().getShipAddress(_shipId);
-    //     return GrantShipStrategy(strategyAddress);
-    // }
 
     function _register_recipient_return_data() internal returns (address recipientId, bytes memory data) {
         recipientId = profile1_anchor();
