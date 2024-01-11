@@ -30,8 +30,9 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
     /// ========== State ==============
     /// ===============================
 
-    uint256 internal constant _gameAmount = 90_000e18;
-    uint256 internal constant _shipAmount = 30_000e18;
+    uint256 internal constant _3_MONTHS = 7889400;
+    uint256 internal constant _GAME_AMOUNT = 90_000e18;
+    uint256 internal constant _SHIP_AMOUNT = 30_000e18;
 
     GrantShipStrategy internal ship;
     GrantShipStrategy internal ship2;
@@ -143,7 +144,7 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
 
         GameManagerStrategy.GameRound memory round = gameManager().getGameRound(0);
 
-        assertEq(_gameAmount, round.totalRoundAmount);
+        assertEq(_GAME_AMOUNT, round.totalRoundAmount);
         assertEq(address(ARB()), round.token);
         assertEq(uint8(round.roundStatus), uint8(GameManagerStrategy.RoundStatus.Pending));
         assertEq(uint8(round.startTime), 0);
@@ -156,7 +157,7 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
 
         vm.expectRevert(UNAUTHORIZED.selector);
         vm.startPrank(randomAddress());
-        gameManager().createRound(_gameAmount, address(ARB()));
+        gameManager().createRound(_GAME_AMOUNT, address(ARB()));
         vm.stopPrank();
     }
 
@@ -166,7 +167,7 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         vm.expectRevert(GameManagerStrategy.INVALID_STATUS.selector);
 
         vm.startPrank(facilitator().wearer);
-        gameManager().createRound(_gameAmount, address(ARB()));
+        gameManager().createRound(_GAME_AMOUNT, address(ARB()));
         vm.stopPrank();
     }
 
@@ -285,7 +286,7 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
 
         assertEq(uint8(round.startTime), 0);
         assertEq(uint8(round.endTime), 0);
-        assertEq(_gameAmount, round.totalRoundAmount);
+        assertEq(_GAME_AMOUNT, round.totalRoundAmount);
         assertEq(address(ARB()), round.token);
         assertEq(uint8(round.roundStatus), uint8(GameManagerStrategy.RoundStatus.Allocated));
         assertEq(roundShips.length, 3);
@@ -303,7 +304,7 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
     //     uint256[] memory amounts = new uint256[](1);
     //     amounts[0] = 20_000e18;
 
-    //     bytes memory data = abi.encode(recipientAddresses, amounts, _gameAmount);
+    //     bytes memory data = abi.encode(recipientAddresses, amounts, _GAME_AMOUNT);
 
     //     vm.expectRevert(GameManagerStrategy.INVALID_STATUS.selector);
 
@@ -320,9 +321,9 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         recipientAddresses[0] = recipientAddress;
 
         uint256[] memory amounts = new uint256[](1);
-        amounts[0] = _gameAmount;
+        amounts[0] = _GAME_AMOUNT;
 
-        bytes memory data = abi.encode(recipientAddresses, amounts, _gameAmount + 1);
+        bytes memory data = abi.encode(recipientAddresses, amounts, _GAME_AMOUNT + 1);
 
         uint256 poolId = gameManager().getPoolId();
         vm.expectRevert(NOT_ENOUGH_FUNDS.selector);
@@ -340,9 +341,9 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         recipientAddresses[0] = recipientAddress;
 
         uint256[] memory amounts = new uint256[](1);
-        amounts[0] = _gameAmount;
+        amounts[0] = _GAME_AMOUNT;
 
-        bytes memory data = abi.encode(recipientAddresses, amounts, _gameAmount);
+        bytes memory data = abi.encode(recipientAddresses, amounts, _GAME_AMOUNT);
 
         uint256 poolId = gameManager().getPoolId();
 
@@ -361,10 +362,10 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
 
         recipientAddresses[0] = recipientAddress;
         uint256[] memory amounts = new uint256[](2);
-        amounts[0] = _gameAmount;
-        amounts[1] = _gameAmount;
+        amounts[0] = _GAME_AMOUNT;
+        amounts[1] = _GAME_AMOUNT;
 
-        bytes memory data = abi.encode(recipientAddresses, amounts, _gameAmount);
+        bytes memory data = abi.encode(recipientAddresses, amounts, _GAME_AMOUNT);
 
         uint256 poolId = gameManager().getPoolId();
 
@@ -383,9 +384,9 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         recipientAddresses[0] = recipientAddress;
 
         uint256[] memory amounts = new uint256[](1);
-        amounts[0] = _gameAmount + 1;
+        amounts[0] = _GAME_AMOUNT + 1;
 
-        bytes memory data = abi.encode(recipientAddresses, amounts, _gameAmount);
+        bytes memory data = abi.encode(recipientAddresses, amounts, _GAME_AMOUNT);
 
         uint256 poolId = gameManager().getPoolId();
 
@@ -404,9 +405,9 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         recipientAddresses[0] = recipientAddress;
 
         uint256[] memory amounts = new uint256[](1);
-        amounts[0] = _gameAmount;
+        amounts[0] = _GAME_AMOUNT;
 
-        bytes memory data = abi.encode(recipientAddresses, amounts, _gameAmount - 1);
+        bytes memory data = abi.encode(recipientAddresses, amounts, _GAME_AMOUNT - 1);
 
         uint256 poolId = gameManager().getPoolId();
 
@@ -417,9 +418,30 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         vm.stopPrank();
     }
 
+    function test_distribute() public {
+        address[] memory recipients = _register_create_accept_allocate_distribute();
+    }
+
     // ====================================
     // =========== Helpers ================
     // ====================================
+
+    function _register_create_accept_allocate_distribute() internal returns (address[] memory recipients) {
+        recipients = _register_create_accept_allocate();
+
+        bytes memory data = abi.encode(block.timestamp, block.timestamp + _3_MONTHS);
+
+        uint256 poolId = gameManager().getPoolId();
+
+        vm.expectEmit(true, true, true, true);
+        emit Distributed(recipients[0], address(ship), 20_000e18, facilitator().wearer);
+        emit Distributed(recipients[1], address(ship2), 40_000e18, facilitator().wearer);
+        emit Distributed(recipients[2], address(ship3), 30_000e18, facilitator().wearer);
+
+        vm.startPrank(facilitator().wearer);
+        allo().distribute(poolId, recipients, data);
+        vm.stopPrank();
+    }
 
     function _register_create_accept_allocate() internal returns (address[] memory) {
         address recipientAddress = _register_create_approve();
@@ -486,7 +508,7 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         amounts[1] = 40_000e18;
         amounts[2] = 30_000e18;
 
-        bytes memory data = abi.encode(recipientAddresses, amounts, _gameAmount);
+        bytes memory data = abi.encode(recipientAddresses, amounts, _GAME_AMOUNT);
 
         vm.startPrank(facilitator().wearer);
         allo().allocate(gameManager().getPoolId(), data);
@@ -497,15 +519,15 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
 
     function _quick_fund_manager() internal {
         vm.startPrank(arbWhale);
-        ARB().transfer(facilitator().wearer, _gameAmount);
+        ARB().transfer(facilitator().wearer, _GAME_AMOUNT);
         vm.stopPrank();
 
         uint256 poolId = gameManager().getPoolId();
 
         vm.startPrank(facilitator().wearer);
-        ARB().approve(address(allo()), _gameAmount);
+        ARB().approve(address(allo()), _GAME_AMOUNT);
 
-        allo().fundPool(poolId, _gameAmount);
+        allo().fundPool(poolId, _GAME_AMOUNT);
 
         vm.stopPrank();
     }
@@ -563,9 +585,9 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         vm.startPrank(facilitator().wearer);
 
         vm.expectEmit(true, true, true, true);
-        emit RoundCreated(0, arbAddress, _gameAmount);
+        emit RoundCreated(0, arbAddress, _GAME_AMOUNT);
 
-        gameManager().createRound(_gameAmount, arbAddress);
+        gameManager().createRound(_GAME_AMOUNT, arbAddress);
         vm.stopPrank();
     }
 

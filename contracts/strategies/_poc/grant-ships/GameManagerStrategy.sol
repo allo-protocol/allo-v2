@@ -36,7 +36,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         Rejected,
         Allocated,
         Active,
-        Completed,
+        Completed
     }
 
     enum RoundStatus {
@@ -110,6 +110,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     /// ======== Game State ===========
     /// ===============================
     bool public registryGating;
+
     uint256 public metadataProtocol;
 
     address public gameManager;
@@ -276,6 +277,8 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
             // sets the recipient status to Allocated
             recipient.status = ShipStatus.Allocated;
 
+            emit Allocated(recipientAddress, grantAmount, currentRound.token, _sender);
+
             unchecked {
                 i++;
             }
@@ -306,30 +309,28 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         // checks that the current round is pending
         if (currentRound.roundStatus != RoundStatus.Allocated) revert INVALID_STATUS();
 
-        // () = abi.decode(_data, (uint256));
-
-        uint256 totalDistrubted;
-
         for (uint32 i; i < _recipientIds.length;) {
-
             Recipient storage recipient = recipients[_recipientIds[i]];
-
             // checks that the Recipient status is Allocated
             if (recipient.status != ShipStatus.Allocated) revert INVALID_STATUS();
 
             poolAmount -= recipient.grantAmount;
 
-            recipient.status = ShipStatus.;
+            recipient.status = ShipStatus.Active;
 
-            _transferAmount(currentRound.token, recipient.recipientAddress, recipient.grantAmount);
-            
+            _transferAmount(currentRound.token, recipient.shipAddress, recipient.grantAmount);
 
             unchecked {
                 i++;
             }
+            emit Distributed(recipient.recipientAddress, recipient.shipAddress, recipient.grantAmount, _sender);
         }
 
-       
+        (uint256 startTime, uint256 endTime) = abi.decode(_data, (uint256, uint256));
+
+        currentRound.startTime = startTime;
+        currentRound.endTime = endTime;
+        currentRound.roundStatus = RoundStatus.Funded;
     }
 
     /// ====================================
