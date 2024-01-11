@@ -210,6 +210,13 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         _;
     }
 
+    modifier onlyGameManger(address _sender) {
+        if (_sender != address(_gameManager)) {
+            revert UNAUTHORIZED();
+        }
+        _;
+    }
+
     /// ===============================
     /// ======== Constructor ==========
     /// ===============================
@@ -546,6 +553,10 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
                 i++;
             }
         }
+    }
+
+    function managerIncreasePoolAmount(uint256 _amount) external onlyGameManger(msg.sender) {
+        poolAmount += _amount;
     }
 
     /// @notice Toggle the status between active and inactive.

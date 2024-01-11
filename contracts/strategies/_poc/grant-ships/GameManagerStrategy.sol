@@ -318,6 +318,9 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
 
             recipient.status = ShipStatus.Active;
 
+            GrantShipStrategy grantShip = GrantShipStrategy(recipient.shipAddress);
+
+            grantShip.managerIncreasePoolAmount(recipient.grantAmount);
             _transferAmount(currentRound.token, recipient.shipAddress, recipient.grantAmount);
 
             unchecked {
@@ -325,6 +328,8 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
             }
             emit Distributed(recipient.recipientAddress, recipient.shipAddress, recipient.grantAmount, _sender);
         }
+
+        console.log(0);
 
         (uint256 startTime, uint256 endTime) = abi.decode(_data, (uint256, uint256));
 

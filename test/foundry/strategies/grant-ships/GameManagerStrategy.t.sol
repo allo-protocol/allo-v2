@@ -295,24 +295,6 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         assertEq(roundShip3, recipientAddress3);
     }
 
-    // function testRevert_allocate_INVALID_STATUS() public {
-    //     address recipientAddress = _register_create_approve();
-
-    //     address[] memory recipientAddresses = new address[](1);
-    //     recipientAddresses[0] = recipientAddress;
-
-    //     uint256[] memory amounts = new uint256[](1);
-    //     amounts[0] = 20_000e18;
-
-    //     bytes memory data = abi.encode(recipientAddresses, amounts, _GAME_AMOUNT);
-
-    //     vm.expectRevert(GameManagerStrategy.INVALID_STATUS.selector);
-
-    //     vm.startPrank(facilitator().wearer);
-    //     allo().allocate(gameManager().getPoolId(), data);
-    //     vm.stopPrank();
-    // }
-
     function testRevert_allocate_NOT_ENOUGH_FUNDS_total() public {
         address recipientAddress = _register_create_approve();
         _quick_fund_manager();
@@ -419,7 +401,37 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
     }
 
     function test_distribute() public {
-        address[] memory recipients = _register_create_accept_allocate_distribute();
+        address[] memory recipientAddresses = _register_create_accept_allocate_distribute();
+
+        GameManagerStrategy.Recipient memory recipient1 = gameManager().getRecipient(recipientAddresses[0]);
+
+        assertEq(uint8(recipient1.status), uint8(GameManagerStrategy.ShipStatus.Active));
+
+        GameManagerStrategy.GameRound memory round = gameManager().getGameRound(0);
+
+        assertEq(block.timestamp, round.startTime);
+        assertEq(block.timestamp + _3_MONTHS, round.endTime);
+        assertEq(uint8(round.roundStatus), uint8(GameManagerStrategy.RoundStatus.Funded));
+
+        uint256 shipBalance = ARB().balanceOf(address(ship));
+        uint256 ship2Balance = ARB().balanceOf(address(ship2));
+        uint256 ship3Balance = ARB().balanceOf(address(ship3));
+
+        uint256 shipPoolAmount = ship.getPoolAmount();
+        uint256 ship2PoolAmount = ship2.getPoolAmount();
+        uint256 ship3PoolAmount = ship3.getPoolAmount();
+        uint256 gameManagerBalance = ARB().balanceOf(address(gameManager()));
+
+        assertEq(shipBalance, 20_000e18);
+        assertEq(ship2Balance, 40_000e18);
+        assertEq(ship3Balance, 30_000e18);
+
+        assertEq(shipPoolAmount, 20_000e18);
+        assertEq(ship2PoolAmount, 40_000e18);
+        assertEq(ship3PoolAmount, 30_000e18);
+
+        assertEq(gameManager().getPoolAmount(), 0);
+        assertEq(gameManagerBalance, 0);
     }
 
     // ====================================
@@ -526,9 +538,7 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
 
         vm.startPrank(facilitator().wearer);
         ARB().approve(address(allo()), _GAME_AMOUNT);
-
         allo().fundPool(poolId, _GAME_AMOUNT);
-
         vm.stopPrank();
     }
 
