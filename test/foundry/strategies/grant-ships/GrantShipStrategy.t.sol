@@ -749,8 +749,6 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
 
         vm.stopPrank();
 
-        console.log(gameAmount);
-
         assertEq(ARB().balanceOf(address(ship(1))), 0);
         assertEq(ARB().balanceOf(address(gameManager())), _poolAmount);
     }

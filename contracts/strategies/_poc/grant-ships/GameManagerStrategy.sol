@@ -24,6 +24,7 @@ import {GrantShipStrategy} from "./GrantShipStrategy.sol";
 //Internal Libraries
 import {ShipInitData} from "./libraries/GrantShipShared.sol";
 
+// TODO CLean, reorgnaize, and document this contract
 contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     /// ================================
     /// ========== Models ==============
@@ -117,7 +118,9 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice The 'Hats Protocol' contract interface.
     IHats private _hats;
+
     Allo private _allo;
+
     IRegistry private _registry;
 
     ///@notice Mapping of all GrantShip Recipients
@@ -404,14 +407,9 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         return _anchorAddress;
     }
 
-    function _getRecipientStatus(address _recipientId) internal view virtual override returns (Status) {
-        // Recipient memory grantShipRecipient = grantShipRecipients[_recipientId];
-        // return grantShipRecipient.recipientStatus;
-    }
-
-    function getGrantShipRecipient(address _recipientId) public view returns (Recipient memory) {
-        // Recipient memory grantShipRecipient = grantShipRecipients[_recipientId];
-        // return grantShipRecipient;
+    function _getRecipientStatus(address recipientAddress) internal view virtual override returns (Status) {
+        Recipient memory grantShipRecipient = grantShipRecipients[recipientAddress];
+        return grantShipRecipient.recipientStatus;
     }
 
     function _getPayout(address _recipientId, bytes memory) internal view override returns (PayoutSummary memory) {
