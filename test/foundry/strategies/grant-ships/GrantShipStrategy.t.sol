@@ -27,35 +27,34 @@ import {EventSetup} from "../../shared/EventSetup.sol";
 // //Todo Test if each contract inherits a different version of the same contract
 // // Is this contract getting the same address that others recieve.
 contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
-    //     // Events
-    //     event RecipientStatusChanged(address recipientId, GrantShipStrategy.Status status);
-    //     event MilestoneSubmitted(address recipientId, uint256 milestoneId, Metadata metadata);
-    //     event MilestoneStatusChanged(address recipientId, uint256 milestoneId, IStrategy.Status status);
-    //     event MilestonesSet(address recipientId, uint256 milestonesLength);
-    //     event MilestonesReviewed(address recipientId, IStrategy.Status status);
-    //     event PoolFunded(uint256 poolId, uint256 amountAfterFee, uint256 feeAmount);
-    //     event PoolWithdraw(uint256 amount);
-    //     event FlagIssued(uint256 nonce, GrantShipStrategy.FlagType flagType, Metadata flagReason);
-    //     event FlagResolved(uint256 nonce, Metadata resolutionReason);
-    //     event UpdatePosted(
-    //         string indexed tag, GrantShipStrategy.RoleType indexed role, address indexed recipientId, Metadata content
-    //     );
+    // Events
+    event RecipientStatusChanged(address recipientId, GrantShipStrategy.Status status);
+    event MilestoneSubmitted(address recipientId, uint256 milestoneId, Metadata metadata);
+    event MilestoneStatusChanged(address recipientId, uint256 milestoneId, IStrategy.Status status);
+    event MilestonesSet(address recipientId, uint256 milestonesLength);
+    event MilestonesReviewed(address recipientId, IStrategy.Status status);
+    event PoolFunded(uint256 poolId, uint256 amountAfterFee, uint256 feeAmount);
+    event PoolWithdraw(uint256 amount);
+    event FlagIssued(uint256 nonce, GrantShipStrategy.FlagType flagType, Metadata flagReason);
+    event FlagResolved(uint256 nonce, Metadata resolutionReason);
+    event UpdatePosted(
+        string indexed tag, GrantShipStrategy.RoleType indexed role, address indexed recipientId, Metadata content
+    );
 
-    //     // ================= State ===================
+    // ================= State ===================
 
-    //     uint256 internal constant _grantAmount = 1_000e18;
-    //     uint256 internal constant _poolAmount = 30_000e18;
+    uint256 internal constant _grantAmount = 1_000e18;
+    uint256 internal constant _poolAmount = 30_000e18;
 
-    //     // ================= Setup =====================
+    // ================= Setup =====================
 
     function setUp() public {
-        // Create 3 grant ships and set up game
-        __GameSetup(3);
+        __GameSetup();
     }
 
     function test() public {}
 
-    //     // ================= Deployment & Init Tests =====================
+    // ================= Deployment & Init Tests =====================
 
     //     function test_deploy_manager() public {
     //         assertTrue(address(gameManager()) != address(0));
@@ -73,14 +72,14 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
     //         assertTrue(gameManager().gameFacilitatorHatId() == facilitator().id);
     //     }
 
-    //     function test_ships_created() public {
-    //         for (uint256 i = 0; i < 3;) {
-    //             _test_ship_created(i);
-    //             unchecked {
-    //                 i++;
-    //             }
-    //         }
-    //     }
+    function test_ships_created() public {
+        for (uint256 i = 0; i < 3;) {
+            _test_ship_created(i);
+            unchecked {
+                i++;
+            }
+        }
+    }
 
     //     // ================= GrantShip Strategy =====================
 
@@ -936,180 +935,178 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
     //         vm.stopPrank();
     //     }
 
-    //     function _test_ship_created(uint256 _shipId) internal {
-    //         // GrantShipStrategy shipStrategy = _getShipStrategy(_shipId);
-    //         ShipInitData memory shipInitData = abi.decode(shipSetupData(_shipId), (ShipInitData));
-    //         assertTrue(address(ship(_shipId).getAllo()) == address(allo()));
-    //         assertTrue(ship(_shipId).getStrategyId() == keccak256(abi.encode(shipInitData.shipName)));
-    //         assertTrue(ship(_shipId).registryGating());
-    //         assertTrue(ship(_shipId).metadataRequired());
-    //         assertTrue(ship(_shipId).grantAmountRequired());
-    //         assertTrue(shipInitData.operatorHatId == ship(_shipId).operatorHatId());
-    //         // Todo add tests for other params once they are added to Ship Strategy
-    //     }
+    function _test_ship_created(uint256 _shipId) internal {
+        ShipInitData memory shipInitData = shipSetupData(_shipId);
+        assertTrue(address(ship(_shipId).getAllo()) == address(allo()));
+        assertTrue(ship(_shipId).getStrategyId() == keccak256(abi.encode(shipInitData.shipName)));
+        assertTrue(ship(_shipId).registryGating());
+        assertTrue(ship(_shipId).metadataRequired());
+        assertTrue(ship(_shipId).grantAmountRequired());
+        assertTrue(shipInitData.operatorHatId == ship(_shipId).operatorHatId());
+    }
 
-    //     function _getShipStrategy(uint256 _shipId) internal view returns (GrantShipStrategy) {
-    //         address payable strategyAddress = gameManager().getShipAddress(_shipId);
-    //         return GrantShipStrategy(strategyAddress);
-    //     }
-
-    //     function _register_recipient_return_data() internal returns (address recipientId, bytes memory data) {
-    //         recipientId = profile1_anchor();
-    //         address recipientAddress = recipient1();
-    //         address sender = profile1_member1();
-    //         uint256 grantAmount = _grantAmount; //
-    //         Metadata memory metadata = Metadata(1, "team recipient 1");
-
-    //         data = abi.encode(recipientId, recipientAddress, grantAmount, metadata);
-
-    //         vm.startPrank(address(allo()));
-
-    //         vm.expectEmit(true, true, true, true);
-    //         emit Registered(recipientId, data, profile1_member1());
-
-    //         ship(1).registerRecipient(data, sender);
-    //         vm.stopPrank();
-    //     }
-
-    //     function _register_recipient() internal returns (address recipientId) {
-    //         (recipientId,) = _register_recipient_return_data();
-    //     }
-
-    // function _quick_fund_ship(uint256 _shipId) internal {
-    //     vm.startPrank(arbWhale);
-    //     ARB().transfer(facilitator().wearer, _poolAmount);
-    //     vm.stopPrank();
-
-    //     uint256 poolId = ship(_shipId).getPoolId();
-
-    //     vm.startPrank(facilitator().wearer);
-    //     ARB().approve(address(allo()), _poolAmount);
-
-    //     allo().fundPool(poolId, _poolAmount);
-
-    //     vm.stopPrank();
+    // function _getShipStrategy(uint256 _shipId) internal view returns (GrantShipStrategy) {
+    //     address payable strategyAddress = gameManager().getShipAddress(_shipId);
+    //     return GrantShipStrategy(strategyAddress);
     // }
 
-    //     function _register_recipient_allocate_accept() internal returns (address recipientId) {
-    //         recipientId = _register_recipient();
-    //         GrantShipStrategy.Status recipientStatus = IStrategy.Status.Accepted;
-    //         uint256 grantAmount = _grantAmount;
+    function _register_recipient_return_data() internal returns (address recipientId, bytes memory data) {
+        recipientId = profile1_anchor();
+        address recipientAddress = recipient1();
+        address sender = profile1_member1();
+        uint256 grantAmount = _grantAmount; //
+        Metadata memory metadata = Metadata(1, "team recipient 1");
 
-    //         bytes memory data = abi.encode(recipientId, recipientStatus, grantAmount);
-    //         _quick_fund_ship(1);
+        data = abi.encode(recipientId, recipientAddress, grantAmount, metadata);
 
-    //         vm.expectEmit(true, true, true, true);
-    //         emit RecipientStatusChanged(recipientId, recipientStatus);
-    //         emit Allocated(recipientId, grantAmount, address(ARB()), facilitator().wearer);
+        vm.startPrank(address(allo()));
 
-    //         vm.startPrank(address(allo()));
-    //         ship(1).allocate(data, facilitator().wearer);
-    //         vm.stopPrank();
-    //     }
+        vm.expectEmit(true, true, true, true);
+        emit Registered(recipientId, data, profile1_member1());
 
-    //     function _register_recipient_allocate_reject() internal returns (address recipientId) {
-    //         recipientId = _register_recipient();
-    //         GrantShipStrategy.Status recipientStatus = IStrategy.Status.Rejected;
-    //         uint256 grantAmount = _grantAmount;
+        ship(1).registerRecipient(data, sender);
+        vm.stopPrank();
+    }
 
-    //         bytes memory data = abi.encode(recipientId, recipientStatus, grantAmount);
-    //         _quick_fund_ship(1);
+    function _register_recipient() internal returns (address recipientId) {
+        (recipientId,) = _register_recipient_return_data();
+    }
 
-    //         vm.expectEmit(false, false, false, false);
-    //         emit RecipientStatusChanged(recipientId, recipientStatus);
+    function _quick_fund_ship(uint256 _shipId) internal {
+        vm.startPrank(arbWhale);
+        ARB().transfer(facilitator().wearer, _poolAmount);
+        vm.stopPrank();
 
-    //         vm.startPrank(address(allo()));
-    //         ship(1).allocate(data, facilitator().wearer);
-    //         vm.stopPrank();
-    //     }
+        uint256 poolId = ship(_shipId).getPoolId();
 
-    //     function _register_recipient_allocate_accept_set_milestones_by_ship_operator()
-    //         internal
-    //         returns (address recipientId)
-    //     {
-    //         recipientId = _register_recipient_allocate_accept();
+        vm.startPrank(facilitator().wearer);
+        ARB().approve(address(allo()), _poolAmount);
 
-    //         GrantShipStrategy.Milestone[] memory milestones = new GrantShipStrategy.Milestone[](2);
-    //         milestones[0] = GrantShipStrategy.Milestone({
-    //             amountPercentage: 0.3e18,
-    //             metadata: Metadata(1, "milestone-1"),
-    //             milestoneStatus: IStrategy.Status.None
-    //         });
+        allo().fundPool(poolId, _poolAmount);
 
-    //         milestones[1] = GrantShipStrategy.Milestone({
-    //             amountPercentage: 0.7e18,
-    //             metadata: Metadata(1, "milestone-2"),
-    //             milestoneStatus: IStrategy.Status.None
-    //         });
+        vm.stopPrank();
+    }
 
-    //         vm.expectEmit(true, true, true, true);
+    function _register_recipient_allocate_accept() internal returns (address recipientId) {
+        recipientId = _register_recipient();
+        GrantShipStrategy.Status recipientStatus = IStrategy.Status.Accepted;
+        uint256 grantAmount = _grantAmount;
 
-    //         emit MilestonesSet(recipientId, milestones.length);
-    //         emit MilestonesReviewed(recipientId, IStrategy.Status.Accepted);
+        bytes memory data = abi.encode(recipientId, recipientStatus, grantAmount);
+        _quick_fund_ship(1);
 
-    //         vm.startPrank(shipOperator(1).wearer);
-    //         ship(1).setMilestones(recipientId, milestones);
-    //         vm.stopPrank();
-    //     }
+        vm.expectEmit(true, true, true, true);
+        emit RecipientStatusChanged(recipientId, recipientStatus);
+        emit Allocated(recipientId, grantAmount, address(ARB()), facilitator().wearer);
 
-    //     function _register_recipient_allocate_accept_set_milestones_by_recipient() internal returns (address recipientId) {
-    //         recipientId = _register_recipient_allocate_accept();
+        vm.startPrank(address(allo()));
+        ship(1).allocate(data, facilitator().wearer);
+        vm.stopPrank();
+    }
 
-    //         GrantShipStrategy.Milestone[] memory milestones = new GrantShipStrategy.Milestone[](2);
-    //         milestones[0] = GrantShipStrategy.Milestone({
-    //             amountPercentage: 0.3e18,
-    //             metadata: Metadata(1, "milestone-1"),
-    //             milestoneStatus: IStrategy.Status.None
-    //         });
+    function _register_recipient_allocate_reject() internal returns (address recipientId) {
+        recipientId = _register_recipient();
+        GrantShipStrategy.Status recipientStatus = IStrategy.Status.Rejected;
+        uint256 grantAmount = _grantAmount;
 
-    //         milestones[1] = GrantShipStrategy.Milestone({
-    //             amountPercentage: 0.7e18,
-    //             metadata: Metadata(1, "milestone-2"),
-    //             milestoneStatus: IStrategy.Status.None
-    //         });
+        bytes memory data = abi.encode(recipientId, recipientStatus, grantAmount);
+        _quick_fund_ship(1);
 
-    //         vm.expectEmit(true, true, true, true);
+        vm.expectEmit(false, false, false, false);
+        emit RecipientStatusChanged(recipientId, recipientStatus);
 
-    //         emit MilestonesSet(recipientId, milestones.length);
+        vm.startPrank(address(allo()));
+        ship(1).allocate(data, facilitator().wearer);
+        vm.stopPrank();
+    }
 
-    //         vm.startPrank(profile1_member1());
-    //         ship(1).setMilestones(recipientId, milestones);
-    //         vm.stopPrank();
-    //     }
+    function _register_recipient_allocate_accept_set_milestones_by_ship_operator()
+        internal
+        returns (address recipientId)
+    {
+        recipientId = _register_recipient_allocate_accept();
 
-    //     function _register_recipient_allocate_accept_set_and_submit_milestones() internal returns (address recipientId) {
-    //         recipientId = _register_recipient_allocate_accept_set_milestones_by_ship_operator();
+        GrantShipStrategy.Milestone[] memory milestones = new GrantShipStrategy.Milestone[](2);
+        milestones[0] = GrantShipStrategy.Milestone({
+            amountPercentage: 0.3e18,
+            metadata: Metadata(1, "milestone-1"),
+            milestoneStatus: IStrategy.Status.None
+        });
 
-    //         Metadata memory metadata1 = Metadata(1, "milestone-1");
-    //         Metadata memory metadata2 = Metadata(1, "milestone-2");
+        milestones[1] = GrantShipStrategy.Milestone({
+            amountPercentage: 0.7e18,
+            metadata: Metadata(1, "milestone-2"),
+            milestoneStatus: IStrategy.Status.None
+        });
 
-    //         vm.expectEmit(true, true, true, true);
-    //         emit MilestoneSubmitted(recipientId, 0, metadata1);
+        vm.expectEmit(true, true, true, true);
 
-    //         vm.startPrank(profile1_member1());
-    //         ship(1).submitMilestone(recipientId, 0, metadata1);
-    //         ship(1).submitMilestone(recipientId, 1, metadata2);
-    //         vm.stopPrank();
-    //     }
+        emit MilestonesSet(recipientId, milestones.length);
+        emit MilestonesReviewed(recipientId, IStrategy.Status.Accepted);
 
-    //     function _register_recipient_allocate_accept_set_and_submit_milestones_distribute()
-    //         internal
-    //         returns (address recipientId)
-    //     {
-    //         recipientId = _register_recipient_allocate_accept_set_and_submit_milestones();
+        vm.startPrank(shipOperator(1).wearer);
+        ship(1).setMilestones(recipientId, milestones);
+        vm.stopPrank();
+    }
 
-    //         address[] memory recipients = new address[](2);
+    function _register_recipient_allocate_accept_set_milestones_by_recipient() internal returns (address recipientId) {
+        recipientId = _register_recipient_allocate_accept();
 
-    //         recipients[0] = recipientId;
-    //         recipients[1] = recipientId;
+        GrantShipStrategy.Milestone[] memory milestones = new GrantShipStrategy.Milestone[](2);
+        milestones[0] = GrantShipStrategy.Milestone({
+            amountPercentage: 0.3e18,
+            metadata: Metadata(1, "milestone-1"),
+            milestoneStatus: IStrategy.Status.None
+        });
 
-    //         vm.expectEmit(true, true, true, true);
+        milestones[1] = GrantShipStrategy.Milestone({
+            amountPercentage: 0.7e18,
+            metadata: Metadata(1, "milestone-2"),
+            milestoneStatus: IStrategy.Status.None
+        });
 
-    //         emit MilestoneStatusChanged(recipientId, 1, IStrategy.Status.Accepted);
-    //         emit Distributed(recipientId, recipient1(), 0.7e18, facilitator().wearer);
+        vm.expectEmit(true, true, true, true);
 
-    //         vm.startPrank(shipOperator(1).wearer);
-    //         allo().distribute(ship(1).getPoolId(), recipients, "");
-    //         vm.stopPrank();
-    //     }
+        emit MilestonesSet(recipientId, milestones.length);
+
+        vm.startPrank(profile1_member1());
+        ship(1).setMilestones(recipientId, milestones);
+        vm.stopPrank();
+    }
+
+    function _register_recipient_allocate_accept_set_and_submit_milestones() internal returns (address recipientId) {
+        recipientId = _register_recipient_allocate_accept_set_milestones_by_ship_operator();
+
+        Metadata memory metadata1 = Metadata(1, "milestone-1");
+        Metadata memory metadata2 = Metadata(1, "milestone-2");
+
+        vm.expectEmit(true, true, true, true);
+        emit MilestoneSubmitted(recipientId, 0, metadata1);
+
+        vm.startPrank(profile1_member1());
+        ship(1).submitMilestone(recipientId, 0, metadata1);
+        ship(1).submitMilestone(recipientId, 1, metadata2);
+        vm.stopPrank();
+    }
+
+    function _register_recipient_allocate_accept_set_and_submit_milestones_distribute()
+        internal
+        returns (address recipientId)
+    {
+        recipientId = _register_recipient_allocate_accept_set_and_submit_milestones();
+
+        address[] memory recipients = new address[](2);
+
+        recipients[0] = recipientId;
+        recipients[1] = recipientId;
+
+        vm.expectEmit(true, true, true, true);
+
+        emit MilestoneStatusChanged(recipientId, 1, IStrategy.Status.Accepted);
+        emit Distributed(recipientId, recipient1(), 0.7e18, facilitator().wearer);
+
+        vm.startPrank(shipOperator(1).wearer);
+        allo().distribute(ship(1).getPoolId(), recipients, "");
+        vm.stopPrank();
+    }
 }

@@ -34,9 +34,9 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
     uint256 internal constant _GAME_AMOUNT = 90_000e18;
     uint256 internal constant _SHIP_AMOUNT = 30_000e18;
 
-    GrantShipStrategy internal ship;
-    GrantShipStrategy internal ship2;
-    GrantShipStrategy internal ship3;
+    GrantShipStrategy internal shipStrategy;
+    GrantShipStrategy internal ship2Strategy;
+    GrantShipStrategy internal ship3Strategy;
 
     function setUp() public {
         vm.createSelectFork({blockNumber: 166_807_779, urlOrAlias: "arbitrumOne"});
@@ -179,9 +179,9 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         assertEq(recipient.recipientAddress, recipientAddress);
         assertEq(recipient.profileId, registry().getProfileByAnchor(profile1_anchor()).id);
         assertEq(recipient.shipName, "Ship Name");
-        assertEq(recipient.shipAddress, address(ship));
+        assertEq(recipient.shipAddress, address(shipStrategy));
         assertEq(recipient.previousAddress, address(0));
-        assertEq(recipient.shipPoolId, ship.getPoolId());
+        assertEq(recipient.shipPoolId, shipStrategy.getPoolId());
         assertEq(recipient.grantAmount, 0);
         assertEq(recipient.metadata.pointer, "Ship 1");
         assertEq(recipient.metadata.protocol, 1);
@@ -240,9 +240,9 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         assertEq(recipient1.recipientAddress, recipientAddress);
         assertEq(recipient1.profileId, profileId1);
         assertEq(recipient1.shipName, "Ship Name");
-        assertEq(recipient1.shipAddress, address(ship));
+        assertEq(recipient1.shipAddress, address(shipStrategy));
         assertEq(recipient1.previousAddress, address(0));
-        assertEq(recipient1.shipPoolId, ship.getPoolId());
+        assertEq(recipient1.shipPoolId, shipStrategy.getPoolId());
         assertEq(recipient1.grantAmount, 20_000e18);
         assertEq(recipient1.metadata.pointer, "Ship 1");
         assertEq(recipient1.metadata.protocol, 1);
@@ -254,9 +254,9 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         assertEq(recipient2.recipientAddress, recipientAddress2);
         assertEq(recipient2.profileId, profileId2);
         assertEq(recipient2.shipName, "Ship Name 2");
-        assertEq(recipient2.shipAddress, address(ship2));
+        assertEq(recipient2.shipAddress, address(ship2Strategy));
         assertEq(recipient2.previousAddress, address(0));
-        assertEq(recipient2.shipPoolId, ship2.getPoolId());
+        assertEq(recipient2.shipPoolId, ship2Strategy.getPoolId());
         assertEq(recipient2.grantAmount, 40_000e18);
         assertEq(recipient2.metadata.pointer, "Ship 2");
         assertEq(recipient2.metadata.protocol, 1);
@@ -268,9 +268,9 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         assertEq(recipient3.recipientAddress, recipientAddress3);
         assertEq(recipient3.profileId, profileId3);
         assertEq(recipient3.shipName, "Ship Name 3");
-        assertEq(recipient3.shipAddress, address(ship3));
+        assertEq(recipient3.shipAddress, address(ship3Strategy));
         assertEq(recipient3.previousAddress, address(0));
-        assertEq(recipient3.shipPoolId, ship3.getPoolId());
+        assertEq(recipient3.shipPoolId, ship3Strategy.getPoolId());
         assertEq(recipient3.grantAmount, 30_000e18);
         assertEq(recipient3.metadata.pointer, "Ship 3");
         assertEq(recipient3.metadata.protocol, 1);
@@ -413,13 +413,13 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         assertEq(block.timestamp + _3_MONTHS, round.endTime);
         assertEq(uint8(round.roundStatus), uint8(GameManagerStrategy.RoundStatus.Funded));
 
-        uint256 shipBalance = ARB().balanceOf(address(ship));
-        uint256 ship2Balance = ARB().balanceOf(address(ship2));
-        uint256 ship3Balance = ARB().balanceOf(address(ship3));
+        uint256 shipBalance = ARB().balanceOf(address(shipStrategy));
+        uint256 ship2Balance = ARB().balanceOf(address(ship2Strategy));
+        uint256 ship3Balance = ARB().balanceOf(address(ship3Strategy));
 
-        uint256 shipPoolAmount = ship.getPoolAmount();
-        uint256 ship2PoolAmount = ship2.getPoolAmount();
-        uint256 ship3PoolAmount = ship3.getPoolAmount();
+        uint256 shipPoolAmount = shipStrategy.getPoolAmount();
+        uint256 ship2PoolAmount = ship2Strategy.getPoolAmount();
+        uint256 ship3PoolAmount = ship3Strategy.getPoolAmount();
         uint256 gameManagerBalance = ARB().balanceOf(address(gameManager()));
 
         assertEq(shipBalance, 20_000e18);
@@ -446,9 +446,9 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         uint256 poolId = gameManager().getPoolId();
 
         vm.expectEmit(true, true, true, true);
-        emit Distributed(recipients[0], address(ship), 20_000e18, facilitator().wearer);
-        emit Distributed(recipients[1], address(ship2), 40_000e18, facilitator().wearer);
-        emit Distributed(recipients[2], address(ship3), 30_000e18, facilitator().wearer);
+        emit Distributed(recipients[0], address(shipStrategy), 20_000e18, facilitator().wearer);
+        emit Distributed(recipients[1], address(ship2Strategy), 40_000e18, facilitator().wearer);
+        emit Distributed(recipients[2], address(ship3Strategy), 30_000e18, facilitator().wearer);
 
         vm.startPrank(facilitator().wearer);
         allo().distribute(poolId, recipients, data);
@@ -490,8 +490,7 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
             ShipInitData(true, true, true, "Ship Name 2", Metadata(1, "Ship 2"), team(1).wearer, shipOperator(1).id)
         );
         vm.stopPrank();
-        // console.log("got here");
-        ship2 = GrantShipStrategy(shipAddress2);
+        ship2Strategy = GrantShipStrategy(shipAddress2);
 
         // Review recipient 3
         vm.startPrank(pool_admin());
@@ -506,7 +505,7 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         );
         vm.stopPrank();
 
-        ship3 = GrantShipStrategy(shipAddress3);
+        ship3Strategy = GrantShipStrategy(shipAddress3);
 
         // Finally, we allocate
 
@@ -580,11 +579,11 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         address payable shipAddress = gameManager().reviewRecipient(
             applicantId,
             GameManagerStrategy.ShipStatus.Accepted,
-            ShipInitData(true, true, true, "Ship Name", Metadata(1, "Ship 1"), team(0).wearer, shipOperator(0).id)
+            ShipInitData(true, true, true, "Ship Name", Metadata(1, "Ship 1"), profile1_owner(), shipOperator(0).id)
         );
         vm.stopPrank();
 
-        ship = GrantShipStrategy(shipAddress);
+        shipStrategy = GrantShipStrategy(shipAddress);
     }
 
     function _register_create_round() internal returns (address recipientId) {

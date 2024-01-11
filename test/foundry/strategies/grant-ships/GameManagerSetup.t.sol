@@ -21,11 +21,6 @@ import {Accounts} from "../../shared/Accounts.sol";
 import {ShipInitData} from "../../../../contracts/strategies/_poc/grant-ships/libraries/GrantShipShared.sol";
 
 contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLive, Native {
-    struct ShipProfile {
-        bytes32 id;
-        address anchor;
-    }
-
     //     /////////////////GAME MANAGER///////////////
     GameManagerStrategy internal _gameManager;
     uint256 public gameManagerPoolId;
@@ -34,14 +29,16 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
     string public gameManagerStrategyId = "GameManagerStrategy";
     uint32 internal shipAmount;
 
-    //     ////////////////GRANT SHIPS/////////////////
-    // bytes[] internal _shipSetupData = new bytes[](3);
-    //     GrantShipStrategy[] internal _ships = new GrantShipStrategy[](3);
-    ShipProfile[3] internal _shipProfiles;
+    ////////////////GRANT SHIPS/////////////////
+    ShipInitData[] internal _shipSetupData;
+    GrantShipStrategy[] internal _ships;
 
-    //     /////////////////GAME TOKEN/////////////////
+    address[] internal _shipAnchor;
+    bytes32[] internal _shipProfileId;
+
+    /////////////////GAME TOKEN/////////////////
     IERC20 public arbToken = IERC20(0x912CE59144191C1204E64559FE8253a0e49E6548);
-    uint256 internal _manager_pool_amount = 90_000e18;
+    uint256 internal arbAmount = 90_000e18;
 
     // Binance Hot Wallet on Arbitrum.
     // EOA with lots of ARB for testing live
@@ -58,30 +55,39 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
         return _gameManager;
     }
 
-    //     function ship(uint256 _index) public view returns (GrantShipStrategy) {
-    //         return _ships[_index];
-    //     }
+    function ship(uint256 _index) public view returns (GrantShipStrategy) {
+        return _ships[_index];
+    }
 
-    //     function shipSetupData(uint256 _index) public view returns (bytes memory) {
-    //         return _shipSetupData[_index];
-    //     }
+    function shipSetupData(uint256 _index) public view returns (ShipInitData memory) {
+        return _shipSetupData[_index];
+    }
 
     function ARB() public view returns (IERC20) {
         return arbToken;
+    }
+
+    function shipAnchor(uint256 _index) public view returns (address) {
+        return _shipAnchor[_index];
+    }
+
+    function shipProfileId(uint256 _index) public view returns (bytes32) {
+        return _shipProfileId[_index];
     }
 
     //     // ====================================
     //     // =========== Setup ==================
     //     // ====================================
 
-    function __GameSetup(uint32 _shipAmount) internal {
+    function __GameSetup() internal {
         vm.createSelectFork({blockNumber: 166_807_779, urlOrAlias: "arbitrumOne"});
         __RegistrySetupFullLive();
         __AlloSetupLive();
         __HatsSetupLive();
         __initGameManager();
         __initGameManagerPool();
-        __registerShips(_shipAmount);
+        __generateShipData();
+        __registerShips();
     }
 
     function __ManagerSetup() internal {
@@ -93,21 +99,20 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
         __initGameManagerPool();
     }
 
-    function __registerShips(uint32 _shipAmount) internal {
-        for (uint32 i = 0; i < _shipAmount;) {
+    function __registerShips() internal {
+        vm.startPrank(facilitator().wearer);
+        gameManager().createRound(arbAmount, address(ARB()));
+        vm.stopPrank();
+
+        for (uint32 i = 0; i < 3;) {
             address[] memory managers = new address[](2);
             managers[0] = address(gameManager());
-
-            console.log("___In TEST___");
-            console.log("address(gameManager())", address(gameManager()));
-
             managers[1] = shipOperator(i).wearer;
 
             vm.startPrank(team(i).wearer);
-
             // Create profile with Hats Team Address And ID as Owner
             bytes32 profileId = _registry_.createProfile(
-                i,
+                i + 50,
                 string.concat("Ship Profile ", vm.toString(i)),
                 Metadata({protocol: 1, pointer: string.concat("ipfs://ship-profile/", vm.toString(i))}),
                 team(i).wearer,
@@ -117,20 +122,26 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
             address profileAnchor = _registry_.getProfileById(profileId).anchor;
 
             // Save profiles for easy testing later on
-            ShipProfile storage currentShipProfile = _shipProfiles[i];
-
-            currentShipProfile.id = profileId;
-            currentShipProfile.anchor = profileAnchor;
+            _shipProfileId.push(profileId);
+            _shipAnchor.push(profileAnchor);
 
             Metadata memory applicantMetadata =
                 Metadata(1, string.concat("ipfs://grant-ships/applicant/", vm.toString(i)));
 
-            // Register Hats Branch/Profile as a recipient
+            // Register HatsBranch/Profile as a recipient
             allo().registerRecipient(
                 _gameManager.getPoolId(),
                 abi.encode(profileAnchor, string.concat("Ship ", vm.toString(i)), applicantMetadata)
             );
+
             vm.stopPrank();
+
+            vm.startPrank(facilitator().wearer);
+            address payable shipAddress =
+                gameManager().reviewRecipient(profileAnchor, GameManagerStrategy.ShipStatus.Accepted, _shipSetupData[i]);
+            vm.stopPrank();
+
+            _ships.push(GrantShipStrategy(shipAddress));
 
             unchecked {
                 i++;
@@ -138,34 +149,29 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
         }
     }
 
-    //     function __generateShipData() internal {
-    //         for (uint32 i = 0; i < _shipSetupData.length;) {
-    //             ShipInitData memory shipInitData = ShipInitData(
-    //                 true,
-    //                 true,
-    //                 true,
-    //                 string.concat("Ship ", vm.toString(uint256(i))),
-    //                 Metadata(1, string.concat("ipfs://grant-ships/ship.json/", vm.toString(i))),
-    //                 team(i).wearer,
-    //                 shipOperator(i).id
-    //             );
+    function __generateShipData() internal {
+        for (uint32 i = 0; i < 3;) {
+            ShipInitData memory shipInitData = ShipInitData(
+                true,
+                true,
+                true,
+                string.concat("Ship ", vm.toString(uint256(i))),
+                Metadata(1, string.concat("ipfs://grant-ships/ship.json/", vm.toString(i))),
+                team(i).wearer,
+                shipOperator(i).id
+            );
 
-    //             //Todo there will be more setup params once the strategy design is finalized
-    //             _shipSetupData[i] = abi.encode(shipInitData);
-    //             unchecked {
-    //                 i++;
-    //             }
-    //         }
-    //     }
+            //Todo there will be more setup params once the strategy design is finalized
+            _shipSetupData.push(shipInitData);
+            unchecked {
+                i++;
+            }
+        }
+    }
 
     function __initGameManager() internal {
         _gameManager = new GameManagerStrategy(address(allo()), gameManagerStrategyId);
     }
-
-    //     function __dealArb() internal {
-    //         vm.prank(arbWhale);
-    //         arbToken.transfer(pool_admin(), _manager_pool_amount);
-    //     }
 
     function __initGameManagerPool() internal {
         vm.startPrank(pool_admin());
@@ -174,8 +180,6 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
             poolProfile_id(),
             address(_gameManager),
             abi.encode(facilitator().id, IPFS, address(hats()), pool_admin()),
-            // Todo: Using native to test multi-token
-            // write tests to confirm that this works, otherwise use ARB
             address(ARB()),
             0,
             Metadata(IPFS, "ipfs://grant-ships/about.json"),
@@ -187,14 +191,4 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
 
         vm.stopPrank();
     }
-
-    //     function __storeShips() internal {
-    //         for (uint32 i = 0; i < _shipSetupData.length;) {
-    //             address payable shipAddress = _gameManager.getShipAddress(i);
-    //             _ships[i] = GrantShipStrategy(shipAddress);
-    //             unchecked {
-    //                 i++;
-    //             }
-    //         }
-    //     }
 }
