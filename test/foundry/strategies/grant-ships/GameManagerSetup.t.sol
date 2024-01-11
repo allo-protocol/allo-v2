@@ -78,7 +78,7 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
         vm.createSelectFork({blockNumber: 166_807_779, urlOrAlias: "arbitrumOne"});
         __RegistrySetupFullLive();
         __AlloSetupLive();
-        __HatsSetupLive(pool_admin());
+        __HatsSetupLive();
         __initGameManager();
         __initGameManagerPool();
         __registerShips(_shipAmount);
@@ -88,7 +88,7 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
         vm.createSelectFork({blockNumber: 166_807_779, urlOrAlias: "arbitrumOne"});
         __RegistrySetupFullLive();
         __AlloSetupLive();
-        __HatsSetupLive(pool_admin());
+        __HatsSetupLive();
         __initGameManager();
         __initGameManagerPool();
     }
@@ -173,7 +173,7 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
         gameManagerPoolId = allo().createPoolWithCustomStrategy(
             poolProfile_id(),
             address(_gameManager),
-            abi.encode(facilitator().id, IPFS, address(hats()), pool_admin(), true),
+            abi.encode(facilitator().id, IPFS, address(hats()), pool_admin()),
             // Todo: Using native to test multi-token
             // write tests to confirm that this works, otherwise use ARB
             address(ARB()),

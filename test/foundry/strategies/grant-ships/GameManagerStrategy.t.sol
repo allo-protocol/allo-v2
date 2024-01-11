@@ -43,6 +43,10 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         __ManagerSetup();
     }
 
+    // ====================================
+    // =========== Tests ==================
+    // ====================================
+
     function test_registerRecipient() public {
         address recipientId = _register_recipient();
 
@@ -223,15 +227,202 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
     }
 
     function test_allocate() public {
-        _register_create_accept_allocate();
+        address[] memory recipients = _register_create_accept_allocate();
+
+        address recipientAddress = recipients[0];
+        address recipientAddress2 = recipients[1];
+        address recipientAddress3 = recipients[2];
+
+        GameManagerStrategy.Recipient memory recipient1 = gameManager().getRecipient(recipientAddress);
+        bytes32 profileId1 = registry().getProfileByAnchor(profile1_anchor()).id;
+
+        assertEq(recipient1.recipientAddress, recipientAddress);
+        assertEq(recipient1.profileId, profileId1);
+        assertEq(recipient1.shipName, "Ship Name");
+        assertEq(recipient1.shipAddress, address(ship));
+        assertEq(recipient1.previousAddress, address(0));
+        assertEq(recipient1.shipPoolId, ship.getPoolId());
+        assertEq(recipient1.grantAmount, 20_000e18);
+        assertEq(recipient1.metadata.pointer, "Ship 1");
+        assertEq(recipient1.metadata.protocol, 1);
+        assertEq(uint8(recipient1.status), uint8(GameManagerStrategy.ShipStatus.Allocated));
+
+        GameManagerStrategy.Recipient memory recipient2 = gameManager().getRecipient(recipientAddress2);
+        bytes32 profileId2 = registry().getProfileByAnchor(profile2_anchor()).id;
+
+        assertEq(recipient2.recipientAddress, recipientAddress2);
+        assertEq(recipient2.profileId, profileId2);
+        assertEq(recipient2.shipName, "Ship Name 2");
+        assertEq(recipient2.shipAddress, address(ship2));
+        assertEq(recipient2.previousAddress, address(0));
+        assertEq(recipient2.shipPoolId, ship2.getPoolId());
+        assertEq(recipient2.grantAmount, 40_000e18);
+        assertEq(recipient2.metadata.pointer, "Ship 2");
+        assertEq(recipient2.metadata.protocol, 1);
+        assertEq(uint8(recipient2.status), uint8(GameManagerStrategy.ShipStatus.Allocated));
+
+        GameManagerStrategy.Recipient memory recipient3 = gameManager().getRecipient(recipientAddress3);
+        bytes32 profileId3 = registry().getProfileByAnchor(poolProfile_anchor()).id;
+
+        assertEq(recipient3.recipientAddress, recipientAddress3);
+        assertEq(recipient3.profileId, profileId3);
+        assertEq(recipient3.shipName, "Ship Name 3");
+        assertEq(recipient3.shipAddress, address(ship3));
+        assertEq(recipient3.previousAddress, address(0));
+        assertEq(recipient3.shipPoolId, ship3.getPoolId());
+        assertEq(recipient3.grantAmount, 30_000e18);
+        assertEq(recipient3.metadata.pointer, "Ship 3");
+        assertEq(recipient3.metadata.protocol, 1);
+        assertEq(uint8(recipient3.status), uint8(GameManagerStrategy.ShipStatus.Allocated));
+
+        GameManagerStrategy.GameRound memory round = gameManager().getGameRound(0);
+
+        address[] memory roundShips = round.ships;
+
+        address roundShip = roundShips[0];
+        address roundShip2 = roundShips[1];
+        address roundShip3 = roundShips[2];
+
+        assertEq(uint8(round.startTime), 0);
+        assertEq(uint8(round.endTime), 0);
+        assertEq(_gameAmount, round.totalRoundAmount);
+        assertEq(address(ARB()), round.token);
+        assertEq(uint8(round.roundStatus), uint8(GameManagerStrategy.RoundStatus.Allocated));
+        assertEq(roundShips.length, 3);
+        assertEq(roundShip, recipientAddress);
+        assertEq(roundShip2, recipientAddress2);
+        assertEq(roundShip3, recipientAddress3);
+    }
+
+    // function testRevert_allocate_INVALID_STATUS() public {
+    //     address recipientAddress = _register_create_approve();
+
+    //     address[] memory recipientAddresses = new address[](1);
+    //     recipientAddresses[0] = recipientAddress;
+
+    //     uint256[] memory amounts = new uint256[](1);
+    //     amounts[0] = 20_000e18;
+
+    //     bytes memory data = abi.encode(recipientAddresses, amounts, _gameAmount);
+
+    //     vm.expectRevert(GameManagerStrategy.INVALID_STATUS.selector);
+
+    //     vm.startPrank(facilitator().wearer);
+    //     allo().allocate(gameManager().getPoolId(), data);
+    //     vm.stopPrank();
+    // }
+
+    function testRevert_allocate_NOT_ENOUGH_FUNDS_total() public {
+        address recipientAddress = _register_create_approve();
+        _quick_fund_manager();
+
+        address[] memory recipientAddresses = new address[](1);
+        recipientAddresses[0] = recipientAddress;
+
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = _gameAmount;
+
+        bytes memory data = abi.encode(recipientAddresses, amounts, _gameAmount + 1);
+
+        uint256 poolId = gameManager().getPoolId();
+        vm.expectRevert(NOT_ENOUGH_FUNDS.selector);
+
+        vm.startPrank(facilitator().wearer);
+        allo().allocate(poolId, data);
+        vm.stopPrank();
+    }
+
+    function testRevert_allocate_ARRAY_MISMATCH_out_of_bounds() public {
+        address recipientAddress = _register_recipient();
+        _quick_fund_manager();
+
+        address[] memory recipientAddresses = new address[](1);
+        recipientAddresses[0] = recipientAddress;
+
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = _gameAmount;
+
+        bytes memory data = abi.encode(recipientAddresses, amounts, _gameAmount);
+
+        uint256 poolId = gameManager().getPoolId();
+
+        vm.expectRevert(ARRAY_MISMATCH.selector);
+
+        vm.startPrank(facilitator().wearer);
+        allo().allocate(poolId, data);
+        vm.stopPrank();
+    }
+
+    function testRevert_allocate_ARRAY_MISMATCH_param_length() public {
+        address recipientAddress = _register_create_approve();
+        _quick_fund_manager();
+
+        address[] memory recipientAddresses = new address[](1);
+
+        recipientAddresses[0] = recipientAddress;
+        uint256[] memory amounts = new uint256[](2);
+        amounts[0] = _gameAmount;
+        amounts[1] = _gameAmount;
+
+        bytes memory data = abi.encode(recipientAddresses, amounts, _gameAmount);
+
+        uint256 poolId = gameManager().getPoolId();
+
+        vm.expectRevert(ARRAY_MISMATCH.selector);
+
+        vm.startPrank(facilitator().wearer);
+        allo().allocate(poolId, data);
+        vm.stopPrank();
+    }
+
+    function testRevert_allocate_NOT_ENOUGH_FUNDS_in_loop() public {
+        address recipientAddress = _register_create_approve();
+        _quick_fund_manager();
+
+        address[] memory recipientAddresses = new address[](1);
+        recipientAddresses[0] = recipientAddress;
+
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = _gameAmount + 1;
+
+        bytes memory data = abi.encode(recipientAddresses, amounts, _gameAmount);
+
+        uint256 poolId = gameManager().getPoolId();
+
+        vm.expectRevert(NOT_ENOUGH_FUNDS.selector);
+
+        vm.startPrank(facilitator().wearer);
+        allo().allocate(poolId, data);
+        vm.stopPrank();
+    }
+
+    function testRevert_allocate_MISMATCH() public {
+        address recipientAddress = _register_create_approve();
+        _quick_fund_manager();
+
+        address[] memory recipientAddresses = new address[](1);
+        recipientAddresses[0] = recipientAddress;
+
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = _gameAmount;
+
+        bytes memory data = abi.encode(recipientAddresses, amounts, _gameAmount - 1);
+
+        uint256 poolId = gameManager().getPoolId();
+
+        vm.expectRevert(MISMATCH.selector);
+
+        vm.startPrank(facilitator().wearer);
+        allo().allocate(poolId, data);
+        vm.stopPrank();
     }
 
     // ====================================
     // =========== Helpers ================
     // ====================================
 
-    function _register_create_accept_allocate() internal returns (address recipientAddress) {
-        recipientAddress = _register_create_approve();
+    function _register_create_accept_allocate() internal returns (address[] memory) {
+        address recipientAddress = _register_create_approve();
         _quick_fund_manager();
 
         // Register recipient 2
@@ -295,12 +486,13 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         amounts[1] = 40_000e18;
         amounts[2] = 30_000e18;
 
-        // console.log("Got Here");
         bytes memory data = abi.encode(recipientAddresses, amounts, _gameAmount);
 
         vm.startPrank(facilitator().wearer);
         allo().allocate(gameManager().getPoolId(), data);
         vm.stopPrank();
+
+        return recipientAddresses;
     }
 
     function _quick_fund_manager() internal {

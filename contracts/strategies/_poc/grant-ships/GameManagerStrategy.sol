@@ -34,9 +34,9 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         Pending,
         Accepted,
         Rejected,
+        Allocated,
         Active,
         Completed,
-        InReview
     }
 
     enum RoundStatus {
@@ -119,17 +119,9 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     Allo private _allo;
     IRegistry private _registry;
 
-    // ///@notice This maps the recipientId to the recipient
-    // ///@dev 'recipientId' to 'Recipient'
-    // mapping(address => Recipient) public grantShipRecipients;
-
     ///@notice Mapping of all GrantShip Recipients
     ///@dev 'recipientAddress' to 'Recipient'
     mapping(address => Recipient) public recipients;
-
-    //@notice Mapping of all ship applications
-    ///@dev 'recipientAddress' to 'Applicant'
-    // mapping(address => Applicant) public applications;
 
     ///@notice Array of all Game Rounds
     GameRound[] public gameRounds;
@@ -157,13 +149,8 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     }
 
     function __GameManager_init(bytes memory _data) internal {
-        (
-            uint256 _gameFacilitatorId,
-            uint256 _metadataProtocol,
-            address _hatsAddress,
-            address _gameManager,
-            bool _registryGating
-        ) = abi.decode(_data, (uint256, uint256, address, address, bool));
+        (uint256 _gameFacilitatorId, uint256 _metadataProtocol, address _hatsAddress, address _gameManager) =
+            abi.decode(_data, (uint256, uint256, address, address));
 
         gameFacilitatorHatId = _gameFacilitatorId;
         metadataProtocol = _metadataProtocol;
@@ -257,11 +244,11 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     function _allocate(bytes memory _data, address _sender) internal virtual override onlyGameFacilitator(_sender) {
         (address[] memory _recipientIds, uint256[] memory _amounts, uint256 _total) =
             abi.decode(_data, (address[], uint256[], uint256));
-
+        // Ensure funds have been added to the pool
         if (poolAmount < _total) revert NOT_ENOUGH_FUNDS();
-
+        // Prevent overflow errors
+        if (gameRounds.length == 0) revert ARRAY_MISMATCH();
         GameRound storage currentRound = gameRounds[currentRoundIndex];
-
         // checks that the current round is pending
         if (currentRound.roundStatus != RoundStatus.Pending) revert INVALID_STATUS();
 
@@ -278,24 +265,16 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
             address recipientAddress = _recipientIds[i];
             uint256 grantAmount = _amounts[i];
 
-            // console.log("--IN LOOP--");
-            // console.log("i", i);
-            // console.log("recipient.grantAmount", recipient.grantAmount);
-            // console.log("grantAmount", grantAmount);
-            // console.log("recipent", recipient.recipientAddress);
-
-            // checks that the Recipient is not already allocated
-            if (recipient.grantAmount != 0) revert MISMATCH();
             // check that there is enough in the pool
             if (poolAmount < grantAmount + totalAllocated) revert NOT_ENOUGH_FUNDS();
             // adds the grant amount to the total allocated
             totalAllocated += grantAmount;
-            // console.log("totalAllocated", totalAllocated);
             // sets the grant amount on the recipient
             recipient.grantAmount = grantAmount;
-            // console.log("recipient.grantAmount", recipient.grantAmount);
             // adds the recipient to the current round
             currentRound.ships.push(recipientAddress);
+            // sets the recipient status to Allocated
+            recipient.status = ShipStatus.Allocated;
 
             unchecked {
                 i++;
@@ -316,10 +295,41 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         override
         onlyGameFacilitator(_sender)
     {
-        // onlyFacilitator
-        // transfer token amounts to each grantShip pool.
+        // Prevent overflow errors, ensure arrays are the same length
+        if (gameRounds.length == 0 || _recipientIds.length != gameRounds[currentRoundIndex].ships.length) {
+            revert ARRAY_MISMATCH();
+        }
 
-        // distributes funding to each grantship
+        GameRound storage currentRound = gameRounds[currentRoundIndex];
+        // Ensure funds have been added to the pool
+        if (poolAmount < currentRound.totalRoundAmount) revert NOT_ENOUGH_FUNDS();
+        // checks that the current round is pending
+        if (currentRound.roundStatus != RoundStatus.Allocated) revert INVALID_STATUS();
+
+        // () = abi.decode(_data, (uint256));
+
+        uint256 totalDistrubted;
+
+        for (uint32 i; i < _recipientIds.length;) {
+
+            Recipient storage recipient = recipients[_recipientIds[i]];
+
+            // checks that the Recipient status is Allocated
+            if (recipient.status != ShipStatus.Allocated) revert INVALID_STATUS();
+
+            poolAmount -= recipient.grantAmount;
+
+            recipient.status = ShipStatus.;
+
+            _transferAmount(currentRound.token, recipient.recipientAddress, recipient.grantAmount);
+            
+
+            unchecked {
+                i++;
+            }
+        }
+
+       
     }
 
     /// ====================================
@@ -369,7 +379,8 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
 
         Recipient memory recipient = recipients[_anchorAddress];
 
-        if (recipient.status == ShipStatus.Accepted || recipient.status == ShipStatus.Accepted) revert INVALID_STATUS();
+        // Todo check what other statuses should be guarded against here
+        if (recipient.status == ShipStatus.Accepted) revert INVALID_STATUS();
 
         IRegistry.Profile memory profile = _registry.getProfileByAnchor(_anchorAddress);
 
