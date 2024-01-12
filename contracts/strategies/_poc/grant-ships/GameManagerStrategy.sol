@@ -89,6 +89,8 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     );
     event RecipientRejected(address recipientAddress);
 
+    event GameActive(bool active, uint256 gameIndex);
+
     /// ===============================
     /// ========== Modifiers ==========
     /// ===============================
@@ -103,10 +105,6 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     /// ===============================
     /// ======== Game State ===========
     /// ===============================
-
-    bool public registryGating;
-
-    uint256 public metadataProtocol;
 
     address public gameManager;
 
@@ -148,14 +146,10 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     }
 
     function __GameManager_init(bytes memory _data) internal {
-        (uint256 _gameFacilitatorId, uint256 _metadataProtocol, address _hatsAddress, address _gameManager) =
-            abi.decode(_data, (uint256, uint256, address, address));
+        (uint256 _gameFacilitatorId, address _hatsAddress, address _gameManager) =
+            abi.decode(_data, (uint256, address, address));
 
         gameFacilitatorHatId = _gameFacilitatorId;
-
-        metadataProtocol = _metadataProtocol;
-        // Todo: Remove this
-        registryGating = true;
 
         gameManager = _gameManager;
 
@@ -172,7 +166,8 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
 
         currentRound.status = GameStatus.Active;
         _setPoolActive(false);
-        // emit
+
+        emit GameActive(true, currentRoundIndex);
     }
 
     function stopGame() external onlyGameFacilitator(msg.sender) onlyInactivePool {
@@ -192,7 +187,8 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         currentRound.status = GameStatus.Completed;
         _setPoolActive(true);
         currentRoundIndex++;
-        // emit
+
+        emit GameActive(false, currentRoundIndex);
     }
 
     function reviewRecipient(address recipientAddress, GameStatus _approvalFlag, ShipInitData memory shipInitData)
@@ -413,7 +409,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         }
 
         // Check to ensure that the _metadata protocol is correct
-        if (_metadata.protocol != metadataProtocol || bytes(_metadata.pointer).length == 0) {
+        if (bytes(_metadata.pointer).length == 0) {
             revert INVALID_METADATA();
         }
 
@@ -438,8 +434,8 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         return _anchorAddress;
     }
 
-    function _getRecipientStatus(address recipientAddress) internal view virtual override returns (Status) {
-        // Todo: We would like to return GameStatus here, but it is not possible to return a GameStatus
+    function _getRecipientStatus(address) internal view virtual override returns (Status) {
+        // Note: We would like to return GameStatus here, but it is not possible to return a GameStatus
         // with the override
         return Status.None;
     }

@@ -25,6 +25,7 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
     event ShipLaunched(
         address shipAddress, uint256 shipPoolId, address applicantId, string shipName, Metadata metadata
     );
+    event GameActive(bool active, uint256 gameIndex);
 
     /// ===============================
     /// ========== State ==============
@@ -463,7 +464,6 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
 
     function testRevert_distribute_ARRAY_MISMATCH() public {
         address recipientAddress = _register_create_approve();
-        // _quick_fund_manager();
 
         address[] memory recipientAddresses = new address[](1);
         recipientAddresses[0] = recipientAddress;
@@ -602,7 +602,13 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
 
         vm.warp(block.timestamp + _3_MONTHS + 1);
 
-        vm.startPrank(facilitator().wearer);
+        address facilitator = facilitator().wearer;
+
+        vm.expectEmit(true, true, true, true);
+        emit PoolActive(true);
+        emit GameActive(false, 0);
+
+        vm.startPrank(facilitator);
         gameManager().stopGame();
         vm.stopPrank();
 
@@ -611,6 +617,10 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
 
     function _register_create_accept_allocate_distribute_start() internal returns (address[] memory recipients) {
         recipients = _register_create_accept_allocate_distribute();
+
+        vm.expectEmit(true, true, true, true);
+        emit PoolActive(false);
+        emit GameActive(true, 0);
 
         vm.startPrank(facilitator().wearer);
         gameManager().startGame();

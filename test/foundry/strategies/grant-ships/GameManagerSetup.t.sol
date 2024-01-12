@@ -179,7 +179,7 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
         gameManagerPoolId = allo().createPoolWithCustomStrategy(
             poolProfile_id(),
             address(_gameManager),
-            abi.encode(facilitator().id, IPFS, address(hats()), pool_admin()),
+            abi.encode(facilitator().id, address(hats()), pool_admin()),
             address(ARB()),
             0,
             Metadata(IPFS, "ipfs://grant-ships/about.json"),
