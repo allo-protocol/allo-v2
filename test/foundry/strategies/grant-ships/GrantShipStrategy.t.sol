@@ -40,6 +40,8 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
     event UpdatePosted(
         string indexed tag, GrantShipStrategy.RoleType indexed role, address indexed recipientId, Metadata content
     );
+    event Approval(address indexed owner, address indexed spender, uint256 value);
+    event Transfer(address indexed from, address indexed to, uint256 value);
 
     // ================= State ===================
 
@@ -722,11 +724,17 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
     function test_withdraw() public {
         _quick_fund_ship(1);
 
+        uint256 GM_poolId = gameManager().getPoolId();
+
         vm.startPrank(facilitator().wearer);
 
         ship(1).setPoolActive(false);
 
         vm.expectEmit(true, true, true, true);
+        emit Approval(address(ship(1)), address(allo()), _poolAmount);
+        emit Transfer(address(ship(1)), address(allo()), _poolAmount);
+        emit Approval(address(allo()), address(ship(1)), 0);
+        emit PoolFunded(GM_poolId, _poolAmount, 0);
         emit PoolWithdraw(_poolAmount);
 
         ship(1).withdraw(_poolAmount);
@@ -735,6 +743,9 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
 
         assertEq(ARB().balanceOf(address(ship(1))), 0);
         assertEq(ARB().balanceOf(address(gameManager())), _poolAmount);
+
+        assertEq(ship(1).getPoolAmount(), 0);
+        assertEq(gameManager().getPoolAmount(), _poolAmount);
     }
 
     function testRevert_withdraw_UNAUTHORIZED() public {

@@ -5,6 +5,7 @@ import "forge-std/Test.sol";
 
 // External Libraries
 import {ReentrancyGuard} from "openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 // Intefaces
 import {IAllo} from "../../../core/interfaces/IAllo.sol";
 import {IHats} from "hats-protocol/Interfaces/IHats.sol";
@@ -581,11 +582,13 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
 
         poolAmount -= _amount;
 
+        // Note: Using fund pool and approve to ensure that
+        // game manager's pool amount is correct when it recieves funds
+        // There's probably a better pattern for this. @Todo
+        IERC20 token = IERC20(allo.getPool(poolId).token);
+        token.approve(address(allo), _amount);
         // Transfer the amount to the pool manager
-
         allo.fundPool(_gameManager.getPoolId(), _amount);
-
-        // _transferAmount(allo.getPool(poolId).token, address(_gameManager), _amount);
 
         // Emit event for the withdrawal
         emit PoolWithdraw(_amount);
