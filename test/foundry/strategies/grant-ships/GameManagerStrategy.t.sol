@@ -443,11 +443,44 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         assertEq(gameManager().isPoolActive(), false);
     }
 
-    function test_stopGame() public {}
+    function test_stopGame() public {
+        address[] memory recipients = _register_create_accept_allocate_distribute_start_stop();
+
+        address recipientAddress = recipients[0];
+        address recipientAddress2 = recipients[1];
+        address recipientAddress3 = recipients[2];
+
+        GameManagerStrategy.GameRound memory round = gameManager().getGameRound(0);
+        uint256 currentRoundIndex = gameManager().currentRoundIndex();
+
+        GameManagerStrategy.Recipient memory recipient1 = gameManager().getRecipient(recipientAddress);
+        GameManagerStrategy.Recipient memory recipient2 = gameManager().getRecipient(recipientAddress2);
+        GameManagerStrategy.Recipient memory recipient3 = gameManager().getRecipient(recipientAddress3);
+
+        assertEq(uint8(round.status), uint8(GameManagerStrategy.GameStatus.Completed));
+        assertEq(currentRoundIndex, 1);
+
+        assertEq(uint8(recipient1.status), uint8(GameManagerStrategy.GameStatus.Completed));
+        assertEq(uint8(recipient2.status), uint8(GameManagerStrategy.GameStatus.Completed));
+        assertEq(uint8(recipient3.status), uint8(GameManagerStrategy.GameStatus.Completed));
+
+        assertEq(gameManager().isPoolActive(), true);
+    }
 
     // ====================================
     // =========== Helpers ================
     // ====================================
+    function _register_create_accept_allocate_distribute_start_stop() internal returns (address[] memory recipients) {
+        recipients = _register_create_accept_allocate_distribute_start();
+
+        vm.warp(block.timestamp + _3_MONTHS + 1);
+
+        vm.startPrank(facilitator().wearer);
+        gameManager().stopGame();
+        vm.stopPrank();
+
+        return recipients;
+    }
 
     function _register_create_accept_allocate_distribute_start() internal returns (address[] memory recipients) {
         recipients = _register_create_accept_allocate_distribute();
