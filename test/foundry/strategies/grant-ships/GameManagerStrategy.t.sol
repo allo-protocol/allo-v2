@@ -40,7 +40,6 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
 
     function setUp() public {
         vm.createSelectFork({blockNumber: 166_807_779, urlOrAlias: "arbitrumOne"});
-
         __ManagerSetup();
     }
 
@@ -146,7 +145,7 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
 
         assertEq(_GAME_AMOUNT, round.totalRoundAmount);
         assertEq(address(ARB()), round.token);
-        assertEq(uint8(round.GameStatus), uint8(GameManagerStrategy.GameStatus.Pending));
+        assertEq(uint8(round.status), uint8(GameManagerStrategy.GameStatus.Pending));
         assertEq(uint8(round.startTime), 0);
         assertEq(uint8(round.endTime), 0);
         assertEq(round.ships.length, 0);
@@ -288,7 +287,7 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         assertEq(uint8(round.endTime), 0);
         assertEq(_GAME_AMOUNT, round.totalRoundAmount);
         assertEq(address(ARB()), round.token);
-        assertEq(uint8(round.GameStatus), uint8(GameManagerStrategy.GameStatus.Allocated));
+        assertEq(uint8(round.status), uint8(GameManagerStrategy.GameStatus.Allocated));
         assertEq(roundShips.length, 3);
         assertEq(roundShip, recipientAddress);
         assertEq(roundShip2, recipientAddress2);
@@ -408,10 +407,9 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         assertEq(uint8(recipient1.status), uint8(GameManagerStrategy.GameStatus.Active));
 
         GameManagerStrategy.GameRound memory round = gameManager().getGameRound(0);
-
         assertEq(block.timestamp, round.startTime);
         assertEq(block.timestamp + _3_MONTHS, round.endTime);
-        assertEq(uint8(round.GameStatus), uint8(GameManagerStrategy.GameStatus.Funded));
+        assertEq(uint8(round.status), uint8(GameManagerStrategy.GameStatus.Funded));
 
         uint256 shipBalance = ARB().balanceOf(address(shipStrategy));
         uint256 ship2Balance = ARB().balanceOf(address(ship2Strategy));
@@ -434,14 +432,35 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         assertEq(gameManagerBalance, 0);
     }
 
+    // TODO: Distribute reverts
+
+    function test_startGame() public {
+        _register_create_accept_allocate_distribute_start();
+
+        GameManagerStrategy.GameRound memory round = gameManager().getGameRound(0);
+
+        assertEq(uint8(round.status), uint8(GameManagerStrategy.GameStatus.Active));
+        assertEq(gameManager().isPoolActive(), false);
+    }
+
+    function test_stopGame() public {}
+
     // ====================================
     // =========== Helpers ================
     // ====================================
 
+    function _register_create_accept_allocate_distribute_start() internal returns (address[] memory recipients) {
+        recipients = _register_create_accept_allocate_distribute();
+
+        vm.startPrank(facilitator().wearer);
+        gameManager().startGame();
+        vm.stopPrank();
+
+        return recipients;
+    }
+
     function _register_create_accept_allocate_distribute() internal returns (address[] memory recipients) {
         recipients = _register_create_accept_allocate();
-
-        bytes memory data = abi.encode(block.timestamp, block.timestamp + _3_MONTHS);
 
         uint256 poolId = gameManager().getPoolId();
 
@@ -450,9 +469,13 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         emit Distributed(recipients[1], address(ship2Strategy), 40_000e18, facilitator().wearer);
         emit Distributed(recipients[2], address(ship3Strategy), 30_000e18, facilitator().wearer);
 
+        bytes memory times = abi.encode(block.timestamp, block.timestamp + _3_MONTHS);
+
         vm.startPrank(facilitator().wearer);
-        allo().distribute(poolId, recipients, data);
+        allo().distribute(poolId, recipients, times);
         vm.stopPrank();
+
+        return recipients;
     }
 
     function _register_create_accept_allocate() internal returns (address[] memory) {

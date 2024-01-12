@@ -46,7 +46,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         uint256 endTime;
         uint256 totalRoundAmount;
         address token;
-        GameStatus GameStatus;
+        GameStatus status;
         address[] ships;
     }
 
@@ -144,6 +144,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     function initialize(uint256 _poolId, bytes memory _data) external {
         __BaseStrategy_init(_poolId);
         __GameManager_init(_data);
+        _setPoolActive(true);
     }
 
     function __GameManager_init(bytes memory _data) internal {
@@ -151,33 +152,33 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
             abi.decode(_data, (uint256, uint256, address, address));
 
         gameFacilitatorHatId = _gameFacilitatorId;
+
         metadataProtocol = _metadataProtocol;
         // Todo: Remove this
         registryGating = true;
 
         gameManager = _gameManager;
+
         _hats = IHats(_hatsAddress);
+
         _registry = _allo.getRegistry();
     }
 
-    function startGame() external onlyGameFacilitator(msg.sender) onlyInactivePool {
+    function startGame() external onlyGameFacilitator(msg.sender) onlyActivePool {
         GameRound storage currentRound = gameRounds[currentRoundIndex];
 
-        if (currentRound.GameStatus != GameStatus.Funded) revert INVALID_STATUS();
+        if (currentRound.status != GameStatus.Funded) revert INVALID_STATUS();
         if (block.timestamp < currentRound.startTime) revert INVALID_TIME();
 
-        currentRound.GameStatus = GameStatus.Active;
-        _setPoolActive(true);
+        currentRound.status = GameStatus.Active;
+        _setPoolActive(false);
     }
 
-    function stopGame() external onlyGameFacilitator(msg.sender) onlyActivePool {
+    function stopGame() external onlyGameFacilitator(msg.sender) onlyInactivePool {
         GameRound storage currentRound = gameRounds[currentRoundIndex];
 
-        if (currentRound.GameStatus != GameStatus.Active) revert INVALID_STATUS();
+        if (currentRound.status != GameStatus.Active) revert INVALID_STATUS();
         if (block.timestamp < currentRound.endTime) revert INVALID_TIME();
-
-        currentRound.GameStatus = GameStatus.Completed;
-        _setPoolActive(false);
 
         for (uint32 i; i < currentRound.ships.length;) {
             Recipient storage recipient = recipients[currentRound.ships[i]];
@@ -187,6 +188,8 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
             }
         }
 
+        currentRound.status = GameStatus.Completed;
+        _setPoolActive(true);
         currentRoundIndex++;
     }
 
@@ -198,7 +201,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         Recipient storage recipient = recipients[recipientAddress];
         GameRound storage currentRound = gameRounds[currentRoundIndex];
 
-        if (currentRound.GameStatus != GameStatus.Pending) revert INVALID_STATUS();
+        if (currentRound.status != GameStatus.Pending) revert INVALID_STATUS();
 
         // check if there is a current round. If not, revert
 
@@ -220,7 +223,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         onlyGameFacilitator(msg.sender)
         returns (uint256)
     {
-        if (gameRounds.length > 0 && gameRounds[currentRoundIndex].GameStatus != GameStatus.None) {
+        if (gameRounds.length > 0 && gameRounds[currentRoundIndex].status != GameStatus.None) {
             revert INVALID_STATUS();
         }
 
@@ -277,7 +280,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         if (gameRounds.length == 0) revert ARRAY_MISMATCH();
         GameRound storage currentRound = gameRounds[currentRoundIndex];
         // checks that the current round is pending
-        if (currentRound.GameStatus != GameStatus.Pending) revert INVALID_STATUS();
+        if (currentRound.status != GameStatus.Pending) revert INVALID_STATUS();
 
         // checks that the arrays are the same length
         if (_recipientIds.length != _amounts.length) revert ARRAY_MISMATCH();
@@ -315,7 +318,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         // assigns the amount to the round round amount
         currentRound.totalRoundAmount = totalAllocated;
         // sets the round status to active
-        currentRound.GameStatus = GameStatus.Allocated;
+        currentRound.status = GameStatus.Allocated;
     }
 
     function _distribute(address[] memory _recipientIds, bytes memory _data, address _sender)
@@ -333,7 +336,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         // Ensure funds have been added to the pool
         if (poolAmount < currentRound.totalRoundAmount) revert NOT_ENOUGH_FUNDS();
         // checks that the current round is pending
-        if (currentRound.GameStatus != GameStatus.Allocated) revert INVALID_STATUS();
+        if (currentRound.status != GameStatus.Allocated) revert INVALID_STATUS();
 
         for (uint32 i; i < _recipientIds.length;) {
             Recipient storage recipient = recipients[_recipientIds[i]];
@@ -359,7 +362,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
 
         currentRound.startTime = startTime;
         currentRound.endTime = endTime;
-        currentRound.GameStatus = GameStatus.Funded;
+        currentRound.status = GameStatus.Funded;
     }
 
     /// ====================================
