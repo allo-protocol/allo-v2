@@ -63,7 +63,6 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         bytes32 profileId;
         string shipName;
         address payable shipAddress;
-        address payable previousAddress;
         uint256 shipPoolId;
         uint256 grantAmount;
         Metadata metadata;
@@ -431,19 +430,17 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         Recipient memory recipient = recipients[_anchorAddress];
 
         // Todo check what other statuses should be guarded against here
-        if (recipient.status == GameStatus.Accepted) revert INVALID_STATUS();
+
+        GameStatus recipientStatus = recipient.status;
+        if (
+            recipientStatus != GameStatus.None && recipientStatus != GameStatus.Completed
+                && recipientStatus != GameStatus.Rejected && recipientStatus != GameStatus.Pending
+        ) revert INVALID_STATUS();
 
         IRegistry.Profile memory profile = _registry.getProfileByAnchor(_anchorAddress);
 
-        bool shipExists = recipient.shipAddress != address(0);
-        bool previousShipExists = recipient.previousAddress != address(0);
-
-        address payable _shipAddress = shipExists ? recipient.shipAddress : payable(address(0));
-        address payable _previousAddress = previousShipExists ? recipient.previousAddress : payable(address(0));
-
-        recipients[_anchorAddress] = Recipient(
-            _anchorAddress, profile.id, _shipName, _shipAddress, _previousAddress, 0, 0, _metadata, GameStatus.Pending
-        );
+        recipients[_anchorAddress] =
+            Recipient(_anchorAddress, profile.id, _shipName, payable(address(0)), 0, 0, _metadata, GameStatus.Pending);
 
         emit Registered(_anchorAddress, _data, _sender);
         return _anchorAddress;

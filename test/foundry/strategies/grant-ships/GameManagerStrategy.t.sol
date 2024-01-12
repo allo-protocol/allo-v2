@@ -59,7 +59,6 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         assertEq(recipient.profileId, profileId);
         assertEq(recipient.shipName, "Ship Name");
         assertEq(recipient.shipAddress, address(0));
-        assertEq(recipient.previousAddress, address(0));
         assertEq(recipient.shipPoolId, 0);
         assertEq(recipient.grantAmount, 0);
         assertEq(recipient.metadata.pointer, "Ship 1");
@@ -108,7 +107,6 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         assertEq(recipient.profileId, profileId);
         assertEq(recipient.shipName, "Ship Name");
         assertEq(recipient.shipAddress, address(0));
-        assertEq(recipient.previousAddress, address(0));
         assertEq(recipient.shipPoolId, 0);
         assertEq(recipient.grantAmount, 0);
         assertEq(recipient.metadata.pointer, "Ship 1");
@@ -131,7 +129,6 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         assertEq(newRecipient.profileId, profileId);
         assertEq(newRecipient.shipName, "Ship Name: Part 2");
         assertEq(newRecipient.shipAddress, address(0));
-        assertEq(newRecipient.previousAddress, address(0));
         assertEq(newRecipient.shipPoolId, 0);
         assertEq(newRecipient.grantAmount, 0);
         assertEq(newRecipient.metadata.pointer, "Ship 1: Part 2");
@@ -180,7 +177,6 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         assertEq(recipient.profileId, registry().getProfileByAnchor(profile1_anchor()).id);
         assertEq(recipient.shipName, "Ship Name");
         assertEq(recipient.shipAddress, address(shipStrategy));
-        assertEq(recipient.previousAddress, address(0));
         assertEq(recipient.shipPoolId, shipStrategy.getPoolId());
         assertEq(recipient.grantAmount, 0);
         assertEq(recipient.metadata.pointer, "Ship 1");
@@ -219,7 +215,6 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         assertEq(recipient.profileId, registry().getProfileByAnchor(profile1_anchor()).id);
         assertEq(recipient.shipName, "Ship Name");
         assertEq(recipient.shipAddress, address(0));
-        assertEq(recipient.previousAddress, address(0));
         assertEq(recipient.shipPoolId, 0);
         assertEq(recipient.grantAmount, 0);
         assertEq(recipient.metadata.pointer, "Ship 1");
@@ -241,7 +236,6 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         assertEq(recipient1.profileId, profileId1);
         assertEq(recipient1.shipName, "Ship Name");
         assertEq(recipient1.shipAddress, address(shipStrategy));
-        assertEq(recipient1.previousAddress, address(0));
         assertEq(recipient1.shipPoolId, shipStrategy.getPoolId());
         assertEq(recipient1.grantAmount, 20_000e18);
         assertEq(recipient1.metadata.pointer, "Ship 1");
@@ -255,7 +249,6 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         assertEq(recipient2.profileId, profileId2);
         assertEq(recipient2.shipName, "Ship Name 2");
         assertEq(recipient2.shipAddress, address(ship2Strategy));
-        assertEq(recipient2.previousAddress, address(0));
         assertEq(recipient2.shipPoolId, ship2Strategy.getPoolId());
         assertEq(recipient2.grantAmount, 40_000e18);
         assertEq(recipient2.metadata.pointer, "Ship 2");
@@ -269,7 +262,6 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         assertEq(recipient3.profileId, profileId3);
         assertEq(recipient3.shipName, "Ship Name 3");
         assertEq(recipient3.shipAddress, address(ship3Strategy));
-        assertEq(recipient3.previousAddress, address(0));
         assertEq(recipient3.shipPoolId, ship3Strategy.getPoolId());
         assertEq(recipient3.grantAmount, 30_000e18);
         assertEq(recipient3.metadata.pointer, "Ship 3");
