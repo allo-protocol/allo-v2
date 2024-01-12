@@ -87,7 +87,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     event ShipLaunched(
         address shipAddress, uint256 shipPoolId, address applicantId, string shipName, Metadata metadata
     );
-    event ApplicationRejected(address recipientAddress);
+    event RecipientRejected(address recipientAddress);
 
     /// ===============================
     /// ========== Modifiers ==========
@@ -172,6 +172,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
 
         currentRound.status = GameStatus.Active;
         _setPoolActive(false);
+        // emit
     }
 
     function stopGame() external onlyGameFacilitator(msg.sender) onlyInactivePool {
@@ -180,7 +181,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         if (currentRound.status != GameStatus.Active) revert INVALID_STATUS();
         if (block.timestamp < currentRound.endTime) revert INVALID_TIME();
 
-        for (uint32 i; i < currentRound.ships.length;) {
+        for (uint256 i; i < currentRound.ships.length;) {
             Recipient storage recipient = recipients[currentRound.ships[i]];
             recipient.status = GameStatus.Completed;
             unchecked {
@@ -191,6 +192,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         currentRound.status = GameStatus.Completed;
         _setPoolActive(true);
         currentRoundIndex++;
+        // emit
     }
 
     function reviewRecipient(address recipientAddress, GameStatus _approvalFlag, ShipInitData memory shipInitData)
@@ -213,7 +215,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
             return _createShip(recipient, shipInitData, currentRound);
         } else {
             recipient.status = GameStatus.Rejected;
-            emit ApplicationRejected(recipientAddress);
+            emit RecipientRejected(recipientAddress);
             return payable(address(0));
         }
     }
@@ -287,7 +289,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
 
         uint256 totalAllocated;
 
-        for (uint32 i; i < _recipientIds.length;) {
+        for (uint256 i; i < _recipientIds.length;) {
             Recipient storage recipient = recipients[_recipientIds[i]];
             // checks that the Recipient status is Accepted
             if (recipient.status != GameStatus.Accepted) revert INVALID_STATUS();
@@ -328,17 +330,17 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         onlyGameFacilitator(_sender)
     {
         // Prevent overflow errors, ensure arrays are the same length
-        if (gameRounds.length == 0 || _recipientIds.length != gameRounds[currentRoundIndex].ships.length) {
+        if (_recipientIds.length != gameRounds[currentRoundIndex].ships.length) {
             revert ARRAY_MISMATCH();
         }
 
         GameRound storage currentRound = gameRounds[currentRoundIndex];
         // Ensure funds have been added to the pool
         if (poolAmount < currentRound.totalRoundAmount) revert NOT_ENOUGH_FUNDS();
-        // checks that the current round is pending
+        // checks that the current round is allocated
         if (currentRound.status != GameStatus.Allocated) revert INVALID_STATUS();
 
-        for (uint32 i; i < _recipientIds.length;) {
+        for (uint256 i; i < _recipientIds.length;) {
             Recipient storage recipient = recipients[_recipientIds[i]];
             // checks that the Recipient status is Allocated
             if (recipient.status != GameStatus.Allocated) revert INVALID_STATUS();
@@ -348,6 +350,11 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
             recipient.status = GameStatus.Active;
 
             GrantShipStrategy grantShip = GrantShipStrategy(recipient.shipAddress);
+
+            // Note: I need a way to increase the pool amount on the child strategies
+            // Calling fundPool on the child strategy does not work here because it triggers the
+            // re-entrancy guard on Allo. I solve this problem by transferring the funds directly
+            // and then calling the managerIncreasePoolAmount function on the child strategy.
 
             grantShip.managerIncreasePoolAmount(recipient.grantAmount);
             _transferAmount(currentRound.token, recipient.shipAddress, recipient.grantAmount);

@@ -21,7 +21,7 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
     /// ===============================
 
     event RoundCreated(uint256 gameIndex, address token, uint256 totalRoundAmount);
-    event ApplicationRejected(address recipientAddress);
+    event RecipientRejected(address recipientAddress);
     event ShipLaunched(
         address shipAddress, uint256 shipPoolId, address applicantId, string shipName, Metadata metadata
     );
@@ -432,7 +432,52 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         assertEq(gameManagerBalance, 0);
     }
 
-    // TODO: Distribute reverts
+    function testRevert_distribute_NOT_ENOUGH_FUNDS() public {
+        address[] memory recipientAddresses = _register_create_accept_allocate_distribute();
+
+        uint256 poolId = gameManager().getPoolId();
+
+        vm.expectRevert(NOT_ENOUGH_FUNDS.selector);
+
+        vm.startPrank(facilitator().wearer);
+        allo().distribute(poolId, recipientAddresses, abi.encode(block.timestamp, block.timestamp + _3_MONTHS));
+        vm.stopPrank();
+    }
+
+    function testRevert_distribute_INVALID_STATUS() public {
+        _register_create_approve();
+        _quick_fund_manager();
+
+        address[] memory recipientAddresses = new address[](0);
+
+        uint256 poolId = gameManager().getPoolId();
+
+        console.log(recipientAddresses.length);
+
+        vm.expectRevert(GameManagerStrategy.INVALID_STATUS.selector);
+
+        vm.startPrank(facilitator().wearer);
+        allo().distribute(poolId, recipientAddresses, abi.encode(block.timestamp, block.timestamp + _3_MONTHS));
+        vm.stopPrank();
+    }
+
+    function testRevert_distribute_ARRAY_MISMATCH() public {
+        address recipientAddress = _register_create_approve();
+        // _quick_fund_manager();
+
+        address[] memory recipientAddresses = new address[](1);
+        recipientAddresses[0] = recipientAddress;
+
+        uint256 poolId = gameManager().getPoolId();
+
+        console.log(recipientAddresses.length);
+
+        vm.expectRevert(ARRAY_MISMATCH.selector);
+
+        vm.startPrank(facilitator().wearer);
+        allo().distribute(poolId, recipientAddresses, abi.encode(block.timestamp, block.timestamp + _3_MONTHS));
+        vm.stopPrank();
+    }
 
     function test_startGame() public {
         _register_create_accept_allocate_distribute_start();
@@ -609,7 +654,7 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         vm.stopPrank();
 
         vm.expectEmit(true, true, true, true);
-        emit ApplicationRejected(applicantId);
+        emit RecipientRejected(applicantId);
 
         vm.startPrank(facilitator().wearer);
         gameManager().reviewRecipient(
