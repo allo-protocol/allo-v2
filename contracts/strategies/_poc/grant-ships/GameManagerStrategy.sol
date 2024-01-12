@@ -76,6 +76,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Throws when the milestone is invalid.
     error INVALID_STATUS();
+
     error INVALID_TIME();
 
     /// ===============================
@@ -102,6 +103,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     /// ===============================
     /// ======== Game State ===========
     /// ===============================
+
     bool public registryGating;
 
     uint256 public metadataProtocol;
@@ -156,6 +158,36 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         gameManager = _gameManager;
         _hats = IHats(_hatsAddress);
         _registry = _allo.getRegistry();
+    }
+
+    function startGame() external onlyGameFacilitator(msg.sender) onlyInactivePool {
+        GameRound storage currentRound = gameRounds[currentRoundIndex];
+
+        if (currentRound.GameStatus != GameStatus.Funded) revert INVALID_STATUS();
+        if (block.timestamp < currentRound.startTime) revert INVALID_TIME();
+
+        currentRound.GameStatus = GameStatus.Active;
+        _setPoolActive(true);
+    }
+
+    function stopGame() external onlyGameFacilitator(msg.sender) onlyActivePool {
+        GameRound storage currentRound = gameRounds[currentRoundIndex];
+
+        if (currentRound.GameStatus != GameStatus.Active) revert INVALID_STATUS();
+        if (block.timestamp < currentRound.endTime) revert INVALID_TIME();
+
+        currentRound.GameStatus = GameStatus.Completed;
+        _setPoolActive(false);
+
+        for (uint32 i; i < currentRound.ships.length;) {
+            Recipient storage recipient = recipients[currentRound.ships[i]];
+            recipient.status = GameStatus.Completed;
+            unchecked {
+                i++;
+            }
+        }
+
+        currentRoundIndex++;
     }
 
     function reviewRecipient(address recipientAddress, GameStatus _approvalFlag, ShipInitData memory shipInitData)
@@ -397,9 +429,8 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     }
 
     function _getRecipientStatus(address recipientAddress) internal view virtual override returns (Status) {
-        // Recipient memory recipient = recipients[recipientAddress];
-        // return recipient.status;
-
+        // Todo: We would like to return GameStatus here, but it is not possible to return a GameStatus
+        // with the override
         return Status.None;
     }
 

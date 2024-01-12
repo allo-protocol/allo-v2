@@ -56,22 +56,6 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
 
     // ================= Deployment & Init Tests =====================
 
-    //     function test_deploy_manager() public {
-    //         assertTrue(address(gameManager()) != address(0));
-    //         assertTrue(address(gameManager().getAllo()) == address(allo()));
-    //         assertTrue(gameManager().getStrategyId() == keccak256(abi.encode(gameManagerStrategyId)));
-    //         assertTrue(address(hats()) == gameManager().getHatsAddress());
-    //     }
-
-    //     function test_init_manager() public {
-    //         assertTrue(gameManager().currentRoundId() == 0);
-    //         assertTrue(gameManager().currentRoundStartTime() == 0);
-    //         assertTrue(gameManager().currentRoundEndTime() == 0);
-    //         assertTrue(gameManager().currentGameStatus() == IStrategy.Status.None);
-    //         assertTrue(gameManager().token() == address(arbToken));
-    //         assertTrue(gameManager().gameFacilitatorHatId() == facilitator().id);
-    //     }
-
     function test_ships_created() public {
         for (uint256 i = 0; i < 3;) {
             _test_ship_created(i);
