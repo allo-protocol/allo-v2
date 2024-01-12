@@ -560,7 +560,6 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
 
     function managerIncreasePoolAmount(uint256 _amount) external onlyGameManger(msg.sender) {
         poolAmount += _amount;
-        uint256 poolId = this.getPoolId();
         emit PoolFunded(poolId, _amount, 0);
     }
 

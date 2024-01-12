@@ -237,6 +237,17 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         return currentRoundIndex;
     }
 
+    function withdraw(uint256 _amount) external {
+        if (_amount > poolAmount) revert NOT_ENOUGH_FUNDS();
+        if (msg.sender != rootAccount && !isGameFacilitator(msg.sender)) revert UNAUTHORIZED();
+
+        poolAmount -= _amount;
+
+        address poolToken = allo.getPool(poolId).token;
+
+        _transferAmount(poolToken, rootAccount, _amount);
+    }
+
     function _createShip(Recipient memory _recipient, ShipInitData memory _shipInitData, GameRound memory _currentRound)
         internal
         returns (address payable)

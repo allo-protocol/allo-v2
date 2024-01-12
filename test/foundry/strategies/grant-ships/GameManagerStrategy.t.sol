@@ -542,6 +542,30 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         vm.stopPrank();
     }
 
+    function test_stopGame() public {
+        address[] memory recipients = _register_create_accept_allocate_distribute_start_stop();
+
+        address recipientAddress = recipients[0];
+        address recipientAddress2 = recipients[1];
+        address recipientAddress3 = recipients[2];
+
+        GameManagerStrategy.GameRound memory round = gameManager().getGameRound(0);
+        uint256 currentRoundIndex = gameManager().currentRoundIndex();
+
+        GameManagerStrategy.Recipient memory recipient1 = gameManager().getRecipient(recipientAddress);
+        GameManagerStrategy.Recipient memory recipient2 = gameManager().getRecipient(recipientAddress2);
+        GameManagerStrategy.Recipient memory recipient3 = gameManager().getRecipient(recipientAddress3);
+
+        assertEq(uint8(round.status), uint8(GameManagerStrategy.GameStatus.Completed));
+        assertEq(currentRoundIndex, 1);
+
+        assertEq(uint8(recipient1.status), uint8(GameManagerStrategy.GameStatus.Completed));
+        assertEq(uint8(recipient2.status), uint8(GameManagerStrategy.GameStatus.Completed));
+        assertEq(uint8(recipient3.status), uint8(GameManagerStrategy.GameStatus.Completed));
+
+        assertEq(gameManager().isPoolActive(), true);
+    }
+
     function testRevert_stopGame_POOL_ACTIVE() public {
         _register_create_accept_allocate_distribute();
 
@@ -570,28 +594,58 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         vm.stopPrank();
     }
 
-    function test_stopGame() public {
-        address[] memory recipients = _register_create_accept_allocate_distribute_start_stop();
+    function testWithdraw_facilitator() public {
+        _register_create_accept_allocate();
 
-        address recipientAddress = recipients[0];
-        address recipientAddress2 = recipients[1];
-        address recipientAddress3 = recipients[2];
+        vm.startPrank(facilitator().wearer);
+        gameManager().withdraw(_GAME_AMOUNT);
+        vm.stopPrank();
 
-        GameManagerStrategy.GameRound memory round = gameManager().getGameRound(0);
-        uint256 currentRoundIndex = gameManager().currentRoundIndex();
+        // pool admin is serving as root account in the context of these tests
+        assertEq(ARB().balanceOf(pool_admin()), _GAME_AMOUNT);
+        assertEq(ARB().balanceOf(address(gameManager())), 0);
 
-        GameManagerStrategy.Recipient memory recipient1 = gameManager().getRecipient(recipientAddress);
-        GameManagerStrategy.Recipient memory recipient2 = gameManager().getRecipient(recipientAddress2);
-        GameManagerStrategy.Recipient memory recipient3 = gameManager().getRecipient(recipientAddress3);
+        assertEq(gameManager().getPoolAmount(), 0);
+    }
 
-        assertEq(uint8(round.status), uint8(GameManagerStrategy.GameStatus.Completed));
-        assertEq(currentRoundIndex, 1);
+    function testWithdraw_root_account() public {
+        _register_create_accept_allocate();
 
-        assertEq(uint8(recipient1.status), uint8(GameManagerStrategy.GameStatus.Completed));
-        assertEq(uint8(recipient2.status), uint8(GameManagerStrategy.GameStatus.Completed));
-        assertEq(uint8(recipient3.status), uint8(GameManagerStrategy.GameStatus.Completed));
+        vm.startPrank(pool_admin());
+        gameManager().withdraw(_GAME_AMOUNT);
+        vm.stopPrank();
 
-        assertEq(gameManager().isPoolActive(), true);
+        // pool admin is serving as root account in the context of these tests
+        assertEq(ARB().balanceOf(pool_admin()), _GAME_AMOUNT);
+        assertEq(ARB().balanceOf(address(gameManager())), 0);
+
+        assertEq(gameManager().getPoolAmount(), 0);
+    }
+
+    function testRevert_withdraw_NOT_ENOUGH_FUNDS() public {
+        _register_create_accept_allocate();
+
+        vm.expectRevert(NOT_ENOUGH_FUNDS.selector);
+
+        vm.startPrank(facilitator().wearer);
+        gameManager().withdraw(_GAME_AMOUNT + 1);
+        vm.stopPrank();
+    }
+
+    function testRevert_withdraw_UNAUTHORIZED() public {
+        _register_create_accept_allocate();
+
+        vm.expectRevert(UNAUTHORIZED.selector);
+
+        vm.startPrank(randomAddress());
+        gameManager().withdraw(_GAME_AMOUNT);
+        vm.stopPrank();
+
+        vm.expectRevert(UNAUTHORIZED.selector);
+
+        vm.startPrank(shipOperator(1).wearer);
+        gameManager().withdraw(_GAME_AMOUNT);
+        vm.stopPrank();
     }
 
     // ====================================
