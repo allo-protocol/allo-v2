@@ -176,6 +176,8 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
     function __initGameManagerPool() internal {
         vm.startPrank(pool_admin());
 
+        // Note: Can't test emitter because I don't have access to gameManagerPoolId before init
+
         gameManagerPoolId = allo().createPoolWithCustomStrategy(
             poolProfile_id(),
             address(_gameManager),

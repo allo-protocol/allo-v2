@@ -74,7 +74,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     /// ========== Errors =============
     /// ===============================
 
-    /// @notice Throws when the milestone is invalid.
+    /// @notice Throws when the game status or regular status is invalid.
     error INVALID_STATUS();
 
     error INVALID_TIME();
@@ -91,6 +91,8 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
 
     event GameActive(bool active, uint256 gameIndex);
 
+    event GameManagerInitialized(uint256 gameFacilitatorId, address hatsAddress, address rootAccount);
+
     /// ===============================
     /// ========== Modifiers ==========
     /// ===============================
@@ -106,7 +108,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     /// ======== Game State ===========
     /// ===============================
 
-    address public gameManager;
+    address public rootAccount;
 
     /// @notice The 'Hats Protocol' contract interface.
     IHats private _hats;
@@ -146,16 +148,18 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     }
 
     function __GameManager_init(bytes memory _data) internal {
-        (uint256 _gameFacilitatorId, address _hatsAddress, address _gameManager) =
+        (uint256 _gameFacilitatorId, address _hatsAddress, address _rootAccount) =
             abi.decode(_data, (uint256, address, address));
 
         gameFacilitatorHatId = _gameFacilitatorId;
 
-        gameManager = _gameManager;
+        rootAccount = _rootAccount;
 
         _hats = IHats(_hatsAddress);
 
         _registry = _allo.getRegistry();
+
+        emit GameManagerInitialized(_gameFacilitatorId, _hatsAddress, _rootAccount);
     }
 
     function startGame() external onlyGameFacilitator(msg.sender) onlyActivePool {

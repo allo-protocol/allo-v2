@@ -130,6 +130,8 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
 
     event PoolWithdraw(uint256 amount);
 
+    event PoolFunded(uint256 poolId, uint256 amount, uint256 amountPercentage);
+
     event UpdatePosted(string indexed tag, RoleType indexed role, address indexed recipientId, Metadata content);
 
     /// ================================
@@ -557,6 +559,8 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
 
     function managerIncreasePoolAmount(uint256 _amount) external onlyGameManger(msg.sender) {
         poolAmount += _amount;
+        uint256 poolId = this.getPoolId();
+        emit PoolFunded(poolId, _amount, 0);
     }
 
     /// @notice Toggle the status between active and inactive.
@@ -578,7 +582,10 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         poolAmount -= _amount;
 
         // Transfer the amount to the pool manager
-        _transferAmount(allo.getPool(poolId).token, address(_gameManager), _amount);
+
+        allo.fundPool(_gameManager.getPoolId(), _amount);
+
+        // _transferAmount(allo.getPool(poolId).token, address(_gameManager), _amount);
 
         // Emit event for the withdrawal
         emit PoolWithdraw(_amount);
