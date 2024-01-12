@@ -488,6 +488,44 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         assertEq(gameManager().isPoolActive(), false);
     }
 
+    function testRevert_startGame_UNAUTHORIZED() public {
+        _register_create_accept_allocate_distribute();
+
+        vm.expectRevert(UNAUTHORIZED.selector);
+
+        vm.startPrank(shipOperator(0).wearer);
+        gameManager().startGame();
+        vm.stopPrank();
+
+        vm.expectRevert(UNAUTHORIZED.selector);
+
+        vm.startPrank(randomAddress());
+        gameManager().startGame();
+        vm.stopPrank();
+    }
+
+    function testRevert_startGame_POOL_INACTIVE() public {
+        _register_create_accept_allocate_distribute_start();
+
+        vm.expectRevert(POOL_INACTIVE.selector);
+
+        vm.startPrank(facilitator().wearer);
+        gameManager().startGame();
+        vm.stopPrank();
+    }
+
+    function testRevert_startGame_INVALID_TIME() public {
+        _register_create_accept_allocate_distribute();
+
+        vm.warp(block.timestamp - 1);
+
+        vm.expectRevert(GameManagerStrategy.INVALID_TIME.selector);
+
+        vm.startPrank(facilitator().wearer);
+        gameManager().startGame();
+        vm.stopPrank();
+    }
+
     function test_stopGame() public {
         address[] memory recipients = _register_create_accept_allocate_distribute_start_stop();
 
