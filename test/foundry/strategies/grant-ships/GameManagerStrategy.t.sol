@@ -183,6 +183,37 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         assertEq(uint8(recipient.status), uint8(GameManagerStrategy.GameStatus.Accepted));
     }
 
+    function test_recipient_can_reapply_after_reject() public {
+        address recipientAddress = _register_create_reject();
+
+        // Facilitator cannot simply approve after rejecting recipient
+        // Why?
+        // If they were rejected, they should make some changes to their profile.
+
+        vm.expectRevert(GameManagerStrategy.INVALID_STATUS.selector);
+        vm.startPrank(facilitator().wearer);
+        gameManager().reviewRecipient(
+            recipientAddress,
+            GameManagerStrategy.GameStatus.Accepted,
+            ShipInitData(true, true, true, "Ship Name", Metadata(1, "Ship 1"), team(0).wearer, shipOperator(0).id)
+        );
+        vm.stopPrank();
+
+        // They must update their profile
+
+        _register_recipient();
+
+        // Then they can be approved
+
+        vm.startPrank(facilitator().wearer);
+        gameManager().reviewRecipient(
+            recipientAddress,
+            GameManagerStrategy.GameStatus.Accepted,
+            ShipInitData(true, true, true, "Ship Name", Metadata(1, "Ship 1"), team(0).wearer, shipOperator(0).id)
+        );
+        vm.stopPrank();
+    }
+
     function testRevert_reviewApplicant_INVALID_STATUS() public {
         address applicantId = _register_create_round();
 
@@ -636,18 +667,115 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         vm.stopPrank();
     }
 
-    function test_2_rounds() public {
-        _register_create_accept_allocate_distribute_start_stop();
-        // _register_create_accept_allocate_distribute_start_stop();
-
-        vm.prank(facilitator().wearer);
-        gameManager().createRound(_GAME_AMOUNT);
-        vm.stopPrank();
-    }
-
     // ====================================
     // =========== Helpers ================
     // ====================================
+
+    function _2_rounds() public {
+        // ***ROUND 1***
+        address[] memory recipients = _register_create_accept_allocate_distribute_start_stop();
+        uint256 poolId = gameManager().getPoolId();
+
+        // ***ROUND 2***
+
+        // CREATE ROUND
+        vm.startPrank(facilitator().wearer);
+        gameManager().createRound(_GAME_AMOUNT);
+        vm.stopPrank();
+
+        /// REGISTER
+        _register_all_3_ships(recipients);
+
+        // APPROVE
+        _approve_all_3_ships(recipients);
+
+        // ALLOCATE
+        uint256[] memory amounts = new uint256[](3);
+        amounts[0] = 20_000e18;
+        amounts[1] = 40_000e18;
+        amounts[2] = 30_000e18;
+
+        _quick_fund_manager();
+
+        vm.startPrank(facilitator().wearer);
+        bytes memory allocateData = abi.encode(recipients, amounts, _GAME_AMOUNT);
+        allo().allocate(poolId, allocateData);
+
+        // Distribute
+        bytes memory times = abi.encode(block.timestamp, block.timestamp + _3_MONTHS);
+
+        allo().distribute(poolId, recipients, times);
+
+        vm.stopPrank();
+
+        // START
+
+        vm.startPrank(facilitator().wearer);
+        gameManager().startGame();
+        vm.stopPrank();
+
+        vm.warp(block.timestamp + _3_MONTHS + 1);
+
+        // STOP
+        vm.startPrank(facilitator().wearer);
+        gameManager().stopGame();
+        vm.stopPrank();
+    }
+
+    function _register_all_3_ships(address[] memory recipients) public {
+        address recipientAddress = recipients[0];
+        address recipientAddress2 = recipients[1];
+        address recipientAddress3 = recipients[2];
+
+        uint256 poolId = gameManager().getPoolId();
+        // Register recipient 1
+        Metadata memory metadata = Metadata(1, "Ship 1");
+        bytes memory data = abi.encode(recipientAddress, "Ship Name", metadata);
+        vm.startPrank(profile1_member1());
+        allo().registerRecipient(poolId, data);
+        vm.stopPrank();
+
+        // Register recipient 2
+        Metadata memory metadata2 = Metadata(1, "Ship 2");
+        bytes memory data2 = abi.encode(recipientAddress2, "Ship Name 2", metadata2);
+        vm.startPrank(profile2_owner());
+        allo().registerRecipient(poolId, data2);
+        vm.stopPrank();
+
+        // Register reciepient 3
+        Metadata memory metadata3 = Metadata(1, "Ship 3");
+        bytes memory data3 = abi.encode(recipientAddress3, "Ship Name 3", metadata3);
+        vm.startPrank(pool_admin());
+        allo().registerRecipient(poolId, data3);
+        vm.stopPrank();
+    }
+
+    function _approve_all_3_ships(address[] memory recipients) public {
+        address recipientAddress = recipients[0];
+        address recipientAddress2 = recipients[1];
+        address recipientAddress3 = recipients[2];
+
+        vm.startPrank(facilitator().wearer);
+        gameManager().reviewRecipient(
+            recipientAddress,
+            GameManagerStrategy.GameStatus.Accepted,
+            ShipInitData(true, true, true, "Ship Name", Metadata(1, "Ship 1"), profile1_owner(), shipOperator(0).id)
+        );
+        // Accept recipient 2
+        gameManager().reviewRecipient(
+            recipientAddress2,
+            GameManagerStrategy.GameStatus.Accepted,
+            ShipInitData(true, true, true, "Ship Name 2", Metadata(1, "Ship 2"), profile2_owner(), shipOperator(1).id)
+        );
+        // Accept recipient 3
+        gameManager().reviewRecipient(
+            recipientAddress3,
+            GameManagerStrategy.GameStatus.Accepted,
+            ShipInitData(true, true, true, "Ship Name 3", Metadata(1, "Ship 3"), pool_admin(), shipOperator(2).id)
+        );
+        vm.stopPrank();
+    }
+
     function _register_create_accept_allocate_distribute_start_stop() internal returns (address[] memory recipients) {
         recipients = _register_create_accept_allocate_distribute_start();
 
