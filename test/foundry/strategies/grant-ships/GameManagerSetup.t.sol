@@ -101,7 +101,7 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
 
     function __registerShips() internal {
         vm.startPrank(facilitator().wearer);
-        gameManager().createRound(gameAmount, address(ARB()));
+        gameManager().createRound(gameAmount);
         vm.stopPrank();
 
         for (uint32 i = 0; i < 3;) {

@@ -45,7 +45,6 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         uint256 startTime;
         uint256 endTime;
         uint256 totalRoundAmount;
-        address token;
         GameStatus status;
         address[] ships;
     }
@@ -82,7 +81,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     /// ========== Events =============
     /// ===============================
 
-    event RoundCreated(uint256 gameIndex, address token, uint256 totalRoundAmount);
+    event RoundCreated(uint256 gameIndex, uint256 totalRoundAmount);
     event ShipLaunched(
         address shipAddress, uint256 shipPoolId, address applicantId, string shipName, Metadata metadata
     );
@@ -90,7 +89,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
 
     event GameActive(bool active, uint256 gameIndex);
 
-    event GameManagerInitialized(uint256 gameFacilitatorId, address hatsAddress, address rootAccount);
+    event GameManagerInitialized(uint256 gameFacilitatorId, address hatsAddress, address rootAccount, address token);
 
     /// ===============================
     /// ========== Modifiers ==========
@@ -111,6 +110,8 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice The 'Hats Protocol' contract interface.
     IHats private _hats;
+
+    address public token;
 
     Allo private _allo;
 
@@ -158,7 +159,9 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
 
         _registry = _allo.getRegistry();
 
-        emit GameManagerInitialized(_gameFacilitatorId, _hatsAddress, _rootAccount);
+        token = allo.getPool(poolId).token;
+
+        emit GameManagerInitialized(_gameFacilitatorId, _hatsAddress, _rootAccount, token);
     }
 
     function startGame() external onlyGameFacilitator(msg.sender) onlyActivePool {
@@ -219,20 +222,23 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         }
     }
 
-    function createRound(uint256 _totalRoundAmount, address _tokenAddress)
+    function createRound(uint256 _totalRoundAmount)
         external
         onlyGameFacilitator(msg.sender)
+        nonReentrant
         returns (uint256)
     {
-        if (gameRounds.length > 0 && gameRounds[currentRoundIndex].status != GameStatus.None) {
+        // Note: This check allows us to create the first round, then checks the previous round for
+        // the correct status. Doesn't seem like the cleanest way to do this, open to suggestions.
+        if (gameRounds.length > 0 && gameRounds[gameRounds.length - 1].status != GameStatus.Completed) {
             revert INVALID_STATUS();
         }
 
-        GameRound memory round = GameRound(0, 0, _totalRoundAmount, _tokenAddress, GameStatus.Pending, new address[](0));
+        GameRound memory round = GameRound(0, 0, _totalRoundAmount, GameStatus.Pending, new address[](0));
 
         gameRounds.push(round);
 
-        emit RoundCreated(currentRoundIndex, _tokenAddress, _totalRoundAmount);
+        emit RoundCreated(currentRoundIndex, _totalRoundAmount);
         return currentRoundIndex;
     }
 
@@ -242,9 +248,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
 
         poolAmount -= _amount;
 
-        address poolToken = allo.getPool(poolId).token;
-
-        _transferAmount(poolToken, rootAccount, _amount);
+        _transferAmount(token, rootAccount, _amount);
     }
 
     function _createShip(Recipient memory _recipient, ShipInitData memory _shipInitData, GameRound memory _currentRound)
@@ -262,7 +266,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
             _recipient.profileId,
             strategyAddress,
             abi.encode(_shipInitData, address(this)),
-            _currentRound.token,
+            token,
             0,
             _recipient.metadata,
             // No Managers: This strategy uses Hats Protocol for permissioning
@@ -318,7 +322,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
             // sets the recipient status to Allocated
             recipient.status = GameStatus.Allocated;
 
-            emit Allocated(recipientAddress, grantAmount, currentRound.token, _sender);
+            emit Allocated(recipientAddress, grantAmount, token, _sender);
 
             unchecked {
                 i++;
@@ -367,7 +371,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
             // and then calling the managerIncreasePoolAmount function on the child strategy.
 
             grantShip.managerIncreasePoolAmount(recipient.grantAmount);
-            _transferAmount(currentRound.token, recipient.shipAddress, recipient.grantAmount);
+            _transferAmount(token, recipient.shipAddress, recipient.grantAmount);
 
             unchecked {
                 i++;

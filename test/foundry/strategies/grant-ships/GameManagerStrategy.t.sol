@@ -20,7 +20,7 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
     /// ========== Events =============
     /// ===============================
 
-    event RoundCreated(uint256 gameIndex, address token, uint256 totalRoundAmount);
+    event RoundCreated(uint256 gameIndex, uint256 totalRoundAmount);
     event RecipientRejected(address recipientAddress);
     event ShipLaunched(
         address shipAddress, uint256 shipPoolId, address applicantId, string shipName, Metadata metadata
@@ -142,7 +142,6 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         GameManagerStrategy.GameRound memory round = gameManager().getGameRound(0);
 
         assertEq(_GAME_AMOUNT, round.totalRoundAmount);
-        assertEq(address(ARB()), round.token);
         assertEq(uint8(round.status), uint8(GameManagerStrategy.GameStatus.Pending));
         assertEq(uint8(round.startTime), 0);
         assertEq(uint8(round.endTime), 0);
@@ -154,7 +153,7 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
 
         vm.expectRevert(UNAUTHORIZED.selector);
         vm.startPrank(randomAddress());
-        gameManager().createRound(_GAME_AMOUNT, address(ARB()));
+        gameManager().createRound(_GAME_AMOUNT);
         vm.stopPrank();
     }
 
@@ -164,7 +163,7 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         vm.expectRevert(GameManagerStrategy.INVALID_STATUS.selector);
 
         vm.startPrank(facilitator().wearer);
-        gameManager().createRound(_GAME_AMOUNT, address(ARB()));
+        gameManager().createRound(_GAME_AMOUNT);
         vm.stopPrank();
     }
 
@@ -279,7 +278,6 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         assertEq(uint8(round.startTime), 0);
         assertEq(uint8(round.endTime), 0);
         assertEq(_GAME_AMOUNT, round.totalRoundAmount);
-        assertEq(address(ARB()), round.token);
         assertEq(uint8(round.status), uint8(GameManagerStrategy.GameStatus.Allocated));
         assertEq(roundShips.length, 3);
         assertEq(roundShip, recipientAddress);
@@ -444,8 +442,6 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         address[] memory recipientAddresses = new address[](0);
 
         uint256 poolId = gameManager().getPoolId();
-
-        console.log(recipientAddresses.length);
 
         vm.expectRevert(GameManagerStrategy.INVALID_STATUS.selector);
 
@@ -640,6 +636,15 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         vm.stopPrank();
     }
 
+    function test_2_rounds() public {
+        _register_create_accept_allocate_distribute_start_stop();
+        // _register_create_accept_allocate_distribute_start_stop();
+
+        vm.prank(facilitator().wearer);
+        gameManager().createRound(_GAME_AMOUNT);
+        vm.stopPrank();
+    }
+
     // ====================================
     // =========== Helpers ================
     // ====================================
@@ -828,14 +833,12 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
     function _register_create_round() internal returns (address recipientId) {
         recipientId = _register_recipient();
 
-        address arbAddress = address(ARB());
-
         vm.startPrank(facilitator().wearer);
 
         vm.expectEmit(true, true, true, true);
-        emit RoundCreated(0, arbAddress, _GAME_AMOUNT);
+        emit RoundCreated(0, _GAME_AMOUNT);
 
-        gameManager().createRound(_GAME_AMOUNT, arbAddress);
+        gameManager().createRound(_GAME_AMOUNT);
         vm.stopPrank();
     }
 
