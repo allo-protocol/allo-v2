@@ -136,9 +136,12 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
 
             vm.stopPrank();
 
+            Metadata memory reason = Metadata(1, "I like the ship!");
+
             vm.startPrank(facilitator().wearer);
-            address payable shipAddress =
-                gameManager().reviewRecipient(profileAnchor, GameManagerStrategy.GameStatus.Accepted, _shipSetupData[i]);
+            address payable shipAddress = gameManager().reviewRecipient(
+                profileAnchor, GameManagerStrategy.GameStatus.Accepted, _shipSetupData[i], reason
+            );
             vm.stopPrank();
 
             _ships.push(GrantShipStrategy(shipAddress));

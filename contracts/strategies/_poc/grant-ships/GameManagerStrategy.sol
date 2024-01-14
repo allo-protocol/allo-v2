@@ -95,7 +95,13 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Emitted when a new GrantShip recipient is Rejected.
     /// @param recipientAddress The anchor address of the GrantShip recipient.
-    event RecipientRejected(address recipientAddress);
+    /// @param reason The reason for the rejection.
+    event RecipientRejected(address recipientAddress, Metadata reason);
+
+    /// @notice Emitted when a new GrantShip recipient is Rejected.
+    /// @param recipientAddress The anchor address of the GrantShip recipient.
+    /// @param reason The reason for the rejection.
+    event RecipientAccepted(address recipientAddress, Metadata reason);
 
     /// @notice Emitted when a new GrantShip recipient is Registered.
     /// @param active boolean indicating whether or the GrantShips Round is active.
@@ -273,11 +279,13 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     /// @param recipientAddress The address of the GrantShip applicant
     /// @param _approvalFlag The approval status of the GrantShip applicant (Accepted/Rejected)
     /// @param shipInitData The init data for the GrantShip Strategy (see GrantShipShared for struct)
-    function reviewRecipient(address recipientAddress, GameStatus _approvalFlag, ShipInitData memory shipInitData)
-        external
-        onlyGameFacilitator(msg.sender)
-        returns (address payable)
-    {
+    /// @param _reason The reason for the approval or rejection
+    function reviewRecipient(
+        address recipientAddress,
+        GameStatus _approvalFlag,
+        ShipInitData memory shipInitData,
+        Metadata memory _reason
+    ) external onlyGameFacilitator(msg.sender) returns (address payable) {
         Recipient storage recipient = recipients[recipientAddress];
         GameRound storage currentRound = gameRounds[currentRoundIndex];
 
@@ -290,10 +298,11 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
 
         if (_approvalFlag == GameStatus.Accepted) {
             recipient.status = GameStatus.Accepted;
+            emit RecipientAccepted(recipientAddress, _reason);
             return _createShip(recipient, shipInitData);
         } else {
             recipient.status = GameStatus.Rejected;
-            emit RecipientRejected(recipientAddress);
+            emit RecipientRejected(recipientAddress, _reason);
             return payable(address(0));
         }
     }

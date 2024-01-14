@@ -21,7 +21,8 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
     /// ===============================
 
     event RoundCreated(uint256 gameIndex, uint256 totalRoundAmount);
-    event RecipientRejected(address recipientAddress);
+    event RecipientRejected(address recipientAddress, Metadata reason);
+    event RecipientAccepted(address recipientAddress, Metadata reason);
     event ShipLaunched(
         address shipAddress, uint256 shipPoolId, address applicantId, string shipName, Metadata metadata
     );
@@ -191,12 +192,15 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         // Why?
         // If they were rejected, they should make some changes to their profile.
 
+        Metadata memory reason = Metadata(1, "I like the ship!");
+
         vm.expectRevert(GameManagerStrategy.INVALID_STATUS.selector);
         vm.startPrank(facilitator().wearer);
         gameManager().reviewRecipient(
             recipientAddress,
             GameManagerStrategy.GameStatus.Accepted,
-            ShipInitData(true, true, true, "Ship Name", Metadata(1, "Ship 1"), team(0).wearer, shipOperator(0).id)
+            ShipInitData(true, true, true, "Ship Name", Metadata(1, "Ship 1"), team(0).wearer, shipOperator(0).id),
+            reason
         );
         vm.stopPrank();
 
@@ -210,7 +214,8 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         gameManager().reviewRecipient(
             recipientAddress,
             GameManagerStrategy.GameStatus.Accepted,
-            ShipInitData(true, true, true, "Ship Name", Metadata(1, "Ship 1"), team(0).wearer, shipOperator(0).id)
+            ShipInitData(true, true, true, "Ship Name", Metadata(1, "Ship 1"), team(0).wearer, shipOperator(0).id),
+            reason
         );
         vm.stopPrank();
     }
@@ -222,6 +227,8 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         contractAsManager[0] = address(gameManager());
         bytes32 profileId = registry().getProfileByAnchor(profile1_anchor()).id;
 
+        Metadata memory reason = Metadata(1, "I like the ship!");
+
         vm.startPrank(profile1_owner());
         registry().addMembers(profileId, contractAsManager);
         vm.stopPrank();
@@ -232,7 +239,8 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         gameManager().reviewRecipient(
             applicantId,
             GameManagerStrategy.GameStatus.None,
-            ShipInitData(true, true, true, "Ship Name", Metadata(1, "Ship 1"), team(0).wearer, shipOperator(0).id)
+            ShipInitData(true, true, true, "Ship Name", Metadata(1, "Ship 1"), team(0).wearer, shipOperator(0).id),
+            reason
         );
         vm.stopPrank();
     }
@@ -780,23 +788,28 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         address recipientAddress2 = recipients[1];
         address recipientAddress3 = recipients[2];
 
+        Metadata memory reason = Metadata(1, "I like the ship!");
+
         vm.startPrank(facilitator().wearer);
         gameManager().reviewRecipient(
             recipientAddress,
             GameManagerStrategy.GameStatus.Accepted,
-            ShipInitData(true, true, true, "Ship Name", Metadata(1, "Ship 1"), profile1_owner(), shipOperator(0).id)
+            ShipInitData(true, true, true, "Ship Name", Metadata(1, "Ship 1"), profile1_owner(), shipOperator(0).id),
+            reason
         );
         // Accept recipient 2
         gameManager().reviewRecipient(
             recipientAddress2,
             GameManagerStrategy.GameStatus.Accepted,
-            ShipInitData(true, true, true, "Ship Name 2", Metadata(1, "Ship 2"), profile2_owner(), shipOperator(1).id)
+            ShipInitData(true, true, true, "Ship Name 2", Metadata(1, "Ship 2"), profile2_owner(), shipOperator(1).id),
+            reason
         );
         // Accept recipient 3
         gameManager().reviewRecipient(
             recipientAddress3,
             GameManagerStrategy.GameStatus.Accepted,
-            ShipInitData(true, true, true, "Ship Name 3", Metadata(1, "Ship 3"), pool_admin(), shipOperator(2).id)
+            ShipInitData(true, true, true, "Ship Name 3", Metadata(1, "Ship 3"), pool_admin(), shipOperator(2).id),
+            reason
         );
         vm.stopPrank();
     }
@@ -875,6 +888,8 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         address[] memory contractAsManager = new address[](1);
         contractAsManager[0] = address(gameManager());
 
+        Metadata memory reason = Metadata(1, "I like the ship!");
+
         // Review recipient 2
         vm.startPrank(profile2_owner());
         registry().addMembers(profile2_id(), contractAsManager);
@@ -884,7 +899,8 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         address payable shipAddress2 = gameManager().reviewRecipient(
             profile2_anchor(),
             GameManagerStrategy.GameStatus.Accepted,
-            ShipInitData(true, true, true, "Ship Name 2", Metadata(1, "Ship 2"), team(1).wearer, shipOperator(1).id)
+            ShipInitData(true, true, true, "Ship Name 2", Metadata(1, "Ship 2"), team(1).wearer, shipOperator(1).id),
+            reason
         );
         vm.stopPrank();
         ship2Strategy = GrantShipStrategy(shipAddress2);
@@ -898,7 +914,8 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         address payable shipAddress3 = gameManager().reviewRecipient(
             poolProfile_anchor(),
             GameManagerStrategy.GameStatus.Accepted,
-            ShipInitData(true, true, true, "Ship Name 3", Metadata(1, "Ship 3"), team(1).wearer, shipOperator(2).id)
+            ShipInitData(true, true, true, "Ship Name 3", Metadata(1, "Ship 3"), team(1).wearer, shipOperator(2).id),
+            reason
         );
         vm.stopPrank();
 
@@ -945,18 +962,21 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         contractAsManager[0] = address(gameManager());
         bytes32 profileId = registry().getProfileByAnchor(profile1_anchor()).id;
 
+        Metadata memory reason = Metadata(1, "I dislike the ship!");
+
         vm.startPrank(profile1_owner());
         registry().addMembers(profileId, contractAsManager);
         vm.stopPrank();
 
         vm.expectEmit(true, true, true, true);
-        emit RecipientRejected(applicantId);
+        emit RecipientRejected(applicantId, reason);
 
         vm.startPrank(facilitator().wearer);
         gameManager().reviewRecipient(
             applicantId,
             GameManagerStrategy.GameStatus.Rejected,
-            ShipInitData(true, true, true, "Ship Name", Metadata(1, "Ship 1"), team(0).wearer, shipOperator(0).id)
+            ShipInitData(true, true, true, "Ship Name", Metadata(1, "Ship 1"), team(0).wearer, shipOperator(0).id),
+            reason
         );
         vm.stopPrank();
     }
@@ -968,15 +988,26 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         contractAsManager[0] = address(gameManager());
         bytes32 profileId = registry().getProfileByAnchor(profile1_anchor()).id;
 
+        Metadata memory reason = Metadata(1, "I like the ship!");
+
         vm.startPrank(profile1_owner());
         registry().addMembers(profileId, contractAsManager);
         vm.stopPrank();
+
+        // Review: I cannot test the ShipLaunched event here because the ship is created in the
+        // reviewRecipient function. The address of the ship is not known until
+        // after the reviewRecipient function is called. If there is a way to
+        // test this, I would love to know.
+
+        vm.expectEmit(true, true, true, true);
+        emit RecipientAccepted(applicantId, reason);
 
         vm.startPrank(facilitator().wearer);
         address payable shipAddress = gameManager().reviewRecipient(
             applicantId,
             GameManagerStrategy.GameStatus.Accepted,
-            ShipInitData(true, true, true, "Ship Name", Metadata(1, "Ship 1"), profile1_owner(), shipOperator(0).id)
+            ShipInitData(true, true, true, "Ship Name", Metadata(1, "Ship 1"), profile1_owner(), shipOperator(0).id),
+            reason
         );
         vm.stopPrank();
 
