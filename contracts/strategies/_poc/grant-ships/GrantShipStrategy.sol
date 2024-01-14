@@ -20,37 +20,10 @@ import {GameManagerStrategy} from "./GameManagerStrategy.sol";
 /// @title Grant Ships Strategy.
 /// @author @jord<https://github.com/jordanlesich>, @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>, @0xZakk <zakk@gitcoin.co>, @nfrgosselin <nate@gitcoin.co>
 /// @notice Sub-Strategy used to allocate & distribute funds to recipients with milestone payouts. TThis contract is modified version of the Direct Grants Strategy.
-/// This contract is deployed by a MetaStrategy contract that creates a shared set of rules for multiple implmentations of this contract.
-
-/// Just like the Direct Grants Strategy, this strategy is designed for recipients or grant managers to submit milestones for review and approval.
-/// a few notable differences are:
-
-/// Permissions: (Write permission changes here)
-
-/// Game Rules: (Explain how GameManager contract impacts this sub-strategy)
-
-/// Hats Protocol: (Explain how the hats protocol impacts this sub-strategy)
-
-/// GameFacilitators: (Explain that the game facilitators, not pool managers are in control of allocations)
-
-/// ShipOperators: (Explain how the ship operators are in control of reviewwing milestones and reviewing funds))
-
-/// Flagging: (Facilitators can flag this ship and pause allocation/distribution)
-
-/// Posting: Each player in this game can post arbitrary data (mostly updates) to the game contract.
-/// This data is stored as event data to be indexed and viewed by the public.
-
 contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// ================================
     /// ========== Structs =============
     /// ================================
-
-    enum RoleType {
-        None,
-        Recipient,
-        GameFacilitator,
-        ShipOperator
-    }
 
     enum FlagType {
         None,
@@ -133,7 +106,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
 
     event PoolFunded(uint256 poolId, uint256 amount, uint256 amountPercentage);
 
-    event UpdatePosted(string indexed tag, RoleType indexed role, address indexed recipientId, Metadata content);
+    event UpdatePosted(string tag, uint256 role, address recipientId, Metadata content);
 
     /// ================================
     /// ===== Game (Global) State ======
@@ -341,11 +314,17 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         bool isNotRecipient = _recipientId == address(0);
 
         if (isGameFacilitator(msg.sender) && isNotRecipient) {
-            emit UpdatePosted(_tag, RoleType.GameFacilitator, _recipientId, _content);
+            console.log("_tag", _tag);
+            console.log("_content.protocol", _content.protocol);
+            console.log("_content.pointer", _content.pointer);
+            console.log("_recipientId", _recipientId);
+            console.log("gameFacilitatorHatId", _gameManager.gameFacilitatorHatId());
+            emit UpdatePosted(_tag, _gameManager.gameFacilitatorHatId(), _recipientId, _content);
         } else if (isShipOperator(msg.sender) && isNotRecipient) {
-            emit UpdatePosted(_tag, RoleType.ShipOperator, _recipientId, _content);
+            console.log("operatorHatId", operatorHatId);
+            emit UpdatePosted(_tag, operatorHatId, _recipientId, _content);
         } else if (_isProfileMember(_recipientId, msg.sender) && !isNotRecipient) {
-            emit UpdatePosted(_tag, RoleType.Recipient, _recipientId, _content);
+            emit UpdatePosted(_tag, 0, _recipientId, _content);
         } else {
             revert UNAUTHORIZED();
         }
@@ -736,7 +715,6 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         virtual
         override
         noUnresolvedRedFlags
-        nonReentrant
         onlyShipOperator(_sender)
     {
         uint256 recipientLength = _recipientIds.length;

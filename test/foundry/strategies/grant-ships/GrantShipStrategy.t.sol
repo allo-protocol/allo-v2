@@ -37,9 +37,7 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
     event PoolWithdraw(uint256 amount);
     event FlagIssued(uint256 nonce, GrantShipStrategy.FlagType flagType, Metadata flagReason);
     event FlagResolved(uint256 nonce, Metadata resolutionReason);
-    event UpdatePosted(
-        string indexed tag, GrantShipStrategy.RoleType indexed role, address indexed recipientId, Metadata content
-    );
+    event UpdatePosted(string tag, uint256 role, address recipientId, Metadata content);
     event Approval(address indexed owner, address indexed spender, uint256 value);
     event Transfer(address indexed from, address indexed to, uint256 value);
 
@@ -76,10 +74,8 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         address notRecipientId = address(0);
 
         // Game Facilitator posts an update
-
         vm.expectEmit(true, true, true, true);
-        emit UpdatePosted(tag, GrantShipStrategy.RoleType.GameFacilitator, notRecipientId, metadata);
-
+        emit UpdatePosted(tag, facilitator().id, notRecipientId, metadata);
         vm.startPrank(facilitator().wearer);
         ship(1).postUpdate(tag, metadata, notRecipientId);
         vm.stopPrank();
@@ -87,7 +83,7 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         // Recipient posts an update
 
         vm.expectEmit(true, true, true, true);
-        emit UpdatePosted(tag, GrantShipStrategy.RoleType.Recipient, profile1_anchor(), metadata);
+        emit UpdatePosted(tag, 0, profile1_anchor(), metadata);
 
         vm.startPrank(profile1_member1());
         ship(1).postUpdate(tag, metadata, profile1_anchor());
@@ -96,7 +92,7 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         // Ship Operator posts an update
 
         vm.expectEmit(true, true, true, true);
-        emit UpdatePosted(tag, GrantShipStrategy.RoleType.ShipOperator, notRecipientId, metadata);
+        emit UpdatePosted(tag, shipOperator(1).id, notRecipientId, metadata);
 
         vm.startPrank(shipOperator(1).wearer);
         ship(1).postUpdate(tag, metadata, notRecipientId);
@@ -126,6 +122,7 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         vm.stopPrank();
 
         // Ship Operator tries to post an update for another recipient
+        // Doesn't use empty address flag
 
         vm.expectRevert(UNAUTHORIZED.selector);
 
@@ -138,6 +135,14 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         vm.expectRevert(UNAUTHORIZED.selector);
 
         vm.startPrank(shipOperator(1).wearer);
+        ship(1).postUpdate(tag, metadata, randomAddress());
+        vm.stopPrank();
+
+        // Ship Operator tries to post an update on another ship's feed.
+
+        vm.expectRevert(UNAUTHORIZED.selector);
+
+        vm.startPrank(shipOperator(0).wearer);
         ship(1).postUpdate(tag, metadata, randomAddress());
         vm.stopPrank();
     }

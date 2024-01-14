@@ -27,7 +27,7 @@ import {ShipInitData} from "./libraries/GrantShipShared.sol";
 // TODO CLean, reorgnaize, and document this contract
 contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     /// ================================
-    /// ========== Models ==============
+    /// ========== Struct/Enum =========
     /// ================================
 
     enum GameStatus {
@@ -47,14 +47,6 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         uint256 totalRoundAmount;
         GameStatus status;
         address[] ships;
-    }
-
-    struct Applicant {
-        address applicantId;
-        bytes32 profileId;
-        string shipName;
-        Metadata metadata;
-        Status status;
     }
 
     struct Recipient {
@@ -91,19 +83,10 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
 
     event GameManagerInitialized(uint256 gameFacilitatorId, address hatsAddress, address rootAccount, address token);
 
-    /// ===============================
-    /// ========== Modifiers ==========
-    /// ===============================
-
-    modifier onlyGameFacilitator(address _sender) {
-        if (!_hats.isWearerOfHat(_sender, gameFacilitatorHatId)) {
-            revert UNAUTHORIZED();
-        }
-        _;
-    }
+    event UpdatePosted(string indexed tag, uint256 indexed role, address indexed recipientId, Metadata content);
 
     /// ===============================
-    /// ======== Game State ===========
+    /// ========== Storage ============
     /// ===============================
 
     address public rootAccount;
@@ -128,6 +111,17 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     uint256 public currentRoundIndex;
 
     uint256 public gameFacilitatorHatId;
+
+    /// ===============================
+    /// ========== Modifiers ==========
+    /// ===============================
+
+    modifier onlyGameFacilitator(address _sender) {
+        if (!_hats.isWearerOfHat(_sender, gameFacilitatorHatId)) {
+            revert UNAUTHORIZED();
+        }
+        _;
+    }
 
     /// ===============================
     /// ======== Constructor ==========
@@ -164,6 +158,78 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         emit GameManagerInitialized(_gameFacilitatorId, _hatsAddress, _rootAccount, token);
     }
 
+    /// ===============================
+    /// ============ Views ============
+    /// ===============================
+
+    function getShipAddress(address _recipientAddress) public view returns (address payable) {
+        return getRecipient(_recipientAddress).shipAddress;
+    }
+
+    function getRecipient(address _recipientAddress) public view returns (Recipient memory) {
+        return recipients[_recipientAddress];
+    }
+
+    function getHatsAddress() public view returns (address) {
+        return address(_hats);
+    }
+
+    function getGameRound(uint256 _gameRoundIndex) public view returns (GameRound memory) {
+        return gameRounds[_gameRoundIndex];
+    }
+
+    function isGameFacilitator(address _address) public view returns (bool) {
+        return _hats.isWearerOfHat(_address, gameFacilitatorHatId);
+    }
+
+    function isGameActive() public view returns (bool) {
+        return !_isPoolActive();
+    }
+
+    /// ===============================
+    /// ======= External/Custom =======
+    /// ===============================
+
+    function createRound(uint256 _totalRoundAmount) external onlyGameFacilitator(msg.sender) returns (uint256) {
+        // Note: This check allows us to create the first round, then checks the previous round for
+        // the correct status. Doesn't seem like the cleanest way to do this, open to suggestions.
+        if (gameRounds.length > 0 && gameRounds[gameRounds.length - 1].status != GameStatus.Completed) {
+            revert INVALID_STATUS();
+        }
+
+        GameRound memory round = GameRound(0, 0, _totalRoundAmount, GameStatus.Pending, new address[](0));
+
+        gameRounds.push(round);
+
+        emit RoundCreated(currentRoundIndex, _totalRoundAmount);
+        return currentRoundIndex;
+    }
+
+    function reviewRecipient(address recipientAddress, GameStatus _approvalFlag, ShipInitData memory shipInitData)
+        external
+        onlyGameFacilitator(msg.sender)
+        returns (address payable)
+    {
+        Recipient storage recipient = recipients[recipientAddress];
+        GameRound storage currentRound = gameRounds[currentRoundIndex];
+
+        if (currentRound.status != GameStatus.Pending) revert INVALID_STATUS();
+
+        // check if there is a current round. If not, revert
+
+        if (recipient.status != GameStatus.Pending) revert INVALID_STATUS();
+        if (_approvalFlag != GameStatus.Accepted && _approvalFlag != GameStatus.Rejected) revert INVALID_STATUS();
+
+        if (_approvalFlag == GameStatus.Accepted) {
+            recipient.status = GameStatus.Accepted;
+            return _createShip(recipient, shipInitData);
+        } else {
+            recipient.status = GameStatus.Rejected;
+            emit RecipientRejected(recipientAddress);
+            return payable(address(0));
+        }
+    }
+
     function startGame() external onlyGameFacilitator(msg.sender) onlyActivePool {
         GameRound storage currentRound = gameRounds[currentRoundIndex];
 
@@ -197,51 +263,6 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         emit GameActive(false, currentRoundIndex);
     }
 
-    function reviewRecipient(address recipientAddress, GameStatus _approvalFlag, ShipInitData memory shipInitData)
-        external
-        onlyGameFacilitator(msg.sender)
-        returns (address payable)
-    {
-        Recipient storage recipient = recipients[recipientAddress];
-        GameRound storage currentRound = gameRounds[currentRoundIndex];
-
-        if (currentRound.status != GameStatus.Pending) revert INVALID_STATUS();
-
-        // check if there is a current round. If not, revert
-
-        if (recipient.status != GameStatus.Pending) revert INVALID_STATUS();
-        if (_approvalFlag != GameStatus.Accepted && _approvalFlag != GameStatus.Rejected) revert INVALID_STATUS();
-
-        if (_approvalFlag == GameStatus.Accepted) {
-            recipient.status = GameStatus.Accepted;
-            return _createShip(recipient, shipInitData, currentRound);
-        } else {
-            recipient.status = GameStatus.Rejected;
-            emit RecipientRejected(recipientAddress);
-            return payable(address(0));
-        }
-    }
-
-    function createRound(uint256 _totalRoundAmount)
-        external
-        onlyGameFacilitator(msg.sender)
-        nonReentrant
-        returns (uint256)
-    {
-        // Note: This check allows us to create the first round, then checks the previous round for
-        // the correct status. Doesn't seem like the cleanest way to do this, open to suggestions.
-        if (gameRounds.length > 0 && gameRounds[gameRounds.length - 1].status != GameStatus.Completed) {
-            revert INVALID_STATUS();
-        }
-
-        GameRound memory round = GameRound(0, 0, _totalRoundAmount, GameStatus.Pending, new address[](0));
-
-        gameRounds.push(round);
-
-        emit RoundCreated(currentRoundIndex, _totalRoundAmount);
-        return currentRoundIndex;
-    }
-
     function withdraw(uint256 _amount) external {
         if (_amount > poolAmount) revert NOT_ENOUGH_FUNDS();
         if (msg.sender != rootAccount && !isGameFacilitator(msg.sender)) revert UNAUTHORIZED();
@@ -251,7 +272,17 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         _transferAmount(token, rootAccount, _amount);
     }
 
-    function _createShip(Recipient memory _recipient, ShipInitData memory _shipInitData, GameRound memory _currentRound)
+    function postUpdate(string memory _tag, Metadata memory _content, address _recipientId) external {
+        if (isGameFacilitator(msg.sender)) {
+            emit UpdatePosted(_tag, gameFacilitatorHatId, _recipientId, _content);
+        } else if (msg.sender == rootAccount) {
+            emit UpdatePosted(_tag, 0, _recipientId, _content);
+        } else {
+            revert UNAUTHORIZED();
+        }
+    }
+
+    function _createShip(Recipient memory _recipient, ShipInitData memory _shipInitData)
         internal
         returns (address payable)
     {
@@ -287,7 +318,13 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         return strategyAddress;
     }
 
-    function _allocate(bytes memory _data, address _sender) internal virtual override onlyGameFacilitator(_sender) {
+    function _allocate(bytes memory _data, address _sender)
+        internal
+        virtual
+        override
+        onlyGameFacilitator(_sender)
+        nonReentrant
+    {
         (address[] memory _recipientIds, uint256[] memory _amounts, uint256 _total) =
             abi.decode(_data, (address[], uint256[], uint256));
         // Ensure funds have been added to the pool
@@ -309,20 +346,20 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
             if (recipient.status != GameStatus.Accepted) revert INVALID_STATUS();
 
             address recipientAddress = _recipientIds[i];
-            uint256 grantAmount = _amounts[i];
+            uint256 allocation = _amounts[i];
 
             // check that there is enough in the pool
-            if (poolAmount < grantAmount + totalAllocated) revert NOT_ENOUGH_FUNDS();
+            if (poolAmount < allocation + totalAllocated) revert NOT_ENOUGH_FUNDS();
             // adds the grant amount to the total allocated
-            totalAllocated += grantAmount;
+            totalAllocated += allocation;
             // sets the grant amount on the recipient
-            recipient.grantAmount = grantAmount;
+            recipient.grantAmount = allocation;
             // adds the recipient to the current round
             currentRound.ships.push(recipientAddress);
             // sets the recipient status to Allocated
             recipient.status = GameStatus.Allocated;
 
-            emit Allocated(recipientAddress, grantAmount, token, _sender);
+            emit Allocated(recipientAddress, allocation, token, _sender);
 
             unchecked {
                 i++;
@@ -387,30 +424,6 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     }
 
     /// ====================================
-    /// ============ View ==================
-    /// ====================================
-
-    function getShipAddress(address _recipientAddress) public view returns (address payable) {
-        return getRecipient(_recipientAddress).shipAddress;
-    }
-
-    function getRecipient(address _recipientAddress) public view returns (Recipient memory) {
-        return recipients[_recipientAddress];
-    }
-
-    function getHatsAddress() public view returns (address) {
-        return address(_hats);
-    }
-
-    function getGameRound(uint256 _gameRoundIndex) public view returns (GameRound memory) {
-        return gameRounds[_gameRoundIndex];
-    }
-
-    function isGameFacilitator(address _address) public view returns (bool) {
-        return _hats.isWearerOfHat(_address, gameFacilitatorHatId);
-    }
-
-    /// ====================================
     /// ============ Internal ==============
     /// ====================================
 
@@ -457,6 +470,8 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     }
 
     function _getPayout(address _recipientId, bytes memory) internal view override returns (PayoutSummary memory) {
+        // TODO: This is status dependant, we should return exactly how much the ship has been paid.
+
         Recipient memory shipRecipient = getRecipient(_recipientId);
         return PayoutSummary(address(shipRecipient.shipAddress), shipRecipient.grantAmount);
     }
