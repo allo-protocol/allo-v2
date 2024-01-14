@@ -272,11 +272,11 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         _transferAmount(token, rootAccount, _amount);
     }
 
-    function postUpdate(string memory _tag, Metadata memory _content, address _recipientId) external {
+    function postUpdate(string memory _tag, Metadata memory _content) external {
         if (isGameFacilitator(msg.sender)) {
-            emit UpdatePosted(_tag, gameFacilitatorHatId, _recipientId, _content);
+            emit UpdatePosted(_tag, gameFacilitatorHatId, address(0), _content);
         } else if (msg.sender == rootAccount) {
-            emit UpdatePosted(_tag, 0, _recipientId, _content);
+            emit UpdatePosted(_tag, 0, rootAccount, _content);
         } else {
             revert UNAUTHORIZED();
         }

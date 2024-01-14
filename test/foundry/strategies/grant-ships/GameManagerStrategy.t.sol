@@ -26,6 +26,7 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         address shipAddress, uint256 shipPoolId, address applicantId, string shipName, Metadata metadata
     );
     event GameActive(bool active, uint256 gameIndex);
+    event UpdatePosted(string tag, uint256 role, address recipientId, Metadata content);
 
     /// ===============================
     /// ========== State ==============
@@ -664,6 +665,29 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
 
         vm.startPrank(shipOperator(1).wearer);
         gameManager().withdraw(_GAME_AMOUNT);
+        vm.stopPrank();
+    }
+
+    function testPostUpdate() public {
+        string memory tag = "test";
+        Metadata memory metadata = Metadata(1, "Posting Update!");
+
+        address notRecipientId = address(0);
+
+        // Game Facilitator posts an update
+        vm.expectEmit(true, true, true, true);
+        emit UpdatePosted(tag, facilitator().id, notRecipientId, metadata);
+        vm.startPrank(facilitator().wearer);
+        gameManager().postUpdate(tag, metadata);
+        vm.stopPrank();
+
+        // Root Account posts an update
+
+        vm.expectEmit(true, true, true, true);
+        emit UpdatePosted(tag, 0, pool_admin(), metadata);
+
+        vm.startPrank(pool_admin());
+        gameManager().postUpdate(tag, metadata);
         vm.stopPrank();
     }
 
