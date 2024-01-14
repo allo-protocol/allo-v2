@@ -85,7 +85,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// ===============================
 
     /// @notice Emitted for the registration of a recipient and the status is updated.
-    event RecipientStatusChanged(address recipientId, Status status);
+    event RecipientStatusChanged(address recipientId, Status status, Metadata reason);
 
     /// @notice Emitted for the submission of a milestone.
     event MilestoneSubmitted(address recipientId, uint256 milestoneId, Metadata metadata);
@@ -100,7 +100,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
 
     event FlagResolved(uint256 nonce, Metadata resolutionReason);
 
-    event MilestonesReviewed(address recipientId, Status status);
+    event MilestonesReviewed(address recipientId, Status status, Metadata reason);
 
     event PoolWithdraw(uint256 amount);
 
@@ -314,11 +314,6 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         bool isNotRecipient = _recipientId == address(0);
 
         if (isGameFacilitator(msg.sender) && isNotRecipient) {
-            console.log("_tag", _tag);
-            console.log("_content.protocol", _content.protocol);
-            console.log("_content.pointer", _content.pointer);
-            console.log("_recipientId", _recipientId);
-            console.log("gameFacilitatorHatId", _gameManager.gameFacilitatorHatId());
             emit UpdatePosted(_tag, _gameManager.gameFacilitatorHatId(), _recipientId, _content);
         } else if (isShipOperator(msg.sender) && isNotRecipient) {
             console.log("operatorHatId", operatorHatId);
@@ -335,7 +330,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// @dev 'msg.sender' must be recipient creator or pool manager. Emits a 'MilestonesReviewed()' event.
     /// @param _recipientId ID of the recipient
     /// @param _milestones The milestones to be set
-    function setMilestones(address _recipientId, Milestone[] memory _milestones) external {
+    function setMilestones(address _recipientId, Milestone[] memory _milestones, Metadata calldata _reason) external {
         // Todo: Do a deep dive on _recipientId. If this is anchor address, and the sender is not a member of the profile,
         // then the person who created the profile and recipient is going to have to use Anchor.execute to call this
         // which is infeasible for quickly building a frontend.
@@ -361,7 +356,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
 
         if (isOperator) {
             recipient.milestonesReviewStatus = Status.Accepted;
-            emit MilestonesReviewed(_recipientId, Status.Accepted);
+            emit MilestonesReviewed(_recipientId, Status.Accepted, _reason);
         }
     }
 
@@ -369,7 +364,10 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// @dev Emits a 'MilestonesReviewed()' event
     /// @param _recipientId ID of the recipient
     /// @param _status The status of the milestone review
-    function reviewSetMilestones(address _recipientId, Status _status) external onlyShipOperator(msg.sender) {
+    function reviewSetMilestones(address _recipientId, Status _status, Metadata calldata _reason)
+        external
+        onlyShipOperator(msg.sender)
+    {
         Recipient storage recipient = _recipients[_recipientId];
 
         // Check if the recipient has any milestones, otherwise revert
@@ -388,7 +386,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
             recipient.milestonesReviewStatus = _status;
 
             // Emit event for the milestone review
-            emit MilestonesReviewed(_recipientId, _status);
+            emit MilestonesReviewed(_recipientId, _status, _reason);
         }
     }
 
@@ -519,9 +517,12 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Set the status of the recipient to 'InReview'
     /// @dev Emits a 'RecipientStatusChanged()' event
     /// @param _recipientIds IDs of the recipients
-    function setRecipientStatusToInReview(address[] calldata _recipientIds) external {
+    function setRecipientStatusToInReview(address[] calldata _recipientIds, Metadata[] calldata _reasons) external {
         if (!isShipOperator(msg.sender) && !isGameFacilitator(msg.sender)) {
             revert UNAUTHORIZED();
+        }
+        if (_recipientIds.length != _reasons.length) {
+            revert ARRAY_MISMATCH();
         }
 
         uint256 recipientLength = _recipientIds.length;
@@ -529,7 +530,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
             address recipientId = _recipientIds[i];
             _recipients[recipientId].recipientStatus = Status.InReview;
 
-            emit RecipientStatusChanged(recipientId, Status.InReview);
+            emit RecipientStatusChanged(recipientId, Status.InReview, _reasons[i]);
 
             unchecked {
                 i++;
@@ -667,8 +668,8 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         onlyGameFacilitator(_sender)
     {
         // Decode the '_data'
-        (address recipientId, Status recipientStatus, uint256 grantAmount) =
-            abi.decode(_data, (address, Status, uint256));
+        (address recipientId, Status recipientStatus, uint256 grantAmount, Metadata memory _reason) =
+            abi.decode(_data, (address, Status, uint256, Metadata));
 
         Recipient storage recipient = _recipients[recipientId];
 
@@ -694,7 +695,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
             recipient.recipientStatus = Status.Accepted;
 
             // Emit event for the acceptance
-            emit RecipientStatusChanged(recipientId, Status.Accepted);
+            emit RecipientStatusChanged(recipientId, Status.Accepted, _reason);
 
             // Emit event for the allocation
             emit Allocated(recipientId, recipient.grantAmount, pool.token, _sender);
@@ -702,7 +703,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
             recipient.recipientStatus = Status.Rejected;
 
             // Emit event for the rejection
-            emit RecipientStatusChanged(recipientId, Status.Rejected);
+            emit RecipientStatusChanged(recipientId, Status.Rejected, _reason);
         }
     }
 

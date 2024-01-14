@@ -28,11 +28,11 @@ import {EventSetup} from "../../shared/EventSetup.sol";
 // // Is this contract getting the same address that others recieve.
 contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
     // Events
-    event RecipientStatusChanged(address recipientId, GrantShipStrategy.Status status);
+    event RecipientStatusChanged(address recipientId, GrantShipStrategy.Status status, Metadata reason);
     event MilestoneSubmitted(address recipientId, uint256 milestoneId, Metadata metadata);
     event MilestoneStatusChanged(address recipientId, uint256 milestoneId, IStrategy.Status status);
     event MilestonesSet(address recipientId, uint256 milestonesLength);
-    event MilestonesReviewed(address recipientId, IStrategy.Status status);
+    event MilestonesReviewed(address recipientId, IStrategy.Status status, Metadata reason);
     event PoolFunded(uint256 poolId, uint256 amountAfterFee, uint256 feeAmount);
     event PoolWithdraw(uint256 amount);
     event FlagIssued(uint256 nonce, GrantShipStrategy.FlagType flagType, Metadata flagReason);
@@ -45,6 +45,8 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
 
     uint256 internal constant _grantAmount = 1_000e18;
     uint256 internal constant _poolAmount = 30_000e18;
+
+    Metadata internal reason = Metadata(1, "reason");
 
     // ================= Setup =====================
 
@@ -230,11 +232,15 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         address[] memory recipients = new address[](1);
         recipients[0] = recipientId;
 
+        Metadata[] memory reasons = new Metadata[](1);
+
+        reasons[0] = reason;
+
         vm.expectEmit(true, true, true, true);
-        emit RecipientStatusChanged(recipientId, IStrategy.Status.InReview);
+        emit RecipientStatusChanged(recipientId, IStrategy.Status.InReview, reason);
 
         vm.startPrank(shipOperator(1).wearer);
-        ship(1).setRecipientStatusToInReview(recipients);
+        ship(1).setRecipientStatusToInReview(recipients, reasons);
         IStrategy.Status status = ship(1).getRecipientStatus(recipientId);
 
         assertTrue(uint8(status) == uint8(IStrategy.Status.InReview));
@@ -248,11 +254,14 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         address[] memory recipients = new address[](1);
         recipients[0] = recipientId;
 
+        Metadata[] memory reasons = new Metadata[](1);
+        reasons[0] = reason;
+
         vm.expectEmit(true, true, true, true);
-        emit RecipientStatusChanged(recipientId, IStrategy.Status.InReview);
+        emit RecipientStatusChanged(recipientId, IStrategy.Status.InReview, reason);
 
         vm.startPrank(facilitator().wearer);
-        ship(1).setRecipientStatusToInReview(recipients);
+        ship(1).setRecipientStatusToInReview(recipients, reasons);
         IStrategy.Status status = ship(1).getRecipientStatus(recipientId);
 
         assertTrue(uint8(status) == uint8(IStrategy.Status.InReview));
@@ -266,10 +275,13 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         address[] memory recipients = new address[](1);
         recipients[0] = recipientId;
 
+        Metadata[] memory reasons = new Metadata[](1);
+        reasons[0] = reason;
+
         vm.expectRevert(UNAUTHORIZED.selector);
 
         vm.startPrank(randomAddress());
-        ship(1).setRecipientStatusToInReview(recipients);
+        ship(1).setRecipientStatusToInReview(recipients, reasons);
 
         vm.stopPrank();
     }
@@ -329,7 +341,7 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         GrantShipStrategy.Status recipientStatus = IStrategy.Status.Accepted;
         uint256 grantAmount = _poolAmount + 5_000e18;
 
-        bytes memory data = abi.encode(recipientId, recipientStatus, grantAmount);
+        bytes memory data = abi.encode(recipientId, recipientStatus, grantAmount, reason);
 
         vm.expectRevert(GrantShipStrategy.ALLOCATION_EXCEEDS_POOL_AMOUNT.selector);
 
@@ -344,7 +356,7 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         GrantShipStrategy.Status recipientStatus = IStrategy.Status.Accepted;
         uint256 grantAmount = _grantAmount;
 
-        bytes memory data = abi.encode(recipientId, recipientStatus, grantAmount);
+        bytes memory data = abi.encode(recipientId, recipientStatus, grantAmount, reason);
 
         vm.expectRevert(GrantShipStrategy.MILESTONES_ALREADY_SET.selector);
 
@@ -396,7 +408,7 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
 
         vm.expectRevert(UNAUTHORIZED.selector);
         vm.startPrank(randomAddress());
-        ship(1).setMilestones(recipientId, milestones);
+        ship(1).setMilestones(recipientId, milestones, reason);
         vm.stopPrank();
     }
 
@@ -407,10 +419,10 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         assertEq(uint8(recipient.milestonesReviewStatus), uint8(IStrategy.Status.Pending));
 
         vm.expectEmit(true, true, true, true);
-        emit MilestonesReviewed(recipientId, IStrategy.Status.Rejected);
+        emit MilestonesReviewed(recipientId, IStrategy.Status.Rejected, reason);
 
         vm.startPrank(shipOperator(1).wearer);
-        ship(1).reviewSetMilestones(recipientId, IStrategy.Status.Rejected);
+        ship(1).reviewSetMilestones(recipientId, IStrategy.Status.Rejected, reason);
         vm.stopPrank();
 
         recipient = ship(1).getRecipient(profile1_anchor());
@@ -419,9 +431,9 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         vm.startPrank(shipOperator(1).wearer);
 
         vm.expectEmit(true, true, true, true);
-        emit MilestonesReviewed(recipientId, IStrategy.Status.Accepted);
+        emit MilestonesReviewed(recipientId, IStrategy.Status.Accepted, reason);
 
-        ship(1).reviewSetMilestones(recipientId, IStrategy.Status.Accepted);
+        ship(1).reviewSetMilestones(recipientId, IStrategy.Status.Accepted, reason);
         vm.stopPrank();
 
         recipient = ship(1).getRecipient(profile1_anchor());
@@ -432,13 +444,13 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         address recipientId = _register_recipient_allocate_accept_set_milestones_by_recipient();
 
         vm.startPrank(shipOperator(1).wearer);
-        ship(1).reviewSetMilestones(recipientId, IStrategy.Status.Accepted);
+        ship(1).reviewSetMilestones(recipientId, IStrategy.Status.Accepted, reason);
         vm.stopPrank();
 
         vm.expectRevert(UNAUTHORIZED.selector);
 
         vm.startPrank(randomAddress());
-        ship(1).reviewSetMilestones(recipientId, IStrategy.Status.Rejected);
+        ship(1).reviewSetMilestones(recipientId, IStrategy.Status.Rejected, reason);
         vm.stopPrank();
     }
 
@@ -447,15 +459,16 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
 
         vm.expectRevert(GrantShipStrategy.MILESTONES_ALREADY_SET.selector);
         vm.startPrank(shipOperator(1).wearer);
-        ship(1).reviewSetMilestones(recipientId, IStrategy.Status.Rejected);
+        ship(1).reviewSetMilestones(recipientId, IStrategy.Status.Rejected, reason);
         vm.stopPrank();
     }
 
     function testRevert_reviewSetMilestones_INVALID_MILESTONE() public {
         address recipientId = _register_recipient_allocate_accept();
+
         vm.startPrank(shipOperator(1).wearer);
         vm.expectRevert(GrantShipStrategy.INVALID_MILESTONE.selector);
-        ship(1).reviewSetMilestones(recipientId, IStrategy.Status.Rejected);
+        ship(1).reviewSetMilestones(recipientId, IStrategy.Status.Rejected, reason);
         vm.stopPrank();
     }
 
@@ -479,7 +492,7 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         vm.expectRevert(GrantShipStrategy.MILESTONES_ALREADY_SET.selector);
 
         vm.startPrank(shipOperator(1).wearer);
-        ship(1).setMilestones(recipientId, milestones);
+        ship(1).setMilestones(recipientId, milestones, reason);
         vm.stopPrank();
     }
 
@@ -501,7 +514,7 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         vm.expectRevert(RECIPIENT_NOT_ACCEPTED.selector);
 
         vm.startPrank(shipOperator(1).wearer);
-        ship(1).setMilestones(randomAddress(), milestones);
+        ship(1).setMilestones(randomAddress(), milestones, reason);
         vm.stopPrank();
     }
 
@@ -524,7 +537,7 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         vm.expectRevert(GrantShipStrategy.INVALID_MILESTONE.selector);
 
         vm.startPrank(shipOperator(1).wearer);
-        ship(1).setMilestones(recipientId, milestones);
+        ship(1).setMilestones(recipientId, milestones, reason);
         vm.stopPrank();
     }
 
@@ -553,7 +566,7 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         vm.startPrank(profile1_member1());
 
         // set to 100%
-        ship(1).setMilestones(recipientId, milestones);
+        ship(1).setMilestones(recipientId, milestones, reason);
 
         GrantShipStrategy.Milestone[] memory setMilestones = ship(1).getMilestones(recipientId);
         assertEq(setMilestones.length, 3);
@@ -569,7 +582,7 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         });
 
         // set to 100% again => should override older setting
-        ship(1).setMilestones(recipientId, anotherMilestones);
+        ship(1).setMilestones(recipientId, anotherMilestones, reason);
 
         // check if sum of milestones are equal to 100% (1e18)
         setMilestones = ship(1).getMilestones(recipientId);
@@ -605,7 +618,7 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         vm.expectRevert(GrantShipStrategy.INVALID_MILESTONE.selector);
 
         vm.startPrank(shipOperator(1).wearer);
-        ship(1).setMilestones(recipientId, milestones);
+        ship(1).setMilestones(recipientId, milestones, reason);
         vm.stopPrank();
     }
 
@@ -781,7 +794,7 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         assertEq(ship(1).unresolvedRedFlags(), 1);
         assertEq(uint8(flag.flagType), uint8(GrantShipStrategy.FlagType.Red));
         assertEq(flag.flagReason.protocol, 1);
-        assertEq(flag.flagReason.pointer, "flag-reason");
+        assertEq(flag.flagReason.pointer, "reason");
         assertFalse(flag.isResolved);
         assertEq(flag.resolutionReason.protocol, 0);
         assertEq(flag.resolutionReason.pointer, "");
@@ -792,7 +805,6 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
     }
 
     function testRevert_issueFlag_UNAUTHORIZED() public {
-        Metadata memory reason = Metadata(1, "flag-reason");
         vm.expectRevert(UNAUTHORIZED.selector);
 
         vm.startPrank(randomAddress());
@@ -801,7 +813,6 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
     }
 
     function testRevert_issueFlag_INVALID_FLAG() public {
-        Metadata memory reason = Metadata(1, "flag-reason");
         vm.expectRevert(GrantShipStrategy.INVALID_FLAG.selector);
 
         vm.startPrank(facilitator().wearer);
@@ -810,7 +821,6 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
     }
 
     function testRevert_issueFlag_FLAG_ALREADY_EXISTS() public {
-        Metadata memory reason = Metadata(1, "flag-reason");
         _issue_flag(0, GrantShipStrategy.FlagType.Red);
 
         vm.expectRevert(GrantShipStrategy.FLAG_ALREADY_EXISTS.selector);
@@ -828,7 +838,7 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
 
         GrantShipStrategy.Status recipientStatus = IStrategy.Status.Accepted;
         uint256 grantAmount = _grantAmount;
-        bytes memory data = abi.encode(recipientId, recipientStatus, grantAmount);
+        bytes memory data = abi.encode(recipientId, recipientStatus, grantAmount, reason);
         uint256 poolId = ship(1).getPoolId();
 
         vm.expectRevert(GrantShipStrategy.UNRESOLVED_RED_FLAGS.selector);
@@ -838,7 +848,7 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         vm.stopPrank();
 
         vm.startPrank(facilitator().wearer);
-        ship(1).resolveFlag(0, Metadata(1, "resolution-reason"));
+        ship(1).resolveFlag(0, reason);
         vm.stopPrank();
 
         vm.startPrank(facilitator().wearer);
@@ -863,7 +873,7 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         vm.stopPrank();
 
         vm.startPrank(facilitator().wearer);
-        ship(1).resolveFlag(0, Metadata(1, "resolution-reason"));
+        ship(1).resolveFlag(0, reason);
         vm.stopPrank();
 
         vm.startPrank(shipOperator(1).wearer);
@@ -886,10 +896,10 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         assertEq(ship(1).unresolvedRedFlags(), 0);
         assertEq(uint8(flag.flagType), uint8(GrantShipStrategy.FlagType.Red));
         assertEq(flag.flagReason.protocol, 1);
-        assertEq(flag.flagReason.pointer, "flag-reason");
+        assertEq(flag.flagReason.pointer, "reason");
         assertTrue(flag.isResolved);
         assertEq(flag.resolutionReason.protocol, 1);
-        assertEq(flag.resolutionReason.pointer, "resolution-reason");
+        assertEq(flag.resolutionReason.pointer, "reason");
 
         _issue_flag(1, GrantShipStrategy.FlagType.Yellow);
         GrantShipStrategy.Flag memory yellowFlag = ship(1).getFlag(1);
@@ -905,17 +915,16 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         assertEq(ship(1).unresolvedRedFlags(), 0);
         assertEq(uint8(yellowFlag.flagType), uint8(GrantShipStrategy.FlagType.Yellow));
         assertEq(yellowFlag.flagReason.protocol, 1);
-        assertEq(yellowFlag.flagReason.pointer, "flag-reason");
+        assertEq(yellowFlag.flagReason.pointer, "reason");
         assertTrue(yellowFlag.isResolved);
         assertEq(yellowFlag.resolutionReason.protocol, 1);
-        assertEq(yellowFlag.resolutionReason.pointer, "resolution-reason");
+        assertEq(yellowFlag.resolutionReason.pointer, "reason");
     }
 
     //     // ================= Helpers =====================
 
     function _issue_flag(uint256 _nonce, GrantShipStrategy.FlagType _flagType) internal {
         vm.startPrank(facilitator().wearer);
-        Metadata memory reason = Metadata(1, "flag-reason");
 
         vm.expectEmit(true, true, true, true);
         emit FlagIssued(_nonce, _flagType, reason);
@@ -926,7 +935,6 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
 
     function _resolve_flag(uint256 _nonce) internal {
         vm.startPrank(facilitator().wearer);
-        Metadata memory reason = Metadata(1, "resolution-reason");
 
         vm.expectEmit(true, true, true, true);
         emit FlagResolved(_nonce, reason);
@@ -987,11 +995,11 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         GrantShipStrategy.Status recipientStatus = IStrategy.Status.Accepted;
         uint256 grantAmount = _grantAmount;
 
-        bytes memory data = abi.encode(recipientId, recipientStatus, grantAmount);
+        bytes memory data = abi.encode(recipientId, recipientStatus, grantAmount, reason);
         _quick_fund_ship(1);
 
         vm.expectEmit(true, true, true, true);
-        emit RecipientStatusChanged(recipientId, recipientStatus);
+        emit RecipientStatusChanged(recipientId, recipientStatus, reason);
         emit Allocated(recipientId, grantAmount, address(ARB()), facilitator().wearer);
 
         vm.startPrank(address(allo()));
@@ -1004,11 +1012,11 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         GrantShipStrategy.Status recipientStatus = IStrategy.Status.Rejected;
         uint256 grantAmount = _grantAmount;
 
-        bytes memory data = abi.encode(recipientId, recipientStatus, grantAmount);
+        bytes memory data = abi.encode(recipientId, recipientStatus, grantAmount, reason);
         _quick_fund_ship(1);
 
         vm.expectEmit(false, false, false, false);
-        emit RecipientStatusChanged(recipientId, recipientStatus);
+        emit RecipientStatusChanged(recipientId, recipientStatus, reason);
 
         vm.startPrank(address(allo()));
         ship(1).allocate(data, facilitator().wearer);
@@ -1037,10 +1045,10 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         vm.expectEmit(true, true, true, true);
 
         emit MilestonesSet(recipientId, milestones.length);
-        emit MilestonesReviewed(recipientId, IStrategy.Status.Accepted);
+        emit MilestonesReviewed(recipientId, IStrategy.Status.Accepted, reason);
 
         vm.startPrank(shipOperator(1).wearer);
-        ship(1).setMilestones(recipientId, milestones);
+        ship(1).setMilestones(recipientId, milestones, reason);
         vm.stopPrank();
     }
 
@@ -1065,7 +1073,7 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         emit MilestonesSet(recipientId, milestones.length);
 
         vm.startPrank(profile1_member1());
-        ship(1).setMilestones(recipientId, milestones);
+        ship(1).setMilestones(recipientId, milestones, reason);
         vm.stopPrank();
     }
 
