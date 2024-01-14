@@ -10,7 +10,6 @@ import {ReentrancyGuard} from "openzeppelin-contracts/contracts/security/Reentra
 import {IHats} from "hats-protocol/Interfaces/IHats.sol";
 import {IAllo} from "../../../core/interfaces/IAllo.sol";
 import {IStrategy} from "../../../core/interfaces/IStrategy.sol";
-
 import {IRegistry} from "../../../core/interfaces/IRegistry.sol";
 
 // Core Contracts
@@ -24,12 +23,15 @@ import {GrantShipStrategy} from "./GrantShipStrategy.sol";
 //Internal Libraries
 import {ShipInitData} from "./libraries/GrantShipShared.sol";
 
-// TODO CLean, reorgnaize, and document this contract
+/// @title RFP Simple Strategy
+/// @author @Jord
+/// @notice Strategy for allocation to GrantShips and managing the Grant Ships lifecycle.
 contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     /// ================================
     /// ========== Struct/Enum =========
     /// ================================
 
+    /// @notice Custom Status for managing the lifecycle GrantShips
     enum GameStatus {
         None,
         Pending,
@@ -41,6 +43,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         Completed
     }
 
+    /// @notice Struct holding the data for each round of the game
     struct GameRound {
         uint256 startTime;
         uint256 endTime;
@@ -49,6 +52,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         address[] ships;
     }
 
+    /// @notice Struct holding the data for each GrantShip recipient
     struct Recipient {
         address recipientAddress;
         bytes32 profileId;
@@ -64,58 +68,87 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     /// ========== Errors =============
     /// ===============================
 
-    /// @notice Throws when the game status or regular status is invalid.
+    /// @notice Throws when the game status or GrantShip recipient status is invalid.
     error INVALID_STATUS();
 
+    /// @notice Throws when a function is being called at an invalid time.
     error INVALID_TIME();
 
     /// ===============================
     /// ========== Events =============
     /// ===============================
 
+    /// @notice Emitted when a new round of the game is created.
+    /// @param gameIndex The index of the game round.
+    /// @param totalRoundAmount The total funding amount of the round.
     event RoundCreated(uint256 gameIndex, uint256 totalRoundAmount);
+
+    /// @notice Emitted when a new GrantShip recipient is Accepted and their Ship Strategy is deployed.
+    /// @param shipAddress The deployed contract address of the GrantShip Strategy.
+    /// @param shipPoolId The Allo Pool Id for the GrantShip Strategy.
+    /// @param recipientId The address of the GrantShip recipient. This will the Ship or team's anchor address
+    /// @param shipName The name of the GrantShip.
+    /// @param metadata The metadata of the GrantShip.
     event ShipLaunched(
-        address shipAddress, uint256 shipPoolId, address applicantId, string shipName, Metadata metadata
+        address shipAddress, uint256 shipPoolId, address recipientId, string shipName, Metadata metadata
     );
+
+    /// @notice Emitted when a new GrantShip recipient is Rejected.
+    /// @param recipientAddress The anchor address of the GrantShip recipient.
     event RecipientRejected(address recipientAddress);
 
+    /// @notice Emitted when a new GrantShip recipient is Registered.
+    /// @param active boolean indicating whether or the GrantShips Round is active.
+    /// @param gameIndex The index of the game round.
     event GameActive(bool active, uint256 gameIndex);
 
+    /// @notice Emitted when the GameManager is initialized.
+    /// @param gameFacilitatorId The Hats Protocol Id for the Game Facilitator.
+    /// @param hatsAddress The address of the Hats Protocol contract.
+    /// @param rootAccount The address of the root account.
+    /// @param token The address of the token used for funding GrantShips.
     event GameManagerInitialized(uint256 gameFacilitatorId, address hatsAddress, address rootAccount, address token);
 
+    /// @notice Emitted when a content update is posted. Permissioned to facilitators or root account.
     event UpdatePosted(string indexed tag, uint256 indexed role, address indexed recipientId, Metadata content);
 
     /// ===============================
     /// ========== Storage ============
     /// ===============================
 
-    address public rootAccount;
-
     /// @notice The 'Hats Protocol' contract interface.
     IHats private _hats;
 
-    address public token;
-
+    /// @notice The Allo contract image. Using this instead of IAllo so this contract can call createPoolWithCustomStrategy. .
     Allo private _allo;
 
+    /// @notice The Allo Registry contract interface
     IRegistry private _registry;
+
+    /// @notice The address of the root account. This is the account that funds are withdrawn to.
+    address public rootAccount;
+
+    /// @notice The address of the token used for funding GrantShips.
+    address public token;
 
     ///@notice Mapping of all GrantShip Recipients
     ///@dev 'recipientAddress' to 'Recipient'
     mapping(address => Recipient) public recipients;
 
-    ///@notice Array of all Game Rounds
+    ///@notice Array of all Game Rounds.
     GameRound[] public gameRounds;
 
     ///@notice index of the current game round
     uint256 public currentRoundIndex;
 
+    /// @notice The Hats Protocol Id for managing the lifecycle of GrantShips.
     uint256 public gameFacilitatorHatId;
 
     /// ===============================
     /// ========== Modifiers ==========
     /// ===============================
 
+    /// @notice Modifier to restrict functions to the Game Facilitator.
     modifier onlyGameFacilitator(address _sender) {
         if (!_hats.isWearerOfHat(_sender, gameFacilitatorHatId)) {
             revert UNAUTHORIZED();
@@ -127,6 +160,9 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     /// ======== Constructor ==========
     /// ===============================
 
+    /// @notice Constructor for the GameManager Strategy
+    /// @param _alloAddress The 'Allo' contract address
+    /// @param _name The name of the strategy
     constructor(address _alloAddress, string memory _name) BaseStrategy(_alloAddress, _name) {
         _allo = Allo(_alloAddress);
     }
@@ -135,12 +171,21 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     /// ======== Initialize ===========
     /// ===============================
 
+    /// @notice Initialize the strategy
+    /// @param _poolId ID of the pool
+    /// @param _data The data to be decoded
+    /// @custom:data (uint256 gameFacilitatorId, address hatsAddress, address rootAccount)
     function initialize(uint256 _poolId, bytes memory _data) external {
         __BaseStrategy_init(_poolId);
         __GameManager_init(_data);
         _setPoolActive(true);
     }
 
+    /// @notice This initializes the BaseStrategy and parameters specific to the GameManager Strategy
+    /// @dev You only need to pass the 'poolId' to initialize the BaseStrategy and the rest is specific to the strategy
+    /// @param _data The data to be decoded
+    /// @custom:data (uint256 gameFacilitatorId, address hatsAddress, address rootAccount)
+    /// @dev registryGating, metadataRequired, grantAmountRequired are all implicitly set to true
     function __GameManager_init(bytes memory _data) internal {
         (uint256 _gameFacilitatorId, address _hatsAddress, address _rootAccount) =
             abi.decode(_data, (uint256, address, address));
@@ -162,26 +207,42 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     /// ============ Views ============
     /// ===============================
 
-    function getShipAddress(address _recipientAddress) public view returns (address payable) {
-        return getRecipient(_recipientAddress).shipAddress;
-    }
-
+    /// @notice Get the recipient
+    /// @param _recipientAddress The address of the recipient
+    /// @return returns the recipient struct
     function getRecipient(address _recipientAddress) public view returns (Recipient memory) {
         return recipients[_recipientAddress];
     }
 
-    function getHatsAddress() public view returns (address) {
-        return address(_hats);
+    /// @notice Get the ship contract address
+    /// @param _recipientAddress The address of the recipient
+    /// @return returns the ship contract address
+    function getShipAddress(address _recipientAddress) public view returns (address payable) {
+        return getRecipient(_recipientAddress).shipAddress;
     }
 
+    /// @notice Get the game round
+    /// @param _gameRoundIndex The index of the game round you wish to return
+    /// @return returns the GameRound struct
     function getGameRound(uint256 _gameRoundIndex) public view returns (GameRound memory) {
         return gameRounds[_gameRoundIndex];
     }
 
+    /// @notice Getter to test if an address is the Game Facilitator
+    /// @param _address The address you wish to test
     function isGameFacilitator(address _address) public view returns (bool) {
         return _hats.isWearerOfHat(_address, gameFacilitatorHatId);
     }
 
+    /// @notice Get the deployment address of Hats Protocol
+    /// @return returns the address of the Hats Protocol contract
+    function getHatsAddress() public view returns (address) {
+        return address(_hats);
+    }
+
+    /// @notice Get the curent status of the Grant Ships GameRound
+    /// @return returns the current status of the GameRound
+    /// @dev The GrantShips game round is the inverse of the GameManager's pool active status (prep round)
     function isGameActive() public view returns (bool) {
         return !_isPoolActive();
     }
@@ -190,6 +251,9 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     /// ======= External/Custom =======
     /// ===============================
 
+    /// @notice Game Facilitators create a new round of the game
+    /// @param _totalRoundAmount The total funding amount of the round.
+    /// @return returns the index of the new game round
     function createRound(uint256 _totalRoundAmount) external onlyGameFacilitator(msg.sender) returns (uint256) {
         // Note: This check allows us to create the first round, then checks the previous round for
         // the correct status. Doesn't seem like the cleanest way to do this, open to suggestions.
@@ -205,6 +269,10 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         return currentRoundIndex;
     }
 
+    /// @notice Game Facilitators review GrantShip applicants and create a new GrantShip Strategy
+    /// @param recipientAddress The address of the GrantShip applicant
+    /// @param _approvalFlag The approval status of the GrantShip applicant (Accepted/Rejected)
+    /// @param shipInitData The init data for the GrantShip Strategy (see GrantShipShared for struct)
     function reviewRecipient(address recipientAddress, GameStatus _approvalFlag, ShipInitData memory shipInitData)
         external
         onlyGameFacilitator(msg.sender)
@@ -230,6 +298,10 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         }
     }
 
+    /// @notice Game Facilitators start the game
+    /// @dev This function will set the pool to inactive and start the game.
+    /// This happens after registrations, review, allocation, and distribution have been completed.
+    /// 'Game Start' activates the GrantShip strategies deployed by this contract.
     function startGame() external onlyGameFacilitator(msg.sender) onlyActivePool {
         GameRound storage currentRound = gameRounds[currentRoundIndex];
 
@@ -242,6 +314,10 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         emit GameActive(true, currentRoundIndex);
     }
 
+    /// @notice Game Facilitators stop the game
+    /// @dev This function will set the pool to active and stop the game.
+    /// This happens after the game has been started and the end time has been reached.
+    /// 'Game Start' deactivates the GrantShip strategies deployed by this contract and increments the round counter.
     function stopGame() external onlyGameFacilitator(msg.sender) onlyInactivePool {
         GameRound storage currentRound = gameRounds[currentRoundIndex];
 
@@ -263,6 +339,9 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         emit GameActive(false, currentRoundIndex);
     }
 
+    /// @notice Game Facilitators withdraw funds from the pool
+    /// @param _amount The amount to withdraw
+    /// @dev This function will withdraw funds from the pool and transfer them to the root account only.
     function withdraw(uint256 _amount) external {
         if (_amount > poolAmount) revert NOT_ENOUGH_FUNDS();
         if (msg.sender != rootAccount && !isGameFacilitator(msg.sender)) revert UNAUTHORIZED();
@@ -272,6 +351,9 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         _transferAmount(token, rootAccount, _amount);
     }
 
+    /// @notice Game Facilitators or root account post updates about the GrantShips
+    /// @param _tag The tag of the update, used to mark the type of update when indexing
+    /// @param _content The content of the update,
     function postUpdate(string memory _tag, Metadata memory _content) external {
         if (isGameFacilitator(msg.sender)) {
             emit UpdatePosted(_tag, gameFacilitatorHatId, address(0), _content);
@@ -282,6 +364,13 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         }
     }
 
+    /// ====================================
+    /// ============ Internal ==============
+    /// ====================================
+
+    /// @notice Called by reviewRecipient, this function deploys a new GrantShip Strategy
+    /// @param _recipient The recipient struct
+    /// @param _shipInitData The init data for the GrantShip Strategy (see GrantShipShared for struct)
     function _createShip(Recipient memory _recipient, ShipInitData memory _shipInitData)
         internal
         returns (address payable)
@@ -318,6 +407,10 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         return strategyAddress;
     }
 
+    /// @notice Allocates funds to Accepted GrantShip recipients who are in the upcoming round
+    /// @param _data The data to be decoded
+    /// @custom:data (address[] _recipientIds, uint256[] _amounts, uint256 _total)
+    /// @dev This function is called by the Allocator and is permissioned to the Game Facilitator
     function _allocate(bytes memory _data, address _sender)
         internal
         virtual
@@ -374,6 +467,10 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         currentRound.status = GameStatus.Allocated;
     }
 
+    /// @notice Distributes funds to GrantShip recipients who are in the current round
+    /// @param _data The data to be decoded
+    /// @custom:data (address[] _recipientIds, uint256[] _amounts, uint256 _total)
+    /// @dev This function is called by the Allocator and is permissioned to the Game Facilitator
     function _distribute(address[] memory _recipientIds, bytes memory _data, address _sender)
         internal
         virtual
@@ -413,9 +510,11 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
             unchecked {
                 i++;
             }
+
             emit Distributed(recipient.recipientAddress, recipient.shipAddress, recipient.grantAmount, _sender);
         }
 
+        // Review: Do I need to do a final interaction check here? (ex. total amount == total distributed)
         (uint256 startTime, uint256 endTime) = abi.decode(_data, (uint256, uint256));
 
         currentRound.startTime = startTime;
@@ -423,13 +522,10 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         currentRound.status = GameStatus.Funded;
     }
 
-    /// ====================================
-    /// ============ Internal ==============
-    /// ====================================
-
-    // Register to be a ship. This step does not create a ship, it just registers the address to be a ship.
-    // Users can re-register to update their metadata.
-    // All Ship Applicants MUST have registered profiles
+    /// @notice Registers a new GrantShip recipient
+    /// @param _data The data to be decoded
+    /// @custom:data (address _anchorAddress, string _shipName, Metadata _metadata)
+    /// @param _sender The address of the sender
     function _registerRecipient(bytes memory _data, address _sender) internal virtual override returns (address) {
         (address _anchorAddress, string memory _shipName, Metadata memory _metadata) =
             abi.decode(_data, (address, string, Metadata));
@@ -463,24 +559,33 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         return _anchorAddress;
     }
 
+    /// @notice Returns the status of the recipient
+    /// @dev currently out of order, until I know the Allo protocol use for this function and how best to adapt to it.
     function _getRecipientStatus(address) internal view virtual override returns (Status) {
-        // Note: We would like to return GameStatus here, but it is not possible to return a GameStatus
-        // with the override
+        // Review: We would like to return GameStatus here, but it is not possible to return a GameStatus
+        // with the override. Should I make an adapater function to convert GameStatus to Status?
+        assert(false);
         return Status.None;
     }
 
+    /// @notice Returns the payout summary for the recipient
+    /// @param _recipientId The address of the recipient
     function _getPayout(address _recipientId, bytes memory) internal view override returns (PayoutSummary memory) {
-        // TODO: This is status dependant, we should return exactly how much the ship has been paid.
-
+        // Review: Is this function meant to return the total amount paid out to the recipient? Or just the amount currently?
         Recipient memory shipRecipient = getRecipient(_recipientId);
         return PayoutSummary(address(shipRecipient.shipAddress), shipRecipient.grantAmount);
     }
 
+    /// @notice Tests if the sender is a member of the profile
+    /// @param _anchor The address of the profile anchor
+    /// @param _sender The address of the sender
     function _isProfileMember(address _anchor, address _sender) internal view returns (bool) {
         IRegistry.Profile memory profile = _registry.getProfileByAnchor(_anchor);
         return _registry.isOwnerOrMemberOfProfile(profile.id, _sender);
     }
 
+    /// @notice Tests if the sender is a valid allocator
+    /// @param _allocator The address that is being tested
     function _isValidAllocator(address _allocator) internal view virtual override returns (bool) {
         return isGameFacilitator(_allocator);
     }
