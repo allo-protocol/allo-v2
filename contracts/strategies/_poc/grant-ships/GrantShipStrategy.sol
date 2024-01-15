@@ -22,15 +22,17 @@ import {GameManagerStrategy} from "./GameManagerStrategy.sol";
 /// @notice Sub-Strategy used to allocate & distribute funds to recipients with milestone payouts. TThis contract is modified version of the Direct Grants Strategy.
 contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// ================================
-    /// ========== Structs =============
+    /// ========== Struct/Enum =========
     /// ================================
 
+    /// @notice Enum for deternining flag type
     enum FlagType {
         None,
         Yellow,
         Red
     }
 
+    /// @notice Stores details about a flag, its issuance, and resolution
     struct Flag {
         FlagType flagType;
         Metadata flagReason;
@@ -45,7 +47,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         Status milestoneStatus;
     }
 
-    /// @notice Struct to hold details of an recipient
+    /// @notice Struct to hold details of a recipient
     struct Recipient {
         bool useRegistryAnchor;
         address recipientAddress;
@@ -62,7 +64,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Throws when there is collision with the Flag nonce
     error FLAG_ALREADY_EXISTS();
 
-    /// @notice Throws when there is collision with the Flag nonce
+    /// @notice Throws when there is an incorrect FlagType
     error INVALID_FLAG();
 
     /// @notice Throws when the ship still has unresolved red flags
@@ -93,23 +95,32 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Emitted for the status change of a milestone.
     event MilestoneStatusChanged(address recipientId, uint256 milestoneId, Status status);
 
+    /// @notice Emitted for the rejection of a single milestone.
+    event MilestoneRejected(address recipientId, uint256 milestoneId, Metadata reason);
+
     /// @notice Emitted for the milestones set.
     event MilestonesSet(address recipientId, uint256 milestonesLength);
 
+    ///@notice Emitted when a flag is issued to this GrantShip
     event FlagIssued(uint256 nonce, FlagType flagType, Metadata flagReason);
 
+    ///@notice Emitted when a flag is resolved
     event FlagResolved(uint256 nonce, Metadata resolutionReason);
 
+    /// @notice Emitted for the review of the milestones. Contains a 'reason'
     event MilestonesReviewed(address recipientId, Status status, Metadata reason);
 
+    /// @notice Emitted when funds for this pool have been withdrawn.
     event PoolWithdraw(uint256 amount);
 
+    /// @notice Emitted when funds have been added to this pool.
     event PoolFunded(uint256 poolId, uint256 amount, uint256 amountPercentage);
 
+    /// @notice Emitted when a game player creates a metadata update
     event UpdatePosted(string tag, uint256 role, address recipientId, Metadata content);
 
     /// ================================
-    /// ===== Game (Global) State ======
+    /// ========== Storage =============
     /// ================================
 
     /// @notice Reference to the 'GameManager' contract interface.
@@ -117,10 +128,6 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Reference to GameManager's 'Hats' contract interface.
     IHats internal _hats;
-
-    /// ================================
-    /// ========== Storage =============
-    /// ================================
 
     /// @notice Flag to check if registry gating is enabled.
     bool public registryGating;
@@ -134,16 +141,16 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice The 'Registry' contract interface.
     IRegistry private _registry;
 
-    /// @notice The total amount allocated to grant/recipient.
+    /// @notice The total amount allocated to recipients.
     uint256 public allocatedGrantAmount;
 
-    /// @notice The Hat's Protocol ID for the ship operator.
+    /// @notice The Hats Protocol ID for Ship Operator.
     uint256 public operatorHatId;
 
-    /// @notice The Hat's Protocol ID for the game facilitator.
+    /// @notice The Hats Protocol ID for the Game Gacilitator.
     uint256 public facilitatorHatId;
 
-    ///@notice
+    ///@notice The total amount of unresolved red flags
     uint256 public unresolvedRedFlags;
 
     /// @notice Flag to check if the Ship has been flagged for a violation
@@ -156,11 +163,11 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// @dev 'recipientId' to 'Recipient'
     mapping(address => Recipient) private _recipients;
 
-    /// @notice This maps accepted recipients to their milestones
+    /// @notice This maps recipients to their milestones
     /// @dev 'recipientId' to 'Milestone'
     mapping(address => Milestone[]) public milestones;
 
-    /// @notice This maps accepted recipients to their upcoming milestone
+    /// @notice This maps recipients to their upcoming milestone
     /// @dev 'recipientId' to 'nextMilestone'
     mapping(address => uint256) public upcomingMilestone;
 
@@ -168,6 +175,8 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// ======== Modifiers ============
     /// ===============================
 
+    /// @notice odifier to check if sender is a game facilitator
+    /// @dev Throws if the sender does not hold a Game Facilitator hat
     modifier onlyGameFacilitator(address _sender) {
         if (!isGameFacilitator(_sender)) {
             revert UNAUTHORIZED();
@@ -175,6 +184,8 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         _;
     }
 
+    /// @notice Modifier to check if sender is a ship operator
+    /// @dev Throws if the sender does not hold a Ship Operator hat
     modifier onlyShipOperator(address _sender) {
         if (!isShipOperator(_sender)) {
             revert UNAUTHORIZED();
@@ -182,6 +193,8 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         _;
     }
 
+    /// @notice Modifier to check if this GrantShip Strategy does not have any unresolved red flags
+    /// @dev Throws if the GrantShip Strategy has unresolved red flags
     modifier noUnresolvedRedFlags() {
         if (hasUnresolvedRedFlags()) {
             revert UNRESOLVED_RED_FLAGS();
@@ -189,6 +202,8 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         _;
     }
 
+    /// @notice Modifier to check if the function is being called by the GameManagerStrategy
+    /// @dev Throws if the sender is not the parent GameManagerStrategy
     modifier onlyGameManger(address _sender) {
         if (_sender != address(_gameManager)) {
             revert UNAUTHORIZED();
@@ -212,7 +227,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Initialize the strategy
     /// @param _poolId ID of the pool
     /// @param _data The data to be decoded
-    /// @custom:data (bool registryGating, bool metadataRequired, bool grantAmountRequired)
+    /// @custom:data (ShipInitData (see GrantShipsShared.sol), address payable _gameManagerAddress)
     function initialize(uint256 _poolId, bytes memory _data) external virtual override {
         (ShipInitData memory shipInitData, address payable _gameManagerAddress) =
             abi.decode(_data, (ShipInitData, address));
@@ -220,10 +235,9 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         emit Initialized(_poolId, _data);
     }
 
-    /// @notice This initializes the BaseStrategy
-    /// @dev You only need to pass the 'poolId' to initialize the BaseStrategy and the rest is specific to the strategy
+    /// @notice This initializes the BaseStrategy, and sets this strategies init params
     /// @param _poolId ID of the pool - required to initialize the BaseStrategy
-    /// @param _initData The init params for the strategy (bool registryGating, bool metadataRequired, bool grantAmountRequired)
+    /// @param _initData The init params for the strategy (ShipInitData, address payable _gameManagerAddress)
     function __GrantShipStrategy_init(
         uint256 _poolId,
         ShipInitData memory _initData,
@@ -232,8 +246,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         // Initialize the BaseStrategy
         __BaseStrategy_init(_poolId);
 
-        GameManagerStrategy gameManager = GameManagerStrategy(_gameManagerAddress);
-        _gameManager = gameManager;
+        _gameManager = GameManagerStrategy(_gameManagerAddress);
 
         _hats = IHats(address(_gameManager.getHatsAddress()));
 
@@ -256,11 +269,14 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Get the recipient
     /// @param _recipientId ID of the recipient
-    /// @return Recipient Returns the recipient
+    /// @return Recipient Returns the Recipient struct
     function getRecipient(address _recipientId) external view returns (Recipient memory) {
         return _getRecipient(_recipientId);
     }
 
+    /// @notice Get the Flag
+    /// @param _nonce ID of the flag
+    /// @return Flag Returns the Flag struct
     function getFlag(uint256 _nonce) external view returns (Flag memory) {
         return violationFlags[_nonce];
     }
@@ -273,19 +289,24 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         return _getRecipient(_recipientId).recipientStatus;
     }
 
+    /// @notice Tests if address holds a Game Facilitator hat
+    /// @param _gameFacilitator Address of the game facilitator
+    /// @return 'true' if the address holds a Game Facilitator hat, otherwise 'false'
     function isGameFacilitator(address _gameFacilitator) public view returns (bool) {
         return _hats.isWearerOfHat(_gameFacilitator, facilitatorHatId);
     }
 
+    /// @notice Tests if address holds a Ship Operator hat
+    /// @param _shipOperator Address of the ship operator
+    /// @return 'true' if the address holds a Ship Operator hat, otherwise 'false'
     function isShipOperator(address _shipOperator) public view returns (bool) {
         return _hats.isWearerOfHat(_shipOperator, operatorHatId);
     }
 
-    //Todo: update comment
-    /// @notice Checks if address is eligible allocator.
-    /// @dev This is used to check if the allocator is a pool manager and able to allocate funds from the pool
+    /// @notice Tests if address is eligible allocator.
+    /// @dev This is used to check if the allocator is a GameFacilitator and holds the facilitator hat.
     /// @param _allocator Address of the allocator
-    /// @return 'true' if the allocator is a pool manager, otherwise false
+    /// @return 'true' if the allocator is a game facilitator, otherwise false
     function _isValidAllocator(address _allocator) internal view override returns (bool) {
         return isGameFacilitator(_allocator);
     }
@@ -306,6 +327,8 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         return milestones[_recipientId];
     }
 
+    /// @notice Checks if this Ship has any unresolved red flags
+    /// @return 'true' if the Ship has unresolved red flags, otherwise 'false'
     function hasUnresolvedRedFlags() public view returns (bool) {
         return unresolvedRedFlags > 0;
     }
@@ -314,6 +337,11 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// ======= External/Custom =======
     /// ===============================
 
+    /// @notice Post an update to the this Ship's feed
+    /// @dev 'msg.sender' must be a game facilitator, ship operator, or a recipient to post an update
+    /// @param _tag The tag of the update. Used to index by topic,
+    /// @param _content The content of the update
+    /// @param _recipientId The recipient to post the update. Expecting address(0) if poster has is Game Facilitator or Ship Operator
     function postUpdate(string memory _tag, Metadata memory _content, address _recipientId) external {
         bool isNotRecipient = _recipientId == address(0);
 
@@ -329,16 +357,12 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         }
     }
 
-    /// Todo: update comment
     /// @notice Set milestones for recipient.
-    /// @dev 'msg.sender' must be recipient creator or pool manager. Emits a 'MilestonesReviewed()' event.
+    /// @dev 'msg.sender' must be recipient creator or ShipOperator. Emits a 'MilestonesReviewed()' event.
     /// @param _recipientId ID of the recipient
     /// @param _milestones The milestones to be set
+    /// @param _reason The reason for setting the milestones, only used if Milestone is approved by a shipOperator.
     function setMilestones(address _recipientId, Milestone[] memory _milestones, Metadata calldata _reason) external {
-        // Todo: Do a deep dive on _recipientId. If this is anchor address, and the sender is not a member of the profile,
-        // then the person who created the profile and recipient is going to have to use Anchor.execute to call this
-        // which is infeasible for quickly building a frontend.
-
         bool isRecipientCreator = (msg.sender == _recipientId) || _isProfileMember(_recipientId, msg.sender);
         bool isOperator = isShipOperator(msg.sender);
         if (!isRecipientCreator && !isOperator) {
@@ -368,6 +392,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// @dev Emits a 'MilestonesReviewed()' event
     /// @param _recipientId ID of the recipient
     /// @param _status The status of the milestone review
+    /// @param _reason The reason for setting the milestones
     function reviewSetMilestones(address _recipientId, Status _status, Metadata calldata _reason)
         external
         onlyShipOperator(msg.sender)
@@ -422,10 +447,6 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         }
 
         Milestone storage milestone = recipientMilestones[_milestoneId];
-
-        // Todo: Check we that this works in all cases.
-        // Seems like we should check for the statuses that we want instead of ruling out Accepted
-
         // Check if the milestone is accepted, otherwise revert
         if (milestone.milestoneStatus == Status.Accepted) {
             revert MILESTONE_ALREADY_ACCEPTED();
@@ -443,7 +464,11 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// @dev 'msg.sender' must be a pool manager to reject a milestone. Emits a 'MilestonesStatusChanged()' event.
     /// @param _recipientId ID of the recipient
     /// @param _milestoneId ID of the milestone
-    function rejectMilestone(address _recipientId, uint256 _milestoneId) external onlyShipOperator(msg.sender) {
+    /// @param _reason The reason for rejecting the milestone
+    function rejectMilestone(address _recipientId, uint256 _milestoneId, Metadata _reason)
+        external
+        onlyShipOperator(msg.sender)
+    {
         Milestone[] storage recipientMilestones = milestones[_recipientId];
 
         // Check if the milestone is the upcoming one
@@ -462,10 +487,14 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         milestone.milestoneStatus = Status.Rejected;
 
         // Emit event for the milestone rejection
-        emit MilestoneStatusChanged(_recipientId, _milestoneId, Status.Rejected);
+        emit MilestoneRejected(_recipientId, _milestoneId, _reason);
     }
-    // Todo test if I can just send flagType(8) and see what happens
 
+    /// @notice Issue a flag to this GrantShip
+    /// @dev 'msg.sender' must be a game facilitator to issue a flag
+    /// @param _nonce The nonce of the flag
+    /// @param _flagType The type of flag to issue (Red or Yellow)
+    /// @param _flagReason The reason for issuing the flag
     function issueFlag(uint256 _nonce, FlagType _flagType, Metadata calldata _flagReason)
         external
         onlyGameFacilitator(msg.sender)
@@ -491,6 +520,10 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         emit FlagIssued(_nonce, _flagType, _flagReason);
     }
 
+    /// @notice Resolve a flag issued to this GrantShip
+    /// @dev 'msg.sender' must be a game facilitator to resolve a flag
+    /// @param _nonce The nonce of the flag
+    /// @param _resolutionReason The reason for resolving the flag
     function resolveFlag(uint256 _nonce, Metadata calldata _resolutionReason)
         external
         onlyGameFacilitator(msg.sender)
@@ -516,11 +549,13 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     }
 
     /// Todo: Make sure that the recipient is not 'stuck' at Status.InReview in all possible cases
+    /// OR: Make sure that the recipient isn't able to 'jump ahead'.
     /// Also make sure the UX of getting back in the flow is easy to implement and clear to the user
 
     /// @notice Set the status of the recipient to 'InReview'
     /// @dev Emits a 'RecipientStatusChanged()' event
     /// @param _recipientIds IDs of the recipients
+    /// @param _reasons The reasons for setting statuses to 'InReview'
     function setRecipientStatusToInReview(address[] calldata _recipientIds, Metadata[] calldata _reasons) external {
         if (!isShipOperator(msg.sender) && !isGameFacilitator(msg.sender)) {
             revert UNAUTHORIZED();
@@ -542,13 +577,18 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         }
     }
 
+    /// Review: This is currently the only way for a parent strategy to properly distribute to a child strategy
+    /// Or at least the only solution that I've been able to discover. Any other ideas are welcome.
+
+    /// @notice Increase the pool amount for this pool.
+    /// @dev 'msg.sender' must be the parent GameManagerStrategy to increase the pool amount.
     function managerIncreasePoolAmount(uint256 _amount) external onlyGameManger(msg.sender) {
         poolAmount += _amount;
         emit PoolFunded(poolId, _amount, 0);
     }
 
     /// @notice Toggle the status between active and inactive.
-    /// @dev 'msg.sender' must be a pool manager to close the pool. Emits a 'PoolActive()' event.
+    /// @dev 'msg.sender' must be the GameFacilitator to close the pool. Emits a 'PoolActive()' event.
     /// @param _flag The flag to set the pool to active or inactive
     function setPoolActive(bool _flag) external onlyGameFacilitator(msg.sender) {
         _setPoolActive(_flag);
@@ -557,18 +597,26 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Withdraw funds from pool.
     /// @dev 'msg.sender' must be a pool manager to withdraw funds.
+    /// @dev Only sends funds to the game manager.
     /// @param _amount The amount to be withdrawn
-    function withdraw(uint256 _amount) external onlyGameFacilitator(msg.sender) onlyInactivePool {
+    function withdraw(uint256 _amount) external onlyGameFacilitator(msg.sender) onlyInactivePool nonReentrant {
+        // CHECK
         if (_amount > poolAmount) {
             revert NOT_ENOUGH_FUNDS();
         }
 
+        // EFFECT
         poolAmount -= _amount;
 
-        // Note: Using fund pool and approve to ensure that
+        // Review: Using fund pool and approve to ensure that
         // game manager's pool amount is correct when it recieves funds
-        // There's probably a better pattern for this. @Todo
+        // There's probably a better pattern for this.
+
+        // INTERACTION
+
+        // get pool token address
         IERC20 token = IERC20(allo.getPool(poolId).token);
+        // approve Allo to transfer funds
         token.approve(address(allo), _amount);
         // Transfer the amount to the pool manager
         allo.fundPool(_gameManager.getPoolId(), _amount);
@@ -657,11 +705,11 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         emit Registered(recipientId, _data, _sender);
     }
 
-    /// Todo: Document changes: Facilitators can allocate funds to recipients, not pool managers
-    /// @notice Allocate amount to recipent for GrantShips.
-    /// @dev '_sender' must be a pool manager to allocate. Emits 'RecipientStatusChanged() and 'Allocated()' events.
+    /// @notice Allocate amount to GrantShip recipients
+    /// @dev '_sender' must be a GameFacilitator to allocate. Emits 'RecipientStatusChanged() and 'Allocated()' events.
+    /// @dev  Cannot allocate funds if there are unresolved red flags
     /// @param _data The data to be decoded
-    /// @custom:data (address recipientId, Status recipientStatus, uint256 grantAmount)
+    /// @custom:data (address recipientId, Status recipientStatus, uint256 grantAmount, Metadata _reason)
     /// @param _sender The sender of the allocation
     function _allocate(bytes memory _data, address _sender)
         internal
@@ -688,9 +736,6 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
 
             allocatedGrantAmount += grantAmount;
 
-            // Todo: Maybe we should do this same check on register recipient?
-            // Not doing so might create issues where a there isn't enough funds to allocate to a recipient
-
             // Check if the allocated grant amount exceeds the pool amount and reverts if it does
             if (allocatedGrantAmount > poolAmount) {
                 revert ALLOCATION_EXCEEDS_POOL_AMOUNT();
@@ -713,6 +758,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Distribute the upcoming milestone to recipients.
     /// @dev '_sender' must be a pool manager to distribute.
+    /// @dev Cannot distribute funds if there are unresolved red flags
     /// @param _recipientIds The recipient ids of the distribution
     /// @param _sender The sender of the distribution
     function _distribute(address[] memory _recipientIds, bytes memory, address _sender)
@@ -742,12 +788,12 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         Recipient memory recipient = _recipients[_recipientId];
         Milestone storage milestone = recipientMilestones[milestoneToBeDistributed];
 
-        // check if milestone is not rejected or already paid out
-
+        // CHECK if milestone is not rejected or already paid out
         if (milestoneToBeDistributed > recipientMilestones.length || milestone.milestoneStatus != Status.Pending) {
             revert INVALID_MILESTONE();
         }
 
+        // EFFECTS
         // Calculate the amount to be distributed for the milestone
         uint256 amount = recipient.grantAmount * milestone.amountPercentage / 1e18;
 
@@ -759,10 +805,11 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         // Set the milestone status to 'Accepted'
         milestone.milestoneStatus = Status.Accepted;
 
-        _transferAmount(pool.token, recipient.recipientAddress, amount);
-
         // Increment the upcoming milestone
         upcomingMilestone[_recipientId]++;
+
+        // INTERACTION
+        _transferAmount(pool.token, recipient.recipientAddress, amount);
 
         // Emit events for the milestone and the distribution
         emit MilestoneStatusChanged(_recipientId, milestoneToBeDistributed, Status.Accepted);

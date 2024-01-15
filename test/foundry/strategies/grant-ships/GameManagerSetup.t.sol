@@ -75,9 +75,9 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
         return _shipProfileId[_index];
     }
 
-    //     // ====================================
-    //     // =========== Setup ==================
-    //     // ====================================
+    // ====================================
+    // =========== Setup ==================
+    // ====================================
 
     function __GameSetup() internal {
         vm.createSelectFork({blockNumber: 166_807_779, urlOrAlias: "arbitrumOne"});
