@@ -465,7 +465,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _recipientId ID of the recipient
     /// @param _milestoneId ID of the milestone
     /// @param _reason The reason for rejecting the milestone
-    function rejectMilestone(address _recipientId, uint256 _milestoneId, Metadata _reason)
+    function rejectMilestone(address _recipientId, uint256 _milestoneId, Metadata calldata _reason)
         external
         onlyShipOperator(msg.sender)
     {

@@ -40,7 +40,7 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
     event UpdatePosted(string tag, uint256 role, address recipientId, Metadata content);
     event Approval(address indexed owner, address indexed spender, uint256 value);
     event Transfer(address indexed from, address indexed to, uint256 value);
-
+    event MilestoneRejected(address recipientId, uint256 milestoneId, Metadata reason);
     // ================= State ===================
 
     uint256 internal constant _grantAmount = 1_000e18;
@@ -681,8 +681,11 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
     function test_rejectMilestone() public {
         address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones();
 
+        vm.expectEmit(true, true, true, true);
+        emit MilestoneRejected(recipientId, 0, reason);
+
         vm.startPrank(shipOperator(1).wearer);
-        ship(1).rejectMilestone(recipientId, 0);
+        ship(1).rejectMilestone(recipientId, 0, reason);
         vm.stopPrank();
 
         GrantShipStrategy.Milestone[] memory milestones = ship(1).getMilestones(recipientId);
@@ -697,7 +700,7 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         vm.expectRevert(GrantShipStrategy.MILESTONE_ALREADY_ACCEPTED.selector);
 
         vm.startPrank(shipOperator(1).wearer);
-        ship(1).rejectMilestone(recipientId, 0);
+        ship(1).rejectMilestone(recipientId, 0, reason);
         vm.stopPrank();
     }
 
@@ -705,7 +708,7 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones();
         vm.startPrank(shipOperator(1).wearer);
         vm.expectRevert(GrantShipStrategy.INVALID_MILESTONE.selector);
-        ship(1).rejectMilestone(recipientId, 10);
+        ship(1).rejectMilestone(recipientId, 10, reason);
         vm.stopPrank();
     }
 
@@ -725,7 +728,7 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones();
 
         vm.startPrank(shipOperator(1).wearer);
-        ship(1).rejectMilestone(recipientId, 0);
+        ship(1).rejectMilestone(recipientId, 0, reason);
 
         address[] memory recipients = new address[](2);
 
