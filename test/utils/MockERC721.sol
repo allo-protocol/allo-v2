@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity ^0.8.19;
 
-import {ERC721} from "solady/src/tokens/ERC721.sol";
-import {LibString} from "solady/src/utils/LibString.sol";
+import {ERC721} from "solady/tokens/ERC721.sol";
+import {LibString} from "solady/utils/LibString.sol";
 
 contract MockERC721 is ERC721 {
     function name() public view virtual override returns (string memory) {

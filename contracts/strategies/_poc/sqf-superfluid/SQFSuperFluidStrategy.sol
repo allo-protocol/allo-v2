@@ -13,7 +13,7 @@ import {PoolConfig} from
 import {SuperTokenV1Library} from
     "../../../../lib/superfluid-protocol-monorepo/packages/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
 import {IGitcoinPassportDecoder} from "./lib/IGitcoinPassportDecoder.sol";
-import {FixedPointMathLib} from "solady/src/utils/FixedPointMathLib.sol";
+import {FixedPointMathLib} from "solady/utils/FixedPointMathLib.sol";
 
 // Interfaces
 import {IRegistry} from "../../../core/interfaces/IRegistry.sol";
@@ -150,10 +150,6 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice stores the recipienId of each superApp
     /// @dev superApp => recipientId
     mapping(address => address) public superApps;
-
-    /// @notice stores the units for each recipient
-    /// @dev recipientId => allocator => units
-    mapping(address => mapping(address => uint256)) public recipientAllocatorUnits;
 
     /// @notice stores the total units for each recipient
     /// @dev recipientId => units
@@ -518,37 +514,34 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     /// @dev This can only be called by the super app callback onFlowUpdated
     /// @param _previousFlowrate The previous flow rate
     /// @param _newFlowRate The new flow rate
-    /// @param _allocator The allocator address
-    function adjustWeightings(uint256 _previousFlowrate, uint256 _newFlowRate, address _allocator) external {
+    function adjustWeightings(uint256 _previousFlowrate, uint256 _newFlowRate) external {
         address recipientId = superApps[msg.sender];
 
         if (recipientId == address(0)) revert UNAUTHORIZED();
 
-        uint256 unitsAfterAllocation;
-        uint256 unitsBeforeAllocation = recipientAllocatorUnits[recipientId][_allocator];
+        uint256 recipientTotalUnits = totalUnitsByRecipient[recipientId] * 1000;
 
         if (_previousFlowrate == 0) {
             // created a new flow
-            unitsAfterAllocation = _newFlowRate;
+            recipientTotalUnits = (recipientTotalUnits.sqrt() + _newFlowRate.sqrt()) ** 2;
         } else if (_newFlowRate == 0) {
             // canceled a flow
-            unitsAfterAllocation = 0;
+            recipientTotalUnits = (recipientTotalUnits.sqrt() - _previousFlowrate.sqrt()) ** 2;
         } else {
             // updated a flow
-            unitsAfterAllocation = (unitsBeforeAllocation.sqrt() + _newFlowRate.sqrt() - _previousFlowrate.sqrt()) ** 2;
+            recipientTotalUnits = (recipientTotalUnits.sqrt() + _newFlowRate.sqrt() - _previousFlowrate.sqrt()) ** 2;
         }
+
+        recipientTotalUnits /= 1000;
 
         Recipient storage recipient = recipients[recipientId];
 
-        uint256 recipientTotalUnits = totalUnitsByRecipient[recipientId];
-        recipientTotalUnits += unitsAfterAllocation - unitsBeforeAllocation;
-
         _updateMemberUnits(recipientId, recipient.recipientAddress, uint128(recipientTotalUnits));
 
-        recipientAllocatorUnits[recipientId][_allocator] = unitsAfterAllocation;
         totalUnitsByRecipient[recipientId] = recipientTotalUnits;
 
         uint256 currentFlowRate = recipientFlowRate[recipientId];
+
         recipientFlowRate[recipientId] = currentFlowRate + _newFlowRate - _previousFlowrate;
 
         emit TotalUnitsUpdated(recipientId, recipientTotalUnits);

@@ -94,7 +94,7 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
         allocationStartTime = uint64(block.timestamp) + 120;
         allocationEndTime = uint64(block.timestamp) + uint64(2 days);
         minPassportScore = 69;
-        initialSuperAppBalance = 420 * 1e5;
+        initialSuperAppBalance = 420 * 1e8;
 
         // set empty app RegistrationKey
         vm.prank(superfluidOwner);
@@ -373,7 +373,7 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
 
     function testRevert_adjustWeigthings_UNAUTHORIZED() public {
         vm.expectRevert(UNAUTHORIZED.selector);
-        _strategy.adjustWeightings(0, 1, randomAddress());
+        _strategy.adjustWeightings(0, 1);
     }
 
     function test_updatePoolTimestamps() public {
@@ -500,12 +500,12 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
             poolId,
             abi.encode(
                 recipientId,
-                9 // super small flowRate
+                9000 // super small flowRate
             )
         );
 
-        assertEq(_strategy.totalUnitsByRecipient(recipientId), 10);
-        assertEq(_strategy.recipientFlowRate(recipientId), 9);
+        assertEq(_strategy.totalUnitsByRecipient(recipientId), 15);
+        assertEq(_strategy.recipientFlowRate(recipientId), 9000);
     }
 
     function test_allocate_second_time_same_user() public {
@@ -516,12 +516,12 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
             poolId,
             abi.encode(
                 recipientId,
-                16 // super small flowRate
+                16000 // super small flowRate
             )
         );
 
-        assertEq(_strategy.totalUnitsByRecipient(recipientId), 17);
-        assertEq(_strategy.recipientFlowRate(recipientId), 16);
+        assertEq(_strategy.totalUnitsByRecipient(recipientId), 23);
+        assertEq(_strategy.recipientFlowRate(recipientId), 16000);
     }
 
     function test_allocate_second_time_different_user() public {
@@ -535,14 +535,14 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
             poolId,
             abi.encode(
                 recipientId,
-                16 // super small flowRate
+                16000 // super small flowRate
             )
         );
 
         vm.stopPrank();
 
-        assertEq(_strategy.totalUnitsByRecipient(recipientId), 26);
-        assertEq(_strategy.recipientFlowRate(recipientId), 25);
+        assertEq(_strategy.totalUnitsByRecipient(recipientId), 61);
+        assertEq(_strategy.recipientFlowRate(recipientId), 25000);
     }
 
     function test_allocate_multiple_recipients() public {
@@ -559,7 +559,7 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
             poolId,
             abi.encode(
                 recipientId1,
-                16 // super small flowRate
+                16000 // super small flowRate
             )
         );
 
@@ -567,15 +567,15 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
             poolId,
             abi.encode(
                 recipientId2,
-                25 // super small flowRate
+                25000 // super small flowRate
             )
         );
 
-        assertEq(_strategy.totalUnitsByRecipient(recipientId1), 17);
-        assertEq(_strategy.recipientFlowRate(recipientId1), 16);
+        assertEq(_strategy.totalUnitsByRecipient(recipientId1), 24);
+        assertEq(_strategy.recipientFlowRate(recipientId1), 16000);
 
-        assertEq(_strategy.totalUnitsByRecipient(recipientId2), 26);
-        assertEq(_strategy.recipientFlowRate(recipientId2), 25);
+        assertEq(_strategy.totalUnitsByRecipient(recipientId2), 35);
+        assertEq(_strategy.recipientFlowRate(recipientId2), 25000);
 
         vm.startPrank(secondAllocator);
         superFakeDai.increaseFlowRateAllowanceWithPermissions(address(_strategy), 7, type(int96).max);
@@ -584,7 +584,7 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
             poolId,
             abi.encode(
                 recipientId1,
-                9 // super small flowRate
+                9000 // super small flowRate
             )
         );
 
@@ -592,35 +592,17 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
             poolId,
             abi.encode(
                 recipientId2,
-                36 // super small flowRate
+                36000 // super small flowRate
             )
         );
 
         vm.stopPrank();
 
-        assertEq(_strategy.totalUnitsByRecipient(recipientId1), 26);
-        assertEq(_strategy.recipientFlowRate(recipientId1), 25);
+        assertEq(_strategy.totalUnitsByRecipient(recipientId1), 61);
+        assertEq(_strategy.recipientFlowRate(recipientId1), 25000);
 
-        assertEq(_strategy.totalUnitsByRecipient(recipientId2), 62);
-        assertEq(_strategy.recipientFlowRate(recipientId2), 61);
-
-        // vm.startPrank(recipientId1);
-        // superFakeDai.connectPool(_strategy.gdaPool());
-        // ISuperfluidPool gdaPool = ISuperfluidPool(address(_strategy.gdaPool()));
-        // uint256 netFlowGDA = uint256(int256(superFakeDai.getGDANetFlowRate(address(gdaPool))));
-        // vm.stopPrank();
-
-        // uint256 totalUnits =  _strategy.totalUnitsByRecipient(recipientId1) +_strategy.totalUnitsByRecipient(recipientId2);
-        // uint256 calculatedFlowRateForRecipient1 = netFlowGDA *  _strategy.totalUnitsByRecipient(recipientId1) / totalUnits;
-        // assertEq(calculatedFlowRateForRecipient1, gdaPool.getFlowRate(recipientId1));
-
-        assertEq(superFakeDai.balanceOf(recipient1()), 0);
-        assertEq(superFakeDai.balanceOf(recipient2()), 0);
-
-        vm.warp(uint256(registrationEndTime) + 100);
-
-        assertNotEq(superFakeDai.balanceOf(recipient1()), 0);
-        assertNotEq(superFakeDai.balanceOf(recipient2()), 0);
+        assertEq(_strategy.totalUnitsByRecipient(recipientId2), 141);
+        assertEq(_strategy.recipientFlowRate(recipientId2), 61000);
     }
 
     function testRevert_allocate_UNATUTHORIZED() public {

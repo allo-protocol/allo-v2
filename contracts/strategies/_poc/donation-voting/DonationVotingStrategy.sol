@@ -3,7 +3,7 @@ pragma solidity 0.8.19;
 
 // External Libraries
 import {ReentrancyGuard} from "openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
-import {SafeTransferLib} from "solady/src/utils/SafeTransferLib.sol";
+import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 // Interfaces
 import {IAllo} from "../../../core/interfaces/IAllo.sol";
 import {IRegistry} from "../../../core/interfaces/IRegistry.sol";
