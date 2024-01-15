@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import "forge-std/Test.sol";
+// import "forge-std/Test.sol";
 
 // External Libraries
 import {ReentrancyGuard} from "openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
@@ -346,7 +346,6 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         if (isGameFacilitator(msg.sender) && isNotRecipient) {
             emit UpdatePosted(_tag, _gameManager.gameFacilitatorHatId(), _recipientId, _content);
         } else if (isShipOperator(msg.sender) && isNotRecipient) {
-            console.log("operatorHatId", operatorHatId);
             emit UpdatePosted(_tag, operatorHatId, _recipientId, _content);
         } else if (_isProfileMember(_recipientId, msg.sender) && !isNotRecipient) {
             emit UpdatePosted(_tag, 0, _recipientId, _content);

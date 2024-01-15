@@ -541,8 +541,6 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
 
         uint256 poolId = gameManager().getPoolId();
 
-        console.log(recipientAddresses.length);
-
         vm.expectRevert(ARRAY_MISMATCH.selector);
 
         vm.startPrank(facilitator().wearer);
