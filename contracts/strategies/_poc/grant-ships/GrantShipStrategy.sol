@@ -35,9 +35,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Stores details about a flag, its issuance, and resolution
     struct Flag {
         FlagType flagType;
-        Metadata flagReason;
         bool isResolved;
-        Metadata resolutionReason;
     }
 
     /// @notice Struct to hold details about the milestone
@@ -494,8 +492,8 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// @dev 'msg.sender' must be a game facilitator to issue a flag
     /// @param _nonce The nonce of the flag
     /// @param _flagType The type of flag to issue (Red or Yellow)
-    /// @param _flagReason The reason for issuing the flag
-    function issueFlag(uint256 _nonce, FlagType _flagType, Metadata calldata _flagReason)
+    /// @param _reason The reason for issuing the flag
+    function issueFlag(uint256 _nonce, FlagType _flagType, Metadata calldata _reason)
         external
         onlyGameFacilitator(msg.sender)
     {
@@ -511,23 +509,19 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         }
 
         flag.flagType = _flagType;
-        flag.flagReason = _flagReason;
 
         if (_flagType == FlagType.Red) {
             unresolvedRedFlags++;
         }
 
-        emit FlagIssued(_nonce, _flagType, _flagReason);
+        emit FlagIssued(_nonce, _flagType, _reason);
     }
 
     /// @notice Resolve a flag issued to this GrantShip
     /// @dev 'msg.sender' must be a game facilitator to resolve a flag
     /// @param _nonce The nonce of the flag
-    /// @param _resolutionReason The reason for resolving the flag
-    function resolveFlag(uint256 _nonce, Metadata calldata _resolutionReason)
-        external
-        onlyGameFacilitator(msg.sender)
-    {
+    /// @param _reason The reason for resolving the flag
+    function resolveFlag(uint256 _nonce, Metadata calldata _reason) external onlyGameFacilitator(msg.sender) {
         Flag storage flag = violationFlags[_nonce];
 
         if (flag.flagType == FlagType.None) {
@@ -539,13 +533,12 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         }
 
         flag.isResolved = true;
-        flag.resolutionReason = _resolutionReason;
 
         if (flag.flagType == FlagType.Red) {
             unresolvedRedFlags--;
         }
 
-        emit FlagResolved(_nonce, _resolutionReason);
+        emit FlagResolved(_nonce, _reason);
     }
 
     /// Todo: Make sure that the recipient is not 'stuck' at Status.InReview in all possible cases

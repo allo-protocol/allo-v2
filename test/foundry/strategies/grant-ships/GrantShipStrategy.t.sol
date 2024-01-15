@@ -796,11 +796,7 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
 
         assertEq(ship(1).unresolvedRedFlags(), 1);
         assertEq(uint8(flag.flagType), uint8(GrantShipStrategy.FlagType.Red));
-        assertEq(flag.flagReason.protocol, 1);
-        assertEq(flag.flagReason.pointer, "reason");
         assertFalse(flag.isResolved);
-        assertEq(flag.resolutionReason.protocol, 0);
-        assertEq(flag.resolutionReason.pointer, "");
 
         _issue_flag(1, GrantShipStrategy.FlagType.Yellow);
 
@@ -898,11 +894,7 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
 
         assertEq(ship(1).unresolvedRedFlags(), 0);
         assertEq(uint8(flag.flagType), uint8(GrantShipStrategy.FlagType.Red));
-        assertEq(flag.flagReason.protocol, 1);
-        assertEq(flag.flagReason.pointer, "reason");
         assertTrue(flag.isResolved);
-        assertEq(flag.resolutionReason.protocol, 1);
-        assertEq(flag.resolutionReason.pointer, "reason");
 
         _issue_flag(1, GrantShipStrategy.FlagType.Yellow);
         GrantShipStrategy.Flag memory yellowFlag = ship(1).getFlag(1);
@@ -917,11 +909,7 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
 
         assertEq(ship(1).unresolvedRedFlags(), 0);
         assertEq(uint8(yellowFlag.flagType), uint8(GrantShipStrategy.FlagType.Yellow));
-        assertEq(yellowFlag.flagReason.protocol, 1);
-        assertEq(yellowFlag.flagReason.pointer, "reason");
         assertTrue(yellowFlag.isResolved);
-        assertEq(yellowFlag.resolutionReason.protocol, 1);
-        assertEq(yellowFlag.resolutionReason.pointer, "reason");
     }
 
     //     // ================= Helpers =====================
