@@ -17,4 +17,5 @@ struct ShipInitData {
     Metadata shipMetadata;
     address recipientId;
     uint256 operatorHatId;
+    uint256 facilitatorHatId;
 }

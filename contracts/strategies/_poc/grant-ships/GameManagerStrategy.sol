@@ -60,6 +60,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         address payable shipAddress;
         uint256 shipPoolId;
         uint256 grantAmount;
+        uint256 totalAmountRecieved;
         Metadata metadata;
         GameStatus status;
     }
@@ -499,20 +500,22 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
 
         for (uint256 i; i < _recipientIds.length;) {
             Recipient storage recipient = recipients[_recipientIds[i]];
-            // checks that the Recipient status is Allocated
+            // CHECK that the Recipient status is Allocated
             if (recipient.status != GameStatus.Allocated) revert INVALID_STATUS();
 
+            /// EFFECTS:
             poolAmount -= recipient.grantAmount;
-
+            recipient.totalAmountRecieved += recipient.grantAmount;
             recipient.status = GameStatus.Active;
 
             GrantShipStrategy grantShip = GrantShipStrategy(recipient.shipAddress);
 
-            // Note: I need a way to increase the pool amount on the child strategies
+            // Review: I need a way to increase the pool amount on the child strategies
             // Calling fundPool on the child strategy does not work here because it triggers the
             // re-entrancy guard on Allo. I solve this problem by transferring the funds directly
             // and then calling the managerIncreasePoolAmount function on the child strategy.
 
+            /// INTERACTIONS:
             grantShip.managerIncreasePoolAmount(recipient.grantAmount);
             _transferAmount(token, recipient.shipAddress, recipient.grantAmount);
 
@@ -523,7 +526,6 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
             emit Distributed(recipient.recipientAddress, recipient.shipAddress, recipient.grantAmount, _sender);
         }
 
-        // Review: Do I need to do a final interaction check here? (ex. total amount == total distributed)
         (uint256 startTime, uint256 endTime) = abi.decode(_data, (uint256, uint256));
 
         currentRound.startTime = startTime;
@@ -551,8 +553,6 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
 
         Recipient memory recipient = recipients[_anchorAddress];
 
-        // Todo check what other statuses should be guarded against here
-
         GameStatus recipientStatus = recipient.status;
         if (
             recipientStatus != GameStatus.None && recipientStatus != GameStatus.Completed
@@ -561,8 +561,19 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
 
         IRegistry.Profile memory profile = _registry.getProfileByAnchor(_anchorAddress);
 
-        recipients[_anchorAddress] =
-            Recipient(_anchorAddress, profile.id, _shipName, payable(address(0)), 0, 0, _metadata, GameStatus.Pending);
+        uint256 _totalAmountRecieved = recipients[_anchorAddress].totalAmountRecieved;
+
+        recipients[_anchorAddress] = Recipient(
+            _anchorAddress,
+            profile.id,
+            _shipName,
+            payable(address(0)),
+            0,
+            0,
+            _totalAmountRecieved,
+            _metadata,
+            GameStatus.Pending
+        );
 
         emit Registered(_anchorAddress, _data, _sender);
         return _anchorAddress;
@@ -580,9 +591,8 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Returns the payout summary for the recipient
     /// @param _recipientId The address of the recipient
     function _getPayout(address _recipientId, bytes memory) internal view override returns (PayoutSummary memory) {
-        // Review: Is this function meant to return the total amount paid out to the recipient? Or just the amount currently?
         Recipient memory shipRecipient = getRecipient(_recipientId);
-        return PayoutSummary(address(shipRecipient.shipAddress), shipRecipient.grantAmount);
+        return PayoutSummary(address(shipRecipient.shipAddress), shipRecipient.totalAmountRecieved);
     }
 
     /// @notice Tests if the sender is a member of the profile

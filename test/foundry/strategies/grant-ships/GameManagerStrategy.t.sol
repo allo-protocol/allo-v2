@@ -63,6 +63,7 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         assertEq(recipient.shipAddress, address(0));
         assertEq(recipient.shipPoolId, 0);
         assertEq(recipient.grantAmount, 0);
+        assertEq(recipient.totalAmountRecieved, 0);
         assertEq(recipient.metadata.pointer, "Ship 1");
         assertEq(recipient.metadata.protocol, 1);
         assertEq(uint8(recipient.status), uint8(IStrategy.Status.Pending));
@@ -111,6 +112,7 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         assertEq(recipient.shipAddress, address(0));
         assertEq(recipient.shipPoolId, 0);
         assertEq(recipient.grantAmount, 0);
+        assertEq(recipient.totalAmountRecieved, 0);
         assertEq(recipient.metadata.pointer, "Ship 1");
         assertEq(recipient.metadata.protocol, 1);
         assertEq(uint8(recipient.status), uint8(IStrategy.Status.Pending));
@@ -180,6 +182,7 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         assertEq(recipient.shipAddress, address(shipStrategy));
         assertEq(recipient.shipPoolId, shipStrategy.getPoolId());
         assertEq(recipient.grantAmount, 0);
+        assertEq(recipient.totalAmountRecieved, 0);
         assertEq(recipient.metadata.pointer, "Ship 1");
         assertEq(recipient.metadata.protocol, 1);
         assertEq(uint8(recipient.status), uint8(GameManagerStrategy.GameStatus.Accepted));
@@ -199,7 +202,16 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         gameManager().reviewRecipient(
             recipientAddress,
             GameManagerStrategy.GameStatus.Accepted,
-            ShipInitData(true, true, true, "Ship Name", Metadata(1, "Ship 1"), team(0).wearer, shipOperator(0).id),
+            ShipInitData(
+                true,
+                true,
+                true,
+                "Ship Name",
+                Metadata(1, "Ship 1"),
+                team(0).wearer,
+                shipOperator(0).id,
+                facilitator().id
+            ),
             reason
         );
         vm.stopPrank();
@@ -214,7 +226,16 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         gameManager().reviewRecipient(
             recipientAddress,
             GameManagerStrategy.GameStatus.Accepted,
-            ShipInitData(true, true, true, "Ship Name", Metadata(1, "Ship 1"), team(0).wearer, shipOperator(0).id),
+            ShipInitData(
+                true,
+                true,
+                true,
+                "Ship Name",
+                Metadata(1, "Ship 1"),
+                team(0).wearer,
+                shipOperator(0).id,
+                facilitator().id
+            ),
             reason
         );
         vm.stopPrank();
@@ -239,7 +260,16 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         gameManager().reviewRecipient(
             applicantId,
             GameManagerStrategy.GameStatus.None,
-            ShipInitData(true, true, true, "Ship Name", Metadata(1, "Ship 1"), team(0).wearer, shipOperator(0).id),
+            ShipInitData(
+                true,
+                true,
+                true,
+                "Ship Name",
+                Metadata(1, "Ship 1"),
+                team(0).wearer,
+                shipOperator(0).id,
+                facilitator().id
+            ),
             reason
         );
         vm.stopPrank();
@@ -256,6 +286,7 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         assertEq(recipient.shipAddress, address(0));
         assertEq(recipient.shipPoolId, 0);
         assertEq(recipient.grantAmount, 0);
+        assertEq(recipient.totalAmountRecieved, 0);
         assertEq(recipient.metadata.pointer, "Ship 1");
         assertEq(recipient.metadata.protocol, 1);
         assertEq(uint8(recipient.status), uint8(GameManagerStrategy.GameStatus.Rejected));
@@ -451,6 +482,10 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         uint256 ship3PoolAmount = ship3Strategy.getPoolAmount();
         uint256 gameManagerBalance = ARB().balanceOf(address(gameManager()));
 
+        GameManagerStrategy.Recipient memory recipient = gameManager().getRecipient(recipientAddresses[0]);
+        GameManagerStrategy.Recipient memory recipient2 = gameManager().getRecipient(recipientAddresses[1]);
+        GameManagerStrategy.Recipient memory recipient3 = gameManager().getRecipient(recipientAddresses[2]);
+
         assertEq(shipBalance, 20_000e18);
         assertEq(ship2Balance, 40_000e18);
         assertEq(ship3Balance, 30_000e18);
@@ -458,6 +493,14 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         assertEq(shipPoolAmount, 20_000e18);
         assertEq(ship2PoolAmount, 40_000e18);
         assertEq(ship3PoolAmount, 30_000e18);
+
+        assertEq(recipient.totalAmountRecieved, 20_000e18);
+        assertEq(recipient2.totalAmountRecieved, 40_000e18);
+        assertEq(recipient3.totalAmountRecieved, 30_000e18);
+
+        assertEq(uint8(recipient.status), uint8(GameManagerStrategy.GameStatus.Active));
+        assertEq(uint8(recipient2.status), uint8(GameManagerStrategy.GameStatus.Active));
+        assertEq(uint8(recipient3.status), uint8(GameManagerStrategy.GameStatus.Active));
 
         assertEq(gameManager().getPoolAmount(), 0);
         assertEq(gameManagerBalance, 0);
@@ -700,11 +743,7 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         // vm.stopPrank();
     }
 
-    // ====================================
-    // =========== Helpers ================
-    // ====================================
-
-    function _2_rounds() public {
+    function test_2_rounds() public {
         // ***ROUND 1***
         address[] memory recipients = _register_create_accept_allocate_distribute_start_stop();
         uint256 poolId = gameManager().getPoolId();
@@ -718,6 +757,14 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
 
         /// REGISTER
         _register_all_3_ships(recipients);
+
+        GameManagerStrategy.Recipient memory newRecipient = gameManager().getRecipient(recipients[0]);
+        GameManagerStrategy.Recipient memory newRecipient2 = gameManager().getRecipient(recipients[1]);
+        GameManagerStrategy.Recipient memory newRecipient3 = gameManager().getRecipient(recipients[2]);
+
+        assertEq(newRecipient.totalAmountRecieved, 20_000e18);
+        assertEq(newRecipient2.totalAmountRecieved, 40_000e18);
+        assertEq(newRecipient3.totalAmountRecieved, 30_000e18);
 
         // APPROVE
         _approve_all_3_ships(recipients);
@@ -741,6 +788,14 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
 
         vm.stopPrank();
 
+        GameManagerStrategy.Recipient memory recipient = gameManager().getRecipient(recipients[0]);
+        GameManagerStrategy.Recipient memory recipient2 = gameManager().getRecipient(recipients[1]);
+        GameManagerStrategy.Recipient memory recipient3 = gameManager().getRecipient(recipients[2]);
+
+        assertEq(recipient.totalAmountRecieved, 40_000e18);
+        assertEq(recipient2.totalAmountRecieved, 80_000e18);
+        assertEq(recipient3.totalAmountRecieved, 60_000e18);
+
         // START
 
         vm.startPrank(facilitator().wearer);
@@ -754,6 +809,10 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         gameManager().stopGame();
         vm.stopPrank();
     }
+
+    // ====================================
+    // =========== Helpers ================
+    // ====================================
 
     function _register_all_3_ships(address[] memory recipients) public {
         address recipientAddress = recipients[0];
@@ -794,21 +853,48 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         gameManager().reviewRecipient(
             recipientAddress,
             GameManagerStrategy.GameStatus.Accepted,
-            ShipInitData(true, true, true, "Ship Name", Metadata(1, "Ship 1"), profile1_owner(), shipOperator(0).id),
+            ShipInitData(
+                true,
+                true,
+                true,
+                "Ship Name",
+                Metadata(1, "Ship 1"),
+                profile1_owner(),
+                shipOperator(0).id,
+                facilitator().id
+            ),
             reason
         );
         // Accept recipient 2
         gameManager().reviewRecipient(
             recipientAddress2,
             GameManagerStrategy.GameStatus.Accepted,
-            ShipInitData(true, true, true, "Ship Name 2", Metadata(1, "Ship 2"), profile2_owner(), shipOperator(1).id),
+            ShipInitData(
+                true,
+                true,
+                true,
+                "Ship Name 2",
+                Metadata(1, "Ship 2"),
+                profile2_owner(),
+                shipOperator(1).id,
+                facilitator().id
+            ),
             reason
         );
         // Accept recipient 3
         gameManager().reviewRecipient(
             recipientAddress3,
             GameManagerStrategy.GameStatus.Accepted,
-            ShipInitData(true, true, true, "Ship Name 3", Metadata(1, "Ship 3"), pool_admin(), shipOperator(2).id),
+            ShipInitData(
+                true,
+                true,
+                true,
+                "Ship Name 3",
+                Metadata(1, "Ship 3"),
+                pool_admin(),
+                shipOperator(2).id,
+                facilitator().id
+            ),
             reason
         );
         vm.stopPrank();
@@ -899,7 +985,16 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         address payable shipAddress2 = gameManager().reviewRecipient(
             profile2_anchor(),
             GameManagerStrategy.GameStatus.Accepted,
-            ShipInitData(true, true, true, "Ship Name 2", Metadata(1, "Ship 2"), team(1).wearer, shipOperator(1).id),
+            ShipInitData(
+                true,
+                true,
+                true,
+                "Ship Name 2",
+                Metadata(1, "Ship 2"),
+                team(1).wearer,
+                shipOperator(1).id,
+                facilitator().id
+            ),
             reason
         );
         vm.stopPrank();
@@ -914,7 +1009,16 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         address payable shipAddress3 = gameManager().reviewRecipient(
             poolProfile_anchor(),
             GameManagerStrategy.GameStatus.Accepted,
-            ShipInitData(true, true, true, "Ship Name 3", Metadata(1, "Ship 3"), team(1).wearer, shipOperator(2).id),
+            ShipInitData(
+                true,
+                true,
+                true,
+                "Ship Name 3",
+                Metadata(1, "Ship 3"),
+                team(1).wearer,
+                shipOperator(2).id,
+                facilitator().id
+            ),
             reason
         );
         vm.stopPrank();
@@ -975,7 +1079,16 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         gameManager().reviewRecipient(
             applicantId,
             GameManagerStrategy.GameStatus.Rejected,
-            ShipInitData(true, true, true, "Ship Name", Metadata(1, "Ship 1"), team(0).wearer, shipOperator(0).id),
+            ShipInitData(
+                true,
+                true,
+                true,
+                "Ship Name",
+                Metadata(1, "Ship 1"),
+                team(0).wearer,
+                shipOperator(0).id,
+                facilitator().id
+            ),
             reason
         );
         vm.stopPrank();
@@ -1006,7 +1119,16 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
         address payable shipAddress = gameManager().reviewRecipient(
             applicantId,
             GameManagerStrategy.GameStatus.Accepted,
-            ShipInitData(true, true, true, "Ship Name", Metadata(1, "Ship 1"), profile1_owner(), shipOperator(0).id),
+            ShipInitData(
+                true,
+                true,
+                true,
+                "Ship Name",
+                Metadata(1, "Ship 1"),
+                profile1_owner(),
+                shipOperator(0).id,
+                facilitator().id
+            ),
             reason
         );
         vm.stopPrank();

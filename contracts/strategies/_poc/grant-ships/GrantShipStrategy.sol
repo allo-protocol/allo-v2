@@ -137,8 +137,11 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice The total amount allocated to grant/recipient.
     uint256 public allocatedGrantAmount;
 
-    /// @notice The total amount allocated to grant/recipient.
+    /// @notice The Hat's Protocol ID for the ship operator.
     uint256 public operatorHatId;
+
+    /// @notice The Hat's Protocol ID for the game facilitator.
+    uint256 public facilitatorHatId;
 
     ///@notice
     uint256 public unresolvedRedFlags;
@@ -239,6 +242,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         metadataRequired = _initData.metadataRequired;
         grantAmountRequired = _initData.grantAmountRequired;
         operatorHatId = _initData.operatorHatId;
+        facilitatorHatId = _initData.facilitatorHatId;
         _registry = allo.getRegistry();
 
         // Set the pool to active - this is required for the strategy to work and distribute funds
@@ -270,7 +274,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     }
 
     function isGameFacilitator(address _gameFacilitator) public view returns (bool) {
-        return _hats.isWearerOfHat(_gameFacilitator, _gameManager.gameFacilitatorHatId());
+        return _hats.isWearerOfHat(_gameFacilitator, facilitatorHatId);
     }
 
     function isShipOperator(address _shipOperator) public view returns (bool) {

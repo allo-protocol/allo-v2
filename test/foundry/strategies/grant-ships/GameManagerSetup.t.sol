@@ -161,7 +161,8 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
                 string.concat("Ship ", vm.toString(uint256(i))),
                 Metadata(1, string.concat("ipfs://grant-ships/ship.json/", vm.toString(i))),
                 team(i).wearer,
-                shipOperator(i).id
+                shipOperator(i).id,
+                facilitator().id
             );
 
             //Todo there will be more setup params once the strategy design is finalized
