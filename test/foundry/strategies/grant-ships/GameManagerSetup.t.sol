@@ -165,7 +165,6 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
                 facilitator().id
             );
 
-            //Todo there will be more setup params once the strategy design is finalized
             _shipSetupData.push(shipInitData);
             unchecked {
                 i++;
@@ -179,9 +178,7 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
 
     function __initGameManagerPool() internal {
         vm.startPrank(pool_admin());
-
         // Note: Can't test emitter because I don't have access to gameManagerPoolId before init
-
         gameManagerPoolId = allo().createPoolWithCustomStrategy(
             poolProfile_id(),
             address(_gameManager),
@@ -194,7 +191,10 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
             // using pool_admin as a single address for both roles
             noManagers
         );
-
         vm.stopPrank();
+
+        assertEq(gameManager().gameFacilitatorHatId(), facilitator().id);
+        assertEq(gameManager().rootAccount(), pool_admin());
+        assertEq(gameManager().token(), address(ARB()));
     }
 }
