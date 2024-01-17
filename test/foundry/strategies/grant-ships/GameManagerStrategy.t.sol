@@ -208,6 +208,7 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
                 shipOperator(0).id,
                 facilitator().id
             ),
+            address(shipFactory()),
             reason
         );
         vm.stopPrank();
@@ -232,6 +233,7 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
                 shipOperator(0).id,
                 facilitator().id
             ),
+            address(shipFactory()),
             reason
         );
         vm.stopPrank();
@@ -266,6 +268,7 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
                 shipOperator(0).id,
                 facilitator().id
             ),
+            address(shipFactory()),
             reason
         );
         vm.stopPrank();
@@ -857,6 +860,7 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
                 shipOperator(0).id,
                 facilitator().id
             ),
+            address(shipFactory()),
             reason
         );
         // Accept recipient 2
@@ -873,6 +877,7 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
                 shipOperator(1).id,
                 facilitator().id
             ),
+            address(shipFactory()),
             reason
         );
         // Accept recipient 3
@@ -889,6 +894,7 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
                 shipOperator(2).id,
                 facilitator().id
             ),
+            address(shipFactory()),
             reason
         );
         vm.stopPrank();
@@ -989,6 +995,7 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
                 shipOperator(1).id,
                 facilitator().id
             ),
+            address(shipFactory()),
             reason
         );
         vm.stopPrank();
@@ -1013,6 +1020,7 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
                 shipOperator(2).id,
                 facilitator().id
             ),
+            address(shipFactory()),
             reason
         );
         vm.stopPrank();
@@ -1083,6 +1091,7 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
                 shipOperator(0).id,
                 facilitator().id
             ),
+            address(shipFactory()),
             reason
         );
         vm.stopPrank();
@@ -1123,6 +1132,7 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
                 shipOperator(0).id,
                 facilitator().id
             ),
+            address(shipFactory()),
             reason
         );
         vm.stopPrank();

@@ -19,6 +19,7 @@ import {GrantShipStrategy} from "./GrantShipStrategy.sol";
 
 //Internal Libraries
 import {ShipInitData} from "./libraries/GrantShipShared.sol";
+import {GrantShipFactory} from "./libraries/GrantShipFactory.sol";
 
 /// @title RFP Simple Strategy
 /// @author @Jord
@@ -274,17 +275,18 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     }
 
     /// @notice Game Facilitators review GrantShip applicants and create a new GrantShip Strategy
-    /// @param recipientAddress The address of the GrantShip applicant
+    /// @param _recipientAddress The address of the GrantShip applicant
     /// @param _approvalFlag The approval status of the GrantShip applicant (Accepted/Rejected)
-    /// @param shipInitData The init data for the GrantShip Strategy (see GrantShipShared for struct)
+    /// @param _shipInitData The init data for the GrantShip Strategy (see GrantShipShared for struct)
     /// @param _reason The reason for the approval or rejection
     function reviewRecipient(
-        address recipientAddress,
+        address _recipientAddress,
         GameStatus _approvalFlag,
-        ShipInitData memory shipInitData,
+        ShipInitData memory _shipInitData,
+        address _shipFactoryAddress,
         Metadata memory _reason
     ) external onlyGameFacilitator(msg.sender) returns (address payable) {
-        Recipient storage recipient = recipients[recipientAddress];
+        Recipient storage recipient = recipients[_recipientAddress];
         GameRound storage currentRound = gameRounds[currentRoundIndex];
 
         if (currentRound.status != GameStatus.Pending) revert INVALID_STATUS();
@@ -296,11 +298,11 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
 
         if (_approvalFlag == GameStatus.Accepted) {
             recipient.status = GameStatus.Accepted;
-            emit RecipientAccepted(recipientAddress, _reason);
-            return _createShip(recipient, shipInitData);
+            emit RecipientAccepted(_recipientAddress, _reason);
+            return _createShip(recipient, _shipInitData, _shipFactoryAddress);
         } else {
             recipient.status = GameStatus.Rejected;
-            emit RecipientRejected(recipientAddress, _reason);
+            emit RecipientRejected(_recipientAddress, _reason);
             return payable(address(0));
         }
     }
@@ -378,14 +380,13 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Called by reviewRecipient, this function deploys a new GrantShip Strategy
     /// @param _recipient The recipient struct
     /// @param _shipInitData The init data for the GrantShip Strategy (see GrantShipShared for struct)
-    function _createShip(Recipient memory _recipient, ShipInitData memory _shipInitData)
+    function _createShip(Recipient memory _recipient, ShipInitData memory _shipInitData, address _shipFactoryAddress)
         internal
         returns (address payable)
     {
         // Deploy a new GrantShipStrategy contract
-        GrantShipStrategy grantShip = new GrantShipStrategy(address(allo), _recipient.shipName);
+        address strategyAddress = GrantShipFactory(_shipFactoryAddress).create();
 
-        address payable strategyAddress = payable(address(grantShip));
         address[] memory noManagers = new address[](0);
 
         // Create a new pool with the GrantShipStrategy contract
@@ -404,14 +405,14 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         Recipient storage recipient = recipients[_recipient.recipientAddress];
 
         recipient.shipPoolId = shipPoolId;
-        recipient.shipAddress = strategyAddress;
+        recipient.shipAddress = payable(strategyAddress);
         recipient.status = GameStatus.Accepted;
 
         emit ShipLaunched(
             strategyAddress, shipPoolId, _recipient.recipientAddress, _recipient.shipName, _recipient.metadata
         );
 
-        return strategyAddress;
+        return payable(strategyAddress);
     }
 
     /// @notice Allocates funds to Accepted GrantShip recipients who are in the upcoming round

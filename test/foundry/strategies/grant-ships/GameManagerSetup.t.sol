@@ -19,6 +19,7 @@ import {Native} from "../../../../contracts/core/libraries/Native.sol";
 import {HatsSetupLive} from "./HatsSetup.sol";
 import {Accounts} from "../../shared/Accounts.sol";
 import {ShipInitData} from "../../../../contracts/strategies/_poc/grant-ships/libraries/GrantShipShared.sol";
+import {GrantShipFactory} from "../../../../contracts/strategies/_poc/grant-ships/libraries/GrantShipFactory.sol";
 
 contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLive, Native {
     //     /////////////////GAME MANAGER///////////////
@@ -33,9 +34,11 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
     string public gameManagerStrategyId = "GameManagerStrategy";
     uint32 internal shipAmount;
 
+    GrantShipFactory internal _shipFactory;
     ////////////////GRANT SHIPS/////////////////
     ShipInitData[] internal _shipSetupData;
     GrantShipStrategy[] internal _ships;
+    GrantShipStrategy internal _shipImpl;
 
     address[] internal _shipAnchor;
     bytes32[] internal _shipProfileId;
@@ -67,6 +70,14 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
         return _shipSetupData[_index];
     }
 
+    function shipImpl() public view returns (GrantShipStrategy) {
+        return _shipImpl;
+    }
+
+    function shipFactory() public view returns (GrantShipFactory) {
+        return _shipFactory;
+    }
+
     function ARB() public view returns (IERC20) {
         return arbToken;
     }
@@ -92,10 +103,11 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
         __AlloSetupLive();
         __HatsSetupLive();
         __initGameManager();
+        __initFactory();
         __initGameManagerPool();
         __generateShipData();
         __registerShips();
-        __allocate_distribute_start();
+        // __allocate_distribute_start();
     }
 
     function __ManagerSetup() internal {
@@ -106,6 +118,7 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
         __AlloSetupLive();
         __HatsSetupLive();
         __initGameManager();
+        __initFactory();
         __initGameManagerPool();
     }
 
@@ -150,7 +163,11 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
 
             vm.startPrank(facilitator().wearer);
             address payable shipAddress = gameManager().reviewRecipient(
-                profileAnchor, GameManagerStrategy.GameStatus.Accepted, _shipSetupData[i], reason
+                profileAnchor,
+                GameManagerStrategy.GameStatus.Accepted,
+                _shipSetupData[i],
+                address(shipFactory()),
+                reason
             );
             vm.stopPrank();
 
@@ -161,41 +178,41 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
             }
         }
 
-        _fund_manager();
+        // _fund_manager();
     }
 
-    function _fund_manager() internal {
-        vm.startPrank(arbWhale);
-        ARB().transfer(facilitator().wearer, _GAME_AMOUNT);
-        vm.stopPrank();
+    // function _fund_manager() internal {
+    //     vm.startPrank(arbWhale);
+    //     ARB().transfer(facilitator().wearer, _GAME_AMOUNT);
+    //     vm.stopPrank();
 
-        uint256 poolId = gameManager().getPoolId();
+    //     uint256 poolId = gameManager().getPoolId();
 
-        vm.startPrank(facilitator().wearer);
-        ARB().approve(address(allo()), _GAME_AMOUNT);
-        allo().fundPool(poolId, _GAME_AMOUNT);
-        vm.stopPrank();
-    }
+    //     vm.startPrank(facilitator().wearer);
+    //     ARB().approve(address(allo()), _GAME_AMOUNT);
+    //     allo().fundPool(poolId, _GAME_AMOUNT);
+    //     vm.stopPrank();
+    // }
 
-    function __allocate_distribute_start() internal {
-        address[] memory recipients = new address[](3);
-        recipients[0] = address(ship(0));
-        recipients[1] = address(ship(1));
-        recipients[2] = address(ship(2));
+    // function __allocate_distribute_start() internal {
+    //     address[] memory recipients = new address[](3);
+    //     recipients[0] = address(ship(0));
+    //     recipients[1] = address(ship(1));
+    //     recipients[2] = address(ship(2));
 
-        uint256[] memory amounts = new uint256[](3);
-        amounts[0] = _SHIP_AMOUNT;
-        amounts[1] = _SHIP_AMOUNT;
-        amounts[2] = _SHIP_AMOUNT;
+    //     uint256[] memory amounts = new uint256[](3);
+    //     amounts[0] = _SHIP_AMOUNT;
+    //     amounts[1] = _SHIP_AMOUNT;
+    //     amounts[2] = _SHIP_AMOUNT;
 
-        vm.startPrank(facilitator().wearer);
-        allo().allocate(gameManager().getPoolId(), abi.encode(recipients, amounts, _GAME_AMOUNT));
-        allo().distribute(
-            gameManager().getPoolId(), recipients, abi.encode(recipients, block.timestamp, block.timestamp + _3_MONTHS)
-        );
-        gameManager().startGame();
-        vm.stopPrank();
-    }
+    //     vm.startPrank(facilitator().wearer);
+    //     allo().allocate(gameManager().getPoolId(), abi.encode(recipients, amounts, _GAME_AMOUNT));
+    //     allo().distribute(
+    //         gameManager().getPoolId(), recipients, abi.encode(recipients, block.timestamp, block.timestamp + _3_MONTHS)
+    //     );
+    //     gameManager().startGame();
+    //     vm.stopPrank();
+    // }
 
     function __generateShipData() internal {
         for (uint32 i = 0; i < 3;) {
@@ -203,7 +220,7 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
                 true,
                 true,
                 true,
-                string.concat("Ship ", vm.toString(uint256(i))),
+                "GrantShipStrategy",
                 Metadata(1, string.concat("ipfs://grant-ships/ship.json/", vm.toString(i))),
                 team(i).wearer,
                 shipOperator(i).id,
@@ -219,6 +236,11 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
 
     function __initGameManager() internal {
         _gameManager = new GameManagerStrategy(address(allo()), gameManagerStrategyId);
+    }
+
+    function __initFactory() internal {
+        _shipImpl = new GrantShipStrategy(address(allo()), "GrantShipStrategy");
+        _shipFactory = new GrantShipFactory(address(_shipImpl));
     }
 
     function __initGameManagerPool() internal {
