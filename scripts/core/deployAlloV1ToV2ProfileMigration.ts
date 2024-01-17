@@ -4,7 +4,7 @@ import {
   verifyContract
 } from "../utils/scripts";
 
-export async function deployBulkCreation() {
+export async function deployAlloV1ToV2ProfileMigration() {
   const network = await ethers.provider.getNetwork();
   const networkName = hre.network.name;
   const chainId = Number(network.chainId);
@@ -15,27 +15,27 @@ export async function deployBulkCreation() {
 
   console.log(`
     ////////////////////////////////////////////////////
-        Deploys BulkCreation.sol on ${networkName}
+        Deploys AlloV1ToV2ProfileMigration.sol on ${networkName}
     ////////////////////////////////////////////////////
   `);
 
   console.table({
-    contract: "Deploy BulkCreation.sol",
+    contract: "Deploy AlloV1ToV2ProfileMigration.sol",
     chainId: chainId,
     network: networkName,
     deployerAddress: deployerAddress,
     balance: ethers.formatEther(balance),
   });
 
-  console.log("Deploying BulkCreation.sol...");
+  console.log("Deploying AlloV1ToV2ProfileMigration.sol...");
 
-  const BulkCreation = await ethers.getContractFactory("BulkCreation");
-  const instance = await BulkCreation.deploy();
+  const AlloV1ToV2ProfileMigration = await ethers.getContractFactory("AlloV1ToV2ProfileMigration");
+  const instance = await AlloV1ToV2ProfileMigration.deploy();
 
   await instance.waitForDeployment();
   await instance.deploymentTransaction()?.wait(blocksToWait);
 
-  console.log("BulkCreation deployed to:", instance.target);
+  console.log("AlloV1ToV2ProfileMigration deployed to:", instance.target);
 
 
   await delay(20000);
@@ -43,11 +43,11 @@ export async function deployBulkCreation() {
 }
 
 if (require.main === module) {
-  deployBulkCreation().catch((error) => {
+  deployAlloV1ToV2ProfileMigration().catch((error) => {
     console.error(error);
     process.exitCode = 1;
   });
 }
 
 // Note: Deploy script to run in terminal:
-// npx hardhat run scripts/core/deployBulkCreation.ts --network sepolia
+// npx hardhat run scripts/core/deployAlloV1ToV2ProfileMigration.ts --network sepolia
