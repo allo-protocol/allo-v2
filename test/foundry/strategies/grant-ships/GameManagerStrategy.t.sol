@@ -33,10 +33,6 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
     /// ========== State ==============
     /// ===============================
 
-    uint256 internal constant _3_MONTHS = 7889400;
-    uint256 internal constant _GAME_AMOUNT = 90_000e18;
-    uint256 internal constant _SHIP_AMOUNT = 30_000e18;
-
     GrantShipStrategy internal shipStrategy;
     GrantShipStrategy internal ship2Strategy;
     GrantShipStrategy internal ship3Strategy;
@@ -719,26 +715,26 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
 
     function test_postUpdate() public {
         //Todo: Finish Test
-        // string memory tag = "test";
-        // Metadata memory metadata = Metadata(1, "Posting Update!");
+        string memory tag = "test";
+        Metadata memory metadata = Metadata(1, "Posting Update!");
 
-        // address notRecipientId = address(0);
+        address notRecipientId = address(0);
 
-        // // Game Facilitator posts an update
-        // vm.expectEmit(true, true, true, true);
-        // emit UpdatePosted(tag, facilitator().id, notRecipientId, metadata);
-        // vm.startPrank(facilitator().wearer);
-        // gameManager().postUpdate(tag, metadata);
-        // vm.stopPrank();
+        // Game Facilitator posts an update
+        vm.expectEmit(true, true, true, true);
+        emit UpdatePosted(tag, facilitator().id, notRecipientId, metadata);
+        vm.startPrank(facilitator().wearer);
+        gameManager().postUpdate(tag, metadata);
+        vm.stopPrank();
 
-        // // Root Account posts an update
+        // Root Account posts an update
 
-        // vm.expectEmit(true, true, true, true);
-        // emit UpdatePosted(tag, 0, pool_admin(), metadata);
+        vm.expectEmit(true, true, true, true);
+        emit UpdatePosted(tag, 0, pool_admin(), metadata);
 
-        // vm.startPrank(pool_admin());
-        // gameManager().postUpdate(tag, metadata);
-        // vm.stopPrank();
+        vm.startPrank(pool_admin());
+        gameManager().postUpdate(tag, metadata);
+        vm.stopPrank();
     }
 
     function test_2_rounds() public {

@@ -200,11 +200,12 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         _;
     }
 
-    /// @notice Modifier to check if the function is being called by the GameManagerStrategy
-    /// @dev Throws if the sender is not the parent GameManagerStrategy
-    modifier onlyGameManger(address _sender) {
-        if (_sender != address(_gameManager)) {
-            revert UNAUTHORIZED();
+    /// @notice Modifier to check if the current game round is active.
+    /// @dev Checks to see if the GameManager is finished its current round.
+    /// Uses the inverse of the GameManager's isPoolActive()
+    modifier onlyGameActive() {
+        if (_gameManager.isGameActive()) {
+            revert UNRESOLVED_RED_FLAGS();
         }
         _;
     }
@@ -574,7 +575,9 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Increase the pool amount for this pool.
     /// @dev 'msg.sender' must be the parent GameManagerStrategy to increase the pool amount.
-    function managerIncreasePoolAmount(uint256 _amount) external onlyGameManger(msg.sender) {
+    function managerIncreasePoolAmount(uint256 _amount) external {
+        if (msg.sender != address(_gameManager)) revert UNAUTHORIZED();
+
         poolAmount += _amount;
         emit PoolFunded(poolId, _amount, 0);
     }
@@ -631,7 +634,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     function _registerRecipient(bytes memory _data, address _sender)
         internal
         override
-        onlyActivePool
+        onlyGameActive
         noUnresolvedRedFlags
         returns (address recipientId)
     {
@@ -709,6 +712,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         override
         nonReentrant
         noUnresolvedRedFlags
+        onlyGameActive
         onlyGameFacilitator(_sender)
     {
         // Decode the '_data'

@@ -26,6 +26,10 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
     uint256 public gameManagerPoolId;
     uint256 internal constant IPFS = 1;
 
+    uint256 internal constant _3_MONTHS = 7889400;
+    uint256 internal constant _GAME_AMOUNT = 90_000e18;
+    uint256 internal constant _SHIP_AMOUNT = 30_000e18;
+
     string public gameManagerStrategyId = "GameManagerStrategy";
     uint32 internal shipAmount;
 
@@ -80,6 +84,9 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
     // ====================================
 
     function __GameSetup() internal {
+        /// Note: This setup is used for testing the GrantShipStrategies
+        /// It includes the full manager setup, all the way
+
         vm.createSelectFork({blockNumber: 166_807_779, urlOrAlias: "arbitrumOne"});
         __RegistrySetupFullLive();
         __AlloSetupLive();
@@ -88,9 +95,12 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
         __initGameManagerPool();
         __generateShipData();
         __registerShips();
+        __allocate_distribute_start();
     }
 
     function __ManagerSetup() internal {
+        /// Note: This setup is used for testing the GameManagerStrategy
+
         vm.createSelectFork({blockNumber: 166_807_779, urlOrAlias: "arbitrumOne"});
         __RegistrySetupFullLive();
         __AlloSetupLive();
@@ -150,6 +160,41 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
                 i++;
             }
         }
+
+        _fund_manager();
+    }
+
+    function _fund_manager() internal {
+        vm.startPrank(arbWhale);
+        ARB().transfer(facilitator().wearer, _GAME_AMOUNT);
+        vm.stopPrank();
+
+        uint256 poolId = gameManager().getPoolId();
+
+        vm.startPrank(facilitator().wearer);
+        ARB().approve(address(allo()), _GAME_AMOUNT);
+        allo().fundPool(poolId, _GAME_AMOUNT);
+        vm.stopPrank();
+    }
+
+    function __allocate_distribute_start() internal {
+        address[] memory recipients = new address[](3);
+        recipients[0] = address(ship(0));
+        recipients[1] = address(ship(1));
+        recipients[2] = address(ship(2));
+
+        uint256[] memory amounts = new uint256[](3);
+        amounts[0] = _SHIP_AMOUNT;
+        amounts[1] = _SHIP_AMOUNT;
+        amounts[2] = _SHIP_AMOUNT;
+
+        vm.startPrank(facilitator().wearer);
+        allo().allocate(gameManager().getPoolId(), abi.encode(recipients, amounts, _GAME_AMOUNT));
+        allo().distribute(
+            gameManager().getPoolId(), recipients, abi.encode(recipients, block.timestamp, block.timestamp + _3_MONTHS)
+        );
+        gameManager().startGame();
+        vm.stopPrank();
     }
 
     function __generateShipData() internal {
