@@ -1,21 +1,18 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.19;
 
-// import {console} from "forge-std/Test.sol"; //remove after testing
-
 // External Libraries
 import {ReentrancyGuard} from "openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
 
 // Interfaces
 import {IHats} from "hats-protocol/Interfaces/IHats.sol";
 import {IAllo} from "../../../core/interfaces/IAllo.sol";
-import {IStrategy} from "../../../core/interfaces/IStrategy.sol";
+
 import {IRegistry} from "../../../core/interfaces/IRegistry.sol";
 
 // Core Contracts
 import {BaseStrategy} from "../../BaseStrategy.sol";
 import {Metadata} from "../../../core/libraries/Metadata.sol";
-import {Allo} from "../../../../contracts/core/Allo.sol";
 
 // SubStrategy Contracts
 import {GrantShipStrategy} from "./GrantShipStrategy.sol";
@@ -127,7 +124,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     IHats private _hats;
 
     /// @notice The Allo contract image. Using this instead of IAllo so this contract can call createPoolWithCustomStrategy. .
-    Allo private _allo;
+    IAllo private _allo;
 
     /// @notice The Allo Registry contract interface
     IRegistry private _registry;
@@ -171,7 +168,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _alloAddress The 'Allo' contract address
     /// @param _name The name of the strategy
     constructor(address _alloAddress, string memory _name) BaseStrategy(_alloAddress, _name) {
-        _allo = Allo(_alloAddress);
+        _allo = IAllo(_alloAddress);
     }
 
     /// ===============================
