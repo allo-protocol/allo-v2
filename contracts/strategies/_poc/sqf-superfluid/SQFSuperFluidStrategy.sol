@@ -243,7 +243,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
                 false,
                 /// @dev if true, anyone can execute distributions via the pool
                 /// else, only the pool admin can execute distributions via the pool
-                false
+                true
             )
         );
 
