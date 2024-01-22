@@ -24,9 +24,11 @@ const chainIds = {
   goerli: 5,
   sepolia: 11155111,
   "optimism-goerli": 420,
+  "optimism-sepolia": 11155420,
   "fantom-testnet": 4002,
   "pgn-sepolia": 58008,
   "celo-testnet": 44787,
+  "arbitrum-goerli": 421613,
   "arbitrum-sepolia": 421614,
   "base-testnet": 84531,
   mumbai: 80001,
@@ -74,7 +76,7 @@ function getRemappings(): string[][] {
  */
 function createTestnetConfig(
   network: keyof typeof chainIds,
-  url?: string
+  url?: string,
 ): NetworkUserConfig {
   if (!url) {
     url = `https://${network}.infura.io/v3/${infuraIdKey}`;
@@ -96,7 +98,7 @@ function createTestnetConfig(
  */
 function createMainnetConfig(
   network: keyof typeof chainIds,
-  url?: string
+  url?: string,
 ): NetworkUserConfig {
   if (!url) {
     url = `https://${network}.infura.io/v3/${infuraIdKey}`;
@@ -151,11 +153,11 @@ const config: HardhatUserConfig = {
     },
     "arbitrum-mainnet": createMainnetConfig(
       "arbitrum-mainnet",
-      `https://arb-mainnet.g.alchemy.com/v2/${alchemyIdKey}`
+      `https://arb-mainnet.g.alchemy.com/v2/${alchemyIdKey}`,
     ),
     "fantom-mainnet": createMainnetConfig(
       "fantom-mainnet",
-      "https://rpc.ftm.tools"
+      "https://rpc.ftm.tools",
     ),
     "pgn-mainnet": {
       ...createMainnetConfig("pgn-mainnet"),
@@ -179,23 +181,23 @@ const config: HardhatUserConfig = {
     // Test Networks
     goerli: createTestnetConfig(
       "goerli",
-      `https://eth-goerli.g.alchemy.com/v2/${alchemyIdKey}`
+      `https://eth-goerli.g.alchemy.com/v2/${alchemyIdKey}`,
     ),
     sepolia: createTestnetConfig(
       "sepolia",
-      `https://eth-sepolia.g.alchemy.com/v2/${alchemyIdKey}`
+      `https://eth-sepolia.g.alchemy.com/v2/${alchemyIdKey}`,
     ),
     "arbitrum-goerli": createTestnetConfig(
       "arbitrum-goerli",
-      `https://arb-goerli.g.alchemy.com/v2/${alchemyIdKey}`
+      `https://arb-goerli.g.alchemy.com/v2/${alchemyIdKey}`,
     ),
     "arbitrum-sepolia": createTestnetConfig(
       "arbitrum-sepolia",
-      `https://arb-sepolia.g.alchemy.com/v2/${alchemyIdKey}`
+      `https://arb-sepolia.g.alchemy.com/v2/${alchemyIdKey}`,
     ),
     ftmTestnet: createTestnetConfig(
       "fantom-testnet",
-      "https://rpc.testnet.fantom.network/"
+      "https://rpc.testnet.fantom.network/",
     ),
     "optimism-goerli": {
       ...createTestnetConfig("optimism-goerli"),
@@ -216,6 +218,10 @@ const config: HardhatUserConfig = {
       ...createTestnetConfig("base-testnet"),
       url: `https://base-goerli.g.alchemy.com/v2/${alchemyIdKey}`,
       gasPrice: 20000000000,
+    },
+    "optimism-sepolia": {
+      ...createTestnetConfig("optimism-sepolia"),
+      url: `https://sepolia.optimism.io`,
     },
     mumbai: {
       ...createTestnetConfig("mumbai"),
@@ -278,6 +284,8 @@ const config: HardhatUserConfig = {
       "arbitrum-mainnet": process.env.ARBITRUMSCAN_API_KEY,
       // @ts-ignore
       "arbitrum-sepolia": process.env.ARBITRUMSCAN_API_KEY,
+      // @ts-ignore
+      "optimism-sepolia": process.env.OPTIMISTIC_ETHERSCAN_API_KEY,
     },
     customChains: [
       {
@@ -358,6 +366,14 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://api-sepolia.arbiscan.io/api",
           browserURL: "https://arbiscan.io",
+        },
+      },
+      {
+        network: "optimism-sepolia",
+        chainId: chainIds["optimism-sepolia"],
+        urls: {
+          apiURL: "https://api-sepolia-optimistic.etherscan.io/api",
+          browserURL: "https://sepolia-optimism.etherscan.io",
         },
       },
     ],

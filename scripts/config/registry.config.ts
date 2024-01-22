@@ -68,4 +68,8 @@ export const registryConfig: DeployParams = {
   84531: {
     owner: "0xB145b7742A5a082C4f334981247E148dB9dF0cb3",
   },
+  // Optimism Sepolia
+  11155420: {
+    owner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
+  },
 };

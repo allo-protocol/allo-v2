@@ -179,3 +179,21 @@
 20231214_144149 - Deployment finished with 0 error(s)
 20231214_144933 - Executing: bun hardhat run scripts/strategies/deployQVSimple.ts --no-compile --network arbitrum-sepolia | tee ./reports/deployment-logs/strategies/deployQVSimple/arbitrum-sepolia/20231214_144933/deploy-20231214_144933.log
 20231214_145020 - Deployment finished with 0 error(s)
+20240122_201724 - Executing: bun hardhat run scripts/core/deployRegistry.ts --no-compile --network optimism-sepolia | tee ./reports/deployment-logs/core/deployRegistry/optimism-sepolia/20240122_201724/deploy-20240122_201724.log
+20240122_201957 - Deployment finished with 0 error(s)
+20240122_202321 - Executing: bun hardhat run scripts/core/deployContractFactory.ts --no-compile --network optimism-sepolia | tee ./reports/deployment-logs/core/deployContractFactory/optimism-sepolia/20240122_202321/deploy-20240122_202321.log
+20240122_202501 - Deployment finished with 0 error(s)
+20240122_202520 - Executing: bun hardhat run scripts/core/deployAllo.ts --no-compile --network optimism-sepolia | tee ./reports/deployment-logs/core/deployAllo/optimism-sepolia/20240122_202520/deploy-20240122_202520.log
+20240122_202715 - Deployment finished with 0 error(s)
+20240122_202757 - Executing: bun hardhat run scripts/core/transferProxyAdminOwnership.ts --no-compile --network optimism-sepolia | tee ./reports/deployment-logs/core/transferProxyAdminOwnership/optimism-sepolia/20240122_202757/deploy-20240122_202757.log
+20240122_202759 - Deployment finished with 0 error(s)
+20240122_202807 - Executing: bun hardhat run scripts/strategies/deployDonationVotingMerkleDistributionDirect.ts --no-compile --network optimism-sepolia | tee ./reports/deployment-logs/strategies/deployDonationVotingMerkleDistributionDirect/optimism-sepolia/20240122_202807/deploy-20240122_202807.log
+20240122_202925 - Deployment finished with 0 error(s)
+20240122_202944 - Executing: bun hardhat run scripts/strategies/deployDonationVotingMerkleDistributionVault.ts --no-compile --network optimism-sepolia | tee ./reports/deployment-logs/strategies/deployDonationVotingMerkleDistributionVault/optimism-sepolia/20240122_202944/deploy-20240122_202944.log
+20240122_203103 - Deployment finished with 0 error(s)
+20240122_203113 - Executing: bun hardhat run scripts/strategies/deployQVSimple.ts --no-compile --network optimism-sepolia | tee ./reports/deployment-logs/strategies/deployQVSimple/optimism-sepolia/20240122_203113/deploy-20240122_203113.log
+20240122_203226 - Deployment finished with 0 error(s)
+20240122_203256 - Executing: bun hardhat run scripts/strategies/deployRFPCommittee.ts --no-compile --network optimism-sepolia | tee ./reports/deployment-logs/strategies/deployRFPCommittee/optimism-sepolia/20240122_203256/deploy-20240122_203256.log
+20240122_203414 - Deployment finished with 0 error(s)
+20240122_203414 - Executing: bun hardhat run scripts/strategies/deployRFPSimple.ts --no-compile --network optimism-sepolia | tee ./reports/deployment-logs/strategies/deployRFPSimple/optimism-sepolia/20240122_203256/deploy-20240122_203256.log
+20240122_203536 - Deployment finished with 0 error(s)
