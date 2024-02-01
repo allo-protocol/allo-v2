@@ -41,7 +41,8 @@ networks=(
 #   "mainnet"
 #   "pgn-sepolia"
 #   "pgn-mainnet"
-   "arbitrum-sepolia"
+#    "arbitrum-sepolia"
+   "optimism-sepolia"
 )
 
 scripts=(
@@ -52,8 +53,8 @@ scripts=(
     # "strategies/deployDonationVotingMerkleDistributionDirect"
     # "strategies/deployDonationVotingMerkleDistributionVault"
     # "strategies/deployQVSimple"
-    # "strategies/deployRFPCommittee"
-    # "strategies/deployRFPSimple"
+    "strategies/deployRFPCommittee"
+    "strategies/deployRFPSimple"
 
     # "strategies/deployImpactStream"
 )

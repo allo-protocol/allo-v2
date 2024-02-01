@@ -81,4 +81,9 @@ export const commonConfig: DeployParams = {
     proxyAdminOwner: "0xB145b7742A5a082C4f334981247E148dB9dF0cb3",
     permit2Address: "0x000000000022D473030F116dDEE9F6B43aC78BA3",
   },
+  // Optimism Sepolia
+  11155420: {
+    proxyAdminOwner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
+    permit2Address: "0x000000000022D473030F116dDEE9F6B43aC78BA3",
+  },
 };
