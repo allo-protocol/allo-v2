@@ -163,7 +163,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     uint256 public totalPayoutAmount;
 
     /// @notice The total number of recipients.
-    uint256 public recipientsCounter = 1;
+    uint256 public recipientsCounter;
 
     /// @notice The registry contract interface.
     IRegistry private _registry;
@@ -284,6 +284,8 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
         registrationEndTime = _initializeData.registrationEndTime;
         allocationStartTime = _initializeData.allocationStartTime;
         allocationEndTime = _initializeData.allocationEndTime;
+
+        recipientsCounter = 1;
 
         // If the timestamps are invalid this will revert - See details in '_isPoolTimestampValid'
         _isPoolTimestampValid(registrationStartTime, registrationEndTime, allocationStartTime, allocationEndTime);
