@@ -1,0 +1,4 @@
+20240209_085129 - Executing: bun hardhat run scripts/strategies/deployDonationVotingMerkleDistributionDirect.ts --no-compile --network goerli | tee ./reports/deployment-logs/strategies/deployDonationVotingMerkleDistributionDirect/goerli/20240209_085129/deploy-20240209_085129.log
+20240209_085129 - Deployment finished with 0 error(s)
+20240209_085129 - Executing: bun hardhat run scripts/strategies/deployDonationVotingMerkleDistributionVault.ts --no-compile --network goerli | tee ./reports/deployment-logs/strategies/deployDonationVotingMerkleDistributionVault/goerli/20240209_085129/deploy-20240209_085129.log
+20240209_085130 - Deployment finished with 0 error(s)

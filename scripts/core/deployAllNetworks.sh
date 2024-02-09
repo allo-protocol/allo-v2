@@ -26,23 +26,21 @@ handle_insufficient_funds_error() {
 }
 
 networks=(
-#   "mumbai"
 #   "goerli"
+#   "mumbai"
 #   "sepolia"
-#   "arbitrum-goerli"
 #   "optimism-goerli"
 #   "base-testnet"
 #   "celo-testnet"
+#   "arbitrum-sepolia"
+#   "optimism-sepolia"
+   
 #   "optimism-mainnet"
 #   "celo-mainnet"
 #   "arbitrum-mainnet"
 #   "base"
 #   "polygon"
 #   "mainnet"
-#   "pgn-sepolia"
-#   "pgn-mainnet"
-#    "arbitrum-sepolia"
-   "optimism-sepolia"
 )
 
 scripts=(
@@ -53,8 +51,8 @@ scripts=(
     # "strategies/deployDonationVotingMerkleDistributionDirect"
     # "strategies/deployDonationVotingMerkleDistributionVault"
     # "strategies/deployQVSimple"
-    "strategies/deployRFPCommittee"
-    "strategies/deployRFPSimple"
+    # "strategies/deployRFPCommittee"
+    # "strategies/deployRFPSimple"
 
     # "strategies/deployImpactStream"
 )
