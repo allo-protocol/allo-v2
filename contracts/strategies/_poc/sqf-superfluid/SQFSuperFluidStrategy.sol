@@ -523,18 +523,18 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
 
         if (_previousFlowrate == 0) {
             // created a new flow
-            uint256 scaledFlowRate = _newFlowRate / 1e6;
+            uint256 scaledFlowRate = _newFlowRate / 1e8;
 
             recipientTotalUnits = (recipientTotalUnits.sqrt() + scaledFlowRate.sqrt()) ** 2;
         } else if (_newFlowRate == 0) {
             // canceled a flow
-            uint256 scaledFlowRate = _previousFlowrate / 1e6;
+            uint256 scaledFlowRate = _previousFlowrate / 1e8;
 
             recipientTotalUnits = recipientTotalUnits + scaledFlowRate - 2 * uint256(recipientTotalUnits * scaledFlowRate).sqrt();
         } else {
             // updated a flow
-            uint256 scaledNewFlowRate = _newFlowRate / 1e6;
-            uint256 scaledPreviousFlowRate = _previousFlowrate / 1e6;
+            uint256 scaledNewFlowRate = _newFlowRate / 1e8;
+            uint256 scaledPreviousFlowRate = _previousFlowrate / 1e8;
 
             recipientTotalUnits = (recipientTotalUnits.sqrt() + scaledNewFlowRate.sqrt() - scaledPreviousFlowRate.sqrt()) ** 2;
         }
