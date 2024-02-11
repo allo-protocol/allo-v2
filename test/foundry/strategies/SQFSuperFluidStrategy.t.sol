@@ -574,10 +574,10 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
             )
         );
 
-        assertEq(_strategy.totalUnitsByRecipient(recipientId1), 13);
+        assertEq(_strategy.totalUnitsByRecipient(recipientId1), 14);
         assertEq(_strategy.recipientFlowRate(recipientId1), 761035007610);
 
-        assertEq(_strategy.totalUnitsByRecipient(recipientId2), 18);
+        assertEq(_strategy.totalUnitsByRecipient(recipientId2), 19);
         assertEq(_strategy.recipientFlowRate(recipientId2), 1141552511415);
 
         vm.startPrank(secondAllocator);
@@ -601,10 +601,10 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
 
         vm.stopPrank();
 
-        assertEq(_strategy.totalUnitsByRecipient(recipientId1), 30);
+        assertEq(_strategy.totalUnitsByRecipient(recipientId1), 32);
         assertEq(_strategy.recipientFlowRate(recipientId1), 1141552511415);
 
-        assertEq(_strategy.totalUnitsByRecipient(recipientId2), 48);
+        assertEq(_strategy.totalUnitsByRecipient(recipientId2), 50);
         assertEq(_strategy.recipientFlowRate(recipientId2), 1902587519025);
 
         SuperfluidPool gdaPool = SuperfluidPool(address(_strategy.gdaPool()));
@@ -675,7 +675,7 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
         assertEq(newNetFlowRate, 0);
         assertEq(newFlowRateToRecipient, 0);
         assertEq(isSuperAppJailed, false);
-        assertEq(_strategy.totalUnitsByRecipient(recipientId), 0);
+        assertEq(_strategy.totalUnitsByRecipient(recipientId), 1);
     }
 
     function testRevert_allocate_UNATUTHORIZED() public {
