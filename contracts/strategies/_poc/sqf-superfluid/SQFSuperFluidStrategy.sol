@@ -524,7 +524,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         if (_previousFlowRate == 0) {
             // created a new flow
             uint256 scaledFlowRate = _newFlowRate / 1e6;
-            
+
             if (scaledFlowRate > 0) {
                 recipientTotalUnits = (recipientTotalUnits.sqrt() + scaledFlowRate.sqrt()) ** 2;
             }
@@ -533,7 +533,8 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
             uint256 scaledFlowRate = _previousFlowRate / 1e6;
 
             if (scaledFlowRate > 0) {
-                recipientTotalUnits = recipientTotalUnits + scaledFlowRate - 2 * uint256(recipientTotalUnits * scaledFlowRate).sqrt();
+                recipientTotalUnits =
+                    recipientTotalUnits + scaledFlowRate - 2 * uint256(recipientTotalUnits * scaledFlowRate).sqrt();
             }
         } else {
             // updated a flow
@@ -542,10 +543,11 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
 
             if (scaledNewFlowRate != scaledPreviousFlowRate) {
                 if (scaledNewFlowRate > 0) {
-                    recipientTotalUnits = (recipientTotalUnits.sqrt() + scaledNewFlowRate.sqrt() - scaledPreviousFlowRate.sqrt()) ** 2;
-                } else if (scaledPreviousFlowRate > 0) {
                     recipientTotalUnits =
-                        recipientTotalUnits + scaledPreviousFlowRate - 2 * uint256(recipientTotalUnits * scaledPreviousFlowRate).sqrt();
+                        (recipientTotalUnits.sqrt() + scaledNewFlowRate.sqrt() - scaledPreviousFlowRate.sqrt()) ** 2;
+                } else if (scaledPreviousFlowRate > 0) {
+                    recipientTotalUnits = recipientTotalUnits + scaledPreviousFlowRate
+                        - 2 * uint256(recipientTotalUnits * scaledPreviousFlowRate).sqrt();
                 }
             }
         }
