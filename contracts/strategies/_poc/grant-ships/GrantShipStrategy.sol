@@ -84,6 +84,17 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// ========== Events =============
     /// ===============================
 
+    /// @notice Emitted when the strategy is initialized
+    event GrantShipInitialized(
+        uint256 poolId,
+        bool registryGating,
+        bool metadataRequired,
+        bool grantAmountRequired,
+        uint256 operatorHatId,
+        uint256 facilitatorHatId,
+        address registryAnchor
+    );
+
     /// @notice Emitted for the registration of a recipient and the status is updated.
     event RecipientStatusChanged(address recipientId, Status status, Metadata reason);
 
@@ -136,8 +147,14 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Flag to check if grant amount is required.
     bool public grantAmountRequired;
 
+    /// @notice The registryId of this GrantShip in the parent GameManagerStrategy
+    address public shipRegistryAnchor;
+
     /// @notice The 'Registry' contract interface.
     IRegistry private _registry;
+
+    /// @notice Flag to check if registry gating is enabled.
+    address public anchorAddress;
 
     /// @notice The total amount allocated to recipients.
     uint256 public allocatedGrantAmount;
@@ -255,11 +272,22 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         grantAmountRequired = _initData.grantAmountRequired;
         operatorHatId = _initData.operatorHatId;
         facilitatorHatId = _initData.facilitatorHatId;
+        shipRegistryAnchor = _initData.recipientId;
         _registry = allo.getRegistry();
 
         // Set the pool to active - this is required for the strategy to work and distribute funds
         // NOTE: There may be some cases where you may want to not set this here, but will be strategy specific
         _setPoolActive(true);
+
+        emit GrantShipInitialized(
+            _poolId,
+            registryGating,
+            metadataRequired,
+            grantAmountRequired,
+            operatorHatId,
+            facilitatorHatId,
+            shipRegistryAnchor
+        );
     }
 
     /// ===============================

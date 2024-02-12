@@ -206,6 +206,8 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         token = allo.getPool(poolId).token;
 
         emit GameManagerInitialized(_gameFacilitatorId, _hatsAddress, _rootAccount, token);
+
+        // Todo - We need to track the pool ID initialized event
     }
 
     /// ===============================
@@ -287,6 +289,8 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         Metadata memory _reason
     ) external onlyGameFacilitator(msg.sender) returns (address payable) {
         Recipient storage recipient = recipients[_recipientAddress];
+
+        // Todo: Check array not out of bounds.
         GameRound storage currentRound = gameRounds[currentRoundIndex];
 
         if (currentRound.status != GameStatus.Pending) revert INVALID_STATUS();
@@ -385,13 +389,15 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         returns (address payable)
     {
         // Deploy a new GrantShipStrategy contract
-        address strategyAddress = GrantShipFactory(_shipFactoryAddress).create();
+        address strategyAddress = GrantShipFactory(_shipFactoryAddress).create(_recipient.recipientAddress);
 
         address[] memory noManagers = new address[](0);
 
+        bytes32 contractProfileId = _createShipProfile(_recipient.recipientAddress, currentRoundIndex, _shipInitData);
+
         // Create a new pool with the GrantShipStrategy contract
         uint256 shipPoolId = _allo.createPoolWithCustomStrategy(
-            _recipient.profileId,
+            contractProfileId,
             strategyAddress,
             abi.encode(_shipInitData, address(this)),
             token,
@@ -529,6 +535,8 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         currentRound.startTime = startTime;
         currentRound.endTime = endTime;
         currentRound.status = GameStatus.Funded;
+
+        // Todo - We need an event to track start times and end times
     }
 
     /// @notice Registers a new GrantShip recipient
@@ -575,6 +583,23 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
 
         emit Registered(_anchorAddress, _data, _sender);
         return _anchorAddress;
+    }
+
+    function _createShipProfile(address _recipientId, uint256 _roundId, ShipInitData memory _shipInitData)
+        internal
+        returns (bytes32)
+    {
+        bytes memory encoded = abi.encodePacked(_recipientId, _roundId);
+        bytes32 hash = keccak256(encoded);
+        uint256 nonce = uint256(hash);
+
+        address[] memory noManagers = new address[](0);
+
+        bytes32 contractProfileId = _registry.createProfile(
+            nonce, _shipInitData.shipName, _shipInitData.shipMetadata, address(this), noManagers
+        );
+
+        return contractProfileId;
     }
 
     /// @notice Returns the status of the recipient

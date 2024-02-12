@@ -132,13 +132,13 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
             managers[0] = address(gameManager());
             managers[1] = shipOperator(i).wearer;
 
-            vm.startPrank(team(i).wearer);
+            vm.startPrank(facilitator().wearer);
             // Create profile with Hats Team Address And ID as Owner
             bytes32 profileId = _registry_.createProfile(
                 i + 50,
                 string.concat("Ship Profile ", vm.toString(i)),
                 Metadata({protocol: 1, pointer: string.concat("ipfs://ship-profile/", vm.toString(i))}),
-                team(i).wearer,
+                facilitator().wearer,
                 managers
             );
 
@@ -177,42 +177,7 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
                 i++;
             }
         }
-
-        // _fund_manager();
     }
-
-    // function _fund_manager() internal {
-    //     vm.startPrank(arbWhale);
-    //     ARB().transfer(facilitator().wearer, _GAME_AMOUNT);
-    //     vm.stopPrank();
-
-    //     uint256 poolId = gameManager().getPoolId();
-
-    //     vm.startPrank(facilitator().wearer);
-    //     ARB().approve(address(allo()), _GAME_AMOUNT);
-    //     allo().fundPool(poolId, _GAME_AMOUNT);
-    //     vm.stopPrank();
-    // }
-
-    // function __allocate_distribute_start() internal {
-    //     address[] memory recipients = new address[](3);
-    //     recipients[0] = address(ship(0));
-    //     recipients[1] = address(ship(1));
-    //     recipients[2] = address(ship(2));
-
-    //     uint256[] memory amounts = new uint256[](3);
-    //     amounts[0] = _SHIP_AMOUNT;
-    //     amounts[1] = _SHIP_AMOUNT;
-    //     amounts[2] = _SHIP_AMOUNT;
-
-    //     vm.startPrank(facilitator().wearer);
-    //     allo().allocate(gameManager().getPoolId(), abi.encode(recipients, amounts, _GAME_AMOUNT));
-    //     allo().distribute(
-    //         gameManager().getPoolId(), recipients, abi.encode(recipients, block.timestamp, block.timestamp + _3_MONTHS)
-    //     );
-    //     gameManager().startGame();
-    //     vm.stopPrank();
-    // }
 
     function __generateShipData() internal {
         for (uint32 i = 0; i < 3;) {
