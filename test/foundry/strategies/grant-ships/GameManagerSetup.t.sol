@@ -128,9 +128,9 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
         vm.stopPrank();
 
         for (uint32 i = 0; i < 3;) {
-            address[] memory managers = new address[](2);
-            managers[0] = address(gameManager());
-            managers[1] = shipOperator(i).wearer;
+            address[] memory managers = new address[](1);
+            // managers[0] = address(gameManager());
+            managers[0] = shipOperator(i).wearer;
 
             vm.startPrank(facilitator().wearer);
             // Create profile with Hats Team Address And ID as Owner
