@@ -44,7 +44,8 @@ contract DonationVotingMerkleDistributionDirectTransferStrategy is DonationVotin
     /// @param _sender The sender of the allocation
     function _afterAllocate(bytes memory _data, address _sender) internal override {
         // Decode the '_data' to get the recipientId, amount and token
-        (address recipientId, Permit2Data memory p2Data) = abi.decode(_data, (address, Permit2Data));
+        (address recipientId, PermitType permitType, Permit2Data memory p2Data) =
+            abi.decode(_data, (address, PermitType, Permit2Data));
 
         // Get the token address
         address token = p2Data.permit.permitted.token;

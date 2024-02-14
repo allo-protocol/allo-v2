@@ -84,6 +84,11 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
         address[] allowedTokens;
     }
 
+    enum PermitType {
+        Permit1,
+        Permit2
+    }
+
     /// @notice Stores the permit2 data for the allocation
     struct Permit2Data {
         ISignatureTransfer.PermitTransferFrom permit;
@@ -261,7 +266,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     ///               uint64 _registrationEndTime, uint64 _allocationStartTime, uint64 _allocationEndTime,
     ///               address[] memory _allowedTokens)
     function initialize(uint256 _poolId, bytes memory _data) external virtual override onlyAllo {
-        (InitializeData memory initializeData) = abi.decode(_data, (InitializeData));
+        InitializeData memory initializeData = abi.decode(_data, (InitializeData));
         __DonationVotingStrategy_init(_poolId, initializeData);
         emit Initialized(_poolId, _data);
     }
@@ -663,7 +668,8 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     /// @param _sender The sender of the transaction
     function _allocate(bytes memory _data, address _sender) internal virtual override onlyActiveAllocation {
         // Decode the '_data' to get the recipientId, amount and token
-        (address recipientId, Permit2Data memory p2Data) = abi.decode(_data, (address, Permit2Data));
+        (address recipientId, PermitType permitType, Permit2Data memory p2Data) =
+            abi.decode(_data, (address, PermitType, Permit2Data));
 
         uint256 amount = p2Data.permit.permitted.amount;
         address token = p2Data.permit.permitted.token;
@@ -679,7 +685,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
         }
 
         // If the token is native, the amount must be equal to the value sent, otherwise it reverts
-        if (msg.value > 0 && token != NATIVE || token == NATIVE && msg.value != amount) {
+        if ((msg.value > 0 && token != NATIVE) || (token == NATIVE && msg.value != amount)) {
             revert INVALID();
         }
 

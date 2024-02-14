@@ -676,7 +676,10 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         vm.expectRevert(ALLOCATION_NOT_ACTIVE.selector);
 
         vm.prank(pool_admin());
-        allo().allocate(poolId, abi.encode(recipient1(), address(0), 1e18));
+        allo().allocate(
+            poolId,
+            abi.encode(recipient1(), DonationVotingMerkleDistributionBaseStrategy.PermitType.Permit2, address(0), 1e18)
+        );
     }
 
     function testRevert_allocate_RECIPIENT_ERROR() public {
@@ -695,7 +698,10 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         vm.warp(allocationStartTime + 1);
         vm.deal(pool_admin(), 1e20);
         vm.prank(pool_admin());
-        allo().allocate(poolId, abi.encode(randomAddress(), permit2Data));
+        allo().allocate(
+            poolId,
+            abi.encode(randomAddress(), DonationVotingMerkleDistributionBaseStrategy.PermitType.Permit2, permit2Data)
+        );
     }
 
     function testRevert_allocate_INVALID_invalidToken() public virtual {
@@ -716,7 +722,10 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         vm.warp(allocationStartTime + 1);
         vm.deal(pool_admin(), 1e20);
         vm.prank(pool_admin());
-        allo().allocate(poolId, abi.encode(recipientId, permit2Data));
+        allo().allocate(
+            poolId,
+            abi.encode(recipientId, DonationVotingMerkleDistributionBaseStrategy.PermitType.Permit2, permit2Data)
+        );
     }
 
     function testRevert_allocate_INVALID_amountMismatch() public {
@@ -736,7 +745,10 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         vm.warp(allocationStartTime + 1);
         vm.deal(pool_admin(), 1e20);
         vm.prank(pool_admin());
-        allo().allocate{value: 1e17}(poolId, abi.encode(recipientId, permit2Data));
+        allo().allocate{value: 1e17}(
+            poolId,
+            abi.encode(recipientId, DonationVotingMerkleDistributionBaseStrategy.PermitType.Permit2, permit2Data)
+        );
     }
 
     function test_distribute() public {
@@ -936,7 +948,10 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         vm.expectEmit(false, false, false, true);
         emit Allocated(recipientId, 1e18, NATIVE, randomAddress());
 
-        allo().allocate{value: 1e18}(poolId, abi.encode(recipientId, permit2Data));
+        allo().allocate{value: 1e18}(
+            poolId,
+            abi.encode(recipientId, DonationVotingMerkleDistributionBaseStrategy.PermitType.Permit2, permit2Data)
+        );
 
         return recipientId;
     }

@@ -50,7 +50,8 @@ contract DonationVotingMerkleDistributionDirectTransferStrategyTest is DonationV
         DonationVotingMerkleDistributionBaseStrategy.Permit2Data memory permit2Data =
             DonationVotingMerkleDistributionBaseStrategy.Permit2Data({permit: permit, signature: sig});
 
-        bytes memory data = abi.encode(recipientId, permit2Data);
+        bytes memory data =
+            abi.encode(recipientId, DonationVotingMerkleDistributionBaseStrategy.PermitType.Permit2, permit2Data);
 
         uint256 balanceBefore = mockERC20.balanceOf(recipientAddress());
 
@@ -83,7 +84,8 @@ contract DonationVotingMerkleDistributionDirectTransferStrategyTest is DonationV
         DonationVotingMerkleDistributionBaseStrategy.Permit2Data memory permit2Data =
             DonationVotingMerkleDistributionBaseStrategy.Permit2Data({permit: permit, signature: sig});
 
-        bytes memory data = abi.encode(recipientId, permit2Data);
+        bytes memory data =
+            abi.encode(recipientId, DonationVotingMerkleDistributionBaseStrategy.PermitType.Permit2, permit2Data);
 
         vm.startPrank(from);
 
@@ -116,7 +118,8 @@ contract DonationVotingMerkleDistributionDirectTransferStrategyTest is DonationV
         DonationVotingMerkleDistributionBaseStrategy.Permit2Data memory permit2Data =
             DonationVotingMerkleDistributionBaseStrategy.Permit2Data({permit: permit, signature: sig});
 
-        bytes memory data = abi.encode(recipientId, permit2Data);
+        bytes memory data =
+            abi.encode(recipientId, DonationVotingMerkleDistributionBaseStrategy.PermitType.Permit2, permit2Data);
 
         vm.startPrank(from);
 
@@ -147,7 +150,8 @@ contract DonationVotingMerkleDistributionDirectTransferStrategyTest is DonationV
         DonationVotingMerkleDistributionBaseStrategy.Permit2Data memory permit2Data =
             DonationVotingMerkleDistributionBaseStrategy.Permit2Data({permit: permit, signature: sig});
 
-        bytes memory data = abi.encode(recipientId, permit2Data);
+        bytes memory data =
+            abi.encode(recipientId, DonationVotingMerkleDistributionBaseStrategy.PermitType.Permit2, permit2Data);
 
         vm.startPrank(from);
 
