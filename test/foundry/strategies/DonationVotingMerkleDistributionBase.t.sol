@@ -21,8 +21,10 @@ import {Anchor} from "../../../contracts/core/Anchor.sol";
 import {AlloSetup} from "../shared/AlloSetup.sol";
 import {RegistrySetupFull} from "../shared/RegistrySetup.sol";
 import {EventSetup} from "../shared/EventSetup.sol";
-// import MockERC20
+// import ERC20 mocks
 import {MockERC20} from "../../utils/MockERC20.sol";
+import {MockERC20Permit} from "../../utils/MockERC20Permit.sol";
+import {MockERC20PermitDAI} from "../../utils/MockERC20PermitDAI.sol";
 
 import {ISignatureTransfer} from "permit2/ISignatureTransfer.sol";
 import {PermitSignature} from "lib/permit2/test/utils/PermitSignature.sol";
@@ -66,6 +68,9 @@ contract DonationVotingMerkleDistributionBaseMockTest is
 
     DonationVotingMerkleDistributionBaseMock public strategy;
     MockERC20 public mockERC20;
+    MockERC20Permit public mockERC20Permit;
+    MockERC20PermitDAI public mockERC20PermitDAI;
+
     Metadata public poolMetadata;
 
     // Setup the tests
@@ -86,13 +91,21 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         poolMetadata = Metadata({protocol: 1, pointer: "PoolMetadata"});
 
         strategy = DonationVotingMerkleDistributionBaseMock(_deployStrategy());
-        mockERC20 = new MockERC20();
 
+        mockERC20 = new MockERC20();
         mockERC20.mint(address(this), 1_000_000 * 1e18);
 
-        allowedTokens = new address[](2);
+        mockERC20Permit = new MockERC20Permit();
+        mockERC20Permit.mint(address(this), 1_000_000 * 1e18);
+
+        mockERC20PermitDAI = new MockERC20PermitDAI();
+        mockERC20PermitDAI.mint(address(this), 1_000_000 * 1e18);
+
+        allowedTokens = new address[](4);
         allowedTokens[0] = NATIVE;
         allowedTokens[1] = address(mockERC20);
+        allowedTokens[2] = address(mockERC20Permit);
+        allowedTokens[3] = address(mockERC20PermitDAI);
 
         vm.prank(allo_owner());
         allo().updatePercentFee(0);
