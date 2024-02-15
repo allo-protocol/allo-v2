@@ -348,7 +348,7 @@ const config: HardhatUserConfig = {
         network: "mumbai",
         chainId: chainIds["mumbai"],
         urls: {
-          apiURL: "https://mumbai.polygonscan.com/api",
+          apiURL: "https://api-mumbai.polygonscan.com/api",
           browserURL: "https://mumbai.polygonscan.com/",
         },
       },

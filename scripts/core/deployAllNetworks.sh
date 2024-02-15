@@ -40,7 +40,7 @@ networks=(
 #   "arbitrum-mainnet"
 #   "base"
 #   "polygon"
-#   "mainnet"
+  "mainnet"
 )
 
 scripts=(
@@ -49,7 +49,7 @@ scripts=(
     # "core/deployAllo"
     # "core/transferProxyAdminOwnership"
     # "strategies/deployDonationVotingMerkleDistributionDirect"
-    # "strategies/deployDonationVotingMerkleDistributionVault"
+    "strategies/deployDonationVotingMerkleDistributionVault"
     # "strategies/deployQVSimple"
     # "strategies/deployRFPCommittee"
     # "strategies/deployRFPSimple"
