@@ -39,6 +39,10 @@ export const strategyConfig: DeployParams = {
       name: "QVImpactStreamStrategy",
       version: "v1.0",
     },
+    "direct-grants": {
+      name: "DirectGrantsSimpleStrategy",
+      version: "v1.0",
+    },
   },
   // Goerli
   5: {
@@ -64,6 +68,10 @@ export const strategyConfig: DeployParams = {
     },
     "qv-impact-stream": {
       name: "QVImpactStreamStrategy",
+      version: "v1.0",
+    },
+    "direct-grants": {
+      name: "DirectGrantsSimpleStrategy",
       version: "v1.0",
     },
   },
@@ -93,6 +101,10 @@ export const strategyConfig: DeployParams = {
       name: "QVImpactStreamStrategy",
       version: "v1.0",
     },
+    "direct-grants": {
+      name: "DirectGrantsSimpleStrategy",
+      version: "v1.0",
+    },
   },
   // PGN
   424: {
@@ -118,6 +130,10 @@ export const strategyConfig: DeployParams = {
     },
     "qv-impact-stream": {
       name: "QVImpactStreamStrategy",
+      version: "v1.0",
+    },
+    "direct-grants": {
+      name: "DirectGrantsSimpleStrategy",
       version: "v1.0",
     },
   },
@@ -147,6 +163,10 @@ export const strategyConfig: DeployParams = {
       name: "QVImpactStreamStrategy",
       version: "v1.0",
     },
+    "direct-grants": {
+      name: "DirectGrantsSimpleStrategy",
+      version: "v1.0",
+    },
   },
   // Optimism
   10: {
@@ -172,6 +192,10 @@ export const strategyConfig: DeployParams = {
     },
     "qv-impact-stream": {
       name: "QVImpactStreamStrategy",
+      version: "v1.0",
+    },
+    "direct-grants": {
+      name: "DirectGrantsSimpleStrategy",
       version: "v1.0",
     },
   },
@@ -201,6 +225,10 @@ export const strategyConfig: DeployParams = {
       name: "QVImpactStreamStrategy",
       version: "v1.0",
     },
+    "direct-grants": {
+      name: "DirectGrantsSimpleStrategy",
+      version: "v1.0",
+    },
   },
   // Celo Mainnet
   42220: {
@@ -226,6 +254,10 @@ export const strategyConfig: DeployParams = {
     },
     "qv-impact-stream": {
       name: "QVImpactStreamStrategy",
+      version: "v1.0",
+    },
+    "direct-grants": {
+      name: "DirectGrantsSimpleStrategy",
       version: "v1.0",
     },
   },
@@ -255,6 +287,10 @@ export const strategyConfig: DeployParams = {
       name: "QVImpactStreamStrategy",
       version: "v1.0",
     },
+    "direct-grants": {
+      name: "DirectGrantsSimpleStrategy",
+      version: "v1.0",
+    },
   },
   // Polygon Mainnet
   137: {
@@ -280,6 +316,10 @@ export const strategyConfig: DeployParams = {
     },
     "qv-impact-stream": {
       name: "QVImpactStreamStrategy",
+      version: "v1.0",
+    },
+    "direct-grants": {
+      name: "DirectGrantsSimpleStrategy",
       version: "v1.0",
     },
   },
@@ -309,6 +349,10 @@ export const strategyConfig: DeployParams = {
       name: "QVImpactStreamStrategy",
       version: "v1.0",
     },
+    "direct-grants": {
+      name: "DirectGrantsSimpleStrategy",
+      version: "v1.0",
+    },
   },
   // Arbitrum One Mainnet
   42161: {
@@ -334,6 +378,10 @@ export const strategyConfig: DeployParams = {
     },
     "qv-impact-stream": {
       name: "QVImpactStreamStrategy",
+      version: "v1.0",
+    },
+    "direct-grants": {
+      name: "DirectGrantsSimpleStrategy",
       version: "v1.0",
     },
   },
@@ -363,6 +411,10 @@ export const strategyConfig: DeployParams = {
       name: "QVImpactStreamStrategy",
       version: "v1.0",
     },
+    "direct-grants": {
+      name: "DirectGrantsSimpleStrategy",
+      version: "v1.0",
+    },
   },
   // Base Mainnet
   8453: {
@@ -388,6 +440,10 @@ export const strategyConfig: DeployParams = {
     },
     "qv-impact-stream": {
       name: "QVImpactStreamStrategy",
+      version: "v1.0",
+    },
+    "direct-grants": {
+      name: "DirectGrantsSimpleStrategy",
       version: "v1.0",
     },
   },
@@ -417,6 +473,10 @@ export const strategyConfig: DeployParams = {
       name: "QVImpactStreamStrategy",
       version: "v1.0",
     },
+    "direct-grants": {
+      name: "DirectGrantsSimpleStrategy",
+      version: "v1.0",
+    },
   },
   // Optimism Sepolia
   11155420: {
@@ -442,6 +502,10 @@ export const strategyConfig: DeployParams = {
     },
     "qv-impact-stream": {
       name: "QVImpactStreamStrategy",
+      version: "v1.0",
+    },
+    "direct-grants": {
+      name: "DirectGrantsSimpleStrategy",
       version: "v1.0",
     },
   },

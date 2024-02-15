@@ -26,8 +26,8 @@ handle_insufficient_funds_error() {
 }
 
 networks=(
-#   "goerli"
-#   "mumbai"
+  "mumbai"
+  "goerli"
 #   "sepolia"
 #   "optimism-goerli"
 #   "base-testnet"
@@ -40,7 +40,11 @@ networks=(
 #   "arbitrum-mainnet"
 #   "base"
 #   "polygon"
-  "mainnet"
+#   "mainnet"
+#   "pgn-sepolia"
+#   "pgn-mainnet"
+#    "arbitrum-sepolia"
+#    "optimism-sepolia"
 )
 
 scripts=(
@@ -53,7 +57,7 @@ scripts=(
     # "strategies/deployQVSimple"
     # "strategies/deployRFPCommittee"
     # "strategies/deployRFPSimple"
-
+    "strategies/deployDirectGrants"
     # "strategies/deployImpactStream"
 )
 
