@@ -26,8 +26,8 @@ handle_insufficient_funds_error() {
 }
 
 networks=(
-  "mumbai"
-  "goerli"
+#   "mumbai"
+#   "goerli"
 #   "sepolia"
 #   "optimism-goerli"
 #   "base-testnet"
@@ -43,8 +43,8 @@ networks=(
 #   "mainnet"
 #   "pgn-sepolia"
 #   "pgn-mainnet"
-#    "arbitrum-sepolia"
-#    "optimism-sepolia"
+   "arbitrum-sepolia"
+   "optimism-sepolia"
 )
 
 scripts=(
