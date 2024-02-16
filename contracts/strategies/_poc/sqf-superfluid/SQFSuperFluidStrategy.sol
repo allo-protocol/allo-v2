@@ -512,37 +512,55 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Adjust the weightings of the recipients
     /// @dev This can only be called by the super app callback onFlowUpdated
-    /// @param _previousFlowrate The previous flow rate
+    /// @param _previousFlowRate The previous flow rate
     /// @param _newFlowRate The new flow rate
-    function adjustWeightings(uint256 _previousFlowrate, uint256 _newFlowRate) external {
+    function adjustWeightings(uint256 _previousFlowRate, uint256 _newFlowRate) external {
         address recipientId = superApps[msg.sender];
 
         if (recipientId == address(0)) revert UNAUTHORIZED();
 
-        uint256 recipientTotalUnits = totalUnitsByRecipient[recipientId] * 1000;
+        uint256 recipientTotalUnits = totalUnitsByRecipient[recipientId] * 1e5;
 
-        if (_previousFlowrate == 0) {
+        if (_previousFlowRate == 0) {
             // created a new flow
-            recipientTotalUnits = (recipientTotalUnits.sqrt() + _newFlowRate.sqrt()) ** 2;
+            uint256 scaledFlowRate = _newFlowRate / 1e6;
+
+            if (scaledFlowRate > 0) {
+                recipientTotalUnits = (recipientTotalUnits.sqrt() + scaledFlowRate.sqrt()) ** 2;
+            }
         } else if (_newFlowRate == 0) {
             // canceled a flow
-            recipientTotalUnits = (recipientTotalUnits.sqrt() - _previousFlowrate.sqrt()) ** 2;
+            uint256 scaledFlowRate = _previousFlowRate / 1e6;
+
+            if (scaledFlowRate > 0) {
+                recipientTotalUnits =
+                    recipientTotalUnits + scaledFlowRate - 2 * uint256(recipientTotalUnits * scaledFlowRate).sqrt();
+            }
         } else {
             // updated a flow
-            recipientTotalUnits = (recipientTotalUnits.sqrt() + _newFlowRate.sqrt() - _previousFlowrate.sqrt()) ** 2;
+            uint256 scaledNewFlowRate = _newFlowRate / 1e6;
+            uint256 scaledPreviousFlowRate = _previousFlowRate / 1e6;
+
+            if (scaledNewFlowRate != scaledPreviousFlowRate) {
+                if (scaledNewFlowRate > 0) {
+                    recipientTotalUnits =
+                        (recipientTotalUnits.sqrt() + scaledNewFlowRate.sqrt() - scaledPreviousFlowRate.sqrt()) ** 2;
+                } else if (scaledPreviousFlowRate > 0) {
+                    recipientTotalUnits = recipientTotalUnits + scaledPreviousFlowRate
+                        - 2 * uint256(recipientTotalUnits * scaledPreviousFlowRate).sqrt();
+                }
+            }
         }
 
-        recipientTotalUnits /= 1000;
+        recipientTotalUnits = recipientTotalUnits > 1e5 ? recipientTotalUnits / 1e5 : 1;
 
         Recipient storage recipient = recipients[recipientId];
 
         _updateMemberUnits(recipientId, recipient.recipientAddress, uint128(recipientTotalUnits));
 
-        totalUnitsByRecipient[recipientId] = recipientTotalUnits;
-
         uint256 currentFlowRate = recipientFlowRate[recipientId];
 
-        recipientFlowRate[recipientId] = currentFlowRate + _newFlowRate - _previousFlowrate;
+        recipientFlowRate[recipientId] = currentFlowRate + _newFlowRate - _previousFlowRate;
 
         emit TotalUnitsUpdated(recipientId, recipientTotalUnits);
     }
