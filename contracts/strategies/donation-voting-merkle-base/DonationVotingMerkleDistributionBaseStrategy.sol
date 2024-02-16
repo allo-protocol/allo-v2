@@ -669,8 +669,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     /// @param _sender The sender of the transaction
     function _allocate(bytes memory _data, address _sender) internal virtual override onlyActiveAllocation {
         // Decode the '_data' to get the recipientId, amount and token
-        (address recipientId, PermitType permitType, Permit2Data memory p2Data) =
-            abi.decode(_data, (address, PermitType, Permit2Data));
+        (address recipientId,, Permit2Data memory p2Data) = abi.decode(_data, (address, PermitType, Permit2Data));
 
         uint256 amount = p2Data.permit.permitted.amount;
         address token = p2Data.permit.permitted.token;

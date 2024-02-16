@@ -74,43 +74,19 @@ contract DonationVotingMerkleDistributionDirectTransferStrategy is DonationVotin
             );
         } else if (permitType == PermitType.Permit) {
             (bytes32 r, bytes32 s, uint8 v) = splitSignature(p2Data.signature);
-            IERC20Permit(token).permit(_sender, address(this), amount, p2Data.permit.deadline, v, r, s);
+            // The tx can be front-run, and another user can use the permit message and signature to invalidate the nonce.
+            // In this case the permit call will fail, but it means that the contract already has allowance for the token.
+            try IERC20Permit(token).permit(_sender, address(this), amount, p2Data.permit.deadline, v, r, s) {}
+            catch Error(string memory reason) {
+                if (IERC20(token).allowance(msg.sender, address(this)) < amount) {
+                    revert(reason);
+                }
+            } catch (bytes memory reason) {
+                if (IERC20(token).allowance(msg.sender, address(this)) < amount) {
+                    revert(string(reason));
+                }
+            }
             IERC20(token).transferFrom(_sender, _recipients[recipientId].recipientAddress, amount);
-
-            // try
-            //     IERC20Permit(token).permit(
-            //         msg.sender,
-            //         address(this),
-            //         totalAmount,
-            //         deadline,
-            //         v,
-            //         r,
-            //         s
-            //     )
-            // {} catch Error(string memory reason) {
-            //     if (
-            //         IERC20Upgradeable(token).allowance(
-            //             msg.sender,
-            //             address(this)
-            //         ) < totalAmount
-            //     ) {
-            //         revert(reason);
-            //     }
-            // } catch (bytes memory reason) {
-            //     if (
-            //         IERC20Upgradeable(token).allowance(
-            //             msg.sender,
-            //             address(this)
-            //         ) < totalAmount
-            //     ) {
-            //         revert(string(reason));
-            //     }
-            // }
-            // IERC20Upgradeable(token).transferFrom(
-            //     msg.sender,
-            //     address(this),
-            //     totalAmount
-            // );
         }
     }
 
