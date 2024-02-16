@@ -5,7 +5,13 @@
 pragma solidity ^0.8.19;
 
 contract MockERC20PermitDAI {
+    // --- EIP712 niceties ---
+    bytes32 public DOMAIN_SEPARATOR;
+    // bytes32 public constant PERMIT_TYPEHASH = keccak256("Permit(address holder,address spender,uint256 nonce,uint256 expiry,bool allowed)");
+    bytes32 public constant PERMIT_TYPEHASH =
+        0xea2aa0a1be11a07ed86d755c93467f4f82362b452371d1ba94d1715123511acb;
     // --- Auth ---
+
     mapping(address => uint) public wards;
 
     function rely(address guy) external auth {
@@ -44,12 +50,6 @@ contract MockERC20PermitDAI {
         require((z = x - y) <= x);
     }
 
-    // --- EIP712 niceties ---
-    bytes32 public DOMAIN_SEPARATOR;
-    // bytes32 public constant PERMIT_TYPEHASH = keccak256("Permit(address holder,address spender,uint256 nonce,uint256 expiry,bool allowed)");
-    bytes32 public constant PERMIT_TYPEHASH =
-        0xea2aa0a1be11a07ed86d755c93467f4f82362b452371d1ba94d1715123511acb;
-
     constructor() {
         wards[msg.sender] = 1;
         DOMAIN_SEPARATOR = keccak256(
@@ -65,7 +65,7 @@ contract MockERC20PermitDAI {
         );
     }
 
-    function getChainId() internal returns (uint256) {
+    function getChainId() internal view returns (uint256) {
         uint256 id;
         assembly {
             id := chainid()
@@ -177,4 +177,3 @@ contract MockERC20PermitDAI {
         emit Approval(holder, spender, wad);
     }
 }
-

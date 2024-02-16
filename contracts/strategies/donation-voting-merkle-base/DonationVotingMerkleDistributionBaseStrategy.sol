@@ -85,7 +85,8 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     }
 
     enum PermitType {
-        Permit1,
+        Permit,
+        PermitDAI,
         Permit2
     }
 
@@ -93,6 +94,21 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     struct Permit2Data {
         ISignatureTransfer.PermitTransferFrom permit;
         bytes signature;
+    }
+
+    struct Permit {
+        address owner;
+        address spender;
+        uint256 value;
+        uint256 nonce;
+        uint256 deadline;
+    }
+
+    struct PermitData {
+        Permit permit;
+        bytes32 r;
+        bytes32 s;
+        uint8 v;
     }
 
     /// ===============================
