@@ -78,6 +78,7 @@ contract DonationVotingMerkleDistributionDirectTransferStrategyTest is DonationV
 
         uint256 nonce = 0;
         uint256 amount = 1e17;
+        uint256 deadline = block.timestamp + 1000;
 
         // We build a permit message using the erc2612 standard and we
         // use it to create the signature.
@@ -87,7 +88,7 @@ contract DonationVotingMerkleDistributionDirectTransferStrategyTest is DonationV
             spender: address(_strategy),
             value: amount,
             nonce: nonce,
-            deadline: type(uint256).max
+            deadline: deadline
         });
 
         PermitSigUtils permitSigUtils = new PermitSigUtils(vm, mockERC20Permit.DOMAIN_SEPARATOR());
@@ -99,7 +100,7 @@ contract DonationVotingMerkleDistributionDirectTransferStrategyTest is DonationV
         ISignatureTransfer.PermitTransferFrom memory permit2 = ISignatureTransfer.PermitTransferFrom({
             permitted: ISignatureTransfer.TokenPermissions({token: address(mockERC20Permit), amount: amount}),
             nonce: nonce,
-            deadline: type(uint256).max
+            deadline: deadline
         });
 
         permit2.permitted.amount = permit1.value;
