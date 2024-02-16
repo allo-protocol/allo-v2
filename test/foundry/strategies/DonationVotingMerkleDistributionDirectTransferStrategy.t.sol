@@ -76,50 +76,45 @@ contract DonationVotingMerkleDistributionDirectTransferStrategyTest is DonationV
         address recipientId = __register_accept_recipient();
         vm.warp(allocationStartTime + 1);
 
-        // uint256 nonce = 0;
-        // ISignatureTransfer.PermitTransferFrom
-        //     memory permit = defaultERC20PermitTransfer(
-        //         address(mockERC20Permit),
-        //         nonce
-        //     );
-        // permit.permitted.amount = 1e17;
-        // bytes memory sig = __getPermitTransferSignature(
-        //     permit,
-        //     fromPrivateKey,
-        //     permit2.DOMAIN_SEPARATOR(),
-        //     address(_strategy)
-        // );
+        uint256 nonce = 0;
 
-        // DonationVotingMerkleDistributionBaseStrategy.Permit2Data
-        //     memory permit2Data = DonationVotingMerkleDistributionBaseStrategy
-        //         .Permit2Data({permit: permit, signature: sig});
-
-        DonationVotingMerkleDistributionBaseStrategy.Permit memory permit = DonationVotingMerkleDistributionBaseStrategy
-            .Permit({owner: from, spender: address(_strategy), value: 1e17, nonce: 0, deadline: type(uint256).max});
-
+        // We build a permit message using the erc2612 standard and we
+        // use it to create the signature.
+        // This message is not sent to the contract.
+        DonationVotingMerkleDistributionBaseStrategy.Permit memory permit1 =
+        DonationVotingMerkleDistributionBaseStrategy.Permit({
+            owner: from,
+            spender: address(_strategy),
+            value: 1e17,
+            nonce: nonce,
+            deadline: type(uint256).max
+        });
         PermitSigUtils permitSigUtils = new PermitSigUtils(mockERC20Permit.DOMAIN_SEPARATOR());
-        bytes32 digest = permitSigUtils.getTypedDataHash(permit);
-        bytes32 r;
-        bytes32 s;
-        uint8 v;
-        (v, r, s) = vm.sign(fromPrivateKey, digest);
+        // signature of the permit "1" message
+        bytes32 digest = permitSigUtils.getTypedDataHash(permit1);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(fromPrivateKey, digest);
+        bytes memory sig = bytes.concat(r, s, bytes1(v));
 
-        DonationVotingMerkleDistributionBaseStrategy.PermitData memory permitData =
-            DonationVotingMerkleDistributionBaseStrategy.PermitData({permit: permit, v: v, r: r, s: s});
+        // now we build a permit2 struct to be sent to the contract
+        ISignatureTransfer.PermitTransferFrom memory permit2 = defaultERC20PermitTransfer(address(mockERC20), nonce);
+        permit2.permitted.amount = permit1.value;
+
+        DonationVotingMerkleDistributionBaseStrategy.Permit2Data memory permit2Data =
+            DonationVotingMerkleDistributionBaseStrategy.Permit2Data({permit: permit2, signature: sig});
 
         bytes memory data =
-            abi.encode(recipientId, DonationVotingMerkleDistributionBaseStrategy.PermitType.Permit, permitData);
+            abi.encode(recipientId, DonationVotingMerkleDistributionBaseStrategy.PermitType.Permit, permit2Data);
 
         uint256 balanceBefore = mockERC20Permit.balanceOf(recipientAddress());
 
-        // vm.startPrank(from);
-        // // we don't need to approve like with permit2
-        // allo().allocate(poolId, data);
-        // vm.stopPrank();
+        vm.startPrank(from);
+        // we don't need to approve like with permit2
+        allo().allocate(poolId, data);
+        vm.stopPrank();
 
-        // uint256 balanceAfter = mockERC20Permit.balanceOf(recipientAddress());
+        uint256 balanceAfter = mockERC20Permit.balanceOf(recipientAddress());
 
-        // assertEq(balanceAfter, balanceBefore + 1e17);
+        assertEq(balanceAfter, balanceBefore + 1e17);
     }
 
     function testRevert_allocate_ERC20_InvalidSigner() public {
