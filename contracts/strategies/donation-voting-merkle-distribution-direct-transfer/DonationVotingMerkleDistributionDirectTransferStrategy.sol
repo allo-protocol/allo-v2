@@ -74,9 +74,7 @@ contract DonationVotingMerkleDistributionDirectTransferStrategy is DonationVotin
             );
         } else if (permitType == PermitType.Permit) {
             (bytes32 r, bytes32 s, uint8 v) = splitSignature(p2Data.signature);
-            IERC20Permit(token).permit(
-                _sender, _recipients[recipientId].recipientAddress, amount, p2Data.permit.deadline, v, r, s
-            );
+            IERC20Permit(token).permit(_sender, address(this), amount, p2Data.permit.deadline, v, r, s);
             IERC20(token).transferFrom(_sender, _recipients[recipientId].recipientAddress, amount);
 
             // try

@@ -13,6 +13,7 @@ import {PermitSigUtils} from "../../utils/PermitSigUtils.sol";
 
 import {ISignatureTransfer} from "permit2/ISignatureTransfer.sol";
 import {PermitSignature} from "lib/permit2/test/utils/PermitSignature.sol";
+import {MockERC20Permit} from "../../utils/MockERC20Permit.sol";
 
 contract DonationVotingMerkleDistributionDirectTransferStrategyTest is DonationVotingMerkleDistributionBaseMockTest {
     DonationVotingMerkleDistributionDirectTransferStrategy _strategy;
@@ -71,32 +72,36 @@ contract DonationVotingMerkleDistributionDirectTransferStrategyTest is DonationV
         address from = vm.addr(fromPrivateKey);
 
         mockERC20Permit.mint(from, 1e18);
-        mockERC20Permit.approve(address(permit2), type(uint256).max);
 
         address recipientId = __register_accept_recipient();
         vm.warp(allocationStartTime + 1);
 
         uint256 nonce = 0;
+        uint256 amount = 1e17;
 
         // We build a permit message using the erc2612 standard and we
         // use it to create the signature.
         // This message is not sent to the contract.
-        DonationVotingMerkleDistributionBaseStrategy.Permit memory permit1 =
-        DonationVotingMerkleDistributionBaseStrategy.Permit({
+        PermitSigUtils.Permit memory permit1 = PermitSigUtils.Permit({
             owner: from,
             spender: address(_strategy),
-            value: 1e17,
+            value: amount,
             nonce: nonce,
             deadline: type(uint256).max
         });
-        PermitSigUtils permitSigUtils = new PermitSigUtils(mockERC20Permit.DOMAIN_SEPARATOR());
+
+        PermitSigUtils permitSigUtils = new PermitSigUtils(vm, mockERC20Permit.DOMAIN_SEPARATOR());
+
         // signature of the permit "1" message
-        bytes32 digest = permitSigUtils.getTypedDataHash(permit1);
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(fromPrivateKey, digest);
-        bytes memory sig = bytes.concat(r, s, bytes1(v));
+        bytes memory sig = permitSigUtils.sign(permit1, fromPrivateKey);
 
         // now we build a permit2 struct to be sent to the contract
-        ISignatureTransfer.PermitTransferFrom memory permit2 = defaultERC20PermitTransfer(address(mockERC20), nonce);
+        ISignatureTransfer.PermitTransferFrom memory permit2 = ISignatureTransfer.PermitTransferFrom({
+            permitted: ISignatureTransfer.TokenPermissions({token: address(mockERC20Permit), amount: amount}),
+            nonce: nonce,
+            deadline: type(uint256).max
+        });
+
         permit2.permitted.amount = permit1.value;
 
         DonationVotingMerkleDistributionBaseStrategy.Permit2Data memory permit2Data =
