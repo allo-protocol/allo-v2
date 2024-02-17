@@ -92,6 +92,11 @@ contract RecipientSuperApp is ISuperApp {
         IERC20(token).transfer(msg.sender, IERC20(token).balanceOf(address(this)));
     }
 
+    /// @notice Close incoming streams in an emergency
+    function closeIncomingStream(address from) external onlyRecipient {
+        acceptedToken.deleteFlow(from, address(this));
+    }
+
     /// @dev Accepts all super tokens
     function isAcceptedSuperToken(ISuperToken _superToken) public view virtual returns (bool) {
         return address(_superToken) == address(acceptedToken);

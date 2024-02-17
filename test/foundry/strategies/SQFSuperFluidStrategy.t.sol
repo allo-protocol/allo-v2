@@ -802,6 +802,54 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
         recipient.superApp.emergencyWithdraw(address(superFakeDai));
     }
 
+    function test_superAppCloseStream() public {
+        address recipientId = __register_accept_recipient();
+
+        SQFSuperFluidStrategy.Recipient memory recipient = _strategy.getRecipient(recipientId);
+
+        vm.warp(uint256(allocationStartTime) + 1);
+
+        // unlimited allowance
+        superFakeDai.increaseFlowRateAllowanceWithPermissions(address(_strategy), 7, type(int96).max);
+        allo().allocate(
+            poolId,
+            abi.encode(
+                recipientId,
+                380517503805 // 1 per month
+            )
+        );
+
+        assertEq(superFakeDai.getFlowRate(address(this), address(recipient.superApp)), 380517503805);
+
+        vm.prank(recipient.recipientAddress);
+        recipient.superApp.closeIncomingStream(address(this));
+
+        assertEq(superFakeDai.getFlowRate(address(this), address(recipient.superApp)), 0);
+    }
+
+    function test_superAppCloseStream_unauthorized() public {
+        address recipientId = __register_accept_recipient();
+
+        SQFSuperFluidStrategy.Recipient memory recipient = _strategy.getRecipient(recipientId);
+
+        vm.warp(uint256(allocationStartTime) + 1);
+
+        // unlimited allowance
+        superFakeDai.increaseFlowRateAllowanceWithPermissions(address(_strategy), 7, type(int96).max);
+        allo().allocate(
+            poolId,
+            abi.encode(
+                recipientId,
+                380517503805 // 1 per month
+            )
+        );
+
+
+        vm.prank(pool_admin());
+        vm.expectRevert(UNAUTHORIZED.selector);
+        recipient.superApp.closeIncomingStream(address(this));
+    }
+
     function __deploy_strategy() internal returns (SQFSuperFluidStrategy) {
         return new SQFSuperFluidStrategy(address(allo()), "SQFSuperFluidStrategyv1");
     }
