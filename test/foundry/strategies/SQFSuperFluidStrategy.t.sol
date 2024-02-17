@@ -770,6 +770,38 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
         assertEq(_strategy.minPassportScore(), newMinPassportScore);
     }
 
+    function test_superAppEmergencyWithdraw() public {
+        address recipientId = __register_accept_recipient();
+
+        SQFSuperFluidStrategy.Recipient memory recipient = _strategy.getRecipient(recipientId);
+
+        // Transfer DAI
+        vm.prank(superFakeDaiWhale);
+        superFakeDai.transfer(address(recipient.superApp), 2000);
+
+        uint256 superAppBalanceBefore = superFakeDai.balanceOf(address(recipient.superApp));
+        uint256 recipientBalanceBefore = superFakeDai.balanceOf(recipient.recipientAddress);
+
+        vm.prank(recipient.recipientAddress);
+        recipient.superApp.emergencyWithdraw(address(superFakeDai));
+
+        uint256 superAppBalanceAfter = superFakeDai.balanceOf(address(recipient.superApp));
+        uint256 recipientBalanceAfter = superFakeDai.balanceOf(recipient.recipientAddress);
+
+        assertTrue(superAppBalanceAfter == 0);
+        assertTrue(recipientBalanceAfter == recipientBalanceBefore + superAppBalanceBefore);
+    }
+
+    function test_superAppEmergencyWithdraw_unauthorized() public {
+        address recipientId = __register_accept_recipient();
+
+        SQFSuperFluidStrategy.Recipient memory recipient = _strategy.getRecipient(recipientId);
+
+        vm.prank(pool_admin());
+        vm.expectRevert(UNAUTHORIZED.selector);
+        recipient.superApp.emergencyWithdraw(address(superFakeDai));
+    }
+
     function __deploy_strategy() internal returns (SQFSuperFluidStrategy) {
         return new SQFSuperFluidStrategy(address(allo()), "SQFSuperFluidStrategyv1");
     }
