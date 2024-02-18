@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 
 import {SQFSuperFluidStrategy} from "../../../contracts/strategies/_poc/sqf-superfluid/SQFSuperFluidStrategy.sol";
 import {RecipientSuperApp} from "../../../contracts/strategies/_poc/sqf-superfluid/RecipientSuperApp.sol";
+import {RecipientSuperAppFactory} from "../../../contracts/strategies/_poc/sqf-superfluid/RecipientSuperAppFactory.sol";
 
 import {Native} from "../../../contracts/core/libraries/Native.sol";
 import {Errors} from "../../../contracts/core/libraries/Errors.sol";
@@ -53,6 +54,7 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
     address passportDecoder;
     address superfluidHost;
     address allocationSuperToken;
+    address recipientSuperAppFactory;
     uint64 registrationStartTime;
     uint64 registrationEndTime;
     uint64 allocationStartTime;
@@ -98,6 +100,7 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
         allocationEndTime = uint64(block.timestamp) + uint64(2 days);
         minPassportScore = 69;
         initialSuperAppBalance = 420 * 1e8;
+        recipientSuperAppFactory = address(new RecipientSuperAppFactory());
 
         // set empty app RegistrationKey
         vm.prank(superfluidOwner);
@@ -844,7 +847,6 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
             )
         );
 
-
         vm.prank(pool_admin());
         vm.expectRevert(UNAUTHORIZED.selector);
         recipient.superApp.closeIncomingStream(address(this));
@@ -861,6 +863,7 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
             passportDecoder,
             superfluidHost,
             allocationSuperToken,
+            recipientSuperAppFactory,
             registrationStartTime,
             registrationEndTime,
             allocationStartTime,

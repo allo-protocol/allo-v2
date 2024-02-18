@@ -22,6 +22,7 @@ import {BaseStrategy} from "../../BaseStrategy.sol";
 // Internal Libraries
 import {Metadata} from "../../../core/libraries/Metadata.sol";
 import {RecipientSuperApp} from "./RecipientSuperApp.sol";
+import {RecipientSuperAppFactory} from "./RecipientSuperAppFactory.sol";
 
 contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     using SuperTokenV1Library for ISuperToken;
@@ -47,6 +48,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         address passportDecoder;
         address superfluidHost;
         address allocationSuperToken;
+        address recipientSuperAppFactory;
         uint64 registrationStartTime;
         uint64 registrationEndTime;
         uint64 allocationStartTime;
@@ -117,6 +119,9 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice The pool super token
     ISuperToken public allocationSuperToken;
     ISuperToken public poolSuperToken;
+
+    /// @notice The recipient SuperApp factory
+    RecipientSuperAppFactory public recipientSuperAppFactory;
 
     /// @notice The GDA pool which streams pool tokens to recipients
     ISuperfluidPool public gdaPool;
@@ -218,6 +223,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         metadataRequired = params.metadataRequired;
         superfluidHost = params.superfluidHost;
         minPassportScore = params.minPassportScore;
+        recipientSuperAppFactory = RecipientSuperAppFactory(params.recipientSuperAppFactory);
         _registry = allo.getRegistry();
 
         if (
@@ -444,7 +450,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
             emit Reviewed(recipientId, recipientStatus, msg.sender);
 
             if (recipientStatus == Status.Accepted) {
-                RecipientSuperApp superApp = new RecipientSuperApp(
+                RecipientSuperApp superApp = recipientSuperAppFactory.createRecipientSuperApp(
                     recipient.recipientAddress,
                     address(this),
                     superfluidHost,
@@ -452,7 +458,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
                     true,
                     true,
                     true,
-                    "" // regsitrationKey - for future create a superApp factory
+                    ""
                 );
 
                 allocationSuperToken.transfer(address(superApp), initialSuperAppBalance);
