@@ -457,8 +457,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
                     allocationSuperToken,
                     true,
                     true,
-                    true,
-                    ""
+                    true
                 );
 
                 allocationSuperToken.transfer(address(superApp), initialSuperAppBalance);
