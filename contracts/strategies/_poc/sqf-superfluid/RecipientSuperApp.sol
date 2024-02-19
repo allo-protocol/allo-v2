@@ -14,6 +14,7 @@ import {IInstantDistributionAgreementV1} from
     "../../../../lib/superfluid-protocol-monorepo/packages/ethereum-contracts/contracts/interfaces/agreements/IInstantDistributionAgreementV1.sol";
 
 import {SQFSuperFluidStrategy} from "./SQFSuperFluidStrategy.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract RecipientSuperApp is ISuperApp {
     error UNAUTHORIZED();
@@ -41,6 +42,11 @@ contract RecipientSuperApp is ISuperApp {
     address public recipient;
     SQFSuperFluidStrategy public immutable strategy;
     ISuperToken public immutable acceptedToken;
+
+    modifier onlyRecipient() {
+        _checkOnlyRecipient();
+        _;
+    }
 
     constructor(
         address _recipient,
@@ -81,6 +87,16 @@ contract RecipientSuperApp is ISuperApp {
         recipient = _recipient;
     }
 
+    /// @notice Withdraw ERC20 funds in an emergency
+    function emergencyWithdraw(address token) external onlyRecipient {
+        IERC20(token).transfer(msg.sender, IERC20(token).balanceOf(address(this)));
+    }
+
+    /// @notice Close incoming streams in an emergency
+    function closeIncomingStream(address from) external onlyRecipient {
+        acceptedToken.deleteFlow(from, address(this));
+    }
+
     /// @dev Accepts all super tokens
     function isAcceptedSuperToken(ISuperToken _superToken) public view virtual returns (bool) {
         return address(_superToken) == address(acceptedToken);
@@ -109,6 +125,12 @@ contract RecipientSuperApp is ISuperApp {
     function _checkHookParam(ISuperToken _superToken) internal view {
         if (msg.sender != address(HOST)) revert UnauthorizedHost();
         if (!isAcceptedSuperToken(_superToken)) revert NotAcceptedSuperToken();
+    }
+
+    function _checkOnlyRecipient() internal view virtual {
+        if (msg.sender != recipient) {
+            revert UNAUTHORIZED();
+        }
     }
 
     // https://Ihub.com/superfluid-finance/super-examples/blob/main/projects/tradeable-cashflow/contracts/RedirectAll.sol#L163

@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 
 import {SQFSuperFluidStrategy} from "../../../contracts/strategies/_poc/sqf-superfluid/SQFSuperFluidStrategy.sol";
 import {RecipientSuperApp} from "../../../contracts/strategies/_poc/sqf-superfluid/RecipientSuperApp.sol";
+import {RecipientSuperAppFactory} from "../../../contracts/strategies/_poc/sqf-superfluid/RecipientSuperAppFactory.sol";
 
 import {Native} from "../../../contracts/core/libraries/Native.sol";
 import {Errors} from "../../../contracts/core/libraries/Errors.sol";
@@ -53,6 +54,7 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
     address passportDecoder;
     address superfluidHost;
     address allocationSuperToken;
+    address recipientSuperAppFactory;
     uint64 registrationStartTime;
     uint64 registrationEndTime;
     uint64 allocationStartTime;
@@ -98,6 +100,8 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
         allocationEndTime = uint64(block.timestamp) + uint64(2 days);
         minPassportScore = 69;
         initialSuperAppBalance = 420 * 1e8;
+        recipientSuperAppFactory = address(new RecipientSuperAppFactory());
+        RecipientSuperAppFactory(recipientSuperAppFactory).setRegistrationKey("");
 
         // set empty app RegistrationKey
         vm.prank(superfluidOwner);
@@ -770,6 +774,85 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
         assertEq(_strategy.minPassportScore(), newMinPassportScore);
     }
 
+    function test_superAppEmergencyWithdraw() public {
+        address recipientId = __register_accept_recipient();
+
+        SQFSuperFluidStrategy.Recipient memory recipient = _strategy.getRecipient(recipientId);
+
+        // Transfer DAI
+        vm.prank(superFakeDaiWhale);
+        superFakeDai.transfer(address(recipient.superApp), 2000);
+
+        uint256 superAppBalanceBefore = superFakeDai.balanceOf(address(recipient.superApp));
+        uint256 recipientBalanceBefore = superFakeDai.balanceOf(recipient.recipientAddress);
+
+        vm.prank(recipient.recipientAddress);
+        recipient.superApp.emergencyWithdraw(address(superFakeDai));
+
+        uint256 superAppBalanceAfter = superFakeDai.balanceOf(address(recipient.superApp));
+        uint256 recipientBalanceAfter = superFakeDai.balanceOf(recipient.recipientAddress);
+
+        assertTrue(superAppBalanceAfter == 0);
+        assertTrue(recipientBalanceAfter == recipientBalanceBefore + superAppBalanceBefore);
+    }
+
+    function test_superAppEmergencyWithdraw_unauthorized() public {
+        address recipientId = __register_accept_recipient();
+
+        SQFSuperFluidStrategy.Recipient memory recipient = _strategy.getRecipient(recipientId);
+
+        vm.prank(pool_admin());
+        vm.expectRevert(UNAUTHORIZED.selector);
+        recipient.superApp.emergencyWithdraw(address(superFakeDai));
+    }
+
+    function test_superAppCloseStream() public {
+        address recipientId = __register_accept_recipient();
+
+        SQFSuperFluidStrategy.Recipient memory recipient = _strategy.getRecipient(recipientId);
+
+        vm.warp(uint256(allocationStartTime) + 1);
+
+        // unlimited allowance
+        superFakeDai.increaseFlowRateAllowanceWithPermissions(address(_strategy), 7, type(int96).max);
+        allo().allocate(
+            poolId,
+            abi.encode(
+                recipientId,
+                380517503805 // 1 per month
+            )
+        );
+
+        assertEq(superFakeDai.getFlowRate(address(this), address(recipient.superApp)), 380517503805);
+
+        vm.prank(recipient.recipientAddress);
+        recipient.superApp.closeIncomingStream(address(this));
+
+        assertEq(superFakeDai.getFlowRate(address(this), address(recipient.superApp)), 0);
+    }
+
+    function test_superAppCloseStream_unauthorized() public {
+        address recipientId = __register_accept_recipient();
+
+        SQFSuperFluidStrategy.Recipient memory recipient = _strategy.getRecipient(recipientId);
+
+        vm.warp(uint256(allocationStartTime) + 1);
+
+        // unlimited allowance
+        superFakeDai.increaseFlowRateAllowanceWithPermissions(address(_strategy), 7, type(int96).max);
+        allo().allocate(
+            poolId,
+            abi.encode(
+                recipientId,
+                380517503805 // 1 per month
+            )
+        );
+
+        vm.prank(pool_admin());
+        vm.expectRevert(UNAUTHORIZED.selector);
+        recipient.superApp.closeIncomingStream(address(this));
+    }
+
     function __deploy_strategy() internal returns (SQFSuperFluidStrategy) {
         return new SQFSuperFluidStrategy(address(allo()), "SQFSuperFluidStrategyv1");
     }
@@ -781,6 +864,7 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
             passportDecoder,
             superfluidHost,
             allocationSuperToken,
+            recipientSuperAppFactory,
             registrationStartTime,
             registrationEndTime,
             allocationStartTime,
