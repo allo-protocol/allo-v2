@@ -117,6 +117,8 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Emitted when a content update is posted. Permissioned to facilitators or root account.
     event UpdatePosted(string indexed tag, uint256 indexed role, address indexed recipientId, Metadata content);
 
+    event GameRoundTimesCreated(uint256 indexed gameRoundIndex, uint256 startTime, uint256 endTime);
+
     /// ===============================
     /// ========== Storage ============
     /// ===============================
@@ -537,6 +539,8 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         currentRound.status = GameStatus.Funded;
 
         // Todo - We need an event to track start times and end times
+
+        emit GameRoundTimesCreated(currentRoundIndex, startTime, endTime);
     }
 
     /// @notice Registers a new GrantShip recipient
