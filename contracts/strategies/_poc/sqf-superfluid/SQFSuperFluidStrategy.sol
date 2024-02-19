@@ -451,13 +451,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
 
             if (recipientStatus == Status.Accepted) {
                 RecipientSuperApp superApp = recipientSuperAppFactory.createRecipientSuperApp(
-                    recipient.recipientAddress,
-                    address(this),
-                    superfluidHost,
-                    allocationSuperToken,
-                    true,
-                    true,
-                    true
+                    recipient.recipientAddress, address(this), superfluidHost, allocationSuperToken, true, true, true
                 );
 
                 allocationSuperToken.transfer(address(superApp), initialSuperAppBalance);
