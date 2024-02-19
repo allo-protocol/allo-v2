@@ -6,9 +6,15 @@ import {ISuperToken} from
 import "./RecipientSuperApp.sol";
 
 contract RecipientSuperAppFactory {
+    address deployer;
     string registrationKey;
 
-    constructor(string memory _registrationKey) {
+    constructor() {
+        deployer = msg.sender;
+    }
+
+    function setRegistrationKey(string memory _registrationKey) external {
+        require(msg.sender == deployer, "Only deployer may set registration key");
         registrationKey = _registrationKey;
     }
 

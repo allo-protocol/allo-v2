@@ -100,7 +100,8 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
         allocationEndTime = uint64(block.timestamp) + uint64(2 days);
         minPassportScore = 69;
         initialSuperAppBalance = 420 * 1e8;
-        recipientSuperAppFactory = address(new RecipientSuperAppFactory(""));
+        recipientSuperAppFactory = address(new RecipientSuperAppFactory());
+        RecipientSuperAppFactory(recipientSuperAppFactory).setRegistrationKey("");
 
         // set empty app RegistrationKey
         vm.prank(superfluidOwner);
