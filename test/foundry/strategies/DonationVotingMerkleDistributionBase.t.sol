@@ -39,6 +39,8 @@ contract DonationVotingMerkleDistributionBaseMockTest is
     Native,
     Errors
 {
+    event Initialized(uint256 poolId, bytes data);
+
     event RecipientStatusUpdated(uint256 indexed rowIndex, uint256 fullRow, address sender);
     event DistributionUpdated(bytes32 merkleRoot, Metadata metadata);
     event FundsDistributed(uint256 amount, address grantee, address indexed token, address indexed recipientId);
@@ -249,23 +251,6 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         strategy = new DonationVotingMerkleDistributionBaseMock(
             address(allo()), "DonationVotingMerkleDistributionBaseMock", permit2
         );
-        // when _registrationStartTime is in past
-        vm.expectRevert(INVALID.selector);
-        vm.prank(address(allo()));
-        strategy.initialize(
-            poolId,
-            abi.encode(
-                DonationVotingMerkleDistributionBaseStrategy.InitializeData(
-                    useRegistryAnchor,
-                    metadataRequired,
-                    uint64(block.timestamp - 1),
-                    registrationEndTime,
-                    allocationStartTime,
-                    allocationEndTime,
-                    allowedTokens
-                )
-            )
-        );
 
         // when _registrationStartTime > _registrationEndTime
         vm.expectRevert(INVALID.selector);
@@ -338,6 +323,31 @@ contract DonationVotingMerkleDistributionBaseMockTest is
                 )
             )
         );
+    }
+
+    function test_initialize_registration_can_start_in_the_past() public {
+        strategy = new DonationVotingMerkleDistributionBaseMock(
+            address(allo()), "DonationVotingMerkleDistributionBaseMock", permit2
+        );
+
+        bytes memory data = abi.encode(
+            DonationVotingMerkleDistributionBaseStrategy.InitializeData(
+                useRegistryAnchor,
+                metadataRequired,
+                uint64(block.timestamp - 1),
+                registrationEndTime,
+                allocationStartTime,
+                allocationEndTime,
+                allowedTokens
+            )
+        );
+
+        // Initialized should be emitted
+        vm.expectEmit(true, true, false, false, address(strategy));
+        emit Initialized(poolId, data);
+
+        vm.prank(address(allo()));
+        strategy.initialize(poolId, data);
     }
 
     // Tests that the correct recipient is returned
@@ -445,15 +455,22 @@ contract DonationVotingMerkleDistributionBaseMockTest is
     function test_updatePoolTimestamps() public {
         vm.expectEmit(false, false, false, true);
         emit TimestampsUpdated(
-            registrationStartTime, registrationEndTime, allocationStartTime, allocationEndTime + 10, pool_admin()
+            uint64(block.timestamp - 1), // can be set in the past
+            registrationEndTime,
+            allocationStartTime,
+            allocationEndTime + 10,
+            pool_admin()
         );
 
         vm.prank(pool_admin());
         strategy.updatePoolTimestamps(
-            registrationStartTime, registrationEndTime, allocationStartTime, allocationEndTime + 10
+            uint64(block.timestamp - 1), // can be set in the past
+            registrationEndTime,
+            allocationStartTime,
+            allocationEndTime + 10
         );
 
-        assertEq(strategy.registrationStartTime(), registrationStartTime);
+        assertEq(strategy.registrationStartTime(), uint64(block.timestamp - 1));
         assertEq(strategy.registrationEndTime(), registrationEndTime);
         assertEq(strategy.allocationStartTime(), allocationStartTime);
         assertEq(strategy.allocationEndTime(), allocationEndTime + 10);
@@ -471,7 +488,28 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         vm.expectRevert(INVALID.selector);
         vm.prank(pool_admin());
         strategy.updatePoolTimestamps(
-            uint64(block.timestamp - 1), registrationEndTime, allocationStartTime, allocationEndTime
+            registrationStartTime,
+            registrationStartTime - 1, // registration end time is before start time
+            allocationStartTime,
+            allocationEndTime
+        );
+
+        vm.expectRevert(INVALID.selector);
+        vm.prank(pool_admin());
+        strategy.updatePoolTimestamps(
+            registrationStartTime,
+            registrationEndTime,
+            registrationStartTime - 1, // allocation start tie is before registration end time
+            allocationEndTime
+        );
+
+        vm.expectRevert(INVALID.selector);
+        vm.prank(pool_admin());
+        strategy.updatePoolTimestamps(
+            registrationStartTime,
+            registrationEndTime,
+            allocationStartTime,
+            allocationStartTime - 1 // allocation end time is before start time
         );
     }
 
