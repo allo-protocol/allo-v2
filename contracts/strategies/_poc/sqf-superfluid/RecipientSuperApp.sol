@@ -48,36 +48,8 @@ contract RecipientSuperApp is ISuperApp {
         _;
     }
 
-    constructor(
-        address _recipient,
-        address _strategy,
-        address _host,
-        ISuperToken _acceptedToken,
-        bool _activateOnCreated,
-        bool _activateOnUpdated,
-        bool _activateOnDeleted,
-        string memory _registrationKey
-    ) {
+    constructor(address _recipient, address _strategy, address _host, ISuperToken _acceptedToken) {
         HOST = ISuperfluid(_host);
-
-        uint256 callBackDefinitions =
-            SuperAppDefinitions.APP_LEVEL_FINAL | SuperAppDefinitions.BEFORE_AGREEMENT_CREATED_NOOP;
-
-        if (!_activateOnCreated) {
-            callBackDefinitions |= SuperAppDefinitions.AFTER_AGREEMENT_CREATED_NOOP;
-        }
-
-        if (!_activateOnUpdated) {
-            callBackDefinitions |=
-                SuperAppDefinitions.BEFORE_AGREEMENT_UPDATED_NOOP | SuperAppDefinitions.AFTER_AGREEMENT_UPDATED_NOOP;
-        }
-
-        if (!_activateOnDeleted) {
-            callBackDefinitions |= SuperAppDefinitions.BEFORE_AGREEMENT_TERMINATED_NOOP
-                | SuperAppDefinitions.AFTER_AGREEMENT_TERMINATED_NOOP;
-        }
-
-        HOST.registerAppWithKey(callBackDefinitions, _registrationKey);
 
         if (address(_strategy) == address(0)) {
             revert ZERO_ADDRESS();
