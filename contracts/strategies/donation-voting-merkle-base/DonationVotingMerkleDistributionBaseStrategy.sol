@@ -159,7 +159,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     /// @notice Flag to indicate whether the distribution has started or not.
     bool public distributionStarted;
 
-    /// @notice The timestamps in milliseconds for the start and end times.
+    /// @notice The timestamps in seconds for the start and end times.
     uint64 public registrationStartTime;
     uint64 public registrationEndTime;
     uint64 public allocationStartTime;
@@ -376,7 +376,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     }
 
     /// @notice Sets the start and end dates.
-    /// @dev The timestamps are in milliseconds for the start and end times. The 'msg.sender' must be a pool manager.
+    /// @dev The timestamps are in seconds for the start and end times. The 'msg.sender' must be a pool manager.
     ///      Emits a 'TimestampsUpdated()' event.
     /// @param _registrationStartTime The start time for the registration
     /// @param _registrationEndTime The end time for the registration
@@ -527,11 +527,10 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
         uint64 _registrationEndTime,
         uint64 _allocationStartTime,
         uint64 _allocationEndTime
-    ) internal view {
+    ) internal pure {
         if (
-            block.timestamp > _registrationStartTime || _registrationStartTime > _registrationEndTime
-                || _registrationStartTime > _allocationStartTime || _allocationStartTime > _allocationEndTime
-                || _registrationEndTime > _allocationEndTime
+            _registrationStartTime > _registrationEndTime || _registrationStartTime > _allocationStartTime
+                || _allocationStartTime > _allocationEndTime || _registrationEndTime > _allocationEndTime
         ) {
             revert INVALID();
         }
