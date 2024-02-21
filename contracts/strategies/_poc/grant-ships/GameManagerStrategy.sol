@@ -112,7 +112,9 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     /// @param hatsAddress The address of the Hats Protocol contract.
     /// @param rootAccount The address of the root account.
     /// @param token The address of the token used for funding GrantShips.
-    event GameManagerInitialized(uint256 gameFacilitatorId, address hatsAddress, address rootAccount, address token);
+    event GameManagerInitialized(
+        uint256 gameFacilitatorId, address hatsAddress, address rootAccount, address token, uint256 poolId
+    );
 
     /// @notice Emitted when a content update is posted. Permissioned to facilitators or root account.
     event UpdatePosted(string indexed tag, uint256 indexed role, address indexed recipientId, Metadata content);
@@ -208,9 +210,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
 
         token = allo.getPool(poolId).token;
 
-        emit GameManagerInitialized(_gameFacilitatorId, _hatsAddress, _rootAccount, token);
-
-        // Todo - We need to track the pool ID initialized event
+        emit GameManagerInitialized(_gameFacilitatorId, _hatsAddress, _rootAccount, token, poolId);
     }
 
     /// ===============================
@@ -286,7 +286,9 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     ) external onlyGameFacilitator(msg.sender) returns (address payable) {
         Recipient storage recipient = recipients[_recipientAddress];
 
-        // Todo: Check array not out of bounds.
+        // If we haven't created a round, revert
+        if (gameRounds.length == 0) revert ARRAY_MISMATCH();
+
         GameRound storage currentRound = gameRounds[currentRoundIndex];
 
         if (currentRound.status != GameStatus.Pending) revert INVALID_STATUS();
