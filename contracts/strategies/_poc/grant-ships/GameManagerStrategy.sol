@@ -362,6 +362,11 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         _transferAmount(token, rootAccount, _amount);
     }
 
+    function setPoolActive(bool _flag) external onlyGameFacilitator(msg.sender) {
+        _setPoolActive(_flag);
+        emit PoolActive(_flag);
+    }
+
     /// @notice Game Facilitators or root account post updates about the GrantShips
     /// @param _tag The tag of the update, used to mark the type of update when indexing
     /// @param _content The content of the update,
