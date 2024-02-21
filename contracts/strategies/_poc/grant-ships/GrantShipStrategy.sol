@@ -221,7 +221,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// @dev Checks to see if the GameManager is finished its current round.
     /// Uses the inverse of the GameManager's isPoolActive()
     modifier onlyGameActive() {
-        if (_gameManager.isGameActive()) {
+        if (_gameManager.isPoolActive()) {
             revert UNRESOLVED_RED_FLAGS();
         }
         _;

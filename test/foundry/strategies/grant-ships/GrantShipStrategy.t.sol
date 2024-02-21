@@ -743,8 +743,6 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
     }
 
     function test_withdraw() public {
-        _quick_fund_ship(1);
-
         uint256 GM_poolId = gameManager().getPoolId();
 
         vm.startPrank(facilitator().wearer);
@@ -770,8 +768,6 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
     }
 
     function testRevert_withdraw_UNAUTHORIZED() public {
-        _quick_fund_ship(1);
-
         vm.expectRevert(UNAUTHORIZED.selector);
 
         vm.startPrank(shipOperator(1).wearer);
@@ -780,8 +776,6 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
     }
 
     function testRevert_withdraw_POOL_ACTIVE() public {
-        _quick_fund_ship(1);
-
         vm.expectRevert(POOL_ACTIVE.selector);
 
         vm.startPrank(facilitator().wearer);
@@ -833,7 +827,6 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         address recipientId = _register_recipient();
 
         _issue_flag(0, GrantShipStrategy.FlagType.Red);
-        _quick_fund_ship(1);
 
         GrantShipStrategy.Status recipientStatus = IStrategy.Status.Accepted;
         uint256 grantAmount = _grantAmount;
@@ -937,8 +930,6 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
     function _test_ship_created(uint256 _shipId) internal {
         ShipInitData memory shipInitData = shipSetupData(_shipId);
         assertTrue(address(ship(_shipId).getAllo()) == address(allo()));
-        console.log("shipInitData.shipName", shipInitData.shipName);
-        console.logBytes32(ship(_shipId).getStrategyId());
         // assertTrue(ship(_shipId).getStrategyId() == keccak256(abi.encode(shipInitData.shipName)));
         assertTrue(ship(_shipId).registryGating());
         assertTrue(ship(_shipId).metadataRequired());
@@ -968,28 +959,12 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         (recipientId,) = _register_recipient_return_data();
     }
 
-    function _quick_fund_ship(uint256 _shipId) internal {
-        vm.startPrank(arbWhale);
-        ARB().transfer(facilitator().wearer, _poolAmount);
-        vm.stopPrank();
-
-        uint256 poolId = ship(_shipId).getPoolId();
-
-        vm.startPrank(facilitator().wearer);
-        ARB().approve(address(allo()), _poolAmount);
-
-        allo().fundPool(poolId, _poolAmount);
-
-        vm.stopPrank();
-    }
-
     function _register_recipient_allocate_accept() internal returns (address recipientId) {
         recipientId = _register_recipient();
         GrantShipStrategy.Status recipientStatus = IStrategy.Status.Accepted;
         uint256 grantAmount = _grantAmount;
 
         bytes memory data = abi.encode(recipientId, recipientStatus, grantAmount, reason);
-        _quick_fund_ship(1);
 
         vm.expectEmit(true, true, true, true);
         emit RecipientStatusChanged(recipientId, recipientStatus, reason);
@@ -1006,7 +981,6 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         uint256 grantAmount = _grantAmount;
 
         bytes memory data = abi.encode(recipientId, recipientStatus, grantAmount, reason);
-        _quick_fund_ship(1);
 
         vm.expectEmit(false, false, false, false);
         emit RecipientStatusChanged(recipientId, recipientStatus, reason);

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.19;
 
+import "forge-std/Test.sol";
+
 // External Libraries
 import {ReentrancyGuard} from "openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
 
@@ -117,6 +119,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Emitted when a content update is posted. Permissioned to facilitators or root account.
     event UpdatePosted(string indexed tag, uint256 indexed role, address indexed recipientId, Metadata content);
 
+    /// @notice Emitted after distribtion of funds to GrantShip recipients. Tracks Game round times.
     event GameRoundTimesCreated(uint256 indexed gameRoundIndex, uint256 startTime, uint256 endTime);
 
     /// ===============================
@@ -247,13 +250,6 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     /// @return returns the address of the Hats Protocol contract
     function getHatsAddress() public view returns (address) {
         return address(_hats);
-    }
-
-    /// @notice Get the curent status of the Grant Ships GameRound
-    /// @return returns the current status of the GameRound
-    /// @dev The GrantShips game round is the inverse of the GameManager's pool active status (prep round)
-    function isGameActive() public view returns (bool) {
-        return !_isPoolActive();
     }
 
     /// ===============================
@@ -537,8 +533,6 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         currentRound.startTime = startTime;
         currentRound.endTime = endTime;
         currentRound.status = GameStatus.Funded;
-
-        // Todo - We need an event to track start times and end times
 
         emit GameRoundTimesCreated(currentRoundIndex, startTime, endTime);
     }

@@ -107,7 +107,7 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
         __initGameManagerPool();
         __generateShipData();
         __registerShips();
-        // __allocate_distribute_start();
+        __allocate_distribute_start();
     }
 
     function __ManagerSetup() internal {
@@ -132,13 +132,13 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
             // managers[0] = address(gameManager());
             managers[0] = shipOperator(i).wearer;
 
-            vm.startPrank(facilitator().wearer);
+            vm.startPrank(shipOperator(i).wearer);
             // Create profile with Hats Team Address And ID as Owner
             bytes32 profileId = _registry_.createProfile(
                 i + 50,
                 string.concat("Ship Profile ", vm.toString(i)),
                 Metadata({protocol: 1, pointer: string.concat("ipfs://ship-profile/", vm.toString(i))}),
-                facilitator().wearer,
+                shipOperator(i).wearer,
                 managers
             );
 
@@ -177,6 +177,32 @@ contract GameManagerSetup is Test, HatsSetupLive, AlloSetup, RegistrySetupFullLi
                 i++;
             }
         }
+    }
+
+    function __allocate_distribute_start() internal {
+        // ARB Whale sends ARB to a game facilitator
+        uint256 poolId = gameManager().getPoolId();
+        vm.startPrank(arbWhale);
+        ARB().transfer(facilitator().wearer, _GAME_AMOUNT);
+        vm.stopPrank();
+
+        // Facilitator approves gameManager to spend ARB
+        vm.startPrank(facilitator().wearer);
+        ARB().approve(address(allo()), _GAME_AMOUNT);
+
+        // Facilitator approves funds the gameManager Allo pool
+        allo().fundPool(poolId, _GAME_AMOUNT);
+
+        uint256[] memory amounts = new uint256[](3);
+
+        amounts[0] = _SHIP_AMOUNT;
+        amounts[1] = _SHIP_AMOUNT;
+        amounts[2] = _SHIP_AMOUNT;
+
+        allo().allocate(poolId, abi.encode(_shipAnchor, amounts, _GAME_AMOUNT));
+        allo().distribute(poolId, _shipAnchor, abi.encode(block.timestamp, block.timestamp + _3_MONTHS));
+        gameManager().startGame();
+        vm.stopPrank();
     }
 
     function __generateShipData() internal {
