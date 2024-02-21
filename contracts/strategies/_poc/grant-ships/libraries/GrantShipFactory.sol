@@ -4,7 +4,7 @@ pragma solidity 0.8.19;
 import "@openzeppelin/contracts/proxy/Clones.sol";
 
 contract GrantShipFactory {
-    event ShipCreated(address strategyAddress, address anchorAddress, address sender);
+    event ShipCreated(address strategyAddress, address anchorAddress);
 
     address public immutable template;
 
@@ -15,7 +15,7 @@ contract GrantShipFactory {
     function create(address anchorAddress) external returns (address) {
         address clone = Clones.clone(template);
 
-        emit ShipCreated(clone, anchorAddress, msg.sender);
+        emit ShipCreated(clone, anchorAddress);
         return clone;
     }
 }
