@@ -569,7 +569,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         emit FlagResolved(_nonce, _reason);
     }
 
-    /// Todo: Make sure that the recipient is not 'stuck' at Status.InReview in all possible cases
+    /// Review: Make sure that the recipient is not 'stuck' at Status.InReview in all possible cases
     /// OR: Make sure that the recipient isn't able to 'jump ahead'.
     /// Also make sure the UX of getting back in the flow is easy to implement and clear to the user
 
@@ -749,7 +749,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
 
         Recipient storage recipient = _recipients[recipientId];
 
-        // Todo: figure out why we need this check
+        // Review: figure out why we need this check
         // Most grant managers would like to see a project's milestones before allocating funds
         if (upcomingMilestone[recipientId] != 0) {
             revert MILESTONES_ALREADY_SET();
