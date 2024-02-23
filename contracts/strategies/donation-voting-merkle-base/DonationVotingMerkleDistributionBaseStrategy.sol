@@ -513,8 +513,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
 
     /// @notice Checks if the timestamps are valid.
     /// @dev This will revert if any of the timestamps are invalid. This is determined by the strategy
-    /// and may vary from strategy to strategy. Checks if '_registrationStartTime' is less than the
-    /// current 'block.timestamp' or if '_registrationStartTime' is greater than the '_registrationEndTime'
+    /// and may vary from strategy to strategy. Checks if '_registrationStartTime' is greater than the '_registrationEndTime'
     /// or if '_registrationStartTime' is greater than the '_allocationStartTime' or if '_registrationEndTime'
     /// is greater than the '_allocationEndTime' or if '_allocationStartTime' is greater than the '_allocationEndTime'.
     /// If any of these conditions are true, this will revert.
