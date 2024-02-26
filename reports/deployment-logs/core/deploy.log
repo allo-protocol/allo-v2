@@ -197,7 +197,6 @@
 20240122_203414 - Deployment finished with 0 error(s)
 20240122_203414 - Executing: bun hardhat run scripts/strategies/deployRFPSimple.ts --no-compile --network optimism-sepolia | tee ./reports/deployment-logs/strategies/deployRFPSimple/optimism-sepolia/20240122_203256/deploy-20240122_203256.log
 20240122_203536 - Deployment finished with 0 error(s)
-<<<<<<< HEAD
 20240209_085203 - Executing: bun hardhat run scripts/strategies/deployDonationVotingMerkleDistributionDirect.ts --no-compile --network goerli | tee ./reports/deployment-logs/strategies/deployDonationVotingMerkleDistributionDirect/goerli/20240209_085203/deploy-20240209_085203.log
 20240209_085224 - Executing: bun hardhat run scripts/strategies/deployDonationVotingMerkleDistributionDirect.ts --no-compile --network goerli | tee ./reports/deployment-logs/strategies/deployDonationVotingMerkleDistributionDirect/goerli/20240209_085224/deploy-20240209_085224.log
 20240209_085354 - Deployment finished with 0 error(s)
@@ -255,7 +254,6 @@
 20240209_143519 - Executing: bun hardhat run scripts/strategies/deployDonationVotingMerkleDistributionVault.ts --no-compile --network mainnet | tee ./reports/deployment-logs/strategies/deployDonationVotingMerkleDistributionVault/mainnet/20240209_143519/deploy-20240209_143519.log
 20240209_143546 - Deployment finished with 0 error(s)
 20240209_143548 - Executing: bun hardhat run scripts/strategies/deployDonationVotingMerkleDistributionVault.ts --no-compile --network mainnet | tee ./reports/deployment-logs/strategies/deployDonationVotingMerkleDistributionVault/mainnet/20240209_143548/deploy-20240209_143548.log
-=======
 20240215_125746 - Executing: bun hardhat run scripts/strategies/deployDirectGrants.ts --no-compile --network mumbai | tee ./reports/deployment-logs/strategies/deployDirectGrants/mumbai/20240215_125746/deploy-20240215_125746.log
 20240215_125903 - Executing: bun hardhat run scripts/strategies/deployDirectGrants.ts --no-compile --network mumbai | tee ./reports/deployment-logs/strategies/deployDirectGrants/mumbai/20240215_125903/deploy-20240215_125903.log
 20240215_125927 - Executing: bun hardhat run scripts/strategies/deployDirectGrants.ts --no-compile --network goerli | tee ./reports/deployment-logs/strategies/deployDirectGrants/goerli/20240215_125903/deploy-20240215_125903.log
@@ -272,4 +270,3 @@
 20240215_131034 - Executing: bun hardhat run scripts/strategies/deployDirectGrants.ts --no-compile --network arbitrum-sepolia | tee ./reports/deployment-logs/strategies/deployDirectGrants/arbitrum-sepolia/20240215_131034/deploy-20240215_131034.log
 20240215_131144 - Executing: bun hardhat run scripts/strategies/deployDirectGrants.ts --no-compile --network optimism-sepolia | tee ./reports/deployment-logs/strategies/deployDirectGrants/optimism-sepolia/20240215_131034/deploy-20240215_131034.log
 20240215_131258 - Deployment finished with 0 error(s)
->>>>>>> d6a1aac (testnet deployment)
