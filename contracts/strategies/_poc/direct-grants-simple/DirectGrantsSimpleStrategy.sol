@@ -140,6 +140,13 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @dev 'recipientId' to 'nextMilestone'
     mapping(address => uint256) public upcomingMilestone;
 
+    /// @notice Modifier to check if the registration is active
+    /// @dev Reverts if the registration is not active
+    modifier onlyActiveRegistration() {
+        _checkOnlyActiveRegistration();
+        _;
+    }
+
     /// ===============================
     /// ======== Constructor ==========
     /// ===============================
@@ -443,6 +450,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         internal
         override
         onlyActivePool
+        onlyActiveRegistration
         returns (address recipientId)
     {
         address recipientAddress;
@@ -674,6 +682,14 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         }
 
         emit MilestonesSet(_recipientId, milestonesLength);
+    }
+
+    /// @notice Check if the registration is active
+    /// @dev Reverts if the registration is not active
+    function _checkOnlyActiveRegistration() internal view virtual {
+        if (registrationStartTime > block.timestamp || block.timestamp > registrationEndTime) {
+            revert REGISTRATION_NOT_ACTIVE();
+        }
     }
 
     /// @notice This contract should be able to receive native token

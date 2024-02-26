@@ -134,6 +134,25 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
         vm.stopPrank();
     }
 
+    function testRevert_registerRecipient_REGISTRATION_NOT_ACTIVE() public {
+        address recipientId = profile1_anchor();
+        address recipientAddress = recipient1();
+        address sender = profile1_member1();
+        uint256 grantAmount = 5e17;
+        Metadata memory metadata = Metadata(1, "recipient-data");
+
+        bytes memory data = abi.encode(recipientId, recipientAddress, grantAmount, metadata);
+
+        vm.startPrank(address(allo()));
+        // move time to registrationEndTime + 10
+        vm.warp(registrationEndTime + 10);
+
+        vm.expectRevert(REGISTRATION_NOT_ACTIVE.selector);
+
+        strategy.registerRecipient(data, sender);
+        vm.stopPrank();
+    }
+
     function test_registerRecipient_noRegistryGating() public {
         (, address payable newStrategyAddress) = _createPool(false, true, true);
         DirectGrantsSimpleStrategy newStrategy = DirectGrantsSimpleStrategy(newStrategyAddress);
