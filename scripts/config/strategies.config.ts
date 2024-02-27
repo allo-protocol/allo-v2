@@ -103,7 +103,7 @@ export const strategyConfig: DeployParams = {
     },
     "direct-grants": {
       name: "DirectGrantsSimpleStrategy",
-      version: "v1.0",
+      version: "v1.1",
     },
   },
   // PGN
@@ -351,7 +351,7 @@ export const strategyConfig: DeployParams = {
     },
     "direct-grants": {
       name: "DirectGrantsSimpleStrategy",
-      version: "v1.0",
+      version: "v1.1",
     },
   },
   // Arbitrum One Mainnet
