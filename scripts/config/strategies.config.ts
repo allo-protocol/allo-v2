@@ -83,7 +83,7 @@ export const strategyConfig: DeployParams = {
     },
     "donation-voting-merkle-distribution-direct": {
       name: "DonationVotingMerkleDistributionDirectTransferStrategy",
-      version: "v1.0",
+      version: "v2.0",
     },
     "donation-voting-merkle-distribution-vault": {
       name: "DonationVotingMerkleDistributionVaultStrategy",
