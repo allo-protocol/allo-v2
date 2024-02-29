@@ -24,7 +24,6 @@ import {IRegistry} from "./interfaces/IRegistry.sol";
 /// @author @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>, @0xZakk <zakk@gitcoin.co>, @nfrgosselin <nate@gitcoin.co>
 /// @notice This contract is used to migrate Allo V1 profiles to Allo V2
 contract AlloV1ToV2ProfileMigration {
-
     /// ===============
     /// === Struct ====
     /// ===============
@@ -33,7 +32,6 @@ contract AlloV1ToV2ProfileMigration {
         // Allo V1
         bytes32 alloV1;
         uint256 alloV1ChainId;
-
         // Allo V2
         bytes32 alloV2;
         uint256 nonce;
@@ -48,7 +46,6 @@ contract AlloV1ToV2ProfileMigration {
 
     /// @notice Allo V2 profile to AlloV1V2Profile
     mapping(bytes32 => AlloV1V2Profile) public alloV2ToAlloV1V2Profile;
-
 
     /// ==========================
     /// ======== Event ===========
@@ -80,52 +77,30 @@ contract AlloV1ToV2ProfileMigration {
             string[] memory _names,
             Metadata[] memory _metadatas,
             address[] memory _owners
-        ) = abi.decode(_encodedData, (
-            bytes32[], 
-            uint256[],
-            uint256[],
-            string[],
-            Metadata[],
-            address[])
-        );
+        ) = abi.decode(_encodedData, (bytes32[], uint256[], uint256[], string[], Metadata[], address[]));
 
         uint256 _profilesLength = _nonces.length;
 
         bytes32[] memory migratedProfileIds = new bytes32[](_profilesLength);
 
         for (uint256 i = 0; i < _profilesLength;) {
-
             bytes32 alloV1 = _projectIds[i];
             uint256 alloV1ChainId = _sourceChainIds[i];
             uint256 nonce = _nonces[i];
 
             // create allo v2 profile
-            bytes32 alloV2Profile = IRegistry(_registry).createProfile(
-                nonce,
-                _names[i],
-                _metadatas[i],
-                _owners[i],
-                new address[](0)
-            );
+            bytes32 alloV2Profile =
+                IRegistry(_registry).createProfile(nonce, _names[i], _metadatas[i], _owners[i], new address[](0));
 
             migratedProfileIds[i] = alloV2Profile;
 
-            AlloV1V2Profile memory alloV1V2Profile = AlloV1V2Profile({
-                alloV1: alloV1,
-                alloV1ChainId: alloV1ChainId,
-                alloV2: alloV2Profile,
-                nonce: nonce
-            });
+            AlloV1V2Profile memory alloV1V2Profile =
+                AlloV1V2Profile({alloV1: alloV1, alloV1ChainId: alloV1ChainId, alloV2: alloV2Profile, nonce: nonce});
 
             alloV1ToAlloV1V2Profile[alloV1] = alloV1V2Profile;
             alloV2ToAlloV1V2Profile[alloV2Profile] = alloV1V2Profile;
 
-            emit ProfileMigrated(
-                alloV1,
-                alloV1ChainId,
-                alloV2Profile,
-                nonce
-            );
+            emit ProfileMigrated(alloV1, alloV1ChainId, alloV2Profile, nonce);
 
             unchecked {
                 i++;
