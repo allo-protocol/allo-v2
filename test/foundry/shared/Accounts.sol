@@ -133,6 +133,34 @@ contract Accounts is StdCheats {
     }
 
     // //////////////////////
+    // Profile 3 adresses
+    // //////////////////////
+
+    function profile3_owner() public virtual returns (address) {
+        return makeAddr("profile3_owner");
+    }
+
+    function profile3_notAMember() public virtual returns (address) {
+        return makeAddr("profile3_notAMember");
+    }
+
+    function profile3_member1() public virtual returns (address) {
+        return makeAddr("profile3_member1");
+    }
+
+    function profile3_member2() public virtual returns (address) {
+        return makeAddr("profile3_member2");
+    }
+
+    function profile3_members() public virtual returns (address[] memory) {
+        address[] memory _members = new address[](2);
+        _members[0] = profile3_member1();
+        _members[1] = profile3_member2();
+
+        return _members;
+    }
+
+    // //////////////////////
     // Recipient adresses
     // //////////////////////
 
@@ -142,6 +170,10 @@ contract Accounts is StdCheats {
 
     function recipient2() public virtual returns (address) {
         return makeAddr("recipient2");
+    }
+
+    function recipient3() public virtual returns (address) {
+        return makeAddr("recipient3");
     }
 
     function recipient() public virtual returns (address) {

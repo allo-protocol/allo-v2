@@ -34,6 +34,9 @@ contract RegistrySetupFull is RegistrySetup {
     bytes32 internal _profile2Id_;
     address internal _profile2Anchor_;
 
+    bytes32 internal _profile3Id_;
+    address internal _profile3Anchor_;
+
     function __RegistrySetupFull() internal {
         __RegistrySetup();
         _createProfiles();
@@ -57,6 +60,12 @@ contract RegistrySetupFull is RegistrySetup {
             0, "Profile 2", Metadata({protocol: 1, pointer: "Profile2"}), profile2_owner(), profile2_members()
         );
         _profile2Anchor_ = _registry_.getProfileById(_profile2Id_).anchor;
+
+        vm.prank(profile3_owner());
+        _profile3Id_ = _registry_.createProfile(
+            0, "Profile 3", Metadata({protocol: 1, pointer: "Profile3"}), profile3_owner(), profile3_members()
+        );
+        _profile3Anchor_ = _registry_.getProfileById(_profile3Id_).anchor;
     }
 
     function poolProfile_id() public view virtual returns (bytes32) {
@@ -83,6 +92,14 @@ contract RegistrySetupFull is RegistrySetup {
     // Use ths anchor with Accounts.profile2_member1 or Accounts.profile2_member2
     function profile2_anchor() public view virtual returns (address) {
         return _profile2Anchor_;
+    }
+
+    function profile3_id() public view virtual returns (bytes32) {
+        return _profile3Id_;
+    }
+
+    function profile3_anchor() public view virtual returns (address) {
+        return _profile3Anchor_;
     }
 }
 

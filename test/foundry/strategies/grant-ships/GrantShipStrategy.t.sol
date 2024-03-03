@@ -89,10 +89,64 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         _register_recipient_allocate_accept_set_and_submit_milestones_distribute();
     }
 
-    function test_whole_cycle() public {
+    function test_whole_cycle_3_times() public {
         _test_grant_cycle(profile1_anchor(), profile1_member1(), recipient1(), 12_000e18, 1, StopCycleAfter.None);
         _test_grant_cycle(profile1_anchor(), profile1_member1(), recipient1(), 12_000e18, 1, StopCycleAfter.None);
+        _test_grant_cycle(profile1_anchor(), profile1_member1(), recipient1(), 6_000e18, 1, StopCycleAfter.None);
+
+        assertEq(ARB().balanceOf(recipient1()), _poolAmount);
+        assertEq(address(ship(1)).balance, 0);
     }
+
+    function test_manyGrantees() public {
+        _test_grant_cycle(profile1_anchor(), profile1_member1(), recipient1(), 4_000e18, 1, StopCycleAfter.None);
+        _test_grant_cycle(profile2_anchor(), profile2_member1(), recipient2(), 4_000e18, 1, StopCycleAfter.None);
+        _test_grant_cycle(profile3_anchor(), profile3_member1(), recipient3(), 6_000e18, 1, StopCycleAfter.None);
+
+        assertEq(ARB().balanceOf(recipient1()), 4_000e18);
+        assertEq(ARB().balanceOf(recipient2()), 4_000e18);
+        assertEq(ARB().balanceOf(recipient3()), 6_000e18);
+
+        assertEq(ARB().balanceOf(address(ship(1))), 16_000e18);
+        assertEq(ship(1).getPoolAmount(), 16_000e18);
+
+        _test_grant_cycle(profile1_anchor(), profile1_member1(), recipient1(), 3_000e18, 1, StopCycleAfter.None);
+        _test_grant_cycle(profile2_anchor(), profile2_member1(), recipient2(), 2_000e18, 1, StopCycleAfter.None);
+        _test_grant_cycle(profile3_anchor(), profile3_member1(), recipient3(), 4_000e18, 1, StopCycleAfter.None);
+
+        assertEq(ARB().balanceOf(recipient1()), 7_000e18);
+        assertEq(ARB().balanceOf(recipient2()), 6_000e18);
+        assertEq(ARB().balanceOf(recipient3()), 10_000e18);
+
+        assertEq(ARB().balanceOf(address(ship(1))), 7_000e18);
+        assertEq(ship(1).getPoolAmount(), 7_000e18);
+
+        _test_grant_cycle(profile1_anchor(), profile1_member1(), recipient1(), 2_000e18, 1, StopCycleAfter.None);
+        _test_grant_cycle(profile3_anchor(), profile3_member1(), recipient3(), 2_000e18, 1, StopCycleAfter.None);
+
+        assertEq(ARB().balanceOf(recipient1()), 9_000e18);
+        assertEq(ARB().balanceOf(recipient2()), 6_000e18);
+        assertEq(ARB().balanceOf(recipient3()), 12_000e18);
+
+        assertEq(ARB().balanceOf(address(ship(1))), 3_000e18);
+        assertEq(ship(1).getPoolAmount(), 3_000e18);
+
+        _test_grant_cycle(profile1_anchor(), profile1_member1(), recipient1(), 3_000e18, 1, StopCycleAfter.None);
+
+        assertEq(ARB().balanceOf(recipient1()), 12_000e18);
+        assertEq(ARB().balanceOf(recipient2()), 6_000e18);
+        assertEq(ARB().balanceOf(recipient3()), 12_000e18);
+
+        assertEq(ARB().balanceOf(address(ship(1))), 0);
+        assertEq(ship(1).getPoolAmount(), 0);
+    }
+    // _test_grant_cycle(profile1_anchor(), profile1_member1(), recipient1(), 1_000e18, 1, StopCycleAfter.None);
+
+    // assertEq(ARB().balanceOf(recipient1()), 10_000e18);
+    // assertEq(ARB().balanceOf(recipient2()), 6_000e18);
+    // assertEq(ARB().balanceOf(recipient3()), 12_000e18);
+
+    // assertEq(address(ship(1)).balance, 0);
 
     function test_postUpdate() public {
         string memory tag = "test";
