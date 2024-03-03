@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import "forge-std/Test.sol";
+// import "forge-std/Test.sol";
 
 // External Libraries
 import {ReentrancyGuard} from "openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
@@ -97,6 +97,9 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Emitted for the registration of a recipient and the status is updated.
     event RecipientStatusChanged(address recipientId, Status status, Metadata reason);
+
+    /// @notice Emitted when a milestone is created
+    event MilestoneCreated(address recipientId, uint256 milestoneId, uint256 amountPercentage, Metadata metadata);
 
     /// @notice Emitted for the submission of a milestone.
     event MilestoneSubmitted(address recipientId, uint256 milestoneId, Metadata metadata);
@@ -705,9 +708,6 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
 
         // Check if the recipient is not already accepted, otherwise revert
         if (_recipients[recipientId].recipientStatus == Status.Accepted) {
-            console.log("Recipient already accepted");
-            console.log(uint8(_recipients[recipientId].recipientStatus));
-            console.log("Recipient ID: ", recipientId);
             revert RECIPIENT_ALREADY_ACCEPTED();
         }
 
@@ -767,8 +767,6 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
 
             // Check if the allocated grant amount exceeds the pool amount and reverts if it does
             if (allocatedGrantAmount > poolAmount) {
-                console.log("allocatedGrantAmount: ", allocatedGrantAmount);
-                console.log("poolAmount: ", poolAmount);
                 revert ALLOCATION_EXCEEDS_POOL_AMOUNT();
             }
             recipient.grantAmount = grantAmount;
@@ -903,6 +901,9 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
             // Add the milestone to the recipient's milestones
             milestones[_recipientId].push(milestone);
 
+            // Emit event for the milestone creation
+            // needed for historical data
+            emit MilestoneCreated(_recipientId, i, milestone.amountPercentage, milestone.metadata);
             unchecked {
                 i++;
             }

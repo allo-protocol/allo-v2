@@ -145,8 +145,20 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
     function test_revert_allocate_ALLOCATION_EXCEEDS_POOL_AMOUNT_reserved_funding() public {
         _test_grant_cycle(profile1_anchor(), profile1_member1(), recipient1(), 12_000e18, 1, StopCycleAfter.None);
         _test_grant_cycle(profile2_anchor(), profile2_member1(), recipient2(), 18_000e18, 1, StopCycleAfter.Allocate);
+
+        bytes memory registerData = abi.encode(profile3_anchor(), recipient3(), 10_000e18, dummyMetadata);
+        uint256 poolId = ship(1).getPoolId();
+
+        vm.startPrank(profile3_member1());
+        allo().registerRecipient(poolId, registerData);
+        vm.stopPrank();
+
+        bytes memory allocateData = abi.encode(profile3_anchor(), IStrategy.Status.Accepted, 10_000e18, dummyMetadata);
+
         vm.expectRevert(GrantShipStrategy.ALLOCATION_EXCEEDS_POOL_AMOUNT.selector);
-        _test_grant_cycle(profile3_anchor(), profile3_member1(), recipient3(), 6_000e18, 1, StopCycleAfter.None);
+        vm.startPrank(facilitator().wearer);
+        allo().allocate(poolId, allocateData);
+        vm.stopPrank();
     }
 
     function test_postUpdate() public {
