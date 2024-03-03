@@ -131,6 +131,9 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Emitted when a game player creates a metadata update
     event UpdatePosted(string tag, uint256 role, address recipientId, Metadata content);
 
+    /// @notice Emitted when a grant is completed
+    event GrantComplete(address recipientId, uint256 amount);
+
     /// ================================
     /// ========== Storage =============
     /// ================================
@@ -842,6 +845,8 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
 
             delete milestones[_recipientId];
             delete upcomingMilestone[_recipientId];
+
+            emit GrantComplete(_recipientId, recipient.grantAmount);
         }
 
         // Emit events for the milestone and the distribution
