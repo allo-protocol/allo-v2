@@ -43,10 +43,23 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
     event MilestoneRejected(address recipientId, uint256 milestoneId, Metadata reason);
     // ================= State ===================
 
+    enum StopCycleAfter {
+        None,
+        Register,
+        Allocate,
+        SetMilestones,
+        ApproveMilestones,
+        SubmitMilestone1,
+        SubmitMilestone2,
+        SubmitMilestone3,
+        Distribute
+    }
+
     uint256 internal constant _grantAmount = 1_000e18;
     uint256 internal constant _poolAmount = 30_000e18;
 
     Metadata internal reason = Metadata(1, "reason");
+    Metadata internal dummyMetadata = Metadata(1, "dummy");
 
     // ================= Setup =====================
 
@@ -68,6 +81,18 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
     }
 
     //     // ================= GrantShip Strategy =====================
+
+    function test_interval_distribution() public {
+        // so far contracts only test spending and funding in lump sums
+        // this test is to ensure that the natural distribution of funds is working as expected
+
+        _register_recipient_allocate_accept_set_and_submit_milestones_distribute();
+    }
+
+    function test_whole_cycle() public {
+        _test_grant_cycle(profile1_anchor(), profile1_member1(), recipient1(), 12_000e18, 1);
+        _test_grant_cycle(profile1_anchor(), profile1_member1(), recipient1(), 12_000e18, 1);
+    }
 
     function test_postUpdate() public {
         string memory tag = "test";
@@ -1077,6 +1102,84 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
 
         vm.startPrank(shipOperator(1).wearer);
         allo().distribute(ship(1).getPoolId(), recipients, "");
+        vm.stopPrank();
+    }
+
+    function _test_grant_cycle(
+        address granteeAnchor,
+        address granteeTeamMember,
+        address receiverAddress,
+        uint256 grantAmount,
+        uint256 shipIndex
+    ) internal {
+        bytes memory registerData = abi.encode(granteeAnchor, receiverAddress, grantAmount, dummyMetadata);
+        uint256 poolId = ship(shipIndex).getPoolId();
+
+        address shipOperator = shipOperator(uint32(shipIndex)).wearer;
+
+        vm.startPrank(granteeTeamMember);
+        allo().registerRecipient(poolId, registerData);
+        vm.stopPrank();
+
+        bytes memory allocateData = abi.encode(granteeAnchor, IStrategy.Status.Accepted, grantAmount, dummyMetadata);
+
+        vm.startPrank(facilitator().wearer);
+        allo().allocate(poolId, allocateData);
+        vm.stopPrank();
+
+        GrantShipStrategy.Milestone[] memory milestones = new GrantShipStrategy.Milestone[](3);
+
+        milestones[0] = GrantShipStrategy.Milestone({
+            amountPercentage: 0.3e18,
+            metadata: dummyMetadata,
+            milestoneStatus: IStrategy.Status.None
+        });
+
+        milestones[1] = GrantShipStrategy.Milestone({
+            amountPercentage: 0.3e18,
+            metadata: dummyMetadata,
+            milestoneStatus: IStrategy.Status.None
+        });
+
+        milestones[2] = GrantShipStrategy.Milestone({
+            amountPercentage: 0.4e18,
+            metadata: dummyMetadata,
+            milestoneStatus: IStrategy.Status.None
+        });
+
+        vm.startPrank(granteeTeamMember);
+        ship(shipIndex).setMilestones(granteeAnchor, milestones, dummyMetadata);
+        vm.stopPrank();
+
+        vm.startPrank(shipOperator);
+        ship(shipIndex).reviewSetMilestones(granteeAnchor, IStrategy.Status.Accepted, dummyMetadata);
+        vm.stopPrank();
+
+        vm.startPrank(granteeTeamMember);
+        ship(shipIndex).submitMilestone(granteeAnchor, 0, dummyMetadata);
+        vm.stopPrank();
+
+        address[] memory recipients = new address[](1);
+        recipients[0] = granteeAnchor;
+
+        vm.startPrank(shipOperator);
+        allo().distribute(poolId, recipients, "");
+        vm.stopPrank();
+
+        vm.startPrank(granteeTeamMember);
+        ship(shipIndex).submitMilestone(granteeAnchor, 1, dummyMetadata);
+        vm.stopPrank();
+
+        vm.startPrank(shipOperator);
+        allo().distribute(poolId, recipients, "");
+        vm.stopPrank();
+
+        vm.startPrank(granteeTeamMember);
+        ship(shipIndex).submitMilestone(granteeAnchor, 2, dummyMetadata);
+        vm.stopPrank();
+
+        vm.startPrank(shipOperator);
+        allo().distribute(poolId, recipients, "");
         vm.stopPrank();
     }
 }

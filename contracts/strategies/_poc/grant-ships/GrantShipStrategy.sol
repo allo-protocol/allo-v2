@@ -153,9 +153,6 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice The 'Registry' contract interface.
     IRegistry private _registry;
 
-    /// @notice Flag to check if registry gating is enabled.
-    address public anchorAddress;
-
     /// @notice The total amount allocated to recipients.
     uint256 public allocatedGrantAmount;
 
@@ -467,7 +464,6 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
 
         Milestone[] storage recipientMilestones = milestones[_recipientId];
 
-        // Check if the milestone is the upcoming one
         if (_milestoneId > recipientMilestones.length) {
             revert INVALID_MILESTONE();
         }
@@ -497,7 +493,6 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     {
         Milestone[] storage recipientMilestones = milestones[_recipientId];
 
-        // Check if the milestone is the upcoming one
         if (_milestoneId > recipientMilestones.length) {
             revert INVALID_MILESTONE();
         }
@@ -749,7 +744,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
 
         Recipient storage recipient = _recipients[recipientId];
 
-        // Review: figure out why we need this check
+        // : figure out why we need this check
         // Most grant managers would like to see a project's milestones before allocating funds
         if (upcomingMilestone[recipientId] != 0) {
             revert MILESTONES_ALREADY_SET();
