@@ -815,7 +815,6 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         if (milestoneToBeDistributed > recipientMilestones.length || milestone.milestoneStatus != Status.Pending) {
             revert INVALID_MILESTONE();
         }
-
         // Calculate the amount to be distributed for the milestone
         uint256 amount = recipient.grantAmount * milestone.amountPercentage / 1e18;
 
@@ -835,6 +834,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
 
         if (milestoneToBeDistributed == recipientMilestones.length - 1) {
             recipient.recipientStatus = Status.None;
+
             delete milestones[_recipientId];
             delete upcomingMilestone[_recipientId];
         }

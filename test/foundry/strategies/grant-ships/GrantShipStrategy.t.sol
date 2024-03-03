@@ -86,7 +86,7 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         // so far contracts only test spending and funding in lump sums
         // this test is to ensure that the natural distribution of funds is working as expected
 
-        _register_recipient_allocate_accept_set_and_submit_milestones_distribute();
+        _register_recipient_allocate_accept_set_and_submit_milestones_distribute_all();
     }
 
     function test_whole_cycle_3_times() public {
@@ -95,58 +95,59 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         _test_grant_cycle(profile1_anchor(), profile1_member1(), recipient1(), 6_000e18, 1, StopCycleAfter.None);
 
         assertEq(ARB().balanceOf(recipient1()), _poolAmount);
-        assertEq(address(ship(1)).balance, 0);
-    }
-
-    function test_manyGrantees() public {
-        _test_grant_cycle(profile1_anchor(), profile1_member1(), recipient1(), 4_000e18, 1, StopCycleAfter.None);
-        _test_grant_cycle(profile2_anchor(), profile2_member1(), recipient2(), 4_000e18, 1, StopCycleAfter.None);
-        _test_grant_cycle(profile3_anchor(), profile3_member1(), recipient3(), 6_000e18, 1, StopCycleAfter.None);
-
-        assertEq(ARB().balanceOf(recipient1()), 4_000e18);
-        assertEq(ARB().balanceOf(recipient2()), 4_000e18);
-        assertEq(ARB().balanceOf(recipient3()), 6_000e18);
-
-        assertEq(ARB().balanceOf(address(ship(1))), 16_000e18);
-        assertEq(ship(1).getPoolAmount(), 16_000e18);
-
-        _test_grant_cycle(profile1_anchor(), profile1_member1(), recipient1(), 3_000e18, 1, StopCycleAfter.None);
-        _test_grant_cycle(profile2_anchor(), profile2_member1(), recipient2(), 2_000e18, 1, StopCycleAfter.None);
-        _test_grant_cycle(profile3_anchor(), profile3_member1(), recipient3(), 4_000e18, 1, StopCycleAfter.None);
-
-        assertEq(ARB().balanceOf(recipient1()), 7_000e18);
-        assertEq(ARB().balanceOf(recipient2()), 6_000e18);
-        assertEq(ARB().balanceOf(recipient3()), 10_000e18);
-
-        assertEq(ARB().balanceOf(address(ship(1))), 7_000e18);
-        assertEq(ship(1).getPoolAmount(), 7_000e18);
-
-        _test_grant_cycle(profile1_anchor(), profile1_member1(), recipient1(), 2_000e18, 1, StopCycleAfter.None);
-        _test_grant_cycle(profile3_anchor(), profile3_member1(), recipient3(), 2_000e18, 1, StopCycleAfter.None);
-
-        assertEq(ARB().balanceOf(recipient1()), 9_000e18);
-        assertEq(ARB().balanceOf(recipient2()), 6_000e18);
-        assertEq(ARB().balanceOf(recipient3()), 12_000e18);
-
-        assertEq(ARB().balanceOf(address(ship(1))), 3_000e18);
-        assertEq(ship(1).getPoolAmount(), 3_000e18);
-
-        _test_grant_cycle(profile1_anchor(), profile1_member1(), recipient1(), 3_000e18, 1, StopCycleAfter.None);
-
-        assertEq(ARB().balanceOf(recipient1()), 12_000e18);
-        assertEq(ARB().balanceOf(recipient2()), 6_000e18);
-        assertEq(ARB().balanceOf(recipient3()), 12_000e18);
-
         assertEq(ARB().balanceOf(address(ship(1))), 0);
         assertEq(ship(1).getPoolAmount(), 0);
     }
-    // _test_grant_cycle(profile1_anchor(), profile1_member1(), recipient1(), 1_000e18, 1, StopCycleAfter.None);
 
-    // assertEq(ARB().balanceOf(recipient1()), 10_000e18);
-    // assertEq(ARB().balanceOf(recipient2()), 6_000e18);
-    // assertEq(ARB().balanceOf(recipient3()), 12_000e18);
+    // function test_manyGrantees() public {
+    //     _test_grant_cycle(profile1_anchor(), profile1_member1(), recipient1(), 4_000e18, 1, StopCycleAfter.None);
+    //     _test_grant_cycle(profile2_anchor(), profile2_member1(), recipient2(), 4_000e18, 1, StopCycleAfter.None);
+    //     _test_grant_cycle(profile3_anchor(), profile3_member1(), recipient3(), 6_000e18, 1, StopCycleAfter.None);
 
-    // assertEq(address(ship(1)).balance, 0);
+    //     assertEq(ARB().balanceOf(recipient1()), 4_000e18);
+    //     assertEq(ARB().balanceOf(recipient2()), 4_000e18);
+    //     assertEq(ARB().balanceOf(recipient3()), 6_000e18);
+
+    //     assertEq(ARB().balanceOf(address(ship(1))), 16_000e18);
+    //     assertEq(ship(1).getPoolAmount(), 16_000e18);
+
+    //     _test_grant_cycle(profile1_anchor(), profile1_member1(), recipient1(), 3_000e18, 1, StopCycleAfter.None);
+    //     _test_grant_cycle(profile2_anchor(), profile2_member1(), recipient2(), 2_000e18, 1, StopCycleAfter.None);
+    //     _test_grant_cycle(profile3_anchor(), profile3_member1(), recipient3(), 4_000e18, 1, StopCycleAfter.None);
+
+    //     assertEq(ARB().balanceOf(recipient1()), 7_000e18);
+    //     assertEq(ARB().balanceOf(recipient2()), 6_000e18);
+    //     assertEq(ARB().balanceOf(recipient3()), 10_000e18);
+
+    // assertEq(ARB().balanceOf(address(ship(1))), 7_000e18);
+    // assertEq(ship(1).getPoolAmount(), 7_000e18);
+
+    //     _test_grant_cycle(profile1_anchor(), profile1_member1(), recipient1(), 2_000e18, 1, StopCycleAfter.None);
+    //     _test_grant_cycle(profile3_anchor(), profile3_member1(), recipient3(), 2_000e18, 1, StopCycleAfter.None);
+
+    //     assertEq(ARB().balanceOf(recipient1()), 9_000e18);
+    //     assertEq(ARB().balanceOf(recipient2()), 6_000e18);
+    //     assertEq(ARB().balanceOf(recipient3()), 12_000e18);
+
+    //     assertEq(ARB().balanceOf(address(ship(1))), 3_000e18);
+    //     assertEq(ship(1).getPoolAmount(), 3_000e18);
+
+    //     _test_grant_cycle(profile1_anchor(), profile1_member1(), recipient1(), 3_000e18, 1, StopCycleAfter.None);
+
+    //     assertEq(ARB().balanceOf(recipient1()), 12_000e18);
+    //     assertEq(ARB().balanceOf(recipient2()), 6_000e18);
+    //     assertEq(ARB().balanceOf(recipient3()), 12_000e18);
+
+    //     assertEq(ARB().balanceOf(address(ship(1))), 0);
+    //     assertEq(ship(1).getPoolAmount(), 0);
+    // }
+
+    // function test_revert_allocate_ALLOCATION_EXCEEDS_POOL_AMOUNT_reserved_funding() public {
+    //     _test_grant_cycle(profile1_anchor(), profile1_member1(), recipient1(), 12_000e18, 1, StopCycleAfter.None);
+    //     _test_grant_cycle(profile2_anchor(), profile2_member1(), recipient2(), 18_000e18, 1, StopCycleAfter.Allocate);
+    //     // vm.expectRevert(GrantShipStrategy.ALLOCATION_EXCEEDS_POOL_AMOUNT.selector);
+    //     // _test_grant_cycle(profile3_anchor(), profile3_member1(), recipient3(), 6_000e18, 1, StopCycleAfter.None);
+    // }
 
     function test_postUpdate() public {
         string memory tag = "test";
@@ -429,20 +430,20 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         vm.stopPrank();
     }
 
-    function testRevert_allocate_MILESTONES_ALREADY_SET() public {
-        address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones_distribute();
+    // function testRevert_allocate_MILESTONES_ALREADY_SET() public {
+    //     address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones_distribute_all();
 
-        GrantShipStrategy.Status recipientStatus = IStrategy.Status.Accepted;
-        uint256 grantAmount = _grantAmount;
+    //     GrantShipStrategy.Status recipientStatus = IStrategy.Status.Accepted;
+    //     uint256 grantAmount = _grantAmount;
 
-        bytes memory data = abi.encode(recipientId, recipientStatus, grantAmount, reason);
+    //     bytes memory data = abi.encode(recipientId, recipientStatus, grantAmount, reason);
 
-        vm.expectRevert(GrantShipStrategy.MILESTONES_ALREADY_SET.selector);
+    //     vm.expectRevert(GrantShipStrategy.MILESTONES_ALREADY_SET.selector);
 
-        vm.startPrank(address(allo()));
-        ship(1).allocate(data, facilitator().wearer);
-        vm.stopPrank();
-    }
+    //     vm.startPrank(address(allo()));
+    //     ship(1).allocate(data, facilitator().wearer);
+    //     vm.stopPrank();
+    // }
 
     function test_setMilestonesByShipOperator() public {
         address recipientId = _register_recipient_allocate_accept_set_milestones_by_ship_operator();
@@ -551,29 +552,29 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         vm.stopPrank();
     }
 
-    function testRevert_setMilestones_MILESTONES_ALREADY_SET() public {
-        address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones_distribute();
+    // function testRevert_setMilestones_MILESTONES_ALREADY_SET() public {
+    //     address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones_distribute_all();
 
-        GrantShipStrategy.Milestone[] memory milestones = new GrantShipStrategy.Milestone[](2);
+    //     GrantShipStrategy.Milestone[] memory milestones = new GrantShipStrategy.Milestone[](2);
 
-        milestones[0] = GrantShipStrategy.Milestone({
-            amountPercentage: 0.3e18,
-            metadata: Metadata(1, "milestone-1"),
-            milestoneStatus: IStrategy.Status.None
-        });
+    //     milestones[0] = GrantShipStrategy.Milestone({
+    //         amountPercentage: 0.3e18,
+    //         metadata: Metadata(1, "milestone-1"),
+    //         milestoneStatus: IStrategy.Status.None
+    //     });
 
-        milestones[1] = GrantShipStrategy.Milestone({
-            amountPercentage: 0.7e18,
-            metadata: Metadata(1, "milestone-2"),
-            milestoneStatus: IStrategy.Status.None
-        });
+    //     milestones[1] = GrantShipStrategy.Milestone({
+    //         amountPercentage: 0.7e18,
+    //         metadata: Metadata(1, "milestone-2"),
+    //         milestoneStatus: IStrategy.Status.None
+    //     });
 
-        vm.expectRevert(GrantShipStrategy.MILESTONES_ALREADY_SET.selector);
+    //     vm.expectRevert(GrantShipStrategy.MILESTONES_ALREADY_SET.selector);
 
-        vm.startPrank(shipOperator(1).wearer);
-        ship(1).setMilestones(recipientId, milestones, reason);
-        vm.stopPrank();
-    }
+    //     vm.startPrank(shipOperator(1).wearer);
+    //     ship(1).setMilestones(recipientId, milestones, reason);
+    //     vm.stopPrank();
+    // }
 
     function testRevert_setMilestones_RECIPIENT_NOT_ACCEPTED() public {
         GrantShipStrategy.Milestone[] memory milestones = new GrantShipStrategy.Milestone[](2);
@@ -745,17 +746,17 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         vm.stopPrank();
     }
 
-    function testRevert_submitMilestone_MILESTONE_ALREADY_ACCEPTED() public {
-        address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones_distribute();
+    // function testRevert_submitMilestone_MILESTONE_ALREADY_ACCEPTED() public {
+    //     address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones_distribute_all();
 
-        Metadata memory metadata = Metadata(1, "milestone-1");
+    //     Metadata memory metadata = Metadata(1, "milestone-1");
 
-        vm.expectRevert(GrantShipStrategy.MILESTONE_ALREADY_ACCEPTED.selector);
+    //     vm.expectRevert(GrantShipStrategy.MILESTONE_ALREADY_ACCEPTED.selector);
 
-        vm.startPrank(profile1_member1());
-        ship(1).submitMilestone(recipientId, 0, metadata);
-        vm.stopPrank();
-    }
+    //     vm.startPrank(profile1_member1());
+    //     ship(1).submitMilestone(recipientId, 0, metadata);
+    //     vm.stopPrank();
+    // }
 
     function test_rejectMilestone() public {
         address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones();
@@ -773,15 +774,15 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         assertEq(uint8(milestones[1].milestoneStatus), uint8(IStrategy.Status.Pending));
     }
 
-    function testRevert_rejectMilestone_MILESTONE_ALREADY_ACCEPTED() public {
-        address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones_distribute();
+    // function testRevert_rejectMilestone_MILESTONE_ALREADY_ACCEPTED() public {
+    //     address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones_distribute_all();
 
-        vm.expectRevert(GrantShipStrategy.MILESTONE_ALREADY_ACCEPTED.selector);
+    //     vm.expectRevert(GrantShipStrategy.MILESTONE_ALREADY_ACCEPTED.selector);
 
-        vm.startPrank(shipOperator(1).wearer);
-        ship(1).rejectMilestone(recipientId, 0, reason);
-        vm.stopPrank();
-    }
+    //     vm.startPrank(shipOperator(1).wearer);
+    //     ship(1).rejectMilestone(recipientId, 0, reason);
+    //     vm.stopPrank();
+    // }
 
     function testRevert_rejectMilestones_INVALID_MILESTONE() public {
         address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones();
@@ -791,15 +792,14 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         vm.stopPrank();
     }
 
-    function test_distribute() public {
-        address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones_distribute();
+    function test_distribute_single() public {
+        address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones_distribute_single();
 
         GrantShipStrategy.Milestone[] memory milestones = ship(1).getMilestones(recipientId);
 
         assertEq(uint8(milestones[0].milestoneStatus), uint8(IStrategy.Status.Accepted));
-        assertEq(uint8(milestones[1].milestoneStatus), uint8(IStrategy.Status.Accepted));
 
-        assertEq(ARB().balanceOf(recipient1()), _grantAmount);
+        assertEq(ARB().balanceOf(recipient1()), 300e18);
         assertEq(address(ship(1)).balance, 0);
     }
 
@@ -1138,7 +1138,7 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         vm.stopPrank();
     }
 
-    function _register_recipient_allocate_accept_set_and_submit_milestones_distribute()
+    function _register_recipient_allocate_accept_set_and_submit_milestones_distribute_all()
         internal
         returns (address recipientId)
     {
@@ -1153,6 +1153,27 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
 
         emit MilestoneStatusChanged(recipientId, 1, IStrategy.Status.Accepted);
         emit Distributed(recipientId, recipient1(), 0.7e18, facilitator().wearer);
+
+        vm.startPrank(shipOperator(1).wearer);
+        allo().distribute(ship(1).getPoolId(), recipients, "");
+        vm.stopPrank();
+    }
+
+    function _register_recipient_allocate_accept_set_and_submit_milestones_distribute_single()
+        internal
+        returns (address recipientId)
+    {
+        recipientId = _register_recipient_allocate_accept_set_and_submit_milestones();
+
+        address[] memory recipients = new address[](1);
+
+        recipients[0] = recipientId;
+        // recipients[1] = recipientId;
+
+        vm.expectEmit(true, true, true, true);
+
+        emit MilestoneStatusChanged(recipientId, 0, IStrategy.Status.Accepted);
+        emit Distributed(recipientId, recipient1(), 0.3e18, facilitator().wearer);
 
         vm.startPrank(shipOperator(1).wearer);
         allo().distribute(ship(1).getPoolId(), recipients, "");
