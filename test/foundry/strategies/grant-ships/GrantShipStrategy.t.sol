@@ -90,8 +90,8 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
     }
 
     function test_whole_cycle() public {
-        _test_grant_cycle(profile1_anchor(), profile1_member1(), recipient1(), 12_000e18, 1);
-        _test_grant_cycle(profile1_anchor(), profile1_member1(), recipient1(), 12_000e18, 1);
+        _test_grant_cycle(profile1_anchor(), profile1_member1(), recipient1(), 12_000e18, 1, StopCycleAfter.None);
+        _test_grant_cycle(profile1_anchor(), profile1_member1(), recipient1(), 12_000e18, 1, StopCycleAfter.None);
     }
 
     function test_postUpdate() public {

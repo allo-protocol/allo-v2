@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-// import "forge-std/Test.sol";
+import "forge-std/Test.sol";
 
 // External Libraries
 import {ReentrancyGuard} from "openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
@@ -698,6 +698,9 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
 
         // Check if the recipient is not already accepted, otherwise revert
         if (_recipients[recipientId].recipientStatus == Status.Accepted) {
+            console.log("Recipient already accepted");
+            console.log(uint8(_recipients[recipientId].recipientStatus));
+            console.log("Recipient ID: ", recipientId);
             revert RECIPIENT_ALREADY_ACCEPTED();
         }
 
@@ -804,15 +807,13 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         uint256 milestoneToBeDistributed = upcomingMilestone[_recipientId];
         Milestone[] storage recipientMilestones = milestones[_recipientId];
 
-        Recipient memory recipient = _recipients[_recipientId];
+        Recipient storage recipient = _recipients[_recipientId];
         Milestone storage milestone = recipientMilestones[milestoneToBeDistributed];
 
-        // CHECK if milestone is not rejected or already paid out
         if (milestoneToBeDistributed > recipientMilestones.length || milestone.milestoneStatus != Status.Pending) {
             revert INVALID_MILESTONE();
         }
 
-        // EFFECTS
         // Calculate the amount to be distributed for the milestone
         uint256 amount = recipient.grantAmount * milestone.amountPercentage / 1e18;
 
@@ -827,8 +828,13 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         // Increment the upcoming milestone
         upcomingMilestone[_recipientId]++;
 
-        // INTERACTION
         _transferAmount(pool.token, recipient.recipientAddress, amount);
+
+        if (milestoneToBeDistributed == recipientMilestones.length - 1) {
+            recipient.recipientStatus = Status.None;
+            delete milestones[_recipientId];
+            delete upcomingMilestone[_recipientId];
+        }
 
         // Emit events for the milestone and the distribution
         emit MilestoneStatusChanged(_recipientId, milestoneToBeDistributed, Status.Accepted);
