@@ -760,6 +760,8 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
 
             // Check if the allocated grant amount exceeds the pool amount and reverts if it does
             if (allocatedGrantAmount > poolAmount) {
+                console.log("allocatedGrantAmount: ", allocatedGrantAmount);
+                console.log("poolAmount: ", poolAmount);
                 revert ALLOCATION_EXCEEDS_POOL_AMOUNT();
             }
             recipient.grantAmount = grantAmount;
@@ -821,6 +823,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         IAllo.Pool memory pool = allo.getPool(poolId);
 
         poolAmount -= amount;
+        allocatedGrantAmount -= amount;
 
         // Set the milestone status to 'Accepted'
         milestone.milestoneStatus = Status.Accepted;
