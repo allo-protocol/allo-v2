@@ -30,6 +30,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     /// ================================
 
     /// @notice Custom Status for managing the lifecycle GrantShips
+    /// Todo - This should be a Status enum from overwrite 
     enum GameStatus {
         None,
         Pending,

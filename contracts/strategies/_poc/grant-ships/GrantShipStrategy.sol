@@ -719,6 +719,18 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
             revert INVALID_METADATA();
         }
 
+        // Check if recipient is reapplying after finishing a grant
+
+        // Status.None can only be set if the recipient has distributed all their milestones
+        // OR
+        // Status.None can only be set if the recipient has not created a profile
+        // A recipient with Status.None can only have milestones if they had distributed all their milestones
+        // Therefore, we should delete existing milestone data if the recipient is reapplying
+        if (milestones[recipientId].length > 0 && _recipients[recipientId].recipientStatus == Status.None) {
+            delete milestones[recipientId];
+            delete upcomingMilestone[recipientId];
+        }
+
         // Create the recipient instance
         Recipient memory recipient = Recipient({
             recipientAddress: recipientAddress,
@@ -818,36 +830,41 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         Milestone[] storage recipientMilestones = milestones[_recipientId];
 
         Recipient storage recipient = _recipients[_recipientId];
-        Milestone storage milestone = recipientMilestones[milestoneToBeDistributed];
 
-        if (milestoneToBeDistributed > recipientMilestones.length || milestone.milestoneStatus != Status.Pending) {
+        // Ensure milestone exists
+        if (milestoneToBeDistributed >= recipientMilestones.length) {
             revert INVALID_MILESTONE();
         }
-        // Calculate the amount to be distributed for the milestone
-        uint256 amount = recipient.grantAmount * milestone.amountPercentage / 1e18;
 
-        // Get the pool, subtract the amount and transfer to the recipient
-        IAllo.Pool memory pool = allo.getPool(poolId);
+        Milestone storage milestone = recipientMilestones[milestoneToBeDistributed];
 
-        poolAmount -= amount;
-        allocatedGrantAmount -= amount;
-
-        // Set the milestone status to 'Accepted'
-        milestone.milestoneStatus = Status.Accepted;
-
-        // Increment the upcoming milestone
-        upcomingMilestone[_recipientId]++;
-
-        _transferAmount(pool.token, recipient.recipientAddress, amount);
+        if (milestone.milestoneStatus != Status.Pending) {
+            revert INVALID_MILESTONE();
+        }
 
         if (milestoneToBeDistributed == recipientMilestones.length - 1) {
             recipient.recipientStatus = Status.None;
-
-            delete milestones[_recipientId];
-            delete upcomingMilestone[_recipientId];
-
             emit GrantComplete(_recipientId, recipient.grantAmount);
         }
+
+        // Calculate the amount to be distributed for the milestone
+        uint256 amount = recipient.grantAmount * milestone.amountPercentage / 1e18;
+
+        if (poolAmount < amount) {
+            revert NOT_ENOUGH_FUNDS();
+        }
+
+        // Set the milestone status to 'Accepted'
+        milestone.milestoneStatus = Status.Accepted;
+        // Increment the upcoming milestone
+        upcomingMilestone[_recipientId]++;
+
+        // Get the pool, subtract the amount and transfer to the recipient
+        IAllo.Pool memory pool = allo.getPool(poolId);
+        poolAmount -= amount;
+        allocatedGrantAmount -= amount;
+
+        _transferAmount(pool.token, recipient.recipientAddress, amount);
 
         // Emit events for the milestone and the distribution
         emit MilestoneStatusChanged(_recipientId, milestoneToBeDistributed, Status.Accepted);

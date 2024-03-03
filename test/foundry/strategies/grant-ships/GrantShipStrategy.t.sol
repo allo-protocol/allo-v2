@@ -821,8 +821,12 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
 
         GrantShipStrategy.Milestone[] memory milestones = ship(1).getMilestones(recipientId);
         uint256 upcomingMilestone = ship(1).getUpcomingMilestone(recipientId);
-        assertEq(milestones.length, 0);
-        assertEq(upcomingMilestone, 0);
+
+        assertEq(uint8(milestones[0].milestoneStatus), uint8(IStrategy.Status.Accepted));
+        assertEq(uint8(milestones[0].milestoneStatus), uint8(IStrategy.Status.Accepted));
+
+        assertEq(milestones.length, 2);
+        assertEq(upcomingMilestone, 2);
 
         assertEq(ARB().balanceOf(recipient1()), _grantAmount);
         assertEq(ARB().balanceOf(address(ship(1))), _poolAmount - _grantAmount);
