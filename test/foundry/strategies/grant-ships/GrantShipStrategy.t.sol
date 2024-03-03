@@ -803,6 +803,18 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         assertEq(address(ship(1)).balance, 0);
     }
 
+    function test_distribute_all() public {
+        address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones_distribute_all();
+
+        GrantShipStrategy.Milestone[] memory milestones = ship(1).getMilestones(recipientId);
+        uint256 upcomingMilestone = ship(1).getUpcomingMilestone(recipientId);
+        assertEq(milestones.length, 0);
+        assertEq(upcomingMilestone, 0);
+
+        assertEq(ARB().balanceOf(recipient1()), _grantAmount);
+        assertEq(address(ship(1)).balance, 0);
+    }
+
     function testRevert_distribute_INVALID_MILESTONE() public {
         address recipientId = _register_recipient_allocate_accept_set_and_submit_milestones();
 

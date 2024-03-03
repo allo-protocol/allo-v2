@@ -351,6 +351,13 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         return milestones[_recipientId];
     }
 
+    /// @notice Get the upcoming milestone.
+    /// @param _recipientId ID of the recipient
+    /// @return uint256 Returns the upcoming milestone for a 'recipientId'
+    function getUpcomingMilestone(address _recipientId) external view returns (uint256) {
+        return upcomingMilestone[_recipientId];
+    }
+
     /// @notice Checks if this Ship has any unresolved red flags
     /// @return 'true' if the Ship has unresolved red flags, otherwise 'false'
     function hasUnresolvedRedFlags() public view returns (bool) {
