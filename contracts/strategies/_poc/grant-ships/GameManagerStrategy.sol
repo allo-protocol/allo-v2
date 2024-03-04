@@ -611,9 +611,11 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Returns the status of the recipient
     /// @dev currently out of order, until I know the Allo protocol use for this function and how best to adapt to it.
     function _getRecipientStatus(address) internal view virtual override returns (Status) {
-        // Review: We would like to return GameStatus here, but it is not possible to return a GameStatus
-        // with the override. Should I make an adapater function to convert GameStatus to Status?
-        assert(false);
+        // Note: Not possible to return the status as Recipients use GameStatus
+
+        // Also, overwriting this function Status with GameStatus is not possible, as
+        // this violates the function signature of the virtual function in the BaseStrategy contract.
+
         return Status.None;
     }
 
