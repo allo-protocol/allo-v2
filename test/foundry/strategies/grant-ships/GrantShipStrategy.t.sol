@@ -166,6 +166,7 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         gameManager().withdraw(_GAME_AMOUNT);
 
         assertEq(ARB().balanceOf(address(gameManager())), 0);
+        assertEq(ARB().balanceOf(address(gameManager())), 0);
 
         assertEq(ARB().balanceOf(pool_admin()), _GAME_AMOUNT);
 

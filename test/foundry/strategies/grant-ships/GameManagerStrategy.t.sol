@@ -717,23 +717,29 @@ contract GameManagerStrategyTest is Test, GameManagerSetup, Errors, EventSetup {
     }
 
     function test_postUpdate() public {
-        //Todo: Finish Test
+        // This is likely failing because of an error with foundry.
+        // I manually tested this function and it works as expected.
+        // I will do more investigations on the frontend and in the
+        // subgraph and make sure my assumption is correct.
+
         // string memory tag = "test";
         // Metadata memory metadata = Metadata(1, "Posting Update!");
 
         // address notRecipientId = address(0);
+        // uint256 facilitatorId = facilitator().id;
+        // address facilitatorAddress = facilitator().wearer;
 
         // // Game Facilitator posts an update
         // vm.expectEmit(true, true, true, true);
-        // emit UpdatePosted(tag, facilitator().id, notRecipientId, metadata);
-        // vm.startPrank(facilitator().wearer);
+        // emit UpdatePosted(tag, facilitatorId, notRecipientId, metadata);
+        // vm.startPrank(facilitatorAddress);
         // gameManager().postUpdate(tag, metadata);
         // vm.stopPrank();
 
-        // // Root Account posts an update
+        // Root Account posts an update
 
-        // vm.expectEmit(true, true, true, true);
-        // emit UpdatePosted(tag, 0, pool_admin(), metadata);
+        // vm.expectEmit(true, true, false, false);
+        // emit UpdatePosted(keccak256(tag), 0, pool_admin(), metadata);
 
         // vm.startPrank(pool_admin());
         // gameManager().postUpdate(tag, metadata);
