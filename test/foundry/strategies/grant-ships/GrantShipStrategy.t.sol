@@ -142,6 +142,36 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         assertEq(ship(1).getPoolAmount(), 0);
     }
 
+    function test_mass_withdraw() public {
+        vm.startPrank(facilitator().wearer);
+
+        ship(0).setPoolActive(false);
+        ship(1).setPoolActive(false);
+        ship(2).setPoolActive(false);
+
+        ship(0).withdraw(_poolAmount);
+        ship(1).withdraw(_poolAmount);
+        ship(2).withdraw(_poolAmount);
+
+        assertEq(ARB().balanceOf(address(gameManager())), _GAME_AMOUNT);
+        assertEq(ARB().balanceOf(address(ship(0))), 0);
+        assertEq(ARB().balanceOf(address(ship(1))), 0);
+        assertEq(ARB().balanceOf(address(ship(2))), 0);
+
+        assertEq(ARB().balanceOf(address(gameManager())), _GAME_AMOUNT);
+        assertEq(ship(0).getPoolAmount(), 0);
+        assertEq(ship(1).getPoolAmount(), 0);
+        assertEq(ship(2).getPoolAmount(), 0);
+
+        gameManager().withdraw(_GAME_AMOUNT);
+
+        assertEq(ARB().balanceOf(address(gameManager())), 0);
+
+        assertEq(ARB().balanceOf(pool_admin()), _GAME_AMOUNT);
+
+        vm.stopPrank();
+    }
+
     function test_revert_allocate_ALLOCATION_EXCEEDS_POOL_AMOUNT_reserved_funding() public {
         _test_grant_cycle(profile1_anchor(), profile1_member1(), recipient1(), 12_000e18, 1, StopCycleAfter.None);
         _test_grant_cycle(profile2_anchor(), profile2_member1(), recipient2(), 18_000e18, 1, StopCycleAfter.Allocate);
