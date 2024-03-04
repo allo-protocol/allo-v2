@@ -48,7 +48,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Struct to hold details of a recipient
     struct Recipient {
         bool useRegistryAnchor;
-        address recipientAddress;
+        address receivingAddress;
         uint256 grantAmount;
         Metadata metadata;
         Status recipientStatus;
@@ -663,8 +663,8 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Register a recipient to the pool.
     /// @dev Emits a 'Registered()' event
     /// @param _data The data to be decoded
-    /// @custom:data when 'registryGating' is 'true' -> (address recipientId, address recipientAddress, uint256 grantAmount, Metadata metadata)
-    ///              when 'registryGating' is 'false' -> (address recipientAddress, address registryAnchor, uint256 grantAmount, Metadata metadata)
+    /// @custom:data when 'registryGating' is 'true' -> (address recipientId, address receivingAddress, uint256 grantAmount, Metadata metadata)
+    ///              when 'registryGating' is 'false' -> (address receivingAddress, address registryAnchor, uint256 grantAmount, Metadata metadata)
     /// @param _sender The sender of the transaction
     /// @return recipientId The id of the recipient
     function _registerRecipient(bytes memory _data, address _sender)
@@ -674,24 +674,24 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         noUnresolvedRedFlags
         returns (address recipientId)
     {
-        address recipientAddress;
+        address receivingAddress;
         address registryAnchor;
         bool isUsingRegistryAnchor;
         uint256 grantAmount;
         Metadata memory metadata;
 
         // Decode '_data' depending on the 'registryGating' flag
-        /// @custom:data when 'true' -> (address recipientId, address recipientAddress, uint256 grantAmount, Metadata metadata)
+        /// @custom:data when 'true' -> (address recipientId, address receivingAddress, uint256 grantAmount, Metadata metadata)
         if (registryGating) {
-            (recipientId, recipientAddress, grantAmount, metadata) =
+            (recipientId, receivingAddress, grantAmount, metadata) =
                 abi.decode(_data, (address, address, uint256, Metadata));
 
             if (!_isProfileMember(recipientId, _sender)) {
                 revert UNAUTHORIZED();
             }
         } else {
-            /// @custom:data when 'false' -> (address recipientAddress, address registryAnchor, uint256 grantAmount, Metadata metadata)
-            (recipientAddress, registryAnchor, grantAmount, metadata) =
+            /// @custom:data when 'false' -> (address receivingAddress, address registryAnchor, uint256 grantAmount, Metadata metadata)
+            (receivingAddress, registryAnchor, grantAmount, metadata) =
                 abi.decode(_data, (address, address, uint256, Metadata));
 
             // Check if the registry anchor is valid so we know whether to use it or not
@@ -733,7 +733,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
 
         // Create the recipient instance
         Recipient memory recipient = Recipient({
-            recipientAddress: recipientAddress,
+            receivingAddress: receivingAddress,
             useRegistryAnchor: registryGating ? true : isUsingRegistryAnchor,
             grantAmount: grantAmount,
             metadata: metadata,
@@ -864,11 +864,11 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
         poolAmount -= amount;
         allocatedGrantAmount -= amount;
 
-        _transferAmount(pool.token, recipient.recipientAddress, amount);
+        _transferAmount(pool.token, recipient.receivingAddress, amount);
 
         // Emit events for the milestone and the distribution
         emit MilestoneStatusChanged(_recipientId, milestoneToBeDistributed, Status.Accepted);
-        emit Distributed(_recipientId, recipient.recipientAddress, amount, _sender);
+        emit Distributed(_recipientId, recipient.receivingAddress, amount, _sender);
     }
 
     /// @notice Check if sender is a profile owner or member.
@@ -891,7 +891,7 @@ contract GrantShipStrategy is BaseStrategy, ReentrancyGuard {
     /// @return Returns the payout summary for the accepted recipient
     function _getPayout(address _recipientId, bytes memory) internal view override returns (PayoutSummary memory) {
         Recipient memory recipient = _getRecipient(_recipientId);
-        return PayoutSummary(recipient.recipientAddress, recipient.grantAmount);
+        return PayoutSummary(recipient.receivingAddress, recipient.grantAmount);
     }
 
     /// @notice Set the milestones for the recipient.

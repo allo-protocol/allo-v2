@@ -278,6 +278,7 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
         assertTrue(ship(2).isValidAllocator(facilitator().wearer));
 
         assertFalse(ship(0).isValidAllocator(randomAddress()));
+
         assertFalse(ship(1).isValidAllocator(shipOperator(0).wearer));
         assertFalse(ship(2).isValidAllocator(team(0).wearer));
     }
@@ -287,7 +288,7 @@ contract GrantShipStrategyTest is Test, GameManagerSetup, EventSetup, Errors {
 
         GrantShipStrategy.Recipient memory recipient = ship(1).getRecipient(profile1_anchor());
 
-        assertTrue(recipient.recipientAddress == recipient1());
+        assertTrue(recipient.receivingAddress == recipient1());
         assertTrue(recipient.grantAmount == _grantAmount);
         assertTrue(keccak256(abi.encode(recipient.metadata.pointer)) == keccak256(abi.encode("team recipient 1")));
         assertTrue(recipient.metadata.protocol == 1);
