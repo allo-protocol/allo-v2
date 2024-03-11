@@ -21,8 +21,10 @@ import {Anchor} from "../../../contracts/core/Anchor.sol";
 import {AlloSetup} from "../shared/AlloSetup.sol";
 import {RegistrySetupFull} from "../shared/RegistrySetup.sol";
 import {EventSetup} from "../shared/EventSetup.sol";
-// import MockERC20
+// import ERC20 mocks
 import {MockERC20} from "../../utils/MockERC20.sol";
+import {MockERC20Permit} from "../../utils/MockERC20Permit.sol";
+import {MockERC20PermitDAI} from "../../utils/MockERC20PermitDAI.sol";
 
 import {ISignatureTransfer} from "permit2/ISignatureTransfer.sol";
 import {PermitSignature} from "lib/permit2/test/utils/PermitSignature.sol";
@@ -37,6 +39,8 @@ contract DonationVotingMerkleDistributionBaseMockTest is
     Native,
     Errors
 {
+    event Initialized(uint256 poolId, bytes data);
+
     event RecipientStatusUpdated(uint256 indexed rowIndex, uint256 fullRow, address sender);
     event DistributionUpdated(bytes32 merkleRoot, Metadata metadata);
     event FundsDistributed(uint256 amount, address grantee, address indexed token, address indexed recipientId);
@@ -66,6 +70,9 @@ contract DonationVotingMerkleDistributionBaseMockTest is
 
     DonationVotingMerkleDistributionBaseMock public strategy;
     MockERC20 public mockERC20;
+    MockERC20Permit public mockERC20Permit;
+    MockERC20PermitDAI public mockERC20PermitDAI;
+
     Metadata public poolMetadata;
 
     // Setup the tests
@@ -86,13 +93,21 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         poolMetadata = Metadata({protocol: 1, pointer: "PoolMetadata"});
 
         strategy = DonationVotingMerkleDistributionBaseMock(_deployStrategy());
-        mockERC20 = new MockERC20();
 
+        mockERC20 = new MockERC20();
         mockERC20.mint(address(this), 1_000_000 * 1e18);
 
-        allowedTokens = new address[](2);
+        mockERC20Permit = new MockERC20Permit();
+        mockERC20Permit.mint(address(this), 1_000_000 * 1e18);
+
+        mockERC20PermitDAI = new MockERC20PermitDAI();
+        mockERC20PermitDAI.mint(address(this), 1_000_000 * 1e18);
+
+        allowedTokens = new address[](4);
         allowedTokens[0] = NATIVE;
         allowedTokens[1] = address(mockERC20);
+        allowedTokens[2] = address(mockERC20Permit);
+        allowedTokens[3] = address(mockERC20PermitDAI);
 
         vm.prank(allo_owner());
         allo().updatePercentFee(0);
@@ -236,23 +251,6 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         strategy = new DonationVotingMerkleDistributionBaseMock(
             address(allo()), "DonationVotingMerkleDistributionBaseMock", permit2
         );
-        // when _registrationStartTime is in past
-        vm.expectRevert(INVALID.selector);
-        vm.prank(address(allo()));
-        strategy.initialize(
-            poolId,
-            abi.encode(
-                DonationVotingMerkleDistributionBaseStrategy.InitializeData(
-                    useRegistryAnchor,
-                    metadataRequired,
-                    uint64(block.timestamp - 1),
-                    registrationEndTime,
-                    allocationStartTime,
-                    allocationEndTime,
-                    allowedTokens
-                )
-            )
-        );
 
         // when _registrationStartTime > _registrationEndTime
         vm.expectRevert(INVALID.selector);
@@ -325,6 +323,31 @@ contract DonationVotingMerkleDistributionBaseMockTest is
                 )
             )
         );
+    }
+
+    function test_initialize_registration_can_start_in_the_past() public {
+        strategy = new DonationVotingMerkleDistributionBaseMock(
+            address(allo()), "DonationVotingMerkleDistributionBaseMock", permit2
+        );
+
+        bytes memory data = abi.encode(
+            DonationVotingMerkleDistributionBaseStrategy.InitializeData(
+                useRegistryAnchor,
+                metadataRequired,
+                uint64(block.timestamp - 1),
+                registrationEndTime,
+                allocationStartTime,
+                allocationEndTime,
+                allowedTokens
+            )
+        );
+
+        // Initialized should be emitted
+        vm.expectEmit(true, true, false, false, address(strategy));
+        emit Initialized(poolId, data);
+
+        vm.prank(address(allo()));
+        strategy.initialize(poolId, data);
     }
 
     // Tests that the correct recipient is returned
@@ -432,15 +455,22 @@ contract DonationVotingMerkleDistributionBaseMockTest is
     function test_updatePoolTimestamps() public {
         vm.expectEmit(false, false, false, true);
         emit TimestampsUpdated(
-            registrationStartTime, registrationEndTime, allocationStartTime, allocationEndTime + 10, pool_admin()
+            uint64(block.timestamp - 1), // can be set in the past
+            registrationEndTime,
+            allocationStartTime,
+            allocationEndTime + 10,
+            pool_admin()
         );
 
         vm.prank(pool_admin());
         strategy.updatePoolTimestamps(
-            registrationStartTime, registrationEndTime, allocationStartTime, allocationEndTime + 10
+            uint64(block.timestamp - 1), // can be set in the past
+            registrationEndTime,
+            allocationStartTime,
+            allocationEndTime + 10
         );
 
-        assertEq(strategy.registrationStartTime(), registrationStartTime);
+        assertEq(strategy.registrationStartTime(), uint64(block.timestamp - 1));
         assertEq(strategy.registrationEndTime(), registrationEndTime);
         assertEq(strategy.allocationStartTime(), allocationStartTime);
         assertEq(strategy.allocationEndTime(), allocationEndTime + 10);
@@ -458,7 +488,28 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         vm.expectRevert(INVALID.selector);
         vm.prank(pool_admin());
         strategy.updatePoolTimestamps(
-            uint64(block.timestamp - 1), registrationEndTime, allocationStartTime, allocationEndTime
+            registrationStartTime,
+            registrationStartTime - 1, // registration end time is before start time
+            allocationStartTime,
+            allocationEndTime
+        );
+
+        vm.expectRevert(INVALID.selector);
+        vm.prank(pool_admin());
+        strategy.updatePoolTimestamps(
+            registrationStartTime,
+            registrationEndTime,
+            registrationStartTime - 1, // allocation start tie is before registration end time
+            allocationEndTime
+        );
+
+        vm.expectRevert(INVALID.selector);
+        vm.prank(pool_admin());
+        strategy.updatePoolTimestamps(
+            registrationStartTime,
+            registrationEndTime,
+            allocationStartTime,
+            allocationStartTime - 1 // allocation end time is before start time
         );
     }
 
@@ -676,7 +727,10 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         vm.expectRevert(ALLOCATION_NOT_ACTIVE.selector);
 
         vm.prank(pool_admin());
-        allo().allocate(poolId, abi.encode(recipient1(), address(0), 1e18));
+        allo().allocate(
+            poolId,
+            abi.encode(recipient1(), DonationVotingMerkleDistributionBaseStrategy.PermitType.Permit2, address(0), 1e18)
+        );
     }
 
     function testRevert_allocate_RECIPIENT_ERROR() public {
@@ -695,7 +749,10 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         vm.warp(allocationStartTime + 1);
         vm.deal(pool_admin(), 1e20);
         vm.prank(pool_admin());
-        allo().allocate(poolId, abi.encode(randomAddress(), permit2Data));
+        allo().allocate(
+            poolId,
+            abi.encode(randomAddress(), DonationVotingMerkleDistributionBaseStrategy.PermitType.Permit2, permit2Data)
+        );
     }
 
     function testRevert_allocate_INVALID_invalidToken() public virtual {
@@ -716,7 +773,10 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         vm.warp(allocationStartTime + 1);
         vm.deal(pool_admin(), 1e20);
         vm.prank(pool_admin());
-        allo().allocate(poolId, abi.encode(recipientId, permit2Data));
+        allo().allocate(
+            poolId,
+            abi.encode(recipientId, DonationVotingMerkleDistributionBaseStrategy.PermitType.Permit2, permit2Data)
+        );
     }
 
     function testRevert_allocate_INVALID_amountMismatch() public {
@@ -736,7 +796,10 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         vm.warp(allocationStartTime + 1);
         vm.deal(pool_admin(), 1e20);
         vm.prank(pool_admin());
-        allo().allocate{value: 1e17}(poolId, abi.encode(recipientId, permit2Data));
+        allo().allocate{value: 1e17}(
+            poolId,
+            abi.encode(recipientId, DonationVotingMerkleDistributionBaseStrategy.PermitType.Permit2, permit2Data)
+        );
     }
 
     function test_distribute() public {
@@ -936,7 +999,10 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         vm.expectEmit(false, false, false, true);
         emit Allocated(recipientId, 1e18, NATIVE, randomAddress());
 
-        allo().allocate{value: 1e18}(poolId, abi.encode(recipientId, permit2Data));
+        allo().allocate{value: 1e18}(
+            poolId,
+            abi.encode(recipientId, DonationVotingMerkleDistributionBaseStrategy.PermitType.Permit2, permit2Data)
+        );
 
         return recipientId;
     }

@@ -84,6 +84,12 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
         address[] allowedTokens;
     }
 
+    enum PermitType {
+        Permit,
+        PermitDAI,
+        Permit2
+    }
+
     /// @notice Stores the permit2 data for the allocation
     struct Permit2Data {
         ISignatureTransfer.PermitTransferFrom permit;
@@ -153,7 +159,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     /// @notice Flag to indicate whether the distribution has started or not.
     bool public distributionStarted;
 
-    /// @notice The timestamps in milliseconds for the start and end times.
+    /// @notice The timestamps in seconds for the start and end times.
     uint64 public registrationStartTime;
     uint64 public registrationEndTime;
     uint64 public allocationStartTime;
@@ -261,7 +267,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     ///               uint64 _registrationEndTime, uint64 _allocationStartTime, uint64 _allocationEndTime,
     ///               address[] memory _allowedTokens)
     function initialize(uint256 _poolId, bytes memory _data) external virtual override onlyAllo {
-        (InitializeData memory initializeData) = abi.decode(_data, (InitializeData));
+        InitializeData memory initializeData = abi.decode(_data, (InitializeData));
         __DonationVotingStrategy_init(_poolId, initializeData);
         emit Initialized(_poolId, _data);
     }
@@ -372,7 +378,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     }
 
     /// @notice Sets the start and end dates.
-    /// @dev The timestamps are in milliseconds for the start and end times. The 'msg.sender' must be a pool manager.
+    /// @dev The timestamps are in seconds for the start and end times. The 'msg.sender' must be a pool manager.
     ///      Emits a 'TimestampsUpdated()' event.
     /// @param _registrationStartTime The start time for the registration
     /// @param _registrationEndTime The end time for the registration
@@ -522,11 +528,10 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
         uint64 _registrationEndTime,
         uint64 _allocationStartTime,
         uint64 _allocationEndTime
-    ) internal view {
+    ) internal pure {
         if (
-            block.timestamp > _registrationStartTime || _registrationStartTime > _registrationEndTime
-                || _registrationStartTime > _allocationStartTime || _allocationStartTime > _allocationEndTime
-                || _registrationEndTime > _allocationEndTime
+            _registrationStartTime > _registrationEndTime || _registrationStartTime > _allocationStartTime
+                || _allocationStartTime > _allocationEndTime || _registrationEndTime > _allocationEndTime
         ) {
             revert INVALID();
         }
@@ -664,7 +669,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     /// @param _sender The sender of the transaction
     function _allocate(bytes memory _data, address _sender) internal virtual override onlyActiveAllocation {
         // Decode the '_data' to get the recipientId, amount and token
-        (address recipientId, Permit2Data memory p2Data) = abi.decode(_data, (address, Permit2Data));
+        (address recipientId,, Permit2Data memory p2Data) = abi.decode(_data, (address, PermitType, Permit2Data));
 
         uint256 amount = p2Data.permit.permitted.amount;
         address token = p2Data.permit.permitted.token;
@@ -680,7 +685,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
         }
 
         // If the token is native, the amount must be equal to the value sent, otherwise it reverts
-        if (msg.value > 0 && token != NATIVE || token == NATIVE && msg.value != amount) {
+        if ((msg.value > 0 && token != NATIVE) || (token == NATIVE && msg.value != amount)) {
             revert INVALID();
         }
 
