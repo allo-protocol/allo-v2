@@ -85,6 +85,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     }
 
     enum PermitType {
+        None,
         Permit,
         PermitDAI,
         Permit2

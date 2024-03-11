@@ -87,7 +87,6 @@ contract DonationVotingMerkleDistributionDirectTransferStrategy is DonationVotin
                     revert(string(reason));
                 }
             }
-            IERC20(token).transferFrom(_sender, _recipients[recipientId].recipientAddress, amount);
         } else if (permitType == PermitType.PermitDAI) {
             (bytes32 r, bytes32 s, uint8 v) = splitSignature(p2Data.signature);
             // The tx can be front-run, and another user can use the permit message and signature to invalidate the nonce.
@@ -102,8 +101,8 @@ contract DonationVotingMerkleDistributionDirectTransferStrategy is DonationVotin
                     revert(string(reason));
                 }
             }
-            IERC20(token).transferFrom(_sender, _recipients[recipientId].recipientAddress, amount);
         }
+        IERC20(token).transferFrom(_sender, _recipients[recipientId].recipientAddress, amount);
     }
 
     function splitSignature(bytes memory sig) public pure returns (bytes32 r, bytes32 s, uint8 v) {
