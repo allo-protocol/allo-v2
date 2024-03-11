@@ -207,7 +207,6 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Get recipient status
     /// @dev The global 'Status' is used at the protocol level and most strategies will use this.
-    ///      todo: finish this
     /// @param _recipientId ID of the recipient
     /// @return Status Returns the global recipient status
     function _getRecipientStatus(address _recipientId) internal view override returns (Status) {
@@ -665,7 +664,6 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
                 revert INVALID_MILESTONE();
             }
 
-            // TODO: I see we check on line 649, but it seems we need to check when added it is NOT greater than 100%?
             // Add the milestone percentage amount to the total percentage amount
             totalAmountPercentage += milestone.amountPercentage;
 
