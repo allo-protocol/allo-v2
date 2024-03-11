@@ -49,7 +49,7 @@ contract GameManagerFactory {
         return clone;
     }
 
-    function createWithPool(
+    function cloneWithPool(
         string memory _name,
         uint256 _nonce,
         Metadata memory _profileMetadata,
@@ -58,12 +58,12 @@ contract GameManagerFactory {
         address _tokenAddress
     ) external onlyRoot returns (address) {
         address deployedAddress = cloneTemplate(_name);
+        address[] memory noManagers = new address[](0);
 
-        bytes32 profileId =
-            allo.getRegistry().createProfile(_nonce, _name, _profileMetadata, msg.sender, new address[](0));
+        bytes32 profileId = allo.getRegistry().createProfile(_nonce, _name, _profileMetadata, address(this), noManagers);
 
         uint256 poolId = allo.createPoolWithCustomStrategy(
-            profileId, msg.sender, _initData, _tokenAddress, 0, _poolMetadata, new address[](0)
+            profileId, deployedAddress, _initData, _tokenAddress, 0, _poolMetadata, noManagers
         );
 
         emit GameManagerDeployedWithPool(deployedAddress, profileId, poolId);
