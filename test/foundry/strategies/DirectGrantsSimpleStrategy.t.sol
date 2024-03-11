@@ -304,6 +304,29 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
         vm.stopPrank();
     }
 
+    function test_setRecipientStatusToInReview_forAcceptedApplication() public {
+        address recipientId = _register_recipient_allocate_accept();
+        assertEq(strategy.allocatedGrantAmount(), 1e18);
+
+        address[] memory recipients = new address[](1);
+        recipients[0] = recipientId;
+
+        vm.expectEmit(false, false, false, true);
+        emit RecipientStatusChanged(recipientId, IStrategy.Status.InReview);
+
+        vm.startPrank(pool_manager1());
+        strategy.setRecipientStatusToInReview(recipients);
+        IStrategy.Status status = strategy.getRecipientStatus(recipientId);
+
+        assertTrue(uint8(status) == uint8(IStrategy.Status.InReview));
+        assertEq(strategy.allocatedGrantAmount(), 0);
+
+        DirectGrantsSimpleStrategy.Recipient memory recipient = strategy.getRecipient(recipientId);
+        assertTrue(recipient.grantAmount == 0);
+
+        vm.stopPrank();
+    }
+
     function test_isPoolActive() public {
         vm.expectEmit(false, false, false, true);
         emit PoolActive(true);
