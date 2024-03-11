@@ -79,11 +79,11 @@ contract DonationVotingMerkleDistributionDirectTransferStrategy is DonationVotin
             // In this case the permit call will fail, but it means that the contract already has allowance for the token.
             try IERC20Permit(token).permit(_sender, address(this), amount, p2Data.permit.deadline, v, r, s) {}
             catch Error(string memory reason) {
-                if (IERC20(token).allowance(msg.sender, address(this)) < amount) {
+                if (IERC20(token).allowance(_sender, address(this)) < amount) {
                     revert(reason);
                 }
             } catch (bytes memory reason) {
-                if (IERC20(token).allowance(msg.sender, address(this)) < amount) {
+                if (IERC20(token).allowance(_sender, address(this)) < amount) {
                     revert(string(reason));
                 }
             }
@@ -94,11 +94,11 @@ contract DonationVotingMerkleDistributionDirectTransferStrategy is DonationVotin
             // In this case the permit call will fail, but it means that the contract already has allowance for the token.
             try IDAI(token).permit(_sender, address(this), p2Data.permit.nonce, p2Data.permit.deadline, true, v, r, s) {}
             catch Error(string memory reason) {
-                if (IERC20(token).allowance(msg.sender, address(this)) < amount) {
+                if (IERC20(token).allowance(_sender, address(this)) < amount) {
                     revert(reason);
                 }
             } catch (bytes memory reason) {
-                if (IERC20(token).allowance(msg.sender, address(this)) < amount) {
+                if (IERC20(token).allowance(_sender, address(this)) < amount) {
                     revert(string(reason));
                 }
             }
