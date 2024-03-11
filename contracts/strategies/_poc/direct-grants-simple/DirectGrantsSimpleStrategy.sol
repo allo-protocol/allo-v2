@@ -388,6 +388,12 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         uint256 recipientLength = _recipientIds.length;
         for (uint256 i; i < recipientLength;) {
             address recipientId = _recipientIds[i];
+            // reset the allocated grant amount
+            if (allocatedGrantAmount > 0 && _recipients[recipientId].grantAmount > 0) {
+                allocatedGrantAmount -= _recipients[recipientId].grantAmount;
+                _recipients[recipientId].grantAmount = 0;
+            }
+
             _recipients[recipientId].recipientStatus = Status.InReview;
 
             emit RecipientStatusChanged(recipientId, Status.InReview);
