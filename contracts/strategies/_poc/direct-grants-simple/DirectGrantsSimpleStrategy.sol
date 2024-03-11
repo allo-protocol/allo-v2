@@ -342,7 +342,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         Milestone[] storage recipientMilestones = milestones[_recipientId];
 
         // Check if the milestone is the upcoming one
-        if (_milestoneId > recipientMilestones.length) {
+        if (_milestoneId >= recipientMilestones.length) {
             revert INVALID_MILESTONE();
         }
 
@@ -369,7 +369,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         Milestone[] storage recipientMilestones = milestones[_recipientId];
 
         // Check if the milestone is the upcoming one
-        if (_milestoneId > recipientMilestones.length) {
+        if (_milestoneId >= recipientMilestones.length) {
             revert INVALID_MILESTONE();
         }
 
@@ -596,7 +596,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         Milestone storage milestone = recipientMilestones[milestoneToBeDistributed];
 
         // check if milestone is not rejected or already paid out
-        if (milestoneToBeDistributed > recipientMilestones.length || milestone.milestoneStatus != Status.Pending) {
+        if (milestoneToBeDistributed >= recipientMilestones.length || milestone.milestoneStatus != Status.Pending) {
             revert INVALID_MILESTONE();
         }
 
