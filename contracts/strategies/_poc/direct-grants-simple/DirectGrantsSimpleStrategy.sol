@@ -304,30 +304,28 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
             revert INVALID_MILESTONE();
         }
 
-        // Check if the recipient is 'Accepted', otherwise revert
+        // Check if the recipient is not 'Accepted', otherwise revert.
         if (recipient.milestonesReviewStatus == Status.Accepted) {
             revert MILESTONES_ALREADY_SET();
         }
 
-        // Check if the status is 'Accepted' or 'Rejected', otherwise revert
+        // Update milestonesReviewStatus
         if (_status == Status.Accepted || _status == Status.Rejected) {
-            // Set the status of the milestone review
             recipient.milestonesReviewStatus = _status;
 
-            // Emit event for the milestone review
+            // Emit event for the milestone being reviewed
             emit MilestonesReviewed(_recipientId, _status);
         }
     }
 
     /// @notice Submit milestone by the recipient.
-    /// @dev 'msg.sender' must be the 'recipientId' (this depends on whether your using registry gating) and must be a member
+    /// @dev 'msg.sender' must be the 'recipientId' (this depends on whether you're using registry gating) and must be a member
     ///      of a 'Profile' to submit a milestone and '_recipientId'.
     ///      must NOT be the same as 'msg.sender'. Emits a 'MilestonesSubmitted()' event.
     /// @param _recipientId ID of the recipient
     /// @param _metadata The proof of work
     function submitMilestone(address _recipientId, uint256 _milestoneId, Metadata calldata _metadata) external {
-        // Check if the '_recipientId' is the same as 'msg.sender' and if it is NOT, revert. This
-        // also checks if the '_recipientId' is a member of the 'Profile' and if it is NOT, revert.
+        // Check if the recipient is the same as the sender or if the sender is a member of the recipient's profile, otherwise revert
         if (_recipientId != msg.sender && !_isProfileMember(_recipientId, msg.sender)) {
             revert UNAUTHORIZED();
         }
@@ -348,7 +346,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
         Milestone storage milestone = recipientMilestones[_milestoneId];
 
-        // Check if the milestone is accepted, otherwise revert
+        // Check if the milestone is not accepted, otherwise revert.
         if (milestone.milestoneStatus == Status.Accepted) {
             revert MILESTONE_ALREADY_ACCEPTED();
         }
@@ -507,7 +505,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
             milestonesReviewStatus: Status.Pending
         });
 
-        // Add the recipient to the accepted recipient ids mapping
+        // Track the recipient
         _recipients[recipientId] = recipient;
 
         // Emit event for the registration
@@ -659,7 +657,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         for (uint256 i; i < milestonesLength;) {
             Milestone memory milestone = _milestones[i];
 
-            // Reverts if the milestone status is 'None'
+            // Reverts if the milestone status is not 'None'.
             if (milestone.milestoneStatus != Status.None) {
                 revert INVALID_MILESTONE();
             }
