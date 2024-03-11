@@ -3,12 +3,14 @@ pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import {IAllo} from "../../../core/interfaces/IAllo.sol";
+import {Metadata} from "../../../../contracts/core/libraries/Metadata.sol";
 
 contract GameManagerFactory {
     event TemplateCreated(string name, address templateAddress);
     event FactoryInitialized(address rootAccount);
     event RootAccountSwitched(address newRootAccount);
     event GameManagerDeployed(address gameManagerAddress);
+    event GameManagerDeployedWithPool(address gameManagerAddress, bytes32 profileAddress, uint256 poolId);
 
     address public rootAccount;
     IAllo public allo;
@@ -39,12 +41,34 @@ contract GameManagerFactory {
         emit RootAccountSwitched(_newRootAccount);
     }
 
-    function createWithoutPool(string memory _string) external onlyRoot returns (address) {
-        require(templates[_string] != address(0), "Template does not exist");
-        address clone = Clones.clone(templates[_string]);
+    function cloneTemplate(string memory _name) public onlyRoot returns (address) {
+        require(templates[_name] != address(0), "Template does not exist");
+        address clone = Clones.clone(templates[_name]);
 
         emit GameManagerDeployed(clone);
         return clone;
+    }
+
+    function createWithPool(
+        string memory _name,
+        uint256 _nonce,
+        Metadata memory _profileMetadata,
+        Metadata memory _poolMetadata,
+        bytes memory _initData,
+        address _tokenAddress
+    ) external onlyRoot returns (address) {
+        address deployedAddress = cloneTemplate(_name);
+
+        bytes32 profileId =
+            allo.getRegistry().createProfile(_nonce, _name, _profileMetadata, msg.sender, new address[](0));
+
+        uint256 poolId = allo.createPoolWithCustomStrategy(
+            profileId, msg.sender, _initData, _tokenAddress, 0, _poolMetadata, new address[](0)
+        );
+
+        emit GameManagerDeployedWithPool(deployedAddress, profileId, poolId);
+
+        return deployedAddress;
     }
 
     function getTemplateAddress(string memory _name) external view returns (address) {
