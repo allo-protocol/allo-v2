@@ -125,9 +125,6 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice The total amount allocated to grant/recipient.
     uint256 public allocatedGrantAmount;
 
-    /// @notice Internal collection of accepted recipients able to submit milestones
-    address[] private _acceptedRecipientIds;
-
     /// @notice This maps accepted recipients to their details
     /// @dev 'recipientId' to 'Recipient'
     mapping(address => Recipient) private _recipients;
