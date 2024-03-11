@@ -14,7 +14,6 @@ contract GrantShipFactory {
 
     function create(address anchorAddress) external returns (address) {
         address clone = Clones.clone(template);
-
         emit ShipCreated(clone, anchorAddress);
         return clone;
     }
