@@ -34,7 +34,7 @@ import {Hats} from "hats-protocol/Hats.sol";
 ///         can also reject the recipient.
 contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// ================================
-    /// ========== Storage =============
+    /// ========== Struct =============
     /// ================================
 
     /// @notice Struct to hold details of an recipient
