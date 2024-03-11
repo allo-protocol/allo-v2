@@ -596,7 +596,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         Milestone storage milestone = recipientMilestones[milestoneToBeDistributed];
 
         // check if milestone is not rejected or already paid out
-        if (milestoneToBeDistributed > recipientMilestones.length || milestone.milestoneStatus != Status.Pending) {
+        if (milestone.milestoneStatus != Status.Pending) {
             revert INVALID_MILESTONE();
         }
 
