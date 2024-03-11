@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.19;
 
-// import "forge-std/Test.sol";
+import "forge-std/Test.sol";
 
 // External Libraries
 import {ReentrancyGuard} from "openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
@@ -132,9 +132,6 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice The 'Hats Protocol' contract interface.
     IHats private _hats;
 
-    /// @notice The Allo contract image. Using this instead of IAllo so this contract can call createPoolWithCustomStrategy. .
-    IAllo private _allo;
-
     /// @notice The Allo Registry contract interface
     IRegistry private _registry;
 
@@ -176,9 +173,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Constructor for the GameManager Strategy
     /// @param _alloAddress The 'Allo' contract address
     /// @param _name The name of the strategy
-    constructor(address _alloAddress, string memory _name) BaseStrategy(_alloAddress, _name) {
-        _allo = IAllo(_alloAddress);
-    }
+    constructor(address _alloAddress, string memory _name) BaseStrategy(_alloAddress, _name) {}
 
     /// ===============================
     /// ======== Initialize ===========
@@ -203,13 +198,16 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         (uint256 _gameFacilitatorId, address _hatsAddress, address _rootAccount) =
             abi.decode(_data, (uint256, address, address));
 
+        console.log("----IN GameManager Strategy----");
+        console.log(address(allo), "Allo address");
+
         gameFacilitatorHatId = _gameFacilitatorId;
 
         rootAccount = _rootAccount;
 
         _hats = IHats(_hatsAddress);
 
-        _registry = _allo.getRegistry();
+        _registry = allo.getRegistry();
 
         token = allo.getPool(poolId).token;
 
@@ -402,7 +400,7 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         bytes32 contractProfileId = _createShipProfile(_recipient.recipientAddress, currentRoundIndex, _shipInitData);
 
         // Create a new pool with the GrantShipStrategy contract
-        uint256 shipPoolId = _allo.createPoolWithCustomStrategy(
+        uint256 shipPoolId = allo.createPoolWithCustomStrategy(
             contractProfileId,
             strategyAddress,
             abi.encode(_shipInitData, address(this)),
