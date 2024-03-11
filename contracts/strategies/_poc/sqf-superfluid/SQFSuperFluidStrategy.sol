@@ -22,6 +22,7 @@ import {BaseStrategy} from "../../BaseStrategy.sol";
 // Internal Libraries
 import {Metadata} from "../../../core/libraries/Metadata.sol";
 import {RecipientSuperApp} from "./RecipientSuperApp.sol";
+import {RecipientSuperAppFactory} from "./RecipientSuperAppFactory.sol";
 
 contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     using SuperTokenV1Library for ISuperToken;
@@ -47,6 +48,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         address passportDecoder;
         address superfluidHost;
         address allocationSuperToken;
+        address recipientSuperAppFactory;
         uint64 registrationStartTime;
         uint64 registrationEndTime;
         uint64 allocationStartTime;
@@ -117,6 +119,9 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice The pool super token
     ISuperToken public allocationSuperToken;
     ISuperToken public poolSuperToken;
+
+    /// @notice The recipient SuperApp factory
+    RecipientSuperAppFactory public recipientSuperAppFactory;
 
     /// @notice The GDA pool which streams pool tokens to recipients
     ISuperfluidPool public gdaPool;
@@ -218,6 +223,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         metadataRequired = params.metadataRequired;
         superfluidHost = params.superfluidHost;
         minPassportScore = params.minPassportScore;
+        recipientSuperAppFactory = RecipientSuperAppFactory(params.recipientSuperAppFactory);
         _registry = allo.getRegistry();
 
         if (
@@ -444,15 +450,8 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
             emit Reviewed(recipientId, recipientStatus, msg.sender);
 
             if (recipientStatus == Status.Accepted) {
-                RecipientSuperApp superApp = new RecipientSuperApp(
-                    recipient.recipientAddress,
-                    address(this),
-                    superfluidHost,
-                    allocationSuperToken,
-                    true,
-                    true,
-                    true,
-                    "" // regsitrationKey - for future create a superApp factory
+                RecipientSuperApp superApp = recipientSuperAppFactory.createRecipientSuperApp(
+                    recipient.recipientAddress, address(this), superfluidHost, allocationSuperToken, true, true, true
                 );
 
                 allocationSuperToken.transfer(address(superApp), initialSuperAppBalance);
@@ -512,37 +511,55 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Adjust the weightings of the recipients
     /// @dev This can only be called by the super app callback onFlowUpdated
-    /// @param _previousFlowrate The previous flow rate
+    /// @param _previousFlowRate The previous flow rate
     /// @param _newFlowRate The new flow rate
-    function adjustWeightings(uint256 _previousFlowrate, uint256 _newFlowRate) external {
+    function adjustWeightings(uint256 _previousFlowRate, uint256 _newFlowRate) external {
         address recipientId = superApps[msg.sender];
 
         if (recipientId == address(0)) revert UNAUTHORIZED();
 
-        uint256 recipientTotalUnits = totalUnitsByRecipient[recipientId] * 1000;
+        uint256 recipientTotalUnits = totalUnitsByRecipient[recipientId] * 1e5;
 
-        if (_previousFlowrate == 0) {
+        if (_previousFlowRate == 0) {
             // created a new flow
-            recipientTotalUnits = (recipientTotalUnits.sqrt() + _newFlowRate.sqrt()) ** 2;
+            uint256 scaledFlowRate = _newFlowRate / 1e6;
+
+            if (scaledFlowRate > 0) {
+                recipientTotalUnits = (recipientTotalUnits.sqrt() + scaledFlowRate.sqrt()) ** 2;
+            }
         } else if (_newFlowRate == 0) {
             // canceled a flow
-            recipientTotalUnits = (recipientTotalUnits.sqrt() - _previousFlowrate.sqrt()) ** 2;
+            uint256 scaledFlowRate = _previousFlowRate / 1e6;
+
+            if (scaledFlowRate > 0) {
+                recipientTotalUnits =
+                    recipientTotalUnits + scaledFlowRate - 2 * uint256(recipientTotalUnits * scaledFlowRate).sqrt();
+            }
         } else {
             // updated a flow
-            recipientTotalUnits = (recipientTotalUnits.sqrt() + _newFlowRate.sqrt() - _previousFlowrate.sqrt()) ** 2;
+            uint256 scaledNewFlowRate = _newFlowRate / 1e6;
+            uint256 scaledPreviousFlowRate = _previousFlowRate / 1e6;
+
+            if (scaledNewFlowRate != scaledPreviousFlowRate) {
+                if (scaledNewFlowRate > 0) {
+                    recipientTotalUnits =
+                        (recipientTotalUnits.sqrt() + scaledNewFlowRate.sqrt() - scaledPreviousFlowRate.sqrt()) ** 2;
+                } else if (scaledPreviousFlowRate > 0) {
+                    recipientTotalUnits = recipientTotalUnits + scaledPreviousFlowRate
+                        - 2 * uint256(recipientTotalUnits * scaledPreviousFlowRate).sqrt();
+                }
+            }
         }
 
-        recipientTotalUnits /= 1000;
+        recipientTotalUnits = recipientTotalUnits > 1e5 ? recipientTotalUnits / 1e5 : 1;
 
         Recipient storage recipient = recipients[recipientId];
 
         _updateMemberUnits(recipientId, recipient.recipientAddress, uint128(recipientTotalUnits));
 
-        totalUnitsByRecipient[recipientId] = recipientTotalUnits;
-
         uint256 currentFlowRate = recipientFlowRate[recipientId];
 
-        recipientFlowRate[recipientId] = currentFlowRate + _newFlowRate - _previousFlowrate;
+        recipientFlowRate[recipientId] = currentFlowRate + _newFlowRate - _previousFlowRate;
 
         emit TotalUnitsUpdated(recipientId, recipientTotalUnits);
     }

@@ -25,17 +25,22 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
     event MilestoneStatusChanged(address recipientId, uint256 milestoneId, IStrategy.Status status);
     event MilestonesSet(address recipientId, uint256 milestonesLength);
     event MilestonesReviewed(address recipientId, IStrategy.Status status);
+    event TimestampsUpdated(uint128 registrationStartTime, uint128 registrationEndTime, address sender);
 
     DirectGrantsSimpleStrategy strategyImplementation;
     DirectGrantsSimpleStrategy strategy;
     uint256 poolId;
     address token = NATIVE;
+    uint128 registrationStartTime;
+    uint128 registrationEndTime;
 
     function setUp() public {
         __RegistrySetupFull();
         __AlloSetup(address(registry()));
 
         strategyImplementation = new DirectGrantsSimpleStrategy(address(allo()), "DirectGrantsSimpleStrategy");
+        registrationStartTime = uint128(block.timestamp);
+        registrationEndTime = uint128(block.timestamp + 10);
 
         vm.startPrank(allo_owner());
         allo().addToCloneableStrategies(address(strategyImplementation));
@@ -56,6 +61,8 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
     // =================== TESTS ===================
 
     function test_initialize() public {
+        vm.expectEmit(false, false, false, true);
+        emit TimestampsUpdated(registrationStartTime, registrationEndTime, address(allo()));
         (, address payable newStrategyAddress) = _createPool(true, true, true);
         DirectGrantsSimpleStrategy newStrategy = DirectGrantsSimpleStrategy(newStrategyAddress);
 
@@ -63,6 +70,27 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
         assertTrue(newStrategy.metadataRequired());
         assertTrue(newStrategy.grantAmountRequired());
         assertTrue(newStrategy.allocatedGrantAmount() == 0);
+    }
+
+    function testRevert_updatePoolTimestamps_INVALID() public {
+        vm.expectRevert(INVALID.selector);
+        vm.prank(pool_admin());
+        strategy.updatePoolTimestamps(
+            // opposite of what it should be
+            registrationEndTime,
+            registrationStartTime
+        );
+    }
+
+    function test_updatePoolTimestamps() public {
+        vm.expectEmit(false, false, false, true);
+        emit TimestampsUpdated(registrationStartTime + 1, registrationEndTime + 1, pool_admin());
+
+        vm.prank(pool_admin());
+        strategy.updatePoolTimestamps(registrationStartTime + 1, registrationEndTime + 1);
+
+        assertEq(strategy.registrationStartTime(), registrationStartTime + 1);
+        assertEq(strategy.registrationEndTime(), registrationEndTime + 1);
     }
 
     function test_isValidAllocator() public {
@@ -101,6 +129,25 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
         vm.startPrank(address(allo()));
 
         vm.expectRevert(UNAUTHORIZED.selector);
+
+        strategy.registerRecipient(data, sender);
+        vm.stopPrank();
+    }
+
+    function testRevert_registerRecipient_REGISTRATION_NOT_ACTIVE() public {
+        address recipientId = profile1_anchor();
+        address recipientAddress = recipient1();
+        address sender = profile1_member1();
+        uint256 grantAmount = 5e17;
+        Metadata memory metadata = Metadata(1, "recipient-data");
+
+        bytes memory data = abi.encode(recipientId, recipientAddress, grantAmount, metadata);
+
+        vm.startPrank(address(allo()));
+        // move time to registrationEndTime + 10
+        vm.warp(registrationEndTime + 10);
+
+        vm.expectRevert(REGISTRATION_NOT_ACTIVE.selector);
 
         strategy.registerRecipient(data, sender);
         vm.stopPrank();
@@ -694,7 +741,9 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
         newPoolId = allo().createPool{value: 1e18}(
             poolProfile_id(),
             address(strategyImplementation),
-            abi.encode(_registryGating, _metadataRequired, _grantAmountRequired),
+            abi.encode(
+                _registryGating, _metadataRequired, _grantAmountRequired, registrationStartTime, registrationEndTime
+            ),
             token,
             1e18,
             Metadata(1, "pool-data"),

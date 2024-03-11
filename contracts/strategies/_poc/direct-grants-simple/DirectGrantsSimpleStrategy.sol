@@ -59,6 +59,8 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         bool registryGating;
         bool metadataRequired;
         bool grantAmountRequired;
+        uint128 registrationStartTime;
+        uint128 registrationEndTime;
     }
 
     /// ===============================
@@ -94,9 +96,19 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     event MilestonesSet(address recipientId, uint256 milestonesLength);
     event MilestonesReviewed(address recipientId, Status status);
 
+    /// @notice Emitted when the timestamps are updated
+    /// @param registrationStartTime The start time for the registration
+    /// @param registrationEndTime The end time for the registration
+    /// @param sender The sender of the transaction
+    event TimestampsUpdated(uint128 registrationStartTime, uint128 registrationEndTime, address sender);
+
     /// ================================
     /// ========== Storage =============
     /// ================================
+
+    /// @notice The timestamps in seconds for the start and end times.
+    uint128 public registrationStartTime;
+    uint128 public registrationEndTime;
 
     /// @notice Flag to check if registry gating is enabled.
     bool public registryGating;
@@ -128,6 +140,13 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @dev 'recipientId' to 'nextMilestone'
     mapping(address => uint256) public upcomingMilestone;
 
+    /// @notice Modifier to check if the registration is active
+    /// @dev Reverts if the registration is not active
+    modifier onlyActiveRegistration() {
+        _checkOnlyActiveRegistration();
+        _;
+    }
+
     /// ===============================
     /// ======== Constructor ==========
     /// ===============================
@@ -146,7 +165,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _data The data to be decoded
     /// @custom:data (bool registryGating, bool metadataRequired, bool grantAmountRequired)
     function initialize(uint256 _poolId, bytes memory _data) external virtual override {
-        (InitializeData memory initData) = abi.decode(_data, (InitializeData));
+        InitializeData memory initData = abi.decode(_data, (InitializeData));
         __DirectGrantsSimpleStrategy_init(_poolId, initData);
         emit Initialized(_poolId, _data);
     }
@@ -163,11 +182,16 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         registryGating = _initData.registryGating;
         metadataRequired = _initData.metadataRequired;
         grantAmountRequired = _initData.grantAmountRequired;
+        registrationStartTime = _initData.registrationStartTime;
+        registrationEndTime = _initData.registrationEndTime;
         _registry = allo.getRegistry();
 
         // Set the pool to active - this is required for the strategy to work and distribute funds
         // NOTE: There may be some cases where you may want to not set this here, but will be strategy specific
         _setPoolActive(true);
+
+        // Emit that the timestamps have been updated with the updated values
+        emit TimestampsUpdated(registrationStartTime, registrationEndTime, msg.sender);
     }
 
     /// ===============================
@@ -217,6 +241,26 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// ===============================
     /// ======= External/Custom =======
     /// ===============================
+
+    /// @notice Sets the start and end dates.
+    /// @dev The timestamps are in seconds for the start and end times. The 'msg.sender' must be a pool manager.
+    ///      Emits a 'TimestampsUpdated()' event.
+    /// @param _registrationStartTime The start time for the registration
+    /// @param _registrationEndTime The end time for the registration
+    function updatePoolTimestamps(uint128 _registrationStartTime, uint128 _registrationEndTime)
+        external
+        onlyPoolManager(msg.sender)
+    {
+        // If the timestamps are invalid this will revert - See details in '_isPoolTimestampValid'
+        _isPoolTimestampValid(_registrationStartTime, _registrationEndTime);
+
+        // Set the updated timestamps
+        registrationStartTime = _registrationStartTime;
+        registrationEndTime = _registrationEndTime;
+
+        // Emit that the timestamps have been updated with the updated values
+        emit TimestampsUpdated(registrationStartTime, registrationEndTime, msg.sender);
+    }
 
     /// @notice Set milestones for recipient.
     /// @dev 'msg.sender' must be recipient creator or pool manager. Emits a 'MilestonesReviewed()' event.
@@ -383,6 +427,18 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// ============ Internal ==============
     /// ====================================
 
+    /// @notice Checks if the timestamps are valid.
+    /// @dev This will revert if any of the timestamps are invalid. This is determined by the strategy
+    /// and may vary from strategy to strategy.
+    /// Reverts in case '_registrationStartTime' is greater than the '_registrationEndTime'
+    /// @param _registrationStartTime The start time for the registration
+    /// @param _registrationEndTime The end time for the registration
+    function _isPoolTimestampValid(uint128 _registrationStartTime, uint128 _registrationEndTime) internal pure {
+        if (_registrationStartTime > _registrationEndTime) {
+            revert INVALID();
+        }
+    }
+
     /// @notice Register a recipient to the pool.
     /// @dev Emits a 'Registered()' event
     /// @param _data The data to be decoded
@@ -394,6 +450,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         internal
         override
         onlyActivePool
+        onlyActiveRegistration
         returns (address recipientId)
     {
         address recipientAddress;
@@ -544,7 +601,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         }
 
         // Calculate the amount to be distributed for the milestone
-        uint256 amount = recipient.grantAmount * milestone.amountPercentage / 1e18;
+        uint256 amount = (recipient.grantAmount * milestone.amountPercentage) / 1e18;
 
         // Get the pool, subtract the amount and transfer to the recipient
         IAllo.Pool memory pool = allo.getPool(poolId);
@@ -625,6 +682,14 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         }
 
         emit MilestonesSet(_recipientId, milestonesLength);
+    }
+
+    /// @notice Check if the registration is active
+    /// @dev Reverts if the registration is not active
+    function _checkOnlyActiveRegistration() internal view virtual {
+        if (registrationStartTime > block.timestamp || block.timestamp > registrationEndTime) {
+            revert REGISTRATION_NOT_ACTIVE();
+        }
     }
 
     /// @notice This contract should be able to receive native token

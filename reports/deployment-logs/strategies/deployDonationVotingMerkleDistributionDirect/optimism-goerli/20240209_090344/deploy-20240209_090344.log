@@ -1,0 +1,38 @@
+WARNING: You are currently using Node.js v21.1.0, which is not supported by Hardhat. This can lead to unexpected behavior. See https://hardhat.org/nodejs-versions
+
+
+
+    ////////////////////////////////////////////////////
+      Deploys DonationVotingMerkleDistributionDirectTransferStrategy.sol on optimism-goerli
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────────────────────┐
+│     (index)     │                            Values                            │
+├─────────────────┼──────────────────────────────────────────────────────────────┤
+│    contract     │ 'DonationVotingMerkleDistributionDirectTransferStrategy.sol' │
+│     chainId     │                             420                              │
+│     network     │                      'optimism-goerli'                       │
+│ deployerAddress │         '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C'         │
+│     balance     │                    '7.364401080717484655'                    │
+└─────────────────┴──────────────────────────────────────────────────────────────┘
+Deploying DonationVotingMerkleDistributionDirectTransferStrategy.sol
+[35mError calling deploy() function for contract DonationVotingMerkleDistributionDirectTransferStrategy
+ProviderError: execution reverted[0m
+
+Verifying contract...
+InvalidAddressError:  is an invalid address.
+    at SimpleTaskDefinition.action (/home/kurt/git/allo/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/index.ts:530:15)
+    at async Environment._runTaskDefinition (/home/kurt/git/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:358:14)
+    at async Environment.run (/home/kurt/git/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:191:14)
+    at async verifyContract (/home/kurt/git/allo/allo-v2/scripts/utils/scripts.ts:39:5)
+    at async deployStrategies (/home/kurt/git/allo/allo-v2/scripts/strategies/deployStrategies.ts:72:3)
+    at async deployDonationVotingMerkleDistributionDirect (/home/kurt/git/allo/allo-v2/scripts/strategies/deployDonationVotingMerkleDistributionDirect.ts:13:19)
+[90m
+	Validating getAllo() == 0x1133eA7Af70876e64665ecD07C0A0476d09465a1[0m
+[31m	❌❌❌ FAILED with Error: NotImplementedError: Method 'HardhatEthersProvider.resolveName' is not implemented[0m
+[90m
+	Validating getStrategyId() == 0x2f46bf157821dc41daa51479e94783bb0c8699eac63bf75ec450508ab03867ce[0m
+[31m	❌❌❌ FAILED with Error: NotImplementedError: Method 'HardhatEthersProvider.resolveName' is not implemented[0m
+[90m
+	Validating PERMIT2() == 0x000000000022d473030f116ddee9f6b43ac78ba3[0m
+[31m	❌❌❌ FAILED with Error: NotImplementedError: Method 'HardhatEthersProvider.resolveName' is not implemented[0m

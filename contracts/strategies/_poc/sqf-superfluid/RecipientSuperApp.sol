@@ -14,6 +14,7 @@ import {IInstantDistributionAgreementV1} from
     "../../../../lib/superfluid-protocol-monorepo/packages/ethereum-contracts/contracts/interfaces/agreements/IInstantDistributionAgreementV1.sol";
 
 import {SQFSuperFluidStrategy} from "./SQFSuperFluidStrategy.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract RecipientSuperApp is ISuperApp {
     error UNAUTHORIZED();
@@ -42,36 +43,13 @@ contract RecipientSuperApp is ISuperApp {
     SQFSuperFluidStrategy public immutable strategy;
     ISuperToken public immutable acceptedToken;
 
-    constructor(
-        address _recipient,
-        address _strategy,
-        address _host,
-        ISuperToken _acceptedToken,
-        bool _activateOnCreated,
-        bool _activateOnUpdated,
-        bool _activateOnDeleted,
-        string memory _registrationKey
-    ) {
+    modifier onlyRecipient() {
+        _checkOnlyRecipient();
+        _;
+    }
+
+    constructor(address _recipient, address _strategy, address _host, ISuperToken _acceptedToken) {
         HOST = ISuperfluid(_host);
-
-        uint256 callBackDefinitions =
-            SuperAppDefinitions.APP_LEVEL_FINAL | SuperAppDefinitions.BEFORE_AGREEMENT_CREATED_NOOP;
-
-        if (!_activateOnCreated) {
-            callBackDefinitions |= SuperAppDefinitions.AFTER_AGREEMENT_CREATED_NOOP;
-        }
-
-        if (!_activateOnUpdated) {
-            callBackDefinitions |=
-                SuperAppDefinitions.BEFORE_AGREEMENT_UPDATED_NOOP | SuperAppDefinitions.AFTER_AGREEMENT_UPDATED_NOOP;
-        }
-
-        if (!_activateOnDeleted) {
-            callBackDefinitions |= SuperAppDefinitions.BEFORE_AGREEMENT_TERMINATED_NOOP
-                | SuperAppDefinitions.AFTER_AGREEMENT_TERMINATED_NOOP;
-        }
-
-        HOST.registerAppWithKey(callBackDefinitions, _registrationKey);
 
         if (address(_strategy) == address(0)) {
             revert ZERO_ADDRESS();
@@ -79,6 +57,16 @@ contract RecipientSuperApp is ISuperApp {
         strategy = SQFSuperFluidStrategy(_strategy);
         acceptedToken = _acceptedToken;
         recipient = _recipient;
+    }
+
+    /// @notice Withdraw ERC20 funds in an emergency
+    function emergencyWithdraw(address token) external onlyRecipient {
+        IERC20(token).transfer(msg.sender, IERC20(token).balanceOf(address(this)));
+    }
+
+    /// @notice Close incoming streams in an emergency
+    function closeIncomingStream(address from) external onlyRecipient {
+        acceptedToken.deleteFlow(from, address(this));
     }
 
     /// @dev Accepts all super tokens
@@ -109,6 +97,12 @@ contract RecipientSuperApp is ISuperApp {
     function _checkHookParam(ISuperToken _superToken) internal view {
         if (msg.sender != address(HOST)) revert UnauthorizedHost();
         if (!isAcceptedSuperToken(_superToken)) revert NotAcceptedSuperToken();
+    }
+
+    function _checkOnlyRecipient() internal view virtual {
+        if (msg.sender != recipient) {
+            revert UNAUTHORIZED();
+        }
     }
 
     // https://Ihub.com/superfluid-finance/super-examples/blob/main/projects/tradeable-cashflow/contracts/RedirectAll.sol#L163

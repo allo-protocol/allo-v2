@@ -26,13 +26,15 @@ handle_insufficient_funds_error() {
 }
 
 networks=(
-#   "mumbai"
+  "mumbai"
 #   "goerli"
   "sepolia"
 #   "arbitrum-goerli"
 #   "optimism-goerli"
 #   "base-testnet"
 #   "celo-testnet"
+#   "arbitrum-sepolia"
+#   "optimism-sepolia"
 #   "optimism-mainnet"
 #   "celo-mainnet"
 #   "arbitrum-mainnet"
@@ -55,6 +57,7 @@ scripts=(
     # "strategies/deployQVSimple"
     # "strategies/deployRFPCommittee"
     # "strategies/deployRFPSimple"
+    "strategies/deployDirectGrants"
     # "strategies/deployImpactStream"
 )
 
