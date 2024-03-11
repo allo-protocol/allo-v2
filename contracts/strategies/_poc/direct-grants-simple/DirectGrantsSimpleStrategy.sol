@@ -459,6 +459,8 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         uint256 grantAmount;
         Metadata memory metadata;
 
+        if (msg.value != 0) revert NON_ZERO_VALUE();
+
         // Decode '_data' depending on the 'registryGating' flag
         /// @custom:data when 'true' -> (address recipientId, address recipientAddress, uint256 grantAmount, Metadata metadata)
         if (registryGating) {
@@ -527,6 +529,8 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         nonReentrant
         onlyPoolManager(_sender)
     {
+        if (msg.value != 0) revert NON_ZERO_VALUE();
+
         // Decode the '_data'
         (address recipientId, Status recipientStatus, uint256 grantAmount) =
             abi.decode(_data, (address, Status, uint256));
