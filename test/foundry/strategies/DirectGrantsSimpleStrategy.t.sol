@@ -118,6 +118,22 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
         assertTrue(uint8(status) == uint8(IStrategy.Status.Pending));
     }
 
+    function testRevert_registerRecipient_NON_ZERO_VALUE() public {
+        address recipientId = profile1_anchor();
+        address recipientAddress = recipient1();
+        address sender = profile1_member1();
+        uint256 grantAmount = 0; // grant amount required and no grant amount
+        Metadata memory metadata = Metadata(1, "recipient-data");
+
+        vm.deal(address(allo()), 5e17);
+        bytes memory data = abi.encode(recipientId, recipientAddress, grantAmount, metadata);
+        vm.startPrank(address(allo()));
+        vm.expectRevert(NON_ZERO_VALUE.selector);
+
+        strategy.registerRecipient{value: 5e17}(data, sender);
+        vm.stopPrank();
+    }
+
     function testRevert_registerRecipient_UNAUTHORIZED() public {
         address recipientId = profile1_anchor();
         address recipientAddress = recipient1();
@@ -322,6 +338,20 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
         DirectGrantsSimpleStrategy.Status recipientStatus = strategy.getRecipientStatus(recipientId);
 
         assertEq(uint8(recipientStatus), uint8(IStrategy.Status.Rejected));
+    }
+
+    function testRevert_allocate_NON_ZERO_VALUE() public {
+        address recipientId = _register_recipient();
+        DirectGrantsSimpleStrategy.Status recipientStatus = IStrategy.Status.Accepted;
+        uint256 grantAmount = 2e18; // 2 eth
+
+        bytes memory data = abi.encode(recipientId, recipientStatus, grantAmount);
+        vm.deal(address(allo()), 2e18);
+        vm.expectRevert(NON_ZERO_VALUE.selector);
+
+        vm.startPrank(address(allo()));
+        strategy.allocate{value: 1e18}(data, pool_manager1());
+        vm.stopPrank();
     }
 
     function testRevert_allocate_ALLOCATION_EXCEEDS_POOL_AMOUNT() public {
