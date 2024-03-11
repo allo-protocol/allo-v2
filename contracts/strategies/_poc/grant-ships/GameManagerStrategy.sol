@@ -198,9 +198,6 @@ contract GameManagerStrategy is BaseStrategy, ReentrancyGuard {
         (uint256 _gameFacilitatorId, address _hatsAddress, address _rootAccount) =
             abi.decode(_data, (uint256, address, address));
 
-        console.log("----IN GameManager Strategy----");
-        console.log(address(allo), "Allo address");
-
         gameFacilitatorHatId = _gameFacilitatorId;
 
         rootAccount = _rootAccount;

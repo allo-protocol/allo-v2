@@ -35,7 +35,7 @@ contract GameManagerFactoryTest is Test, RegistrySetupFull, AlloSetup {
         address cloneAddress = _gameManagerFactory.cloneTemplate(gameManagerStrategyId);
         vm.stopPrank();
 
-        GameManagerStrategy clone = GameManagerStrategy(payable(cloneAddress));
+        GameManagerStrategy(payable(cloneAddress));
     }
 
     function testCreateWithPool() public {
@@ -44,8 +44,16 @@ contract GameManagerFactoryTest is Test, RegistrySetupFull, AlloSetup {
         bytes memory initData = abi.encode(facilitatorHatId, hatsAddress, rootAccount);
 
         vm.startPrank(rootAccount);
-        _gameManagerFactory.cloneWithPool(gameManagerStrategyId, 0, dummyMetadata, dummyMetadata, initData, arbAddress);
+        address cloneAddress = _gameManagerFactory.cloneWithPool(
+            gameManagerStrategyId, 0, dummyMetadata, dummyMetadata, initData, arbAddress
+        );
         vm.stopPrank();
+
+        GameManagerStrategy gameManagerStrategy = GameManagerStrategy(payable(cloneAddress));
+
+        assertEq(gameManagerStrategy.gameFacilitatorHatId(), facilitatorHatId);
+        assertEq(gameManagerStrategy.rootAccount(), rootAccount);
+        assertEq(gameManagerStrategy.token(), arbAddress);
     }
 
     function _registerGameManager() private returns (address) {
