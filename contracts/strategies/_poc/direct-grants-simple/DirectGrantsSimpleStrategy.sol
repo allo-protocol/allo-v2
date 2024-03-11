@@ -399,7 +399,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
             emit RecipientStatusChanged(recipientId, Status.InReview);
 
             unchecked {
-                i++;
+                ++i;
             }
         }
     }
@@ -579,7 +579,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         for (uint256 i; i < recipientLength;) {
             _distributeUpcomingMilestone(_recipientIds[i], _sender);
             unchecked {
-                i++;
+                ++i;
             }
         }
     }
@@ -673,7 +673,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
             milestones[_recipientId].push(milestone);
 
             unchecked {
-                i++;
+                ++i;
             }
         }
 
