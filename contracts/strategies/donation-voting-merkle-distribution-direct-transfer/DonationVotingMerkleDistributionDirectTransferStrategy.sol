@@ -53,20 +53,15 @@ contract DonationVotingMerkleDistributionDirectTransferStrategy is DonationVotin
         // Get the token address
         address token = p2Data.permit.permitted.token;
         uint256 amount = p2Data.permit.permitted.amount;
-
-        if (token == NATIVE) {
-            if (msg.value < amount) {
-                revert AMOUNT_MISMATCH();
-            }
-            SafeTransferLib.safeTransferETH(_recipients[recipientId].recipientAddress, amount);
+        address recipientAddress = _recipients[recipientId].recipientAddress;
+        // Native or already approved
+        if (permitType == PermitType.None) {
+            _transferAmountFrom(token, TransferData(_sender, recipientAddress, amount));
         } else if (permitType == PermitType.Permit2) {
             PERMIT2.permitTransferFrom( // The permit message.
                 p2Data.permit,
                 // The transfer recipient and amount.
-                ISignatureTransfer.SignatureTransferDetails({
-                    to: _recipients[recipientId].recipientAddress,
-                    requestedAmount: amount
-                }),
+                ISignatureTransfer.SignatureTransferDetails({to: recipientAddress, requestedAmount: amount}),
                 // Owner of the tokens and signer of the message.
                 _sender,
                 // The packed signature that was the result of signing
@@ -87,6 +82,7 @@ contract DonationVotingMerkleDistributionDirectTransferStrategy is DonationVotin
                     revert(string(reason));
                 }
             }
+            IERC20(token).transferFrom(_sender, recipientAddress, amount);
         } else if (permitType == PermitType.PermitDAI) {
             (bytes32 r, bytes32 s, uint8 v) = splitSignature(p2Data.signature);
             // The tx can be front-run, and another user can use the permit message and signature to invalidate the nonce.
@@ -101,8 +97,8 @@ contract DonationVotingMerkleDistributionDirectTransferStrategy is DonationVotin
                     revert(string(reason));
                 }
             }
+            IERC20(token).transferFrom(_sender, recipientAddress, amount);
         }
-        IERC20(token).transferFrom(_sender, _recipients[recipientId].recipientAddress, amount);
     }
 
     function splitSignature(bytes memory sig) public pure returns (bytes32 r, bytes32 s, uint8 v) {

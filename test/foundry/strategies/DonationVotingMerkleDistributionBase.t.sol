@@ -1000,8 +1000,7 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         emit Allocated(recipientId, 1e18, NATIVE, randomAddress());
 
         allo().allocate{value: 1e18}(
-            poolId,
-            abi.encode(recipientId, DonationVotingMerkleDistributionBaseStrategy.PermitType.Permit2, permit2Data)
+            poolId, abi.encode(recipientId, DonationVotingMerkleDistributionBaseStrategy.PermitType.None, permit2Data)
         );
 
         return recipientId;
