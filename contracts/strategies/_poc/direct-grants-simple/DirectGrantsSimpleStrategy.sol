@@ -695,5 +695,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     }
 
     /// @notice This contract should be able to receive native token
-    receive() external payable {}
+    receive() external payable {
+        _checkOnlyAllo();
+    }
 }
