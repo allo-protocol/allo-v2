@@ -59,8 +59,8 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         bool registryGating;
         bool metadataRequired;
         bool grantAmountRequired;
-        uint128 registrationStartTime;
-        uint128 registrationEndTime;
+        uint64 registrationStartTime;
+        uint64 registrationEndTime;
     }
 
     /// ===============================
@@ -100,15 +100,15 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @param registrationStartTime The start time for the registration
     /// @param registrationEndTime The end time for the registration
     /// @param sender The sender of the transaction
-    event TimestampsUpdated(uint128 registrationStartTime, uint128 registrationEndTime, address sender);
+    event TimestampsUpdated(uint64 registrationStartTime, uint64 registrationEndTime, address sender);
 
     /// ================================
     /// ========== Storage =============
     /// ================================
 
     /// @notice The timestamps in seconds for the start and end times.
-    uint128 public registrationStartTime;
-    uint128 public registrationEndTime;
+    uint64 public registrationStartTime;
+    uint64 public registrationEndTime;
 
     /// @notice Flag to check if registry gating is enabled.
     bool public registryGating;
@@ -243,7 +243,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     ///      Emits a 'TimestampsUpdated()' event.
     /// @param _registrationStartTime The start time for the registration
     /// @param _registrationEndTime The end time for the registration
-    function updatePoolTimestamps(uint128 _registrationStartTime, uint128 _registrationEndTime)
+    function updatePoolTimestamps(uint64 _registrationStartTime, uint64 _registrationEndTime)
         external
         onlyPoolManager(msg.sender)
     {
