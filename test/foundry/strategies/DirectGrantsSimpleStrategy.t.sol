@@ -25,22 +25,21 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
     event MilestoneStatusChanged(address recipientId, uint256 milestoneId, IStrategy.Status status);
     event MilestonesSet(address recipientId, uint256 milestonesLength);
     event MilestonesReviewed(address recipientId, IStrategy.Status status);
-    event TimestampsUpdated(uint128 registrationStartTime, uint128 registrationEndTime, address sender);
 
     DirectGrantsSimpleStrategy strategyImplementation;
     DirectGrantsSimpleStrategy strategy;
     uint256 poolId;
     address token = NATIVE;
-    uint128 registrationStartTime;
-    uint128 registrationEndTime;
+    uint64 registrationStartTime;
+    uint64 registrationEndTime;
 
     function setUp() public {
         __RegistrySetupFull();
         __AlloSetup(address(registry()));
 
         strategyImplementation = new DirectGrantsSimpleStrategy(address(allo()), "DirectGrantsSimpleStrategy");
-        registrationStartTime = uint128(block.timestamp);
-        registrationEndTime = uint128(block.timestamp + 10);
+        registrationStartTime = uint64(block.timestamp);
+        registrationEndTime = uint64(block.timestamp + 10);
 
         vm.startPrank(allo_owner());
         allo().addToCloneableStrategies(address(strategyImplementation));
