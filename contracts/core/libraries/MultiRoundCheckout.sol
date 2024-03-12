@@ -12,9 +12,6 @@ import "../libraries/Errors.sol";
 import "../interfaces/IVotable.sol";
 import "../interfaces/IDAIPermit.sol";
 
-error VotesNotEqualRoundsLength();
-error ExcessAmountSent();
-
 contract MultiRoundCheckout is OwnableUpgradeable, PausableUpgradeable, ReentrancyGuardUpgradeable, Errors {
     // todo: this exists twice in the codebase - line 95 of DonationVotingMerkleDistributionBaseStrategy
     // if we inherhit this contract into the strategy contract we can remove the one in the strategy contract.
@@ -55,7 +52,7 @@ contract MultiRoundCheckout is OwnableUpgradeable, PausableUpgradeable, Reentran
         whenNotPaused
     {
         if (votes.length != rounds.length) {
-            revert VotesNotEqualRoundsLength();
+            revert MISMATCH();
         }
 
         if (amounts.length != rounds.length) {
@@ -75,7 +72,7 @@ contract MultiRoundCheckout is OwnableUpgradeable, PausableUpgradeable, Reentran
         }
 
         if (address(this).balance != initialBalance - msg.value) {
-            revert ExcessAmountSent();
+            revert EXCESS_AMOUNT_SENT();
         }
     }
 
@@ -94,7 +91,7 @@ contract MultiRoundCheckout is OwnableUpgradeable, PausableUpgradeable, Reentran
         bytes32 s
     ) public nonReentrant whenNotPaused {
         if (votes.length != rounds.length) {
-            revert VotesNotEqualRoundsLength();
+            revert MISMATCH();
         }
 
         if (amounts.length != rounds.length) {
@@ -127,7 +124,7 @@ contract MultiRoundCheckout is OwnableUpgradeable, PausableUpgradeable, Reentran
         }
 
         if (IERC20Upgradeable(token).balanceOf(address(this)) != initialBalance) {
-            revert ExcessAmountSent();
+            revert EXCESS_AMOUNT_SENT();
         }
     }
 
@@ -147,7 +144,7 @@ contract MultiRoundCheckout is OwnableUpgradeable, PausableUpgradeable, Reentran
         bytes32 s
     ) public nonReentrant whenNotPaused {
         if (votes.length != rounds.length) {
-            revert VotesNotEqualRoundsLength();
+            revert MISMATCH();
         }
 
         if (amounts.length != rounds.length) {
@@ -180,7 +177,7 @@ contract MultiRoundCheckout is OwnableUpgradeable, PausableUpgradeable, Reentran
         }
 
         if (IERC20Upgradeable(token).balanceOf(address(this)) != initialBalance) {
-            revert ExcessAmountSent();
+            revert EXCESS_AMOUNT_SENT();
         }
     }
 

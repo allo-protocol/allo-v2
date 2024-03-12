@@ -45,6 +45,9 @@ contract Errors {
     /// @notice Thrown when the value is non-zero
     error NON_ZERO_VALUE();
 
+    /// @notice Thrown when excess amount sent
+    error EXCESS_AMOUNT_SENT();
+
     /// ======================
     /// ====== Registry ======
     /// ======================
