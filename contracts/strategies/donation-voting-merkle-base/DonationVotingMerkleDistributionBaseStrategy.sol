@@ -144,6 +144,14 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     /// @param sender The sender of the transaction
     event BatchPayoutSuccessful(address indexed sender);
 
+    /// @notice Emitted when a recipient is allocated funds
+    /// @param recipientId The id of the recipient
+    /// @param amount The amount of tokens allocated
+    /// @param token The address of the token
+    /// @param sender The sender of the transaction
+    /// @param origin The original sender of the transaction
+    event Allocated(address indexed recipientId, uint256 amount, address token, address sender, address origin);
+
     /// ================================
     /// ========== Storage =============
     /// ================================
@@ -691,7 +699,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
         }
 
         // Emit that the amount has been allocated to the recipient by the sender
-        emit Allocated(recipientId, amount, token, _sender);
+        emit Allocated(recipientId, amount, token, _sender, tx.origin);
     }
 
     /// @notice Check if sender is profile owner or member.
