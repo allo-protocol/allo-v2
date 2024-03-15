@@ -462,7 +462,11 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
         emit MilestonesReviewed(recipientId, IStrategy.Status.Rejected);
 
         vm.startPrank(pool_manager1());
-        strategy.reviewSetMilestones(recipientId, IStrategy.Status.Rejected);
+
+        DirectGrantsSimpleStrategy.Milestone[] memory milestonesFromChain = strategy.getMilestones(recipientId);
+        bytes32 milestonesHash = keccak256(abi.encode(milestonesFromChain));
+
+        strategy.reviewSetMilestones(recipientId, IStrategy.Status.Rejected, milestonesHash);
         vm.stopPrank();
 
         recipient = strategy.getRecipient(profile1_anchor());
@@ -473,7 +477,8 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
         vm.expectEmit(false, false, false, true);
         emit MilestonesReviewed(recipientId, IStrategy.Status.Accepted);
 
-        strategy.reviewSetMilestones(recipientId, IStrategy.Status.Accepted);
+        strategy.reviewSetMilestones(recipientId, IStrategy.Status.Accepted, milestonesHash);
+
         vm.stopPrank();
 
         recipient = strategy.getRecipient(profile1_anchor());
@@ -482,26 +487,45 @@ contract DirectGrantsSimpleStrategyTest is Test, EventSetup, AlloSetup, Registry
 
     function testRevert_reviewSetMilestones_UNAUTHORIZED() public {
         address recipientId = _register_recipient_allocate_accept_set_milestones_by_recipient();
-        vm.expectRevert(UNAUTHORIZED.selector);
 
         vm.startPrank(randomAddress());
-        strategy.reviewSetMilestones(recipientId, IStrategy.Status.Rejected);
+        DirectGrantsSimpleStrategy.Milestone[] memory milestonesFromChain = strategy.getMilestones(recipientId);
+        bytes32 milestonesHash = keccak256(abi.encode(milestonesFromChain));
+
+        vm.expectRevert(UNAUTHORIZED.selector);
+        strategy.reviewSetMilestones(recipientId, IStrategy.Status.Rejected, milestonesHash);
         vm.stopPrank();
     }
 
     function testRevert_reviewSetMilestones_MILESTONES_ALREADY_SET() public {
         address recipientId = _register_recipient_allocate_accept_set_milestones_by_pool_manager();
-        vm.expectRevert(DirectGrantsSimpleStrategy.MILESTONES_ALREADY_SET.selector);
         vm.startPrank(pool_manager1());
-        strategy.reviewSetMilestones(recipientId, IStrategy.Status.Rejected);
+        DirectGrantsSimpleStrategy.Milestone[] memory milestonesFromChain = strategy.getMilestones(recipientId);
+        bytes32 milestonesHash = keccak256(abi.encode(milestonesFromChain));
+
+        vm.expectRevert(DirectGrantsSimpleStrategy.MILESTONES_ALREADY_SET.selector);
+        strategy.reviewSetMilestones(recipientId, IStrategy.Status.Rejected, milestonesHash);
+        vm.stopPrank();
+    }
+
+    function testRevert_reviewSetMilestones_INVALID_MILESTONE_INVALID_HASH() public {
+        address recipientId = _register_recipient_allocate_accept_set_milestones_by_pool_manager();
+        vm.startPrank(pool_manager1());
+        bytes32 milestonesHash = bytes32(0);
+
+        vm.expectRevert(DirectGrantsSimpleStrategy.INVALID_MILESTONE.selector);
+        strategy.reviewSetMilestones(recipientId, IStrategy.Status.Rejected, milestonesHash);
         vm.stopPrank();
     }
 
     function testRevert_reviewSetMilestones_INVALID_MILESTONE() public {
         address recipientId = _register_recipient_allocate_accept();
         vm.startPrank(pool_manager1());
+        DirectGrantsSimpleStrategy.Milestone[] memory milestonesFromChain = strategy.getMilestones(recipientId);
+        bytes32 milestonesHash = keccak256(abi.encode(milestonesFromChain));
+
         vm.expectRevert(DirectGrantsSimpleStrategy.INVALID_MILESTONE.selector);
-        strategy.reviewSetMilestones(recipientId, IStrategy.Status.Rejected);
+        strategy.reviewSetMilestones(recipientId, IStrategy.Status.Rejected, milestonesHash);
         vm.stopPrank();
     }
 
