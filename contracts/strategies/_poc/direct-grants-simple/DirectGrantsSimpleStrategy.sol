@@ -292,11 +292,20 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @dev Emits a 'MilestonesReviewed()' event
     /// @param _recipientId ID of the recipient
     /// @param _status The status of the milestone review
-    function reviewSetMilestones(address _recipientId, Status _status) external onlyPoolManager(msg.sender) {
+    /// @param milestonesHash The hash of the milestones reviewed by the pool manager
+    function reviewSetMilestones(address _recipientId, Status _status, bytes32 milestonesHash)
+        external
+        onlyPoolManager(msg.sender)
+    {
         Recipient storage recipient = _recipients[_recipientId];
 
-        // Check if the recipient has any milestones, otherwise revert
-        if (milestones[_recipientId].length == 0) {
+        if (
+            milestones[_recipientId]
+                // Check if the recipient has any milestones, otherwise revert
+                .length == 0
+            // Check if the milestone hasn't been updated via frontrun, otherwise revert
+            || keccak256(abi.encode(milestones[_recipientId])) != milestonesHash
+        ) {
             revert INVALID_MILESTONE();
         }
 
