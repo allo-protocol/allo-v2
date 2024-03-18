@@ -49,6 +49,7 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         bytes32 profileId, uint256 nonce, string name, Metadata metadata, address indexed owner, address indexed anchor
     );
     event UpdatedRegistration(address indexed recipientId, bytes data, address sender, uint8 status);
+    event Allocated(address indexed recipientId, uint256 amount, address token, address sender, address origin);
 
     error InvalidSignature();
     error SignatureExpired(uint256);
@@ -997,11 +998,10 @@ contract DonationVotingMerkleDistributionBaseMockTest is
         vm.prank(randomAddress());
 
         vm.expectEmit(false, false, false, true);
-        emit Allocated(recipientId, 1e18, NATIVE, randomAddress());
+        emit Allocated(recipientId, 1e18, NATIVE, randomAddress(), tx.origin);
 
         allo().allocate{value: 1e18}(
-            poolId,
-            abi.encode(recipientId, DonationVotingMerkleDistributionBaseStrategy.PermitType.Permit2, permit2Data)
+            poolId, abi.encode(recipientId, DonationVotingMerkleDistributionBaseStrategy.PermitType.None, permit2Data)
         );
 
         return recipientId;

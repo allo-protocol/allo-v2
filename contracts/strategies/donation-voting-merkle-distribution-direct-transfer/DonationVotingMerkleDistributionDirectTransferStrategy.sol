@@ -53,20 +53,15 @@ contract DonationVotingMerkleDistributionDirectTransferStrategy is DonationVotin
         // Get the token address
         address token = p2Data.permit.permitted.token;
         uint256 amount = p2Data.permit.permitted.amount;
-
-        if (token == NATIVE) {
-            if (msg.value < amount) {
-                revert AMOUNT_MISMATCH();
-            }
-            SafeTransferLib.safeTransferETH(_recipients[recipientId].recipientAddress, amount);
+        address recipientAddress = _recipients[recipientId].recipientAddress;
+        // Native or already approved
+        if (permitType == PermitType.None) {
+            _transferAmountFrom(token, TransferData(_sender, recipientAddress, amount));
         } else if (permitType == PermitType.Permit2) {
             PERMIT2.permitTransferFrom( // The permit message.
                 p2Data.permit,
                 // The transfer recipient and amount.
-                ISignatureTransfer.SignatureTransferDetails({
-                    to: _recipients[recipientId].recipientAddress,
-                    requestedAmount: amount
-                }),
+                ISignatureTransfer.SignatureTransferDetails({to: recipientAddress, requestedAmount: amount}),
                 // Owner of the tokens and signer of the message.
                 _sender,
                 // The packed signature that was the result of signing
@@ -79,55 +74,46 @@ contract DonationVotingMerkleDistributionDirectTransferStrategy is DonationVotin
             // In this case the permit call will fail, but it means that the contract already has allowance for the token.
             try IERC20Permit(token).permit(_sender, address(this), amount, p2Data.permit.deadline, v, r, s) {}
             catch Error(string memory reason) {
-                if (IERC20(token).allowance(msg.sender, address(this)) < amount) {
+                if (IERC20(token).allowance(_sender, address(this)) < amount) {
                     revert(reason);
                 }
             } catch (bytes memory reason) {
-                if (IERC20(token).allowance(msg.sender, address(this)) < amount) {
+                if (IERC20(token).allowance(_sender, address(this)) < amount) {
                     revert(string(reason));
                 }
             }
-            IERC20(token).transferFrom(_sender, _recipients[recipientId].recipientAddress, amount);
+            IERC20(token).transferFrom(_sender, recipientAddress, amount);
         } else if (permitType == PermitType.PermitDAI) {
             (bytes32 r, bytes32 s, uint8 v) = splitSignature(p2Data.signature);
             // The tx can be front-run, and another user can use the permit message and signature to invalidate the nonce.
             // In this case the permit call will fail, but it means that the contract already has allowance for the token.
             try IDAI(token).permit(_sender, address(this), p2Data.permit.nonce, p2Data.permit.deadline, true, v, r, s) {}
             catch Error(string memory reason) {
-                if (IERC20(token).allowance(msg.sender, address(this)) < amount) {
+                if (IERC20(token).allowance(_sender, address(this)) < amount) {
                     revert(reason);
                 }
             } catch (bytes memory reason) {
-                if (IERC20(token).allowance(msg.sender, address(this)) < amount) {
+                if (IERC20(token).allowance(_sender, address(this)) < amount) {
                     revert(string(reason));
                 }
             }
-            IERC20(token).transferFrom(_sender, _recipients[recipientId].recipientAddress, amount);
+            IERC20(token).transferFrom(_sender, recipientAddress, amount);
         }
     }
 
     function splitSignature(bytes memory sig) public pure returns (bytes32 r, bytes32 s, uint8 v) {
-        require(sig.length == 65, "invalid signature length");
-
-        assembly {
-            /*
-            First 32 bytes stores the length of the signature
-
-            add(sig, 32) = pointer of sig + 32
-            effectively, skips first 32 bytes of signature
-
-            mload(p) loads next 32 bytes starting at the memory address p into memory
-            */
-
-            // first 32 bytes, after the length prefix
-            r := mload(add(sig, 32))
-            // second 32 bytes
-            s := mload(add(sig, 64))
-            // final byte (first byte of the next 32 bytes)
-            v := byte(0, mload(add(sig, 96)))
+        if (sig.length == 65) {
+            (r, s) = abi.decode(sig, (bytes32, bytes32));
+            v = uint8(sig[64]);
+        } else if (sig.length == 64) {
+            // EIP-2098
+            bytes32 vs;
+            (r, vs) = abi.decode(sig, (bytes32, bytes32));
+            s = vs & (0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff);
+            v = uint8(uint256(vs >> 255)) + 27;
+        } else {
+            revert INVALID();
         }
-
-        // implicitly return (r, s, v)
     }
 
     /// @notice Internal function to return the token amount locked in vault

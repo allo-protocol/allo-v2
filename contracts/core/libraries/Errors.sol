@@ -42,6 +42,9 @@ contract Errors {
     /// @notice Thrown when the function is not implemented
     error NOT_IMPLEMENTED();
 
+    /// @notice Thrown when the value is non-zero
+    error NON_ZERO_VALUE();
+
     /// ======================
     /// ====== Registry ======
     /// ======================
