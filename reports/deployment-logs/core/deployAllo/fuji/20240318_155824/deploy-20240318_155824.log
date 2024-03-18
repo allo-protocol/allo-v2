@@ -1,0 +1,52 @@
+
+    ////////////////////////////////////////////////////
+            Deploys Allo.sol on fuji
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────┐
+│     (index)     │                    Values                    │
+├─────────────────┼──────────────────────────────────────────────┤
+│    contract     │              'Deploy Allo.sol'               │
+│     chainId     │                    43113                     │
+│     network     │                    'fuji'                    │
+│      owner      │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│    registry     │ '0x4AAcca72145e1dF2aeC137E1f3C5E3D75DB8b5f3' │
+│    treasury     │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│   percentFee    │                      0                       │
+│     baseFee     │                      0                       │
+│ deployerAddress │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│     balance     │                 '1.42995408'                 │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying Allo.sol...
+Allo Proxy deployed to: 0x1133eA7Af70876e64665ecD07C0A0476d09465a1
+Registry implementation deployed to: 0xB087535DB0df98fC4327136e897A5985E5Cfbd66
+Proxy Admin:  0xf7B93519a3A1790F97f7b14E6f118A139187843e
+Proxy Admin Owner:  0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C
+
+Verifying contract...
+Verifying implementation: 0xB087535DB0df98fC4327136e897A5985E5Cfbd66
+The contract 0xB087535DB0df98fC4327136e897A5985E5Cfbd66 has already been verified.
+https://testnet.avascan.info/blockchain/c/address/0xB087535DB0df98fC4327136e897A5985E5Cfbd66#code
+Verifying proxy: 0x1133eA7Af70876e64665ecD07C0A0476d09465a1
+Error: Failed to get logs for contract at address 0x1133eA7Af70876e64665ecD07C0A0476d09465a1.
+
+Etherscan returned with message: NOTOK, reason: Invalid querystring request
+
+Verifying contract...
+The contract 0xB087535DB0df98fC4327136e897A5985E5Cfbd66 has already been verified.
+https://testnet.avascan.info/blockchain/c/address/0xB087535DB0df98fC4327136e897A5985E5Cfbd66#code
+[90m
+	Validating getRegistry() == 0x4AAcca72145e1dF2aeC137E1f3C5E3D75DB8b5f3[0m
+[32m	✅ PASSED with Result: 0x4AAcca72145e1dF2aeC137E1f3C5E3D75DB8b5f3[0m
+[90m
+	Validating getTreasury() == 0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C[0m
+[32m	✅ PASSED with Result: 0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C[0m
+[90m
+	Validating getPercentFee() == 0[0m
+[32m	✅ PASSED with Result: 0[0m
+[90m
+	Validating getBaseFee() == 0[0m
+[32m	✅ PASSED with Result: 0[0m
+[90m
+	Validating owner() == 0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C[0m
+[32m	✅ PASSED with Result: 0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C[0m

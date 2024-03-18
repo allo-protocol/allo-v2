@@ -1,0 +1,8 @@
+Error: getaddrinfo ENOTFOUND base-goerli.g.alchemy.com
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:118:26) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'base-goerli.g.alchemy.com'
+}
+error: "hardhat" exited with code 1 (SIGHUP)

@@ -1,0 +1,61 @@
+WARNING: You are currently using Node.js v21.1.0, which is not supported by Hardhat. This can lead to unexpected behavior. See https://hardhat.org/nodejs-versions
+
+
+
+    ////////////////////////////////////////////////////
+            Deploys Registry.sol on avalanche
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────┐
+│     (index)     │                    Values                    │
+├─────────────────┼──────────────────────────────────────────────┤
+│    contract     │                'Registry.sol'                │
+│     chainId     │                    43114                     │
+│     network     │                 'avalanche'                  │
+│ deployerAddress │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│  registryOwner  │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│     balance     │            '5.737043262908405076'            │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying Registry...
+Registry proxy deployed to: 0x4AAcca72145e1dF2aeC137E1f3C5E3D75DB8b5f3
+Registry implementation deployed to: 0xA3Fd7042F83960398De6ceddbf513F8cac877cbE
+Proxy Admin:  0x758b87af7fdB4783f848a1dDEa1F025dC48B9858
+Proxy Admin Owner:  0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C
+
+Verifying contract...
+Verifying implementation: 0xA3Fd7042F83960398De6ceddbf513F8cac877cbE
+Successfully submitted source code for contract
+contracts/core/Registry.sol:Registry at 0xA3Fd7042F83960398De6ceddbf513F8cac877cbE
+for verification on the block explorer. Waiting for verification result...
+
+Failed to verify implementation contract at 0xA3Fd7042F83960398De6ceddbf513F8cac877cbE: The API responded with an unexpected message.
+Please report this issue to the Hardhat team.
+Contract verification may have succeeded and should be checked manually.
+Message: Error: Compilation successful, but bytecode does not match with deployed bytecode for address 0xA3Fd7042F83960398De6ceddbf513F8cac877cbE, please check your parameters
+Verifying proxy: 0x4AAcca72145e1dF2aeC137E1f3C5E3D75DB8b5f3
+Error: Failed to get logs for contract at address 0x4AAcca72145e1dF2aeC137E1f3C5E3D75DB8b5f3.
+
+Etherscan returned with message: NOTOK, reason: Invalid querystring request
+
+Verifying contract...
+Successfully submitted source code for contract
+contracts/core/Registry.sol:Registry at 0xA3Fd7042F83960398De6ceddbf513F8cac877cbE
+for verification on the block explorer. Waiting for verification result...
+
+VerificationAPIUnexpectedMessageError: The API responded with an unexpected message.
+Please report this issue to the Hardhat team.
+Contract verification may have succeeded and should be checked manually.
+Message: Error: Compilation successful, but bytecode does not match with deployed bytecode for address 0xA3Fd7042F83960398De6ceddbf513F8cac877cbE, please check your parameters
+    at SimpleTaskDefinition.action (/home/kurt/git/allo/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/index.ts:491:15)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Environment._runTaskDefinition (/home/kurt/git/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:358:14)
+    at async Environment.run (/home/kurt/git/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:191:14)
+    at async SimpleTaskDefinition.action (/home/kurt/git/allo/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/index.ts:298:9)
+    at async Environment._runTaskDefinition (/home/kurt/git/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:358:14)
+    at async hardhatVerify (/home/kurt/git/allo/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/verify-proxy.ts:118:12)
+    at async OverriddenTaskDefinition._action (/home/kurt/git/allo/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/index.ts:198:12)
+    at async Environment._runTaskDefinition (/home/kurt/git/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:358:14)
+    at async Environment.run (/home/kurt/git/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:191:14)
+[90m
+	Validating hasRole(0x815b5a78dc333d344c7df9da23c04dbd432015cc701876ddb9ffe850e6882747,0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C) == true[0m
+[32m	✅ PASSED with Result: true[0m

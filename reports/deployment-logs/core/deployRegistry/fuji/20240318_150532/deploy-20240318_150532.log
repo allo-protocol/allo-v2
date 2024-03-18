@@ -1,0 +1,84 @@
+
+    ////////////////////////////////////////////////////
+            Deploys Registry.sol on fuji
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────┐
+│     (index)     │                    Values                    │
+├─────────────────┼──────────────────────────────────────────────┤
+│    contract     │                'Registry.sol'                │
+│     chainId     │                    43113                     │
+│     network     │                    'fuji'                    │
+│ deployerAddress │ '0xB8cEF765721A6da910f14Be93e7684e9a3714123' │
+│  registryOwner  │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│     balance     │                '0.149309375'                 │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying Registry...
+Registry proxy deployed to: 0x0f0A4961274A578443089D06AfB9d1fC231A5a4D
+Registry implementation deployed to: 0x5987A30F7Cb138c231de96Fe1522Fe4f1e83940D
+Proxy Admin:  0xf7B93519a3A1790F97f7b14E6f118A139187843e
+Proxy Admin Owner:  0xB8cEF765721A6da910f14Be93e7684e9a3714123
+
+Verifying contract...
+Verifying implementation: 0x5987A30F7Cb138c231de96Fe1522Fe4f1e83940D
+Failed to verify implementation contract at 0x5987A30F7Cb138c231de96Fe1522Fe4f1e83940D: You are trying to verify a contract in 'fuji', but no API token was found for this network. Please provide one in your hardhat config. For example:
+
+{
+  ...
+  etherscan: {
+    apiKey: {
+      fuji: 'your API key'
+    }
+  }
+}
+
+See https://etherscan.io/apis
+MissingApiKeyError: You are trying to verify a contract in 'fuji', but no API token was found for this network. Please provide one in your hardhat config. For example:
+
+{
+  ...
+  etherscan: {
+    apiKey: {
+      fuji: 'your API key'
+    }
+  }
+}
+
+See https://etherscan.io/apis
+    at resolveApiKey (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/@nomicfoundation+hardhat-verify@1.1.1_hardhat@2.22.1/node_modules/@nomicfoundation/hardhat-verify/src/internal/etherscan.ts:290:11)
+    at Function.fromChainConfig (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/@nomicfoundation+hardhat-verify@1.1.1_hardhat@2.22.1/node_modules/@nomicfoundation/hardhat-verify/src/internal/etherscan.ts:75:28)
+    at getEtherscanInstance (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/@openzeppelin+hardhat-upgrades@2.5.1_sym3ukwnpvfhm2yjdhnkm4xtb4/node_modules/@openzeppelin/hardhat-upgrades/src/utils/etherscan-api.ts:50:20)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async fullVerifyTransparentOrUUPS (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/@openzeppelin+hardhat-upgrades@2.5.1_sym3ukwnpvfhm2yjdhnkm4xtb4/node_modules/@openzeppelin/hardhat-upgrades/src/verify-proxy.ts:202:21)
+    at async verify (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/@openzeppelin+hardhat-upgrades@2.5.1_sym3ukwnpvfhm2yjdhnkm4xtb4/node_modules/@openzeppelin/hardhat-upgrades/src/verify-proxy.ts:99:5)
+    at async OverriddenTaskDefinition._action (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/@openzeppelin+hardhat-upgrades@2.5.1_sym3ukwnpvfhm2yjdhnkm4xtb4/node_modules/@openzeppelin/hardhat-upgrades/src/index.ts:206:12)
+    at async Environment._runTaskDefinition (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/hardhat@2.22.1_uapi6z6mzql6o72riyrcnnvx6u/node_modules/hardhat/src/internal/core/runtime-environment.ts:359:14)
+    at async Environment.run (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/hardhat@2.22.1_uapi6z6mzql6o72riyrcnnvx6u/node_modules/hardhat/src/internal/core/runtime-environment.ts:192:14)
+    at async SimpleTaskDefinition.action (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/@nomicfoundation+hardhat-verify@1.1.1_hardhat@2.22.1/node_modules/@nomicfoundation/hardhat-verify/src/index.ts:546:7)
+
+Verifying contract...
+MissingApiKeyError: You are trying to verify a contract in 'fuji', but no API token was found for this network. Please provide one in your hardhat config. For example:
+
+{
+  ...
+  etherscan: {
+    apiKey: {
+      fuji: 'your API key'
+    }
+  }
+}
+
+See https://etherscan.io/apis
+    at resolveApiKey (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/@nomicfoundation+hardhat-verify@1.1.1_hardhat@2.22.1/node_modules/@nomicfoundation/hardhat-verify/src/internal/etherscan.ts:290:11)
+    at Function.fromChainConfig (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/@nomicfoundation+hardhat-verify@1.1.1_hardhat@2.22.1/node_modules/@nomicfoundation/hardhat-verify/src/internal/etherscan.ts:75:28)
+    at SimpleTaskDefinition.action (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/@nomicfoundation+hardhat-verify@1.1.1_hardhat@2.22.1/node_modules/@nomicfoundation/hardhat-verify/src/index.ts:240:35)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Environment._runTaskDefinition (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/hardhat@2.22.1_uapi6z6mzql6o72riyrcnnvx6u/node_modules/hardhat/src/internal/core/runtime-environment.ts:359:14)
+    at async hardhatVerify (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/@openzeppelin+hardhat-upgrades@2.5.1_sym3ukwnpvfhm2yjdhnkm4xtb4/node_modules/@openzeppelin/hardhat-upgrades/src/verify-proxy.ts:118:12)
+    at async OverriddenTaskDefinition._action (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/@openzeppelin+hardhat-upgrades@2.5.1_sym3ukwnpvfhm2yjdhnkm4xtb4/node_modules/@openzeppelin/hardhat-upgrades/src/index.ts:206:12)
+    at async Environment._runTaskDefinition (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/hardhat@2.22.1_uapi6z6mzql6o72riyrcnnvx6u/node_modules/hardhat/src/internal/core/runtime-environment.ts:359:14)
+    at async Environment.run (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/hardhat@2.22.1_uapi6z6mzql6o72riyrcnnvx6u/node_modules/hardhat/src/internal/core/runtime-environment.ts:192:14)
+    at async SimpleTaskDefinition.action (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/@nomicfoundation+hardhat-verify@1.1.1_hardhat@2.22.1/node_modules/@nomicfoundation/hardhat-verify/src/index.ts:546:7)
+[90m
+	Validating hasRole(0x815b5a78dc333d344c7df9da23c04dbd432015cc701876ddb9ffe850e6882747,0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C) == true[0m
+[32m	✅ PASSED with Result: true[0m

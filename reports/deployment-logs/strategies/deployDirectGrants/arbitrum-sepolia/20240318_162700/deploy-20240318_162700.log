@@ -1,0 +1,40 @@
+
+    ////////////////////////////////////////////////////
+      Deploys DirectGrantsSimpleStrategy.sol on arbitrum-sepolia
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────┐
+│     (index)     │                    Values                    │
+├─────────────────┼──────────────────────────────────────────────┤
+│    contract     │       'DirectGrantsSimpleStrategy.sol'       │
+│     chainId     │                    421614                    │
+│     network     │              'arbitrum-sepolia'              │
+│ deployerAddress │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│     balance     │              '0.73778979188187'              │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying DirectGrantsSimpleStrategy.sol
+[35mContract DirectGrantsSimpleStrategy deployed at address: 0x8564d522b19836b7F5B4324E7Ee8Cb41810E9F9e[0m
+
+Verifying contract...
+ContractVerificationMissingBytecodeError: Failed to send contract verification request.
+Endpoint URL: https://api-sepolia.arbiscan.io/api
+Reason: The Etherscan API responded that the address 0x8564d522b19836b7F5B4324E7Ee8Cb41810E9F9e does not have bytecode.
+This can happen if the contract was recently deployed and this fact hasn't propagated to the backend yet.
+Try waiting for a minute before verifying your contract. If you are invoking this from a script,
+try to wait for five confirmations of your contract deployment transaction before running the verification subtask.
+    at Etherscan.verify (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/@nomicfoundation+hardhat-verify@1.1.1_hardhat@2.22.1/node_modules/@nomicfoundation/hardhat-verify/src/internal/etherscan.ts:166:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async SimpleTaskDefinition.action (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/@nomicfoundation+hardhat-verify@1.1.1_hardhat@2.22.1/node_modules/@nomicfoundation/hardhat-verify/src/index.ts:471:33)
+    at async Environment._runTaskDefinition (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/hardhat@2.22.1_uapi6z6mzql6o72riyrcnnvx6u/node_modules/hardhat/src/internal/core/runtime-environment.ts:359:14)
+    at async Environment.run (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/hardhat@2.22.1_uapi6z6mzql6o72riyrcnnvx6u/node_modules/hardhat/src/internal/core/runtime-environment.ts:192:14)
+    at async SimpleTaskDefinition.action (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/@nomicfoundation+hardhat-verify@1.1.1_hardhat@2.22.1/node_modules/@nomicfoundation/hardhat-verify/src/index.ts:298:9)
+    at async Environment._runTaskDefinition (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/hardhat@2.22.1_uapi6z6mzql6o72riyrcnnvx6u/node_modules/hardhat/src/internal/core/runtime-environment.ts:359:14)
+    at async hardhatVerify (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/@openzeppelin+hardhat-upgrades@2.5.1_sym3ukwnpvfhm2yjdhnkm4xtb4/node_modules/@openzeppelin/hardhat-upgrades/src/verify-proxy.ts:118:12)
+    at async OverriddenTaskDefinition._action (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/@openzeppelin+hardhat-upgrades@2.5.1_sym3ukwnpvfhm2yjdhnkm4xtb4/node_modules/@openzeppelin/hardhat-upgrades/src/index.ts:206:12)
+    at async Environment._runTaskDefinition (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/hardhat@2.22.1_uapi6z6mzql6o72riyrcnnvx6u/node_modules/hardhat/src/internal/core/runtime-environment.ts:359:14)
+[90m
+	Validating getAllo() == 0x1133eA7Af70876e64665ecD07C0A0476d09465a1[0m
+[32m	✅ PASSED with Result: 0x1133eA7Af70876e64665ecD07C0A0476d09465a1[0m
+[90m
+	Validating getStrategyId() == 0x53fb9d3bce0956ca2db5bb1441f5ca23050cb1973b33789e04a5978acfd9ca93[0m
+[32m	✅ PASSED with Result: 0x53fb9d3bce0956ca2db5bb1441f5ca23050cb1973b33789e04a5978acfd9ca93[0m

@@ -1,0 +1,33 @@
+
+    ////////////////////////////////////////////////////
+      Deploys DonationVotingMerkleDistributionDirectTransferStrategy.sol on celo-testnet
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────────────────────┐
+│     (index)     │                            Values                            │
+├─────────────────┼──────────────────────────────────────────────────────────────┤
+│    contract     │ 'DonationVotingMerkleDistributionDirectTransferStrategy.sol' │
+│     chainId     │                            44787                             │
+│     network     │                        'celo-testnet'                        │
+│ deployerAddress │         '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C'         │
+│     balance     │                         '3.18087154'                         │
+└─────────────────┴──────────────────────────────────────────────────────────────┘
+Deploying DonationVotingMerkleDistributionDirectTransferStrategy.sol
+[35mContract DonationVotingMerkleDistributionDirectTransferStrategy deployed at address: 0x787eC93Dd71a90563979417879F5a3298389227f[0m
+
+Verifying contract...
+Successfully submitted source code for contract
+contracts/strategies/donation-voting-merkle-distribution-direct-transfer/DonationVotingMerkleDistributionDirectTransferStrategy.sol:DonationVotingMerkleDistributionDirectTransferStrategy at 0x787eC93Dd71a90563979417879F5a3298389227f
+for verification on the block explorer. Waiting for verification result...
+
+Successfully verified contract DonationVotingMerkleDistributionDirectTransferStrategy on the block explorer.
+https://alfajores.celoscan.io/address/0x787eC93Dd71a90563979417879F5a3298389227f#code
+[90m
+	Validating getAllo() == 0x1133eA7Af70876e64665ecD07C0A0476d09465a1[0m
+[32m	✅ PASSED with Result: 0x1133eA7Af70876e64665ecD07C0A0476d09465a1[0m
+[90m
+	Validating getStrategyId() == 0x9fa6890423649187b1f0e8bf4265f0305ce99523c3d11aa36b35a54617bb0ec0[0m
+[32m	✅ PASSED with Result: 0x9fa6890423649187b1f0e8bf4265f0305ce99523c3d11aa36b35a54617bb0ec0[0m
+[90m
+	Validating PERMIT2() == 0x000000000022d473030f116ddee9f6b43ac78ba3[0m
+[32m	✅ PASSED with Result: 0x000000000022d473030f116ddee9f6b43ac78ba3[0m

@@ -20,14 +20,6 @@ export const registryConfig: DeployParams = {
   11155111: {
     owner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
   },
-  // PGN
-  424: {
-    owner: "",
-  },
-  // PGN Sepolia
-  58008: {
-    owner: "",
-  },
   // Optimism
   10: {
     owner: "0x791BB7b7e16982BDa029893077EEb4F77A2CD564",
@@ -70,6 +62,26 @@ export const registryConfig: DeployParams = {
   },
   // Optimism Sepolia
   11155420: {
+    owner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
+  },
+  // Fuji
+  43113: {
+    owner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
+  },
+  // Avalanche
+  43114: {
+    owner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
+  },
+  // Scroll
+  534352: {
+    owner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
+  },
+  // Fantom
+  250: {
+    owner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
+  },
+  // Fantom Testnet
+  4002: {
     owner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
   },
 };
