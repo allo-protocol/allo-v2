@@ -26,24 +26,25 @@ const chainIds = {
   "optimism-goerli": 420,
   "optimism-sepolia": 11155420,
   "fantom-testnet": 4002,
-  "pgn-sepolia": 58008,
   "celo-testnet": 44787,
   "arbitrum-goerli": 421613,
   "arbitrum-sepolia": 421614,
   "base-testnet": 84531,
   mumbai: 80001,
   "filecoin-calibration": 314159,
+  fuji: 43113,
 
   // mainnet
   mainnet: 1,
   "optimism-mainnet": 10,
-  "pgn-mainnet": 424,
   "fantom-mainnet": 250,
   "celo-mainnet": 42220,
   "arbitrum-mainnet": 42161,
   base: 8453,
   polygon: 137,
   "filecoin-mainnet": 314,
+  avalanche: 43114,
+  scroll: 534352,
 };
 
 let deployPrivateKey = process.env.DEPLOYER_PRIVATE_KEY as string;
@@ -157,15 +158,7 @@ const config: HardhatUserConfig = {
       "arbitrum-mainnet",
       `https://arb-mainnet.g.alchemy.com/v2/${alchemyIdKey}`,
     ),
-    "fantom-mainnet": createMainnetConfig(
-      "fantom-mainnet",
-      "https://rpc.ftm.tools",
-    ),
-    "pgn-mainnet": {
-      ...createMainnetConfig("pgn-mainnet"),
-      url: "https://rpc.publicgoods.network",
-      gasPrice: 20000000000,
-    },
+    fantom: createMainnetConfig("fantom-mainnet", "https://rpc.ftm.tools"),
     "celo-mainnet": {
       ...createMainnetConfig("celo-mainnet"),
       url: "https://forno.celo.org",
@@ -179,7 +172,14 @@ const config: HardhatUserConfig = {
       url: `https://polygon-mainnet.g.alchemy.com/v2/${alchemyIdKey}`,
       gasPrice: 300000000000,
     },
-
+    avalanche: {
+      ...createMainnetConfig("avalanche"),
+      url: `https://api.avax.network/ext/bc/C/rpc`,
+    },
+    scroll: {
+      ...createMainnetConfig("scroll"),
+      url: `https://1rpc.io/scroll`,
+    },
     // Test Networks
     goerli: createTestnetConfig(
       "goerli",
@@ -206,11 +206,6 @@ const config: HardhatUserConfig = {
       url: "https://optimism-goerli.publicnode.com",
       gasPrice: 20000000000,
     },
-    "pgn-sepolia": {
-      ...createTestnetConfig("pgn-sepolia"),
-      url: "https://sepolia.publicgoods.network",
-      gasPrice: 20000000000,
-    },
     "celo-testnet": {
       ...createTestnetConfig("celo-testnet"),
       url: "https://alfajores-forno.celo-testnet.org",
@@ -230,7 +225,10 @@ const config: HardhatUserConfig = {
       url: `https://polygon-mumbai.g.alchemy.com/v2/${alchemyIdKey}`,
       gasPrice: 20000000000,
     },
-
+    fuji: {
+      ...createTestnetConfig("fuji"),
+      url: `https://api.avax-test.network/ext/bc/C/rpc`,
+    },
     // Local Networks
     localhost: createTestnetConfig("localhost", "http://localhost:8545"),
     hardhat: {
@@ -290,25 +288,32 @@ const config: HardhatUserConfig = {
       "optimism-sepolia": process.env.OPTIMISTIC_ETHERSCAN_API_KEY,
       // @ts-ignore
       "filecoin-mainnet": process.env.FILECOIN_ETHERSCAN_API_KEY,
-      "filecoin-calibration":
-        // @ts-ignore
-        process.env.FILECOIN_CALIBRATION_ETHERSCAN_API_KEY,
+      // @ts-ignore
+      "filecoin-calibration": process.env.FILECOIN_CALIBRATION_ETHERSCAN_API_KEY,
+      // @ts-ignore
+      fuji: "NA",
+      // @ts-ignore
+      avalanche: "NA",
+      // @ts-ignore
+      scroll: process.env.SCROLLSCAN_API_KEY!,
     },
     customChains: [
       {
-        network: "pgn-mainnet",
-        chainId: chainIds["pgn-mainnet"],
+        network: "fuji",
+        chainId: chainIds["fuji"],
         urls: {
-          apiURL: "https://explorer.publicgoods.network/api",
-          browserURL: "https://explorer.publicgoods.network",
+          apiURL:
+            "https://api.avascan.info/v2/network/testnet/evm/43113/etherscan",
+          browserURL: "https://testnet.avascan.info/blockchain/c",
         },
       },
       {
-        network: "pgn-sepolia",
-        chainId: chainIds["pgn-sepolia"],
+        network: "avalanche",
+        chainId: chainIds["avalanche"],
         urls: {
-          apiURL: "https://explorer.sepolia.publicgoods.network/api",
-          browserURL: "https://explorer.sepolia.publicgoods.network",
+          apiURL:
+            "https://api.avascan.info/v2/network/mainnet/evm/43114/etherscan",
+          browserURL: "https://avascan.info/blockchain/c",
         },
       },
       {
@@ -397,6 +402,14 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://api.node.glif.io",
           browserURL: "https://filscan.io",
+        }
+      },
+      {
+        network: "scroll",
+        chainId: chainIds["scroll"],
+        urls: {
+          apiURL: "https://api.scrollscan.com/api",
+          browserURL: "https://scrollscan.com/",
         },
       },
     ],

@@ -1,0 +1,37 @@
+
+    ////////////////////////////////////////////////////
+            Deploys Registry.sol on fuji
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────┐
+│     (index)     │                    Values                    │
+├─────────────────┼──────────────────────────────────────────────┤
+│    contract     │                'Registry.sol'                │
+│     chainId     │                    43113                     │
+│     network     │                    'fuji'                    │
+│ deployerAddress │ '0xB8cEF765721A6da910f14Be93e7684e9a3714123' │
+│  registryOwner  │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│     balance     │                '0.041358875'                 │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying Registry...
+Registry proxy deployed to: 0xCd5AbD09ee34BA604795F7f69413caf20ee0Ab60
+Registry implementation deployed to: 0x5987A30F7Cb138c231de96Fe1522Fe4f1e83940D
+Proxy Admin:  0xf7B93519a3A1790F97f7b14E6f118A139187843e
+Proxy Admin Owner:  0xB8cEF765721A6da910f14Be93e7684e9a3714123
+
+Verifying contract...
+Verifying implementation: 0x5987A30F7Cb138c231de96Fe1522Fe4f1e83940D
+Successfully submitted source code for contract
+contracts/core/Registry.sol:Registry at 0x5987A30F7Cb138c231de96Fe1522Fe4f1e83940D
+for verification on the block explorer. Waiting for verification result...
+
+Failed to verify implementation contract at 0x5987A30F7Cb138c231de96Fe1522Fe4f1e83940D: The API responded with an unexpected message.
+Please report this issue to the Hardhat team.
+Contract verification may have succeeded and should be checked manually.
+Message: Error: Compilation successful, but bytecode does not match with deployed bytecode for address 0x5987A30F7Cb138c231de96Fe1522Fe4f1e83940D, please check your parameters
+Verifying proxy: 0xCd5AbD09ee34BA604795F7f69413caf20ee0Ab60
+Error: Failed to get logs for contract at address 0xCd5AbD09ee34BA604795F7f69413caf20ee0Ab60.
+
+Etherscan returned with message: NOTOK, reason: Invalid querystring request
+
+Verifying contract...

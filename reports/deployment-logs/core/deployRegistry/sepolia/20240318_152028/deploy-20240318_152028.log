@@ -1,0 +1,20 @@
+
+    ////////////////////////////////////////////////////
+            Deploys Registry.sol on sepolia
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────┐
+│     (index)     │                    Values                    │
+├─────────────────┼──────────────────────────────────────────────┤
+│    contract     │                'Registry.sol'                │
+│     chainId     │                   11155111                   │
+│     network     │                  'sepolia'                   │
+│ deployerAddress │ '0xB8cEF765721A6da910f14Be93e7684e9a3714123' │
+│  registryOwner  │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│     balance     │            '9.74876249256072905'             │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying Registry...
+Error: Timed out waiting for implementation contract deployment to address 0xCd26Fb437b282a5cf8304983B67e6934b76294F6 with transaction 0xe6ee16b9533c64d9a3cea4715634e06152cdec6dfb7ae14b276dad0da2e4e048
+
+Run the function again to continue waiting for the transaction confirmation. If the problem persists, adjust the polling parameters with the timeout and pollingInterval options.
+error: "hardhat" exited with code 1 (SIGHUP)

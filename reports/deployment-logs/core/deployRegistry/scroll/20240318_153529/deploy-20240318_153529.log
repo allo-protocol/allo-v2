@@ -1,0 +1,12 @@
+WARNING: You are currently using Node.js v21.1.0, which is not supported by Hardhat. This can lead to unexpected behavior. See https://hardhat.org/nodejs-versions
+
+
+
+    ////////////////////////////////////////////////////
+            Deploys Registry.sol on scroll
+    ////////////////////////////////////////////////////
+  
+Error: Registry params not found for chainId: 534352
+    at deployRegistry (/home/kurt/git/allo/allo-v2/scripts/core/deployRegistry.ts:28:11)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+error: "hardhat" exited with code 1 (SIGHUP)

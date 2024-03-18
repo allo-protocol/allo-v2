@@ -1,0 +1,35 @@
+
+    ////////////////////////////////////////////////////
+      Deploys DonationVotingMerkleDistributionDirectTransferStrategy.sol on sepolia
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────────────────────┐
+│     (index)     │                            Values                            │
+├─────────────────┼──────────────────────────────────────────────────────────────┤
+│    contract     │ 'DonationVotingMerkleDistributionDirectTransferStrategy.sol' │
+│     chainId     │                           11155111                           │
+│     network     │                          'sepolia'                           │
+│ deployerAddress │         '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C'         │
+│     balance     │                    '0.532975821190779587'                    │
+└─────────────────┴──────────────────────────────────────────────────────────────┘
+Deploying DonationVotingMerkleDistributionDirectTransferStrategy.sol
+[35mError calling deploy() function for contract DonationVotingMerkleDistributionDirectTransferStrategy
+ProviderError: execution reverted[0m
+
+Verifying contract...
+InvalidAddressError:  is an invalid address.
+    at SimpleTaskDefinition.action (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/@nomicfoundation+hardhat-verify@1.1.1_hardhat@2.22.1/node_modules/@nomicfoundation/hardhat-verify/src/index.ts:530:15)
+    at async Environment._runTaskDefinition (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/hardhat@2.22.1_uapi6z6mzql6o72riyrcnnvx6u/node_modules/hardhat/src/internal/core/runtime-environment.ts:359:14)
+    at async Environment.run (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/hardhat@2.22.1_uapi6z6mzql6o72riyrcnnvx6u/node_modules/hardhat/src/internal/core/runtime-environment.ts:192:14)
+    at async verifyContract (/Users/thelostone-mc/Labs/allo/allo-v2/scripts/utils/scripts.ts:39:5)
+    at async deployStrategies (/Users/thelostone-mc/Labs/allo/allo-v2/scripts/strategies/deployStrategies.ts:72:3)
+    at async deployDonationVotingMerkleDistributionDirect (/Users/thelostone-mc/Labs/allo/allo-v2/scripts/strategies/deployDonationVotingMerkleDistributionDirect.ts:13:19)
+[90m
+	Validating getAllo() == 0x1133eA7Af70876e64665ecD07C0A0476d09465a1[0m
+[31m	❌❌❌ FAILED with Error: NotImplementedError: Method 'HardhatEthersProvider.resolveName' is not implemented[0m
+[90m
+	Validating getStrategyId() == 0x2f0250d534b2d59b8b5cfa5eb0d0848a59ccbf5de2eaf72d2ba4bfe73dce7c6b[0m
+[31m	❌❌❌ FAILED with Error: NotImplementedError: Method 'HardhatEthersProvider.resolveName' is not implemented[0m
+[90m
+	Validating PERMIT2() == 0x000000000022d473030f116ddee9f6b43ac78ba3[0m
+[31m	❌❌❌ FAILED with Error: NotImplementedError: Method 'HardhatEthersProvider.resolveName' is not implemented[0m

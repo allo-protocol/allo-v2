@@ -1,0 +1,43 @@
+WARNING: You are currently using Node.js v21.1.0, which is not supported by Hardhat. This can lead to unexpected behavior. See https://hardhat.org/nodejs-versions
+
+
+
+    ////////////////////////////////////////////////////
+      Deploys DonationVotingMerkleDistributionDirectTransferStrategy.sol on scroll
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────────────────────┐
+│     (index)     │                            Values                            │
+├─────────────────┼──────────────────────────────────────────────────────────────┤
+│    contract     │ 'DonationVotingMerkleDistributionDirectTransferStrategy.sol' │
+│     chainId     │                            534352                            │
+│     network     │                           'scroll'                           │
+│ deployerAddress │         '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C'         │
+│     balance     │                    '0.002685413212499194'                    │
+└─────────────────┴──────────────────────────────────────────────────────────────┘
+Deploying DonationVotingMerkleDistributionDirectTransferStrategy.sol
+[35mError calling deploy() function for contract DonationVotingMerkleDistributionDirectTransferStrategy
+ProviderError: invalid transaction: insufficient funds for l1fee + gas * price + value[0m
+
+Verifying contract...
+DeployedBytecodeNotFoundError: The address 0x787eC93Dd71a90563979417879F5a3298389227f has no bytecode. Is the contract deployed to this network?
+The selected network is scroll.
+    at Function.getDeployedContractBytecode (/home/kurt/git/allo/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/internal/solc/bytecode.ts:73:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async SimpleTaskDefinition.action (/home/kurt/git/allo/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/index.ts:255:32)
+    at async Environment._runTaskDefinition (/home/kurt/git/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:358:14)
+    at async hardhatVerify (/home/kurt/git/allo/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/verify-proxy.ts:118:12)
+    at async OverriddenTaskDefinition._action (/home/kurt/git/allo/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/index.ts:198:12)
+    at async Environment._runTaskDefinition (/home/kurt/git/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:358:14)
+    at async Environment.run (/home/kurt/git/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:191:14)
+    at async SimpleTaskDefinition.action (/home/kurt/git/allo/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/index.ts:546:7)
+    at async Environment._runTaskDefinition (/home/kurt/git/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:358:14)
+[90m
+	Validating getAllo() == 0x1133eA7Af70876e64665ecD07C0A0476d09465a1[0m
+[31m	❌❌❌ FAILED with Error: Error: could not decode result data (value="0x", info={ "method": "getAllo", "signature": "getAllo()" }, code=BAD_DATA, version=6.8.0)[0m
+[90m
+	Validating getStrategyId() == 0x9fa6890423649187b1f0e8bf4265f0305ce99523c3d11aa36b35a54617bb0ec0[0m
+[31m	❌❌❌ FAILED with Error: Error: could not decode result data (value="0x", info={ "method": "getStrategyId", "signature": "getStrategyId()" }, code=BAD_DATA, version=6.8.0)[0m
+[90m
+	Validating PERMIT2() == 0x000000000022D473030F116dDEE9F6B43aC78BA3[0m
+[31m	❌❌❌ FAILED with Error: Error: could not decode result data (value="0x", info={ "method": "PERMIT2", "signature": "PERMIT2()" }, code=BAD_DATA, version=6.8.0)[0m

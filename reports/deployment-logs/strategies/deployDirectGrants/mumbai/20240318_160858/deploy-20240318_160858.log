@@ -1,0 +1,30 @@
+
+    ////////////////////////////////////////////////////
+      Deploys DirectGrantsSimpleStrategy.sol on mumbai
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────┐
+│     (index)     │                    Values                    │
+├─────────────────┼──────────────────────────────────────────────┤
+│    contract     │       'DirectGrantsSimpleStrategy.sol'       │
+│     chainId     │                    80001                     │
+│     network     │                   'mumbai'                   │
+│ deployerAddress │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│     balance     │             '8.092764789999664'              │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying DirectGrantsSimpleStrategy.sol
+[35mContract DirectGrantsSimpleStrategy deployed at address: 0x8564d522b19836b7F5B4324E7Ee8Cb41810E9F9e[0m
+
+Verifying contract...
+Successfully submitted source code for contract
+contracts/strategies/_poc/direct-grants-simple/DirectGrantsSimpleStrategy.sol:DirectGrantsSimpleStrategy at 0x8564d522b19836b7F5B4324E7Ee8Cb41810E9F9e
+for verification on the block explorer. Waiting for verification result...
+
+Successfully verified contract DirectGrantsSimpleStrategy on the block explorer.
+https://mumbai.polygonscan.com/address/0x8564d522b19836b7F5B4324E7Ee8Cb41810E9F9e#code
+[90m
+	Validating getAllo() == 0x1133eA7Af70876e64665ecD07C0A0476d09465a1[0m
+[32m	✅ PASSED with Result: 0x1133eA7Af70876e64665ecD07C0A0476d09465a1[0m
+[90m
+	Validating getStrategyId() == 0x53fb9d3bce0956ca2db5bb1441f5ca23050cb1973b33789e04a5978acfd9ca93[0m
+[32m	✅ PASSED with Result: 0x53fb9d3bce0956ca2db5bb1441f5ca23050cb1973b33789e04a5978acfd9ca93[0m

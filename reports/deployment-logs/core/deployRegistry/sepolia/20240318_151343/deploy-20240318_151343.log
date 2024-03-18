@@ -1,0 +1,9 @@
+ProviderError: App is inactive. Please create a new app or contact support at https://dashboard.alchemyapi.io/support
+    at HttpProvider.request (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/hardhat@2.22.1_uapi6z6mzql6o72riyrcnnvx6u/node_modules/hardhat/src/internal/core/providers/http.ts:90:21)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async ChainIdValidatorProvider._getChainIdFromEthNetVersion (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/hardhat@2.22.1_uapi6z6mzql6o72riyrcnnvx6u/node_modules/hardhat/src/internal/core/providers/chainId.ts:33:17)
+    at async ChainIdValidatorProvider._getChainId (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/hardhat@2.22.1_uapi6z6mzql6o72riyrcnnvx6u/node_modules/hardhat/src/internal/core/providers/chainId.ts:17:25)
+    at async ChainIdValidatorProvider.request (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/hardhat@2.22.1_uapi6z6mzql6o72riyrcnnvx6u/node_modules/hardhat/src/internal/core/providers/chainId.ts:55:29)
+    at async HardhatEthersProvider.getNetwork (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/@nomicfoundation+hardhat-ethers@3.0.5_na4ffwfmw7pft5kvlk5o6ojwqy/node_modules/@nomicfoundation/hardhat-ethers/src/internal/hardhat-ethers-provider.ts:140:21)
+    at async deployRegistry (/Users/thelostone-mc/Labs/allo/allo-v2/scripts/core/deployRegistry.ts:11:19)
+error: "hardhat" exited with code 1 (SIGHUP)

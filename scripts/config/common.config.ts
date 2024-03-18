@@ -21,16 +21,6 @@ export const commonConfig: DeployParams = {
     proxyAdminOwner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
     permit2Address: "0x000000000022d473030f116ddee9f6b43ac78ba3",
   },
-  // PGN
-  424: {
-    proxyAdminOwner: "",
-    permit2Address: "",
-  },
-  // PGN Sepolia
-  58008: {
-    proxyAdminOwner: "",
-    permit2Address: "",
-  },
   // Optimism
   10: {
     proxyAdminOwner: "0x791BB7b7e16982BDa029893077EEb4F77A2CD564",
@@ -83,6 +73,31 @@ export const commonConfig: DeployParams = {
   },
   // Optimism Sepolia
   11155420: {
+    proxyAdminOwner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
+    permit2Address: "0x000000000022D473030F116dDEE9F6B43aC78BA3",
+  },
+  // Fuji
+  43113: {
+    proxyAdminOwner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
+    permit2Address: "0x000000000022D473030F116dDEE9F6B43aC78BA3",
+  },
+  // Avalanche
+  43114: {
+    proxyAdminOwner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
+    permit2Address: "0x000000000022D473030F116dDEE9F6B43aC78BA3",
+  },
+  // Scroll
+  534352: {
+    proxyAdminOwner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
+    permit2Address: "0x000000000022D473030F116dDEE9F6B43aC78BA3",
+  },
+  // Fantom
+  250: {
+    proxyAdminOwner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
+    permit2Address: "0x000000000022D473030F116dDEE9F6B43aC78BA3",
+  },
+  // Fantom Testnet
+  4002: {
     proxyAdminOwner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
     permit2Address: "0x000000000022D473030F116dDEE9F6B43aC78BA3",
   },
