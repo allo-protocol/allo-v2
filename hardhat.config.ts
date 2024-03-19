@@ -32,6 +32,7 @@ const chainIds = {
   "arbitrum-sepolia": 421614,
   "base-testnet": 84531,
   mumbai: 80001,
+  "filecoin-calibration": 314159,
 
   // mainnet
   mainnet: 1,
@@ -42,6 +43,7 @@ const chainIds = {
   "arbitrum-mainnet": 42161,
   base: 8453,
   polygon: 137,
+  "filecoin-mainnet": 314,
 };
 
 let deployPrivateKey = process.env.DEPLOYER_PRIVATE_KEY as string;
@@ -286,6 +288,11 @@ const config: HardhatUserConfig = {
       "arbitrum-sepolia": process.env.ARBITRUMSCAN_API_KEY,
       // @ts-ignore
       "optimism-sepolia": process.env.OPTIMISTIC_ETHERSCAN_API_KEY,
+      // @ts-ignore
+      "filecoin-mainnet": process.env.FILECOIN_ETHERSCAN_API_KEY,
+      "filecoin-calibration":
+        // @ts-ignore
+        process.env.FILECOIN_CALIBRATION_ETHERSCAN_API_KEY,
     },
     customChains: [
       {
@@ -374,6 +381,22 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://api-sepolia-optimistic.etherscan.io/api",
           browserURL: "https://sepolia-optimism.etherscan.io",
+        },
+      },
+      {
+        network: "filecoin-calibration",
+        chainId: chainIds["filecoin-calibration"],
+        urls: {
+          apiURL: "https://api.calibration.node.glif.io/rpc/v1",
+          browserURL: "https://calibration.filscan.io",
+        },
+      },
+      {
+        network: "filecoin-mainnet",
+        chainId: chainIds["filecoin-mainnet"],
+        urls: {
+          apiURL: "https://api.node.glif.io",
+          browserURL: "https://filscan.io",
         },
       },
     ],
