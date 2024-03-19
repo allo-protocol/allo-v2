@@ -4,21 +4,32 @@
 
 > 🤚 The following contract addresses are the same across all supported networks 🤚
 
-## Supported Networks
+## Supported Mainnet Networks
 
 | Network         | Chain ID |
 | --------------- | -------- |
 | Mainnet         | 1        |
-| Goerli          | 5        |
-| Sepolia         | 11155111 |
-| Base            | 8453     |
-| Base Goerli     | 84531    |
 | Optimism        | 10       |
-| Optimism Goerli | 420      |
+| Fantom          | 250      |
 | Celo            | 42220    |
-| Celo Alfajores  | 44787    |
 | Arbitrum        | 42161    |
+| Base            | 8453     |
+| Polygon         | 137      |
+| Avalanche       | 43114    |
+| Scroll          | 534352   |
+
+
+## Supported Testnet Networks
+
+| Network         | Chain ID |
+| --------------- | -------- |
+| Sepolia         | 11155111 |
+| Optimism Sepolia| 11155420 |
+| Fantom Testnet  | 4002     |
+| Celo Alfajores  | 44787    |
 | Arbitrum Sepolia| 421614   |
+| Mumbai          | 80001    |
+| Fuji            | 43113    |
 
 
 
@@ -59,11 +70,11 @@
 <tbody>
     <tr>
         <td>DonationVotingMerkleDistributionDirectTransferStrategy</td>
-        <td>0xD13ec67938B5E9Cb05A05D8e160daF02Ed5ea9C9</td>
+        <td>0x787eC93Dd71a90563979417879F5a3298389227f</td>
     </tr>
     <tr>
-        <td>DonationVotingMerkleDistributionVaultStrategy</td>
-        <td>0x68d67bf72fcCf0E0f269C67b934b4050d2917F91</td>
+        <td>DirectGrantsSimpleStrategy</td>
+        <td>0x8564d522b19836b7F5B4324E7Ee8Cb41810E9F9e</td>
     </tr>
     <tr>
         <td>RFPSimpleStrategy</td>
