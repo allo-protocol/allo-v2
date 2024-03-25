@@ -123,7 +123,6 @@ export const deployContract = async (
     deployer.zkWallet,
     artifact,
     constructorArguments,
-    { initializer: "initialize" }
   );
   const address = await contract.getAddress();
   const constructorArgs = contract.interface.encodeDeploy(constructorArguments);

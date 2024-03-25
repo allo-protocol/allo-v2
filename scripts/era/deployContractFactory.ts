@@ -13,7 +13,8 @@ export default async function() {
   await deployContract(contractArtifactName, constructorArgs);
 }
 
-//  npx hardhat deploy-zksync --network zksync-testnet --script deployContractFactory.ts --config era.hardhat.config.ts
+// npx hardhat run --network zksync-testnet scripts/era/deployContractFactory.ts 
+//  npx hardhat deploy-zksync --network zksync-testnet --script deployContractFactory.ts
 
 // export async function deployContractFactory() {
 //   const network = await hre.network.config;
