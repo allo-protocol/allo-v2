@@ -68,6 +68,7 @@ const config: HardhatUserConfig = {
     sources: "./contracts",
     cache: "./cache_hardhat",
     deployPaths: ["./scripts/era"],
+    artifacts: "./artifacts",
   },
   zksolc: {
     version: "latest",

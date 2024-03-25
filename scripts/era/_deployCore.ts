@@ -1,12 +1,12 @@
 import * as hre from "hardhat";
-import dotenv from "dotenv";
-import { deployAllo } from "./deployAllo";
-import { deployRegistry } from "./deployRegistry";
+// import dotenv from "dotenv";
+// import { deployAllo } from "./deployAllo";
+// import { deployRegistry } from "./deployRegistry";
 import { deployContractFactory } from "./deployContractFactory";
 
-dotenv.config();
+// dotenv.config();
 
-async function deployCore() {
+export default async function() {
         const network = await hre.network.config;
         const networkName = await hre.network.name;
     
@@ -41,7 +41,7 @@ async function deployCore() {
   })
 }
 
-deployCore().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+// deployCore().catch((error) => {
+//   console.error(error);
+//   process.exitCode = 1;
+// });
