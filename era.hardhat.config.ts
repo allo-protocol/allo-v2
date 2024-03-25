@@ -142,12 +142,12 @@ const config: HardhatUserConfig = {
     cache: "./cache_hardhat",
   },
   zksolc: {
-    version: "1.3.13",
+    version: "latest",
     compilerSource: "binary",
     settings: {
       isSystem: true,
     },
-  },
+  }
 };
 
 export default config;
