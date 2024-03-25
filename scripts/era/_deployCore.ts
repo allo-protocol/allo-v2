@@ -1,5 +1,5 @@
-import hre from "hardhat";
-import * as dotenv from "dotenv";
+import * as hre from "hardhat";
+import dotenv from "dotenv";
 import { deployAllo } from "./deployAllo";
 import { deployRegistry } from "./deployRegistry";
 import { deployContractFactory } from "./deployContractFactory";
@@ -23,23 +23,22 @@ async function deployCore() {
   // ContractFactory
   deployContractFactory().then(deployedContract => {
     // Registry
-    deployRegistry().then(registryAddress => {
-      // Allo
-      deployAllo(registryAddress.toString()).then(alloAddress => {
-          // Log deployed addresses
-          console.log(`
-            ////////////////////////////////////////////////////
-            Core Allo V2 deployed to:
-            ======================================
-            ContractFactory: ${deployedContract}
-            Registry: ${registryAddress}
-            Allo: ${alloAddress}
-            ////////////////////////////////////////////////////`
-          );
-        });
-    });
+    // deployRegistry().then(registryAddress => {
+    //   // Allo
+    //   deployAllo(registryAddress.toString()).then(alloAddress => {
+    //       // Log deployed addresses
+    //       console.log(`
+    //         ////////////////////////////////////////////////////
+    //         Core Allo V2 deployed to:
+    //         ======================================
+    //         ContractFactory: ${deployedContract}
+    //         Registry: ${registryAddress}
+    //         Allo: ${alloAddress}
+    //         ////////////////////////////////////////////////////`
+    //       );
+    //     });
+    // });
   })
-
 }
 
 deployCore().catch((error) => {

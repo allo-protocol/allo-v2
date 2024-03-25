@@ -1,7 +1,7 @@
 import * as hre from "hardhat";
-import * as dotenv from "dotenv";
+import dotenv from "dotenv";
 import { Deployer } from "@matterlabs/hardhat-zksync-deploy";
-import { Wallet } from "zksync-web3";
+import { Wallet } from "zksync-ethers";
 import { alloConfig } from "../config/allo.config";
 import { registryConfig } from "../config/registry.config";
 
@@ -12,7 +12,7 @@ export async function deployAllo(_registryAddress? : string) {
     const networkName = await hre.network.name;
     const chainId = Number(network.chainId);
 
-    const deployerAddress = new Wallet(process.env.DEPLOYER_PRIVATE_KEY);
+    const deployerAddress = new Wallet(process.env.DEPLOYER_PRIVATE_KEY as string);
 
     const registryAddress = _registryAddress ? _registryAddress : registryConfig[chainId].registryProxy;
 
