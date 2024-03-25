@@ -96,10 +96,7 @@ const config: HardhatUserConfig = {
   networks: {
     // Main Networks
     "zksync-mainnet": {
-      ...createMainnetConfig(
-        "zksync-mainnet",
-        "https://zksync2-mainnet.zksync.io",
-      ),
+      ...createMainnetConfig("zksync-mainnet", "https://mainnet.era.zksync.io"),
       zksync: true,
       ethNetwork: "mainnet",
     },
@@ -108,12 +105,11 @@ const config: HardhatUserConfig = {
     "zksync-testnet": {
       ...createTestnetConfig(
         "zksync-testnet",
-        "https://zksync2-testnet.zksync.dev",
+        "https://sepolia.era.zksync.dev"
       ),
       zksync: true,
-      ethNetwork: "goerli",
-      verifyURL:
-        "https://zksync2-testnet-explorer.zksync.dev/contract_verification",
+      ethNetwork: "sepolia",
+      verifyURL: "https://sepolia.explorer.zksync.io/contract_verification",
     },
   },
   defaultNetwork: "zksync-testnet",
@@ -123,7 +119,7 @@ const config: HardhatUserConfig = {
       // @ts-ignore
       mainnet: process.env.ETHERSCAN_API_KEY,
       // @ts-ignore
-      goerli: process.env.ETHERSCAN_API_KEY,
+      sepolia: process.env.ETHERSCAN_API_KEY,
     },
   },
   preprocess: {
