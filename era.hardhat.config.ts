@@ -44,9 +44,9 @@ const config: HardhatUserConfig = {
   etherscan: {
     apiKey: {
       // @ts-ignore
-      mainnet: process.env.ETHERSCAN_API_KEY,
+      "zksync-testnet": process.env.ETHERSCAN_API_KEY,
       // @ts-ignore
-      goerli: process.env.ETHERSCAN_API_KEY,
+      "zksync-mainnet": process.env.ETHERSCAN_API_KEY,
     },
   },
   preprocess: {
@@ -67,6 +67,7 @@ const config: HardhatUserConfig = {
   paths: {
     sources: "./contracts",
     cache: "./cache_hardhat",
+    deployPaths: ["./scripts/era"],
   },
   zksolc: {
     version: "latest",

@@ -6,12 +6,14 @@ import { deployContract } from "./utils";
 
 // dotenv.config();
 
-export async function deployContractFactory() {
+export default async function() {
   const contractArtifactName = "ContractFactory";
   const constructorArgs: [] = [];
 
   await deployContract(contractArtifactName, constructorArgs);
 }
+
+//  npx hardhat deploy-zksync --network zksync-testnet --script deployContractFactory.ts --config era.hardhat.config.ts
 
 // export async function deployContractFactory() {
 //   const network = await hre.network.config;
@@ -45,7 +47,7 @@ export async function deployContractFactory() {
 //   return instance.address;
 // }
 
-// deployContractFactory().catch((error) => {
+// deploy().catch((error) => {
 //   console.error(error);
 //   process.exitCode = 1;
 // });

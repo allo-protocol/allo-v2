@@ -84,4 +84,12 @@ export const registryConfig: DeployParams = {
   4002: {
     owner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
   },
+  // zkSync Mainnet
+  324: {
+    owner: "0xda4983d787769A607244C8f061c2a93FC5772240",
+  },
+  // zkSync Sepolia
+  300: {
+    owner: "0xda4983d787769A607244C8f061c2a93FC5772240",
+  },
 };

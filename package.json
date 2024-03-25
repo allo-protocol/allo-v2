@@ -29,10 +29,11 @@
     "deploy-deployer": "npx hardhat run scripts/core/deployContractFactory.ts --network",
     "/////// deploy-test ///////": "echo 'deploy test scripts'",
     "create-profile": "npx hardhat run scripts/test/createProfile.ts --network",
-    "create-pool": "npx hardhat run scripts/test/createPool.ts --network"
+    "create-pool": "npx hardhat run scripts/test/createPool.ts --network",
+    "deploy-zk:sepolia": "npx hardhat deploy-zksync --script _deployCore.ts --cofig era.hardhat.config.ts --network zksync-testnet"
   },
   "devDependencies": {
-    "@matterlabs/hardhat-zksync-deploy": "^1.1.2",
+    "@matterlabs/hardhat-zksync-deploy": "^1.2.1",
     "@matterlabs/hardhat-zksync-node": "^1.0.1",
     "@matterlabs/hardhat-zksync-solc": "^1.0.6",
     "@matterlabs/hardhat-zksync-verify": "^1.2.2",

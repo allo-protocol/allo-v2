@@ -4,59 +4,83 @@ import { Deployer } from "@matterlabs/hardhat-zksync-deploy";
 import { Wallet } from "zksync-ethers";
 import { alloConfig } from "../config/allo.config";
 import { registryConfig } from "../config/registry.config";
+import { deployContract } from "./utils";
 
 dotenv.config();
 
-export async function deployAllo(_registryAddress? : string) {
-    const network = await hre.network.config;
-    const networkName = await hre.network.name;
-    const chainId = Number(network.chainId);
+export async function deployRegistry(_registryAddress?: string) {
+  const network = await hre.network.config;
+  const chainId = Number(network.chainId);
 
-    const deployerAddress = new Wallet(process.env.DEPLOYER_PRIVATE_KEY as string);
+  const alloParams = alloConfig[chainId];
 
-    const registryAddress = _registryAddress ? _registryAddress : registryConfig[chainId].registryProxy;
+  const contractArtifactName = "Allo";
+  const registryAddress = _registryAddress
+    ? _registryAddress
+    : registryConfig[chainId].registryProxy;
 
-    console.log(`
-        ////////////////////////////////////////////////////
-                Deploys Allo.sol on ${networkName}
-        ////////////////////////////////////////////////////`
-    );
+  const constructorArgs = [
+    registryAddress,
+    alloParams.treasury,
+    alloParams.percentFee,
+    alloParams.baseFee,
+  ];
 
-    const alloParams = alloConfig[chainId];
-    if (!alloParams) {
-      throw new Error(`Allo params not found for chainId: ${chainId}`);
-    }
-
-    console.table({
-        contract: "Allo.sol",
-        chainId: chainId,
-        network: networkName,
-        registry: registryAddress,
-        treasury: alloParams.treasury,
-        percentFee: alloParams.percentFee,
-        baseFee: alloParams.baseFee,
-        deployerAddress: deployerAddress.address,
-    });
-
-    console.log("Deploying Allo...");
-
-    const deployer = new Deployer(hre, deployerAddress);
-    const Allo = await deployer.loadArtifact("Allo");
-    const instance = await hre.zkUpgrades.deployProxy(
-        deployer.zkWallet, Allo,
-        [
-            registryAddress,
-            alloParams.treasury,
-            alloParams.percentFee,
-            alloParams.baseFee,
-        ],
-        { initializer: "initialize" }
-    );
-
-    console.log("Allo deployed to:", instance.address);
-
-    return instance.address;
+  await deployContract(contractArtifactName, constructorArgs);
 }
+
+// npx hardhat deploy-zksync --network zksync-testnet --script deployRegistry.ts --config era.hardhat.config.ts
+
+// export async function deployAllo(_registryAddress? : string) {
+//     const network = await hre.network.config;
+//     const networkName = await hre.network.name;
+//     const chainId = Number(network.chainId);
+
+//     const deployerAddress = new Wallet(process.env.DEPLOYER_PRIVATE_KEY as string);
+
+//     const registryAddress = _registryAddress ? _registryAddress : registryConfig[chainId].registryProxy;
+
+//     console.log(`
+//         ////////////////////////////////////////////////////
+//                 Deploys Allo.sol on ${networkName}
+//         ////////////////////////////////////////////////////`
+//     );
+
+//     const alloParams = alloConfig[chainId];
+//     if (!alloParams) {
+//       throw new Error(`Allo params not found for chainId: ${chainId}`);
+//     }
+
+//     console.table({
+//         contract: "Allo.sol",
+//         chainId: chainId,
+//         network: networkName,
+//         registry: registryAddress,
+//         treasury: alloParams.treasury,
+//         percentFee: alloParams.percentFee,
+//         baseFee: alloParams.baseFee,
+//         deployerAddress: deployerAddress.address,
+//     });
+
+//     console.log("Deploying Allo...");
+
+//     const deployer = new Deployer(hre, deployerAddress);
+//     const Allo = await deployer.loadArtifact("Allo");
+//     const instance = await hre.zkUpgrades.deployProxy(
+//         deployer.zkWallet, Allo,
+//         [
+//             registryAddress,
+//             alloParams.treasury,
+//             alloParams.percentFee,
+//             alloParams.baseFee,
+//         ],
+//         { initializer: "initialize" }
+//     );
+
+//     console.log("Allo deployed to:", instance.address);
+
+//     return instance.address;
+// }
 
 // deployAllo().catch((error) => {
 //     console.error(error);
