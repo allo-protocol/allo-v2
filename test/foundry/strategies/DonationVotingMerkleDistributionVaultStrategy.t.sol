@@ -86,7 +86,8 @@ contract DonationVotingMerkleDistributionVaultStrategyTest is DonationVotingMerk
         DonationVotingMerkleDistributionBaseStrategy.Permit2Data memory permit2Data =
             DonationVotingMerkleDistributionBaseStrategy.Permit2Data({permit: permit, signature: sig});
 
-        bytes memory data = abi.encode(recipientId, permit2Data);
+        bytes memory data =
+            abi.encode(recipientId, DonationVotingMerkleDistributionBaseStrategy.PermitType.Permit2, permit2Data);
 
         vm.startPrank(from);
         mockERC20.approve(address(permit2), type(uint256).max);
@@ -115,7 +116,8 @@ contract DonationVotingMerkleDistributionVaultStrategyTest is DonationVotingMerk
         DonationVotingMerkleDistributionBaseStrategy.Permit2Data memory permit2Data =
             DonationVotingMerkleDistributionBaseStrategy.Permit2Data({permit: permit, signature: sig});
 
-        bytes memory data = abi.encode(recipientId, permit2Data);
+        bytes memory data =
+            abi.encode(recipientId, DonationVotingMerkleDistributionBaseStrategy.PermitType.Permit2, permit2Data);
 
         vm.startPrank(from);
         mockERC20.approve(address(permit2), type(uint256).max);
@@ -154,7 +156,8 @@ contract DonationVotingMerkleDistributionVaultStrategyTest is DonationVotingMerk
         DonationVotingMerkleDistributionBaseStrategy.Permit2Data memory permit2Data =
             DonationVotingMerkleDistributionBaseStrategy.Permit2Data({permit: permit, signature: sig});
 
-        bytes memory data = abi.encode(recipientId, permit2Data);
+        bytes memory data =
+            abi.encode(recipientId, DonationVotingMerkleDistributionBaseStrategy.PermitType.Permit2, permit2Data);
 
         vm.startPrank(from);
 
@@ -219,7 +222,8 @@ contract DonationVotingMerkleDistributionVaultStrategyTest is DonationVotingMerk
         DonationVotingMerkleDistributionBaseStrategy.Permit2Data memory permit2Data =
             DonationVotingMerkleDistributionBaseStrategy.Permit2Data({permit: permit, signature: sig});
 
-        bytes memory data = abi.encode(recipientId, permit2Data);
+        bytes memory data =
+            abi.encode(recipientId, DonationVotingMerkleDistributionBaseStrategy.PermitType.Permit2, permit2Data);
 
         vm.startPrank(from);
 
@@ -250,7 +254,8 @@ contract DonationVotingMerkleDistributionVaultStrategyTest is DonationVotingMerk
         DonationVotingMerkleDistributionBaseStrategy.Permit2Data memory permit2Data =
             DonationVotingMerkleDistributionBaseStrategy.Permit2Data({permit: permit, signature: sig});
 
-        bytes memory data = abi.encode(recipientId, permit2Data);
+        bytes memory data =
+            abi.encode(recipientId, DonationVotingMerkleDistributionBaseStrategy.PermitType.Permit2, permit2Data);
 
         vm.startPrank(from);
 

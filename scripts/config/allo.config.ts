@@ -32,20 +32,6 @@ export const alloConfig: DeployParams = {
     percentFee: 0,
     baseFee: 0,
   },
-  // PGN
-  424: {
-    owner: "",
-    treasury: "",
-    percentFee: 0,
-    baseFee: 0,
-  },
-  // PGN Sepolia
-  58008: {
-    owner: "",
-    treasury: "",
-    percentFee: 0,
-    baseFee: 0,
-  },
   // Optimism
   10: {
     owner: "0x791BB7b7e16982BDa029893077EEb4F77A2CD564",
@@ -113,6 +99,48 @@ export const alloConfig: DeployParams = {
   84531: {
     owner: "0xB145b7742A5a082C4f334981247E148dB9dF0cb3",
     treasury: "0xB145b7742A5a082C4f334981247E148dB9dF0cb3",
+    percentFee: 0,
+    baseFee: 0,
+  },
+  // Optimism Sepolia
+  11155420: {
+    owner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
+    treasury: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
+    percentFee: 0,
+    baseFee: 0,
+  },
+  // Fuji
+  43113: {
+    owner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
+    treasury: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
+    percentFee: 0,
+    baseFee: 0,
+  },
+  // Avalanche Mainnet
+  43114: {
+    owner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
+    treasury: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
+    percentFee: 0,
+    baseFee: 0,
+  },
+  // Scroll
+  534352: {
+    owner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
+    treasury: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
+    percentFee: 0,
+    baseFee: 0,
+  },
+  // Fantom
+  250: {
+    owner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
+    treasury: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
+    percentFee: 0,
+    baseFee: 0,
+  },
+  // Fantom Testnet
+  4002: {
+    owner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
+    treasury: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
     percentFee: 0,
     baseFee: 0,
   },

@@ -1,0 +1,7 @@
+WARNING: You are currently using Node.js v21.1.0, which is not supported by Hardhat. This can lead to unexpected behavior. See https://hardhat.org/nodejs-versions
+
+
+TypeError: Cannot read properties of undefined (reading 'direct-grants')
+    at deployDirectGrants (/home/kurt/git/allo/allo-v2/scripts/strategies/deployDirectGrants.ts:9:49)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+error: "hardhat" exited with code 1 (SIGHUP)

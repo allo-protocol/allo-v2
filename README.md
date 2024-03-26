@@ -52,7 +52,7 @@ flowchart
   </tr>
   <tr>
     <td>Anchor.sol</td>
-    <td>- Contract which can recieve funds / execute transaction.<br>- Generated using identityId and name of the profile<br>- Is linked to a profile in Registry.sol</td>
+    <td>- Contract which can receive funds / execute transaction.<br>- Generated using identityId and name of the profile<br>- Is linked to a profile in Registry.sol</td>
   </tr>
   <tr>
     <td>Allo.sol</td>
@@ -84,7 +84,7 @@ At the heart of the Allo Protocol lies the `Allo` contract, a versatile and feat
 
 ### Profile Creation and Management:
 
-The Allo Protocol commences with the creation and management of profiles through the `Registry` contract. Users can create profiles, each uniquely identified by a profile ID. Profile metadata, attestation addresses, and members can be customized during creation. The `Registry` contract ensures only authorized users can manipulate profiles by verifying ownership.
+The Allo Protocol commences with the creation and management of profiles through the `Registry` contract. Users can create profiles, each uniquely identified by a profile ID. Profile metadata, attestation addresses, and members can be customized during creation. The `Registry` contract ensures that only authorized users can manipulate profiles by verifying ownership.
 
 ### Secure External Interactions:
 

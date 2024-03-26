@@ -1,0 +1,63 @@
+WARNING: You are currently using Node.js v21.1.0, which is not supported by Hardhat. This can lead to unexpected behavior. See https://hardhat.org/nodejs-versions
+
+
+
+    ////////////////////////////////////////////////////
+            Deploys Allo.sol on ftmTestnet
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────┐
+│     (index)     │                    Values                    │
+├─────────────────┼──────────────────────────────────────────────┤
+│    contract     │              'Deploy Allo.sol'               │
+│     chainId     │                     4002                     │
+│     network     │                 'ftmTestnet'                 │
+│      owner      │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│    registry     │ '0x4AAcca72145e1dF2aeC137E1f3C5E3D75DB8b5f3' │
+│    treasury     │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│   percentFee    │                      0                       │
+│     baseFee     │                      0                       │
+│ deployerAddress │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│     balance     │                 '9.88142206'                 │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying Allo.sol...
+Allo Proxy deployed to: 0x1133eA7Af70876e64665ecD07C0A0476d09465a1
+Registry implementation deployed to: 0xB087535DB0df98fC4327136e897A5985E5Cfbd66
+Proxy Admin:  0x758b87af7fdB4783f848a1dDEa1F025dC48B9858
+Proxy Admin Owner:  0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C
+
+Verifying contract...
+Verifying implementation: 0xB087535DB0df98fC4327136e897A5985E5Cfbd66
+Successfully submitted source code for contract
+contracts/core/Allo.sol:Allo at 0xB087535DB0df98fC4327136e897A5985E5Cfbd66
+for verification on the block explorer. Waiting for verification result...
+
+Successfully verified contract Allo on the block explorer.
+https://testnet.ftmscan.com/address/0xB087535DB0df98fC4327136e897A5985E5Cfbd66#code
+Verifying proxy: 0x1133eA7Af70876e64665ecD07C0A0476d09465a1
+Contract at 0x1133eA7Af70876e64665ecD07C0A0476d09465a1 already verified.
+Linking proxy 0x1133eA7Af70876e64665ecD07C0A0476d09465a1 with implementation
+Successfully linked proxy to implementation.
+Verifying proxy admin: 0x758b87af7fdB4783f848a1dDEa1F025dC48B9858
+Contract at 0x758b87af7fdB4783f848a1dDEa1F025dC48B9858 already verified.
+
+Proxy fully verified.
+
+Verifying contract...
+The contract 0xB087535DB0df98fC4327136e897A5985E5Cfbd66 has already been verified.
+https://testnet.ftmscan.com/address/0xB087535DB0df98fC4327136e897A5985E5Cfbd66#code
+[90m
+	Validating getRegistry() == 0x4AAcca72145e1dF2aeC137E1f3C5E3D75DB8b5f3[0m
+[32m	✅ PASSED with Result: 0x4AAcca72145e1dF2aeC137E1f3C5E3D75DB8b5f3[0m
+[90m
+	Validating getTreasury() == 0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C[0m
+[32m	✅ PASSED with Result: 0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C[0m
+[90m
+	Validating getPercentFee() == 0[0m
+[32m	✅ PASSED with Result: 0[0m
+[90m
+	Validating getBaseFee() == 0[0m
+[32m	✅ PASSED with Result: 0[0m
+[90m
+	Validating owner() == 0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C[0m
+[32m	✅ PASSED with Result: 0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C[0m

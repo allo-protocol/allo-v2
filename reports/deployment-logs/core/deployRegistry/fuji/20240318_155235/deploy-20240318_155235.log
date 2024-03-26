@@ -1,0 +1,58 @@
+
+    ////////////////////////////////////////////////////
+            Deploys Registry.sol on fuji
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────┐
+│     (index)     │                    Values                    │
+├─────────────────┼──────────────────────────────────────────────┤
+│    contract     │                'Registry.sol'                │
+│     chainId     │                    43113                     │
+│     network     │                    'fuji'                    │
+│ deployerAddress │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│  registryOwner  │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│     balance     │                 '1.46041092'                 │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying Registry...
+Registry proxy deployed to: 0x4AAcca72145e1dF2aeC137E1f3C5E3D75DB8b5f3
+Registry implementation deployed to: 0x5987A30F7Cb138c231de96Fe1522Fe4f1e83940D
+Proxy Admin:  0xf7B93519a3A1790F97f7b14E6f118A139187843e
+Proxy Admin Owner:  0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C
+
+Verifying contract...
+Verifying implementation: 0x5987A30F7Cb138c231de96Fe1522Fe4f1e83940D
+Successfully submitted source code for contract
+contracts/core/Registry.sol:Registry at 0x5987A30F7Cb138c231de96Fe1522Fe4f1e83940D
+for verification on the block explorer. Waiting for verification result...
+
+Failed to verify implementation contract at 0x5987A30F7Cb138c231de96Fe1522Fe4f1e83940D: The API responded with an unexpected message.
+Please report this issue to the Hardhat team.
+Contract verification may have succeeded and should be checked manually.
+Message: Error: Compilation successful, but bytecode does not match with deployed bytecode for address 0x5987A30F7Cb138c231de96Fe1522Fe4f1e83940D, please check your parameters
+Verifying proxy: 0x4AAcca72145e1dF2aeC137E1f3C5E3D75DB8b5f3
+Error: Failed to get logs for contract at address 0x4AAcca72145e1dF2aeC137E1f3C5E3D75DB8b5f3.
+
+Etherscan returned with message: NOTOK, reason: Invalid querystring request
+
+Verifying contract...
+Successfully submitted source code for contract
+contracts/core/Registry.sol:Registry at 0x5987A30F7Cb138c231de96Fe1522Fe4f1e83940D
+for verification on the block explorer. Waiting for verification result...
+
+VerificationAPIUnexpectedMessageError: The API responded with an unexpected message.
+Please report this issue to the Hardhat team.
+Contract verification may have succeeded and should be checked manually.
+Message: Error: Compilation successful, but bytecode does not match with deployed bytecode for address 0x5987A30F7Cb138c231de96Fe1522Fe4f1e83940D, please check your parameters
+    at SimpleTaskDefinition.action (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/@nomicfoundation+hardhat-verify@1.1.1_hardhat@2.22.1/node_modules/@nomicfoundation/hardhat-verify/src/index.ts:491:15)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Environment._runTaskDefinition (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/hardhat@2.22.1_uapi6z6mzql6o72riyrcnnvx6u/node_modules/hardhat/src/internal/core/runtime-environment.ts:359:14)
+    at async Environment.run (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/hardhat@2.22.1_uapi6z6mzql6o72riyrcnnvx6u/node_modules/hardhat/src/internal/core/runtime-environment.ts:192:14)
+    at async SimpleTaskDefinition.action (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/@nomicfoundation+hardhat-verify@1.1.1_hardhat@2.22.1/node_modules/@nomicfoundation/hardhat-verify/src/index.ts:298:9)
+    at async Environment._runTaskDefinition (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/hardhat@2.22.1_uapi6z6mzql6o72riyrcnnvx6u/node_modules/hardhat/src/internal/core/runtime-environment.ts:359:14)
+    at async hardhatVerify (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/@openzeppelin+hardhat-upgrades@2.5.1_sym3ukwnpvfhm2yjdhnkm4xtb4/node_modules/@openzeppelin/hardhat-upgrades/src/verify-proxy.ts:118:12)
+    at async OverriddenTaskDefinition._action (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/@openzeppelin+hardhat-upgrades@2.5.1_sym3ukwnpvfhm2yjdhnkm4xtb4/node_modules/@openzeppelin/hardhat-upgrades/src/index.ts:206:12)
+    at async Environment._runTaskDefinition (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/hardhat@2.22.1_uapi6z6mzql6o72riyrcnnvx6u/node_modules/hardhat/src/internal/core/runtime-environment.ts:359:14)
+    at async Environment.run (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/hardhat@2.22.1_uapi6z6mzql6o72riyrcnnvx6u/node_modules/hardhat/src/internal/core/runtime-environment.ts:192:14)
+[90m
+	Validating hasRole(0x815b5a78dc333d344c7df9da23c04dbd432015cc701876ddb9ffe850e6882747,0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C) == true[0m
+[32m	✅ PASSED with Result: true[0m

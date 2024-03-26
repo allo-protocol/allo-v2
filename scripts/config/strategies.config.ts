@@ -29,15 +29,15 @@ export const strategyConfig: DeployParams = {
     },
     "donation-voting-merkle-distribution-direct": {
       name: "DonationVotingMerkleDistributionDirectTransferStrategy",
-      version: "v1.0",
-    },
-    "donation-voting-merkle-distribution-vault": {
-      name: "DonationVotingMerkleDistributionVaultStrategy",
-      version: "v1.0a",
+      version: "v2.1",
     },
     "qv-impact-stream": {
       name: "QVImpactStreamStrategy",
       version: "v1.0",
+    },
+    "direct-grants": {
+      name: "DirectGrantsSimpleStrategy",
+      version: "v2.1",
     },
   },
   // Goerli
@@ -56,15 +56,15 @@ export const strategyConfig: DeployParams = {
     },
     "donation-voting-merkle-distribution-direct": {
       name: "DonationVotingMerkleDistributionDirectTransferStrategy",
-      version: "v1.0",
-    },
-    "donation-voting-merkle-distribution-vault": {
-      name: "DonationVotingMerkleDistributionVaultStrategy",
-      version: "v1.0a",
+      version: "v2.1",
     },
     "qv-impact-stream": {
       name: "QVImpactStreamStrategy",
       version: "v1.0",
+    },
+    "direct-grants": {
+      name: "DirectGrantsSimpleStrategy",
+      version: "v2.1",
     },
   },
   // Sepolia
@@ -83,69 +83,15 @@ export const strategyConfig: DeployParams = {
     },
     "donation-voting-merkle-distribution-direct": {
       name: "DonationVotingMerkleDistributionDirectTransferStrategy",
-      version: "v1.0",
-    },
-    "donation-voting-merkle-distribution-vault": {
-      name: "DonationVotingMerkleDistributionVaultStrategy",
-      version: "v1.0a",
+      version: "v2.1",
     },
     "qv-impact-stream": {
       name: "QVImpactStreamStrategy",
       version: "v1.0",
     },
-  },
-  // PGN
-  424: {
-    "rfp-simple": {
-      name: "RFPSimpleStrategy",
-      version: "v1.0",
-    },
-    "rfp-committee": {
-      name: "RFPCommitteeStrategy",
-      version: "v1.0",
-    },
-    "qv-simple": {
-      name: "QVSimpleStrategy",
-      version: "v1.0",
-    },
-    "donation-voting-merkle-distribution-direct": {
-      name: "DonationVotingMerkleDistributionDirectTransferStrategy",
-      version: "v1.0",
-    },
-    "donation-voting-merkle-distribution-vault": {
-      name: "DonationVotingMerkleDistributionVaultStrategy",
-      version: "v1.0a",
-    },
-    "qv-impact-stream": {
-      name: "QVImpactStreamStrategy",
-      version: "v1.0",
-    },
-  },
-  // PGN Sepolia
-  58008: {
-    "rfp-simple": {
-      name: "RFPSimpleStrategy",
-      version: "v1.0",
-    },
-    "rfp-committee": {
-      name: "RFPCommitteeStrategy",
-      version: "v1.0",
-    },
-    "qv-simple": {
-      name: "QVSimpleStrategy",
-      version: "v1.0",
-    },
-    "donation-voting-merkle-distribution-direct": {
-      name: "DonationVotingMerkleDistributionDirectTransferStrategy",
-      version: "v1.0",
-    },
-    "donation-voting-merkle-distribution-vault": {
-      name: "DonationVotingMerkleDistributionVaultStrategy",
-      version: "v1.0a",
-    },
-    "qv-impact-stream": {
-      name: "QVImpactStreamStrategy",
-      version: "v1.0",
+    "direct-grants": {
+      name: "DirectGrantsSimpleStrategy",
+      version: "v2.1",
     },
   },
   // Optimism
@@ -164,15 +110,15 @@ export const strategyConfig: DeployParams = {
     },
     "donation-voting-merkle-distribution-direct": {
       name: "DonationVotingMerkleDistributionDirectTransferStrategy",
-      version: "v1.0",
-    },
-    "donation-voting-merkle-distribution-vault": {
-      name: "DonationVotingMerkleDistributionVaultStrategy",
-      version: "v1.0a",
+      version: "v2.1",
     },
     "qv-impact-stream": {
       name: "QVImpactStreamStrategy",
       version: "v1.0",
+    },
+    "direct-grants": {
+      name: "DirectGrantsSimpleStrategy",
+      version: "v2.1",
     },
   },
   // Optimism Goerli
@@ -191,15 +137,15 @@ export const strategyConfig: DeployParams = {
     },
     "donation-voting-merkle-distribution-direct": {
       name: "DonationVotingMerkleDistributionDirectTransferStrategy",
-      version: "v1.0",
-    },
-    "donation-voting-merkle-distribution-vault": {
-      name: "DonationVotingMerkleDistributionVaultStrategy",
-      version: "v1.0a",
+      version: "v2.1",
     },
     "qv-impact-stream": {
       name: "QVImpactStreamStrategy",
       version: "v1.0",
+    },
+    "direct-grants": {
+      name: "DirectGrantsSimpleStrategy",
+      version: "v2.1",
     },
   },
   // Celo Mainnet
@@ -218,15 +164,15 @@ export const strategyConfig: DeployParams = {
     },
     "donation-voting-merkle-distribution-direct": {
       name: "DonationVotingMerkleDistributionDirectTransferStrategy",
-      version: "v1.0",
-    },
-    "donation-voting-merkle-distribution-vault": {
-      name: "DonationVotingMerkleDistributionVaultStrategy",
-      version: "v1.0a",
+      version: "v2.1",
     },
     "qv-impact-stream": {
       name: "QVImpactStreamStrategy",
       version: "v1.0",
+    },
+    "direct-grants": {
+      name: "DirectGrantsSimpleStrategy",
+      version: "v2.1",
     },
   },
   // Celo Alfajores
@@ -245,15 +191,15 @@ export const strategyConfig: DeployParams = {
     },
     "donation-voting-merkle-distribution-direct": {
       name: "DonationVotingMerkleDistributionDirectTransferStrategy",
-      version: "v1.0",
-    },
-    "donation-voting-merkle-distribution-vault": {
-      name: "DonationVotingMerkleDistributionVaultStrategy",
-      version: "v1.0a",
+      version: "v2.1",
     },
     "qv-impact-stream": {
       name: "QVImpactStreamStrategy",
       version: "v1.0",
+    },
+    "direct-grants": {
+      name: "DirectGrantsSimpleStrategy",
+      version: "v2.1",
     },
   },
   // Polygon Mainnet
@@ -272,15 +218,15 @@ export const strategyConfig: DeployParams = {
     },
     "donation-voting-merkle-distribution-direct": {
       name: "DonationVotingMerkleDistributionDirectTransferStrategy",
-      version: "v1.0",
-    },
-    "donation-voting-merkle-distribution-vault": {
-      name: "DonationVotingMerkleDistributionVaultStrategy",
-      version: "v1.0a",
+      version: "v2.1",
     },
     "qv-impact-stream": {
       name: "QVImpactStreamStrategy",
       version: "v1.0",
+    },
+    "direct-grants": {
+      name: "DirectGrantsSimpleStrategy",
+      version: "v2.1",
     },
   },
   // Mumbai
@@ -299,15 +245,15 @@ export const strategyConfig: DeployParams = {
     },
     "donation-voting-merkle-distribution-direct": {
       name: "DonationVotingMerkleDistributionDirectTransferStrategy",
-      version: "v1.0",
-    },
-    "donation-voting-merkle-distribution-vault": {
-      name: "DonationVotingMerkleDistributionVaultStrategy",
-      version: "v1.0a",
+      version: "v2.1",
     },
     "qv-impact-stream": {
       name: "QVImpactStreamStrategy",
       version: "v1.0",
+    },
+    "direct-grants": {
+      name: "DirectGrantsSimpleStrategy",
+      version: "v2.1",
     },
   },
   // Arbitrum One Mainnet
@@ -326,15 +272,15 @@ export const strategyConfig: DeployParams = {
     },
     "donation-voting-merkle-distribution-direct": {
       name: "DonationVotingMerkleDistributionDirectTransferStrategy",
-      version: "v1.0",
-    },
-    "donation-voting-merkle-distribution-vault": {
-      name: "DonationVotingMerkleDistributionVaultStrategy",
-      version: "v1.0a",
+      version: "v2.1",
     },
     "qv-impact-stream": {
       name: "QVImpactStreamStrategy",
       version: "v1.0",
+    },
+    "direct-grants": {
+      name: "DirectGrantsSimpleStrategy",
+      version: "v2.1",
     },
   },
   // Arbitrum Sepolia
@@ -353,15 +299,15 @@ export const strategyConfig: DeployParams = {
     },
     "donation-voting-merkle-distribution-direct": {
       name: "DonationVotingMerkleDistributionDirectTransferStrategy",
-      version: "v1.0",
-    },
-    "donation-voting-merkle-distribution-vault": {
-      name: "DonationVotingMerkleDistributionVaultStrategy",
-      version: "v1.0a",
+      version: "v2.1",
     },
     "qv-impact-stream": {
       name: "QVImpactStreamStrategy",
       version: "v1.0",
+    },
+    "direct-grants": {
+      name: "DirectGrantsSimpleStrategy",
+      version: "v2.1",
     },
   },
   // Base Mainnet
@@ -380,15 +326,15 @@ export const strategyConfig: DeployParams = {
     },
     "donation-voting-merkle-distribution-direct": {
       name: "DonationVotingMerkleDistributionDirectTransferStrategy",
-      version: "v1.0",
-    },
-    "donation-voting-merkle-distribution-vault": {
-      name: "DonationVotingMerkleDistributionVaultStrategy",
-      version: "v1.0a",
+      version: "v2.1",
     },
     "qv-impact-stream": {
       name: "QVImpactStreamStrategy",
       version: "v1.0",
+    },
+    "direct-grants": {
+      name: "DirectGrantsSimpleStrategy",
+      version: "v2.1",
     },
   },
   // Base Testnet Goerli
@@ -407,15 +353,97 @@ export const strategyConfig: DeployParams = {
     },
     "donation-voting-merkle-distribution-direct": {
       name: "DonationVotingMerkleDistributionDirectTransferStrategy",
-      version: "v1.0",
-    },
-    "donation-voting-merkle-distribution-vault": {
-      name: "DonationVotingMerkleDistributionVaultStrategy",
-      version: "v1.0a",
+      version: "v2.1",
     },
     "qv-impact-stream": {
       name: "QVImpactStreamStrategy",
       version: "v1.0",
+    },
+    "direct-grants": {
+      name: "DirectGrantsSimpleStrategy",
+      version: "v2.1",
+    },
+  },
+  // Optimism Sepolia
+  11155420: {
+    "rfp-simple": {
+      name: "RFPSimpleStrategy",
+      version: "v1.0",
+    },
+    "rfp-committee": {
+      name: "RFPCommitteeStrategy",
+      version: "v1.0",
+    },
+    "qv-simple": {
+      name: "QVSimpleStrategy",
+      version: "v1.0",
+    },
+    "donation-voting-merkle-distribution-direct": {
+      name: "DonationVotingMerkleDistributionDirectTransferStrategy",
+      version: "v2.1",
+    },
+    "qv-impact-stream": {
+      name: "QVImpactStreamStrategy",
+      version: "v1.0",
+    },
+    "direct-grants": {
+      name: "DirectGrantsSimpleStrategy",
+      version: "v2.1",
+    },
+  },
+  // Fuji
+  43113: {
+    "donation-voting-merkle-distribution-direct": {
+      name: "DonationVotingMerkleDistributionDirectTransferStrategy",
+      version: "v2.1",
+    },
+    "direct-grants": {
+      name: "DirectGrantsSimpleStrategy",
+      version: "v2.1",
+    },
+  },
+  // Avalanche
+  43114: {
+    "donation-voting-merkle-distribution-direct": {
+      name: "DonationVotingMerkleDistributionDirectTransferStrategy",
+      version: "v2.1",
+    },
+    "direct-grants": {
+      name: "DirectGrantsSimpleStrategy",
+      version: "v2.1",
+    },
+  },
+  // Scroll:
+  534352: {
+    "donation-voting-merkle-distribution-direct": {
+      name: "DonationVotingMerkleDistributionDirectTransferStrategy",
+      version: "v2.1",
+    },
+    "direct-grants": {
+      name: "DirectGrantsSimpleStrategy",
+      version: "v2.1",
+    },
+  },
+  // Fantom
+  250: {
+    "donation-voting-merkle-distribution-direct": {
+      name: "DonationVotingMerkleDistributionDirectTransferStrategy",
+      version: "v2.1",
+    },
+    "direct-grants": {
+      name: "DirectGrantsSimpleStrategy",
+      version: "v2.1",
+    },
+  },
+  // Fantom Testnet
+  4002: {
+    "donation-voting-merkle-distribution-direct": {
+      name: "DonationVotingMerkleDistributionDirectTransferStrategy",
+      version: "v2.1",
+    },
+    "direct-grants": {
+      name: "DirectGrantsSimpleStrategy",
+      version: "v2.1",
     },
   },
 };
