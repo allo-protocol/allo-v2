@@ -49,22 +49,22 @@ export default async function () {
   );
 
   await instance.waitForDeployment();
-  const CONTRACT_ADDRESS = await instance.getAddress();
+  const proxyContractAddress = await instance.getAddress();
 
-  console.log("Registry deployed to:", CONTRACT_ADDRESS);
+  console.log("Registry deployed to:", proxyContractAddress);
 
   const objToWrite = {
     name: "Registry",
-    proxy: CONTRACT_ADDRESS,
+    proxy: proxyContractAddress,
     deployerAddress: deployerAddress.address,
     owner: registryParams.owner,
   };
 
   deployments.write(objToWrite);
 
-  await verifyContract(CONTRACT_ADDRESS, []);
+  await verifyContract(proxyContractAddress, []);
 
-  return instance.address;
+  return proxyContractAddress;
 }
 
 // Note: Deploy script to run in terminal:

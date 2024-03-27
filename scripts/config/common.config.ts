@@ -101,4 +101,14 @@ export const commonConfig: DeployParams = {
     proxyAdminOwner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
     permit2Address: "0x000000000022D473030F116dDEE9F6B43aC78BA3",
   },
+  // ZkSync Mainnet
+  324: {
+    proxyAdminOwner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
+    permit2Address: "",
+  },
+  // ZkSync Sepolia Testnet
+  300: {
+    proxyAdminOwner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
+    permit2Address: "",
+  },
 };

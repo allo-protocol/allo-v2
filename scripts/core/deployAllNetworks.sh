@@ -64,9 +64,11 @@ scripts=(
     # "strategies/deployImpactStream"
 
     #  === ZkSync Era ===
-    "deployRegistry"
-    # "era/deployAllo"
-    # "deployContractFactory"
+    # "deployEraRegistry"
+    "deployEraAllo"
+    # "deployEraContractFactory"
+    # "strategies/deployEraDonationVotingMerkleDistributionDirect"
+    # "strategies/deployEraDirectGrants"
 )
 
 for script in "${scripts[@]}"; do
