@@ -2,7 +2,7 @@
 // import { commonConfig } from "../config/common.config";
 // import { strategyConfig } from "../config/strategies.config";
 // import { Validator } from "../utils/Validator";
-// import { deployStrategies } from "./deployStrategies";
+// import { deployStrategies } from "./deployEraStrategies";
 
 // export const deployDonationVotingMerkleDistributionDirect = async () => {
 //   const network = await ethers.provider.getNetwork();
