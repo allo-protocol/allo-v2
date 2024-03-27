@@ -446,4 +446,26 @@ export const strategyConfig: DeployParams = {
       version: "v2.1",
     },
   },
+  // ZkSync Mainnet
+  324: {
+    "donation-voting-merkle-distribution-direct": {
+      name: "DonationVotingMerkleDistributionDirectTransferStrategy",
+      version: "v2.1",
+    },
+    "direct-grants": {
+      name: "DirectGrantsSimpleStrategy",
+      version: "v2.1",
+    },
+  },
+  // ZkSync Sepolia Testnet
+  300: {
+    "donation-voting-merkle-distribution-direct": {
+      name: "DonationVotingMerkleDistributionDirectTransferStrategy",
+      version: "v2.1",
+    },
+    "direct-grants": {
+      name: "DirectGrantsSimpleStrategy",
+      version: "v2.1",
+    },
+  },
 };

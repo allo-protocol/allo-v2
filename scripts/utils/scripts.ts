@@ -39,6 +39,7 @@ export const verifyContract = async (
     await hre.run("verify:verify", {
       address: contractAddress.toString(),
       constructorArguments: verifyArgs,
+      noCompile: true,
     });
   } catch (e) {
     console.log(e);
