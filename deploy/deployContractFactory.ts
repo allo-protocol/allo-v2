@@ -2,7 +2,7 @@ import * as hre from "hardhat";
 import * as dotenv from "dotenv";
 import { Deployer } from "@matterlabs/hardhat-zksync-deploy";
 import { Wallet } from "zksync-ethers";
-import { Deployments } from "../scripts/utils/scripts";
+import { Deployments, verifyContract } from "../scripts/utils/scripts";
 
 dotenv.config();
 
@@ -47,21 +47,8 @@ export default async function () {
   };
   deploymentIo.write(objToWrite);
 
-  await hre.run("verify:verify", {
-    address: CONTRACT_ADDRESS,
-    contract: "contracts/factory/ContractFactory.sol:ContractFactory",
-    bytecode: artifact.bytecode,
-    constructorArguments: [],
-    noCompile: true,
-  });
+  await verifyContract(CONTRACT_ADDRESS, []);
 }
-
-// if (require.main === module) {
-//   deployContractFactory().catch((error) => {
-//     console.error(error);
-//     process.exitCode = 1;
-//   });
-// }
 
 // Note: Deploy script to run in terminal:
 // npx hardhat compile --network zkSyncTestnet --config era.hardhat.config.ts

@@ -3,7 +3,7 @@ import * as dotenv from "dotenv";
 import { registryConfig } from "../scripts/config/registry.config";
 import { Deployer } from "@matterlabs/hardhat-zksync-deploy";
 import { Wallet } from "zksync-ethers";
-import { Deployments, getImplementationAddress } from "../scripts/utils/scripts";
+import { Deployments, verifyContract } from "../scripts/utils/scripts";
 
 dotenv.config();
 
@@ -51,36 +51,21 @@ export default async function () {
   await instance.waitForDeployment();
   const CONTRACT_ADDRESS = await instance.getAddress();
 
-  // const implementation = await getImplementationAddress(
-  //   instance.target as string,
-  // );
-  // const proxyAdmin = await hre.upgrades.erc1967.getAdminAddress(instance.target as string);
-  // let proxyAdminOwner = account.address;
-
   console.log("Registry deployed to:", CONTRACT_ADDRESS);
 
   const objToWrite = {
     name: "Registry",
-    // implementation: implementation,
     proxy: CONTRACT_ADDRESS,
-    deployerAddress: deployerAddress,
+    deployerAddress: deployerAddress.address,
     owner: registryParams.owner,
-    // proxyAdmin: proxyAdmin,
-    // proxyAdminOwner: proxyAdminOwner,
   };
 
   deployments.write(objToWrite);
 
-  // await verifyContract(instance.target.toString(), []);
-  // await verifyContract(implementation, []);
+  await verifyContract(CONTRACT_ADDRESS, []);
 
   return instance.address;
 }
-
-// deployRegistry().catch((error) => {
-//     console.error(error);
-//     process.exitCode = 1;
-// });
 
 // Note: Deploy script to run in terminal:
 // npx hardhat compile --network zkSyncTestnet --config era.hardhat.config.ts
