@@ -144,4 +144,18 @@ export const alloConfig: DeployParams = {
     percentFee: 0,
     baseFee: 0,
   },
+  // ZkSync Mainnet
+  324: {
+    owner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
+    treasury: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
+    percentFee: 0,
+    baseFee: 0,
+  },
+  // ZkSync Sepolia Testnet
+  300: {
+    owner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
+    treasury: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
+    percentFee: 0,
+    baseFee: 0,
+  },
 };

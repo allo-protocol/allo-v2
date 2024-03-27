@@ -64,9 +64,11 @@ scripts=(
     # "strategies/deployImpactStream"
 
     #  === ZkSync Era ===
-    # "era/deployRegistry"
-    # "era/deployAllo"
-    "era/deployContractFactory"
+    # "deployEraRegistry"
+    "deployEraAllo"
+    # "deployEraContractFactory"
+    # "strategies/deployEraDonationVotingMerkleDistributionDirect"
+    # "strategies/deployEraDirectGrants"
 )
 
 for script in "${scripts[@]}"; do
@@ -75,7 +77,7 @@ for script in "${scripts[@]}"; do
         mkdir -p ./reports/deployment-logs/$script/$n/$timestamp/
 
         if [ "$n" == "zkSyncTestnet" ] || [ "$n" == "zkSyncMainnet" ]; then
-            cmd="bun hardhat deploy-zksync scripts/$script.ts --network $n --config era.hardhat.config.ts | tee ./reports/deployment-logs/$script/$n/$timestamp/deploy-$n_$timestamp.log"
+            cmd="bun hardhat deploy-zksync --network $n --config era.hardhat.config.ts --script $script.ts | tee ./reports/deployment-logs/$script/$n/$timestamp/deploy-$n_$timestamp.log"
         else
             cmd="bun hardhat run scripts/$script.ts --no-compile --network $n | tee ./reports/deployment-logs/$script/$n/$timestamp/deploy-$n_$timestamp.log"
         fi

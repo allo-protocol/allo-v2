@@ -1,13 +1,11 @@
 import * as dotenv from "dotenv";
 
 import "@nomicfoundation/hardhat-foundry";
-import "@nomicfoundation/hardhat-verify";
 import "@matterlabs/hardhat-zksync-verify";
 import "@matterlabs/hardhat-zksync-deploy";
 import "@matterlabs/hardhat-zksync-solc";
 import "@nomiclabs/hardhat-solhint";
-// import "@matterlabs/hardhat-zksync-upgradable";
-// import "@openzeppelin/hardhat-upgrades";
+import "@matterlabs/hardhat-zksync-upgradable";
 import "@typechain/hardhat";
 import fs from "fs";
 import "hardhat-abi-exporter";
