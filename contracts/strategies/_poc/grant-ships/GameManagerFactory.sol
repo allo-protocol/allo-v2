@@ -9,8 +9,17 @@ contract GameManagerFactory {
     event TemplateCreated(string name, address templateAddress);
     event FactoryInitialized(address rootAccount);
     event RootAccountSwitched(address newRootAccount);
-    event GameManagerDeployed(address gameManagerAddress);
-    event GameManagerDeployedWithPool(address gameManagerAddress, bytes32 profileAddress, uint256 poolId);
+    event GameManagerDeployed(address gameManagerAddress, string templateName);
+    event GameManagerDeployedWithPool(
+        address gameManagerAddress,
+        bytes32 profileId,
+        uint256 poolId,
+        string templateName,
+        address tokenAddress,
+        bytes initData,
+        Metadata poolMetadata,
+        Metadata profileMetadata
+    );
 
     address public rootAccount;
     IAllo public allo;
@@ -45,7 +54,7 @@ contract GameManagerFactory {
         require(templates[_name] != address(0), "Template does not exist");
         address clone = Clones.clone(templates[_name]);
 
-        emit GameManagerDeployed(clone);
+        emit GameManagerDeployed(clone, _name);
         return clone;
     }
 
@@ -58,15 +67,17 @@ contract GameManagerFactory {
         address _tokenAddress
     ) external onlyRoot returns (address) {
         address deployedAddress = cloneTemplate(_name);
-        address[] memory noManagers = new address[](0);
 
-        bytes32 profileId = allo.getRegistry().createProfile(_nonce, _name, _profileMetadata, address(this), noManagers);
+        bytes32 profileId =
+            allo.getRegistry().createProfile(_nonce, _name, _profileMetadata, address(this), new address[](0));
 
         uint256 poolId = allo.createPoolWithCustomStrategy(
-            profileId, deployedAddress, _initData, _tokenAddress, 0, _poolMetadata, noManagers
+            profileId, deployedAddress, _initData, _tokenAddress, 0, _poolMetadata, new address[](0)
         );
 
-        emit GameManagerDeployedWithPool(deployedAddress, profileId, poolId);
+        emit GameManagerDeployedWithPool(
+            deployedAddress, profileId, poolId, _name, _tokenAddress, _initData, _poolMetadata, _profileMetadata
+        );
 
         return deployedAddress;
     }
