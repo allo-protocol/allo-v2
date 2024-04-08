@@ -1,6 +1,6 @@
 import hre, { ethers } from "hardhat";
 import { Validator } from "../../scripts/utils/Validator";
-import { Args, deployContractUsingFactory } from "../../scripts/utils/deployProxy";
+import { Args, deployContractUsingFactoryOnEra } from "../../scripts/utils/deployProxy";
 import { Deployments, verifyContract } from "../../scripts/utils/scripts";
 import { Wallet } from "zksync-ethers";
 
@@ -41,7 +41,7 @@ export async function deployEraStrategies(
   );
 
   // TODO: UPDATE FOR ERA
-  const impl = await deployContractUsingFactory(
+  const impl = await deployContractUsingFactoryOnEra(
     deployments.getContractFactory(),
     strategyName,
     version,
