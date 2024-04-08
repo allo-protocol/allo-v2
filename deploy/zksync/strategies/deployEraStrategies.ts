@@ -13,17 +13,15 @@ const deployContractUsingFactoryWithBytecodeOnEra = async (
   constructorArgs?: Args,
 ): Promise<string> => {
 
-  // const provider = new Provider("https://sepolia.era.zksync.dev");
+  const deployerAddress = new Wallet(process.env.DEPLOYER_PRIVATE_KEY as string);
 
-  // const deployerAddress = new Wallet(process.env.DEPLOYER_PRIVATE_KEY as string, provider);
+  const ContractArtifact = await hre.artifacts.readArtifact("ContractFactory");
 
-  // const ContractArtifact = await hre.artifacts.readArtifact("ContractFactory");
-
-  // const deployerContract = new ethers.Contract(
-  //   contractFactoryAddress,
-  //   ContractArtifact.abi,
-  //   deployerAddress
-  // );
+  const deployerContract = new ethers.Contract(
+    contractFactoryAddress,
+    ContractArtifact.abi,
+    deployerAddress
+  );
 
   // let encodedParams = null;
 
