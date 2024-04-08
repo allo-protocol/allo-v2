@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import {BaseStrategy} from "allo-v2/contracts/strategies/BaseStrategy.sol";
-import {IAllo} from "allo-v2/contracts/core/interfaces/IAllo.sol";
+import {BaseStrategy} from "../BaseStrategy.sol";
+import {IAllo} from "../../core/interfaces/IAllo.sol";
 
 contract EasyRPGFStrategy is BaseStrategy {
     error INPUT_LENGTH_MISMATCH();
