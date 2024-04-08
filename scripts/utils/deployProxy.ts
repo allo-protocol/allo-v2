@@ -164,7 +164,6 @@ export const deployContractUsingFactory = async (
   version: string,
   constructorArgs?: Args
 ): Promise<string | Addressable> => {
-  const network = await ethers.provider.getNetwork();
   const ImplementationFactory = await ethers.getContractFactory(contractName);
   const implementationCreationCode = ImplementationFactory.bytecode;
   const implementationAddress = await deployContractUsingFactoryWithBytecode(
@@ -178,6 +177,6 @@ export const deployContractUsingFactory = async (
   return implementationAddress;
 };
 
-function logPink(text: string) {
+export function logPink(text: string) {
   console.log("\x1b[35m%s\x1b[0m", text);
 }

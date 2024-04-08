@@ -1,25 +1,21 @@
 import * as dotenv from "dotenv";
 
+import "@nomicfoundation/hardhat-foundry";
+import "@matterlabs/hardhat-zksync-verify";
 import "@matterlabs/hardhat-zksync-deploy";
 import "@matterlabs/hardhat-zksync-solc";
+import "@nomiclabs/hardhat-solhint";
 import "@matterlabs/hardhat-zksync-upgradable";
-import "@matterlabs/hardhat-zksync-verify";
-import "@nomicfoundation/hardhat-foundry";
-import "hardhat-preprocessor";
 import "@typechain/hardhat";
-import { HardhatUserConfig, subtask } from "hardhat/config";
-import { NetworkUserConfig } from "hardhat/types";
 import fs from "fs";
+import "hardhat-abi-exporter";
+import "hardhat-contract-sizer";
+import "hardhat-gas-reporter";
+import "hardhat-preprocessor";
+import { HardhatUserConfig } from "hardhat/config";
+import "solidity-coverage";
 
 dotenv.config();
-
-const chainIds = {
-  // local network
-  "zksync-testnet": 280,
-
-  // mainnet
-  "zksync-mainnet": 324,
-};
 
 let deployPrivateKey = process.env.DEPLOYER_PRIVATE_KEY as string;
 if (!deployPrivateKey) {
@@ -27,13 +23,15 @@ if (!deployPrivateKey) {
   throw "No deployer private key set in .env";
 }
 
-const infuraIdKey = process.env.INFURA_RPC_ID as string;
+const DEFENDER_TEAM_API_KEY = process.env.DEFENDER_TEAM_API_KEY as string;
+const DEFENDER_TEAM_API_SECRET_KEY = process.env
+  .DEFENDER_TEAM_API_SECRET_KEY as string;
 
 /**
  * Reads the remappings.txt file and returns an array of arrays.
  * @returns {string[][]}
  */
-function getRemappings() {
+function getRemappings(): string[][] {
   return fs
     .readFileSync("remappings.txt", "utf8")
     .split("\n")
@@ -41,47 +39,24 @@ function getRemappings() {
     .map((line) => line.trim().split("="));
 }
 
-/**
- * Generates hardhat network configuration the test networks.
- * @param network
- * @param url (optional)
- * @returns {NetworkUserConfig}
- */
-function createTestnetConfig(
-  network: keyof typeof chainIds,
-  url?: string
-): NetworkUserConfig {
-  if (!url) {
-    url = `https://${network}.infura.io/v3/${infuraIdKey}`;
-  }
-  return {
-    accounts: [deployPrivateKey],
-    chainId: chainIds[network],
-    allowUnlimitedContractSize: true,
-    url,
-  };
-}
+const abiExporter = [
+  {
+    path: "./abis/pretty",
+    flat: true,
+    clear: true,
+    format: "fullName",
+  },
+  {
+    path: "./abis/ugly",
+    flat: true,
+    clear: true,
+  },
+];
 
 /**
- * Generates hardhat network configuration the mainnet networks.
- * @param network
- * @param url (optional)
- * @returns {NetworkUserConfig}
+ * Generates hardhat network configuration
+ * @type import('hardhat/config').HardhatUserConfig
  */
-function createMainnetConfig(
-  network: keyof typeof chainIds,
-  url?: string
-): NetworkUserConfig {
-  if (!url) {
-    url = `https://${network}.infura.io/v3/${infuraIdKey}`;
-  }
-  return {
-    accounts: [deployPrivateKey],
-    chainId: chainIds[network],
-    url,
-  };
-}
-
 const config: HardhatUserConfig = {
   solidity: {
     version: "0.8.19",
@@ -94,38 +69,28 @@ const config: HardhatUserConfig = {
     // @ts-ignore
   },
   networks: {
-    // Main Networks
-    "zksync-mainnet": {
-      ...createMainnetConfig(
-        "zksync-mainnet",
-        "https://zksync2-mainnet.zksync.io",
-      ),
+    zkSyncTestnet: {
+      url: "https://sepolia.era.zksync.dev",
+      ethNetwork: "sepolia",
       zksync: true,
+      verifyURL: "https://explorer.sepolia.era.zksync.dev/contract_verification",
+      chainId: 300
+    },
+    zkSyncMainnet: {
+      url: "https://mainnet.era.zksync.io",
       ethNetwork: "mainnet",
-    },
-
-    // Test Networks
-    "zksync-testnet": {
-      ...createTestnetConfig(
-        "zksync-testnet",
-        "https://zksync2-testnet.zksync.dev",
-      ),
       zksync: true,
-      ethNetwork: "goerli",
-      verifyURL:
-        "https://zksync2-testnet-explorer.zksync.dev/contract_verification",
+      verifyURL: "https://zksync2-mainnet-explorer.zksync.io/contract_verification",
+      chainId: 324
     },
   },
-  defaultNetwork: "zksync-testnet",
-  // @ts-ignore
-  etherscan: {
-    apiKey: {
-      // @ts-ignore
-      mainnet: process.env.ETHERSCAN_API_KEY,
-      // @ts-ignore
-      goerli: process.env.ETHERSCAN_API_KEY,
-    },
+  gasReporter: {
+    coinmarketcap: process.env.COINMARKETCAP_API_KEY,
+    enabled: process.env.REPORT_GAS !== undefined,
+    currency: "USD",
+    excludeContracts: ["contracts/mocks", "contracts/dummy"],
   },
+  abiExporter: abiExporter,
   preprocess: {
     eachLine: (hre) => ({
       transform: (line: string) => {
@@ -146,11 +111,8 @@ const config: HardhatUserConfig = {
     cache: "./cache_hardhat",
   },
   zksolc: {
-    version: "1.3.13",
-    compilerSource: "binary",
-    settings: {
-      isSystem: true,
-    },
+    version: "latest",
+    settings: {},
   },
 };
 

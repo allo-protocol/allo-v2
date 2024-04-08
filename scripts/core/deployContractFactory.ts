@@ -69,4 +69,5 @@ if (require.main === module) {
 }
 
 // Note: Deploy script to run in terminal:
-// npx hardhat run scripts/core/deployContractFactory.ts --network sepolia
+// npx hardhat compile --network zkSyncTestnet
+// npm hardhat deploy-zksync --script scripts/core/deployContractFactory.ts --network zkSyncTestnet

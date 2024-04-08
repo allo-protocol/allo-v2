@@ -43,12 +43,17 @@ networks=(
 #   "scroll"
 #   "ftmTestnet"
 #   "fantom"
+
+#  === ZkSync Era ===
+  "zkSyncTestnet"
+#   "zkSyncMainnet"
+#  ==================
 )
 
 scripts=(
     # "core/deployRegistry"
-    # "core/deployContractFactory"
     # "core/deployAllo"
+    # "core/deployContractFactory"
     # "strategies/deployDonationVotingMerkleDistributionDirect"
     # "strategies/deployDirectGrants"
     # "core/transferProxyAdminOwnership"
@@ -57,13 +62,26 @@ scripts=(
     # "strategies/deployRFPCommittee"
     # "strategies/deployRFPSimple"
     # "strategies/deployImpactStream"
+
+    #  === ZkSync Era ===
+    # "deployEraRegistry"
+    # "deployEraAllo"
+    "deployEraContractFactory"
+    # "strategies/deployEraDonationVotingMerkleDistributionDirect"
+    # "strategies/deployEraDirectGrants"
 )
 
 for script in "${scripts[@]}"; do
     # Execute the commands
     for n in "${networks[@]}"; do
         mkdir -p ./reports/deployment-logs/$script/$n/$timestamp/
-        cmd="bun hardhat run scripts/$script.ts --no-compile --network $n | tee ./reports/deployment-logs/$script/$n/$timestamp/deploy-$n_$timestamp.log"
+
+        if [ "$n" == "zkSyncTestnet" ] || [ "$n" == "zkSyncMainnet" ]; then
+            cmd="bun hardhat deploy-zksync --network $n --config era.hardhat.config.ts --script $script.ts | tee ./reports/deployment-logs/$script/$n/$timestamp/deploy-$n_$timestamp.log"
+        else
+            cmd="bun hardhat run scripts/$script.ts --no-compile --network $n | tee ./reports/deployment-logs/$script/$n/$timestamp/deploy-$n_$timestamp.log"
+        fi
+
         log "Executing: $cmd"
         # Extract the individual log file path from the command string
         individual_logfile=$(echo $cmd | grep -o "./reports/deployment-logs/$script/$n/[^ ]*/deploy-[^ ]*.log")
