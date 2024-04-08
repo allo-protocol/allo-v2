@@ -468,4 +468,26 @@ export const strategyConfig: DeployParams = {
       version: "v2.1",
     },
   },
+  // Filecoin Mainnet
+  314: {
+    "donation-voting-merkle-distribution-direct": {
+      name: "DonationVotingMerkleDistributionDirectTransferStrategy",
+      version: "v2.1",
+    },
+    "direct-grants": {
+      name: "DirectGrantsSimpleStrategy",
+      version: "v2.1",
+    },
+  },
+  // Filecoin Calibration Testnet
+  314159: {
+    "donation-voting-merkle-distribution-direct": {
+      name: "DonationVotingMerkleDistributionDirectTransferStrategy",
+      version: "v2.1",
+    },
+    "direct-grants": {
+      name: "DirectGrantsSimpleStrategy",
+      version: "v2.1",
+    },
+  },
 };

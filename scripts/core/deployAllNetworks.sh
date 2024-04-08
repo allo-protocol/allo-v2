@@ -43,9 +43,11 @@ networks=(
 #   "scroll"
 #   "ftmTestnet"
 #   "fantom"
+  "filecoin-calibration"
+#   "filecoin-mainnet"
 
 #  === ZkSync Era ===
-  "zkSyncTestnet"
+#   "zkSyncTestnet"
 #   "zkSyncMainnet"
 #  ==================
 )
