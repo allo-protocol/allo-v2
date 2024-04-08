@@ -164,7 +164,6 @@ export const deployContractUsingFactory = async (
   version: string,
   constructorArgs?: Args
 ): Promise<string | Addressable> => {
-  const network = await ethers.provider.getNetwork();
   const ImplementationFactory = await ethers.getContractFactory(contractName);
   const implementationCreationCode = ImplementationFactory.bytecode;
   const implementationAddress = await deployContractUsingFactoryWithBytecode(

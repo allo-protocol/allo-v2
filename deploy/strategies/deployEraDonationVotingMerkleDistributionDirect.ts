@@ -1,11 +1,11 @@
-import { ethers } from "hardhat";
+import * as hre from "hardhat";
 import { deployEraStrategies } from "./deployEraStrategies";
 import { strategyConfig } from "../../scripts/config/strategies.config";
 import { commonConfig } from "../../scripts/config/common.config";
 import { Validator } from "../../scripts/utils/Validator";
 
-export const deployEraDonationVotingMerkleDistributionDirect = async () => {
-  const network = await ethers.provider.getNetwork();
+export default async function () {
+  const network = await hre.network.config;
   const chainId = Number(network.chainId);
 
   const strategyParams = strategyConfig[chainId]["donation-voting-merkle-distribution-direct"];
@@ -26,11 +26,3 @@ export const deployEraDonationVotingMerkleDistributionDirect = async () => {
 
   await validator.validate("PERMIT2", [], commonConfig[chainId].permit2Address);
 };
-
-// Check if this script is the main module (being run directly)
-if (require.main === module) {
-  deployEraDonationVotingMerkleDistributionDirect().catch((error) => {
-    console.error(error);
-    process.exitCode = 1;
-  });
-}

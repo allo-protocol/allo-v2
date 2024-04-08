@@ -2,19 +2,18 @@ import hre, { ethers } from "hardhat";
 import { Validator } from "../../scripts/utils/Validator";
 import { Args, deployContractUsingFactory } from "../../scripts/utils/deployProxy";
 import { Deployments, verifyContract } from "../../scripts/utils/scripts";
+import { Wallet } from "zksync-ethers";
 
 export async function deployEraStrategies(
   strategyName: string,
   version: string,
   additionalArgs?: Args,
 ): Promise<string> {
-  const network = await ethers.provider.getNetwork();
+  const network = await hre.network.config;
   const networkName = await hre.network.name;
   const chainId = Number(network.chainId);
-  const account = (await ethers.getSigners())[0];
-  const deployerAddress = await account.getAddress();
-  // const blocksToWait = networkName === "localhost" ? 0 : 5;
-  const balance = await ethers.provider.getBalance(deployerAddress);
+
+  const deployerAddress = new Wallet(process.env.DEPLOYER_PRIVATE_KEY as string);
 
   const fileName = strategyName.toLowerCase();
   const deployments = new Deployments(chainId, fileName);
@@ -31,8 +30,7 @@ export async function deployEraStrategies(
     contract: `${strategyName}.sol`,
     chainId: chainId,
     network: networkName,
-    deployerAddress: deployerAddress,
-    balance: ethers.formatEther(balance),
+    deployerAddress: deployerAddress.address,
   });
 
   console.log(`Deploying ${strategyName}.sol`);
@@ -42,6 +40,7 @@ export async function deployEraStrategies(
     additionalArgs?.values ?? [],
   );
 
+  // TODO: UPDATE FOR ERA
   const impl = await deployContractUsingFactory(
     deployments.getContractFactory(),
     strategyName,
@@ -61,7 +60,7 @@ export async function deployEraStrategies(
     name: strategyName,
     version: version,
     address: impl.toString(),
-    deployerAddress: deployerAddress,
+    deployerAddress: deployerAddress.address,
   };
 
   deployments.write(objToWrite);
@@ -74,6 +73,3 @@ export async function deployEraStrategies(
 
   return impl.toString();
 }
-
-// Note: Deploy script to run in terminal:
-// npx hardhat run deploy/deployEraStrategies.ts --network zkEraTestnet

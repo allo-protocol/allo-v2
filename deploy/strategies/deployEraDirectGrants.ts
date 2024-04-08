@@ -1,20 +1,11 @@
-import { ethers } from "hardhat";
+import * as hre from "hardhat";
 import { deployEraStrategies } from "./deployEraStrategies";
 import { strategyConfig } from "../../scripts/config/strategies.config";
 
-export const deployEraDirectGrants = async () => {
-  const network = await ethers.provider.getNetwork();
+export default async function () {
+  const network = await hre.network.config;
   const chainId = Number(network.chainId);
-
   const strategyParams = strategyConfig[chainId]["direct-grants"];
 
   await deployEraStrategies(strategyParams.name, strategyParams.version);
 };
-
-// Check if this script is the main module (being run directly)
-if (require.main === module) {
-  deployEraDirectGrants().catch((error) => {
-    console.error(error);
-    process.exitCode = 1;
-  });
-}
