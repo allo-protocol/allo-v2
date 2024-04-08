@@ -58,10 +58,6 @@ const abiExporter = [
  * @type import('hardhat/config').HardhatUserConfig
  */
 const config: HardhatUserConfig = {
-  defender: {
-    apiKey: DEFENDER_TEAM_API_KEY,
-    apiSecret: DEFENDER_TEAM_API_SECRET_KEY,
-  },
   solidity: {
     version: "0.8.19",
     settings: {
