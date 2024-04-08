@@ -1,36 +1,36 @@
-// import { ethers } from "hardhat";
-// import { commonConfig } from "../config/common.config";
-// import { strategyConfig } from "../config/strategies.config";
-// import { Validator } from "../utils/Validator";
-// import { deployStrategies } from "./deployEraStrategies";
+import { ethers } from "hardhat";
+import { deployEraStrategies } from "./deployEraStrategies";
+import { strategyConfig } from "../../scripts/config/strategies.config";
+import { commonConfig } from "../../scripts/config/common.config";
+import { Validator } from "../../scripts/utils/Validator";
 
-// export const deployDonationVotingMerkleDistributionDirect = async () => {
-//   const network = await ethers.provider.getNetwork();
-//   const chainId = Number(network.chainId);
+export const deployEraDonationVotingMerkleDistributionDirect = async () => {
+  const network = await ethers.provider.getNetwork();
+  const chainId = Number(network.chainId);
 
-//   const strategyParams = strategyConfig[chainId]["donation-voting-merkle-distribution-direct"];
+  const strategyParams = strategyConfig[chainId]["donation-voting-merkle-distribution-direct"];
 
-//   const address = await deployStrategies(
-//     strategyParams.name,
-//     strategyParams.version,
-//     {
-//       types: ["address"],
-//       values: [commonConfig[chainId].permit2Address],
-//     },
-//   );
+  const address = await deployEraStrategies(
+    strategyParams.name,
+    strategyParams.version,
+    {
+      types: ["address"],
+      values: [commonConfig[chainId].permit2Address],
+    },
+  );
 
-//   const validator = await new Validator(
-//     strategyParams.name,
-//     address,
-//   );
+  const validator = await new Validator(
+    strategyParams.name,
+    address,
+  );
 
-//   await validator.validate("PERMIT2", [], commonConfig[chainId].permit2Address);
-// };
+  await validator.validate("PERMIT2", [], commonConfig[chainId].permit2Address);
+};
 
-// // Check if this script is the main module (being run directly)
-// if (require.main === module) {
-//   deployDonationVotingMerkleDistributionDirect().catch((error) => {
-//     console.error(error);
-//     process.exitCode = 1;
-//   });
-// }
+// Check if this script is the main module (being run directly)
+if (require.main === module) {
+  deployEraDonationVotingMerkleDistributionDirect().catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+  });
+}

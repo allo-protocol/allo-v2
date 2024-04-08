@@ -65,8 +65,8 @@ scripts=(
 
     #  === ZkSync Era ===
     # "deployEraRegistry"
-    "deployEraAllo"
-    # "deployEraContractFactory"
+    # "deployEraAllo"
+    "deployEraContractFactory"
     # "strategies/deployEraDonationVotingMerkleDistributionDirect"
     # "strategies/deployEraDirectGrants"
 )
