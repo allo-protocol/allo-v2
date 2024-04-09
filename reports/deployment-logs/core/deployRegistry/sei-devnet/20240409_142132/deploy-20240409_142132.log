@@ -1,0 +1,84 @@
+
+    ////////////////////////////////////////////////////
+            Deploys Registry.sol on sei-devnet
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────┐
+│     (index)     │                    Values                    │
+├─────────────────┼──────────────────────────────────────────────┤
+│    contract     │                'Registry.sol'                │
+│     chainId     │                    713715                    │
+│     network     │                 'sei-devnet'                 │
+│ deployerAddress │ '0xE7eB5D2b5b188777df902e89c54570E7Ef4F59CE' │
+│  registryOwner  │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│     balance     │                 '1.99964459'                 │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying Registry...
+Registry proxy deployed to: 0x606BfaCCc19F040F55C7be25C1Db02a4201bf8f0
+Registry implementation deployed to: 0x30eC57511938b798d604C9feb02B2388306d8f43
+Proxy Admin:  0x2447dD8C1f4cd4361a649564Bd441787edf8c03A
+Proxy Admin Owner:  0xE7eB5D2b5b188777df902e89c54570E7Ef4F59CE
+
+Verifying contract...
+Verifying implementation: 0x30eC57511938b798d604C9feb02B2388306d8f43
+Failed to verify implementation contract at 0x30eC57511938b798d604C9feb02B2388306d8f43: You are trying to verify a contract in 'sei-devnet', but no API token was found for this network. Please provide one in your hardhat config. For example:
+
+{
+  ...
+  etherscan: {
+    apiKey: {
+      sei-devnet: 'your API key'
+    }
+  }
+}
+
+See https://etherscan.io/apis
+MissingApiKeyError: You are trying to verify a contract in 'sei-devnet', but no API token was found for this network. Please provide one in your hardhat config. For example:
+
+{
+  ...
+  etherscan: {
+    apiKey: {
+      sei-devnet: 'your API key'
+    }
+  }
+}
+
+See https://etherscan.io/apis
+    at resolveApiKey (/home/kurt/git/allo/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/internal/etherscan.ts:290:11)
+    at Function.fromChainConfig (/home/kurt/git/allo/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/internal/etherscan.ts:75:28)
+    at getEtherscanInstance (/home/kurt/git/allo/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/utils/etherscan-api.ts:50:20)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async fullVerifyTransparentOrUUPS (/home/kurt/git/allo/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/verify-proxy.ts:202:21)
+    at async verify (/home/kurt/git/allo/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/verify-proxy.ts:99:5)
+    at async OverriddenTaskDefinition._action (/home/kurt/git/allo/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/index.ts:206:12)
+    at async Environment._runTaskDefinition (/home/kurt/git/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:359:14)
+    at async Environment.run (/home/kurt/git/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:192:14)
+    at async SimpleTaskDefinition.action (/home/kurt/git/allo/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/index.ts:546:7)
+
+Verifying contract...
+MissingApiKeyError: You are trying to verify a contract in 'sei-devnet', but no API token was found for this network. Please provide one in your hardhat config. For example:
+
+{
+  ...
+  etherscan: {
+    apiKey: {
+      sei-devnet: 'your API key'
+    }
+  }
+}
+
+See https://etherscan.io/apis
+    at resolveApiKey (/home/kurt/git/allo/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/internal/etherscan.ts:290:11)
+    at Function.fromChainConfig (/home/kurt/git/allo/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/internal/etherscan.ts:75:28)
+    at SimpleTaskDefinition.action (/home/kurt/git/allo/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/index.ts:240:35)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Environment._runTaskDefinition (/home/kurt/git/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:359:14)
+    at async hardhatVerify (/home/kurt/git/allo/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/verify-proxy.ts:118:12)
+    at async OverriddenTaskDefinition._action (/home/kurt/git/allo/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/index.ts:206:12)
+    at async Environment._runTaskDefinition (/home/kurt/git/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:359:14)
+    at async Environment.run (/home/kurt/git/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:192:14)
+    at async SimpleTaskDefinition.action (/home/kurt/git/allo/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/index.ts:546:7)
+[90m
+	Validating hasRole(0x815b5a78dc333d344c7df9da23c04dbd432015cc701876ddb9ffe850e6882747,0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C) == true[0m
+[32m	✅ PASSED with Result: true[0m

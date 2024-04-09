@@ -100,4 +100,8 @@ export const registryConfig: DeployParams = {
   314159: {
     owner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
   },
+  // Sei Devnet
+  713715: {
+    owner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
+  },
 };
