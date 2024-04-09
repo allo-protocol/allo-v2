@@ -133,11 +133,17 @@ export const deployContractUsingFactoryWithBytecode = async (
       creationCodeWithConstructor
     );
 
+    const feeData = await ethers.provider.getFeeData();
+
     // Deploy the contract and get the transaction response
     const txResponse = await deployerContract.deploy(
       contractName,
       version,
-      creationCodeWithConstructor
+      creationCodeWithConstructor, 
+      {
+        maxFeePerGas: feeData.maxFeePerGas,
+        maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
+      }
     );
 
     // Wait for the transaction to be mined

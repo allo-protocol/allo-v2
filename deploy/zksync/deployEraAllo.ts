@@ -2,8 +2,8 @@ import * as hre from "hardhat";
 import * as dotenv from "dotenv";
 import { Deployer } from "@matterlabs/hardhat-zksync-deploy";
 import { Wallet } from "zksync-ethers";
-import { Deployments, verifyContract } from "../scripts/utils/scripts";
-import { alloConfig } from "../scripts/config/allo.config";
+import { Deployments, verifyContract } from "../../scripts/utils/scripts";
+import { alloConfig } from "../../scripts/config/allo.config";
 dotenv.config();
 
 export default async function () {

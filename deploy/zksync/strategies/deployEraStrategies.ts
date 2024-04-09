@@ -1,7 +1,7 @@
 import hre, { ethers } from "hardhat";
-import { Validator } from "../../scripts/utils/Validator";
-import { Args, logPink } from "../../scripts/utils/deployProxy";
-import { Deployments, verifyContract } from "../../scripts/utils/scripts";
+import { Validator } from "../../../scripts/utils/Validator";
+import { Args, logPink } from "../../../scripts/utils/deployProxy";
+import { Deployments, verifyContract } from "../../../scripts/utils/scripts";
 import { Provider, Wallet } from "zksync-ethers";
 import { Addressable, AbiCoder, hexlify, concat } from "ethers";
 

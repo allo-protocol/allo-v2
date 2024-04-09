@@ -1,3 +1,4 @@
+const { BigNumber } = require('ethers');
 import hre, { ethers } from "hardhat";
 import { Validator } from "../utils/Validator";
 import {
@@ -12,7 +13,6 @@ export async function deployContractFactory() {
   const chainId = Number(network.chainId);
   const account = (await ethers.getSigners())[0];
   const deployerAddress = await account.getAddress();
-  const blocksToWait = networkName === "localhost" ? 0 : 5;
   const balance = await ethers.provider.getBalance(deployerAddress);
 
   const deploymentIo = new Deployments(chainId, "contractFactory");
@@ -34,10 +34,16 @@ export async function deployContractFactory() {
   console.log("Deploying ContractFactory.sol...");
 
   const ContractFactory = await ethers.getContractFactory("ContractFactory");
-  const instance = await ContractFactory.deploy();
+
+  const feeData = await ethers.provider.getFeeData();
+
+  const instance = await ContractFactory.deploy({
+    account: account,
+    maxFeePerGas: feeData.maxFeePerGas,
+    maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
+  });
 
   await instance.waitForDeployment();
-  await instance.deploymentTransaction()?.wait(blocksToWait);
 
   console.log("ContractFactory deployed to:", instance.target);
 

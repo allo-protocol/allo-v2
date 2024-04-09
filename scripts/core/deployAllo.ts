@@ -45,20 +45,35 @@ export async function deployAllo() {
 
   console.log("Deploying Allo.sol...");
 
+  const feeData = await ethers.provider.getFeeData();
+
   const Allo = await ethers.getContractFactory("Allo");
-  const instance = await upgrades.deployProxy(Allo, [
-    alloParams.owner,
-    registryAddress,
-    alloParams.treasury,
-    alloParams.percentFee,
-    alloParams.baseFee,
-  ]);
+  const instance = await upgrades.deployProxy(Allo,
+    [
+      alloParams.owner,
+      registryAddress,
+      alloParams.treasury,
+      alloParams.percentFee,
+      alloParams.baseFee,
+    ],
+    {
+      txOverrides: {
+        maxFeePerGas: feeData.maxFeePerGas,
+        maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
+      }
+    }
+  );
 
   await instance.waitForDeployment();
 
-  const implementation = await getImplementationAddress(
-    instance.target as string,
-  );
+  let implementation;
+  try {
+    implementation = await getImplementationAddress(
+      instance.target as string,
+    );
+  } catch (error) {
+    console.error("Error getting implementation address: ", error);
+  }
 
   const proxyAdmin = await upgrades.erc1967.getAdminAddress(instance.target as string);
   let proxyAdminOwner = account.address;
@@ -84,8 +99,10 @@ export async function deployAllo() {
 
   deployments.write(objToWrite);
 
-  await verifyContract(instance.target.toString(), []);
-  await verifyContract(implementation, []);
+  if (implementation) {
+    await verifyContract(instance.target.toString(), []);
+    await verifyContract(implementation, []);
+  }
 
   const validator = await new Validator("Allo", instance.target);
   await validator.validate("getRegistry", [], registryAddress);

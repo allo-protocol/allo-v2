@@ -1,8 +1,8 @@
 import * as hre from "hardhat";
 import { deployEraStrategies } from "./deployEraStrategies";
-import { strategyConfig } from "../../scripts/config/strategies.config";
-import { commonConfig } from "../../scripts/config/common.config";
-import { Validator } from "../../scripts/utils/Validator";
+import { strategyConfig } from "../../../scripts/config/strategies.config";
+import { commonConfig } from "../../../scripts/config/common.config";
+import { Validator } from "../../../scripts/utils/Validator";
 
 export default async function () {
   const network = await hre.network.config;

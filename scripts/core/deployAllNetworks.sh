@@ -43,9 +43,10 @@ networks=(
 #   "scroll"
 #   "ftmTestnet"
 #   "fantom"
+  "filecoin-calibration"
 
 #  === ZkSync Era ===
-  "zkSyncTestnet"
+#   "zkSyncTestnet"
 #   "zkSyncMainnet"
 #  ==================
 )
@@ -55,7 +56,7 @@ scripts=(
     # "core/deployAllo"
     # "core/deployContractFactory"
     # "strategies/deployDonationVotingMerkleDistributionDirect"
-    # "strategies/deployDirectGrants"
+    "strategies/deployDirectGrants"
     # "core/transferProxyAdminOwnership"
     # "strategies/deployDonationVotingMerkleDistributionVault"
     # "strategies/deployQVSimple"
@@ -64,11 +65,11 @@ scripts=(
     # "strategies/deployImpactStream"
 
     #  === ZkSync Era ===
-    # "deployEraRegistry"
-    # "deployEraAllo"
-    "deployEraContractFactory"
-    # "strategies/deployEraDonationVotingMerkleDistributionDirect"
-    # "strategies/deployEraDirectGrants"
+    # "zksync/deployEraRegistry"
+    # "zksync/deployEraAllo"
+    # "zksync/deployEraContractFactory"
+    # "zksync/strategies/deployEraDonationVotingMerkleDistributionDirect"
+    # "zksync/strategies/deployEraDirectGrants"
 )
 
 for script in "${scripts[@]}"; do
@@ -77,7 +78,7 @@ for script in "${scripts[@]}"; do
         mkdir -p ./reports/deployment-logs/$script/$n/$timestamp/
 
         if [ "$n" == "zkSyncTestnet" ] || [ "$n" == "zkSyncMainnet" ]; then
-            cmd="bun hardhat deploy-zksync --network $n --config era.hardhat.config.ts --script $script.ts | tee ./reports/deployment-logs/$script/$n/$timestamp/deploy-$n_$timestamp.log"
+            cmd="bun hardhat deploy-zksync --network $n --config config/era.hardhat.config.ts --script $script.ts | tee ./reports/deployment-logs/$script/$n/$timestamp/deploy-$n_$timestamp.log"
         else
             cmd="bun hardhat run scripts/$script.ts --no-compile --network $n | tee ./reports/deployment-logs/$script/$n/$timestamp/deploy-$n_$timestamp.log"
         fi
