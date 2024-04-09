@@ -41,14 +41,12 @@ export async function deployRegistry() {
 
   const feeData = await ethers.provider.getFeeData();
 
-  // TODO: THIS FAILS ON FILECOIN
   const Registry = await ethers.getContractFactory("Registry");
   const instance = await upgrades.deployProxy(
     Registry,
     [registryParams.owner],
     {
       txOverrides: {
-        // account: account,
         maxFeePerGas: feeData.maxFeePerGas,
         maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
       }
@@ -56,10 +54,15 @@ export async function deployRegistry() {
   );
 
   await instance.waitForDeployment();
-
-  const implementation = await getImplementationAddress(
-    instance.target as string,
-  );
+  
+  let implementation;
+  try {
+    implementation = await getImplementationAddress(
+      instance.target as string,
+    );
+  } catch (error) {
+    console.error("Error getting implementation address: ", error);
+  }
 
   const proxyAdmin = await upgrades.erc1967.getAdminAddress(instance.target as string);
   let proxyAdminOwner = account.address;
@@ -81,8 +84,10 @@ export async function deployRegistry() {
 
   deployments.write(objToWrite);
 
-  await verifyContract(instance.target.toString(), []);
-  await verifyContract(implementation, []);
+  if (implementation) {
+    await verifyContract(instance.target.toString(), []);
+    await verifyContract(implementation, []);
+  }
 
   const validator = await new Validator("Registry", instance.target);
   const ownerRole =
