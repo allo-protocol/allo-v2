@@ -31,6 +31,7 @@ const chainIds = {
   "arbitrum-sepolia": 421614,
   "base-testnet": 84531,
   mumbai: 80001,
+  "filecoin-calibration": 314159,
   fuji: 43113,
 
   // mainnet
@@ -41,6 +42,7 @@ const chainIds = {
   "arbitrum-mainnet": 42161,
   base: 8453,
   polygon: 137,
+  "filecoin-mainnet": 314,
   avalanche: 43114,
   scroll: 534352,
 };
