@@ -1,5 +1,5 @@
 import * as hre from "hardhat";
-import { deployEraStrategies } from "./deployEraStrategies";
+import { deployEraStrategies } from "./strategies/deployEraStrategies";
 import { strategyConfig } from "../../scripts/config/strategies.config";
 
 export default async function () {

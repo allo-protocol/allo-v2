@@ -31,7 +31,6 @@ const chainIds = {
   "arbitrum-sepolia": 421614,
   "base-testnet": 84531,
   mumbai: 80001,
-  "filecoin-calibration": 314159,
   fuji: 43113,
 
   // mainnet
@@ -42,7 +41,6 @@ const chainIds = {
   "arbitrum-mainnet": 42161,
   base: 8453,
   polygon: 137,
-  "filecoin-mainnet": 314,
   avalanche: 43114,
   scroll: 534352,
 };
@@ -287,10 +285,6 @@ const config: HardhatUserConfig = {
       // @ts-ignore
       "optimism-sepolia": process.env.OPTIMISTIC_ETHERSCAN_API_KEY,
       // @ts-ignore
-      "filecoin-mainnet": process.env.FILECOIN_ETHERSCAN_API_KEY,
-      // @ts-ignore
-      "filecoin-calibration": process.env.FILECOIN_CALIBRATION_ETHERSCAN_API_KEY,
-      // @ts-ignore
       fuji: "NA",
       // @ts-ignore
       avalanche: "NA",
@@ -387,22 +381,6 @@ const config: HardhatUserConfig = {
           apiURL: "https://api-sepolia-optimistic.etherscan.io/api",
           browserURL: "https://sepolia-optimism.etherscan.io",
         },
-      },
-      {
-        network: "filecoin-calibration",
-        chainId: chainIds["filecoin-calibration"],
-        urls: {
-          apiURL: "https://api.calibration.node.glif.io/rpc/v1",
-          browserURL: "https://calibration.filscan.io",
-        },
-      },
-      {
-        network: "filecoin-mainnet",
-        chainId: chainIds["filecoin-mainnet"],
-        urls: {
-          apiURL: "https://api.node.glif.io",
-          browserURL: "https://filscan.io",
-        }
       },
       {
         network: "scroll",
