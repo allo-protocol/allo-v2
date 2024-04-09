@@ -99,6 +99,7 @@ export async function deployAllo() {
 
   deployments.write(objToWrite);
 
+  await verifyContract(instance.target.toString(), []);
   if (implementation) {
     await verifyContract(instance.target.toString(), []);
     await verifyContract(implementation, []);
