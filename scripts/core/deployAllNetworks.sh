@@ -52,11 +52,11 @@ networks=(
 )
 
 scripts=(
-    "core/deployRegistry"
+    # "core/deployRegistry"
     # "core/deployAllo"
     # "core/deployContractFactory"
     # "strategies/deployDonationVotingMerkleDistributionDirect"
-    # "strategies/deployDirectGrants"
+    "strategies/deployDirectGrants"
     # "core/transferProxyAdminOwnership"
     # "strategies/deployDonationVotingMerkleDistributionVault"
     # "strategies/deployQVSimple"
