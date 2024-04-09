@@ -8,12 +8,8 @@ import "@nomiclabs/hardhat-solhint";
 import "@openzeppelin/hardhat-upgrades";
 import "@typechain/hardhat";
 import fs from "fs";
-import "hardhat-abi-exporter";
-import "hardhat-contract-sizer";
-import "hardhat-gas-reporter";
 import "hardhat-preprocessor";
 import { HardhatUserConfig } from "hardhat/config";
-import "solidity-coverage";
 
 dotenv.config();
 
@@ -34,20 +30,6 @@ function getRemappings(): string[][] {
     .filter(Boolean) // remove empty lines
     .map((line) => line.trim().split("="));
 }
-
-const abiExporter = [
-  {
-    path: "./abis/pretty",
-    flat: true,
-    clear: true,
-    format: "fullName",
-  },
-  {
-    path: "./abis/ugly",
-    flat: true,
-    clear: true,
-  },
-];
 
 /**
  * Generates hardhat network configuration
@@ -77,12 +59,6 @@ const config: HardhatUserConfig = {
       url: `https://api.node.glif.io`,
     },
   },
-  gasReporter: {
-    coinmarketcap: process.env.COINMARKETCAP_API_KEY,
-    enabled: process.env.REPORT_GAS !== undefined,
-    currency: "USD",
-    excludeContracts: ["contracts/mocks", "contracts/dummy"],
-  },
   etherscan: {
     apiKey: {
       // @ts-ignore
@@ -109,7 +85,6 @@ const config: HardhatUserConfig = {
       },
     ],
   },
-  abiExporter: abiExporter,
   preprocess: {
     eachLine: (hre) => ({
       transform: (line: string) => {
