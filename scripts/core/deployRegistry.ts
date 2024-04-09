@@ -39,10 +39,21 @@ export async function deployRegistry() {
 
   console.log("Deploying Registry...");
 
+  const feeData = await ethers.provider.getFeeData();
+
+  // TODO: THIS FAILS ON FILECOIN
   const Registry = await ethers.getContractFactory("Registry");
-  const instance = await upgrades.deployProxy(Registry, [
-    registryParams.owner,
-  ]);
+  const instance = await upgrades.deployProxy(
+    Registry,
+    [registryParams.owner],
+    {
+      txOverrides: {
+        // account: account,
+        maxFeePerGas: feeData.maxFeePerGas,
+        maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
+      }
+    }
+  );
 
   await instance.waitForDeployment();
 

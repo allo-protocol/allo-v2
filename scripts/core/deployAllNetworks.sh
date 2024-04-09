@@ -43,6 +43,7 @@ networks=(
 #   "scroll"
 #   "ftmTestnet"
 #   "fantom"
+  "filecoin-calibration"
 
 #  === ZkSync Era ===
 #   "zkSyncTestnet"
@@ -51,7 +52,7 @@ networks=(
 )
 
 scripts=(
-    # "core/deployRegistry"
+    "core/deployRegistry"
     # "core/deployAllo"
     # "core/deployContractFactory"
     # "strategies/deployDonationVotingMerkleDistributionDirect"
