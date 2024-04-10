@@ -114,11 +114,16 @@ export const commonConfig: DeployParams = {
   // Filecoin Mainnet
   314: {
     proxyAdminOwner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
-    permit2Address: "0x"
+    permit2Address: "0x",
   },
   // Filecoin Calibration Testnet
   314159: {
     proxyAdminOwner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
-    permit2Address: "0x"
+    permit2Address: "0x",
+  },
+  // Sei Devnet
+  713715: {
+    proxyAdminOwner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
+    permit2Address: "0xC1087157eF2aaeBcaDB913251EA5B82c678424F7",
   },
 };

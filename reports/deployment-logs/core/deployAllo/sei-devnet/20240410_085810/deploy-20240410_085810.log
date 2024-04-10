@@ -1,0 +1,100 @@
+
+    ////////////////////////////////////////////////////
+            Deploys Allo.sol on sei-devnet
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────┐
+│     (index)     │                    Values                    │
+├─────────────────┼──────────────────────────────────────────────┤
+│    contract     │              'Deploy Allo.sol'               │
+│     chainId     │                    713715                    │
+│     network     │                 'sei-devnet'                 │
+│      owner      │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│    registry     │ '0x4AAcca72145e1dF2aeC137E1f3C5E3D75DB8b5f3' │
+│    treasury     │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│   percentFee    │                      0                       │
+│     baseFee     │                      0                       │
+│ deployerAddress │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│     balance     │                '1.498020546'                 │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying Allo.sol...
+Allo Proxy deployed to: 0xB087535DB0df98fC4327136e897A5985E5Cfbd66
+Registry implementation deployed to: 0xE195743480D1591B79106FF9B296A0cD38aDa807
+Proxy Admin:  0x2447dD8C1f4cd4361a649564Bd441787edf8c03A
+Proxy Admin Owner:  0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C
+
+Verifying contract...
+Verifying implementation: 0xE195743480D1591B79106FF9B296A0cD38aDa807
+Failed to verify implementation contract at 0xE195743480D1591B79106FF9B296A0cD38aDa807: You are trying to verify a contract in 'sei-devnet', but no API token was found for this network. Please provide one in your hardhat config. For example:
+
+{
+  ...
+  etherscan: {
+    apiKey: {
+      sei-devnet: 'your API key'
+    }
+  }
+}
+
+See https://etherscan.io/apis
+MissingApiKeyError: You are trying to verify a contract in 'sei-devnet', but no API token was found for this network. Please provide one in your hardhat config. For example:
+
+{
+  ...
+  etherscan: {
+    apiKey: {
+      sei-devnet: 'your API key'
+    }
+  }
+}
+
+See https://etherscan.io/apis
+    at resolveApiKey (/home/kurt/git/allo/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/internal/etherscan.ts:290:11)
+    at Function.fromChainConfig (/home/kurt/git/allo/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/internal/etherscan.ts:75:28)
+    at getEtherscanInstance (/home/kurt/git/allo/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/utils/etherscan-api.ts:50:20)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async fullVerifyTransparentOrUUPS (/home/kurt/git/allo/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/verify-proxy.ts:202:21)
+    at async verify (/home/kurt/git/allo/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/verify-proxy.ts:99:5)
+    at async OverriddenTaskDefinition._action (/home/kurt/git/allo/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/index.ts:206:12)
+    at async Environment._runTaskDefinition (/home/kurt/git/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:359:14)
+    at async Environment.run (/home/kurt/git/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:192:14)
+    at async SimpleTaskDefinition.action (/home/kurt/git/allo/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/index.ts:546:7)
+
+Verifying contract...
+MissingApiKeyError: You are trying to verify a contract in 'sei-devnet', but no API token was found for this network. Please provide one in your hardhat config. For example:
+
+{
+  ...
+  etherscan: {
+    apiKey: {
+      sei-devnet: 'your API key'
+    }
+  }
+}
+
+See https://etherscan.io/apis
+    at resolveApiKey (/home/kurt/git/allo/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/internal/etherscan.ts:290:11)
+    at Function.fromChainConfig (/home/kurt/git/allo/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/internal/etherscan.ts:75:28)
+    at SimpleTaskDefinition.action (/home/kurt/git/allo/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/index.ts:240:35)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Environment._runTaskDefinition (/home/kurt/git/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:359:14)
+    at async hardhatVerify (/home/kurt/git/allo/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/verify-proxy.ts:118:12)
+    at async OverriddenTaskDefinition._action (/home/kurt/git/allo/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/index.ts:206:12)
+    at async Environment._runTaskDefinition (/home/kurt/git/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:359:14)
+    at async Environment.run (/home/kurt/git/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:192:14)
+    at async SimpleTaskDefinition.action (/home/kurt/git/allo/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/index.ts:546:7)
+[90m
+	Validating getRegistry() == 0x4AAcca72145e1dF2aeC137E1f3C5E3D75DB8b5f3[0m
+[32m	✅ PASSED with Result: 0x4AAcca72145e1dF2aeC137E1f3C5E3D75DB8b5f3[0m
+[90m
+	Validating getTreasury() == 0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C[0m
+[32m	✅ PASSED with Result: 0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C[0m
+[90m
+	Validating getPercentFee() == 0[0m
+[32m	✅ PASSED with Result: 0[0m
+[90m
+	Validating getBaseFee() == 0[0m
+[32m	✅ PASSED with Result: 0[0m
+[90m
+	Validating owner() == 0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C[0m
+[32m	✅ PASSED with Result: 0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C[0m

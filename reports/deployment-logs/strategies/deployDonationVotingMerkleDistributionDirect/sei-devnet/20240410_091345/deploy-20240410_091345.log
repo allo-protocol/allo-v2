@@ -1,0 +1,32 @@
+
+    ////////////////////////////////////////////////////
+      Deploys DonationVotingMerkleDistributionDirectTransferStrategy.sol on sei-devnet
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────────────────────┐
+│     (index)     │                            Values                            │
+├─────────────────┼──────────────────────────────────────────────────────────────┤
+│    contract     │ 'DonationVotingMerkleDistributionDirectTransferStrategy.sol' │
+│     chainId     │                            713715                            │
+│     network     │                         'sei-devnet'                         │
+│ deployerAddress │         '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C'         │
+│     balance     │                        '1.493359145'                         │
+└─────────────────┴──────────────────────────────────────────────────────────────┘
+Deploying DonationVotingMerkleDistributionDirectTransferStrategy.sol
+TypeError: invalid address (argument="address", value="0x", code=INVALID_ARGUMENT, version=6.11.1) (argument="", value="0x", code=INVALID_ARGUMENT, version=6.11.1)
+    at makeError (/home/kurt/git/allo/allo-v2/node_modules/ethers/src.ts/utils/errors.ts:687:21)
+    at assert (/home/kurt/git/allo/allo-v2/node_modules/ethers/src.ts/utils/errors.ts:715:25)
+    at assertArgument (/home/kurt/git/allo/allo-v2/node_modules/ethers/src.ts/utils/errors.ts:727:5)
+    at AddressCoder._throwError (/home/kurt/git/allo/allo-v2/node_modules/ethers/src.ts/abi/coders/abstract-coder.ts:340:23)
+    at AddressCoder.encode (/home/kurt/git/allo/allo-v2/node_modules/ethers/src.ts/abi/coders/address.ts:28:25)
+    at /home/kurt/git/allo/allo-v2/node_modules/ethers/src.ts/abi/coders/array.ts:64:19
+    at Array.forEach (<anonymous>)
+    at pack (/home/kurt/git/allo/allo-v2/node_modules/ethers/src.ts/abi/coders/array.ts:47:12)
+    at TupleCoder.encode (/home/kurt/git/allo/allo-v2/node_modules/ethers/src.ts/abi/coders/tuple.ts:62:20)
+    at AbiCoder.encode (/home/kurt/git/allo/allo-v2/node_modules/ethers/src.ts/abi/abi-coder.ts:195:15) {
+  code: 'INVALID_ARGUMENT',
+  argument: '',
+  value: '0x',
+  shortMessage: 'invalid address (argument="address", value="0x", code=INVALID_ARGUMENT, version=6.11.1)'
+}
+error: "hardhat" exited with code 1 (SIGHUP)

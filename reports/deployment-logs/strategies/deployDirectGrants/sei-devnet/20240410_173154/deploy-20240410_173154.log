@@ -1,0 +1,32 @@
+
+    ////////////////////////////////////////////////////
+      Deploys DirectGrantsSimpleStrategy.sol on sei-devnet
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────┐
+│     (index)     │                    Values                    │
+├─────────────────┼──────────────────────────────────────────────┤
+│    contract     │       'DirectGrantsSimpleStrategy.sol'       │
+│     chainId     │                    713715                    │
+│     network     │                 'sei-devnet'                 │
+│ deployerAddress │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│     balance     │                '1.486087831'                 │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying DirectGrantsSimpleStrategy.sol
+[35mError calling deploy() function for contract DirectGrantsSimpleStrategy
+ProviderError: execution reverted[0m
+
+Verifying contract...
+InvalidAddressError:  is an invalid address.
+    at SimpleTaskDefinition.action (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/@nomicfoundation+hardhat-verify@1.1.1_hardhat@2.22.1/node_modules/@nomicfoundation/hardhat-verify/src/index.ts:530:15)
+    at async Environment._runTaskDefinition (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:359:14)
+    at async Environment.run (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:192:14)
+    at async verifyContract (/Users/thelostone-mc/Labs/allo/allo-v2/scripts/utils/scripts.ts:39:5)
+    at async deployStrategies (/Users/thelostone-mc/Labs/allo/allo-v2/scripts/strategies/deployStrategies.ts:72:3)
+    at async deployDirectGrants (/Users/thelostone-mc/Labs/allo/allo-v2/scripts/strategies/deployDirectGrants.ts:11:3)
+[90m
+	Validating getAllo() == 0x1133eA7Af70876e64665ecD07C0A0476d09465a1[0m
+[31m	❌❌❌ FAILED with Error: NotImplementedError: Method 'HardhatEthersProvider.resolveName' is not implemented[0m
+[90m
+	Validating getStrategyId() == 0x53fb9d3bce0956ca2db5bb1441f5ca23050cb1973b33789e04a5978acfd9ca93[0m
+[31m	❌❌❌ FAILED with Error: NotImplementedError: Method 'HardhatEthersProvider.resolveName' is not implemented[0m

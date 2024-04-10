@@ -44,6 +44,7 @@ networks=(
 #   "ftmTestnet"
 #   "fantom"
 #   "filecoin-calibration"
+# "sei-devnet"
 
 #  === ZkSync Era ===
 #   "zkSyncTestnet"

@@ -12,7 +12,8 @@ import "hardhat-gas-reporter";
 import "hardhat-preprocessor";
 import { HardhatUserConfig } from "hardhat/config";
 import { NetworkUserConfig } from "hardhat/types";
-import "solidity-coverage";
+import "@xyrusworx/hardhat-solidity-json";
+import "solidity-coverage"; // npx hardhat solidity-json
 
 dotenv.config();
 
@@ -45,6 +46,7 @@ const chainIds = {
   "filecoin-mainnet": 314,
   avalanche: 43114,
   scroll: 534352,
+  "sei-devnet": 713715,
 };
 
 let deployPrivateKey = process.env.DEPLOYER_PRIVATE_KEY as string;
@@ -237,6 +239,10 @@ const config: HardhatUserConfig = {
       ...createMainnetConfig("filecoin-mainnet"),
       url: `https://api.node.glif.io`,
     },
+    "sei-devnet": {
+      ...createTestnetConfig("sei-devnet"),
+      url: `https://evm-rpc-arctic-1.sei-apis.com`,
+    },
     // Local Networks
     localhost: createTestnetConfig("localhost", "http://localhost:8545"),
     hardhat: {
@@ -410,7 +416,7 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://api.node.glif.io",
           browserURL: "https://filscan.io",
-        }
+        },
       },
       {
         network: "scroll",
@@ -418,6 +424,14 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://api.scrollscan.com/api",
           browserURL: "https://scrollscan.com/",
+        },
+      },
+      {
+        network: "sei-devnet",
+        chainId: chainIds["sei-devnet"],
+        urls: {
+          apiURL: "",
+          browserURL: "", // TODO
         },
       },
     ],

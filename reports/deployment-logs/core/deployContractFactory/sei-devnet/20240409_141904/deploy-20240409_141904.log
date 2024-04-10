@@ -1,0 +1,43 @@
+
+    ////////////////////////////////////////////////////
+        Deploys ContractFactory.sol on sei-devnet
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────┐
+│     (index)     │                    Values                    │
+├─────────────────┼──────────────────────────────────────────────┤
+│    contract     │         'Deploy ContractFactory.sol'         │
+│     chainId     │                    713715                    │
+│     network     │                 'sei-devnet'                 │
+│ deployerAddress │ '0xE7eB5D2b5b188777df902e89c54570E7Ef4F59CE' │
+│     balance     │                    '2.0'                     │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying ContractFactory.sol...
+ContractFactory deployed to: 0x3c795a334dE57813D8CA945D1A47D329D6Fc2151
+
+Verifying contract...
+MissingApiKeyError: You are trying to verify a contract in 'sei-devnet', but no API token was found for this network. Please provide one in your hardhat config. For example:
+
+{
+  ...
+  etherscan: {
+    apiKey: {
+      sei-devnet: 'your API key'
+    }
+  }
+}
+
+See https://etherscan.io/apis
+    at resolveApiKey (/home/kurt/git/allo/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/internal/etherscan.ts:290:11)
+    at Function.fromChainConfig (/home/kurt/git/allo/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/internal/etherscan.ts:75:28)
+    at SimpleTaskDefinition.action (/home/kurt/git/allo/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/index.ts:240:35)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Environment._runTaskDefinition (/home/kurt/git/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:359:14)
+    at async hardhatVerify (/home/kurt/git/allo/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/verify-proxy.ts:118:12)
+    at async OverriddenTaskDefinition._action (/home/kurt/git/allo/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/index.ts:206:12)
+    at async Environment._runTaskDefinition (/home/kurt/git/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:359:14)
+    at async Environment.run (/home/kurt/git/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:192:14)
+    at async SimpleTaskDefinition.action (/home/kurt/git/allo/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/index.ts:546:7)
+[90m
+	Validating isDeployer(0xE7eB5D2b5b188777df902e89c54570E7Ef4F59CE) == true[0m
+[32m	✅ PASSED with Result: true[0m

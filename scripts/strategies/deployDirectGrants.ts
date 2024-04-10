@@ -1,6 +1,6 @@
 import { ethers } from "hardhat";
 import { strategyConfig } from "../config/strategies.config";
-import { deployStrategies } from "./deployStrategies";
+import { deployStrategies, deployStrategyDirectly } from "./deployStrategies";
 
 export const deployDirectGrants = async () => {
   const network = await ethers.provider.getNetwork();
@@ -9,6 +9,7 @@ export const deployDirectGrants = async () => {
   const strategyParams = strategyConfig[chainId]["direct-grants"];
 
   await deployStrategies(strategyParams.name, strategyParams.version);
+  // await deployStrategyDirectly(strategyParams.name, strategyParams.version);
 };
 
 // Check if this script is the main module (being run directly)
