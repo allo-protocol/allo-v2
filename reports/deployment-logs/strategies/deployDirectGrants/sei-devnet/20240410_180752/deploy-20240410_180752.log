@@ -1,0 +1,34 @@
+
+    ////////////////////////////////////////////////////
+        Deploys DirectGrantsSimpleStrategy.sol on sei-devnet
+    ////////////////////////////////////////////////////
+┌─────────────────┬──────────────────────────────────────────────┐
+│     (index)     │                    Values                    │
+├─────────────────┼──────────────────────────────────────────────┤
+│    contract     │   'Deploy DirectGrantsSimpleStrategy.sol'    │
+│     version     │                    'v2.1'                    │
+│     chainId     │                    713715                    │
+│     network     │                 'sei-devnet'                 │
+│ deployerAddress │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying DirectGrantsSimpleStrategy.sol...
+TypeError: unsupported addressable value (argument="target", value=[ "0x1133eA7Af70876e64665ecD07C0A0476d09465a1", "DirectGrantsSimpleStrategyv2.1" ], code=INVALID_ARGUMENT, version=6.11.1)
+    at makeError (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/ethers@6.11.1/node_modules/ethers/src.ts/utils/errors.ts:687:21)
+    at assert (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/ethers@6.11.1/node_modules/ethers/src.ts/utils/errors.ts:715:25)
+    at assertArgument (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/ethers@6.11.1/node_modules/ethers/src.ts/utils/errors.ts:727:5)
+    at resolveAddress (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/ethers@6.11.1/node_modules/ethers/src.ts/address/checks.ts:122:19)
+    at /Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/ethers@6.11.1/node_modules/ethers/src.ts/contract/contract.ts:172:60
+    at ParamType.#walkAsync (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/ethers@6.11.1/node_modules/ethers/src.ts/abi/fragments.ts:779:24)
+    at ParamType.walkAsync (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/ethers@6.11.1/node_modules/ethers/src.ts/abi/fragments.ts:797:24)
+    at /Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/ethers@6.11.1/node_modules/ethers/src.ts/contract/contract.ts:170:22
+    at Array.map (<anonymous>)
+    at resolveArgs (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/ethers@6.11.1/node_modules/ethers/src.ts/contract/contract.ts:169:37) {
+  code: 'INVALID_ARGUMENT',
+  argument: 'target',
+  value: [
+    '0x1133eA7Af70876e64665ecD07C0A0476d09465a1',
+    'DirectGrantsSimpleStrategyv2.1'
+  ],
+  shortMessage: 'unsupported addressable value'
+}
+error: "hardhat" exited with code 1 (SIGHUP)

@@ -87,10 +87,9 @@ export async function deployStrategyDirectly(
   const deployerAddress = await account.getAddress();
 
   const fileName = strategyName.toLowerCase();
-  const deploymentIo = new Deployments(chainId, fileName);
-
   const deployments = new Deployments(chainId, fileName);
-  const alloAddress = deploymentIo.getAllo();
+
+  const alloAddress = deployments.getAllo();
 
   console.log(`
     ////////////////////////////////////////////////////
@@ -137,7 +136,7 @@ export async function deployStrategyDirectly(
     deployerAddress: deployerAddress,
   };
 
-  deploymentIo.write(objToWrite);
+  deployments.write(objToWrite);
 
   return instance.target.toString();
 }
