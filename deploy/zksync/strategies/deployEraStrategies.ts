@@ -208,8 +208,14 @@ export async function deployEraStrategyDirectly(
 
   console.log(`${artifact.contractName} was deployed to ${CONTRACT_ADDRESS}`);
 
+  const hashBytesStrategyName = ethers.keccak256(
+    new ethers.AbiCoder().encode(["string"], [strategyName + version]),
+  );
+
   const objToWrite = {
-    name: strategyNameWithVersion,
+    id: hashBytesStrategyName,
+    name: strategyName,
+    version: version,
     address: instance.target,
     deployerAddress: deployerAddress.address,
   };
