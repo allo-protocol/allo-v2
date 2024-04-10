@@ -47,8 +47,8 @@ networks=(
 # "sei-devnet"
 
 #  === ZkSync Era ===
-  "zkSyncTestnet"
-#   "zkSyncMainnet"
+#   "zkSyncTestnet"
+  "zkSyncMainnet"
 #  ==================
 )
 
