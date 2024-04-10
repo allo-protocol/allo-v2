@@ -416,3 +416,5 @@
 20240410_091347 - Deployment finished with 0 error(s)
 20240410_091414 - Executing: bun hardhat run scripts/strategies/deployDirectGrants.ts --no-compile --network sei-devnet | tee ./reports/deployment-logs/strategies/deployDirectGrants/sei-devnet/20240410_091414/deploy-20240410_091414.log
 20240410_091437 - Deployment finished with 0 error(s)
+20240410_103415 - Executing: bun hardhat run scripts/strategies/deployDonationVotingMerkleDistributionDirect.ts --no-compile --network sei-devnet | tee ./reports/deployment-logs/strategies/deployDonationVotingMerkleDistributionDirect/sei-devnet/20240410_103415/deploy-20240410_103415.log
+20240410_103439 - Deployment finished with 0 error(s)
