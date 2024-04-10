@@ -12,7 +12,8 @@ import "hardhat-gas-reporter";
 import "hardhat-preprocessor";
 import { HardhatUserConfig } from "hardhat/config";
 import { NetworkUserConfig } from "hardhat/types";
-import "solidity-coverage";
+import "@xyrusworx/hardhat-solidity-json";
+import "solidity-coverage"; // npx hardhat solidity-json
 
 dotenv.config();
 
