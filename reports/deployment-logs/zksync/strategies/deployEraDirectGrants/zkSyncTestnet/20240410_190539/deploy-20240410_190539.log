@@ -1,0 +1,28 @@
+
+    ////////////////////////////////////////////////////
+        Deploys DirectGrantsSimpleStrategy.sol on zkSyncTestnet
+    ////////////////////////////////////////////////////
+┌─────────────────┬──────────────────────────────────────────────┐
+│     (index)     │                    Values                    │
+├─────────────────┼──────────────────────────────────────────────┤
+│    contract     │   'Deploy DirectGrantsSimpleStrategy.sol'    │
+│     version     │                    'v2.1'                    │
+│     chainId     │                     300                      │
+│     network     │               'zkSyncTestnet'                │
+│ deployerAddress │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying DirectGrantsSimpleStrategy.sol...
+DirectGrantsSimpleStrategy was deployed to 0x373484e543f39354e098f6a7331eac027b397a37
+An unexpected error occurred:
+
+TypeError: Cannot read properties of undefined (reading 'keccak256')
+    at deployEraStrategyDirectly (/Users/thelostone-mc/Labs/allo/allo-v2/deploy/zksync/strategies/deployEraStrategies.ts:211:40)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async default_1 (/Users/thelostone-mc/Labs/allo/allo-v2/deploy/zksync/strategies/deployEraDirectGrants.ts:12:3)
+    at async ScriptManager._runScript (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/@matterlabs/hardhat-zksync-deploy/src/script-manager.ts:78:9)
+    at async ScriptManager.callDeployScripts (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/@matterlabs/hardhat-zksync-deploy/src/script-manager.ts:71:13)
+    at async SimpleTaskDefinition.zkSyncDeploy [as action] (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/@matterlabs/hardhat-zksync-deploy/src/task-actions.ts:14:5)
+    at async Environment._runTaskDefinition (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:359:14)
+    at async Environment.run (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:192:14)
+    at async main (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/hardhat/src/internal/cli/cli.ts:323:7)
+error: "hardhat" exited with code 1 (SIGHUP)

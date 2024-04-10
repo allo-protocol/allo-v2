@@ -47,7 +47,7 @@ networks=(
 # "sei-devnet"
 
 #  === ZkSync Era ===
-#   "zkSyncTestnet"
+  "zkSyncTestnet"
 #   "zkSyncMainnet"
 #  ==================
 )
@@ -69,7 +69,7 @@ scripts=(
     # "zksync/deployEraRegistry"
     # "zksync/deployEraAllo"
     # "zksync/deployEraContractFactory"
-    # "zksync/strategies/deployEraDonationVotingMerkleDistributionDirect"
+    "zksync/strategies/deployEraDonationVotingMerkleDistributionDirect"
     # "zksync/strategies/deployEraDirectGrants"
 )
 
