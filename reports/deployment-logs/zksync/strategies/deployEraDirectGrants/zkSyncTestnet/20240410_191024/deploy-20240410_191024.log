@@ -1,0 +1,26 @@
+
+    ////////////////////////////////////////////////////
+        Deploys DirectGrantsSimpleStrategy.sol on zkSyncTestnet
+    ////////////////////////////////////////////////////
+┌─────────────────┬──────────────────────────────────────────────┐
+│     (index)     │                    Values                    │
+├─────────────────┼──────────────────────────────────────────────┤
+│    contract     │   'Deploy DirectGrantsSimpleStrategy.sol'    │
+│     version     │                    'v2.1'                    │
+│     chainId     │                     300                      │
+│     network     │               'zkSyncTestnet'                │
+│ deployerAddress │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying DirectGrantsSimpleStrategy.sol...
+DirectGrantsSimpleStrategy was deployed to 0x22bAB11345267ab656f11F98F6a793B813f79F14
+
+Verifying contract...
+Your verification ID is: 10517
+
+Your verification request has been sent, but our servers are currently overloaded and we could not confirm that the verification was successful.
+Please try one of the following options:
+  1. Use the your verification request ID (10517) to check the status of the pending verification process by typing the command 'yarn hardhat verify-status --verification-id 10517'
+  2. Manually check the contract's code on the zksync block explorer: https://explorer.zksync.io/
+  3. Run the verification process again
+  
+Contract successfully verified on zkSync block explorer!

@@ -424,3 +424,33 @@
 20240410_181733 - Deployment finished with 0 error(s)
 20240410_181758 - Executing: bun hardhat run scripts/strategies/deployDonationVotingMerkleDistributionDirect.ts --no-compile --network sei-devnet | tee ./reports/deployment-logs/strategies/deployDonationVotingMerkleDistributionDirect/sei-devnet/20240410_181758/deploy-20240410_181758.log
 20240410_181807 - Deployment finished with 0 error(s)
+20240410_185857 - Executing: bun hardhat deploy-zksync --network zkSyncTestnet --config era.hardhat.config.ts --script zksync/deployEraRegistry.ts | tee ./reports/deployment-logs/zksync/deployEraRegistry/zkSyncTestnet/20240410_185857/deploy-20240410_185857.log
+20240410_190009 - Deployment finished with 0 error(s)
+20240410_190338 - Executing: bun hardhat deploy-zksync --network zkSyncTestnet --config era.hardhat.config.ts --script zksync/deployEraAllo.ts | tee ./reports/deployment-logs/zksync/deployEraAllo/zkSyncTestnet/20240410_190338/deploy-20240410_190338.log
+20240410_190441 - Deployment finished with 0 error(s)
+20240410_190539 - Executing: bun hardhat deploy-zksync --network zkSyncTestnet --config era.hardhat.config.ts --script zksync/strategies/deployEraDirectGrants.ts | tee ./reports/deployment-logs/zksync/strategies/deployEraDirectGrants/zkSyncTestnet/20240410_190539/deploy-20240410_190539.log
+20240410_190548 - Deployment finished with 0 error(s)
+20240410_190715 - Executing: bun hardhat deploy-zksync --network zkSyncTestnet --config era.hardhat.config.ts --script zksync/strategies/deployEraDirectGrants.ts | tee ./reports/deployment-logs/zksync/strategies/deployEraDirectGrants/zkSyncTestnet/20240410_190715/deploy-20240410_190715.log
+20240410_190726 - Deployment finished with 0 error(s)
+20240410_190852 - Executing: bun hardhat deploy-zksync --network zkSyncTestnet --config era.hardhat.config.ts --script zksync/strategies/deployEraDirectGrants.ts | tee ./reports/deployment-logs/zksync/strategies/deployEraDirectGrants/zkSyncTestnet/20240410_190852/deploy-20240410_190852.log
+20240410_190903 - Deployment finished with 0 error(s)
+20240410_191024 - Executing: bun hardhat deploy-zksync --network zkSyncTestnet --config era.hardhat.config.ts --script zksync/strategies/deployEraDirectGrants.ts | tee ./reports/deployment-logs/zksync/strategies/deployEraDirectGrants/zkSyncTestnet/20240410_191024/deploy-20240410_191024.log
+20240410_191117 - Deployment finished with 0 error(s)
+20240410_191253 - Executing: bun hardhat deploy-zksync --network zkSyncTestnet --config era.hardhat.config.ts --script zksync/strategies/deployEraDonationVotingMerkleDistributionDirect.ts | tee ./reports/deployment-logs/zksync/strategies/deployEraDonationVotingMerkleDistributionDirect/zkSyncTestnet/20240410_191253/deploy-20240410_191253.log
+20240410_191348 - Deployment finished with 0 error(s)
+20240410_191531 - Executing: bun hardhat deploy-zksync --network zkSyncMainnet --config era.hardhat.config.ts --script core/deployRegistry.ts | tee ./reports/deployment-logs/core/deployRegistry/zkSyncMainnet/20240410_191531/deploy-20240410_191531.log
+20240410_191532 - Deployment finished with 0 error(s)
+20240410_191602 - Executing: bun hardhat deploy-zksync --network zkSyncMainnet --config era.hardhat.config.ts --script zksync/deployEraRegistry.ts | tee ./reports/deployment-logs/zksync/deployEraRegistry/zkSyncMainnet/20240410_191602/deploy-20240410_191602.log
+20240410_191716 - Deployment finished with 0 error(s)
+20240410_191731 - Executing: bun hardhat deploy-zksync --network zkSyncMainnet --config era.hardhat.config.ts --script zksync/deployEraAllo.ts | tee ./reports/deployment-logs/zksync/deployEraAllo/zkSyncMainnet/20240410_191731/deploy-20240410_191731.log
+20240410_191836 - Deployment finished with 0 error(s)
+20240410_191846 - Executing: bun hardhat deploy-zksync --network zkSyncMainnet --config era.hardhat.config.ts --script zksync/strategies/deployEraDirectGrants.ts | tee ./reports/deployment-logs/zksync/strategies/deployEraDirectGrants/zkSyncMainnet/20240410_191846/deploy-20240410_191846.log
+20240410_191936 - Deployment finished with 0 error(s)
+20240410_191939 - Executing: bun hardhat deploy-zksync --network zkSyncMainnet --config era.hardhat.config.ts --script zksync/strategies/deployEraDirectGrants.ts | tee ./reports/deployment-logs/zksync/strategies/deployEraDirectGrants/zkSyncMainnet/20240410_191939/deploy-20240410_191939.log
+20240410_192034 - Deployment finished with 0 error(s)
+20240410_192036 - Executing: bun hardhat deploy-zksync --network zkSyncMainnet --config era.hardhat.config.ts --script zksync/strategies/deployEraDirectGrants.ts | tee ./reports/deployment-logs/zksync/strategies/deployEraDirectGrants/zkSyncMainnet/20240410_192036/deploy-20240410_192036.log
+20240410_192129 - Deployment finished with 0 error(s)
+20240410_192204 - Executing: bun hardhat deploy-zksync --network zkSyncMainnet --config era.hardhat.config.ts --script zksync/strategies/deployEraDirectGrants.ts | tee ./reports/deployment-logs/zksync/strategies/deployEraDirectGrants/zkSyncMainnet/20240410_192204/deploy-20240410_192204.log
+20240410_192256 - Deployment finished with 0 error(s)
+20240410_192305 - Executing: bun hardhat deploy-zksync --network zkSyncMainnet --config era.hardhat.config.ts --script zksync/strategies/deployEraDonationVotingMerkleDistributionDirect.ts | tee ./reports/deployment-logs/zksync/strategies/deployEraDonationVotingMerkleDistributionDirect/zkSyncMainnet/20240410_192305/deploy-20240410_192305.log
+20240410_192400 - Deployment finished with 0 error(s)

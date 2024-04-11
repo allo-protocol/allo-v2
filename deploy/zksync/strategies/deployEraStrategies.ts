@@ -139,12 +139,12 @@ export async function deployEraStrategies(
     },
   );
 
-  const hashBytesStrategyName = ethers.keccak256(
-    new ethers.AbiCoder().encode(["string"], [strategyName + version]),
-  );
+  // const hashBytesStrategyName = hre.ethers.keccak256(
+  //   new hre.ethers.AbiCoder().encode(["string"], [strategyName + version]),
+  // );
 
   const objToWrite = {
-    id: hashBytesStrategyName,
+    id: "",
     name: strategyName,
     version: version,
     address: impl.toString(),
@@ -157,7 +157,7 @@ export async function deployEraStrategies(
 
   const validator = await new Validator(strategyName, impl);
   await validator.validate("getAllo", [], alloAddress);
-  await validator.validate("getStrategyId", [], hashBytesStrategyName);
+  // await validator.validate("getStrategyId", [], hashBytesStrategyName);
 
   return impl.toString();
 }
@@ -208,8 +208,14 @@ export async function deployEraStrategyDirectly(
 
   console.log(`${artifact.contractName} was deployed to ${CONTRACT_ADDRESS}`);
 
+  // const hashBytesStrategyName = ethers.keccak256(
+  //   new ethers.AbiCoder().encode(["string"], [strategyName + version]),
+  // );
+
   const objToWrite = {
-    name: strategyNameWithVersion,
+    id: "",
+    name: strategyName,
+    version: version,
     address: instance.target,
     deployerAddress: deployerAddress.address,
   };

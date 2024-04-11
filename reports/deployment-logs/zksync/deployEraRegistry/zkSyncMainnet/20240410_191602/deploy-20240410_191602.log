@@ -1,0 +1,29 @@
+
+    ////////////////////////////////////////////////////
+          Deploys Registry.sol on zkSyncMainnet
+    ////////////////////////////////////////////////////
+┌─────────────────┬──────────────────────────────────────────────┐
+│     (index)     │                    Values                    │
+├─────────────────┼──────────────────────────────────────────────┤
+│    contract     │                'Registry.sol'                │
+│     chainId     │                     324                      │
+│     network     │               'zkSyncMainnet'                │
+│ deployerAddress │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│  registryOwner  │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying Registry...
+Implementation contract was deployed to 0x989345430246702575b096Ce19050dc8492d668e
+Admin was deployed to 0x223B5b43178c27a28C3b8b29A8AF4CE586A2DE19
+Transparent proxy was deployed to 0xaa376Ef759c1f5A8b0B5a1e2FEC5C23f3bF30246
+Registry deployed to: 0xaa376Ef759c1f5A8b0B5a1e2FEC5C23f3bF30246
+
+Verifying contract...
+Verifying implementation: 0x989345430246702575b096Ce19050dc8492d668e
+Your verification ID is: 52292
+Contract successfully verified on zkSync block explorer!
+Verifying proxy: 0xaa376Ef759c1f5A8b0B5a1e2FEC5C23f3bF30246
+Your verification ID is: 52293
+Contract successfully verified on zkSync block explorer!
+Verifying proxy admin: 0x223B5b43178c27a28C3b8b29A8AF4CE586A2DE19
+Your verification ID is: 52294
+Contract successfully verified on zkSync block explorer!

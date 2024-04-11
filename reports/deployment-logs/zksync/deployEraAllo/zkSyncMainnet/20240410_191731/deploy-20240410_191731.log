@@ -1,0 +1,32 @@
+
+    ////////////////////////////////////////////////////
+          Deploys Allo.sol on zkSyncMainnet
+    ////////////////////////////////////////////////////
+┌─────────────────┬──────────────────────────────────────────────┐
+│     (index)     │                    Values                    │
+├─────────────────┼──────────────────────────────────────────────┤
+│    contract     │                  'Allo.sol'                  │
+│     chainId     │                     324                      │
+│     network     │               'zkSyncMainnet'                │
+│    registry     │ '0xaa376Ef759c1f5A8b0B5a1e2FEC5C23f3bF30246' │
+│    treasury     │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│   percentFee    │                      0                       │
+│     baseFee     │                      0                       │
+│ deployerAddress │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying Allo...
+Implementation contract was deployed to 0x3EF0E57b6FEFA5D34EbF98ED4EBE5Ab7953E9aa3
+Admin was deployed to 0x223B5b43178c27a28C3b8b29A8AF4CE586A2DE19
+Transparent proxy was deployed to 0x9D1D1BF2835935C291C0f5228c86d5C4e235A249
+Allo deployed to: 0x9D1D1BF2835935C291C0f5228c86d5C4e235A249
+
+Verifying contract...
+Verifying implementation: 0x3EF0E57b6FEFA5D34EbF98ED4EBE5Ab7953E9aa3
+Your verification ID is: 52295
+Contract successfully verified on zkSync block explorer!
+Verifying proxy: 0x9D1D1BF2835935C291C0f5228c86d5C4e235A249
+Your verification ID is: 52296
+Contract successfully verified on zkSync block explorer!
+Verifying proxy admin: 0x223B5b43178c27a28C3b8b29A8AF4CE586A2DE19
+Your verification ID is: 52297
+Contract successfully verified on zkSync block explorer!
