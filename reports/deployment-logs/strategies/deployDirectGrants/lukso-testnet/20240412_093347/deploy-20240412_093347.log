@@ -1,0 +1,33 @@
+
+    ////////////////////////////////////////////////////
+      Deploys DirectGrantsSimpleStrategy.sol on lukso-testnet
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────┐
+│     (index)     │                    Values                    │
+├─────────────────┼──────────────────────────────────────────────┤
+│    contract     │       'DirectGrantsSimpleStrategy.sol'       │
+│     chainId     │                     4201                     │
+│     network     │               'lukso-testnet'                │
+│ deployerAddress │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│     balance     │            '0.991740248942181743'            │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying DirectGrantsSimpleStrategy.sol
+[35mContract DirectGrantsSimpleStrategy deployed at address: 0xd1E4D3b4a851cc297323c6ca8356c43e68EAbCd3[0m
+
+Verifying contract...
+SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON
+    at JSON.parse (<anonymous>)
+    at consumeEnd (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/undici@5.28.3/node_modules/undici/lib/api/readable.js:276:20)
+    at BodyReadable.<anonymous> (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/undici@5.28.3/node_modules/undici/lib/api/readable.js:258:7)
+    at BodyReadable.emit (node:events:514:28)
+    at BodyReadable.emit (node:domain:488:12)
+    at BodyReadable.emit (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/undici@5.28.3/node_modules/undici/lib/api/readable.js:73:18)
+    at endReadableNT (node:internal/streams/readable:1589:12)
+    at processTicksAndRejections (node:internal/process/task_queues:82:21)
+[90m
+	Validating getAllo() == 0x1133eA7Af70876e64665ecD07C0A0476d09465a1[0m
+[32m	✅ PASSED with Result: 0x1133eA7Af70876e64665ecD07C0A0476d09465a1[0m
+[90m
+	Validating getStrategyId() == 0x53fb9d3bce0956ca2db5bb1441f5ca23050cb1973b33789e04a5978acfd9ca93[0m
+[32m	✅ PASSED with Result: 0x53fb9d3bce0956ca2db5bb1441f5ca23050cb1973b33789e04a5978acfd9ca93[0m

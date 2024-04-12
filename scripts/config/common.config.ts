@@ -126,4 +126,14 @@ export const commonConfig: DeployParams = {
     proxyAdminOwner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
     permit2Address: "0xC1087157eF2aaeBcaDB913251EA5B82c678424F7",
   },
+  // Lukso
+  42: {
+    proxyAdminOwner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
+    permit2Address: "",
+  },
+  // Lukso testnet
+  4201: {
+    proxyAdminOwner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
+    permit2Address: "0x3c795a334dE57813D8CA945D1A47D329D6Fc2151",
+  },
 };

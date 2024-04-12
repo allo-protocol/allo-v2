@@ -1,0 +1,30 @@
+
+    ////////////////////////////////////////////////////
+        Deploys ContractFactory.sol on lukso-testnet
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────┐
+│     (index)     │                    Values                    │
+├─────────────────┼──────────────────────────────────────────────┤
+│    contract     │         'Deploy ContractFactory.sol'         │
+│     chainId     │                     4201                     │
+│     network     │               'lukso-testnet'                │
+│ deployerAddress │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│     balance     │            '0.992095658944669613'            │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying ContractFactory.sol...
+ContractFactory deployed to: 0x7DE1218DCDC3628F839b19a3aF5ACF092C35BcDE
+
+Verifying contract...
+SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON
+    at JSON.parse (<anonymous>)
+    at consumeEnd (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/undici@5.28.3/node_modules/undici/lib/api/readable.js:276:20)
+    at BodyReadable.<anonymous> (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/undici@5.28.3/node_modules/undici/lib/api/readable.js:258:7)
+    at BodyReadable.emit (node:events:514:28)
+    at BodyReadable.emit (node:domain:488:12)
+    at BodyReadable.emit (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/undici@5.28.3/node_modules/undici/lib/api/readable.js:73:18)
+    at endReadableNT (node:internal/streams/readable:1589:12)
+    at processTicksAndRejections (node:internal/process/task_queues:82:21)
+[90m
+	Validating isDeployer(0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C) == true[0m
+[32m	✅ PASSED with Result: true[0m
