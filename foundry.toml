@@ -33,7 +33,7 @@ gas_reports_ignore = [
 ]
 
 # Storage layout compatibility 
-build_info = true
+build_info = false
 extra_output = ["storageLayout"]
 # Grants access to solc
 allow_paths = ['node_modules']
