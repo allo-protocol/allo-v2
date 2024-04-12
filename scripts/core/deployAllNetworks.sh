@@ -43,7 +43,7 @@ networks=(
 #   "scroll"
 #   "ftmTestnet"
 #   "fantom"
-    "filecoin-calibration"
+#   "filecoin-calibration"
 #   "sei-devnet"
 #   "lukso-testnet"
 #   "lukso-mainnet"
@@ -55,7 +55,7 @@ networks=(
 )
 
 scripts=(
-    "core/deployRegistry"
+    # "core/deployRegistry"
     # "core/deployAllo"
     # "core/deployContractFactory"
     # "strategies/deployDonationVotingMerkleDistributionDirect"

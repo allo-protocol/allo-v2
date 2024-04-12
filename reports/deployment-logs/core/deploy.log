@@ -468,3 +468,9 @@
 20240412_091948 - Deployment finished with 0 error(s)
 20240412_102206 - Executing: bun hardhat run scripts/core/deployRegistry.ts --no-compile --network filecoin-calibration | tee ./reports/deployment-logs/core/deployRegistry/filecoin-calibration/20240412_102206/deploy-20240412_102206.log
 20240412_102601 - Deployment finished with 0 error(s)
+20240412_195124 - Executing: bun hardhat run scripts/core/deployAllo.ts --no-compile --network filecoin-calibration | tee ./reports/deployment-logs/core/deployAllo/filecoin-calibration/20240412_195124/deploy-20240412_195124.log
+20240412_195126 - Deployment finished with 0 error(s)
+20240412_203640 - Executing: bun hardhat run scripts/core/deployAllo.ts --no-compile --network filecoin-calibration | tee ./reports/deployment-logs/core/deployAllo/filecoin-calibration/20240412_203640/deploy-20240412_203640.log
+20240412_203901 - Deployment finished with 0 error(s)
+20240412_233154 - Executing: bun hardhat run scripts/core/deployContractFactory.ts --no-compile --network filecoin-calibration | tee ./reports/deployment-logs/core/deployContractFactory/filecoin-calibration/20240412_233154/deploy-20240412_233154.log
+20240412_233509 - Deployment finished with 0 error(s)
