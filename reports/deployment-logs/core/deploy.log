@@ -454,3 +454,13 @@
 20240410_192256 - Deployment finished with 0 error(s)
 20240410_192305 - Executing: bun hardhat deploy-zksync --network zkSyncMainnet --config era.hardhat.config.ts --script zksync/strategies/deployEraDonationVotingMerkleDistributionDirect.ts | tee ./reports/deployment-logs/zksync/strategies/deployEraDonationVotingMerkleDistributionDirect/zkSyncMainnet/20240410_192305/deploy-20240410_192305.log
 20240410_192400 - Deployment finished with 0 error(s)
+20240412_092239 - Executing: bun hardhat run scripts/core/deployRegistry.ts --no-compile --network lukso-testnet | tee ./reports/deployment-logs/core/deployRegistry/lukso-testnet/20240412_092239/deploy-20240412_092239.log
+20240412_092416 - Deployment finished with 0 error(s)
+20240412_092516 - Executing: bun hardhat run scripts/core/deployAllo.ts --no-compile --network lukso-testnet | tee ./reports/deployment-logs/core/deployAllo/lukso-testnet/20240412_092516/deploy-20240412_092516.log
+20240412_092654 - Deployment finished with 0 error(s)
+20240412_093030 - Executing: bun hardhat run scripts/core/deployAllo.ts --no-compile --network lukso-testnet | tee ./reports/deployment-logs/core/deployAllo/lukso-testnet/20240412_093030/deploy-20240412_093030.log
+20240412_093155 - Deployment finished with 0 error(s)
+20240412_093209 - Executing: bun hardhat run scripts/core/deployContractFactory.ts --no-compile --network lukso-testnet | tee ./reports/deployment-logs/core/deployContractFactory/lukso-testnet/20240412_093209/deploy-20240412_093209.log
+20240412_093311 - Deployment finished with 0 error(s)
+20240412_093347 - Executing: bun hardhat run scripts/strategies/deployDirectGrants.ts --no-compile --network lukso-testnet | tee ./reports/deployment-logs/strategies/deployDirectGrants/lukso-testnet/20240412_093347/deploy-20240412_093347.log
+20240412_093426 - Deployment finished with 0 error(s)
