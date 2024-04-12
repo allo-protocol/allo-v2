@@ -124,6 +124,6 @@ export const commonConfig: DeployParams = {
   // Sei Devnet
   713715: {
     proxyAdminOwner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
-    permit2Address: "0xC1087157eF2aaeBcaDB913251EA5B82c678424F7",
+    permit2Address: "",
   },
 };

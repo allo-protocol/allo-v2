@@ -490,7 +490,30 @@ export const strategyConfig: DeployParams = {
       version: "v2.1",
     },
   },
+  // Sei Devnet
   713715: {
+    "donation-voting-merkle-distribution-direct": {
+      name: "DonationVotingMerkleDistributionDirectTransferStrategy",
+      version: "v2.1",
+    },
+    "direct-grants": {
+      name: "DirectGrantsSimpleStrategy",
+      version: "v2.1",
+    },
+  },
+  // Lukso Mainnet
+  42: {
+    "donation-voting-merkle-distribution-direct": {
+      name: "DonationVotingMerkleDistributionDirectTransferStrategy",
+      version: "v2.1",
+    },
+    "direct-grants": {
+      name: "DirectGrantsSimpleStrategy",
+      version: "v2.1",
+    },
+  },
+  // Lukso Testnet
+  4201: {
     "donation-voting-merkle-distribution-direct": {
       name: "DonationVotingMerkleDistributionDirectTransferStrategy",
       version: "v2.1",

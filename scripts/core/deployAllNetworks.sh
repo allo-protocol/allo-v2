@@ -45,15 +45,17 @@ networks=(
 #   "fantom"
 #   "filecoin-calibration"
 # "sei-devnet"
+"lukso-testnet"
+# "lukso-mainnet"
 
 #  === ZkSync Era ===
 #   "zkSyncTestnet"
-  "zkSyncMainnet"
+#   "zkSyncMainnet"
 #  ==================
 )
 
 scripts=(
-    # "core/deployRegistry"
+    "core/deployRegistry"
     # "core/deployAllo"
     # "core/deployContractFactory"
     # "strategies/deployDonationVotingMerkleDistributionDirect"
@@ -69,7 +71,7 @@ scripts=(
     # "zksync/deployEraRegistry"
     # "zksync/deployEraAllo"
     # "zksync/deployEraContractFactory"
-    "zksync/strategies/deployEraDonationVotingMerkleDistributionDirect"
+    # "zksync/strategies/deployEraDonationVotingMerkleDistributionDirect"
     # "zksync/strategies/deployEraDirectGrants"
 )
 

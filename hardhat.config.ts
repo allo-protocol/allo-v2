@@ -34,6 +34,8 @@ const chainIds = {
   mumbai: 80001,
   "filecoin-calibration": 314159,
   fuji: 43113,
+  "sei-devnet": 713715,
+  "lukso-testnet": 4201,
 
   // mainnet
   mainnet: 1,
@@ -46,7 +48,7 @@ const chainIds = {
   "filecoin-mainnet": 314,
   avalanche: 43114,
   scroll: 534352,
-  "sei-devnet": 713715,
+  "lukso-mainnet": 42,
 };
 
 let deployPrivateKey = process.env.DEPLOYER_PRIVATE_KEY as string;
@@ -182,6 +184,14 @@ const config: HardhatUserConfig = {
       ...createMainnetConfig("scroll"),
       url: `https://1rpc.io/scroll`,
     },
+    "filecoin-mainnet": {
+      ...createMainnetConfig("filecoin-mainnet"),
+      url: `https://api.node.glif.io`,
+    },
+    "lukso-mainnet": {
+      ...createMainnetConfig("lukso-mainnet"),
+      url: 'https://42.rpc.thirdweb.com',
+    },
     // Test Networks
     goerli: createTestnetConfig(
       "goerli",
@@ -235,14 +245,15 @@ const config: HardhatUserConfig = {
       ...createTestnetConfig("filecoin-calibration"),
       url: `https://api.calibration.node.glif.io/rpc/v1`,
     },
-    "filecoin-mainnet": {
-      ...createMainnetConfig("filecoin-mainnet"),
-      url: `https://api.node.glif.io`,
-    },
     "sei-devnet": {
       ...createTestnetConfig("sei-devnet"),
       url: `https://evm-rpc-arctic-1.sei-apis.com`,
     },
+    "lukso-testnet": {
+      ...createTestnetConfig("lukso-testnet"),
+      url: 'https://4201.rpc.thirdweb.com',
+    },
+
     // Local Networks
     localhost: createTestnetConfig("localhost", "http://localhost:8545"),
     hardhat: {
@@ -264,52 +275,29 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: {
-      // @ts-ignore
       mainnet: process.env.ETHERSCAN_API_KEY,
-      // @ts-ignore
       goerli: process.env.ETHERSCAN_API_KEY,
-      // @ts-ignore
       sepolia: process.env.ETHERSCAN_API_KEY,
-      // @ts-ignore
       optimisticEthereum: process.env.OPTIMISTIC_ETHERSCAN_API_KEY,
-      // @ts-ignore
       optimisticGoerli: process.env.OPTIMISTIC_ETHERSCAN_API_KEY,
-      // @ts-ignore
       ftmTestnet: process.env.FTMSCAN_API_KEY,
-      // @ts-ignore
       opera: process.env.FTMSCAN_API_KEY,
-      // @ts-ignore
-      "pgn-mainnet": process.env.PGNSCAN_API_KEY,
-      // @ts-ignore
-      "pgn-sepolia": process.env.PGNSCAN_API_KEY,
-      // @ts-ignore
       "celo-mainnet": process.env.CELOSCAN_API_KEY,
-      // @ts-ignore
       "celo-testnet": process.env.CELOSCAN_API_KEY,
-      // @ts-ignore
       base: process.env.BASESCAN_API_KEY,
-      // @ts-ignore
       "base-testnet": process.env.BASESCAN_API_KEY,
-      // @ts-ignore
       polygon: process.env.POLYGONSCAN_API_KEY,
-      // @ts-ignore
       mumbai: process.env.POLYGONSCAN_API_KEY,
-      // @ts-ignore
       "arbitrum-mainnet": process.env.ARBITRUMSCAN_API_KEY,
-      // @ts-ignore
       "arbitrum-sepolia": process.env.ARBITRUMSCAN_API_KEY,
-      // @ts-ignore
       "optimism-sepolia": process.env.OPTIMISTIC_ETHERSCAN_API_KEY,
-      // @ts-ignore
       "filecoin-mainnet": process.env.FILECOIN_ETHERSCAN_API_KEY,
-      // @ts-ignore
-      "filecoin-calibration": "NA",
-      // @ts-ignore
-      fuji: "NA",
-      // @ts-ignore
-      avalanche: "NA",
-      // @ts-ignore
-      scroll: process.env.SCROLLSCAN_API_KEY!,
+      "filecoin-calibration": "no-api-key-needed",
+      fuji: "no-api-key-needed",
+      avalanche: "no-api-key-needed",
+      scroll: process.env.SCROLLSCAN_API_KEY,
+      "lukso-mainnet": "no-api-key-needed",
+      "lukso-testnet": "no-api-key-needed",
     },
     customChains: [
       {
@@ -432,6 +420,22 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "",
           browserURL: "", // TODO
+        },
+      },
+      {
+        network: 'lukso-testnet',
+        chainId: chainIds["lukso-testnet"],
+        urls: {
+          apiURL: 'https://explorer.execution.testnet.lukso.network/api',
+          browserURL: 'https://explorer.execution.testnet.lukso.network/',
+        },
+      },
+      {
+        network: 'lukso-mainnet',
+        chainId: chainIds["lukso-mainnet"],
+        urls: {
+          apiURL: 'https://explorer.execution.mainnet.lukso.network/api',
+          browserURL: 'https://explorer.execution.mainnet.lukso.network/',
         },
       },
     ],
