@@ -60,7 +60,7 @@ flowchart
   </tr>
   <tr>
     <td>BaseStrategy.sol</td>
-    <td>- Abstract contract which implements IStrategy.sol<br>- Every strategy should override the internal functions to be deemed as a valid strategy <br>- Can have other functions unique to the strategy which can be invoked directly on the startegy</td>
+    <td>- Abstract contract which implements IStrategy.sol<br>- Every strategy should override the internal functions to be deemed as a valid strategy <br>- Can have other functions unique to the strategy which can be invoked directly on the strategy</td>
   </tr>
 </tbody>
 </table>
