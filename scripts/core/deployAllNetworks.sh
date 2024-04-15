@@ -44,9 +44,9 @@ networks=(
 #   "ftmTestnet"
 #   "fantom"
 #   "filecoin-calibration"
-# "sei-devnet"
-"lukso-testnet"
-# "lukso-mainnet"
+#   "sei-devnet"
+#   "lukso-testnet"
+#   "lukso-mainnet"
 
 #  === ZkSync Era ===
 #   "zkSyncTestnet"
@@ -58,7 +58,7 @@ scripts=(
     # "core/deployRegistry"
     # "core/deployAllo"
     # "core/deployContractFactory"
-    "strategies/deployDonationVotingMerkleDistributionDirect"
+    # "strategies/deployDonationVotingMerkleDistributionDirect"
     # "strategies/deployDirectGrants"
     # "core/transferProxyAdminOwnership"
     # "strategies/deployDonationVotingMerkleDistributionVault"
