@@ -1,0 +1,42 @@
+
+    ////////////////////////////////////////////////////
+            Deploys Allo.sol on filecoin-mainnet
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────┐
+│     (index)     │                    Values                    │
+├─────────────────┼──────────────────────────────────────────────┤
+│    contract     │              'Deploy Allo.sol'               │
+│     chainId     │                     314                      │
+│     network     │              'filecoin-mainnet'              │
+│      owner      │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│    registry     │ '0x4AAcca72145e1dF2aeC137E1f3C5E3D75DB8b5f3' │
+│    treasury     │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│   percentFee    │                      0                       │
+│     baseFee     │                      0                       │
+│ deployerAddress │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│     balance     │            '26.56161156478668704'            │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying Allo.sol...
+Error getting implementation address:  Error: Contract at 0x1133eA7Af70876e64665ecD07C0A0476d09465a1 doesn't look like an ERC 1967 proxy with a logic contract address
+
+
+Allo Proxy deployed to: 0x1133eA7Af70876e64665ecD07C0A0476d09465a1
+Registry implementation deployed to: undefined
+Proxy Admin:  0x0000000000000000000000000000000000000000
+Proxy Admin Owner:  0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C
+[90m
+	Validating getRegistry() == 0x4AAcca72145e1dF2aeC137E1f3C5E3D75DB8b5f3[0m
+[32m	✅ PASSED with Result: 0x4AAcca72145e1dF2aeC137E1f3C5E3D75DB8b5f3[0m
+[90m
+	Validating getTreasury() == 0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C[0m
+[32m	✅ PASSED with Result: 0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C[0m
+[90m
+	Validating getPercentFee() == 0[0m
+[32m	✅ PASSED with Result: 0[0m
+[90m
+	Validating getBaseFee() == 0[0m
+[32m	✅ PASSED with Result: 0[0m
+[90m
+	Validating owner() == 0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C[0m
+[32m	✅ PASSED with Result: 0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C[0m
