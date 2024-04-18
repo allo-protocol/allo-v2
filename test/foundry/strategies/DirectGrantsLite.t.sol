@@ -394,19 +394,92 @@ contract DirectGrantsLiteTest is Test, AlloSetup, RegistrySetupFull, EventSetup,
     }
 
     function test_distribute() public {
-        // todo
+        address recipientId1 = __register_accept_recipient();
+        address recipientId2 = __register_accept_recipient();
+
+        DirectGrantsLiteStrategy.Distribution[] memory distributions = new DirectGrantsLiteStrategy.Distribution[](2);
+        distributions[0] = DirectGrantsLiteStrategy.Distribution({index: 0, recipientId: recipientId1, amount: 1e17});
+        distributions[1] = DirectGrantsLiteStrategy.Distribution({index: 1, recipientId: recipientId2, amount: 2e17});
+
+        bytes memory encodedDistributions = abi.encode(distributions);
+        address[] memory emptyAddressArray = new address[](0);
+
+        vm.prank(pool_admin());
+        emit FundsDistributed(1e17, recipientId1, NATIVE, recipientId1);
+        emit FundsDistributed(2e17, recipientId2, NATIVE, recipientId2);
+        emit BatchPayoutSuccessful(pool_admin());
+
+        allo().distribute(poolId, emptyAddressArray, encodedDistributions);
+
+        distributions[0] = DirectGrantsLiteStrategy.Distribution({index: 2, recipientId: recipientId1, amount: 1e17});
+        distributions[1] = DirectGrantsLiteStrategy.Distribution({index: 3, recipientId: recipientId2, amount: 2e17});
+
+        encodedDistributions = abi.encode(distributions);
+
+        vm.prank(pool_admin());
+        emit FundsDistributed(1e17, recipientId1, NATIVE, recipientId1);
+        emit FundsDistributed(2e17, recipientId2, NATIVE, recipientId2);
+        emit BatchPayoutSuccessful(pool_admin());
+
+        allo().distribute(poolId, emptyAddressArray, encodedDistributions);
+    }
+
+    function testRevert_distribute_UNAUTHORIZED() public {
+        address recipientId1 = __register_accept_recipient();
+        address recipientId2 = __register_accept_recipient();
+
+        DirectGrantsLiteStrategy.Distribution[] memory distributions = new DirectGrantsLiteStrategy.Distribution[](2);
+        distributions[0] = DirectGrantsLiteStrategy.Distribution({index: 0, recipientId: recipientId1, amount: 1e17});
+        distributions[1] = DirectGrantsLiteStrategy.Distribution({index: 1, recipientId: recipientId2, amount: 2e17});
+
+        bytes memory encodedDistributions = abi.encode(distributions);
+        address[] memory emptyAddressArray = new address[](0);
+
+        vm.expectRevert(abi.encodeWithSelector(UNAUTHORIZED.selector));
+        allo().distribute(poolId, emptyAddressArray, encodedDistributions);
     }
 
     function testRevert_distribute_INVALID() public {
-        // todo
+        address[] memory emptyAddressArray = new address[](0);
+        DirectGrantsLiteStrategy.Distribution[] memory distributions = new DirectGrantsLiteStrategy.Distribution[](0);
+
+        bytes memory encodedDistributions = abi.encode(distributions);
+
+        vm.expectRevert(abi.encodeWithSelector(INVALID.selector));
+        vm.prank(pool_admin());
+        allo().distribute(poolId, emptyAddressArray, encodedDistributions);
     }
 
+    // note: this may need more coverage/edge-cases.
     function testRevert_distribute_twice_to_same_recipient() public {
-        // todo
+        address recipientId1 = __register_accept_recipient();
+
+        DirectGrantsLiteStrategy.Distribution[] memory distributions = new DirectGrantsLiteStrategy.Distribution[](2);
+        distributions[0] = DirectGrantsLiteStrategy.Distribution({index: 0, recipientId: recipientId1, amount: 1e17});
+        distributions[1] = DirectGrantsLiteStrategy.Distribution({index: 0, recipientId: recipientId1, amount: 1e17});
+
+        bytes memory encodedDistributions = abi.encode(distributions);
+        address[] memory emptyAddressArray = new address[](0);
+
+        vm.prank(pool_admin());
+        vm.expectRevert();
+        allo().distribute(poolId, emptyAddressArray, encodedDistributions);
     }
 
     function testRevert_distribute_RECIPIENT_ERROR() public {
-        // todo
+        address recipientId2 = __register_accept_recipient();
+
+        DirectGrantsLiteStrategy.Distribution[] memory distributions = new DirectGrantsLiteStrategy.Distribution[](2);
+        distributions[0] = DirectGrantsLiteStrategy.Distribution({index: 0, recipientId: address(0), amount: 1e17});
+        distributions[1] = DirectGrantsLiteStrategy.Distribution({index: 1, recipientId: recipientId2, amount: 2e17});
+
+        bytes memory encodedDistributions = abi.encode(distributions);
+
+        address[] memory emptyAddressArray = new address[](0);
+
+        vm.prank(pool_admin());
+        vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, address(0)));
+        allo().distribute(poolId, emptyAddressArray, encodedDistributions);
     }
 
     /// ====================

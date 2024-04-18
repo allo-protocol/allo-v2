@@ -5,6 +5,7 @@ pragma solidity 0.8.19;
 import {Multicall} from "openzeppelin-contracts/contracts/utils/Multicall.sol";
 // Interfaces
 import {IRegistry} from "../../core/interfaces/IRegistry.sol";
+import {IAllo} from "../../core/interfaces/IAllo.sol";
 // Core Contracts
 import {BaseStrategy} from "../BaseStrategy.sol";
 // Internal Libraries
@@ -464,7 +465,49 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
         override
         onlyPoolManager(_sender)
     {
-        // todo
+        // Set the 'distributionStarted' to 'true'
+        distributionStarted = true;
+
+        IAllo.Pool memory pool = allo.getPool(poolId);
+        address poolToken = pool.token;
+
+        // Decode the distribution data
+        (Distribution[] memory distributions) = abi.decode(_data, (Distribution[]));
+
+        // Loop through the distributions and distribute the funds
+        uint256 length = distributions.length;
+
+        if (length == 0) revert INVALID(); // no distributions
+
+        for (uint256 i = 0; i < length; i++) {
+            Distribution memory distribution = distributions[i];
+            Recipient memory recipient = _getRecipient(distribution.recipientId);
+
+            if (recipient.recipientAddress == address(0)) {
+                revert RECIPIENT_ERROR(distribution.recipientId);
+            }
+
+            if (_getUintRecipientStatus(distribution.recipientId) != uint8(Status.Accepted)) {
+                revert RECIPIENT_NOT_ACCEPTED();
+            }
+
+            uint256 indexGroup = distribution.index / 256;
+            uint256 indexBit = distribution.index % 256;
+            uint256 bitMask = 1 << indexBit;
+
+            if ((distributedBitMap[indexGroup] & bitMask) != 0) {
+                revert INVALID(); // Ensure this check fails on a second distribution attempt
+            }
+
+            // Mark as paid immediately after checks and before the transfer
+            distributedBitMap[indexGroup] |= bitMask;
+
+            _transferAmount(poolToken, recipient.recipientAddress, distribution.amount);
+
+            emit FundsDistributed(distribution.amount, recipient.recipientAddress, poolToken, distribution.recipientId);
+        }
+        // Emit that the batch payout was successful
+        emit BatchPayoutSuccessful(_sender);
     }
 
     /// @notice Allocate. Required by the 'BaseStrategy'.
