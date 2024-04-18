@@ -29,7 +29,7 @@ import {Native} from "../../core/libraries/Native.sol";
 /// @title DDirect Grants Lite Strategy
 /// @author @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>
 /// @notice Strategy for direct grants
-abstract contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
+contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
     /// ================================
     /// ========== Struct ==============
     /// ================================
@@ -98,11 +98,7 @@ abstract contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
     /// @param registrationStartTime The start time for the registration
     /// @param registrationEndTime The end time for the registration
     /// @param sender The sender of the transaction
-    event TimestampsUpdated(
-        uint64 registrationStartTime,
-        uint64 registrationEndTime,
-        address sender
-    );
+    event TimestampsUpdated(uint64 registrationStartTime, uint64 registrationEndTime, address sender);
 
     /// @notice Emitted when funds are distributed to a recipient
     /// @param amount The amount of tokens distributed
@@ -238,9 +234,7 @@ abstract contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
         _isPoolTimestampValid(registrationStartTime, registrationEndTime);
 
         // Emit that the timestamps have been updated with the updated values
-        emit TimestampsUpdated(
-            registrationStartTime, registrationEndTime, msg.sender
-        );
+        emit TimestampsUpdated(registrationStartTime, registrationEndTime, msg.sender);
     }
 
     /// ===============================
@@ -309,10 +303,10 @@ abstract contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
     ///      Emits a 'TimestampsUpdated()' event.
     /// @param _registrationStartTime The start time for the registration
     /// @param _registrationEndTime The end time for the registration
-    function updatePoolTimestamps(
-        uint64 _registrationStartTime,
-        uint64 _registrationEndTime
-    ) external onlyPoolManager(msg.sender) {
+    function updatePoolTimestamps(uint64 _registrationStartTime, uint64 _registrationEndTime)
+        external
+        onlyPoolManager(msg.sender)
+    {
         // If the timestamps are invalid this will revert - See details in '_isPoolTimestampValid'
         _isPoolTimestampValid(_registrationStartTime, _registrationEndTime);
 
@@ -321,9 +315,7 @@ abstract contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
         registrationEndTime = _registrationEndTime;
 
         // Emit that the timestamps have been updated with the updated values
-        emit TimestampsUpdated(
-            registrationStartTime, registrationEndTime, msg.sender
-        );
+        emit TimestampsUpdated(registrationStartTime, registrationEndTime, msg.sender);
     }
 
     /// @notice Withdraw funds from pool
@@ -333,20 +325,12 @@ abstract contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
         // get the actual balance hold by the pool
         uint256 amount = _getBalance(_token, address(this));
 
-        // get the token amount in vault which belong to the recipients
-        uint256 tokenInVault = _tokenAmountInVault(_token);
-
         // calculate the amount which is accessible
-        uint256 accessableAmount = amount - tokenInVault;
+        uint256 accessableAmount = amount;
 
         // transfer the amount to the pool manager
         _transferAmount(_token, msg.sender, accessableAmount);
     }
-
-    /// @notice Internal function to return the token amount locked in vault
-    /// @dev This function will return 0 if all funds are accessible
-    /// @param _token The address of the token
-    function _tokenAmountInVault(address _token) internal view virtual returns (uint256);
 
     /// ====================================
     /// ============ Internal ==============
@@ -371,13 +355,8 @@ abstract contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
     /// and may vary from strategy to strategy. Checks if '_registrationStartTime' is greater than the '_registrationEndTime'
     /// @param _registrationStartTime The start time for the registration
     /// @param _registrationEndTime The end time for the registration
-    function _isPoolTimestampValid(
-        uint64 _registrationStartTime,
-        uint64 _registrationEndTime
-    ) internal pure {
-        if (
-            _registrationStartTime > _registrationEndTime
-        ) {
+    function _isPoolTimestampValid(uint64 _registrationStartTime, uint64 _registrationEndTime) internal pure {
+        if (_registrationStartTime > _registrationEndTime) {
             revert INVALID();
         }
     }
@@ -491,7 +470,7 @@ abstract contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
     /// @notice Allocate. Required by the 'BaseStrategy'.
     /// @dev This function reverts by default
     function _allocate(bytes memory, address) internal virtual override {
-      revert();
+        revert();
     }
 
     /// @notice Check if sender is profile owner or member.
