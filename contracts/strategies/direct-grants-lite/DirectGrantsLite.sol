@@ -65,7 +65,6 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
 
     /// @notice Stores the details of the distribution.
     struct Distribution {
-        uint256 index;
         address recipientId;
         uint256 amount;
     }
@@ -167,11 +166,6 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
     /// @notice 'recipientId' => 'statusIndex'
     /// @dev 'statusIndex' is the index of the recipient in the 'statusesBitMap' bitmap.
     mapping(address => uint256) public recipientToStatusIndexes;
-
-    /// @notice This is a packed array of booleans to keep track of claims distributed.
-    /// @dev distributedBitMap[0] is the first row of the bitmap and allows to store 256 bits to describe
-    /// the status of 256 claims
-    mapping(uint256 => uint256) private distributedBitMap;
 
     /// @notice 'recipientId' => 'Recipient' struct.
     mapping(address => Recipient) internal _recipients;
@@ -477,7 +471,7 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
         // Loop through the distributions and distribute the funds
         uint256 length = distributions.length;
 
-        if (length == 0) revert INVALID(); // no distributions
+        if (length == 0) revert INVALID(); // no distributionsdistribute
 
         for (uint256 i = 0; i < length; i++) {
             Distribution memory distribution = distributions[i];
@@ -490,17 +484,6 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
             if (_getUintRecipientStatus(distribution.recipientId) != uint8(Status.Accepted)) {
                 revert RECIPIENT_NOT_ACCEPTED();
             }
-
-            uint256 indexGroup = distribution.index / 256;
-            uint256 indexBit = distribution.index % 256;
-            uint256 bitMask = 1 << indexBit;
-
-            if ((distributedBitMap[indexGroup] & bitMask) != 0) {
-                revert INVALID(); // Ensure this check fails on a second distribution attempt
-            }
-
-            // Mark as paid immediately after checks and before the transfer
-            distributedBitMap[indexGroup] |= bitMask;
 
             _transferAmount(poolToken, recipient.recipientAddress, distribution.amount);
 
