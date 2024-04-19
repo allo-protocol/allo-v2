@@ -1,0 +1,26 @@
+
+    ////////////////////////////////////////////////////
+            Deploys Registry.sol on filecoin-mainnet
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────┐
+│     (index)     │                    Values                    │
+├─────────────────┼──────────────────────────────────────────────┤
+│    contract     │                'Registry.sol'                │
+│     chainId     │                     314                      │
+│     network     │              'filecoin-mainnet'              │
+│ deployerAddress │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│  registryOwner  │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│     balance     │                    '0.3'                     │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying Registry...
+Error getting implementation address:  Error: Contract at 0x4AAcca72145e1dF2aeC137E1f3C5E3D75DB8b5f3 doesn't look like an ERC 1967 proxy with a logic contract address
+
+
+Registry proxy deployed to: 0x4AAcca72145e1dF2aeC137E1f3C5E3D75DB8b5f3
+Registry implementation deployed to: undefined
+Proxy Admin:  0x0000000000000000000000000000000000000000
+Proxy Admin Owner:  0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C
+[90m
+	Validating hasRole(0x815b5a78dc333d344c7df9da23c04dbd432015cc701876ddb9ffe850e6882747,0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C) == true[0m
+[32m	✅ PASSED with Result: true[0m
