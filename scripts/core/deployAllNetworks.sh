@@ -47,7 +47,7 @@ networks=(
 #   "filecoin-calibration"
 #   "sei-devnet"
 #   "lukso-testnet"
-#   "lukso-mainnet"
+  "lukso-mainnet"
 
 #  === ZkSync Era ===
 #   "zkSyncTestnet"
@@ -60,7 +60,7 @@ scripts=(
     # "core/deployAllo"
     # "core/deployContractFactory"
     # "strategies/deployDonationVotingMerkleDistributionDirect"
-    # "strategies/deployDirectGrants"
+    "strategies/deployDirectGrants"
     # "core/transferProxyAdminOwnership"
     # "strategies/deployDonationVotingMerkleDistributionVault"
     # "strategies/deployQVSimple"

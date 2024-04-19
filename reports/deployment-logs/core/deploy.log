@@ -484,3 +484,11 @@
 20240417_225602 - Deployment finished with 0 error(s)
 20240417_225711 - Executing: bun hardhat run scripts/core/deployContractFactory.ts --no-compile --network filecoin-mainnet | tee ./reports/deployment-logs/core/deployContractFactory/filecoin-mainnet/20240417_225711/deploy-20240417_225711.log
 20240417_225843 - Deployment finished with 0 error(s)
+20240419_171518 - Executing: bun hardhat run scripts/core/deployRegistry.ts --no-compile --network lukso-mainnet | tee ./reports/deployment-logs/core/deployRegistry/lukso-mainnet/20240419_171518/deploy-20240419_171518.log
+20240419_171900 - Deployment finished with 0 error(s)
+20240419_172024 - Executing: bun hardhat run scripts/core/deployAllo.ts --no-compile --network lukso-mainnet | tee ./reports/deployment-logs/core/deployAllo/lukso-mainnet/20240419_172024/deploy-20240419_172024.log
+20240419_172340 - Deployment finished with 0 error(s)
+20240419_172348 - Executing: bun hardhat run scripts/core/deployContractFactory.ts --no-compile --network lukso-mainnet | tee ./reports/deployment-logs/core/deployContractFactory/lukso-mainnet/20240419_172348/deploy-20240419_172348.log
+20240419_172609 - Deployment finished with 0 error(s)
+20240419_172709 - Executing: bun hardhat run scripts/strategies/deployDirectGrants.ts --no-compile --network lukso-mainnet | tee ./reports/deployment-logs/strategies/deployDirectGrants/lukso-mainnet/20240419_172709/deploy-20240419_172709.log
+20240419_172949 - Deployment finished with 0 error(s)
