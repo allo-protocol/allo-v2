@@ -314,9 +314,9 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
     }
 
     /// @notice Checks if address is eligible allocator.
-    /// @return Always returns false for this strategy
-    function _isValidAllocator(address) internal pure override returns (bool) {
-        return false;
+    /// @return True, if address is pool manager, otherwise false.
+    function _isValidAllocator(address allocator) internal view override returns (bool) {
+        return allo.isPoolManager(poolId, allocator);
     }
 
     /// @notice Checks if the timestamps are valid.
