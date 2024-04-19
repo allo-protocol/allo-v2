@@ -398,8 +398,10 @@ contract DirectGrantsLiteTest is Test, AlloSetup, RegistrySetupFull, EventSetup,
         address recipientId2 = __register_accept_recipient();
 
         DirectGrantsLiteStrategy.Distribution[] memory distributions = new DirectGrantsLiteStrategy.Distribution[](2);
-        distributions[0] = DirectGrantsLiteStrategy.Distribution({recipientId: recipientId1, amount: 1e17});
-        distributions[1] = DirectGrantsLiteStrategy.Distribution({recipientId: recipientId2, amount: 2e17});
+        distributions[0] =
+            DirectGrantsLiteStrategy.Distribution({token: NATIVE, recipientId: recipientId1, amount: 1e17});
+        distributions[1] =
+            DirectGrantsLiteStrategy.Distribution({token: NATIVE, recipientId: recipientId2, amount: 2e17});
 
         bytes memory encodedDistributions = abi.encode(distributions);
         address[] memory emptyAddressArray = new address[](0);
@@ -411,8 +413,10 @@ contract DirectGrantsLiteTest is Test, AlloSetup, RegistrySetupFull, EventSetup,
 
         allo().distribute(poolId, emptyAddressArray, encodedDistributions);
 
-        distributions[0] = DirectGrantsLiteStrategy.Distribution({recipientId: recipientId1, amount: 1e17});
-        distributions[1] = DirectGrantsLiteStrategy.Distribution({recipientId: recipientId2, amount: 2e17});
+        distributions[0] =
+            DirectGrantsLiteStrategy.Distribution({token: NATIVE, recipientId: recipientId1, amount: 1e17});
+        distributions[1] =
+            DirectGrantsLiteStrategy.Distribution({token: NATIVE, recipientId: recipientId2, amount: 2e17});
 
         encodedDistributions = abi.encode(distributions);
 
@@ -429,8 +433,10 @@ contract DirectGrantsLiteTest is Test, AlloSetup, RegistrySetupFull, EventSetup,
         address recipientId2 = __register_accept_recipient();
 
         DirectGrantsLiteStrategy.Distribution[] memory distributions = new DirectGrantsLiteStrategy.Distribution[](2);
-        distributions[0] = DirectGrantsLiteStrategy.Distribution({recipientId: recipientId1, amount: 1e17});
-        distributions[1] = DirectGrantsLiteStrategy.Distribution({recipientId: recipientId2, amount: 2e17});
+        distributions[0] =
+            DirectGrantsLiteStrategy.Distribution({token: NATIVE, recipientId: recipientId1, amount: 1e17});
+        distributions[1] =
+            DirectGrantsLiteStrategy.Distribution({token: NATIVE, recipientId: recipientId2, amount: 2e17});
 
         bytes memory encodedDistributions = abi.encode(distributions);
         address[] memory emptyAddressArray = new address[](0);
@@ -454,8 +460,9 @@ contract DirectGrantsLiteTest is Test, AlloSetup, RegistrySetupFull, EventSetup,
         address recipientId2 = __register_accept_recipient();
 
         DirectGrantsLiteStrategy.Distribution[] memory distributions = new DirectGrantsLiteStrategy.Distribution[](2);
-        distributions[0] = DirectGrantsLiteStrategy.Distribution({recipientId: address(0), amount: 1e17});
-        distributions[1] = DirectGrantsLiteStrategy.Distribution({recipientId: recipientId2, amount: 2e17});
+        distributions[0] = DirectGrantsLiteStrategy.Distribution({token: NATIVE, recipientId: address(0), amount: 1e17});
+        distributions[1] =
+            DirectGrantsLiteStrategy.Distribution({token: NATIVE, recipientId: recipientId2, amount: 2e17});
 
         bytes memory encodedDistributions = abi.encode(distributions);
 

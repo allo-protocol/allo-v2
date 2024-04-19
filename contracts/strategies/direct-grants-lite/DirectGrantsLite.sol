@@ -65,6 +65,7 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
 
     /// @notice Stores the details of the distribution.
     struct Distribution {
+        address token;
         address recipientId;
         uint256 amount;
     }
@@ -459,11 +460,9 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
         override
         onlyPoolManager(_sender)
     {
+        uint256 nativeAmount = msg.value;
         // Set the 'distributionStarted' to 'true'
         distributionStarted = true;
-
-        IAllo.Pool memory pool = allo.getPool(poolId);
-        address poolToken = pool.token;
 
         // Decode the distribution data
         (Distribution[] memory distributions) = abi.decode(_data, (Distribution[]));
@@ -475,20 +474,30 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
 
         for (uint256 i = 0; i < length; i++) {
             Distribution memory distribution = distributions[i];
-            Recipient memory recipient = _getRecipient(distribution.recipientId);
+            address recipientId = distribution.recipientId;
+            Recipient memory recipient = _getRecipient(recipientId);
+            address recipientAddress = recipient.recipientAddress;
+
+            address token = distributions[i].token;
+            uint256 amount = distributions[i].amount;
+
+            // This will revert if the sender tries to spend more than the msg.value
+            if (token == NATIVE) nativeAmount -= amount;
 
             if (recipient.recipientAddress == address(0)) {
-                revert RECIPIENT_ERROR(distribution.recipientId);
+                revert RECIPIENT_ERROR(recipientId);
             }
 
-            if (_getUintRecipientStatus(distribution.recipientId) != uint8(Status.Accepted)) {
+            if (_getUintRecipientStatus(recipientId) != uint8(Status.Accepted)) {
                 revert RECIPIENT_NOT_ACCEPTED();
             }
 
-            _transferAmount(poolToken, recipient.recipientAddress, distribution.amount);
+            _transferAmountFrom(token, TransferData({from: _sender, to: recipientAddress, amount: amount}));
 
-            emit FundsDistributed(distribution.amount, recipient.recipientAddress, poolToken, distribution.recipientId);
+            emit FundsDistributed(amount, recipientAddress, token, recipientId);
         }
+
+        if (nativeAmount > 0) _transferAmount(NATIVE, _sender, nativeAmount);
         // Emit that the batch payout was successful
         emit BatchPayoutSuccessful(_sender);
     }
