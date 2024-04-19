@@ -93,6 +93,10 @@ export const strategyConfig: DeployParams = {
       name: "DirectGrantsSimpleStrategy",
       version: "v2.1",
     },
+    "direct-grants-lite": {
+      name: "DirectGrantsLiteStrategy",
+      version: "v1.0",
+    },
   },
   // Optimism
   10: {
