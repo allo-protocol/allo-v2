@@ -5,7 +5,6 @@ pragma solidity 0.8.19;
 import {Multicall} from "openzeppelin-contracts/contracts/utils/Multicall.sol";
 // Interfaces
 import {IRegistry} from "../../core/interfaces/IRegistry.sol";
-import {IAllo} from "../../core/interfaces/IAllo.sol";
 // Core Contracts
 import {BaseStrategy} from "../BaseStrategy.sol";
 // Internal Libraries
@@ -63,8 +62,8 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
         Metadata metadata;
     }
 
-    /// @notice Stores the details of the distribution.
-    struct Distribution {
+    /// @notice Stores the details of the allocation.
+    struct Allocation {
         address token;
         address recipientId;
         uint256 amount;
@@ -101,31 +100,9 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
     /// @param sender The sender of the transaction
     event TimestampsUpdated(uint64 registrationStartTime, uint64 registrationEndTime, address sender);
 
-    /// @notice Emitted when funds are distributed to a recipient
-    /// @param amount The amount of tokens distributed
-    /// @param grantee The address of the recipient
-    /// @param token The address of the token
-    /// @param recipientId The id of the recipient
-    event FundsDistributed(uint256 amount, address grantee, address indexed token, address indexed recipientId);
-
-    /// @notice Emitted when a batch payout is successful
-    /// @param sender The sender of the transaction
-    event BatchPayoutSuccessful(address indexed sender);
-
-    /// @notice Emitted when a recipient is allocated funds
-    /// @param recipientId The id of the recipient
-    /// @param amount The amount of tokens allocated
-    /// @param token The address of the token
-    /// @param sender The sender of the transaction
-    /// @param origin The original sender of the transaction
-    event Allocated(address indexed recipientId, uint256 amount, address token, address sender, address origin);
-
     /// ================================
     /// ========== Storage =============
     /// ================================
-
-    /// @notice Metadata containing the distribution data.
-    Metadata public distributionMetadata;
 
     /// @notice Flag to indicate whether to use the registry anchor or not.
     bool public useRegistryAnchor;
@@ -133,15 +110,9 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
     /// @notice Flag to indicate whether metadata is required or not.
     bool public metadataRequired;
 
-    /// @notice Flag to indicate whether the distribution has started or not.
-    bool public distributionStarted;
-
     /// @notice The timestamps in seconds for the start and end times.
     uint64 public registrationStartTime;
     uint64 public registrationEndTime;
-
-    /// @notice The total amount of tokens allocated to the payout.
-    uint256 public totalPayoutAmount;
 
     /// @notice The total number of recipients.
     uint256 public recipientsCounter;
@@ -158,6 +129,8 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
     /// 2: accepted
     /// 3: rejected
     /// 4: appealed
+    /// 5: in review
+    /// 6: canceled
     /// Since it's a mapping the storage it's pre-allocated with zero values, so if we check the
     /// status of an existing recipient, the value is by default 0 (none).
     /// If we want to check the status of an recipient, we take its index from the `recipients` array
@@ -449,37 +422,33 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
     }
 
     /// @notice Distribute funds to recipients.
-    /// @dev 'distributionStarted' will be set to 'true' when called. Only the pool manager can call.
-    ///      Emits a 'BatchPayoutSuccessful()' event.
+    /// @dev This function reverts by default
+    function _distribute(address[] memory, bytes memory, address) internal virtual override {
+        revert();
+    }
+
+    /// @notice Allocate. Required by the 'BaseStrategy'.
     /// @param _data The data to be decoded
-    /// @custom:data '(Distribution[] distributions)'
+    /// @custom:data '(Allocation[] allocations)'
     /// @param _sender The sender of the transaction
-    function _distribute(address[] memory, bytes memory _data, address _sender)
-        internal
-        virtual
-        override
-        onlyPoolManager(_sender)
-    {
+    function _allocate(bytes memory _data, address _sender) internal virtual override onlyPoolManager(_sender) {
         uint256 nativeAmount = msg.value;
-        // Set the 'distributionStarted' to 'true'
-        distributionStarted = true;
 
-        // Decode the distribution data
-        (Distribution[] memory distributions) = abi.decode(_data, (Distribution[]));
+        // Decode the allocation data
+        (Allocation[] memory allocations) = abi.decode(_data, (Allocation[]));
 
-        // Loop through the distributions and distribute the funds
-        uint256 length = distributions.length;
+        uint256 length = allocations.length;
 
-        if (length == 0) revert INVALID(); // no distributionsdistribute
+        if (length == 0) revert INVALID(); // nothing to allocate
 
         for (uint256 i = 0; i < length; i++) {
-            Distribution memory distribution = distributions[i];
-            address recipientId = distribution.recipientId;
+            Allocation memory allocation = allocations[i];
+            address recipientId = allocation.recipientId;
             Recipient memory recipient = _getRecipient(recipientId);
             address recipientAddress = recipient.recipientAddress;
 
-            address token = distributions[i].token;
-            uint256 amount = distributions[i].amount;
+            address token = allocations[i].token;
+            uint256 amount = allocations[i].amount;
 
             // This will revert if the sender tries to spend more than the msg.value
             if (token == NATIVE) nativeAmount -= amount;
@@ -494,18 +463,10 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
 
             _transferAmountFrom(token, TransferData({from: _sender, to: recipientAddress, amount: amount}));
 
-            emit FundsDistributed(amount, recipientAddress, token, recipientId);
+            emit Allocated(recipientId, amount, token, _sender);
         }
 
         if (nativeAmount > 0) _transferAmount(NATIVE, _sender, nativeAmount);
-        // Emit that the batch payout was successful
-        emit BatchPayoutSuccessful(_sender);
-    }
-
-    /// @notice Allocate. Required by the 'BaseStrategy'.
-    /// @dev This function reverts by default
-    function _allocate(bytes memory, address) internal virtual override {
-        revert();
     }
 
     /// @notice Check if sender is profile owner or member.
@@ -525,8 +486,7 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
     }
 
     /// @notice Returns the payout summary for the accepted recipient.
-    /// @custom:data '(Distribution)'
-    /// @return 'PayoutSummary' for a recipient
+    /// @dev This will revert by default.
     function _getPayout(address, bytes memory) internal pure override returns (PayoutSummary memory) {
         revert();
     }

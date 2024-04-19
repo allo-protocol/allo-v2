@@ -29,13 +29,10 @@ contract DirectGrantsLiteTest is Test, AlloSetup, RegistrySetupFull, EventSetup,
 
     event RecipientStatusUpdated(uint256 indexed rowIndex, uint256 fullRow, address sender);
     event DistributionUpdated(bytes32 merkleRoot, Metadata metadata);
-    event FundsDistributed(uint256 amount, address grantee, address indexed token, address indexed recipientId);
-    event BatchPayoutSuccessful(address indexed sender);
     event ProfileCreated(
         bytes32 profileId, uint256 nonce, string name, Metadata metadata, address indexed owner, address indexed anchor
     );
     event UpdatedRegistration(address indexed recipientId, bytes data, address sender, uint8 status);
-    event Allocated(address indexed recipientId, uint256 amount, address token, address sender, address origin);
 
     error InvalidSignature();
     error SignatureExpired(uint256);
@@ -78,7 +75,7 @@ contract DirectGrantsLiteTest is Test, AlloSetup, RegistrySetupFull, EventSetup,
         vm.prank(allo_owner());
         allo().updatePercentFee(0);
 
-        vm.deal(pool_admin(), 1e18);
+        vm.deal(pool_admin(), 10e18);
         vm.prank(pool_admin());
         poolId = allo().createPoolWithCustomStrategy{value: 1e18}(
             poolProfile_id(),
@@ -393,84 +390,70 @@ contract DirectGrantsLiteTest is Test, AlloSetup, RegistrySetupFull, EventSetup,
         strategy.registerRecipient(data, profile1_member1());
     }
 
-    function test_distribute() public {
+    function test_allocate() public {
         address recipientId1 = __register_accept_recipient();
         address recipientId2 = __register_accept_recipient();
 
-        DirectGrantsLiteStrategy.Distribution[] memory distributions = new DirectGrantsLiteStrategy.Distribution[](2);
-        distributions[0] =
-            DirectGrantsLiteStrategy.Distribution({token: NATIVE, recipientId: recipientId1, amount: 1e17});
-        distributions[1] =
-            DirectGrantsLiteStrategy.Distribution({token: NATIVE, recipientId: recipientId2, amount: 2e17});
+        DirectGrantsLiteStrategy.Allocation[] memory allocations = new DirectGrantsLiteStrategy.Allocation[](2);
+        allocations[0] = DirectGrantsLiteStrategy.Allocation({token: NATIVE, recipientId: recipientId1, amount: 1e17});
+        allocations[1] = DirectGrantsLiteStrategy.Allocation({token: NATIVE, recipientId: recipientId2, amount: 2e17});
 
-        bytes memory encodedDistributions = abi.encode(distributions);
-        address[] memory emptyAddressArray = new address[](0);
+        bytes memory encodedAllocations = abi.encode(allocations);
 
         vm.prank(pool_admin());
-        emit FundsDistributed(1e17, recipientId1, NATIVE, recipientId1);
-        emit FundsDistributed(2e17, recipientId2, NATIVE, recipientId2);
-        emit BatchPayoutSuccessful(pool_admin());
+        emit Allocated(recipientId1, 1e17, NATIVE, pool_admin());
+        emit Allocated(recipientId2, 2e17, NATIVE, pool_admin());
 
-        allo().distribute(poolId, emptyAddressArray, encodedDistributions);
+        allo().allocate{value: 3e17}(poolId, encodedAllocations);
 
-        distributions[0] =
-            DirectGrantsLiteStrategy.Distribution({token: NATIVE, recipientId: recipientId1, amount: 1e17});
-        distributions[1] =
-            DirectGrantsLiteStrategy.Distribution({token: NATIVE, recipientId: recipientId2, amount: 2e17});
+        allocations[0] = DirectGrantsLiteStrategy.Allocation({token: NATIVE, recipientId: recipientId1, amount: 1e17});
+        allocations[1] = DirectGrantsLiteStrategy.Allocation({token: NATIVE, recipientId: recipientId2, amount: 2e17});
 
-        encodedDistributions = abi.encode(distributions);
+        encodedAllocations = abi.encode(allocations);
 
         vm.prank(pool_admin());
-        emit FundsDistributed(1e17, recipientId1, NATIVE, recipientId1);
-        emit FundsDistributed(2e17, recipientId2, NATIVE, recipientId2);
-        emit BatchPayoutSuccessful(pool_admin());
+        emit Allocated(recipientId1, 1e17, NATIVE, pool_admin());
+        emit Allocated(recipientId2, 2e17, NATIVE, pool_admin());
 
-        allo().distribute{value: 3e17}(poolId, emptyAddressArray, encodedDistributions);
+        allo().allocate{value: 3e17}(poolId, encodedAllocations);
     }
 
-    function testRevert_distribute_UNAUTHORIZED() public {
+    function testRevert_allocate_UNAUTHORIZED() public {
         address recipientId1 = __register_accept_recipient();
         address recipientId2 = __register_accept_recipient();
 
-        DirectGrantsLiteStrategy.Distribution[] memory distributions = new DirectGrantsLiteStrategy.Distribution[](2);
-        distributions[0] =
-            DirectGrantsLiteStrategy.Distribution({token: NATIVE, recipientId: recipientId1, amount: 1e17});
-        distributions[1] =
-            DirectGrantsLiteStrategy.Distribution({token: NATIVE, recipientId: recipientId2, amount: 2e17});
+        DirectGrantsLiteStrategy.Allocation[] memory allocations = new DirectGrantsLiteStrategy.Allocation[](2);
+        allocations[0] = DirectGrantsLiteStrategy.Allocation({token: NATIVE, recipientId: recipientId1, amount: 1e17});
+        allocations[1] = DirectGrantsLiteStrategy.Allocation({token: NATIVE, recipientId: recipientId2, amount: 2e17});
 
-        bytes memory encodedDistributions = abi.encode(distributions);
-        address[] memory emptyAddressArray = new address[](0);
+        bytes memory encodedAllocations = abi.encode(allocations);
 
         vm.expectRevert(abi.encodeWithSelector(UNAUTHORIZED.selector));
-        allo().distribute(poolId, emptyAddressArray, encodedDistributions);
+        allo().allocate(poolId, encodedAllocations);
     }
 
-    function testRevert_distribute_INVALID() public {
-        address[] memory emptyAddressArray = new address[](0);
-        DirectGrantsLiteStrategy.Distribution[] memory distributions = new DirectGrantsLiteStrategy.Distribution[](0);
+    function testRevert_allocate_INVALID() public {
+        DirectGrantsLiteStrategy.Allocation[] memory allocations = new DirectGrantsLiteStrategy.Allocation[](0);
 
-        bytes memory encodedDistributions = abi.encode(distributions);
+        bytes memory encodedAllocations = abi.encode(allocations);
 
         vm.expectRevert(abi.encodeWithSelector(INVALID.selector));
         vm.prank(pool_admin());
-        allo().distribute(poolId, emptyAddressArray, encodedDistributions);
+        allo().allocate(poolId, encodedAllocations);
     }
 
-    function testRevert_distribute_RECIPIENT_ERROR() public {
+    function testRevert_allocate_RECIPIENT_ERROR() public {
         address recipientId2 = __register_accept_recipient();
 
-        DirectGrantsLiteStrategy.Distribution[] memory distributions = new DirectGrantsLiteStrategy.Distribution[](2);
-        distributions[0] = DirectGrantsLiteStrategy.Distribution({token: NATIVE, recipientId: address(0), amount: 1e17});
-        distributions[1] =
-            DirectGrantsLiteStrategy.Distribution({token: NATIVE, recipientId: recipientId2, amount: 2e17});
+        DirectGrantsLiteStrategy.Allocation[] memory allocations = new DirectGrantsLiteStrategy.Allocation[](2);
+        allocations[0] = DirectGrantsLiteStrategy.Allocation({token: NATIVE, recipientId: address(0), amount: 1e17});
+        allocations[1] = DirectGrantsLiteStrategy.Allocation({token: NATIVE, recipientId: recipientId2, amount: 2e17});
 
-        bytes memory encodedDistributions = abi.encode(distributions);
-
-        address[] memory emptyAddressArray = new address[](0);
+        bytes memory encodedAllocations = abi.encode(allocations);
 
         vm.prank(pool_admin());
         vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, address(0)));
-        allo().distribute(poolId, emptyAddressArray, encodedDistributions);
+        allo().allocate{value: 3e17}(poolId, encodedAllocations);
     }
 
     /// ====================
