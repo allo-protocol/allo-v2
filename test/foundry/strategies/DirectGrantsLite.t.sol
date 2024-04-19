@@ -425,7 +425,7 @@ contract DirectGrantsLiteTest is Test, AlloSetup, RegistrySetupFull, EventSetup,
         emit FundsDistributed(2e17, recipientId2, NATIVE, recipientId2);
         emit BatchPayoutSuccessful(pool_admin());
 
-        allo().distribute(poolId, emptyAddressArray, encodedDistributions);
+        allo().distribute{value: 3e17}(poolId, emptyAddressArray, encodedDistributions);
     }
 
     function testRevert_distribute_UNAUTHORIZED() public {
