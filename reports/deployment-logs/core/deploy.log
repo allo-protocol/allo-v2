@@ -492,3 +492,5 @@
 20240419_172609 - Deployment finished with 0 error(s)
 20240419_172709 - Executing: bun hardhat run scripts/strategies/deployDirectGrants.ts --no-compile --network lukso-mainnet | tee ./reports/deployment-logs/strategies/deployDirectGrants/lukso-mainnet/20240419_172709/deploy-20240419_172709.log
 20240419_172949 - Deployment finished with 0 error(s)
+20240419_181832 - Executing: bun hardhat run scripts/strategies/deployDonationVotingMerkleDistributionDirect.ts --no-compile --network lukso-mainnet | tee ./reports/deployment-logs/strategies/deployDonationVotingMerkleDistributionDirect/lukso-mainnet/20240419_181832/deploy-20240419_181832.log
+20240419_181903 - Deployment finished with 0 error(s)
