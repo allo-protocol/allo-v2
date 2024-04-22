@@ -173,7 +173,7 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
     /// @param _poolId The 'poolId' to initialize
     /// @param _data The data to be decoded to initialize the strategy
     /// @custom:data InitializeData(bool _useRegistryAnchor, bool _metadataRequired, uint64 _registrationStartTime,
-    ///               uint64 _registrationEndTime, uint64 _allocationStartTime, uint64 _allocationEndTime)
+    ///               uint64 _registrationEndTime)
     function initialize(uint256 _poolId, bytes memory _data) external virtual override onlyAllo {
         InitializeData memory initializeData = abi.decode(_data, (InitializeData));
         __DirectGrantsLiteStrategy_init(_poolId, initializeData);
@@ -288,7 +288,6 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
     }
 
     /// @notice Withdraw funds from pool
-    /// @dev This can only be called after the allocation has ended and 30 days have passed.
     /// @param _token The token to be withdrawn
     function withdraw(address _token) external onlyPoolManager(msg.sender) {
         // get the actual balance hold by the pool
