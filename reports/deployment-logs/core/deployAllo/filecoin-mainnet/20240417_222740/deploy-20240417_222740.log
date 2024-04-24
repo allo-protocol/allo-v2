@@ -1,0 +1,32 @@
+
+    ////////////////////////////////////////////////////
+            Deploys Allo.sol on filecoin-mainnet
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────┐
+│     (index)     │                    Values                    │
+├─────────────────┼──────────────────────────────────────────────┤
+│    contract     │              'Deploy Allo.sol'               │
+│     chainId     │                     314                      │
+│     network     │              'filecoin-mainnet'              │
+│      owner      │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│    registry     │ '0x4AAcca72145e1dF2aeC137E1f3C5E3D75DB8b5f3' │
+│    treasury     │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│   percentFee    │                      0                       │
+│     baseFee     │                      0                       │
+│ deployerAddress │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│     balance     │            '0.00796802591664814'             │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying Allo.sol...
+ProviderError: failed to check balance: not enough funds (required: 0.14545926254643872 FIL, balance: 0.00796802591664814 FIL): not enough funds to execute transaction
+    at HttpProvider.request (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/hardhat/src/internal/core/providers/http.ts:90:21)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async HardhatEthersSigner.sendTransaction (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/@nomicfoundation+hardhat-ethers@3.0.5_na4ffwfmw7pft5kvlk5o6ojwqy/node_modules/@nomicfoundation/hardhat-ethers/src/signers.ts:125:18)
+    at async ContractFactory.deploy (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/ethers@6.11.1/node_modules/ethers/src.ts/contract/factory.ts:111:24)
+    at async ethersDeploy (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/@openzeppelin+hardhat-upgrades@2.5.1_sym3ukwnpvfhm2yjdhnkm4xtb4/node_modules/@openzeppelin/hardhat-upgrades/src/utils/deploy.ts:32:28)
+    at async deploy (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/@openzeppelin+hardhat-upgrades@2.5.1_sym3ukwnpvfhm2yjdhnkm4xtb4/node_modules/@openzeppelin/hardhat-upgrades/src/utils/deploy.ts:24:12)
+    at async /Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/@openzeppelin+hardhat-upgrades@2.5.1_sym3ukwnpvfhm2yjdhnkm4xtb4/node_modules/@openzeppelin/hardhat-upgrades/src/utils/deploy-impl.ts:127:49
+    at async resumeOrDeploy (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/@openzeppelin+upgrades-core@1.32.5/node_modules/@openzeppelin/upgrades-core/src/deployment.ts:76:24)
+    at async /Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/@openzeppelin+upgrades-core@1.32.5/node_modules/@openzeppelin/upgrades-core/src/impl-store.ts:63:23
+    at async Manifest.lockedRun (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/@openzeppelin+upgrades-core@1.32.5/node_modules/@openzeppelin/upgrades-core/src/manifest.ts:282:14)
+error: "hardhat" exited with code 1 (SIGHUP)

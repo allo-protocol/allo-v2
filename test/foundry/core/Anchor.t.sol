@@ -102,6 +102,19 @@ contract AnchorTest is Test {
         bytes memory data = abi.encodeWithSignature("someFunction()");
         anchor.execute(address(noFallback), 1 ether, data);
     }
+
+    function test_sendETH() public {
+        mockRegistry.setOwnerOfProfile(profileId, address(this)); // Set the caller as the owner of the profile
+
+        vm.deal(address(anchor), 1 ether); // Send 1 ETH to the Anchor contract
+        assertEq(address(anchor).balance, 1 ether); // Check if the balance of the contract has been updated
+
+        address target = makeAddr("randomReceiver");
+        anchor.execute(target, 1 ether, ""); // Execute a call to send 1 ETH to the target address
+
+        assertEq(address(anchor).balance, 0); // Check if the balance of the contract has been updated
+        assertEq(address(target).balance, 1 ether); // Check if the balance of the target address has been updated
+    }
 }
 
 // Simple contract with a single function to increment a value
