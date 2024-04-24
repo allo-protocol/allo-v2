@@ -28,7 +28,7 @@ handle_insufficient_funds_error() {
 networks=(
 #   "fuji"
 #   "mumbai"
-#   "sepolia"
+  "sepolia"
 #   "base-testnet"
 #   "celo-testnet"
 #   "arbitrum-sepolia"
@@ -61,6 +61,8 @@ scripts=(
     # "core/deployContractFactory"
     # "strategies/deployDonationVotingMerkleDistributionDirect"
     # "strategies/deployDirectGrants"
+    "strategies/deployDirectGrantsLite"
+    
     # "core/transferProxyAdminOwnership"
     # "strategies/deployDonationVotingMerkleDistributionVault"
     # "strategies/deployQVSimple"

@@ -474,6 +474,8 @@
 20240412_203901 - Deployment finished with 0 error(s)
 20240412_233154 - Executing: bun hardhat run scripts/core/deployContractFactory.ts --no-compile --network filecoin-calibration | tee ./reports/deployment-logs/core/deployContractFactory/filecoin-calibration/20240412_233154/deploy-20240412_233154.log
 20240412_233509 - Deployment finished with 0 error(s)
+20240419_162255 - Executing: bun hardhat run scripts/strategies/deployDirectGrantsLite.ts --no-compile --network sepolia | tee ./reports/deployment-logs/strategies/deployDirectGrantsLite/sepolia/20240419_162255/deploy-20240419_162255.log
+20240419_162313 - Deployment finished with 0 error(s)
 20240417_222259 - Executing: bun hardhat run scripts/core/deployRegistry.ts --no-compile --network filecoin-mainnet | tee ./reports/deployment-logs/core/deployRegistry/filecoin-mainnet/20240417_222259/deploy-20240417_222259.log
 20240417_222631 - Deployment finished with 0 error(s)
 20240417_222740 - Executing: bun hardhat run scripts/core/deployAllo.ts --no-compile --network filecoin-mainnet | tee ./reports/deployment-logs/core/deployAllo/filecoin-mainnet/20240417_222740/deploy-20240417_222740.log
