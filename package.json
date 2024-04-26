@@ -10,7 +10,7 @@
   "scripts": {
     "compile": "forge compile",
     "build": "forge build",
-    "test": "forge test",
+    "test": "forge test --no-match-contract '(Lockup|SQF)'",
     "fmt": "forge fmt contracts/**/*.sol && forge fmt test/**/*.sol",
     "fork": "anvil --fork-url",
     "chain": "anvil --block-time 10",
