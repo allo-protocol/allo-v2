@@ -17,8 +17,6 @@ import {EventSetup} from "../shared/EventSetup.sol";
 
 import {SuperTokenV1Library} from
     "../../../lib/superfluid-protocol-monorepo/packages/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
-import {SuperfluidGovernanceII} from
-    "../../../lib/superfluid-protocol-monorepo/packages/ethereum-contracts/contracts/gov/SuperfluidGovernanceII.sol";
 import {
     ISuperfluid,
     ISuperfluidPool,
@@ -64,15 +62,12 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
 
     address secondAllocator = makeAddr("second");
 
-    ISuperToken superFakeDai = ISuperToken(0xaC7A5cf2E0A6DB31456572871Ee33eb6212014a9);
-    IERC20 fakeDai = IERC20(0xd0DE1486F69495D49c02D8f541B7dADf9Cf5CD91);
-    address superFakeDaiWhale = 0x301933aEf6bB308f090087e9075ed5bFcBd3e0B3;
-
-    SuperfluidGovernanceII superfluidGov = SuperfluidGovernanceII(0x25382FdC6a862809EeFE918D065339cFA9227b9E);
-    address superfluidOwner = 0xd15D5d0f5b1b56A4daEF75CfE108Cb825E97d015;
+    ISuperToken superFakeDai = ISuperToken(0xD6FAF98BeFA647403cc56bDB598690660D5257d2);
+    IERC20 fakeDai = IERC20(0x4247bA6C3658Fa5C0F523BAcea8D0b97aF1a175e);
+    address superFakeDaiWhale = 0x1a8b3554089d97Ad8656eb91F34225bf97055C68;
 
     function setUp() public {
-        vm.createSelectFork({blockNumber: 18_562_300, urlOrAlias: "opgoerli"});
+        vm.createSelectFork({blockNumber: 11282376, urlOrAlias: "opsepolia"});
         __RegistrySetupFullLive();
         __AlloSetupLive();
 
@@ -92,7 +87,7 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
         useRegistryAnchor = true;
         metadataRequired = true;
         passportDecoder = address(_passportDecoder);
-        superfluidHost = address(0xE40983C2476032A0915600b9472B3141aA5B5Ba9);
+        superfluidHost = address(0xd399e2Fb5f4cf3722a11F65b88FAB6B2B8621005);
         allocationSuperToken = address(superFakeDai);
         registrationStartTime = uint64(block.timestamp);
         registrationEndTime = uint64(block.timestamp) + uint64(1 days);
@@ -101,12 +96,6 @@ contract SQFSuperFluidStrategyTest is RegistrySetupFullLive, AlloSetup, Native, 
         minPassportScore = 69;
         initialSuperAppBalance = 420 * 1e8;
         recipientSuperAppFactory = address(new RecipientSuperAppFactory());
-
-        // set empty app RegistrationKey
-        vm.prank(superfluidOwner);
-        superfluidGov.setAppRegistrationKey(
-            ISuperfluid(superfluidHost), address(_strategy), "", block.timestamp + 60 days
-        );
 
         poolId = __createPool(address(_strategy));
 
