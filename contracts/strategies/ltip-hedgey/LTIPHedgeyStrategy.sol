@@ -10,6 +10,8 @@ import {Metadata} from "../../core/libraries/Metadata.sol";
 // Simple LTIP
 import {LTIPSimpleStrategy} from "../ltip-simple/LTIPSimpleStrategy.sol";
 
+import {IERC20} from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
+
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⣿⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣸⣿⣿⣿⢿⣿⣿⣿⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -48,39 +50,14 @@ contract LTIPHedgeyStrategy is LTIPSimpleStrategy {
     /// ========== Struct ==============
     /// ================================
 
+    // TODO packing
     /// @notice The parameters used to initialize the strategy
-    // TODO add vesting parameters similar to Hedget funds
-    // interface ITokenVestingPlans {
-    // function createPlan(
-    //     address recipient,
-    //     address token,
-    //     uint256 amount,
-    //     uint256 start,
-    //     uint256 cliff,
-    //     uint256 rate,
-    //     uint256 period,
-    //     address vestingAdmin,
-    //     bool adminTransferOBO
-    // ) external returns (uint256 newPlanId);
-
-    // TODO conflicts with LTIPSimpleStrategy; add struct for vesting strategy params?
-
-    // struct InitializeParams {
-    //     // slot 0
-    //     bool registryGating;
-    //     bool metadataRequired;
-    //     // slot 1
-    //     uint256 allocationThreshold;
-    //     // slot 2
-    //     uint64 registrationStartTime;
-    //     uint64 registrationEndTime;
-    //     uint64 allocationStartTime;
-    //     uint64 allocationEndTime;
-    //     // slot 3
-    //     uint64 distributionStartTime;
-    //     uint64 distributionEndTime;
-    //     address hedgeyToken;
-    // }
+    struct InitializeParamsHedgey {
+        address hedgeyContract;
+        address vestingAdmin;
+        bool adminTransferOBO;
+        InitializeParams initializeParams;
+    }
 
     /// ===============================
     /// ========== Errors =============
@@ -90,9 +67,17 @@ contract LTIPHedgeyStrategy is LTIPSimpleStrategy {
     /// ========== Events =============
     /// ===============================
 
+    event AdminAddressUpdated(address adminAddress, address sender);
+    event AdminTransferOBOUpdated(bool adminTransferOBO, address sender);
+
     /// ================================
     /// ========== Storage =============
     /// ================================
+
+    address public hedgeyContract;
+    address public adminAddress;
+    bool public adminTransferOBO;
+    mapping(address => uint256) internal _recipientLockupTerm;
 
     /// ===============================
     /// ======== Constructor ==========
@@ -112,7 +97,7 @@ contract LTIPHedgeyStrategy is LTIPSimpleStrategy {
     /// @param _data The data to be decoded
     /// @custom:data (bool registryGating, bool metadataRequired, uint256 allocationThreshold, uint64 registrationStartTime, uint64 registrationEndTime, uint64 allocationStartTime, uint64 allocationEndTime)
     function initialize(uint256 _poolId, bytes memory _data) external virtual override {
-        (InitializeParams memory initializeParams) = abi.decode(_data, (InitializeParams));
+        (InitializeParamsHedgey memory initializeParams) = abi.decode(_data, (InitializeParamsHedgey));
         __LTIPHedgeyStrategy_init(_poolId, initializeParams);
         emit Initialized(_poolId, _data);
     }
@@ -120,11 +105,13 @@ contract LTIPHedgeyStrategy is LTIPSimpleStrategy {
     /// @notice This initializes the BaseStrategy
     /// @dev You only need to pass the 'poolId' to initialize the BaseStrategy and the rest is specific to the strategy
     /// @param _initializeParams The initialize params
-    function __LTIPHedgeyStrategy_init(uint256 _poolId, InitializeParams memory _initializeParams) internal {
+    function __LTIPHedgeyStrategy_init(uint256 _poolId, InitializeParamsHedgey memory _initializeParams) internal {
         // Initialize the BaseStrategy
-        __LRIPSimpleStrategy_init(_poolId, _initializeParams);
+        __LTIPSimpleStrategy_init(_poolId, _initializeParams.initializeParams);
 
-        //TODO get Hedgey specific params like contract address and init vars
+        hedgeyContract = _initializeParams.hedgeyContract;
+        adminAddress = _initializeParams.vestingAdmin;
+        adminTransferOBO = _initializeParams.adminTransferOBO;
     }
 
     /// ===============================
@@ -137,9 +124,61 @@ contract LTIPHedgeyStrategy is LTIPSimpleStrategy {
     /// ======= External/Custom =======
     /// ===============================
 
+    /// @notice Update the default Admin wallet used when creating Hedgey plans
+    /// @param _adminAddress The admin wallet to use
+    function setAdminAddress(address _adminAddress) external onlyPoolManager(msg.sender) {
+        adminAddress = _adminAddress;
+        emit AdminAddressUpdated(_adminAddress, msg.sender);
+    }
+
+    /// @notice Update the default Admin wallet used when creating Hedgey plans
+    /// @param _adminTransferOBO Set if the admin is allowed to transfer on behalf of the recipient
+    function setAdminTransferOBO(bool _adminTransferOBO) external onlyPoolManager(msg.sender) {
+        adminTransferOBO = _adminTransferOBO;
+        emit AdminTransferOBOUpdated(_adminTransferOBO, msg.sender);
+    }
+
+    /// @notice Get the lockup term for a recipient
+    /// @param _recipient The recipient to get the lockup term for
+    function getRecipientLockupTerm(address _recipient) external view returns (uint256) {
+        return _recipientLockupTerm[_recipient];
+    }
+
+    /// @notice Revoke the allocation and return funds to the pool
+    /// @dev Callable by the pool manager
+    /// @param _recipientId The id of the recipient
+    function revoke(address _recipientId) external virtual onlyPoolManager(msg.sender) {
+        Recipient storage recipient = _recipients[_recipientId];
+
+        recipient.recipientStatus = Status.Canceled;
+
+        /// TODO transfer funds back to the pool, maybe out of scope for now
+
+        emit AllocationRevoked(_recipientId, msg.sender);
+    }
+
     /// ====================================
     /// ============ Internal ==============
     /// ====================================
+
+    function _transferAmount(address _token, address _recipient, uint256 _amount) internal override {
+        IERC20(_token).approve(hedgeyContract, _amount);
+
+        uint256 rate = _amount / _recipientLockupTerm[_recipient];
+        uint256 hedgeyId = ITokenVestingPlans(hedgeyContract).createPlan(
+            _recipient,
+            _token,
+            _amount,
+            block.timestamp,
+            0, // No cliff
+            rate,
+            1, // Linear period
+            adminAddress,
+            adminTransferOBO
+        );
+
+        emit VestingPlanCreated(hedgeyContract, hedgeyId);
+    }
 
     /// @notice Distribute the allocated funds to a recipient as an hedgey.
     function _distribute(address[] memory, bytes memory, address _sender) internal virtual override {
@@ -154,7 +193,6 @@ contract LTIPHedgeyStrategy is LTIPSimpleStrategy {
         // Get the pool, subtract the amount and transfer to the recipient
         poolAmount -= recipient.allocationAmount;
 
-        // TODO replace transferAmount with creating a vesting plan in Hedgey
         _transferAmount(pool.token, recipient.recipientAddress, recipient.allocationAmount);
 
         // Emit events for the milestone and the distribution
@@ -163,6 +201,15 @@ contract LTIPHedgeyStrategy is LTIPSimpleStrategy {
 
     /// TODO add method  for batch distribution
 
-    // TODO admin flows for updating round parameters
+    /// ====================================
+    /// ============== Hooks ===============
+    /// ====================================
 
+    function _afterRegisterRecipient(bytes memory _data, address) internal override {
+        uint256 lockupTerm;
+        address recipientAddress;
+        (, recipientAddress,,, lockupTerm) = abi.decode(_data, (address, address, uint256, Metadata, uint256));
+
+        _recipientLockupTerm[recipientAddress] = lockupTerm;
+    }
 }
