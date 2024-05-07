@@ -200,10 +200,10 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
         recipientsCounter = 1;
 
         // If the timestamps are invalid this will revert - See details in '_isPoolTimestampValid'
-        _isPoolTimestampValid(registrationStartTime, registrationEndTime);
+        _isPoolTimestampValid(_initializeData.registrationStartTime, _initializeData.registrationEndTime);
 
         // Emit that the timestamps have been updated with the updated values
-        emit TimestampsUpdated(registrationStartTime, registrationEndTime, msg.sender);
+        emit TimestampsUpdated(_initializeData.registrationStartTime, _initializeData.registrationEndTime, msg.sender);
     }
 
     /// ===============================
