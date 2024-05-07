@@ -532,5 +532,7 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
     }
 
     /// @notice Contract should be able to receive NATIVE
-    receive() external payable {}
+    receive() external payable {
+        _checkOnlyAllo();
+    }
 }
