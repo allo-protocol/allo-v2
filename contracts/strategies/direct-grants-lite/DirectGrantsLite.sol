@@ -26,7 +26,7 @@ import {Native} from "../../core/libraries/Native.sol";
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⠙⠋⠛⠙⠋⠛⠙⠋⠛⠙⠋⠃⠀⠀⠀⠀⠀⠀⠀⠀⠠⠿⠻⠟⠿⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⠟⠿⠟⠿⠆⠀⠸⠿⠿⠟⠯⠀⠀⠀⠸⠿⠿⠿⠏⠀⠀⠀⠀⠀⠈⠉⠻⠻⡿⣿⢿⡿⡿⠿⠛⠁⠀⠀⠀⠀⠀⠀
 //                    allo.gitcoin.co
 
-/// @title DDirect Grants Lite Strategy
+/// @title Direct Grants Lite Strategy
 /// @author @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>
 /// @notice Strategy for direct grants
 contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
@@ -123,7 +123,7 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
     /// @notice This is a packed array of booleans, 'statuses[0]' is the first row of the bitmap and allows to
     /// store 256 bits to describe the status of 256 projects. 'statuses[1]' is the second row, and so on
     /// Instead of using 1 bit for each recipient status, we will use 4 bits for each status
-    /// to allow 5 statuses:
+    /// to allow 7 statuses:
     /// 0: none
     /// 1: pending
     /// 2: accepted
@@ -133,7 +133,7 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
     /// 6: canceled
     /// Since it's a mapping the storage it's pre-allocated with zero values, so if we check the
     /// status of an existing recipient, the value is by default 0 (none).
-    /// If we want to check the status of an recipient, we take its index from the `recipients` array
+    /// If we want to check the status of a recipient, we take its index from the `recipients` array
     /// and convert it to the 2-bits position in the bitmap.
     mapping(uint256 => uint256) public statusesBitMap;
 
@@ -294,10 +294,10 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
         uint256 amount = _getBalance(_token, address(this));
 
         // calculate the amount which is accessible
-        uint256 accessableAmount = amount;
+        uint256 accessibleAmount = amount;
 
         // transfer the amount to the pool manager
-        _transferAmount(_token, msg.sender, accessableAmount);
+        _transferAmount(_token, msg.sender, accessibleAmount);
     }
 
     /// ====================================
