@@ -352,6 +352,8 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
         onlyActiveRegistration
         returns (address recipientId)
     {
+        if (msg.value != 0) revert NON_ZERO_VALUE();
+
         bool isUsingRegistryAnchor;
         address recipientAddress;
         address registryAnchor;
