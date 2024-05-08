@@ -442,7 +442,7 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
 
         if (length == 0) revert INVALID(); // nothing to allocate
 
-        for (uint256 i = 0; i < length; i++) {
+        for (uint256 i = 0; i < length;) {
             Allocation memory allocation = allocations[i];
             address recipientId = allocation.recipientId;
             Recipient memory recipient = _getRecipient(recipientId);
@@ -465,6 +465,10 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
             _transferAmountFrom(token, TransferData({from: _sender, to: recipientAddress, amount: amount}));
 
             emit Allocated(recipientId, amount, token, _sender);
+
+            unchecked {
+                ++i;
+            }
         }
 
         if (nativeAmount > 0) _transferAmount(NATIVE, _sender, nativeAmount);
