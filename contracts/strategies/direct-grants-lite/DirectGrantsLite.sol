@@ -425,7 +425,7 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
     /// @notice Distribute funds to recipients.
     /// @dev This function reverts by default
     function _distribute(address[] memory, bytes memory, address) internal virtual override {
-        revert();
+        revert NOT_IMPLEMENTED();
     }
 
     /// @notice Allocate. Required by the 'BaseStrategy'.
@@ -493,7 +493,7 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
     /// @notice Returns the payout summary for the accepted recipient.
     /// @dev This will revert by default.
     function _getPayout(address, bytes memory) internal pure override returns (PayoutSummary memory) {
-        revert();
+        revert NOT_IMPLEMENTED();
     }
 
     /// @notice Set the recipient status.
