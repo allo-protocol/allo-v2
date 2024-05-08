@@ -26,7 +26,7 @@ import {Native} from "../../core/libraries/Native.sol";
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⠙⠋⠛⠙⠋⠛⠙⠋⠛⠙⠋⠃⠀⠀⠀⠀⠀⠀⠀⠀⠠⠿⠻⠟⠿⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⠟⠿⠟⠿⠆⠀⠸⠿⠿⠟⠯⠀⠀⠀⠸⠿⠿⠿⠏⠀⠀⠀⠀⠀⠈⠉⠻⠻⡿⣿⢿⡿⡿⠿⠛⠁⠀⠀⠀⠀⠀⠀
 //                    allo.gitcoin.co
 
-/// @title DDirect Grants Lite Strategy
+/// @title Direct Grants Lite Strategy
 /// @author @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>
 /// @notice Strategy for direct grants
 contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
@@ -123,7 +123,7 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
     /// @notice This is a packed array of booleans, 'statuses[0]' is the first row of the bitmap and allows to
     /// store 256 bits to describe the status of 256 projects. 'statuses[1]' is the second row, and so on
     /// Instead of using 1 bit for each recipient status, we will use 4 bits for each status
-    /// to allow 5 statuses:
+    /// to allow 7 statuses:
     /// 0: none
     /// 1: pending
     /// 2: accepted
@@ -133,7 +133,7 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
     /// 6: canceled
     /// Since it's a mapping the storage it's pre-allocated with zero values, so if we check the
     /// status of an existing recipient, the value is by default 0 (none).
-    /// If we want to check the status of an recipient, we take its index from the `recipients` array
+    /// If we want to check the status of a recipient, we take its index from the `recipients` array
     /// and convert it to the 2-bits position in the bitmap.
     mapping(uint256 => uint256) public statusesBitMap;
 
@@ -200,10 +200,10 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
         recipientsCounter = 1;
 
         // If the timestamps are invalid this will revert - See details in '_isPoolTimestampValid'
-        _isPoolTimestampValid(registrationStartTime, registrationEndTime);
+        _isPoolTimestampValid(_initializeData.registrationStartTime, _initializeData.registrationEndTime);
 
         // Emit that the timestamps have been updated with the updated values
-        emit TimestampsUpdated(registrationStartTime, registrationEndTime, msg.sender);
+        emit TimestampsUpdated(_initializeData.registrationStartTime, _initializeData.registrationEndTime, msg.sender);
     }
 
     /// ===============================
@@ -294,10 +294,10 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
         uint256 amount = _getBalance(_token, address(this));
 
         // calculate the amount which is accessible
-        uint256 accessableAmount = amount;
+        uint256 accessibleAmount = amount;
 
         // transfer the amount to the pool manager
-        _transferAmount(_token, msg.sender, accessableAmount);
+        _transferAmount(_token, msg.sender, accessibleAmount);
     }
 
     /// ====================================
@@ -352,6 +352,8 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
         onlyActiveRegistration
         returns (address recipientId)
     {
+        if (msg.value != 0) revert NON_ZERO_VALUE();
+
         bool isUsingRegistryAnchor;
         address recipientAddress;
         address registryAnchor;
@@ -423,7 +425,7 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
     /// @notice Distribute funds to recipients.
     /// @dev This function reverts by default
     function _distribute(address[] memory, bytes memory, address) internal virtual override {
-        revert();
+        revert NOT_IMPLEMENTED();
     }
 
     /// @notice Allocate. Required by the 'BaseStrategy'.
@@ -440,7 +442,7 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
 
         if (length == 0) revert INVALID(); // nothing to allocate
 
-        for (uint256 i = 0; i < length; i++) {
+        for (uint256 i = 0; i < length;) {
             Allocation memory allocation = allocations[i];
             address recipientId = allocation.recipientId;
             Recipient memory recipient = _getRecipient(recipientId);
@@ -463,6 +465,10 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
             _transferAmountFrom(token, TransferData({from: _sender, to: recipientAddress, amount: amount}));
 
             emit Allocated(recipientId, amount, token, _sender);
+
+            unchecked {
+                ++i;
+            }
         }
 
         if (nativeAmount > 0) _transferAmount(NATIVE, _sender, nativeAmount);
@@ -487,7 +493,7 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
     /// @notice Returns the payout summary for the accepted recipient.
     /// @dev This will revert by default.
     function _getPayout(address, bytes memory) internal pure override returns (PayoutSummary memory) {
-        revert();
+        revert NOT_IMPLEMENTED();
     }
 
     /// @notice Set the recipient status.
@@ -532,5 +538,7 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
     }
 
     /// @notice Contract should be able to receive NATIVE
-    receive() external payable {}
+    receive() external payable {
+        _checkOnlyAllo();
+    }
 }
