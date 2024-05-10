@@ -11,6 +11,10 @@ import {BaseStrategy} from "../BaseStrategy.sol";
 // Internal Libraries
 import {Metadata} from "../../core/libraries/Metadata.sol";
 
+// Timelock
+import {TokenTimelock} from "openzeppelin-contracts/contracts/token/ERC20/utils/TokenTimelock.sol";
+import {IERC20} from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
+
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⣿⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣸⣿⣿⣿⢿⣿⣿⣿⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -43,21 +47,13 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         Metadata metadata;
     }
 
-    /// @notice The parameters used to initialize the strategy
-    // TODO add vesting parameters similar to Hedget funds
-    // interface ITokenVestingPlans {
-    // function createPlan(
-    //     address recipient,
-    //     address token,
-    //     uint256 amount,
-    //     uint256 start,
-    //     uint256 cliff,
-    //     uint256 rate,
-    //     uint256 period,
-    //     address vestingAdmin,
-    //     bool adminTransferOBO
-    // ) external returns (uint256 newPlanId);
+    /// @notice Pointer for the vesting plan.
+    struct VestingPlan {
+        address vestingContract;
+        uint256 tokenId;
+    }
 
+    /// @notice The parameters used to initialize the strategy
     struct InitializeParams {
         // slot 0
         bool registryGating;
@@ -67,11 +63,15 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         // slot 2
         uint64 registrationStartTime;
         uint64 registrationEndTime;
+        uint64 reviewStartTime;
+        uint64 reviewEndTime;
+        // slot 3
         uint64 allocationStartTime;
         uint64 allocationEndTime;
-        // slot 3
         uint64 distributionStartTime;
         uint64 distributionEndTime;
+        // slot 4
+        uint64 vestingPeriod;
     }
 
     /// ===============================
@@ -100,6 +100,11 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @param sender The sender of the transaction
     event AllocationRevoked(address indexed recipientId, address sender);
 
+    /// @notice Emitted when a vesting plan is created
+    /// @param vestingContract The address of the vesting contract
+    /// @param tokenId The token id of the vesting contract (e.g. Hedgey NFT ID)
+    event VestingPlanCreated(address vestingContract, uint256 tokenId);
+
     /// ================================
     /// ========== Storage =============
     /// ================================
@@ -119,6 +124,12 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice End time for registration
     uint64 public registrationEndTime;
 
+    /// @notice Start time for review
+    uint64 public reviewStartTime;
+
+    /// @notice End time for registration
+    uint64 public reviewEndTime;
+
     /// @notice Start time for allocation
     uint64 public allocationStartTime;
 
@@ -130,6 +141,9 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice End time for distribution
     uint64 public distributionEndTime;
+
+    /// @notice Vesting period in seconds;
+    uint64 public vestingPeriod;
 
     /// @notice The accepted recipient who can submit milestones.
     address public acceptedRecipientId;
@@ -144,10 +158,9 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @dev 'recipientId' to 'Recipient'
     mapping(address => Recipient) internal _recipients;
 
-    // TODO can we use the same IDs for the Hedgey LTIP? Hedgey's are 721 so the uint256 is the ID of the NFT
-    /// @notice This maps accepted recipients to their details
-    /// @dev 'recipientId' to 'allocationId'
-    mapping(address => uint256) internal _allocationIds;
+    /// @notice This maps accepted recipients to their vesting plans
+    /// @dev 'recipientId' to 'VestingPlan'
+    mapping(address => VestingPlan) internal _vestingPlans;
 
     /// ===============================
     /// ======== Constructor ==========
@@ -168,14 +181,14 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @custom:data (bool registryGating, bool metadataRequired, uint256 allocationThreshold, uint64 registrationStartTime, uint64 registrationEndTime, uint64 allocationStartTime, uint64 allocationEndTime)
     function initialize(uint256 _poolId, bytes memory _data) external virtual override {
         (InitializeParams memory initializeParams) = abi.decode(_data, (InitializeParams));
-        __LRIPSimpleStrategy_init(_poolId, initializeParams);
+        __LTIPSimpleStrategy_init(_poolId, initializeParams);
         emit Initialized(_poolId, _data);
     }
 
     /// @notice This initializes the BaseStrategy
     /// @dev You only need to pass the 'poolId' to initialize the BaseStrategy and the rest is specific to the strategy
     /// @param _initializeParams The initialize params
-    function __LRIPSimpleStrategy_init(uint256 _poolId, InitializeParams memory _initializeParams) internal {
+    function __LTIPSimpleStrategy_init(uint256 _poolId, InitializeParams memory _initializeParams) internal {
         // Initialize the BaseStrategy
         __BaseStrategy_init(_poolId);
 
@@ -185,6 +198,8 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         allocationThreshold = _initializeParams.allocationThreshold;
         registrationStartTime = _initializeParams.registrationStartTime;
         registrationEndTime = _initializeParams.registrationEndTime;
+        reviewStartTime = _initializeParams.reviewStartTime;
+        reviewEndTime = _initializeParams.reviewEndTime;
         allocationStartTime = _initializeParams.allocationStartTime;
         allocationEndTime = _initializeParams.allocationEndTime;
         distributionStartTime = _initializeParams.distributionStartTime;
@@ -241,19 +256,6 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
         // Transfer the tokens to the 'msg.sender' (pool manager calling function)
         _transferAmount(_token, msg.sender, amount);
-    }
-
-    /// @notice Revoke the allocation and return funds to the pool
-    /// @dev Callable by the pool manager
-    /// @param _recipientId The id of the recipient
-    function revoke(address _recipientId) external virtual onlyPoolManager(msg.sender) {
-        Recipient storage recipient = _recipients[_recipientId];
-
-        recipient.recipientStatus = Status.Canceled;
-
-        /// TODO transfer funds back to the pool
-
-        emit AllocationRevoked(_recipientId, msg.sender);
     }
 
     /// ====================================
@@ -330,9 +332,8 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         onlyActivePool
         onlyPoolManager(_sender)
     {
-        uint256 finalProposalBid;
         // Decode the '_data'
-        (acceptedRecipientId, finalProposalBid) = abi.decode(_data, (address, uint256));
+        (acceptedRecipientId) = abi.decode(_data, (address));
 
         Recipient storage recipient = _recipients[acceptedRecipientId];
 
@@ -347,6 +348,16 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
         // Emit event for the allocation
         emit Allocated(acceptedRecipientId, recipient.allocationAmount, pool.token, _sender);
+    }
+
+    function _transferAmount(address _token, address _recipient, uint256 _amount) internal override {
+        TokenTimelock vestingContract = new TokenTimelock(IERC20(_token), _recipient, block.timestamp + vestingPeriod);
+
+        IERC20(_token).transferFrom(address(this), address(vestingContract), _amount);
+
+        _vestingPlans[acceptedRecipientId] = VestingPlan(address(vestingContract), 0);
+
+        emit VestingPlanCreated(address(vestingContract), 0);
     }
 
     /// @notice Distribute the upcoming milestone to acceptedRecipientId.
@@ -369,7 +380,6 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         // Get the pool, subtract the amount and transfer to the recipient
         poolAmount -= recipient.allocationAmount;
 
-        // TODO replace transferAmount with creating a vesting plan in the round
         _transferAmount(pool.token, recipient.recipientAddress, recipient.allocationAmount);
 
         // Emit events for the milestone and the distribution
