@@ -10,11 +10,9 @@ import {
     "../../../../lib/superfluid-protocol-monorepo/packages/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
 import {SuperTokenV1Library} from
     "../../../../lib/superfluid-protocol-monorepo/packages/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
-import {IInstantDistributionAgreementV1} from
-    "../../../../lib/superfluid-protocol-monorepo/packages/ethereum-contracts/contracts/interfaces/agreements/IInstantDistributionAgreementV1.sol";
 
 import {SQFSuperFluidStrategy} from "./SQFSuperFluidStrategy.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 
 contract RecipientSuperApp is ISuperApp {
     error UNAUTHORIZED();
@@ -39,7 +37,7 @@ contract RecipientSuperApp is ISuperApp {
     /// @dev Thrown when SuperTokens not accepted by the SuperApp are streamed to it
     error NotAcceptedSuperToken();
 
-    address public recipient;
+    address public immutable recipient;
     SQFSuperFluidStrategy public immutable strategy;
     ISuperToken public immutable acceptedToken;
 
@@ -49,11 +47,10 @@ contract RecipientSuperApp is ISuperApp {
     }
 
     constructor(address _recipient, address _strategy, address _host, ISuperToken _acceptedToken) {
-        HOST = ISuperfluid(_host);
-
-        if (address(_strategy) == address(0)) {
+        if (_strategy == address(0) || _host == address(0) || address(_acceptedToken) == address(0) || _recipient == address(0)) {
             revert ZERO_ADDRESS();
         }
+        HOST = ISuperfluid(_host);
         strategy = SQFSuperFluidStrategy(_strategy);
         acceptedToken = _acceptedToken;
         recipient = _recipient;
@@ -61,7 +58,7 @@ contract RecipientSuperApp is ISuperApp {
 
     /// @notice Withdraw ERC20 funds in an emergency
     function emergencyWithdraw(address token) external onlyRecipient {
-        IERC20(token).transfer(msg.sender, IERC20(token).balanceOf(address(this)));
+        SafeTransferLib.safeTransferAll(token, msg.sender);
     }
 
     /// @notice Close incoming streams in an emergency

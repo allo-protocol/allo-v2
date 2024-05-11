@@ -14,6 +14,7 @@ import {SuperTokenV1Library} from
     "../../../../lib/superfluid-protocol-monorepo/packages/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
 import {IGitcoinPassportDecoder} from "./lib/IGitcoinPassportDecoder.sol";
 import {FixedPointMathLib} from "solady/utils/FixedPointMathLib.sol";
+import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 
 // Interfaces
 import {IRegistry} from "../../../core/interfaces/IRegistry.sol";
@@ -240,6 +241,13 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         initialSuperAppBalance = params.initialSuperAppBalance;
 
         passportDecoder = IGitcoinPassportDecoder(params.passportDecoder);
+        _updatePoolTimestamps(
+            params.registrationStartTime,
+            params.registrationEndTime,
+            params.allocationStartTime,
+            params.allocationEndTime
+        );
+
         gdaPool = SuperTokenV1Library.createPool(
             poolSuperToken,
             address(this), // pool admin
@@ -251,13 +259,6 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
                 /// else, only the pool admin can execute distributions via the pool
                 true
             )
-        );
-
-        _updatePoolTimestamps(
-            params.registrationStartTime,
-            params.registrationEndTime,
-            params.allocationStartTime,
-            params.allocationEndTime
         );
     }
 
@@ -342,9 +343,9 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         _checkOnlyAfterRegistration();
 
         (int96 flowRate) = abi.decode(_data, (int96));
-        poolSuperToken.distributeFlow(address(this), gdaPool, flowRate);
-
         emit Distributed(_sender, flowRate);
+
+        poolSuperToken.distributeFlow(address(this), gdaPool, flowRate);
     }
 
     /// @notice This will allocate to a recipient.
@@ -365,6 +366,8 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         address superApp = address(recipient.superApp);
         (uint256 lastUpdated, int96 currentFlowRate,,) = allocationSuperToken.getFlowInfo(_sender, superApp);
 
+        emit Allocated(recipientId, uint256(int256(flowRate)), address(allocationSuperToken), _sender);
+
         if (currentFlowRate == 0 || lastUpdated == 0) {
             // create the flow
             // enhancement: explore making a factory which would be approved by allocator only once
@@ -373,8 +376,6 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
             // update the flow
             allocationSuperToken.updateFlowFrom(_sender, superApp, flowRate);
         }
-
-        emit Allocated(recipientId, uint256(int256(flowRate)), address(allocationSuperToken), _sender);
     }
 
     /// @notice This will get the flow rate for a recipient.
@@ -427,6 +428,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         virtual
         onlyPoolManager(msg.sender)
         onlyBeforeAllocationEnds
+        nonReentrant
     {
         // make sure the arrays are the same length
         uint256 recipientLength = _recipientIds.length;
@@ -454,7 +456,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
                     recipient.recipientAddress, address(this), superfluidHost, allocationSuperToken, true, true, true
                 );
 
-                allocationSuperToken.transfer(address(superApp), initialSuperAppBalance);
+                SafeTransferLib.safeTransfer(address(allocationSuperToken), address(superApp), initialSuperAppBalance);
 
                 // Add recipientAddress as member of the GDA with 1 unit
                 _updateMemberUnits(recipientId, recipient.recipientAddress, 1);
@@ -477,6 +479,7 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         virtual
         onlyPoolManager(msg.sender)
         onlyBeforeAllocationEnds
+        nonReentrant
     {
         uint256 recipientLength = _recipientIds.length;
 
@@ -553,15 +556,15 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
 
         recipientTotalUnits = recipientTotalUnits > 1e5 ? recipientTotalUnits / 1e5 : 1;
 
-        Recipient storage recipient = recipients[recipientId];
-
-        _updateMemberUnits(recipientId, recipient.recipientAddress, uint128(recipientTotalUnits));
+        Recipient memory recipient = recipients[recipientId];
 
         uint256 currentFlowRate = recipientFlowRate[recipientId];
 
         recipientFlowRate[recipientId] = currentFlowRate + _newFlowRate - _previousFlowRate;
 
         emit TotalUnitsUpdated(recipientId, recipientTotalUnits);
+
+        _updateMemberUnits(recipientId, recipient.recipientAddress, uint128(recipientTotalUnits));
     }
 
     /// @notice Withdraw funds from the contract.
@@ -715,8 +718,8 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _recipientAddress Address of the recipient
     /// @param _units The units
     function _updateMemberUnits(address _recipientId, address _recipientAddress, uint128 _units) internal {
-        gdaPool.updateMemberUnits(_recipientAddress, _units);
         totalUnitsByRecipient[_recipientId] = _units;
         emit TotalUnitsUpdated(_recipientId, _units);
+        gdaPool.updateMemberUnits(_recipientAddress, _units);
     }
 }
