@@ -174,7 +174,7 @@ const config: HardhatUserConfig = {
     polygon: {
       ...createMainnetConfig("polygon"),
       url: `https://polygon-mainnet.g.alchemy.com/v2/${alchemyIdKey}`,
-      gasPrice: 300000000000,
+      gasPrice: 450000000000,
     },
     avalanche: {
       ...createMainnetConfig("avalanche"),
@@ -190,7 +190,7 @@ const config: HardhatUserConfig = {
     },
     "lukso-mainnet": {
       ...createMainnetConfig("lukso-mainnet"),
-      url: 'https://42.rpc.thirdweb.com',
+      url: "https://42.rpc.thirdweb.com",
     },
     // Test Networks
     goerli: createTestnetConfig(
@@ -251,7 +251,7 @@ const config: HardhatUserConfig = {
     },
     "lukso-testnet": {
       ...createTestnetConfig("lukso-testnet"),
-      url: 'https://4201.rpc.thirdweb.com',
+      url: "https://4201.rpc.thirdweb.com",
     },
 
     // Local Networks
@@ -423,19 +423,19 @@ const config: HardhatUserConfig = {
         },
       },
       {
-        network: 'lukso-testnet',
+        network: "lukso-testnet",
         chainId: chainIds["lukso-testnet"],
         urls: {
-          apiURL: 'https://explorer.execution.testnet.lukso.network/api',
-          browserURL: 'https://explorer.execution.testnet.lukso.network/',
+          apiURL: "https://explorer.execution.testnet.lukso.network/api",
+          browserURL: "https://explorer.execution.testnet.lukso.network/",
         },
       },
       {
-        network: 'lukso-mainnet',
+        network: "lukso-mainnet",
         chainId: chainIds["lukso-mainnet"],
         urls: {
-          apiURL: 'https://explorer.execution.mainnet.lukso.network/api',
-          browserURL: 'https://explorer.execution.mainnet.lukso.network/',
+          apiURL: "https://explorer.execution.mainnet.lukso.network/api",
+          browserURL: "https://explorer.execution.mainnet.lukso.network/",
         },
       },
     ],

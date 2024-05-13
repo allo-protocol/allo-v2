@@ -27,17 +27,15 @@ handle_insufficient_funds_error() {
 
 networks=(
 #   "fuji"
-#   "mumbai"
-  "sepolia"
-#   "base-testnet"
+#   "sepolia"
 #   "celo-testnet"
 #   "arbitrum-sepolia"
-#   "optimism-sepolia"
+#   "optimism-sepolia" # Error calling deploy() function for contract DirectGrantsLiteStrategy
 #   "optimism-mainnet"
 #   "celo-mainnet"
 #   "arbitrum-mainnet"
 #   "base"
-#   "polygon"
+#   "polygon" # transaction stuck
 #   "mainnet"
 #   "avalanche"
 #   "scroll"

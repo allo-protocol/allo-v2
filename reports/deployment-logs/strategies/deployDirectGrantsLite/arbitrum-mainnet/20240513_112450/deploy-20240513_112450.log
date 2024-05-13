@@ -1,0 +1,32 @@
+
+    ////////////////////////////////////////////////////
+      Deploys DirectGrantsLiteStrategy.sol on arbitrum-mainnet
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────┐
+│     (index)     │                    Values                    │
+├─────────────────┼──────────────────────────────────────────────┤
+│    contract     │        'DirectGrantsLiteStrategy.sol'        │
+│     chainId     │                    42161                     │
+│     network     │              'arbitrum-mainnet'              │
+│ deployerAddress │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│     balance     │            '0.384987267158866577'            │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying DirectGrantsLiteStrategy.sol
+[35mContract DirectGrantsLiteStrategy deployed at address: 0x79A5EEc2C87Cd2116195E71af7A38647f89C8Ffa[0m
+
+Verifying contract...
+Successfully submitted source code for contract
+contracts/strategies/direct-grants-lite/DirectGrantsLite.sol:DirectGrantsLiteStrategy at 0x79A5EEc2C87Cd2116195E71af7A38647f89C8Ffa
+for verification on the block explorer. Waiting for verification result...
+
+Successfully verified contract DirectGrantsLiteStrategy on the block explorer.
+https://arbiscan.io/address/0x79A5EEc2C87Cd2116195E71af7A38647f89C8Ffa#code
+[90m
+	Validating getAllo() == 0x1133eA7Af70876e64665ecD07C0A0476d09465a1[0m
+[32m	✅ PASSED with Result: 0x1133eA7Af70876e64665ecD07C0A0476d09465a1[0m
+[90m
+	Validating getStrategyId() == 0x103732a8e473467a510d4128ee11065262bdd978f0d9dad89ba68f2c56127e27[0m
+[32m	✅ PASSED with Result: 0x103732a8e473467a510d4128ee11065262bdd978f0d9dad89ba68f2c56127e27[0m
+Adding DirectGrantsLiteStrategy v1.0 to cloneable strategies...
+DirectGrantsLiteStrategy v1.0 added to cloneable strategies.

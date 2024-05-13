@@ -79,7 +79,8 @@ export async function deployStrategies(
     const alloInstance = alloFactory.attach(alloAddress);
 
     try {
-      await alloInstance.addToCloneableStrategies(impl.toString());
+      const tx = await alloInstance.addToCloneableStrategies(impl.toString());
+      await tx.wait();
       console.log(`${strategyName} ${version} added to cloneable strategies.`);
     } catch (error) {
       console.log(
@@ -163,7 +164,10 @@ export async function deployStrategyDirectly(
     const alloInstance = alloFactory.attach(alloAddress);
 
     try {
-      await alloInstance.addToCloneableStrategies(instance.target.toString());
+      const tx = await alloInstance.addToCloneableStrategies(
+        instance.target.toString(),
+      );
+      await tx.wait();
       console.log(`${strategyNameWithVersion} added to cloneable strategies.`);
     } catch (error) {
       console.log(

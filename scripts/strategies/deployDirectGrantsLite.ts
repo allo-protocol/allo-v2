@@ -8,11 +8,7 @@ export const deployDirectGrants = async () => {
 
   const strategyParams = strategyConfig[chainId]["direct-grants-lite"];
 
-  await deployStrategies(
-    strategyParams.name,
-    strategyParams.version + "mimimi",
-    true,
-  );
+  await deployStrategies(strategyParams.name, strategyParams.version, true);
   // await deployStrategyDirectly(strategyParams.name, strategyParams.version, [], false);
 };
 
