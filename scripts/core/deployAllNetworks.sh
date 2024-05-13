@@ -30,7 +30,7 @@ networks=(
 #   "sepolia"
 #   "celo-testnet"
 #   "arbitrum-sepolia"
-#   "optimism-sepolia" # Error calling deploy() function for contract DirectGrantsLiteStrategy
+  "optimism-sepolia"
 #   "optimism-mainnet"
 #   "celo-mainnet"
 #   "arbitrum-mainnet"
@@ -59,7 +59,7 @@ scripts=(
     # "core/deployContractFactory"
     # "strategies/deployDonationVotingMerkleDistributionDirect"
     # "strategies/deployDirectGrants"
-    # "strategies/deployDirectGrantsLite"
+    "strategies/deployDirectGrantsLite"
     
     # "core/transferProxyAdminOwnership"
     # "strategies/deployDonationVotingMerkleDistributionVault"

@@ -545,3 +545,5 @@
 20240513_165048 - Deployment finished with 0 error(s)
 20240513_165104 - Executing: bun hardhat deploy-zksync --network zkSyncMainnet --config era.hardhat.config.ts --script zksync/strategies/deployEraDirectGrantsLite.ts | tee ./reports/deployment-logs/zksync/strategies/deployEraDirectGrantsLite/zkSyncMainnet/20240513_165104/deploy-20240513_165104.log
 20240513_165215 - Deployment finished with 0 error(s)
+20240513_135810 - Executing: bun hardhat run scripts/strategies/deployDirectGrantsLite.ts --no-compile --network optimism-sepolia | tee ./reports/deployment-logs/strategies/deployDirectGrantsLite/optimism-sepolia/20240513_135810/deploy-20240513_135810.log
+20240513_135832 - Deployment finished with 0 error(s)
