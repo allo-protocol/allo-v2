@@ -35,7 +35,7 @@ networks=(
 #   "celo-mainnet"
 #   "arbitrum-mainnet"
 #   "base"
-#   "polygon" # transaction stuck
+#   "polygon"
 #   "mainnet"
 #   "avalanche"
 #   "scroll"
@@ -59,7 +59,7 @@ scripts=(
     # "core/deployContractFactory"
     # "strategies/deployDonationVotingMerkleDistributionDirect"
     # "strategies/deployDirectGrants"
-    "strategies/deployDirectGrantsLite"
+    # "strategies/deployDirectGrantsLite"
     
     # "core/transferProxyAdminOwnership"
     # "strategies/deployDonationVotingMerkleDistributionVault"
@@ -74,6 +74,7 @@ scripts=(
     # "zksync/deployEraContractFactory"
     # "zksync/strategies/deployEraDonationVotingMerkleDistributionDirect"
     # "zksync/strategies/deployEraDirectGrants"
+    # "zksync/strategies/deployEraDirectGrantsLite"
 )
 
 for script in "${scripts[@]}"; do

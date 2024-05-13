@@ -541,5 +541,7 @@
 20240513_123825 - Executing: bun hardhat run scripts/strategies/deployDirectGrantsLite.ts --no-compile --network polygon | tee ./reports/deployment-logs/strategies/deployDirectGrantsLite/polygon/20240513_123825/deploy-20240513_123825.log
 20240513_124742 - Executing: bun hardhat run scripts/strategies/deployDirectGrantsLite.ts --no-compile --network avalanche | tee ./reports/deployment-logs/strategies/deployDirectGrantsLite/avalanche/20240513_124742/deploy-20240513_124742.log
 20240513_124923 - Deployment finished with 0 error(s)
-20240513_125038 - Executing: bun hardhat deploy-zksync --network zkSyncTestnet --config era.hardhat.config.ts --script strategies/deployDirectGrantsLite.ts | tee ./reports/deployment-logs/strategies/deployDirectGrantsLite/zkSyncTestnet/20240513_125038/deploy-20240513_125038.log
-20240513_125040 - Deployment finished with 0 error(s)
+20240513_164936 - Executing: bun hardhat deploy-zksync --network zkSyncTestnet --config era.hardhat.config.ts --script zksync/strategies/deployEraDirectGrantsLite.ts | tee ./reports/deployment-logs/zksync/strategies/deployEraDirectGrantsLite/zkSyncTestnet/20240513_164936/deploy-20240513_164936.log
+20240513_165048 - Deployment finished with 0 error(s)
+20240513_165104 - Executing: bun hardhat deploy-zksync --network zkSyncMainnet --config era.hardhat.config.ts --script zksync/strategies/deployEraDirectGrantsLite.ts | tee ./reports/deployment-logs/zksync/strategies/deployEraDirectGrantsLite/zkSyncMainnet/20240513_165104/deploy-20240513_165104.log
+20240513_165215 - Deployment finished with 0 error(s)
