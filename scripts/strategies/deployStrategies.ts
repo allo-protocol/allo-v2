@@ -6,7 +6,8 @@ import { Deployments, verifyContract } from "../utils/scripts";
 export async function deployStrategies(
   strategyName: string,
   version: string,
-  additionalArgs?: Args
+  cloneable?: boolean,
+  additionalArgs?: Args,
 ): Promise<string> {
   const network = await ethers.provider.getNetwork();
   const networkName = await hre.network.name;
@@ -39,7 +40,7 @@ export async function deployStrategies(
 
   const types = ["address", "string"].concat(additionalArgs?.types ?? []);
   const values = [alloAddress, strategyName + version].concat(
-    additionalArgs?.values ?? []
+    additionalArgs?.values ?? [],
   );
 
   const impl = await deployContractUsingFactory(
@@ -49,11 +50,11 @@ export async function deployStrategies(
     {
       types,
       values,
-    }
+    },
   );
 
   const hashBytesStrategyName = ethers.keccak256(
-    new ethers.AbiCoder().encode(["string"], [strategyName + version])
+    new ethers.AbiCoder().encode(["string"], [strategyName + version]),
   );
 
   const objToWrite = {
@@ -72,13 +73,30 @@ export async function deployStrategies(
   await validator.validate("getAllo", [], alloAddress);
   await validator.validate("getStrategyId", [], hashBytesStrategyName);
 
+  if (cloneable) {
+    console.log(`Adding ${strategyName} ${version} to cloneable strategies...`);
+    const alloFactory = await ethers.getContractFactory("Allo");
+    const alloInstance = alloFactory.attach(alloAddress);
+
+    try {
+      const tx = await alloInstance.addToCloneableStrategies(impl.toString());
+      await tx.wait();
+      console.log(`${strategyName} ${version} added to cloneable strategies.`);
+    } catch (error) {
+      console.log(
+        `Error adding ${strategyName} ${version} to cloneable strategies.`,
+      );
+    }
+  }
+
   return impl.toString();
 }
 
 export async function deployStrategyDirectly(
   strategyName: string,
   version: string,
-  args: any = []
+  args: any = [],
+  cloneable?: boolean,
 ): Promise<string> {
   const network = await ethers.provider.getNetwork();
   const networkName = await hre.network.name;
@@ -112,18 +130,20 @@ export async function deployStrategyDirectly(
   const strategyNameWithVersion = strategyName + version;
 
   const instance = await StrategyFactory.deploy(
-    alloAddress, strategyNameWithVersion, ...args,
+    alloAddress,
+    strategyNameWithVersion,
+    ...args,
     {
       account: account,
       maxFeePerGas: feeData.maxFeePerGas,
       maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
-    }
+    },
   );
 
   await instance.waitForDeployment();
 
   const hashBytesStrategyName = ethers.keccak256(
-    new ethers.AbiCoder().encode(["string"], [strategyName + version])
+    new ethers.AbiCoder().encode(["string"], [strategyName + version]),
   );
 
   console.log(`${strategyNameWithVersion} deployed to:`, instance.target);
@@ -137,6 +157,24 @@ export async function deployStrategyDirectly(
   };
 
   deployments.write(objToWrite);
+
+  if (cloneable) {
+    console.log(`Adding ${strategyNameWithVersion} to cloneable strategies...`);
+    const alloFactory = await ethers.getContractFactory("Allo");
+    const alloInstance = alloFactory.attach(alloAddress);
+
+    try {
+      const tx = await alloInstance.addToCloneableStrategies(
+        instance.target.toString(),
+      );
+      await tx.wait();
+      console.log(`${strategyNameWithVersion} added to cloneable strategies.`);
+    } catch (error) {
+      console.log(
+        `Error adding ${strategyNameWithVersion} to cloneable strategies.`,
+      );
+    }
+  }
 
   return instance.target.toString();
 }

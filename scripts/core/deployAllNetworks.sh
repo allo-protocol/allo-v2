@@ -27,12 +27,10 @@ handle_insufficient_funds_error() {
 
 networks=(
 #   "fuji"
-#   "mumbai"
-  "sepolia"
-#   "base-testnet"
+#   "sepolia"
 #   "celo-testnet"
 #   "arbitrum-sepolia"
-#   "optimism-sepolia"
+#   "optimism-sepolia" # Error calling deploy() function for contract DirectGrantsLiteStrategy
 #   "optimism-mainnet"
 #   "celo-mainnet"
 #   "arbitrum-mainnet"
@@ -61,7 +59,7 @@ scripts=(
     # "core/deployContractFactory"
     # "strategies/deployDonationVotingMerkleDistributionDirect"
     # "strategies/deployDirectGrants"
-    "strategies/deployDirectGrantsLite"
+    # "strategies/deployDirectGrantsLite"
     
     # "core/transferProxyAdminOwnership"
     # "strategies/deployDonationVotingMerkleDistributionVault"
@@ -76,6 +74,7 @@ scripts=(
     # "zksync/deployEraContractFactory"
     # "zksync/strategies/deployEraDonationVotingMerkleDistributionDirect"
     # "zksync/strategies/deployEraDirectGrants"
+    # "zksync/strategies/deployEraDirectGrantsLite"
 )
 
 for script in "${scripts[@]}"; do
