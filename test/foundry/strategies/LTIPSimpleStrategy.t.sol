@@ -109,7 +109,7 @@ contract LTIPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, EventSetu
             poolProfile_id(),
             address(strategy),
             abi.encode(
-               registryGating,
+                registryGating,
                 metadataRequired,
                 voteThreshold,
                 registrationStartTime,
@@ -193,7 +193,7 @@ contract LTIPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, EventSetu
         testStrategy.initialize(
             1337,
             abi.encode(
-               registryGating,
+                registryGating,
                 metadataRequired,
                 voteThreshold,
                 registrationStartTime,
