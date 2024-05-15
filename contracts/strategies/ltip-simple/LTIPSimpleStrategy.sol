@@ -394,7 +394,7 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         }
     }
 
-    function _transferAmount(address _token, address _recipient, uint256 _amount) internal override {
+    function _transferAmount(address _token, address _recipient, uint256 _amount) internal virtual override {
         TokenTimelock vestingContract = new TokenTimelock(IERC20(_token), _recipient, block.timestamp + vestingPeriod);
 
         IERC20(_token).transferFrom(address(this), address(vestingContract), _amount);
@@ -423,6 +423,14 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
         // Emit events for the milestone and the distribution
         emit Distributed(acceptedRecipientId, recipient.recipientAddress, recipient.allocationAmount, _sender);
+    }
+
+    /// @notice Checks if address is eligible allocator.
+    /// @dev This is used to check if the allocator is a pool manager and able to allocate funds from the pool
+    /// @param _allocator Address of the allocator
+    /// @return 'true' if the allocator is a pool manager, otherwise false
+    function _isValidAllocator(address _allocator) internal view override returns (bool) {
+        return allo.isPoolManager(poolId, _allocator);
     }
 
     /// @notice Check if sender is a profile owner or member.

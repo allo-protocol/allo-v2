@@ -138,7 +138,7 @@ contract LTIPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, EventSetu
             abi.encode(
                 registryGating,
                 metadataRequired,
-                allocationThreshold,
+                voteThreshold,
                 registrationStartTime,
                 registrationEndTime,
                 allocationStartTime,
@@ -150,7 +150,7 @@ contract LTIPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, EventSetu
         assertEq(testStrategy.getPoolId(), 1337);
         assertEq(testStrategy.useRegistryAnchor(), useRegistryAnchor);
         assertEq(testStrategy.metadataRequired(), metadataRequired);
-        assertEq(testStrategy.allocationThreshold(), allocationThreshold);
+        assertEq(testStrategy.voteThreshold(), voteThreshold);
         assertEq(testStrategy.registrationStartTime(), registrationStartTime);
         assertEq(testStrategy.registrationEndTime(), registrationEndTime);
         assertEq(testStrategy.allocationStartTime(), allocationStartTime);
