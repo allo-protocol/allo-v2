@@ -282,7 +282,7 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Pool managers can extend the allocation period
     /// @param _allocationEndTime The new allocation end time
     function extendAllocationEndTime(uint64 _allocationEndTime) external onlyPoolManager(msg.sender) {
-        if(_allocationEndTime <= allocationEndTime) revert INVALID();
+        if (_allocationEndTime <= allocationEndTime) revert INVALID();
         allocationEndTime = _allocationEndTime;
         emit AllocationPeriodExtended(_allocationEndTime);
     }
@@ -407,11 +407,7 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Distribute the upcoming milestone to acceptedRecipientId.
     /// @dev As allocation determines the acceptance, anybody should be able to distribute.
     /// @param _sender The sender of the distribution.
-    function _distribute(address[] memory, bytes memory, address _sender)
-        internal
-        virtual
-        override
-    {
+    function _distribute(address[] memory, bytes memory, address _sender) internal virtual override {
         IAllo.Pool memory pool = allo.getPool(poolId);
         Recipient memory recipient = _recipients[acceptedRecipientId];
 
