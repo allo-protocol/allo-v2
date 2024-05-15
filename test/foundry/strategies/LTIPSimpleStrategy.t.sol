@@ -51,16 +51,17 @@ contract LTIPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, EventSetu
 
     uint256 public poolId;
 
-    uint256 public voteThreshold;
-
     bool public registryGating;
-    uint256 public allocationThreshold;
+    uint256 public voteThreshold;
     uint64 public registrationStartTime;
     uint64 public registrationEndTime;
     uint64 public allocationStartTime;
     uint64 public allocationEndTime;
+    uint64 public reviewStartTime;
+    uint64 public reviewEndTime;
     uint64 public distributionStartTime;
     uint64 public distributionEndTime;
+    uint64 public vestingPeriod;
 
     // Hedgey Specific
     bool public adminTransferOBO;
@@ -91,6 +92,7 @@ contract LTIPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, EventSetu
 
         useRegistryAnchor = false;
         metadataRequired = true;
+        registryGating = true;
 
         voteThreshold = 2;
 
@@ -109,13 +111,16 @@ contract LTIPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, EventSetu
             abi.encode(
                 registryGating,
                 metadataRequired,
-                allocationThreshold,
+                voteThreshold,
                 registrationStartTime,
                 registrationEndTime,
+                reviewStartTime,
+                reviewEndTime,
                 allocationStartTime,
                 allocationEndTime,
                 distributionStartTime,
-                distributionEndTime
+                distributionEndTime,
+                vestingPeriod
             ),
             address(token),
             0,
@@ -138,25 +143,29 @@ contract LTIPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, EventSetu
             abi.encode(
                 registryGating,
                 metadataRequired,
-                allocationThreshold,
+                voteThreshold,
                 registrationStartTime,
                 registrationEndTime,
+                reviewStartTime,
+                reviewEndTime,
                 allocationStartTime,
                 allocationEndTime,
                 distributionStartTime,
-                distributionEndTime
+                distributionEndTime,
+                vestingPeriod
             )
         );
         assertEq(testStrategy.getPoolId(), 1337);
         assertEq(testStrategy.useRegistryAnchor(), useRegistryAnchor);
         assertEq(testStrategy.metadataRequired(), metadataRequired);
-        assertEq(testStrategy.allocationThreshold(), allocationThreshold);
+        assertEq(testStrategy.voteThreshold(), voteThreshold);
         assertEq(testStrategy.registrationStartTime(), registrationStartTime);
         assertEq(testStrategy.registrationEndTime(), registrationEndTime);
         assertEq(testStrategy.allocationStartTime(), allocationStartTime);
         assertEq(testStrategy.allocationEndTime(), allocationEndTime);
         assertEq(testStrategy.distributionStartTime(), distributionStartTime);
         assertEq(testStrategy.distributionEndTime(), distributionEndTime);
+        assertEq(testStrategy.vestingPeriod(), vestingPeriod);
     }
 
     function testRevert_initialize_ALREADY_INITIALIZED() public {
@@ -167,13 +176,16 @@ contract LTIPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, EventSetu
             abi.encode(
                 registryGating,
                 metadataRequired,
-                allocationThreshold,
+                voteThreshold,
                 registrationStartTime,
                 registrationEndTime,
+                reviewStartTime,
+                reviewEndTime,
                 allocationStartTime,
                 allocationEndTime,
                 distributionStartTime,
-                distributionEndTime
+                distributionEndTime,
+                vestingPeriod
             )
         );
 
@@ -183,13 +195,16 @@ contract LTIPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, EventSetu
             abi.encode(
                 registryGating,
                 metadataRequired,
-                allocationThreshold,
+                voteThreshold,
                 registrationStartTime,
                 registrationEndTime,
+                reviewStartTime,
+                reviewEndTime,
                 allocationStartTime,
                 allocationEndTime,
                 distributionStartTime,
-                distributionEndTime
+                distributionEndTime,
+                vestingPeriod
             )
         );
     }
@@ -202,13 +217,16 @@ contract LTIPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, EventSetu
             abi.encode(
                 registryGating,
                 metadataRequired,
-                allocationThreshold,
+                voteThreshold,
                 registrationStartTime,
                 registrationEndTime,
+                reviewStartTime,
+                reviewEndTime,
                 allocationStartTime,
                 allocationEndTime,
                 distributionStartTime,
-                distributionEndTime
+                distributionEndTime,
+                vestingPeriod
             )
         );
     }

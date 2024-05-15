@@ -20,10 +20,6 @@ The `LTIPSimpleStrategy` contract represents a smart contract for Long-Term Ince
     - [Internal Functions](#internal-functions)
   - [User Flows](#user-flows)
     - [Registering a Recipient](#registering-a-recipient)
-    - [Setting Milestones](#setting-milestones)
-    - [Submitting a Milestone Proof](#submitting-a-milestone-proof)
-    - [Rejecting a Pending Milestone](#rejecting-a-pending-milestone)
-    - [Updating Max Bid](#updating-max-bid)
     - [Distributing Milestone](#distributing-milestone)
     - [Withdrawing Funds from Pool](#withdrawing-funds-from-pool)
 
@@ -35,28 +31,23 @@ sequenceDiagram
     participant Alice
     participant PoolManager
     participant Allo
-    participant RFPSimpleStrategy
+    participant LTIPSimpleStrategy
 
-    PoolManager->>Allo: createPool() with RFPSimple
+    PoolManager->>Allo: createPool() with LTIPSimpleStrategy
     Allo-->>PoolManager: poolId
     Alice->>+Allo: registerRecipient()
-    Allo->>RFPSimpleStrategy: registerRecipient()
-    RFPSimpleStrategy-->>Allo: recipient1
+    Allo->>LTIPSimpleStrategy: registerRecipient()
+    LTIPSimpleStrategy-->>Allo: recipient1
     Allo-->>-Alice: recipientId1
-    PoolManager->>+Allo: allocate() (accepts a recipient and allocate proposal bid)
-    Allo-->>-RFPSimpleStrategy: allocate() (accepts a recipient and allocate proposal bid)
-    PoolManager->> RFPSimpleStrategy: setMilestones()
-    Alice->> RFPSimpleStrategy: submitUpcomingMilestone()
-    PoolManager->> RFPSimpleStrategy: rejectMilestone()
-    Alice->> RFPSimpleStrategy: submitUpcomingMilestone()
-    PoolManager->>+Allo: distribute() ( mnextilestone for recipient)
+    PoolManager->>+Allo: allocate() (votes on recipient)
+    Allo-->>-RFPSimpleStrategy: allocate() (accepts a recipient based on voting threshold and allocate proposed allocation amount)
+    PoolManager->>+Allo: distribute() ( create vesting plan and deposit funds for recipient)
     Allo-->>-RFPSimpleStrategy: distribute() (next milestone for recipient)
-    PoolManager->>RFPSimpleStrategy: setPoolActive() to close pool
 ```
 
 ## Smart Contract Overview
 
-- **License:** The `RFPSimpleStrategy` contract operates under the AGPL-3.0-only License, fostering open-source usage under specific terms.
+- **License:** The `LTIPSimpleStrategy` contract operates under the AGPL-3.0-only License, fostering open-source usage under specific terms.
 - **Solidity Version:** Developed using Solidity version 0.8.19, capitalizing on the latest Ethereum smart contract functionalities.
 - **External Libraries:** Utilizes the `ReentrancyGuard` library from the OpenZeppelin contracts to prevent reentrant attacks.
 - **Interfaces:** Imports interfaces from the Allo core and external libraries.
@@ -64,35 +55,43 @@ sequenceDiagram
 
 ### Structs
 
-1. `Recipient`: Contains recipient-related data, such as the recipient's address, proposal bid, use of registry anchor, and status.
-2. `Milestone`: Holds details about a milestone, including the amount percentage, metadata, and status.
+1. `Recipient`: Contains recipient-related data, such as the recipient's address, requested allocation amount, use of registry anchor, and status.
+2. `VestingPlan`: Points to the vesting plan for the recipient.
+3. `InitializeParams`: Contains parameters for initializing the strategy.
 
 ### Errors
 
-1. `INVALID_MILESTONE`: Thrown when a milestone is invalid.
-2. `MILESTONE_ALREADY_ACCEPTED`: Thrown when a milestone is already accepted.
-3. `EXCEEDING_MAX_BID`: Thrown when a proposal bid exceeds the maximum bid.
-4. `MILESTONES_ALREADY_SET`: Thrown when milestones are already set or approved.
-5. `AMOUNT_TOO_LOW`: Thrown when the max bid increase amount is too low.
+1. `APPLICATION_CANCELLED`: Thrown when an application has been cancelled. After cancellation, reapplying is blocked.
+2. `ALREADY_ALLOCATED`: Thrown when recipients already have received a funds allocation.
 
 ### Events
 
-1. `MaxBidIncreased`: Emitted when the maximum bid is increased.
-2. `MilestoneSubmitted`: Emitted when a milestone is submitted.
-3. `MilestoneStatusChanged`: Emitted for the status change of a milestone.
-4. `MilestonesSet`: Emitted when milestones are set.
+1. `UpdatedRegistration`: Emitted when a recipient updates their registration.
+2. `AllocationRevoked`: Emitted when allocated funds are revoked and returned to the pool.
+3. `Voted`: Emitted when a vote is cast.
+4. `VestingPlanCreated`: Emitted when a vesting plan is created.
+5. `AllocationPeriodExtended` 
 
 ### Storage Variables
 
-1. `useRegistryAnchor`: Flag indicating whether to use the registry anchor for recipient registration.
-2. `metadataRequired`: Flag indicating whether metadata is required for recipient registration.
-3. `acceptedRecipientId`: The accepted recipient who can submit milestones.
-4. `_registry`: Reference to the Allo registry contract.
-5. `maxBid`: The maximum bid for the RFP pool.
-6. `upcomingMilestone`: Index of the upcoming milestone.
-7. `_recipientIds`: Collection of recipient addresses.
-8. `milestones`: Collection of submitted milestones.
-9. `_recipients`: Mapping from recipient addresses to recipient data.
+1. `useRegistryAnchor`: Flag to indicate whether to use the registry anchor or not.
+metadataRequired: Flag to indicate whether metadata is required or not.
+2. `registryGating`: (No notice provided)
+3. `votingThreshold`: The voting threshold for a recipient to be accepted.
+4. `registrationStartTime`: Start time for registration.
+5. `registrationEndTime`: End time for registration.
+6. `reviewStartTime`: Start time for review.
+7. `reviewEndTime`: End time for review.
+8. `allocationStartTime`: Start time for allocation.
+9. `allocationEndTime`: End time for allocation.
+10. `distributionStartTime`: Start time for distribution.
+11. `distributionEndTime`: End time for distribution.
+12. `vestingPeriod`: Vesting period in seconds.
+13. `acceptedRecipientId`: The accepted recipient who can submit milestones.
+14. `_registry`: The registry contract interface. (Private)
+15. `_recipientIds`: Internal collection of recipients. (Private)
+16. `_recipients`: This maps accepted recipients to their details. 'recipientId' to 'Recipient'. (Internal)
+17. `_vestingPlans`: This maps accepted recipients to their vesting plans. 'recipientId' to 'VestingPlan'. (Internal)
 
 ### Constructor
 
@@ -105,22 +104,23 @@ The `initialize` function decodes and initializes parameters passed during strat
 ### Views
 
 1. `getRecipient`: Retrieves recipient details.
-2. `getMilestone`: Retrieves milestone details.
-3. `getMilestoneStatus`: Retrieves the status of a milestone.
+2. `getVestingPlan`: Retrieves milestone details.
+3. `getPayouts`: Returns the payout details for a recipient.
 
 ### External Functions
 
-1. `setMilestones`: Sets milestones for the accepted recipient.
-2. `submitUpcomingMilestone`: Submits a milestone for the accepted recipient.
-3. `rejectMilestone`: Rejects a pending milestone.
-4. `increaseMaxBid`: Updates the maximum bid for the RFP pool.
-5. `withdraw`: Allows pool managers to withdraw funds from the pool.
+1. `withdraw`: Allows pool managers to withdraw funds from the pool.
+2. `setPoolActive`: Sets the pool to active.
+3. `extendAllocationEndTime`: Extends the allocation end time.
 
 ### Internal Functions
 
-1. `_registerRecipient`: Handles recipient registration, processing the provided data.
-2. `_allocate`: Allocates funds to the accepted recipient.
+1. `_registerRecipient`: Submit a proposal to receive funds from LTIP pool.
+2. `_allocate`: Select recipient for LTIP allocation
 3. `_distribute`: Distributes upcoming milestone funds to the accepted recipient.
+4. `_transferAmount`: Creates a vesting plan and deposits funds for the recipient into the plan.
+5. `_getRecipientStatus`: Retrieves the status of a recipient.
+6. `_isProfileMember`: Check is msg.sender is a linked to a profile in the registry.
 
 ## User Flows
 
@@ -141,47 +141,22 @@ The `initialize` function decodes and initializes parameters passed during strat
   * Registers recipient as "Pending" with provided details.
   * Emits `Registered` event.
 
-### Setting Milestones
+### Voting on acceptance of a recipient
+* Check is a vote has already been cast. 
+* All PoolManagers have a voting power of 1
+* PoolManager votes on the acceptance of the recipient.
+* Emits `Voted` event.
+* If the vote puts the recipient on the threshold, the recipient is accepted.
+* Recipient status is set to "Accepted".
+* Emits `Allocated` event.
 
-* Pool Manager initiates a milestone setting request.
-* Verifies if sender is authorized to set milestones.
-* Checks if upcoming milestone is not already set.
-* Sets provided milestones for the accepted recipient.
-* Emits `MilestonesSet` event.
-
-### Submitting a Milestone Proof
-
-* Recipient initiates a milestone proof submission.
-* Verifies if sender is authorized to submit the proof.
-* Checks if upcoming milestone is valid.
-* Updates milestone's metadata and status to "Pending".
-* Emits `MilestoneSubmitted` event.
-
-### Rejecting a Pending Milestone
-
-* Pool Manager initiates a milestone rejection request.
-* Verifies if sender is authorized to reject milestones.
-* Checks if milestone is not already accepted.
-* Changes milestone status to "Rejected".
-* Emits `MilestoneStatusChanged` event.
-
-### Updating Max Bid
-
-* Pool Manager initiates a max bid update request.
-* Verifies if sender is authorized to update the max bid.
-* Ensures the new max bid is higher than the current max bid.
-* Updates the max bid.
-* Emits `MaxBidIncreased` event.
-
-### Distributing Milestone
-
-* Pool Manager initiates a milestone distribution request.
-* Verifies if sender is authorized to distribute funds.
-* Checks if a pending milestone exists.
-* Calculates the amount to distribute based on the accepted recipient's proposal bid and milestone percentage.
-* Transfers the calculated amount to the accepted recipient.
-* Changes the milestone status to "Accepted".
-* Emits `MilestoneStatusChanged` and `Distributed` events.
+### Allocate funds in a vesting plan
+* Check if the recipient doesn't have an active vesting plan
+* Check if the recipient status is "Accepted".
+* Create a vesting plan for the recipient (a OZ TokenTimeLock contract instance).
+  * Transfer the allocated funds to the vesting plan.8
+  * Emits `VestingPlanCreated` event.
+* Emits `Distributed` event.
 
 ### Withdrawing Funds from Pool
 

@@ -161,7 +161,7 @@ contract LTIPHedgeyStrategy is LTIPSimpleStrategy {
     /// ============ Internal ==============
     /// ====================================
 
-    function _transferAmount(address _token, address _recipient, uint256 _amount) internal override {
+    function _transferAmount(address _token, address _recipient, uint256 _amount) internal virtual override {
         IERC20(_token).approve(hedgeyContract, _amount);
 
         uint256 rate = _amount / _recipientLockupTerm[_recipient];
