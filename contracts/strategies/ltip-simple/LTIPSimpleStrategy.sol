@@ -275,8 +275,8 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     function withdraw(address _token) external virtual onlyPoolManager(msg.sender) {
         uint256 amount = _getBalance(_token, address(this));
 
-        // Transfer the tokens to the 'msg.sender' (pool manager calling function)
-        _transferAmount(_token, msg.sender, amount);
+        IAllo.Pool memory pool = allo.getPool(poolId);
+        _transferAmount(pool.token, msg.sender, amount);
     }
 
     /// @notice Pool managers can extend the allocation period
@@ -394,10 +394,11 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         }
     }
 
-    function _transferAmount(address _token, address _recipient, uint256 _amount) internal virtual override {
+    function _vestAmount(address _token, address _recipient, uint256 _amount) internal virtual {
         TokenTimelock vestingContract = new TokenTimelock(IERC20(_token), _recipient, block.timestamp + vestingPeriod);
 
-        IERC20(_token).transferFrom(address(this), address(vestingContract), _amount);
+        IAllo.Pool memory pool = allo.getPool(poolId);
+        _transferAmount(pool.token, address(vestingContract), _amount);
 
         _vestingPlans[acceptedRecipientId] = VestingPlan(address(vestingContract), 0);
 
@@ -419,7 +420,7 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         // Get the pool, subtract the amount and transfer to the recipient
         poolAmount -= recipient.allocationAmount;
 
-        _transferAmount(pool.token, recipient.recipientAddress, recipient.allocationAmount);
+        _vestAmount(pool.token, recipient.recipientAddress, recipient.allocationAmount);
 
         // Emit events for the milestone and the distribution
         emit Distributed(acceptedRecipientId, recipient.recipientAddress, recipient.allocationAmount, _sender);
