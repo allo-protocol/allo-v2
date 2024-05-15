@@ -282,7 +282,7 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Pool managers can extend the allocation period
     /// @param _allocationEndTime The new allocation end time
     function extendAllocationEndTime(uint64 _allocationEndTime) external onlyPoolManager(msg.sender) {
-        if(_allocationEndTime <= allocationEndTime) revert INVALID ();
+        if(_allocationEndTime <= allocationEndTime) revert INVALID();
         allocationEndTime = _allocationEndTime;
         emit AllocationPeriodExtended(_allocationEndTime);
     }
@@ -405,8 +405,8 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     }
 
     /// @notice Distribute the upcoming milestone to acceptedRecipientId.
-    /// @dev As allocation determines the acceptance, anybody should be able to distribute. 
-    /// @param _sender The sender of the distribution
+    /// @dev As allocation determines the acceptance, anybody should be able to distribute.
+    /// @param _sender The sender of the distribution.
     function _distribute(address[] memory, bytes memory, address _sender)
         internal
         virtual
@@ -456,13 +456,11 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         return PayoutSummary(recipient.recipientAddress, recipient.allocationAmount);
     }
 
-
     /// @notice Checks if msg.sender is eligible for RFP allocation
     /// @param _recipientId Id of the recipient
     function _getRecipientStatus(address _recipientId) internal view override returns (Status) {
         return _getRecipient(_recipientId).recipientStatus;
     }
-
 
     /// @notice This contract should be able to receive native token
     receive() external payable {}
