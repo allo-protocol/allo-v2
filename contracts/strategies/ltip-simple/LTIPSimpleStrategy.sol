@@ -59,7 +59,7 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         bool registryGating;
         bool metadataRequired;
         // slot 1
-        uint256 allocationThreshold;
+        uint256 voteThreshold;
         // slot 2
         uint64 registrationStartTime;
         uint64 registrationEndTime;
@@ -100,10 +100,19 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @param sender The sender of the transaction
     event AllocationRevoked(address indexed recipientId, address sender);
 
+    /// @notice Emitted when a vote is casted by an approved allocator
+    /// @param recipientId The recipient that was voted for
+    /// @param voter The allocator that casted the vote
+    event Voted(address indexed recipientId, address voter);
+
     /// @notice Emitted when a vesting plan is created
     /// @param vestingContract The address of the vesting contract
     /// @param tokenId The token id of the vesting contract (e.g. Hedgey NFT ID)
     event VestingPlanCreated(address vestingContract, uint256 tokenId);
+
+    /// @notice Emitted when the allocation period is extended (i.e. allow for longer voting)
+    /// @param allocationEndTime The new allocation end time
+    event AllocationPeriodExtended(uint64 allocationEndTime);
 
     /// ================================
     /// ========== Storage =============
@@ -115,8 +124,11 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Flag to indicate whether metadata is required or not.
     bool public metadataRequired;
 
+    // TODO is this needed when we already have the useRegistryAnchor flag?
     bool public registryGating;
-    uint256 public allocationThreshold;
+
+    /// @notice The voting threshold for a recipient to be accepted
+    uint256 public voteThreshold;
 
     /// @notice Start time for registration
     uint64 public registrationStartTime;
@@ -162,6 +174,14 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @dev 'recipientId' to 'VestingPlan'
     mapping(address => VestingPlan) internal _vestingPlans;
 
+    /// @notice This maps the allocator to the recipient they voted for
+    /// @dev 'allocator' to 'recipientId'
+    mapping(address => address) public votedFor;
+
+    /// @notice This maps the recipient to the number of votes they have
+    /// @dev 'recipientId' to 'votes'
+    mapping(address => uint256) public votes;
+
     /// ===============================
     /// ======== Constructor ==========
     /// ===============================
@@ -195,7 +215,7 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         // Set the strategy specific variables
         metadataRequired = _initializeParams.metadataRequired;
         registryGating = _initializeParams.registryGating;
-        allocationThreshold = _initializeParams.allocationThreshold;
+        voteThreshold = _initializeParams.voteThreshold;
         registrationStartTime = _initializeParams.registrationStartTime;
         registrationEndTime = _initializeParams.registrationEndTime;
         reviewStartTime = _initializeParams.reviewStartTime;
@@ -222,10 +242,11 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         return _getRecipient(_recipientId);
     }
 
-    /// @notice Checks if msg.sender is eligible for RFP allocation
-    /// @param _recipientId Id of the recipient
-    function _getRecipientStatus(address _recipientId) internal view override returns (Status) {
-        return _getRecipient(_recipientId).recipientStatus;
+    /// @notice Get the vesting plan
+    /// @param _recipientId ID of the recipient
+    /// @return VestingPlan Returns the vesting plan
+    function getVestingPlan(address _recipientId) external view returns (VestingPlan memory) {
+        return _vestingPlans[_recipientId];
     }
 
     /// @notice Return the payout for acceptedRecipientId
@@ -256,6 +277,14 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
         // Transfer the tokens to the 'msg.sender' (pool manager calling function)
         _transferAmount(_token, msg.sender, amount);
+    }
+
+    /// @notice Pool managers can extend the allocation period
+    /// @param _allocationEndTime The new allocation end time
+    function extendAllocationEndTime(uint64 _allocationEndTime) external onlyPoolManager(msg.sender) {
+        if(_allocationEndTime <= allocationEndTime) revert INVALID ();
+        allocationEndTime = _allocationEndTime;
+        emit AllocationPeriodExtended(_allocationEndTime);
     }
 
     /// ====================================
@@ -320,7 +349,7 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         recipient.recipientStatus = Status.Pending;
     }
 
-    /// @notice Select recipient for LTIP allocation
+    /// @notice Allocate (delegated) voting power to a recipient. In the simple strategy, every authorized voter has 1 vote.
     /// @dev '_sender' must be a pool manager to allocate.
     /// @param _data The data to be decoded
     /// @param _sender The sender of the allocation
@@ -333,21 +362,36 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         onlyPoolManager(_sender)
     {
         // Decode the '_data'
-        (acceptedRecipientId) = abi.decode(_data, (address));
+        address recipientId = abi.decode(_data, (address));
 
-        Recipient storage recipient = _recipients[acceptedRecipientId];
-
-        if (acceptedRecipientId == address(0) || recipient.recipientStatus != Status.Pending) {
-            revert RECIPIENT_ERROR(acceptedRecipientId);
+        // Check if the allocator has already casted the vote
+        address voteCastedTo = votedFor[_sender];
+        if (voteCastedTo != address(0)) {
+            // remove the old vote to allow recasting of vote
+            votes[voteCastedTo] -= 1;
         }
 
-        // Update status of acceptedRecipientId to accepted
-        recipient.recipientStatus = Status.Accepted;
+        // Increment the votes for the recipient
+        votes[recipientId] += 1;
+        // Update the votedFor mapping
+        votedFor[_sender] = recipientId;
 
-        IAllo.Pool memory pool = allo.getPool(poolId);
+        // Emit the event
+        emit Voted(recipientId, _sender);
 
-        // Emit event for the allocation
-        emit Allocated(acceptedRecipientId, recipient.allocationAmount, pool.token, _sender);
+        // Check if the recipient has reached the vote threshold
+        if (votes[recipientId] == voteThreshold) {
+            // Set the accepted recipient
+            acceptedRecipientId = recipientId;
+
+            Recipient storage recipient = _recipients[acceptedRecipientId];
+            recipient.recipientStatus = Status.Accepted;
+
+            // Set the pool to inactive
+            _setPoolActive(false);
+
+            emit Allocated(acceptedRecipientId, recipient.allocationAmount, allo.getPool(poolId).token, address(0));
+        }
     }
 
     function _transferAmount(address _token, address _recipient, uint256 _amount) internal override {
@@ -361,13 +405,12 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     }
 
     /// @notice Distribute the upcoming milestone to acceptedRecipientId.
-    /// @dev '_sender' must be a pool manager to distribute.
+    /// @dev As allocation determines the acceptance, anybody should be able to distribute. 
     /// @param _sender The sender of the distribution
     function _distribute(address[] memory, bytes memory, address _sender)
         internal
         virtual
         override
-        onlyPoolManager(_sender)
     {
         IAllo.Pool memory pool = allo.getPool(poolId);
         Recipient memory recipient = _recipients[acceptedRecipientId];
@@ -375,7 +418,7 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         // Check if the recipient is accepten
         if (recipient.recipientStatus != Status.Accepted) revert RECIPIENT_NOT_ACCEPTED();
 
-        // TODO throw if already allocated (ALREADY_ALLOCATED())
+        if (_vestingPlans[acceptedRecipientId].vestingContract != address(0)) revert ALREADY_ALLOCATED();
 
         // Get the pool, subtract the amount and transfer to the recipient
         poolAmount -= recipient.allocationAmount;
@@ -406,8 +449,6 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         }
     }
 
-    // TODO admin flows for updating round parameters
-
     /// @notice Get the payout summary for the accepted recipient.
     /// @return Returns the payout summary for the accepted recipient
     function _getPayout(address _recipientId, bytes memory) internal view override returns (PayoutSummary memory) {
@@ -415,13 +456,13 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         return PayoutSummary(recipient.recipientAddress, recipient.allocationAmount);
     }
 
-    /// @notice Checks if address is eligible allocator.
-    /// @dev This is used to check if the allocator is a pool manager and able to allocate funds from the pool
-    /// @param _allocator Address of the allocator
-    /// @return 'true' if the allocator is a pool manager, otherwise false
-    function _isValidAllocator(address _allocator) internal view override returns (bool) {
-        return allo.isPoolManager(poolId, _allocator);
+
+    /// @notice Checks if msg.sender is eligible for RFP allocation
+    /// @param _recipientId Id of the recipient
+    function _getRecipientStatus(address _recipientId) internal view override returns (Status) {
+        return _getRecipient(_recipientId).recipientStatus;
     }
+
 
     /// @notice This contract should be able to receive native token
     receive() external payable {}
