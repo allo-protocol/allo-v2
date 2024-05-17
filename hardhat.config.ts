@@ -14,6 +14,8 @@ import { HardhatUserConfig } from "hardhat/config";
 import { NetworkUserConfig } from "hardhat/types";
 import "@xyrusworx/hardhat-solidity-json";
 import "solidity-coverage"; // npx hardhat solidity-json
+import { url } from "inspector";
+import { network } from "hardhat";
 
 dotenv.config();
 
@@ -49,6 +51,7 @@ const chainIds = {
   avalanche: 43114,
   scroll: 534352,
   "lukso-mainnet": 42,
+  degen: 666666666,
 };
 
 let deployPrivateKey = process.env.DEPLOYER_PRIVATE_KEY as string;
@@ -83,7 +86,7 @@ function getRemappings(): string[][] {
  */
 function createTestnetConfig(
   network: keyof typeof chainIds,
-  url?: string,
+  url?: string
 ): NetworkUserConfig {
   if (!url) {
     url = `https://${network}.infura.io/v3/${infuraIdKey}`;
@@ -105,7 +108,7 @@ function createTestnetConfig(
  */
 function createMainnetConfig(
   network: keyof typeof chainIds,
-  url?: string,
+  url?: string
 ): NetworkUserConfig {
   if (!url) {
     url = `https://${network}.infura.io/v3/${infuraIdKey}`;
@@ -160,7 +163,7 @@ const config: HardhatUserConfig = {
     },
     "arbitrum-mainnet": createMainnetConfig(
       "arbitrum-mainnet",
-      `https://arb-mainnet.g.alchemy.com/v2/${alchemyIdKey}`,
+      `https://arb-mainnet.g.alchemy.com/v2/${alchemyIdKey}`
     ),
     fantom: createMainnetConfig("fantom-mainnet", "https://rpc.ftm.tools"),
     "celo-mainnet": {
@@ -195,23 +198,23 @@ const config: HardhatUserConfig = {
     // Test Networks
     goerli: createTestnetConfig(
       "goerli",
-      `https://eth-goerli.g.alchemy.com/v2/${alchemyIdKey}`,
+      `https://eth-goerli.g.alchemy.com/v2/${alchemyIdKey}`
     ),
     sepolia: createTestnetConfig(
       "sepolia",
-      `https://eth-sepolia.g.alchemy.com/v2/${alchemyIdKey}`,
+      `https://eth-sepolia.g.alchemy.com/v2/${alchemyIdKey}`
     ),
     "arbitrum-goerli": createTestnetConfig(
       "arbitrum-goerli",
-      `https://arb-goerli.g.alchemy.com/v2/${alchemyIdKey}`,
+      `https://arb-goerli.g.alchemy.com/v2/${alchemyIdKey}`
     ),
     "arbitrum-sepolia": createTestnetConfig(
       "arbitrum-sepolia",
-      `https://arb-sepolia.g.alchemy.com/v2/${alchemyIdKey}`,
+      `https://arb-sepolia.g.alchemy.com/v2/${alchemyIdKey}`
     ),
     ftmTestnet: createTestnetConfig(
       "fantom-testnet",
-      "https://rpc.testnet.fantom.network/",
+      "https://rpc.testnet.fantom.network/"
     ),
     "optimism-goerli": {
       ...createTestnetConfig("optimism-goerli"),
@@ -252,6 +255,10 @@ const config: HardhatUserConfig = {
     "lukso-testnet": {
       ...createTestnetConfig("lukso-testnet"),
       url: "https://4201.rpc.thirdweb.com",
+    },
+    degen: {
+      ...createTestnetConfig("degen"),
+      url: "https://rpc.degen.tips",
     },
 
     // Local Networks
@@ -298,6 +305,7 @@ const config: HardhatUserConfig = {
       scroll: process.env.SCROLLSCAN_API_KEY,
       "lukso-mainnet": "no-api-key-needed",
       "lukso-testnet": "no-api-key-needed",
+      degen: "no-api-key-needed",
     },
     customChains: [
       {
@@ -436,6 +444,14 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://explorer.execution.mainnet.lukso.network/api",
           browserURL: "https://explorer.execution.mainnet.lukso.network/",
+        },
+      },
+      {
+        network: "degen",
+        chainId: 666666666,
+        urls: {
+          apiURL: "https://explorer.degen.tips/api",
+          browserURL: "https://explorer.degen.tips/",
         },
       },
     ],

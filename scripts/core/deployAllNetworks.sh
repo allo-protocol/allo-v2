@@ -26,41 +26,41 @@ handle_insufficient_funds_error() {
 }
 
 networks=(
-#   "fuji"
-#   "sepolia"
-#   "celo-testnet"
-#   "arbitrum-sepolia"
-#   "optimism-sepolia" # Error calling deploy() function for contract DirectGrantsLiteStrategy
-#   "optimism-mainnet"
-#   "celo-mainnet"
-#   "arbitrum-mainnet"
-#   "base"
-#   "polygon"
-#   "mainnet"
-#   "avalanche"
-#   "scroll"
-#   "ftmTestnet"
-#   "fantom"
-#   "filecoin-mainnet"
-#   "filecoin-calibration"
-#   "sei-devnet"
-#   "lukso-testnet"
-#   "lukso-mainnet"
+    #   "fuji"
+    #   "sepolia"
+    #   "celo-testnet"
+    #   "arbitrum-sepolia"
+    #   "optimism-sepolia" # Error calling deploy() function for contract DirectGrantsLiteStrategy
+    #   "optimism-mainnet"
+    #   "celo-mainnet"
+    #   "arbitrum-mainnet"
+    #   "base"
+    #   "polygon"
+    #   "mainnet"
+    #   "avalanche"
+    #   "scroll"
+    #   "ftmTestnet"
+    #   "fantom"
+    #   "filecoin-mainnet"
+    #   "filecoin-calibration"
+    #   "sei-devnet"
+    #   "lukso-testnet"
+    #   "lukso-mainnet"
+    "degen"
 
-#  === ZkSync Era ===
-#   "zkSyncTestnet"
-#   "zkSyncMainnet"
-#  ==================
+    #  === ZkSync Era ===
+    #   "zkSyncTestnet"
+    #   "zkSyncMainnet"
+    #  ==================
 )
 
 scripts=(
-    # "core/deployRegistry"
     # "core/deployAllo"
-    # "core/deployContractFactory"
+    "core/deployContractFactory"
     # "strategies/deployDonationVotingMerkleDistributionDirect"
     # "strategies/deployDirectGrants"
     # "strategies/deployDirectGrantsLite"
-    
+
     # "core/transferProxyAdminOwnership"
     # "strategies/deployDonationVotingMerkleDistributionVault"
     # "strategies/deployQVSimple"
