@@ -1,0 +1,58 @@
+
+    ////////////////////////////////////////////////////
+            Deploys Allo.sol on degen
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────┐
+│     (index)     │                    Values                    │
+├─────────────────┼──────────────────────────────────────────────┤
+│    contract     │              'Deploy Allo.sol'               │
+│     chainId     │                  666666666                   │
+│     network     │                   'degen'                    │
+│      owner      │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│    registry     │ '0x4AAcca72145e1dF2aeC137E1f3C5E3D75DB8b5f3' │
+│    treasury     │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│   percentFee    │                      0                       │
+│     baseFee     │                      0                       │
+│ deployerAddress │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│     balance     │              '999.99996396286'               │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying Allo.sol...
+Allo Proxy deployed to: 0xB087535DB0df98fC4327136e897A5985E5Cfbd66
+Registry implementation deployed to: 0xE195743480D1591B79106FF9B296A0cD38aDa807
+Proxy Admin:  0x758b87af7fdB4783f848a1dDEa1F025dC48B9858
+Proxy Admin Owner:  0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C
+
+Verifying contract...
+Verifying implementation: 0xE195743480D1591B79106FF9B296A0cD38aDa807
+Successfully submitted source code for contract
+contracts/core/Allo.sol:Allo at 0xE195743480D1591B79106FF9B296A0cD38aDa807
+for verification on the block explorer. Waiting for verification result...
+
+Successfully verified contract Allo on the block explorer.
+https://explorer.degen.tips/address/0xE195743480D1591B79106FF9B296A0cD38aDa807#code
+Verifying proxy: 0xB087535DB0df98fC4327136e897A5985E5Cfbd66
+Failed to verify TransparentUpgradeableProxy contract at 0xB087535DB0df98fC4327136e897A5985E5Cfbd66: Unknown UID
+Linking proxy 0xB087535DB0df98fC4327136e897A5985E5Cfbd66 with implementation
+Error: Etherscan API call failed with status 500, response: {"message":"Something went wrong.","result":null,"status":"0"}
+
+
+
+Verifying contract...
+The contract 0xE195743480D1591B79106FF9B296A0cD38aDa807 has already been verified.
+https://explorer.degen.tips/address/0xE195743480D1591B79106FF9B296A0cD38aDa807#code
+[90m
+	Validating getRegistry() == 0x4AAcca72145e1dF2aeC137E1f3C5E3D75DB8b5f3[0m
+[32m	✅ PASSED with Result: 0x4AAcca72145e1dF2aeC137E1f3C5E3D75DB8b5f3[0m
+[90m
+	Validating getTreasury() == 0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C[0m
+[32m	✅ PASSED with Result: 0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C[0m
+[90m
+	Validating getPercentFee() == 0[0m
+[32m	✅ PASSED with Result: 0[0m
+[90m
+	Validating getBaseFee() == 0[0m
+[32m	✅ PASSED with Result: 0[0m
+[90m
+	Validating owner() == 0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C[0m
+[32m	✅ PASSED with Result: 0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C[0m

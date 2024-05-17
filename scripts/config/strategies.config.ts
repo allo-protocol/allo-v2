@@ -623,4 +623,35 @@ export const strategyConfig: DeployParams = {
       version: "v1.0",
     },
   },
+    // Degen
+    666666666: {
+      "rfp-simple": {
+        name: "RFPSimpleStrategy",
+        version: "v1.0",
+      },
+      "rfp-committee": {
+        name: "RFPCommitteeStrategy",
+        version: "v1.0",
+      },
+      "qv-simple": {
+        name: "QVSimpleStrategy",
+        version: "v1.0",
+      },
+      "donation-voting-merkle-distribution-direct": {
+        name: "DonationVotingMerkleDistributionDirectTransferStrategy",
+        version: "v2.1",
+      },
+      "qv-impact-stream": {
+        name: "QVImpactStreamStrategy",
+        version: "v1.0",
+      },
+      "direct-grants": {
+        name: "DirectGrantsSimpleStrategy",
+        version: "v2.1",
+      },
+      "direct-grants-lite": {
+        name: "DirectGrantsLiteStrategy",
+        version: "v1.0",
+      },
+    },
 };

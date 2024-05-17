@@ -1,6 +1,6 @@
 type CommonConfig = {
-  proxyAdminOwner?: string,
-  permit2Address: string,
+  proxyAdminOwner?: string;
+  permit2Address: string;
 };
 
 type DeployParams = Record<number, CommonConfig>;
@@ -135,5 +135,10 @@ export const commonConfig: DeployParams = {
   4201: {
     proxyAdminOwner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
     permit2Address: "0x3c795a334dE57813D8CA945D1A47D329D6Fc2151",
+  },
+  // Degen chain
+  666666666: {
+    proxyAdminOwner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
+    permit2Address: "0x000000000022D473030F116dDEE9F6B43aC78BA3",
   },
 };

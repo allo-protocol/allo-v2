@@ -17,6 +17,7 @@
 | Polygon         | 137      |
 | Avalanche       | 43114    |
 | Scroll          | 534352   |
+| Degen           | 666666666| 
 
 
 ## Supported Testnet Networks
@@ -104,6 +105,67 @@
     <tr>
         <td>ContractFactory.sol</td>
         <td>0xE195743480D1591B79106FF9B296A0cD38aDa807</td>
+    </tr>
+</tbody>
+</table>
+
+### Degen Chain Contracts
+
+#### Allo Core
+
+<table>
+<thead>
+    <tr>
+        <th>Contract</th>
+        <th>Address</th>
+    </tr>
+</thead>
+<tbody>
+    <tr>
+        <td>Registry</td>
+        <td>0x4AAcca72145e1dF2aeC137E1f3C5E3D75DB8b5f3</td>
+    </tr>
+    <tr>
+        <td>Allo Proxy</td>
+        <td>0xB087535DB0df98fC4327136e897A5985E5Cfbd66</td>
+    </tr>
+    <tr>
+        <td>Allo Implementation</td>
+        <td>0xE195743480D1591B79106FF9B296A0cD38aDa807</td>
+    </tr>
+</tbody>
+</table>
+
+#### Strategy Contracts
+
+<table>
+<thead>
+    <tr>
+        <th>Contract</th>
+        <th>Address</th>
+    </tr>
+</thead>
+<tbody>
+    <tr>
+        <td>DirectGrantsLiteStrategy</td>
+        <td>0xF21E0915a0b7c541483962Cc7fB4705bBd4D5248</td>
+    </tr>
+</tbody>
+</table>
+
+#### Deployer Contract
+
+<table>
+<thead>
+    <tr>
+        <th>Contract</th>
+        <th>Address</th>
+    </tr>
+</thead>
+<tbody>
+    <tr>
+        <td>ContractFactory.sol</td>
+        <td>0x1133eA7Af70876e64665ecD07C0A0476d09465a1</td>
     </tr>
 </tbody>
 </table>

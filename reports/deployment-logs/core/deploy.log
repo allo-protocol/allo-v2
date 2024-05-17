@@ -549,3 +549,11 @@
 20240517_121108 - Deployment finished with 0 error(s)
 20240517_121144 - Executing: bun hardhat run scripts/core/deployContractFactory.ts --no-compile --network degen | tee ./reports/deployment-logs/core/deployContractFactory/degen/20240517_121144/deploy-20240517_121144.log
 20240517_121259 - Deployment finished with 0 error(s)
+20240517_131548 - Executing: bun hardhat run scripts/core/deployRegistry.ts --no-compile --network degen | tee ./reports/deployment-logs/core/deployRegistry/degen/20240517_131548/deploy-20240517_131548.log
+20240517_131713 - Deployment finished with 0 error(s)
+20240517_141138 - Executing: bun hardhat run scripts/core/deployAllo.ts --no-compile --network degen | tee ./reports/deployment-logs/core/deployAllo/degen/20240517_141138/deploy-20240517_141138.log
+20240517_141307 - Deployment finished with 0 error(s)
+20240517_141528 - Executing: bun hardhat run scripts/core/deployContractFactory.ts --no-compile --network degen | tee ./reports/deployment-logs/core/deployContractFactory/degen/20240517_141528/deploy-20240517_141528.log
+20240517_141644 - Deployment finished with 0 error(s)
+20240517_143240 - Executing: bun hardhat run scripts/strategies/deployDirectGrantsLite.ts --no-compile --network degen | tee ./reports/deployment-logs/strategies/deployDirectGrantsLite/degen/20240517_143240/deploy-20240517_143240.log
+20240517_143433 - Deployment finished with 0 error(s)
