@@ -109,7 +109,7 @@
 </tbody>
 </table>
 
-### Degen Chain Contracts
+### 🟣 Degen Chain Contracts
 
 #### Allo Core
 
