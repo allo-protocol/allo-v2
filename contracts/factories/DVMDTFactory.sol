@@ -4,8 +4,7 @@ pragma solidity 0.8.19;
 // External Libraries
 import "solady/auth/Ownable.sol";
 // Internal Libraries
-import "../../strategies/direct-grants-lite/DirectGrantsLite.sol";
-
+import "../strategies/donation-voting-merkle-distribution-direct-transfer/DonationVotingMerkleDistributionDirectTransferStrategy.sol";
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⣿⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣸⣿⣿⣿⢿⣿⣿⣿⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -21,15 +20,19 @@ import "../../strategies/direct-grants-lite/DirectGrantsLite.sol";
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⠙⠋⠛⠙⠋⠛⠙⠋⠛⠙⠋⠃⠀⠀⠀⠀⠀⠀⠀⠀⠠⠿⠻⠟⠿⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⠟⠿⠟⠿⠆⠀⠸⠿⠿⠟⠯⠀⠀⠀⠸⠿⠿⠿⠏⠀⠀⠀⠀⠀⠈⠉⠻⠻⡿⣿⢿⡿⡿⠿⠛⠁⠀⠀⠀⠀⠀⠀
 //                    allo.gitcoin.co
 
-/// @title DirectGrantsLiteFactory
+/// @title DonationVotingMerkleDirectTransferFactory
 /// @author @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>, @0xZakk <zakk@gitcoin.co>, @nfrgosselin <nate@gitcoin.co>
 /// @notice This contract is used to create new DonationVotingMerkleDistributionDirectTransferStrategy contracts on Era.
-contract DGLFactory is Ownable {
+contract DVMDTFactory is Ownable {
+
   /// @notice Allo address
   address public allo;
-
+  
   /// @notice Strategy name
   string public name;
+
+  /// @notice Permit2 contract
+  ISignatureTransfer public permit2;
 
   /// ===============================
   /// ========== Events =============
@@ -43,14 +46,20 @@ contract DGLFactory is Ownable {
   /// @param name The new name
   event NameUpdated(string name);
 
-  constructor(address _allo, string memory _name) {
+  /// @notice Emitted when the permit2 contract is updated
+  /// @param permit2 The new permit2 contract
+  event Permit2Updated(ISignatureTransfer permit2);
+
+  constructor(address _allo, string memory _name, ISignatureTransfer _permit2) {
     _initializeOwner(msg.sender);
 
     allo = _allo;
     name = _name;
+    permit2 = _permit2;
 
     emit AlloUpdated(_allo);
     emit NameUpdated(_name);
+    emit Permit2Updated(_permit2);
   }
 
   /// @notice Updates allo address
@@ -67,15 +76,35 @@ contract DGLFactory is Ownable {
     emit NameUpdated(_name);
   }
 
-  /// @notice Creates a new DirectGrantsLiteStrategy
-  function createStrategy() external returns (address) {
-    return address(new DirectGrantsLiteStrategy(allo, name));
+  /// @notice Updates permit2 contract
+  /// @param _permit2 The permit2 contract
+  function updatePermit2(ISignatureTransfer _permit2) external onlyOwner {
+    permit2 = _permit2;
+    emit Permit2Updated(_permit2);
   }
 
-  /// @notice Creates a new DirectGrantsLiteStrategy with custom params
+  /// @notice Creates a new DonationVotingMerkleDistributionDirectTransferStrategy
+  function createStrategy() external returns (address) {
+    return address(new DonationVotingMerkleDistributionDirectTransferStrategy(
+      allo,
+      name,
+      permit2
+    ));
+  }
+
+  /// @notice Creates a new DonationVotingMerkleDistributionDirectTransferStrategy with custom params
   /// @param _allo The 'Allo' contract
   /// @param _name The name of the strategy
-  function createCustomStrategy(address _allo, string memory _name) external returns (address) {
-    return address(new DirectGrantsLiteStrategy(_allo, _name));
+  /// @param _permit2 The permit2 contract
+  function createStrategyCustom(
+    address _allo,
+    string memory _name,
+    ISignatureTransfer _permit2
+  ) external returns (address) {
+    return address(new DonationVotingMerkleDistributionDirectTransferStrategy(
+      _allo,
+      _name,
+      _permit2
+    ));
   }
 }
