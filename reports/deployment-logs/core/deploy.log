@@ -545,3 +545,17 @@
 20240513_165048 - Deployment finished with 0 error(s)
 20240513_165104 - Executing: bun hardhat deploy-zksync --network zkSyncMainnet --config era.hardhat.config.ts --script zksync/strategies/deployEraDirectGrantsLite.ts | tee ./reports/deployment-logs/zksync/strategies/deployEraDirectGrantsLite/zkSyncMainnet/20240513_165104/deploy-20240513_165104.log
 20240513_165215 - Deployment finished with 0 error(s)
+20240517_115914 - Executing: bun hardhat deploy-zksync --network zkSyncTestnet --config era.hardhat.config.ts --script zksync/factory/deployDVMDTFactory.ts | tee ./reports/deployment-logs/zksync/factory/deployDVMDTFactory/zkSyncTestnet/20240517_115914/deploy-20240517_115914.log
+20240517_120002 - Deployment finished with 0 error(s)
+20240517_120002 - Executing: bun hardhat deploy-zksync --network zkSyncTestnet --config era.hardhat.config.ts --script zksync/factory/deployDGLFactory.ts | tee ./reports/deployment-logs/zksync/factory/deployDGLFactory/zkSyncTestnet/20240517_115914/deploy-20240517_115914.log
+20240517_120047 - Deployment finished with 0 error(s)
+20240517_120102 - Executing: bun hardhat deploy-zksync --network zkSyncMainnet --config era.hardhat.config.ts --script zksync/factory/deployDVMDTFactory.ts | tee ./reports/deployment-logs/zksync/factory/deployDVMDTFactory/zkSyncMainnet/20240517_120102/deploy-20240517_120102.log
+20240517_120152 - Deployment finished with 0 error(s)
+20240517_120152 - Executing: bun hardhat deploy-zksync --network zkSyncMainnet --config era.hardhat.config.ts --script zksync/factory/deployDGLFactory.ts | tee ./reports/deployment-logs/zksync/factory/deployDGLFactory/zkSyncMainnet/20240517_120102/deploy-20240517_120102.log
+20240517_120238 - Deployment finished with 0 error(s)
+20240521_153654 - Executing: bun hardhat deploy-zksync --network zkSyncTestnet --config era.hardhat.config.ts --script zksync/factory/deployDGLFactory.ts | tee ./reports/deployment-logs/zksync/factory/deployDGLFactory/zkSyncTestnet/20240521_153654/deploy-20240521_153654.log
+20240521_153759 - Executing: bun hardhat deploy-zksync --network zkSyncMainnet --config era.hardhat.config.ts --script zksync/factory/deployDGLFactory.ts | tee ./reports/deployment-logs/zksync/factory/deployDGLFactory/zkSyncMainnet/20240521_153654/deploy-20240521_153654.log
+20240521_153854 - Deployment finished with 0 error(s)
+20240521_153854 - Executing: bun hardhat deploy-zksync --network zkSyncTestnet --config era.hardhat.config.ts --script zksync/factory/deployDVMDTFactory.ts | tee ./reports/deployment-logs/zksync/factory/deployDVMDTFactory/zkSyncTestnet/20240521_153654/deploy-20240521_153654.log
+20240521_153951 - Executing: bun hardhat deploy-zksync --network zkSyncMainnet --config era.hardhat.config.ts --script zksync/factory/deployDVMDTFactory.ts | tee ./reports/deployment-logs/zksync/factory/deployDVMDTFactory/zkSyncMainnet/20240521_153654/deploy-20240521_153654.log
+20240521_154058 - Deployment finished with 0 error(s)

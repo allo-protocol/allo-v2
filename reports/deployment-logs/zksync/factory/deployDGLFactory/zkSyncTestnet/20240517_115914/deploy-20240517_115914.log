@@ -1,0 +1,21 @@
+
+    ////////////////////////////////////////////////////
+        Deploys DGLFactory.sol on zkSyncTestnet
+    ////////////////////////////////////////////////////
+┌─────────────────┬──────────────────────────────────────────────┐
+│     (index)     │                    Values                    │
+├─────────────────┼──────────────────────────────────────────────┤
+│    contract     │           'Deploy DGLFactory.sol'            │
+│  strategyName   │          'DirectGrantsLiteStrategy'          │
+│     version     │                    'v1.0'                    │
+│      args       │                                              │
+│     chainId     │                     300                      │
+│     network     │               'zkSyncTestnet'                │
+│ deployerAddress │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying DGLFactory.sol...
+DGLFactory was deployed to 0xa029A4cED20b2Eec7aC35892FAD6E4564e27FE7A
+
+Verifying contract...
+Your verification ID is: 13442
+Contract successfully verified on zkSync block explorer!

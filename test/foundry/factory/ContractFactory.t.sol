@@ -2,7 +2,7 @@ pragma solidity ^0.8.19;
 
 import "forge-std/Test.sol";
 
-import {ContractFactory} from "../../../contracts/factory/ContractFactory.sol";
+import {ContractFactory} from "../../../contracts/factories/ContractFactory.sol";
 import {TestStrategy} from "../../utils/TestStrategy.sol";
 
 contract ContractFactoryTest is Test {

@@ -75,6 +75,8 @@ scripts=(
     # "zksync/strategies/deployEraDonationVotingMerkleDistributionDirect"
     # "zksync/strategies/deployEraDirectGrants"
     # "zksync/strategies/deployEraDirectGrantsLite"
+    # "zksync/factory/deployDGLFactory"
+    # "zksync/factory/deployDVMDTFactory"
 )
 
 for script in "${scripts[@]}"; do
