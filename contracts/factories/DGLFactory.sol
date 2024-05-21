@@ -43,6 +43,10 @@ contract DGLFactory is Ownable {
     /// @param name The new name
     event NameUpdated(string name);
 
+    /// @notice Emitted when a new strategy is created
+    /// @param strategy The address of the new strategy
+    event StrategyCreated(address strategy);
+
     constructor(address _allo, string memory _name) {
         _initializeOwner(msg.sender);
 
@@ -68,14 +72,16 @@ contract DGLFactory is Ownable {
     }
 
     /// @notice Creates a new DirectGrantsLiteStrategy
-    function createStrategy() external returns (address) {
-        return address(new DirectGrantsLiteStrategy(allo, name));
+    function createStrategy() external returns (address strategy) {
+        strategy = address(new DirectGrantsLiteStrategy(allo, name));
+        emit StrategyCreated(strategy);
     }
 
     /// @notice Creates a new DirectGrantsLiteStrategy with custom params
     /// @param _allo The 'Allo' contract
     /// @param _name The name of the strategy
-    function createCustomStrategy(address _allo, string memory _name) external returns (address) {
-        return address(new DirectGrantsLiteStrategy(_allo, _name));
+    function createCustomStrategy(address _allo, string memory _name) external returns (address strategy) {
+        strategy = address(new DirectGrantsLiteStrategy(_allo, _name));
+        emit StrategyCreated(strategy);
     }
 }

@@ -50,6 +50,10 @@ contract DVMDTFactory is Ownable {
     /// @param permit2 The new permit2 contract
     event Permit2Updated(ISignatureTransfer permit2);
 
+    /// @notice Emitted when a new strategy is created
+    /// @param strategy The address of the new strategy
+    event StrategyCreated(address strategy);
+
     constructor(address _allo, string memory _name, ISignatureTransfer _permit2) {
         _initializeOwner(msg.sender);
 
@@ -84,8 +88,9 @@ contract DVMDTFactory is Ownable {
     }
 
     /// @notice Creates a new DonationVotingMerkleDistributionDirectTransferStrategy
-    function createStrategy() external returns (address) {
-        return address(new DonationVotingMerkleDistributionDirectTransferStrategy(allo, name, permit2));
+    function createStrategy() external returns (address strategy) {
+        strategy = address(new DonationVotingMerkleDistributionDirectTransferStrategy(allo, name, permit2));
+        emit StrategyCreated(strategy);
     }
 
     /// @notice Creates a new DonationVotingMerkleDistributionDirectTransferStrategy with custom params
@@ -94,8 +99,9 @@ contract DVMDTFactory is Ownable {
     /// @param _permit2 The permit2 contract
     function createStrategyCustom(address _allo, string memory _name, ISignatureTransfer _permit2)
         external
-        returns (address)
+        returns (address strategy)
     {
-        return address(new DonationVotingMerkleDistributionDirectTransferStrategy(_allo, _name, _permit2));
+        strategy = address(new DonationVotingMerkleDistributionDirectTransferStrategy(_allo, _name, _permit2));
+        emit StrategyCreated(strategy);
     }
 }
