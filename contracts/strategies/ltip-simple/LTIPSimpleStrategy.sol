@@ -511,15 +511,13 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         }
     }
 
-    function _vestAmount(address _token, address _recipient, uint256 _amount) internal virtual {
-        TokenTimelock vestingContract = new TokenTimelock(IERC20(_token), _recipient, block.timestamp + vestingPeriod);
+    function _vestAmount(address recipientId, address recipientAddress, address _token, uint256 _amount) internal virtual {
+        TokenTimelock vestingContract = new TokenTimelock(IERC20(_token), recipientAddress, block.timestamp + vestingPeriod);
 
         IAllo.Pool memory pool = allo.getPool(poolId);
         _transferAmount(pool.token, address(vestingContract), _amount);
 
-        Recipient storage recipient = _recipients[_recipient];
-
-        _vestingPlans[_recipient] = VestingPlan(address(vestingContract), 0);
+        _vestingPlans[recipientId] = VestingPlan(address(vestingContract), 0);
 
         emit VestingPlanCreated(address(vestingContract), 0);
     }
@@ -546,7 +544,7 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
             // Get the pool, subtract the amount and transfer to the recipient
             poolAmount -= recipient.allocationAmount;
 
-            _vestAmount(pool.token, recipient.recipientAddress, recipient.allocationAmount);
+            _vestAmount(recipientId, recipient.recipientAddress, pool.token, recipient.allocationAmount);
 
             // Emit events for the milestone and the distribution
             emit Distributed(recipientId, recipient.recipientAddress, recipient.allocationAmount, _sender);

@@ -161,15 +161,15 @@ contract LTIPHedgeyStrategy is LTIPSimpleStrategy {
     /// ============ Internal ==============
     /// ====================================
 
-    function _vestAmount(address _token, address _recipient, uint256 _amount) internal virtual override {
-        Recipient memory recipient = _recipients[_recipient];
+    function _vestAmount(address recipientId, address recipientAddress, address _token, uint256 _amount) internal virtual override {
+        Recipient memory recipient = _recipients[recipientId];
 
         IERC20(_token).approve(hedgeyContract, _amount);
 
         // TODO is there a rate?
         uint256 rate = _amount / recipient.allocationAmount;
         uint256 hedgeyId = ITokenVestingPlans(hedgeyContract).createPlan(
-            _recipient,
+            recipientAddress,
             _token,
             _amount,
             block.timestamp,
@@ -181,7 +181,7 @@ contract LTIPHedgeyStrategy is LTIPSimpleStrategy {
         );
 
 
-        _vestingPlans[_recipient] = VestingPlan(hedgeyContract, hedgeyId);
+        _vestingPlans[recipientId] = VestingPlan(hedgeyContract, hedgeyId);
         _transferAmount(_token, address(hedgeyContract), _amount);
 
         emit VestingPlanCreated(hedgeyContract, hedgeyId);

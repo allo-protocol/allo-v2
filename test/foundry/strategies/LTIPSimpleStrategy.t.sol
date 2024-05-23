@@ -44,6 +44,8 @@ contract LTIPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, StrategyS
     // Errors
 
     error REVIEW_NOT_ACTIVE();
+    error INSUFFICIENT_VOTES();
+    error ALREADY_ALLOCATED();
 
     // TODO do we accept multiple tokens?
     address[] public allowedTokens;
@@ -491,7 +493,6 @@ contract LTIPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, StrategyS
         assertEq(votes, 0);
     }
 
-
     function testRevert_allocate_UNAUTHORIZED() public {
         vm.expectRevert(UNAUTHORIZED.selector);
         vm.prank(makeAddr("not_pool_manager"));
@@ -529,8 +530,10 @@ contract LTIPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, StrategyS
         vm.expectEmit(true, false, false, false);
         emit Distributed(recipientId, recipient.recipientAddress, recipient.allocationAmount, anon);
         ltipStrategy().distribute(recipientIds, "", anon);
-    }
 
+        LTIPSimpleStrategy.VestingPlan memory plan = ltipStrategy().getVestingPlan(recipientId);
+        assertTrue(plan.vestingContract != address(0));
+    }
 
     function test_distribute_RECIPIENT_NOT_ACCEPTED() public {
         address recipientId = __register_recipient();
@@ -549,22 +552,79 @@ contract LTIPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, StrategyS
         // any one can call distribute
         address anon = makeAddr("anon");
 
-        vm.expectRevert(RECIPIENT_NOT_ACCEPTED.selector); 
+        vm.expectRevert(RECIPIENT_NOT_ACCEPTED.selector);
         vm.prank(address(allo()));
         ltipStrategy().distribute(recipientIds, "", anon);
     }
 
+    function test_distribute_INSUFFICIENT_VOTES() public {
+        address recipientId = __register_recipient();
+        vm.warp(reviewStartTime + 10);
+
+        // Accept
+
+        address[] memory recipientIds = new address[](1);
+        recipientIds[0] = recipientId;
+        IStrategy.Status[] memory Statuses = new IStrategy.Status[](1);
+        Statuses[0] = IStrategy.Status.Accepted;
+
+        vm.prank(pool_manager1());
+        ltipStrategy().reviewRecipients(recipientIds, Statuses);
+
+        // Allocate
+        vm.warp(allocationStartTime + 10);
+
+        vm.startPrank(address(allo()));
+        ltipStrategy().allocate(abi.encode(recipientId), pool_manager1());
+
+        // Distribute
+        vm.warp(distributionStartTime + 10);
+
+        // any one can call distribute
+        address anon = makeAddr("anon");
+
+        vm.expectRevert(INSUFFICIENT_VOTES.selector);
+        ltipStrategy().distribute(recipientIds, "", anon);
+    }
+
+    function test_distribute_ALREADY_ALLOCATED() public {
+        address recipientId = __register_recipient();
+        vm.warp(reviewStartTime + 10);
+
+        // Accept
+
+        address[] memory recipientIds = new address[](1);
+        recipientIds[0] = recipientId;
+        IStrategy.Status[] memory statuses = new IStrategy.Status[](1);
+        statuses[0] = IStrategy.Status.Accepted;
+
+        vm.prank(pool_manager1());
+        ltipStrategy().reviewRecipients(recipientIds, statuses);
+
+        // Allocate
+        vm.warp(allocationStartTime + 10);
+
+        vm.startPrank(address(allo()));
+        ltipStrategy().allocate(abi.encode(recipientId), pool_manager1());
+        ltipStrategy().allocate(abi.encode(recipientId), pool_manager2());
+
+        // Distribute
+        vm.warp(distributionStartTime + 10);
+
+        // any one can call distribute
+        address anon = makeAddr("anon");
+
+        ltipStrategy().distribute(recipientIds, "", anon);
+
+        vm.expectRevert(ALREADY_ALLOCATED.selector);
+        ltipStrategy().distribute(recipientIds, "", anon);
+    }
 
     // function testRevert_allocate_RECIPIENT_ALREADY_ACCEPTED() public {
     //     __register_setMilestones_allocate();
     //     vm.prank(address(allo()));
     //     vm.expectRevert(RECIPIENT_ALREADY_ACCEPTED.selector);
     //     strategy.allocate(abi.encode(randomAddress()), address(pool_admin()));
-    // }
-
-    // function test_distribute() public {
-    //     _register_allocate_submit_distribute();
-    //     assertEq(uint8(strategy.getMilestoneStatus(0)), uint8(IStrategy.Status.Accepted));
     // }
 
     // function test_change_admin_address() public {
