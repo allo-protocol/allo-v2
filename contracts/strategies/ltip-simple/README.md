@@ -40,9 +40,9 @@ sequenceDiagram
     LTIPSimpleStrategy-->>Allo: recipient1
     Allo-->>-Alice: recipientId1
     PoolManager->>+Allo: allocate() (votes on recipient)
-    Allo-->>-RFPSimpleStrategy: allocate() (accepts a recipient based on voting threshold and allocate proposed allocation amount)
+    Allo-->>-LTIPSimpleStrategy: allocate() (accepts a recipient based on voting threshold and allocate proposed allocation amount)
     PoolManager->>+Allo: distribute() ( create vesting plan and deposit funds for recipient)
-    Allo-->>-RFPSimpleStrategy: distribute() (next milestone for recipient)
+    Allo-->>-LTIPSimpleStrategy: distribute() (create TokenTimeLock)
 ```
 
 ## Smart Contract Overview

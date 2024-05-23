@@ -14,41 +14,22 @@ import {AlloSetup} from "../shared/AlloSetup.sol";
 import {RegistrySetupFull} from "../shared/RegistrySetup.sol";
 import {EventSetup} from "../shared/EventSetup.sol";
 import {StrategySetup} from "../shared/StrategySetup.sol";
-import {HedgeySetup} from "../shared/HedgeySetup.sol";
 import {MockERC20} from "../../utils/MockERC20.sol";
 
 contract LTIPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, StrategySetup, EventSetup, Errors {
     // Events
     event Voted(address indexed recipientId, address voter);
-    event PoolFunded(uint256 indexed poolId, uint256 amount, uint256 fee);
-    event PlanCreated(
-        uint256 indexed id,
-        address indexed recipient,
-        address indexed token,
-        uint256 amount,
-        uint256 start,
-        uint256 cliff,
-        uint256 end,
-        uint256 rate,
-        uint256 period,
-        address vestingAdmin,
-        bool adminTransferOBO
-    );
-    event AdminAddressUpdated(address adminAddress, address sender);
-    event AdminTransferOBOUpdated(bool adminTransferOBO, address sender);
     event Reviewed(address indexed recipientId, IStrategy.Status status, address sender);
     event RecipientStatusUpdated(
         address indexed recipientId, uint256 applicationId, IStrategy.Status status, address sender
     );
+    event Canceled(address indexed recipientId, address sender);
 
     // Errors
 
     error REVIEW_NOT_ACTIVE();
     error INSUFFICIENT_VOTES();
     error ALREADY_ALLOCATED();
-
-    // TODO do we accept multiple tokens?
-    address[] public allowedTokens;
 
     address payable internal _strategy;
     MockERC20 public token;
@@ -72,19 +53,9 @@ contract LTIPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, StrategyS
     uint64 public distributionEndTime;
     uint64 public vestingPeriod;
 
-    // Hedgey Specific
-    bool public adminTransferOBO;
-    address public hedgeyContract;
-    address public adminAddress;
+    uint256 public allocationAmount;
 
     uint256 public constant ONE_MONTH_SECONDS = 2628000;
-
-    // struct TestStruct {
-    //     uint256 a;
-    //     uint256 b;
-    //     uint256 c;
-    //     bool d;
-    // }
 
     function setUp() public {
         __RegistrySetupFull();
@@ -110,6 +81,8 @@ contract LTIPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, StrategyS
         metadataRequired = true;
         registryGating = true;
         useRegistryAnchor = true;
+
+        allocationAmount = 1 ether;
 
         votingThreshold = 2;
 
@@ -500,7 +473,7 @@ contract LTIPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, StrategyS
     }
 
     function test_distribute() public {
-        address recipientId = __register_recipient();
+        address recipientId = __register_recipient_fund_pool();
         vm.warp(reviewStartTime + 10);
 
         // Accept
@@ -588,7 +561,7 @@ contract LTIPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, StrategyS
     }
 
     function test_distribute_ALREADY_ALLOCATED() public {
-        address recipientId = __register_recipient();
+        address recipientId = __register_recipient_fund_pool();
         vm.warp(reviewStartTime + 10);
 
         // Accept
@@ -620,30 +593,38 @@ contract LTIPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, StrategyS
         ltipStrategy().distribute(recipientIds, "", anon);
     }
 
-    // function testRevert_allocate_RECIPIENT_ALREADY_ACCEPTED() public {
-    //     __register_setMilestones_allocate();
-    //     vm.prank(address(allo()));
-    //     vm.expectRevert(RECIPIENT_ALREADY_ACCEPTED.selector);
-    //     strategy.allocate(abi.encode(randomAddress()), address(pool_admin()));
-    // }
+    function test_cancel_recipients() public {
+        address recipientId = __register_recipient();
+        vm.warp(reviewStartTime + 10);
 
-    // function test_change_admin_address() public {
-    //     vm.prank(address(pool_admin()));
-    //     vm.expectEmit(true, true, false, false);
-    //     emit AdminAddressUpdated(address(pool_manager1()), address(pool_admin()));
+        // Accept
 
-    //     strategy.setAdminAddress(address(pool_manager1()));
-    //     assertEq(strategy.adminAddress(), address(pool_manager1()));
-    // }
+        address[] memory recipientIds = new address[](1);
+        recipientIds[0] = recipientId;
+        IStrategy.Status[] memory Statuses = new IStrategy.Status[](1);
+        Statuses[0] = IStrategy.Status.Accepted;
 
-    // function test_change_admin_transfer_obo() public {
-    //     vm.prank(address(pool_admin()));
-    //     vm.expectEmit(true, true, false, false);
-    //     emit AdminTransferOBOUpdated(false, address(pool_admin()));
+        vm.prank(pool_manager1());
+        ltipStrategy().reviewRecipients(recipientIds, Statuses);
 
-    //     strategy.setAdminTransferOBO(false);
-    //     assertEq(strategy.adminTransferOBO(), false);
-    // }
+        // Allocate
+        vm.warp(allocationStartTime + 10);
+
+        vm.prank(address(allo()));
+        ltipStrategy().allocate(abi.encode(recipientId), pool_manager1());
+
+        // Cancel
+        vm.warp(distributionStartTime + 10);
+
+        vm.expectEmit(true, false, false, false);
+        emit Canceled(recipientId, pool_manager1());
+
+        vm.prank(pool_manager1());
+        ltipStrategy().cancelRecipients(recipientIds);
+
+        LTIPSimpleStrategy.Recipient memory recipient = ltipStrategy().getRecipient(recipientId);
+        assertEq(uint8(IStrategy.Status.Canceled), uint8(recipient.recipientStatus));
+    }
 
     function test_withdraw() public {
         allo().fundPool(poolId, 1e18);
@@ -661,7 +642,7 @@ contract LTIPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, StrategyS
     function __generateRecipientWithId(address _recipientId) internal virtual returns (bytes memory) {
         Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
 
-        return abi.encode(_recipientId, recipient1(), metadata);
+        return abi.encode(_recipientId, recipient1(), allocationAmount, metadata);
     }
 
     function __register_recipient() internal virtual returns (address) {
@@ -673,6 +654,27 @@ contract LTIPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, StrategyS
 
         LTIPSimpleStrategy.Recipient memory receipt = ltipStrategy().getRecipient(recipientId);
         assertTrue(receipt.useRegistryAnchor);
+
+        return recipientId;
+    }
+
+    function __register_recipient_fund_pool() internal virtual returns (address) {
+        vm.warp(registrationStartTime + 10);
+        bytes memory data = __generateRecipientWithId(profile1_anchor());
+
+        vm.prank(address(allo()));
+        address recipientId = ltipStrategy().registerRecipient(data, profile1_member1());
+
+        LTIPSimpleStrategy.Recipient memory receipt = ltipStrategy().getRecipient(recipientId);
+        assertTrue(receipt.useRegistryAnchor);
+
+        // Fund pool
+        token.mint(pool_manager1(), 100e18);
+        vm.startPrank(pool_manager1());
+        token.approve(address(allo()), 999999999e18);
+
+        allo().fundPool(poolId, 10 ether);
+        vm.stopPrank();
 
         return recipientId;
     }

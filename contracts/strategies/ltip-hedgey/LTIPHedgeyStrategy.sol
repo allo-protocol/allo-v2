@@ -75,7 +75,7 @@ contract LTIPHedgeyStrategy is LTIPSimpleStrategy {
     /// ================================
 
     address public hedgeyContract;
-    address public adminAddress;
+    address public vestingAdmin;
     bool public adminTransferOBO;
     mapping(address => uint256) internal _recipientLockupTerm;
 
@@ -97,8 +97,8 @@ contract LTIPHedgeyStrategy is LTIPSimpleStrategy {
     /// @param _data The data to be decoded
     /// @custom:data (bool registryGating, bool metadataRequired, uint256 allocationThreshold, uint64 registrationStartTime, uint64 registrationEndTime, uint64 allocationStartTime, uint64 allocationEndTime)
     function initialize(uint256 _poolId, bytes memory _data) external virtual override {
-        (InitializeParamsHedgey memory initializeParams) = abi.decode(_data, (InitializeParamsHedgey));
-        __LTIPHedgeyStrategy_init(_poolId, initializeParams);
+        (InitializeParamsHedgey memory initializeParamsHedgey) = abi.decode(_data, (InitializeParamsHedgey));
+        __LTIPHedgeyStrategy_init(_poolId, initializeParamsHedgey);
         emit Initialized(_poolId, _data);
     }
 
@@ -110,7 +110,7 @@ contract LTIPHedgeyStrategy is LTIPSimpleStrategy {
         __LTIPSimpleStrategy_init(_poolId, _initializeParams.initializeParams);
 
         hedgeyContract = _initializeParams.hedgeyContract;
-        adminAddress = _initializeParams.vestingAdmin;
+        vestingAdmin = _initializeParams.vestingAdmin;
         adminTransferOBO = _initializeParams.adminTransferOBO;
     }
 
@@ -125,10 +125,10 @@ contract LTIPHedgeyStrategy is LTIPSimpleStrategy {
     /// ===============================
 
     /// @notice Update the default Admin wallet used when creating Hedgey plans
-    /// @param _adminAddress The admin wallet to use
-    function setAdminAddress(address _adminAddress) external onlyPoolManager(msg.sender) {
-        adminAddress = _adminAddress;
-        emit AdminAddressUpdated(_adminAddress, msg.sender);
+    /// @param _vestingAdmin The new admin address 
+    function setVestingAdmin(address _vestingAdmin) external onlyPoolManager(msg.sender) {
+        vestingAdmin = _vestingAdmin;
+        emit AdminAddressUpdated(vestingAdmin, msg.sender);
     }
 
     /// @notice Update the default Admin wallet used when creating Hedgey plans
@@ -136,25 +136,6 @@ contract LTIPHedgeyStrategy is LTIPSimpleStrategy {
     function setAdminTransferOBO(bool _adminTransferOBO) external onlyPoolManager(msg.sender) {
         adminTransferOBO = _adminTransferOBO;
         emit AdminTransferOBOUpdated(_adminTransferOBO, msg.sender);
-    }
-
-    /// @notice Get the lockup term for a recipient
-    /// @param _recipient The recipient to get the lockup term for
-    function getRecipientLockupTerm(address _recipient) external view returns (uint256) {
-        return _recipientLockupTerm[_recipient];
-    }
-
-    /// @notice Revoke the allocation and return funds to the pool
-    /// @dev Callable by the pool manager
-    /// @param _recipientId The id of the recipient
-    function revoke(address _recipientId) external virtual onlyPoolManager(msg.sender) {
-        Recipient storage recipient = _recipients[_recipientId];
-
-        recipient.recipientStatus = Status.Canceled;
-
-        /// TODO transfer funds back to the pool, maybe out of scope for now
-
-        emit AllocationRevoked(_recipientId, msg.sender);
     }
 
     /// ====================================
@@ -176,7 +157,7 @@ contract LTIPHedgeyStrategy is LTIPSimpleStrategy {
             0, // No cliff
             rate,
             1, // Linear period
-            adminAddress,
+            vestingAdmin,
             adminTransferOBO
         );
 
@@ -184,20 +165,11 @@ contract LTIPHedgeyStrategy is LTIPSimpleStrategy {
         _vestingPlans[recipientId] = VestingPlan(hedgeyContract, hedgeyId);
         _transferAmount(_token, address(hedgeyContract), _amount);
 
-        emit VestingPlanCreated(hedgeyContract, hedgeyId);
+        emit VestingPlanCreated(recipientId, hedgeyContract, hedgeyId);
     }
-
-    /// TODO add method  for batch distribution
 
     /// ====================================
     /// ============== Hooks ===============
     /// ====================================
 
-    function _afterRegisterRecipient(bytes memory _data, address) internal override {
-        uint256 lockupTerm;
-        address recipientAddress;
-        (, recipientAddress,,, lockupTerm) = abi.decode(_data, (address, address, uint256, Metadata, uint256));
-
-        _recipientLockupTerm[recipientAddress] = lockupTerm;
-    }
 }

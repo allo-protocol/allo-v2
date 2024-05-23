@@ -1,8 +1,6 @@
-//TODO Update for LTIP Strategy
+# LTIPHedgeyStrategy.sol
 
-# LTIPSimpleStrategy.sol
-
-The `LTIPSimpleStrategy` contract represents a smart contract for Long-Term Incentive Programs (LTIP). It extends the capabilities of the `BaseStrategy` contract and integrates features specifically tailored for managing applications and distributing funds. The contract also incorporates the `ReentrancyGuard` library to prevent reentrant attacks.
+The `LTIPHedgeyStrategy` contract represents a smart contract for Long-Term Incentive Programs (LTIP). It extends the capabilities of the `LTIPSimpleStrategy` contract and replaced the TokenTimeLock vesting with Hedgey vesting. The contract also incorporates the `ReentrancyGuard` library to prevent reentrant attacks.
 
 ## Table of Contents
 - [RFPSimpleStrategy.sol](#rfpsimplestrategysol)
@@ -30,33 +28,30 @@ The `LTIPSimpleStrategy` contract represents a smart contract for Long-Term Ince
 
 ## Sequence Diagram 
 
+## Sequence Diagram 
+
 ```mermaid
 sequenceDiagram
     participant Alice
     participant PoolManager
     participant Allo
-    participant RFPSimpleStrategy
+    participant LTIPHedgeyStrategy
 
-    PoolManager->>Allo: createPool() with RFPSimple
+    PoolManager->>Allo: createPool() with LTIPHedgeyStrategy
     Allo-->>PoolManager: poolId
     Alice->>+Allo: registerRecipient()
-    Allo->>RFPSimpleStrategy: registerRecipient()
-    RFPSimpleStrategy-->>Allo: recipient1
+    Allo->>LTIPHedgeyStrategy: registerRecipient()
+    LTIPHedgeyStrategy-->>Allo: recipient1
     Allo-->>-Alice: recipientId1
-    PoolManager->>+Allo: allocate() (accepts a recipient and allocate proposal bid)
-    Allo-->>-RFPSimpleStrategy: allocate() (accepts a recipient and allocate proposal bid)
-    PoolManager->> RFPSimpleStrategy: setMilestones()
-    Alice->> RFPSimpleStrategy: submitUpcomingMilestone()
-    PoolManager->> RFPSimpleStrategy: rejectMilestone()
-    Alice->> RFPSimpleStrategy: submitUpcomingMilestone()
-    PoolManager->>+Allo: distribute() ( mnextilestone for recipient)
-    Allo-->>-RFPSimpleStrategy: distribute() (next milestone for recipient)
-    PoolManager->>RFPSimpleStrategy: setPoolActive() to close pool
+    PoolManager->>+Allo: allocate() (votes on recipient)
+    Allo-->>-LTIPHedgeyStrategy: allocate() (accepts a recipient based on voting threshold and allocate proposed allocation amount)
+    PoolManager->>+Allo: distribute() ( create vesting plan and deposit funds for recipient)
+    Allo-->>-LTIPHedgeyStrategy: distribute() (create TokenTimeLock)
 ```
 
 ## Smart Contract Overview
 
-- **License:** The `RFPSimpleStrategy` contract operates under the AGPL-3.0-only License, fostering open-source usage under specific terms.
+- **License:** The `LTIPHedgeyStrategy` contract operates under the AGPL-3.0-only License, fostering open-source usage under specific terms.
 - **Solidity Version:** Developed using Solidity version 0.8.19, capitalizing on the latest Ethereum smart contract functionalities.
 - **External Libraries:** Utilizes the `ReentrancyGuard` library from the OpenZeppelin contracts to prevent reentrant attacks.
 - **Interfaces:** Imports interfaces from the Allo core and external libraries.
@@ -124,69 +119,10 @@ The `initialize` function decodes and initializes parameters passed during strat
 
 ## User Flows
 
-### Registering a Recipient
+### Distributing Vesting 
 
-* Recipient or Profile Owner initiates a registration request.
-* If `useRegistryAnchor` is enabled:
-  * Submits recipient ID, proposal bid, and metadata.
-  * Verifies sender's authorization.
-  * Validates the provided data.
-  * Registers recipient as "Pending" with provided details.
-  * Emits `Registered` event.
-* If `useRegistryAnchor` is disabled:
-  * Submits recipient address, registry anchor, proposal bid, and metadata.
-  * Determines if the registry anchor is being used.
-  * Verifies sender's authorization.
-  * Validates the provided data.
-  * Registers recipient as "Pending" with provided details.
-  * Emits `Registered` event.
-
-### Setting Milestones
-
-* Pool Manager initiates a milestone setting request.
-* Verifies if sender is authorized to set milestones.
-* Checks if upcoming milestone is not already set.
-* Sets provided milestones for the accepted recipient.
-* Emits `MilestonesSet` event.
-
-### Submitting a Milestone Proof
-
-* Recipient initiates a milestone proof submission.
-* Verifies if sender is authorized to submit the proof.
-* Checks if upcoming milestone is valid.
-* Updates milestone's metadata and status to "Pending".
-* Emits `MilestoneSubmitted` event.
-
-### Rejecting a Pending Milestone
-
-* Pool Manager initiates a milestone rejection request.
-* Verifies if sender is authorized to reject milestones.
-* Checks if milestone is not already accepted.
-* Changes milestone status to "Rejected".
-* Emits `MilestoneStatusChanged` event.
-
-### Updating Max Bid
-
-* Pool Manager initiates a max bid update request.
-* Verifies if sender is authorized to update the max bid.
-* Ensures the new max bid is higher than the current max bid.
-* Updates the max bid.
-* Emits `MaxBidIncreased` event.
-
-### Distributing Milestone
-
-* Pool Manager initiates a milestone distribution request.
+* User initiates a distribution request.
 * Verifies if sender is authorized to distribute funds.
-* Checks if a pending milestone exists.
-* Calculates the amount to distribute based on the accepted recipient's proposal bid and milestone percentage.
-* Transfers the calculated amount to the accepted recipient.
-* Changes the milestone status to "Accepted".
-* Emits `MilestoneStatusChanged` and `Distributed` events.
-
-### Withdrawing Funds from Pool
-
-* Pool Manager initiates a withdrawal request.
-* Verifies if sender is authorized to withdraw funds.
-* Checks if the pool is inactive.
-* Decreases the pool amount by the requested withdrawal amount.
-* Transfers the requested amount to the sender.
+* Checks if a recipient passess voting threshols exists.
+* Creates a vesting plan and deposits funds for the recipient into the plan.
+* Emits `VestingPlanCreated` and `Distributed` events.

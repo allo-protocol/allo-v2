@@ -111,9 +111,7 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @param applicationId ID of the application
     /// @param status The status of the recipient
     /// @param sender The sender of the transaction
-    event RecipientStatusUpdated(
-        address indexed recipientId, uint256 applicationId, Status status, address sender
-    );
+    event RecipientStatusUpdated(address indexed recipientId, uint256 applicationId, Status status, address sender);
 
     /// @notice Emitted when a recipient is canceled
     /// @param recipientId ID of the recipient
@@ -134,7 +132,7 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Emitted when a vesting plan is created
     /// @param vestingContract The address of the vesting contract
     /// @param tokenId The token id of the vesting contract (e.g. Hedgey NFT ID)
-    event VestingPlanCreated(address vestingContract, uint256 tokenId);
+    event VestingPlanCreated(address indexed recipientId, address vestingContract, uint256 tokenId);
 
     /// @notice Emitted when the pool timestamps are updated
     /// @param registrationStartTime The start time for the registration
@@ -266,7 +264,7 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         distributionStartTime = _initializeParams.distributionStartTime;
         distributionEndTime = _initializeParams.distributionEndTime;
         vestingPeriod = _initializeParams.vestingPeriod;
-        
+
         _registry = allo.getRegistry();
 
         // Set the pool to active - this is required for the strategy to work and distribute funds
@@ -397,12 +395,28 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         _transferAmount(pool.token, msg.sender, amount);
     }
 
-    /// @notice Pool managers can extend the allocation period
-    /// @param _allocationEndTime The new allocation end time
-    function extendAllocationEndTime(uint64 _allocationEndTime) external onlyPoolManager(msg.sender) {
-        if (_allocationEndTime <= allocationEndTime) revert INVALID();
-        allocationEndTime = _allocationEndTime;
-        emit TimestampsUpdated(registrationStartTime, registrationEndTime, reviewStartTime, reviewEndTime, msg.sender);
+    /// @notice Sets the start and end dates.
+    /// @dev The timestamps are in seconds for the start and end times. The 'msg.sender' must be a pool manager.
+    ///      Emits a 'TimestampsUpdated()' event.
+    /// @param _registrationStartTime The start time for the registration
+    /// @param _registrationEndTime The end time for the registration
+    function updatePoolTimestamps(
+        uint64 _allocationStartTime,
+        uint64 _allocationEndTime,
+        uint64 _registrationStartTime,
+        uint64 _registrationEndTime
+    ) external onlyPoolManager(msg.sender) {
+        // If the timestamps are invalid this will revert - See details in '_isPoolTimestampValid'
+        _isPoolTimestampValid(_allocationStartTime, _allocationEndTime, _registrationStartTime, _registrationEndTime);
+
+        // Set the updated timestamps
+        registrationStartTime = _registrationStartTime;
+        registrationEndTime = _registrationEndTime;
+
+        // Emit that the timestamps have been updated with the updated values
+        emit TimestampsUpdated(
+            allocationStartTime, allocationEndTime, registrationStartTime, registrationEndTime, msg.sender
+        );
     }
 
     /// ====================================
@@ -430,14 +444,14 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         uint256 allocationAmount;
         Metadata memory metadata;
 
-           // decode data custom to this strategy
+        // decode data custom to this strategy
         if (registryGating) {
-            (recipientId, recipientAddress, metadata) = abi.decode(_data, (address, address, Metadata));
+            (recipientId, recipientAddress, allocationAmount, metadata) = abi.decode(_data, (address, address, uint256, Metadata));
 
             // when registry gating is enabled, the recipientId must be a profile member
             if (!_isProfileMember(recipientId, _sender)) revert UNAUTHORIZED();
         } else {
-            (recipientAddress, registryAnchor, metadata) = abi.decode(_data, (address, address, Metadata));
+            (recipientAddress, registryAnchor, allocationAmount, metadata) = abi.decode(_data, (address, address, uint256, Metadata));
             isUsingRegistryAnchor = registryAnchor != address(0);
             recipientId = isUsingRegistryAnchor ? registryAnchor : _sender;
 
@@ -456,10 +470,10 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         // Get the recipient
         Recipient storage recipient = _recipients[recipientId];
 
-
         // update the recipients data
         recipient.recipientAddress = recipientAddress;
-        recipient.useRegistryAnchor = registryGating ? true : isUsingRegistryAnchor;        recipient.allocationAmount = allocationAmount;
+        recipient.useRegistryAnchor = registryGating ? true : isUsingRegistryAnchor;
+        recipient.allocationAmount = allocationAmount;
         recipient.metadata = metadata;
         recipient.recipientStatus = Status.Pending;
 
@@ -470,7 +484,6 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         } else {
             emit UpdatedRegistration(recipientId, _data, _sender);
         }
-
     }
 
     /// @notice Allocate (delegated) voting power to a recipient. In the simple strategy, every authorized voter has 1 vote.
@@ -511,15 +524,19 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         }
     }
 
-    function _vestAmount(address recipientId, address recipientAddress, address _token, uint256 _amount) internal virtual {
-        TokenTimelock vestingContract = new TokenTimelock(IERC20(_token), recipientAddress, block.timestamp + vestingPeriod);
+    function _vestAmount(address recipientId, address recipientAddress, address _token, uint256 _amount)
+        internal
+        virtual
+    {
+        TokenTimelock vestingContract =
+            new TokenTimelock(IERC20(_token), recipientAddress, block.timestamp + vestingPeriod);
 
         IAllo.Pool memory pool = allo.getPool(poolId);
         _transferAmount(pool.token, address(vestingContract), _amount);
 
         _vestingPlans[recipientId] = VestingPlan(address(vestingContract), 0);
 
-        emit VestingPlanCreated(address(vestingContract), 0);
+        emit VestingPlanCreated(recipientId, address(vestingContract), 0);
     }
 
     /// @notice Distribute the upcoming milestone to acceptedRecipientId.
@@ -555,12 +572,19 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         }
     }
 
-    /// @notice Checks if address is eligible allocator.
-    /// @dev This is used to check if the allocator is a pool manager and able to allocate funds from the pool
-    /// @param _allocator Address of the allocator
-    /// @return 'true' if the allocator is a pool manager, otherwise false
-    function _isValidAllocator(address _allocator) internal view override returns (bool) {
-        return allo.isPoolManager(poolId, _allocator);
+    function _isPoolTimestampValid(
+        uint64 _registrationStartTime,
+        uint64 _registrationEndTime,
+        uint64 _allocationStartTime,
+        uint64 _allocationEndTime
+    ) internal view {
+        if (
+            block.timestamp > _registrationStartTime || _registrationStartTime > _registrationEndTime
+                || _registrationStartTime > _allocationStartTime || _allocationStartTime > _allocationEndTime
+                || _registrationEndTime > _allocationEndTime
+        ) {
+            revert INVALID();
+        }
     }
 
     /// @notice Check if sender is a profile owner or member.
@@ -570,6 +594,14 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     function _isProfileMember(address _anchor, address _sender) internal view returns (bool) {
         IRegistry.Profile memory profile = _registry.getProfileByAnchor(_anchor);
         return _registry.isOwnerOrMemberOfProfile(profile.id, _sender);
+    }
+
+    /// @notice Checks if address is eligible allocator.
+    /// @dev This is used to check if the allocator is a pool manager and able to allocate funds from the pool
+    /// @param _allocator Address of the allocator
+    /// @return 'true' if the allocator is a pool manager, otherwise false
+    function _isValidAllocator(address _allocator) internal view override returns (bool) {
+        return allo.isPoolManager(poolId, _allocator);
     }
 
     /// @notice Get the recipient.
@@ -595,7 +627,8 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @notice Check if the review period is active
     /// @dev Reverts if not active
     function _checkOnlyActiveReview() internal view virtual {
-    if (block.timestamp < reviewStartTime || block.timestamp > reviewEndTime) revert REVIEW_NOT_ACTIVE();    }
+        if (block.timestamp < reviewStartTime || block.timestamp > reviewEndTime) revert REVIEW_NOT_ACTIVE();
+    }
 
     /// @notice This contract should be able to receive native token
     receive() external payable {}
