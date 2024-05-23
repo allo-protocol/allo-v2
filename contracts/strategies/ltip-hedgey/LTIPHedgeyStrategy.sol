@@ -161,10 +161,13 @@ contract LTIPHedgeyStrategy is LTIPSimpleStrategy {
     /// ============ Internal ==============
     /// ====================================
 
-    function _transferAmount(address _token, address _recipient, uint256 _amount) internal virtual override {
+    function _vestAmount(address _token, address _recipient, uint256 _amount) internal virtual override {
+        Recipient memory recipient = _recipients[_recipient];
+
         IERC20(_token).approve(hedgeyContract, _amount);
 
-        uint256 rate = _amount / _recipientLockupTerm[_recipient];
+        // TODO is there a rate?
+        uint256 rate = _amount / recipient.allocationAmount;
         uint256 hedgeyId = ITokenVestingPlans(hedgeyContract).createPlan(
             _recipient,
             _token,
@@ -177,26 +180,11 @@ contract LTIPHedgeyStrategy is LTIPSimpleStrategy {
             adminTransferOBO
         );
 
+
+        _vestingPlans[_recipient] = VestingPlan(hedgeyContract, hedgeyId);
+        _transferAmount(_token, address(hedgeyContract), _amount);
+
         emit VestingPlanCreated(hedgeyContract, hedgeyId);
-    }
-
-    /// @notice Distribute the allocated funds to a recipient as an hedgey.
-    function _distribute(address[] memory, bytes memory, address _sender) internal virtual override {
-        IAllo.Pool memory pool = allo.getPool(poolId);
-        Recipient memory recipient = _recipients[acceptedRecipientId];
-
-        // Check if the recipient is accepten
-        if (recipient.recipientStatus != Status.Accepted) revert RECIPIENT_NOT_ACCEPTED();
-
-        // TODO throw if already allocated (ALREADY_ALLOCATED())
-
-        // Get the pool, subtract the amount and transfer to the recipient
-        poolAmount -= recipient.allocationAmount;
-
-        _transferAmount(pool.token, recipient.recipientAddress, recipient.allocationAmount);
-
-        // Emit events for the milestone and the distribution
-        emit Distributed(acceptedRecipientId, recipient.recipientAddress, recipient.allocationAmount, _sender);
     }
 
     /// TODO add method  for batch distribution

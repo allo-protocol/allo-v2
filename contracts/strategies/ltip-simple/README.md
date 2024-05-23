@@ -141,6 +141,15 @@ The `initialize` function decodes and initializes parameters passed during strat
   * Registers recipient as "Pending" with provided details.
   * Emits `Registered` event.
 
+### Accepting or rejecting an application
+* Recipient of Profile Owner registers on strategy by calling `registerRecipient` function.
+  * Emits `Registered` event.
+* If all checks are passed, the recipient is registered as "Pending".
+* When the review period is active, the PoolManager can vote on the acceptance of the recipient.
+  * If the recipient is accepted, the recipient status is set to "Accepted".
+  * If the recipient is rejected, the recipient status is set to "Rejected".
+* Emits `Reviewed` event.
+
 ### Voting on acceptance of a recipient
 * Check is a vote has already been cast. 
 * All PoolManagers have a voting power of 1
