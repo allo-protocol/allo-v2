@@ -446,12 +446,14 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
         // decode data custom to this strategy
         if (registryGating) {
-            (recipientId, recipientAddress, allocationAmount, metadata) = abi.decode(_data, (address, address, uint256, Metadata));
+            (recipientId, recipientAddress, allocationAmount, metadata) =
+                abi.decode(_data, (address, address, uint256, Metadata));
 
             // when registry gating is enabled, the recipientId must be a profile member
             if (!_isProfileMember(recipientId, _sender)) revert UNAUTHORIZED();
         } else {
-            (recipientAddress, registryAnchor, allocationAmount, metadata) = abi.decode(_data, (address, address, uint256, Metadata));
+            (recipientAddress, registryAnchor, allocationAmount, metadata) =
+                abi.decode(_data, (address, address, uint256, Metadata));
             isUsingRegistryAnchor = registryAnchor != address(0);
             recipientId = isUsingRegistryAnchor ? registryAnchor : _sender;
 

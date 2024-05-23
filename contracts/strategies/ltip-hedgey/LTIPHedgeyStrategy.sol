@@ -125,7 +125,7 @@ contract LTIPHedgeyStrategy is LTIPSimpleStrategy {
     /// ===============================
 
     /// @notice Update the default Admin wallet used when creating Hedgey plans
-    /// @param _vestingAdmin The new admin address 
+    /// @param _vestingAdmin The new admin address
     function setVestingAdmin(address _vestingAdmin) external onlyPoolManager(msg.sender) {
         vestingAdmin = _vestingAdmin;
         emit AdminAddressUpdated(vestingAdmin, msg.sender);
@@ -142,7 +142,11 @@ contract LTIPHedgeyStrategy is LTIPSimpleStrategy {
     /// ============ Internal ==============
     /// ====================================
 
-    function _vestAmount(address recipientId, address recipientAddress, address _token, uint256 _amount) internal virtual override {
+    function _vestAmount(address recipientId, address recipientAddress, address _token, uint256 _amount)
+        internal
+        virtual
+        override
+    {
         Recipient memory recipient = _recipients[recipientId];
 
         IERC20(_token).approve(hedgeyContract, _amount);
@@ -161,7 +165,6 @@ contract LTIPHedgeyStrategy is LTIPSimpleStrategy {
             adminTransferOBO
         );
 
-
         _vestingPlans[recipientId] = VestingPlan(hedgeyContract, hedgeyId);
         _transferAmount(_token, address(hedgeyContract), _amount);
 
@@ -171,5 +174,4 @@ contract LTIPHedgeyStrategy is LTIPSimpleStrategy {
     /// ====================================
     /// ============== Hooks ===============
     /// ====================================
-
 }
