@@ -40,9 +40,9 @@ sequenceDiagram
     LTIPSimpleStrategy-->>Allo: recipient1
     Allo-->>-Alice: recipientId1
     PoolManager->>+Allo: allocate() (votes on recipient)
-    Allo-->>-RFPSimpleStrategy: allocate() (accepts a recipient based on voting threshold and allocate proposed allocation amount)
+    Allo-->>-LTIPSimpleStrategy: allocate() (accepts a recipient based on voting threshold and allocate proposed allocation amount)
     PoolManager->>+Allo: distribute() ( create vesting plan and deposit funds for recipient)
-    Allo-->>-RFPSimpleStrategy: distribute() (next milestone for recipient)
+    Allo-->>-LTIPSimpleStrategy: distribute() (create TokenTimeLock)
 ```
 
 ## Smart Contract Overview
@@ -141,14 +141,24 @@ The `initialize` function decodes and initializes parameters passed during strat
   * Registers recipient as "Pending" with provided details.
   * Emits `Registered` event.
 
+### Accepting or rejecting an application
+* Recipient of Profile Owner registers on strategy by calling `registerRecipient` function.
+  * Emits `Registered` event.
+* If all checks are passed, the recipient is registered as "Pending".
+* When the review period is active, the PoolManager can vote on the acceptance of the recipient.
+  * If the recipient is accepted, the recipient status is set to "Accepted".
+  * If the recipient is rejected, the recipient status is set to "Rejected".
+* Emits `Reviewed` event.
+
 ### Voting on acceptance of a recipient
 * Check is a vote has already been cast. 
 * All PoolManagers have a voting power of 1
 * PoolManager votes on the acceptance of the recipient.
-* Emits `Voted` event.
+  * Assigns a vote to the recipient.
+  * Emits `Voted` event.
 * If the vote puts the recipient on the threshold, the recipient is accepted.
-* Recipient status is set to "Accepted".
-* Emits `Allocated` event.
+  * Recipient status is set to "Accepted".
+  * Emits `Allocated` event.
 
 ### Allocate funds in a vesting plan
 * Check if the recipient doesn't have an active vesting plan
