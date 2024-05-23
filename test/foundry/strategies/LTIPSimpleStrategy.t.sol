@@ -103,6 +103,7 @@ contract LTIPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, StrategyS
         reviewEndTime = uint64(weekAfterNext());
         allocationStartTime = uint64(weekAfterNext());
         allocationEndTime = uint64(oneMonthFromNow());
+        vestingPeriod = uint64(oneMonthFromNow());
 
         metadataRequired = true;
         registryGating = true;
@@ -338,8 +339,6 @@ contract LTIPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, StrategyS
         IStrategy.Status[] memory Statuses = new IStrategy.Status[](1);
         Statuses[0] = IStrategy.Status.Canceled;
 
-        assertEq(ltipStrategy().reviewStartTime(), reviewStartTime);
-
         vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, recipientIds[0]));
         vm.prank(pool_manager1());
         ltipStrategy().reviewRecipients(recipientIds, Statuses);
@@ -348,41 +347,213 @@ contract LTIPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, StrategyS
         assertEq(uint8(IStrategy.Status.Pending), uint8(recipient.recipientStatus));
     }
 
-    // function test_allocate() public {
-    //     address recipientId = __register_setMilestones_allocate();
-    //     IStrategy.Status recipientStatus = strategy.getRecipientStatus(recipientId);
-    //     assertEq(uint8(recipientStatus), uint8(IStrategy.Status.Accepted));
-    // }
+    function test_allocate() public {
+        address recipientId = __register_recipient();
+        vm.warp(reviewStartTime + 10);
 
-    // function test_allocate_reallocating() public {
-    //     address recipientId = __register_recipient();
-    //     address recipientId2 = __register_recipient2();
+        // Accept
 
-    //     __setMilestones();
+        address[] memory recipientIds = new address[](1);
+        recipientIds[0] = recipientId;
+        IStrategy.Status[] memory Statuses = new IStrategy.Status[](1);
+        Statuses[0] = IStrategy.Status.Accepted;
 
-    //     assertEq(strategy.votes(recipientId), 0);
-    //     assertEq(strategy.votes(recipientId2), 0);
+        vm.prank(pool_manager1());
+        ltipStrategy().reviewRecipients(recipientIds, Statuses);
 
-    //     vm.prank(address(allo()));
-    //     strategy.allocate(abi.encode(recipientId), address(pool_admin()));
+        // Allocate
+        vm.warp(allocationStartTime + 10);
 
-    //     assertEq(strategy.votes(recipientId), 1);
-    //     assertEq(strategy.votes(recipientId2), 0);
-    //     assertEq(strategy.votedFor(address(pool_admin())), recipientId);
+        vm.expectEmit(true, false, false, false);
+        emit Voted(recipientId, pool_manager1());
 
-    //     vm.prank(address(allo()));
-    //     strategy.allocate(abi.encode(recipientId2), address(pool_admin()));
+        vm.prank(address(allo()));
+        ltipStrategy().allocate(abi.encode(recipientId), pool_manager1());
 
-    //     assertEq(strategy.votes(recipientId), 0);
-    //     assertEq(strategy.votes(recipientId2), 1);
-    //     assertEq(strategy.votedFor(address(pool_admin())), recipientId2);
-    // }
+        LTIPSimpleStrategy.Recipient memory recipient = ltipStrategy().getRecipient(recipientId);
+        assertEq(uint8(IStrategy.Status.Accepted), uint8(recipient.recipientStatus));
+
+        uint256 votes = ltipStrategy().votes(recipientId);
+        assertEq(votes, 1);
+    }
+
+    function test_allocate_reallocate() public {
+        address recipientId = __register_recipient();
+        address recipientId2 = __register_recipient2();
+        vm.warp(reviewStartTime + 10);
+
+        // Accept
+
+        address[] memory recipientIds = new address[](2);
+        recipientIds[0] = recipientId;
+        recipientIds[1] = recipientId2;
+        IStrategy.Status[] memory Statuses = new IStrategy.Status[](2);
+        Statuses[0] = IStrategy.Status.Accepted;
+        Statuses[1] = IStrategy.Status.Accepted;
+
+        vm.prank(pool_manager1());
+        ltipStrategy().reviewRecipients(recipientIds, Statuses);
+
+        // Allocate
+        vm.warp(allocationStartTime + 10);
+
+        // First vote on recipientId
+        vm.expectEmit(true, false, false, false);
+        emit Voted(recipientId, pool_manager1());
+
+        vm.prank(address(allo()));
+        ltipStrategy().allocate(abi.encode(recipientId), pool_manager1());
+
+        LTIPSimpleStrategy.Recipient memory recipient = ltipStrategy().getRecipient(recipientId);
+        assertEq(uint8(IStrategy.Status.Accepted), uint8(recipient.recipientStatus));
+
+        uint256 votes = ltipStrategy().votes(recipientId);
+        assertEq(votes, 1);
+
+        // Second vote on recipientId2
+        vm.expectEmit(true, false, false, false);
+        emit Voted(recipientId2, pool_manager1());
+
+        vm.prank(address(allo()));
+        ltipStrategy().allocate(abi.encode(recipientId2), pool_manager1());
+
+        LTIPSimpleStrategy.Recipient memory recipient2 = ltipStrategy().getRecipient(recipientId2);
+        assertEq(uint8(IStrategy.Status.Accepted), uint8(recipient2.recipientStatus));
+
+        // Allocation is now set to recipientId2
+        uint256 votes2 = ltipStrategy().votes(recipientId2);
+        assertEq(votes2, 1);
+
+        uint256 votesRecipientId = ltipStrategy().votes(recipientId);
+        assertEq(votesRecipientId, 0);
+    }
+
+    function test_allocate_voting_threshold() public {
+        address recipientId = __register_recipient();
+        vm.warp(reviewStartTime + 10);
+
+        // Accept
+
+        address[] memory recipientIds = new address[](1);
+        recipientIds[0] = recipientId;
+        IStrategy.Status[] memory Statuses = new IStrategy.Status[](1);
+        Statuses[0] = IStrategy.Status.Accepted;
+
+        vm.prank(pool_manager1());
+        ltipStrategy().reviewRecipients(recipientIds, Statuses);
+
+        // Allocate
+        vm.warp(allocationStartTime + 10);
+        LTIPSimpleStrategy.Recipient memory recipient = ltipStrategy().getRecipient(recipientId);
+
+        vm.expectEmit(true, false, false, false);
+        emit Voted(recipientId, pool_manager1());
+
+        vm.startPrank(address(allo()));
+        ltipStrategy().allocate(abi.encode(recipientId), pool_manager1());
+
+        vm.expectEmit();
+        emit Voted(recipientId, address(pool_manager2()));
+        vm.expectEmit();
+        emit Allocated(recipientId, recipient.allocationAmount, address(token), address(0));
+
+        ltipStrategy().allocate(abi.encode(recipientId), pool_manager2());
+
+        uint256 votes = ltipStrategy().votes(recipientId);
+        assertEq(votes, 2);
+    }
+
+    function test_allocate_UNAUTHORIZED() public {
+        address recipientId = __register_recipient();
+        // Allocate
+        vm.warp(allocationStartTime + 10);
+
+        vm.expectRevert(UNAUTHORIZED.selector);
+
+        vm.prank(pool_notAManager());
+        ltipStrategy().allocate(abi.encode(recipientId), pool_manager1());
+
+        uint256 votes = ltipStrategy().votes(recipientId);
+        assertEq(votes, 0);
+    }
+
+    function test_allocate_RECIPIENT_NOT_ACCEPTED() public {
+        address recipientId = __register_recipient();
+        // Allocate
+        vm.warp(allocationStartTime + 10);
+
+        vm.expectRevert(RECIPIENT_NOT_ACCEPTED.selector);
+
+        vm.prank(address(allo()));
+        ltipStrategy().allocate(abi.encode(recipientId), pool_manager1());
+
+        uint256 votes = ltipStrategy().votes(recipientId);
+        assertEq(votes, 0);
+    }
+
 
     function testRevert_allocate_UNAUTHORIZED() public {
         vm.expectRevert(UNAUTHORIZED.selector);
         vm.prank(makeAddr("not_pool_manager"));
         ltipStrategy().allocate(abi.encode(recipientAddress()), recipient());
     }
+
+    function test_distribute() public {
+        address recipientId = __register_recipient();
+        vm.warp(reviewStartTime + 10);
+
+        // Accept
+
+        address[] memory recipientIds = new address[](1);
+        recipientIds[0] = recipientId;
+        IStrategy.Status[] memory Statuses = new IStrategy.Status[](1);
+        Statuses[0] = IStrategy.Status.Accepted;
+
+        vm.prank(pool_manager1());
+        ltipStrategy().reviewRecipients(recipientIds, Statuses);
+
+        // Allocate
+        vm.warp(allocationStartTime + 10);
+        LTIPSimpleStrategy.Recipient memory recipient = ltipStrategy().getRecipient(recipientId);
+
+        vm.startPrank(address(allo()));
+        ltipStrategy().allocate(abi.encode(recipientId), pool_manager1());
+        ltipStrategy().allocate(abi.encode(recipientId), pool_manager2());
+
+        // Distribute
+        vm.warp(distributionStartTime + 10);
+
+        // any one can call distribute
+        address anon = makeAddr("anon");
+
+        vm.expectEmit(true, false, false, false);
+        emit Distributed(recipientId, recipient.recipientAddress, recipient.allocationAmount, anon);
+        ltipStrategy().distribute(recipientIds, "", anon);
+    }
+
+
+    function test_distribute_RECIPIENT_NOT_ACCEPTED() public {
+        address recipientId = __register_recipient();
+        vm.warp(reviewStartTime + 10);
+
+        // Accept
+
+        address[] memory recipientIds = new address[](1);
+        recipientIds[0] = recipientId;
+        IStrategy.Status[] memory Statuses = new IStrategy.Status[](1);
+        Statuses[0] = IStrategy.Status.Accepted;
+
+        // Distribute
+        vm.warp(distributionStartTime + 10);
+
+        // any one can call distribute
+        address anon = makeAddr("anon");
+
+        vm.expectRevert(RECIPIENT_NOT_ACCEPTED.selector); 
+        vm.prank(address(allo()));
+        ltipStrategy().distribute(recipientIds, "", anon);
+    }
+
 
     // function testRevert_allocate_RECIPIENT_ALREADY_ACCEPTED() public {
     //     __register_setMilestones_allocate();
@@ -446,16 +617,18 @@ contract LTIPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, StrategyS
         return recipientId;
     }
 
-    // function __register_recipient2() internal returns (address recipientId) {
-    //     address sender = makeAddr("recipient2");
-    //     Metadata memory metadata = Metadata({protocol: 1, pointer: "metadata"});
+    function __register_recipient2() internal virtual returns (address) {
+        vm.warp(registrationStartTime + 10);
+        bytes memory data = __generateRecipientWithId(profile2_anchor());
 
-    //     bytes memory data = abi.encode(address(0), recipientAddress(), 1e18, metadata, ONE_MONTH_SECONDS * 2);
-    //     vm.prank(address(allo()));
-    //     recipientId = strategy.registerRecipient(data, sender);
+        vm.prank(address(allo()));
+        address recipientId = ltipStrategy().registerRecipient(data, profile2_member1());
 
-    //     assertEq(strategy.getRecipientLockupTerm(recipientAddress()), ONE_MONTH_SECONDS * 2);
-    // }
+        LTIPSimpleStrategy.Recipient memory receipt = ltipStrategy().getRecipient(recipientId);
+        assertTrue(receipt.useRegistryAnchor);
+
+        return recipientId;
+    }
 
     function ltipStrategy() internal view returns (LTIPSimpleStrategy) {
         return LTIPSimpleStrategy(_strategy);

@@ -154,10 +154,11 @@ The `initialize` function decodes and initializes parameters passed during strat
 * Check is a vote has already been cast. 
 * All PoolManagers have a voting power of 1
 * PoolManager votes on the acceptance of the recipient.
-* Emits `Voted` event.
+  * Assigns a vote to the recipient.
+  * Emits `Voted` event.
 * If the vote puts the recipient on the threshold, the recipient is accepted.
-* Recipient status is set to "Accepted".
-* Emits `Allocated` event.
+  * Recipient status is set to "Accepted".
+  * Emits `Allocated` event.
 
 ### Allocate funds in a vesting plan
 * Check if the recipient doesn't have an active vesting plan

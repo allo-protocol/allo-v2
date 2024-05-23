@@ -265,6 +265,8 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         allocationEndTime = _initializeParams.allocationEndTime;
         distributionStartTime = _initializeParams.distributionStartTime;
         distributionEndTime = _initializeParams.distributionEndTime;
+        vestingPeriod = _initializeParams.vestingPeriod;
+        
         _registry = allo.getRegistry();
 
         // Set the pool to active - this is required for the strategy to work and distribute funds
