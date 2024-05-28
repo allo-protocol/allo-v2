@@ -1,0 +1,6 @@
+HardhatError: HH101: Hardhat was set to use chain id 513, but connected to a chain with id 1329.
+    at ChainIdValidatorProvider.request (/home/kurt/git/allo/allo-v2/node_modules/hardhat/src/internal/core/providers/chainId.ts:57:15)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async HardhatEthersProvider.getNetwork (/home/kurt/git/allo/allo-v2/node_modules/@nomicfoundation/hardhat-ethers/src/internal/hardhat-ethers-provider.ts:140:21)
+    at async deployRegistry (/home/kurt/git/allo/allo-v2/scripts/core/deployRegistry.ts:11:19)
+error: "hardhat" exited with code 1 (SIGHUP)

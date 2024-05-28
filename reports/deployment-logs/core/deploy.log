@@ -559,3 +559,19 @@
 20240521_153854 - Executing: bun hardhat deploy-zksync --network zkSyncTestnet --config era.hardhat.config.ts --script zksync/factory/deployDVMDTFactory.ts | tee ./reports/deployment-logs/zksync/factory/deployDVMDTFactory/zkSyncTestnet/20240521_153654/deploy-20240521_153654.log
 20240521_153951 - Executing: bun hardhat deploy-zksync --network zkSyncMainnet --config era.hardhat.config.ts --script zksync/factory/deployDVMDTFactory.ts | tee ./reports/deployment-logs/zksync/factory/deployDVMDTFactory/zkSyncMainnet/20240521_153654/deploy-20240521_153654.log
 20240521_154058 - Deployment finished with 0 error(s)
+20240528_183234 - Executing: bun hardhat run scripts/core/deployRegistry.ts --no-compile --network sei-mainnet | tee ./reports/deployment-logs/core/deployRegistry/sei-mainnet/20240528_183234/deploy-20240528_183234.log
+20240528_183237 - Deployment finished with 0 error(s)
+20240528_183513 - Executing: bun hardhat run scripts/core/deployRegistry.ts --no-compile --network sei-mainnet | tee ./reports/deployment-logs/core/deployRegistry/sei-mainnet/20240528_183513/deploy-20240528_183513.log
+20240528_183528 - Deployment finished with 0 error(s)
+20240528_183701 - Executing: bun hardhat run scripts/core/deployRegistry.ts --no-compile --network sei-mainnet | tee ./reports/deployment-logs/core/deployRegistry/sei-mainnet/20240528_183701/deploy-20240528_183701.log
+20240528_183703 - Deployment finished with 0 error(s)
+20240528_183752 - Executing: bun hardhat run scripts/core/deployRegistry.ts --no-compile --network sei-mainnet | tee ./reports/deployment-logs/core/deployRegistry/sei-mainnet/20240528_183752/deploy-20240528_183752.log
+20240528_183850 - Deployment finished with 0 error(s)
+20240528_184038 - Executing: bun hardhat run scripts/core/deployAllo.ts --no-compile --network sei-mainnet | tee ./reports/deployment-logs/core/deployAllo/sei-mainnet/20240528_184038/deploy-20240528_184038.log
+20240528_184133 - Deployment finished with 0 error(s)
+20240528_185509 - Executing: bun hardhat run scripts/core/deployContractFactory.ts --no-compile --network sei-mainnet | tee ./reports/deployment-logs/core/deployContractFactory/sei-mainnet/20240528_185509/deploy-20240528_185509.log
+20240528_185609 - Deployment finished with 0 error(s)
+20240528_190400 - Executing: bun hardhat run scripts/strategies/deployDonationVotingMerkleDistributionDirect.ts --no-compile --network sei-mainnet | tee ./reports/deployment-logs/strategies/deployDonationVotingMerkleDistributionDirect/sei-mainnet/20240528_190400/deploy-20240528_190400.log
+20240528_190416 - Deployment finished with 0 error(s)
+20240528_190439 - Executing: bun hardhat run scripts/strategies/deployDirectGrantsLite.ts --no-compile --network sei-mainnet | tee ./reports/deployment-logs/strategies/deployDirectGrantsLite/sei-mainnet/20240528_190439/deploy-20240528_190439.log
+20240528_190506 - Deployment finished with 0 error(s)

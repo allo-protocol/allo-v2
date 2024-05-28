@@ -126,6 +126,11 @@ export const commonConfig: DeployParams = {
     proxyAdminOwner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
     permit2Address: "0xC1087157eF2aaeBcaDB913251EA5B82c678424F7",
   },
+  // Sei Mainnet
+  1329: {
+    proxyAdminOwner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
+    permit2Address: "0xb91DBEb018789d712EDC1a9e6C6AdC891BD5Ec2c",
+  },
   // Lukso
   42: {
     proxyAdminOwner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",

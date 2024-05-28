@@ -593,6 +593,17 @@ export const strategyConfig: DeployParams = {
       version: "v1.0",
     },
   },
+  // Sei Mainnet
+  1329: {
+    "donation-voting-merkle-distribution-direct": {
+      name: "DonationVotingMerkleDistributionDirectTransferStrategy",
+      version: "v2.1",
+    },
+    "direct-grants-lite": {
+      name: "DirectGrantsLiteStrategy",
+      version: "v1.0",
+    },
+  },
   // Lukso Mainnet
   42: {
     "donation-voting-merkle-distribution-direct": {
