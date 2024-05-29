@@ -26,7 +26,12 @@ export const deployDonationVotingMerkleDistributionDirect = async () => {
 
   // await validator.validate("PERMIT2", [], commonConfig[chainId].permit2Address);
 
-  await deployStrategyDirectly(strategyParams.name, strategyParams.version, [commonConfig[chainId].permit2Address]);
+  await deployStrategyDirectly(
+    strategyParams.name,
+    strategyParams.version,
+    [commonConfig[chainId].permit2Address],
+    true,
+  );
 
 };
 

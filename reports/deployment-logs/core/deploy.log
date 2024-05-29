@@ -575,3 +575,7 @@
 20240528_190416 - Deployment finished with 0 error(s)
 20240528_190439 - Executing: bun hardhat run scripts/strategies/deployDirectGrantsLite.ts --no-compile --network sei-mainnet | tee ./reports/deployment-logs/strategies/deployDirectGrantsLite/sei-mainnet/20240528_190439/deploy-20240528_190439.log
 20240528_190506 - Deployment finished with 0 error(s)
+20240529_144259 - Executing: bun hardhat run scripts/strategies/deployDirectGrantsLite.ts --no-compile --network sei-mainnet | tee ./reports/deployment-logs/strategies/deployDirectGrantsLite/sei-mainnet/20240529_144259/deploy-20240529_144259.log
+20240529_144319 - Deployment finished with 0 error(s)
+20240529_144402 - Executing: bun hardhat run scripts/strategies/deployDonationVotingMerkleDistributionDirect.ts --no-compile --network sei-mainnet | tee ./reports/deployment-logs/strategies/deployDonationVotingMerkleDistributionDirect/sei-mainnet/20240529_144402/deploy-20240529_144402.log
+20240529_144408 - Deployment finished with 0 error(s)
