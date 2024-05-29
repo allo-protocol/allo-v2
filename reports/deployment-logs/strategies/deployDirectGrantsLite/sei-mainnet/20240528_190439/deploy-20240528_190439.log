@@ -25,6 +25,12 @@ SyntaxError: Unexpected token < in JSON at position 0
     at BodyReadable.emit (/home/kurt/git/allo/allo-v2/node_modules/undici/lib/api/readable.js:73:18)
     at endReadableNT (node:internal/streams/readable:1359:12)
     at processTicksAndRejections (node:internal/process/task_queues:82:21)
+
+#################################################################################
+# NOTE: Actual contract was deployed using REMIX TO 0x1133eA7Af70876e64665ecD07C0A0476d09465a1
+WITH SAME implementation
+#################################################################################
+
 [90m
 	Validating getAllo() == 0xB087535DB0df98fC4327136e897A5985E5Cfbd66[0m
 [32m	✅ PASSED with Result: 0xB087535DB0df98fC4327136e897A5985E5Cfbd66[0m
