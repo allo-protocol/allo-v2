@@ -1,0 +1,30 @@
+
+    ////////////////////////////////////////////////////
+        Deploys ContractFactory.sol on sei-mainnet
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────┐
+│     (index)     │                    Values                    │
+├─────────────────┼──────────────────────────────────────────────┤
+│    contract     │         'Deploy ContractFactory.sol'         │
+│     chainId     │                     1329                     │
+│     network     │                'sei-mainnet'                 │
+│ deployerAddress │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│     balance     │           '71.085231867400000001'            │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying ContractFactory.sol...
+ContractFactory deployed to: 0x7DE1218DCDC3628F839b19a3aF5ACF092C35BcDE
+
+Verifying contract...
+SyntaxError: Unexpected token < in JSON at position 0
+    at JSON.parse (<anonymous>)
+    at consumeEnd (/home/kurt/git/allo/allo-v2/node_modules/undici/lib/api/readable.js:276:20)
+    at BodyReadable.<anonymous> (/home/kurt/git/allo/allo-v2/node_modules/undici/lib/api/readable.js:258:7)
+    at BodyReadable.emit (node:events:513:28)
+    at BodyReadable.emit (node:domain:489:12)
+    at BodyReadable.emit (/home/kurt/git/allo/allo-v2/node_modules/undici/lib/api/readable.js:73:18)
+    at endReadableNT (node:internal/streams/readable:1359:12)
+    at processTicksAndRejections (node:internal/process/task_queues:82:21)
+[90m
+	Validating isDeployer(0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C) == true[0m
+[32m	✅ PASSED with Result: true[0m

@@ -44,6 +44,7 @@ networks=(
 #   "filecoin-mainnet"
 #   "filecoin-calibration"
 #   "sei-devnet"
+#   "sei-mainnet"
 #   "lukso-testnet"
 #   "lukso-mainnet"
 
@@ -55,8 +56,8 @@ networks=(
 
 scripts=(
     # "core/deployRegistry"
-    # "core/deployAllo"
     # "core/deployContractFactory"
+    # "core/deployAllo"
     # "strategies/deployDonationVotingMerkleDistributionDirect"
     # "strategies/deployDirectGrants"
     # "strategies/deployDirectGrantsLite"
