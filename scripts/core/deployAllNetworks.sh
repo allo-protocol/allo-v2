@@ -44,7 +44,7 @@ networks=(
 #   "filecoin-mainnet"
 #   "filecoin-calibration"
 #   "sei-devnet"
-#   "sei-mainnet"
+# "sei-mainnet"
 #   "lukso-testnet"
 #   "lukso-mainnet"
 
