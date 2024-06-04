@@ -37,7 +37,7 @@ interface IAllo {
         address token;
         Metadata metadata;
         bytes32 managerRole;
-        bytes32 adminRole;
+        bytes32 adminRole;   
     }
 
     /// ======================
