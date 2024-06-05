@@ -47,7 +47,10 @@ contract RecipientSuperApp is ISuperApp {
     }
 
     constructor(address _recipient, address _strategy, address _host, ISuperToken _acceptedToken) {
-        if (_strategy == address(0) || _host == address(0) || address(_acceptedToken) == address(0) || _recipient == address(0)) {
+        if (
+            _strategy == address(0) || _host == address(0) || address(_acceptedToken) == address(0)
+                || _recipient == address(0)
+        ) {
             revert ZERO_ADDRESS();
         }
         HOST = ISuperfluid(_host);
