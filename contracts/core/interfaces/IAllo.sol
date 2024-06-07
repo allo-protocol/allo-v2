@@ -92,14 +92,6 @@ interface IAllo {
     /// @param registry Address of the new registry
     event RegistryUpdated(address registry);
 
-    /// @notice Emitted when a strategy is approved and added to the cloneable strategies
-    /// @param strategy Address of the strategy approved
-    event StrategyApproved(address strategy);
-
-    /// @notice Emitted when a strategy is removed from the cloneable strategies
-    /// @param strategy Address of the strategy removed
-    event StrategyRemoved(address strategy);
-
     /// ====================================
     /// ==== External/Public Functions =====
     /// ====================================
@@ -121,8 +113,7 @@ interface IAllo {
     /// @notice Creates a new pool (with a custom strategy)
     /// @dev 'msg.sender' must be a member or owner of a profile to create a pool with or without a custom strategy, The encoded data
     ///      will be specific to a given strategy requirements, reference the strategy implementation of 'initialize()'. The strategy
-    ///      address passed must not be a cloneable strategy. The strategy address passed must not be the zero address. 'msg.sender' must
-    ///      be a member or owner of the profile id passed as '_profileId'.
+    ///      address passed must not be the zero address. 'msg.sender' must be a member or owner of the profile id passed as '_profileId'.
     /// @param _profileId The 'profileId' of the registry profile, used to check if 'msg.sender' is a member or owner of the profile
     /// @param _strategy The address of the deployed custom strategy
     /// @param _initStrategyData The data to initialize the strategy
@@ -141,8 +132,9 @@ interface IAllo {
         address[] memory _managers
     ) external payable returns (uint256 poolId);
 
-    /// @notice Creates a new pool (by cloning a cloneable strategies).
-    /// @dev 'msg.sender' must be owner or member of the profile id passed as '_profileId'.
+    /// @notice Creates a new pool (by cloning a deployed strategies).
+    /// @dev 'msg.sender' must be owner or member of the profile id passed as '_profileId'. The strategy address passed
+    ///      must not be the zero address.
     /// @param _profileId The ID of the registry profile, used to check if 'msg.sender' is a member or owner of the profile
     /// @param _strategy The address of the strategy contract the pool will use.
     /// @param _initStrategyData The data to initialize the strategy
@@ -187,16 +179,6 @@ interface IAllo {
     /// @dev 'msg.sender' must be the Allo contract owner.
     /// @param _baseFee The new base fee
     function updateBaseFee(uint256 _baseFee) external;
-
-    /// @notice Adds a strategy to the cloneable strategies.
-    /// @dev 'msg.sender' must be the Allo contract owner.
-    /// @param _strategy The address of the strategy to add
-    function addToCloneableStrategies(address _strategy) external;
-
-    /// @notice Removes a strategy from the cloneable strategies.
-    /// @dev 'msg.sender' must be the Allo contract owner.
-    /// @param _strategy The address of the strategy to remove
-    function removeFromCloneableStrategies(address _strategy) external;
 
     /// @notice Adds a pool manager to the pool.
     /// @dev 'msg.sender' must be a pool admin.
@@ -266,11 +248,6 @@ interface IAllo {
     /// @param _address The address to check
     /// @return 'true' if the '_address' is a pool manager, otherwise 'false'
     function isPoolManager(uint256 _poolId, address _address) external view returns (bool);
-
-    /// @notice Checks if a strategy is cloneable (is in the cloneableStrategies mapping).
-    /// @param _strategy The address of the strategy to check
-    /// @return 'true' if the '_strategy' is cloneable, otherwise 'false'
-    function isCloneableStrategy(address _strategy) external view returns (bool);
 
     /// @notice Returns the address of the strategy for a given 'poolId'
     /// @param _poolId The ID of the pool to check

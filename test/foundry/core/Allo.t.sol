@@ -115,7 +115,6 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
 
     function test_createPool() public {
         startMeasuringGas("createPool");
-        allo().addToCloneableStrategies(strategy);
 
         vm.expectEmit(true, true, false, false);
         emit PoolCreated(1, poolProfile_id(), IStrategy(strategy), NATIVE, 0, metadata);
@@ -130,23 +129,10 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
         assertNotEq(address(pool.strategy), address(strategy));
     }
 
-    function testRevert_createPool_NOT_APPROVED_STRATEGY() public {
-        vm.expectRevert(NOT_APPROVED_STRATEGY.selector);
-        vm.prank(pool_admin());
-        allo().createPool(poolProfile_id(), strategy, "0x", NATIVE, 0, metadata, pool_managers());
-    }
-
     function testRevert_createPoolWithCustomStrategy_ZERO_ADDRESS() public {
         vm.expectRevert(ZERO_ADDRESS.selector);
         vm.prank(pool_admin());
         allo().createPoolWithCustomStrategy(poolProfile_id(), address(0), "0x", NATIVE, 0, metadata, pool_managers());
-    }
-
-    function testRevert_createPoolWithCustomStrategy_IS_APPROVED_STRATEGY() public {
-        allo().addToCloneableStrategies(strategy);
-        vm.expectRevert(IS_APPROVED_STRATEGY.selector);
-        vm.prank(pool_admin());
-        allo().createPoolWithCustomStrategy(poolProfile_id(), strategy, "0x", NATIVE, 0, metadata, pool_managers());
     }
 
     function testRevert_createPool_UNAUTHORIZED() public {
@@ -176,12 +162,18 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
         );
     }
 
-    function testRevert_createPool_ZERO_ADDRESS() public {
+    function testRevert_createPool_poolManager_ZERO_ADDRESS() public {
         address[] memory poolManagers = new address[](1);
         poolManagers[0] = address(0);
         vm.expectRevert(ZERO_ADDRESS.selector);
         vm.prank(pool_admin());
         allo().createPoolWithCustomStrategy(poolProfile_id(), strategy, "0x", NATIVE, 0, metadata, poolManagers);
+    }
+
+    function testRevert_createPool_ZERO_ADDRESS() public {
+        vm.expectRevert(ZERO_ADDRESS.selector);
+        vm.prank(pool_admin());
+        allo().createPool(poolProfile_id(), address(0), "0x", NATIVE, 0, metadata, pool_managers());
     }
 
     function test_createPoolWithBaseFee() public {
@@ -336,40 +328,6 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
 
         vm.prank(makeAddr("anon"));
         allo().updateBaseFee(1e16);
-    }
-
-    function test_addToCloneableStrategies() public {
-        address _strategy = makeAddr("strategy");
-        assertFalse(allo().isCloneableStrategy(_strategy));
-        allo().addToCloneableStrategies(_strategy);
-        assertTrue(allo().isCloneableStrategy(_strategy));
-    }
-
-    function testRevert_addToCloneableStrategies_ZERO_ADDRESS() public {
-        vm.expectRevert(ZERO_ADDRESS.selector);
-        allo().addToCloneableStrategies(address(0));
-    }
-
-    function testRevert_addToCloneableStrategies_UNAUTHORIZED() public {
-        vm.expectRevert();
-        vm.prank(makeAddr("anon"));
-        address _strategy = makeAddr("strategy");
-        allo().addToCloneableStrategies(_strategy);
-    }
-
-    function test_removeFromCloneableStrategies() public {
-        address _strategy = makeAddr("strategy");
-        allo().addToCloneableStrategies(_strategy);
-        assertTrue(allo().isCloneableStrategy(_strategy));
-        allo().removeFromCloneableStrategies(_strategy);
-        assertFalse(allo().isCloneableStrategy(_strategy));
-    }
-
-    function testRevert_removeFromCloneableStrategies_UNAUTHORIZED() public {
-        address _strategy = makeAddr("strategy");
-        vm.expectRevert();
-        vm.prank(makeAddr("anon"));
-        allo().removeFromCloneableStrategies(_strategy);
     }
 
     function test_addPoolManager() public {

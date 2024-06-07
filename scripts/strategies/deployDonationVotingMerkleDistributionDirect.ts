@@ -30,7 +30,6 @@ export const deployDonationVotingMerkleDistributionDirect = async () => {
     strategyParams.name,
     strategyParams.version,
     [commonConfig[chainId].permit2Address],
-    true,
   );
 
 };

@@ -79,10 +79,6 @@ contract Allo is
     /// @dev 'Pool.id' -> 'Pool'
     mapping(uint256 => Pool) private pools;
 
-    /// @notice Returns a bool for whether a strategy is cloneable or not using the strategy address as the key
-    /// @dev Strategy.address -> bool
-    mapping(address => bool) private cloneableStrategies;
-
     // ====================================
     // =========== Initializer =============
     // ====================================
@@ -144,8 +140,7 @@ contract Allo is
     /// @notice Creates a new pool (with a custom strategy)
     /// @dev 'msg.sender' must be a member or owner of a profile to create a pool with or without a custom strategy, The encoded data
     ///      will be specific to a given strategy requirements, reference the strategy implementation of 'initialize()'. The strategy
-    ///      address passed must not be a cloneable strategy. The strategy address passed must not be the zero address. 'msg.sender' must
-    ///      be a member or owner of the profile id passed as '_profileId'.
+    ///      address passed must not be the zero address. 'msg.sender' must be a member or owner of the profile id passed as '_profileId'.
     /// @param _profileId The 'profileId' of the registry profile, used to check if 'msg.sender' is a member or owner of the profile
     /// @param _strategy The address of the deployed custom strategy
     /// @param _initStrategyData The data to initialize the strategy
@@ -166,15 +161,13 @@ contract Allo is
         // Revert if the strategy address passed is the zero address with 'ZERO_ADDRESS()'
         if (_strategy == address(0)) revert ZERO_ADDRESS();
 
-        // Revert if we already have this strategy in our cloneable mapping with 'IS_APPROVED_STRATEGY()' (only non-cloneable strategies can be used)
-        if (_isCloneableStrategy(_strategy)) revert IS_APPROVED_STRATEGY();
-
         // Call the internal '_createPool()' function and return the pool ID
         return _createPool(_profileId, IStrategy(_strategy), _initStrategyData, _token, _amount, _metadata, _managers);
     }
 
-    /// @notice Creates a new pool (by cloning a cloneable strategies).
-    /// @dev 'msg.sender' must be owner or member of the profile id passed as '_profileId'.
+    /// @notice Creates a new pool (by cloning a deployed strategies).
+    /// @dev 'msg.sender' must be owner or member of the profile id passed as '_profileId'. The strategy address passed
+    ///      must not be the zero address.
     /// @param _profileId The ID of the registry profile, used to check if 'msg.sender' is a member or owner of the profile
     /// @param _strategy The address of the strategy contract the pool will use.
     /// @param _initStrategyData The data to initialize the strategy
@@ -193,9 +186,8 @@ contract Allo is
         Metadata memory _metadata,
         address[] memory _managers
     ) external payable nonReentrant returns (uint256 poolId) {
-        if (!_isCloneableStrategy(_strategy)) {
-            revert NOT_APPROVED_STRATEGY();
-        }
+        // Revert if the strategy address passed is the zero address with 'ZERO_ADDRESS()'
+        if (_strategy == address(0)) revert ZERO_ADDRESS();
 
         // Returns the created pool ID
         return _createPool(
@@ -246,27 +238,6 @@ contract Allo is
     /// @param _baseFee The new base fee
     function updateBaseFee(uint256 _baseFee) external onlyOwner {
         _updateBaseFee(_baseFee);
-    }
-
-    /// @notice Add a strategy to the allowlist.
-    /// @dev Emits the 'StrategyApproved()' event. 'msg.sender' must be Allo owner.
-    /// @param _strategy The address of the strategy
-    function addToCloneableStrategies(address _strategy) external onlyOwner {
-        if (_strategy == address(0)) revert ZERO_ADDRESS();
-
-        cloneableStrategies[_strategy] = true;
-        emit StrategyApproved(_strategy);
-    }
-
-    /// @notice Remove a strategy from the allowlist
-    /// @dev Emits 'StrategyRemoved()' event. 'msg.sender must be Allo owner.
-    /// @param _strategy The address of the strategy
-    function removeFromCloneableStrategies(address _strategy) external onlyOwner {
-        // Set the strategy to false in the cloneableStrategies mapping
-        cloneableStrategies[_strategy] = false;
-
-        // Emit the StrategyRemoved event
-        emit StrategyRemoved(_strategy);
     }
 
     /// @notice Add a pool manager
@@ -558,15 +529,6 @@ contract Allo is
         emit PoolFunded(_poolId, amountAfterFee, feeAmount);
     }
 
-    /// @notice Checks if the strategy is an approved cloneable strategy.
-    /// @dev Internal function used by createPoolwithCustomStrategy and createPool to
-    ///      determine if a strategy is in the cloneable strategy allow list.
-    /// @param _strategy The address of the strategy
-    /// @return This will return 'true' if the strategy is cloneable, otherwise 'false'
-    function _isCloneableStrategy(address _strategy) internal view returns (bool) {
-        return cloneableStrategies[_strategy];
-    }
-
     /// @notice Checks if the address is a pool admin
     /// @dev Internal function used to determine if an address is a pool admin
     /// @param _poolId The ID of the pool
@@ -684,13 +646,6 @@ contract Allo is
     /// @return The registry address
     function getRegistry() external view returns (IRegistry) {
         return registry;
-    }
-
-    /// @notice Getter for if strategy is cloneable.
-    /// @param _strategy The address of the strategy
-    /// @return 'true' if the strategy is cloneable, otherwise 'false'
-    function isCloneableStrategy(address _strategy) external view returns (bool) {
-        return _isCloneableStrategy(_strategy);
     }
 
     /// @notice Getter for the 'Pool'.

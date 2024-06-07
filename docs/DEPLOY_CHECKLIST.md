@@ -60,27 +60,22 @@
 -
 - [ ] Deploy Donation Voting Merkle Direct Transfer
 - [ ] Verify Donation Voting Merkle Direct Transfer
-- [ ] Add to cloneable strategies
 - [ ] Add the deployment addresses to the `strategies.config.ts` file.
 -
 - [ ] Deploy Donation Voting Merkle Vault
 - [ ] Verify Donation Voting Merkle Vault
-- [ ] Add to cloneable strategies
 - [ ] Add the deployment addresses to the `strategies.config.ts` file.
 -
 - [ ] Deploy QV Simple
 - [ ] Verify QV Simple
-- [ ] Add to cloneable strategies
 - [ ] Add the deployment addresses to the `strategies.config.ts` file.
 -
 - [ ] Deploy RFP Simple
 - [ ] Verify RFP Simple
-- [ ] Add to cloneable strategies
 - [ ] Add the deployment addresses to the `strategies.config.ts` file.
 -
 - [ ] Deploy RFP committee
 - [ ] Verify RFP committee
-- [ ] Add to cloneable strategies
 - [ ] Add the deployment addresses to the `strategies.config.ts` file.
 
 
