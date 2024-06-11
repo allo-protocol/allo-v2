@@ -79,6 +79,11 @@ contract Allo is
     /// @dev 'Pool.id' -> 'Pool'
     mapping(uint256 => Pool) private pools;
 
+    /// @notice Returns a bool for whether a strategy is cloneable or not using the strategy address as the key
+    /// @dev Strategy.address -> bool
+    /// @dev This mapping has been depcretated and is not being used
+    mapping(address => bool) private cloneableStrategies;
+
     // ====================================
     // =========== Initializer =============
     // ====================================
