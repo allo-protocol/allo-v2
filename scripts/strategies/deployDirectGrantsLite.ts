@@ -13,7 +13,6 @@ export const deployDirectGrants = async () => {
     strategyParams.name,
     strategyParams.version,
     [],
-    true,
   );
 };
 

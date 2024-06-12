@@ -114,5 +114,3 @@ flowchart LR
 - Check `./scripts/strategies/deployAllStrategies.sh` and ensure the networks you need to deploy on are uncommented
 - Run `./scripts/strategies/deployAllStrategies.sh`
 - This should deploy and generate the log for the deployments for all the strategies
-
-Note: The strategies need to be marked as approved strategies on the Allo contract which has to be done by the owner. If you are replacing an existing strategy, ensure the old one is unapproved

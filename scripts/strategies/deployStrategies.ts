@@ -6,7 +6,6 @@ import { Deployments, verifyContract } from "../utils/scripts";
 export async function deployStrategies(
   strategyName: string,
   version: string,
-  cloneable?: boolean,
   additionalArgs?: Args,
 ): Promise<string> {
   const network = await ethers.provider.getNetwork();
@@ -73,22 +72,6 @@ export async function deployStrategies(
   await validator.validate("getAllo", [], alloAddress);
   await validator.validate("getStrategyId", [], hashBytesStrategyName);
 
-  if (cloneable) {
-    console.log(`Adding ${strategyName} ${version} to cloneable strategies...`);
-    const alloFactory = await ethers.getContractFactory("Allo");
-    const alloInstance = alloFactory.attach(alloAddress);
-
-    try {
-      const tx = await alloInstance.addToCloneableStrategies(impl.toString());
-      await tx.wait();
-      console.log(`${strategyName} ${version} added to cloneable strategies.`);
-    } catch (error) {
-      console.log(
-        `Error adding ${strategyName} ${version} to cloneable strategies.`,
-      );
-    }
-  }
-
   return impl.toString();
 }
 
@@ -96,7 +79,6 @@ export async function deployStrategyDirectly(
   strategyName: string,
   version: string,
   args: any = [],
-  cloneable?: boolean,
 ): Promise<string> {
   const network = await ethers.provider.getNetwork();
   const networkName = await hre.network.name;
@@ -157,24 +139,6 @@ export async function deployStrategyDirectly(
   };
 
   deployments.write(objToWrite);
-
-  if (cloneable) {
-    console.log(`Adding ${strategyNameWithVersion} to cloneable strategies...`);
-    const alloFactory = await ethers.getContractFactory("Allo");
-    const alloInstance = alloFactory.attach(alloAddress);
-
-    try {
-      const tx = await alloInstance.addToCloneableStrategies(
-        instance.target.toString(),
-      );
-      await tx.wait();
-      console.log(`${strategyNameWithVersion} added to cloneable strategies.`);
-    } catch (error) {
-      console.log(
-        `Error adding ${strategyNameWithVersion} to cloneable strategies.`,
-      );
-    }
-  }
 
   return instance.target.toString();
 }
