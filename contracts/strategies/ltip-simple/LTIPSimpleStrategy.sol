@@ -214,6 +214,20 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// ========== Modifier ============
     /// ================================
 
+    /// @notice Modifier to check if the allocation is active
+    /// @dev This will revert if the allocation has not started or if the allocation has ended.
+    modifier onlyActiveAllocation() {
+        _checkOnlyActiveAllocation();
+        _;
+    }
+
+    /// @notice Modifier to check if the registration is active
+    /// @dev This will revert if the registration has not started or if the registration has ended.
+    modifier onlyActiveRegistration() {
+        _checkOnlyActiveRegistration();
+        _;
+    }
+
     /// @notice Modifier to check if the registration is active
     /// @dev Reverts if the registration is not active
     modifier onlyActiveReview() {
@@ -435,7 +449,7 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     function _registerRecipient(bytes memory _data, address _sender)
         internal
         override
-        onlyActivePool
+        onlyActiveRegistration
         returns (address recipientId)
     {
         bool isUsingRegistryAnchor;
@@ -497,8 +511,7 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         virtual
         override
         nonReentrant
-        onlyActivePool
-        onlyPoolManager(_sender)
+        onlyActiveAllocation
     {
         // Decode the '_data'
         address recipientId = abi.decode(_data, (address));
@@ -624,6 +637,22 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _recipientId Id of the recipient
     function _getRecipientStatus(address _recipientId) internal view override returns (Status) {
         return _getRecipient(_recipientId).recipientStatus;
+    }
+
+    /// @notice Checks if the registration is active and reverts if not.
+    /// @dev This will revert if the registration has not started or if the registration has ended.
+    function _checkOnlyActiveRegistration() internal view {
+        if (registrationStartTime > block.timestamp || block.timestamp > registrationEndTime) {
+            revert REGISTRATION_NOT_ACTIVE();
+        }
+    }
+
+    /// @notice Checks if the allocation is active and reverts if not.
+    /// @dev This will revert if the allocation has not started or if the allocation has ended.
+    function _checkOnlyActiveAllocation() internal view {
+        if (allocationStartTime > block.timestamp || block.timestamp > allocationEndTime) {
+            revert ALLOCATION_NOT_ACTIVE();
+        }
     }
 
     /// @notice Check if the review period is active
