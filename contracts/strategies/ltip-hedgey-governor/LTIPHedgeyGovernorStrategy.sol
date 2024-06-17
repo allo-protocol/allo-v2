@@ -148,7 +148,13 @@ contract LTIPHedgeyGovernorStrategy is LTIPHedgeyStrategy {
     /// @dev '_sender' must have a balance > 0 of delegate tokens
     /// @param _data The data to be decoded
     /// @param _sender The sender of the allocation
-    function _allocate(bytes memory _data, address _sender) internal virtual override nonReentrant onlyActiveAllocation {
+    function _allocate(bytes memory _data, address _sender)
+        internal
+        virtual
+        override
+        nonReentrant
+        onlyActiveAllocation
+    {
         // Decode the '_data'
         (address recipientId, uint256 _votes) = abi.decode(_data, (address, uint256));
         Recipient storage recipient = _recipients[recipientId];
