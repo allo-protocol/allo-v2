@@ -4,6 +4,7 @@ import "forge-std/Test.sol";
 
 // Interfaces
 import {IStrategy} from "../../../contracts/core/interfaces/IStrategy.sol";
+import {QVBaseStrategy} from "../../../contracts/strategies/qv-base/QVBaseStrategy.sol";
 // Core contracts
 import {QVImpactStreamStrategy} from "../../../contracts/strategies/_poc/qv-impact-stream/QVImpactStreamStrategy.sol";
 
@@ -29,6 +30,7 @@ contract QVImpactStreamStrategyTest is Test, AlloSetup, RegistrySetupFull, Strat
     event AllocatorRemoved(address indexed allocator, address sender);
     event Allocated(address indexed recipientId, uint256 votes, address allocator);
     event PayoutSet(QVImpactStreamStrategy.Payout[] payouts, address sender);
+    event UpdatedRecipientRegistration(address indexed recipientId, bytes data, address sender);
 
     QVImpactStreamStrategy strategyImplementation;
     QVImpactStreamStrategy strategy;
@@ -36,6 +38,8 @@ contract QVImpactStreamStrategyTest is Test, AlloSetup, RegistrySetupFull, Strat
     bool public useRegistryAnchor;
     bool public metadataRequired;
 
+    uint64 registrationStartTime;
+    uint64 registrationEndTime;
     uint64 public allocationStartTime;
     uint64 public allocationEndTime;
     uint256 public maxVoiceCreditsPerAllocator;
@@ -54,6 +58,8 @@ contract QVImpactStreamStrategyTest is Test, AlloSetup, RegistrySetupFull, Strat
         useRegistryAnchor = true;
         metadataRequired = true;
 
+        registrationStartTime = uint64(today());
+        registrationEndTime = uint64(nextWeek());
         allocationStartTime = uint64(nextWeek());
         allocationEndTime = uint64(weekAfterNext());
         maxVoiceCreditsPerAllocator = 10;
@@ -67,7 +73,7 @@ contract QVImpactStreamStrategyTest is Test, AlloSetup, RegistrySetupFull, Strat
             poolProfile_id(),
             address(strategyImplementation),
             _createInitData(
-                useRegistryAnchor, metadataRequired, allocationStartTime, allocationEndTime, maxVoiceCreditsPerAllocator
+                useRegistryAnchor, metadataRequired, registrationStartTime, registrationEndTime, allocationStartTime, allocationEndTime, maxVoiceCreditsPerAllocator
             ),
             NATIVE,
             100 * 1e18,
@@ -94,12 +100,13 @@ contract QVImpactStreamStrategyTest is Test, AlloSetup, RegistrySetupFull, Strat
         newStrategy.initialize(
             poolId,
             _createInitData(
-                useRegistryAnchor, metadataRequired, allocationStartTime, allocationEndTime, maxVoiceCreditsPerAllocator
+                useRegistryAnchor, metadataRequired, registrationStartTime, registrationEndTime, allocationStartTime, allocationEndTime, maxVoiceCreditsPerAllocator
             )
         );
         assertEq(strategy.allocationStartTime(), allocationStartTime);
         assertEq(strategy.allocationEndTime(), allocationEndTime);
         assertEq(strategy.maxVoiceCreditsPerAllocator(), maxVoiceCreditsPerAllocator);
+        assertEq(strategy.useRegistryAnchor(), useRegistryAnchor);
     }
 
     function test_initialize_Revert_ALREADY_INITIALIZED() public virtual {
@@ -109,7 +116,7 @@ contract QVImpactStreamStrategyTest is Test, AlloSetup, RegistrySetupFull, Strat
         strategy.initialize(
             poolId,
             _createInitData(
-                useRegistryAnchor, metadataRequired, allocationStartTime, allocationEndTime, maxVoiceCreditsPerAllocator
+                useRegistryAnchor, metadataRequired, registrationStartTime, registrationEndTime, allocationStartTime, allocationEndTime, maxVoiceCreditsPerAllocator
             )
         );
     }
@@ -121,7 +128,7 @@ contract QVImpactStreamStrategyTest is Test, AlloSetup, RegistrySetupFull, Strat
         newStrategy.initialize(
             poolId,
             _createInitData(
-                useRegistryAnchor, metadataRequired, allocationStartTime, allocationEndTime, maxVoiceCreditsPerAllocator
+                useRegistryAnchor, metadataRequired, registrationStartTime, registrationEndTime, allocationStartTime, allocationEndTime, maxVoiceCreditsPerAllocator
             )
         );
     }
@@ -137,6 +144,8 @@ contract QVImpactStreamStrategyTest is Test, AlloSetup, RegistrySetupFull, Strat
             _createInitData(
                 useRegistryAnchor,
                 metadataRequired,
+                registrationStartTime,
+                registrationEndTime,
                 uint64(block.timestamp - 1 days),
                 allocationEndTime,
                 maxVoiceCreditsPerAllocator
@@ -148,6 +157,8 @@ contract QVImpactStreamStrategyTest is Test, AlloSetup, RegistrySetupFull, Strat
             _createInitData(
                 useRegistryAnchor,
                 metadataRequired,
+                registrationStartTime,
+                registrationEndTime,
                 allocationStartTime,
                 uint64(block.timestamp - 1 days),
                 maxVoiceCreditsPerAllocator
@@ -170,9 +181,9 @@ contract QVImpactStreamStrategyTest is Test, AlloSetup, RegistrySetupFull, Strat
         assertEq(uint8(strategy.getRecipientStatus(profile1_anchor())), uint256(IStrategy.Status.Accepted));
         QVImpactStreamStrategy.Recipient memory recipient = strategy.getRecipient(profile1_anchor());
         assertEq(recipient.recipientAddress, profile1_member1());
-        assertEq(recipient.requestedAmount, 1e18);
         assertEq(recipient.metadata.protocol, 1);
         assertEq(recipient.metadata.pointer, "Recipient-Metadata");
+        assertEq(strategy.proposalBids(profile1_anchor()), 1e18);
     }
 
     function testRevert_registerRecipient_RECIPIENT_ERROR_no_recipientAddress() public virtual {
@@ -184,7 +195,7 @@ contract QVImpactStreamStrategyTest is Test, AlloSetup, RegistrySetupFull, Strat
             poolProfile_id(),
             address(newStrategy),
             _createInitData(
-                false, metadataRequired, allocationStartTime, allocationEndTime, maxVoiceCreditsPerAllocator
+                false, metadataRequired, registrationStartTime, registrationEndTime, allocationStartTime, allocationEndTime, maxVoiceCreditsPerAllocator
             ),
             NATIVE,
             0,
@@ -223,7 +234,7 @@ contract QVImpactStreamStrategyTest is Test, AlloSetup, RegistrySetupFull, Strat
 
         __registerRecipient(1);
 
-        emit UpdatedRegistration(
+        emit UpdatedRecipientRegistration(
             profile1_anchor(),
             _createRecipientData(
                 profile1_anchor(), profile1_member1(), 1e18, _createMetadata("Recipient-Metadata-Updated")
@@ -422,20 +433,22 @@ contract QVImpactStreamStrategyTest is Test, AlloSetup, RegistrySetupFull, Strat
 
     function test_updateTimestamps() public {
         vm.startPrank(pool_manager1());
-        vm.warp(allocationStartTime + 1 days);
+        vm.warp(registrationStartTime + 1 days);
 
         vm.expectEmit(true, false, false, true);
-        emit TimestampsUpdated(allocationStartTime + 1 days, allocationEndTime + 1 days, pool_manager1());
+        emit TimestampsUpdated(registrationStartTime + 1 days, registrationEndTime + 1 days, allocationStartTime + 1 days, allocationEndTime + 1 days, pool_manager1());
 
-        strategy.updatePoolTimestamps(allocationStartTime + 1 days, allocationEndTime + 1 days);
+        strategy.updatePoolTimestamps(registrationStartTime + 1 days, registrationEndTime + 1 days, allocationStartTime + 1 days, allocationEndTime + 1 days);
 
+        assertEq(strategy.registrationStartTime(), registrationStartTime + 1 days);
+        assertEq(strategy.registrationEndTime(), registrationEndTime + 1 days);
         assertEq(strategy.allocationStartTime(), allocationStartTime + 1 days);
         assertEq(strategy.allocationEndTime(), allocationEndTime + 1 days);
     }
 
     function test_Revert_updateTimestamps_UNAUTHORIZED() public {
         vm.expectRevert(UNAUTHORIZED.selector);
-        strategy.updatePoolTimestamps(allocationStartTime + 1 days, allocationEndTime + 1 days);
+        strategy.updatePoolTimestamps(registrationStartTime + 1 days, registrationEndTime + 1 days, allocationStartTime + 1 days, allocationEndTime + 1 days);
     }
 
     function test_Revert_updateTimestamps_INVALID() public {
@@ -443,7 +456,7 @@ contract QVImpactStreamStrategyTest is Test, AlloSetup, RegistrySetupFull, Strat
         vm.warp(allocationStartTime + 1 days);
 
         vm.expectRevert(INVALID.selector);
-        strategy.updatePoolTimestamps(allocationStartTime, allocationEndTime);
+        strategy.updatePoolTimestamps(registrationStartTime + 1 days, registrationEndTime + 1 days, allocationStartTime + 1 days, allocationEndTime + 1 days);
     }
 
     function test_isPoolActive() public {
@@ -648,16 +661,26 @@ contract QVImpactStreamStrategyTest is Test, AlloSetup, RegistrySetupFull, Strat
     function _createInitData(
         bool _useRegistryAnchor,
         bool _metadataRequired,
+        uint64 _registrationStartTime,
+        uint64 _registrationEndTime,
         uint64 _allocationStartTime,
         uint64 _allocationEndTime,
         uint256 _maxVoiceCreditsPerAllocator
     ) internal pure returns (bytes memory) {
         return abi.encode(
-            _useRegistryAnchor,
-            _metadataRequired,
-            _allocationStartTime,
-            _allocationEndTime,
-            _maxVoiceCreditsPerAllocator
+            QVImpactStreamStrategy.InitializeParamsSimple(
+                _useRegistryAnchor,
+                _maxVoiceCreditsPerAllocator,
+                QVBaseStrategy.InitializeParams(
+                    true,
+                    _metadataRequired,
+                    2,
+                    _registrationStartTime,
+                    _registrationEndTime,
+                    _allocationStartTime,
+                    _allocationEndTime
+                )
+            )
         );
     }
 
