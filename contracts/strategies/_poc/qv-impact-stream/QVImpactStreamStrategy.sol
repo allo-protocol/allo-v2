@@ -82,7 +82,7 @@ contract QVImpactStreamStrategy is QVBaseStrategy, Multicall {
 
     /// @notice The parameters used to initialize the strategy
     struct InitializeParamsSimple {
-        bool useRegistryAnchor; 
+        bool useRegistryAnchor;
         uint256 maxVoiceCreditsPerAllocator;
         InitializeParams params;
     }
