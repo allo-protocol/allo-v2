@@ -3,7 +3,7 @@ pragma solidity ^0.8.19;
 
 import {BaseStrategy} from "../BaseStrategy.sol";
 
-contract DirectTransfer is BaseStrategy {
+contract DirectAllocationStrategy is BaseStrategy {
     constructor(address _allo, string memory _name) BaseStrategy(_allo, _name) {}
 
     function initialize(uint256 _poolId, bytes memory _data) external virtual override {
@@ -28,15 +28,13 @@ contract DirectTransfer is BaseStrategy {
         emit Allocated(recipientId, amount, token, _sender);
     }
 
-    receive() external payable {}
+    receive() external payable {
+        revert NOT_IMPLEMENTED();
+    }
 
     // Not implemented
 
-    function _distribute(address[] memory, bytes memory, address)
-        internal
-        virtual
-        override
-    {
+    function _distribute(address[] memory, bytes memory, address) internal virtual override {
         revert NOT_IMPLEMENTED();
     }
 

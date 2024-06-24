@@ -27,7 +27,7 @@ handle_insufficient_funds_error() {
 
 networks=(
 #   "fuji"
-#   "sepolia"
+  "sepolia"
 #   "celo-testnet"
 #   "arbitrum-sepolia"
 #   "optimism-sepolia" # Error calling deploy() function for contract DirectGrantsLiteStrategy
@@ -61,6 +61,8 @@ scripts=(
     # "strategies/deployDonationVotingMerkleDistributionDirect"
     # "strategies/deployDirectGrants"
     # "strategies/deployDirectGrantsLite"
+
+    "strategies/deployDirectAllocation"   
     
     # "core/transferProxyAdminOwnership"
     # "strategies/deployDonationVotingMerkleDistributionVault"

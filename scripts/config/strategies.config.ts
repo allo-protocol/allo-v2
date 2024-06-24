@@ -105,6 +105,10 @@ export const strategyConfig: DeployParams = {
       name: "DirectGrantsLiteStrategy",
       version: "v1.0",
     },
+    "direct-allocation": {
+      name: "DirectAllocationStrategy",
+      version: "v1.0",
+    },
   },
   // Optimism
   10: {
