@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 import {BaseStrategy} from "../BaseStrategy.sol";
 
 contract DirectAllocationStrategy is BaseStrategy {
+    event DirectAllocated(bytes32 indexed profileId, address profileOwner, uint256 amount, address token, address sender);
     constructor(address _allo, string memory _name) BaseStrategy(_allo, _name) {}
 
     function initialize(uint256 _poolId, bytes memory _data) external virtual override {
@@ -23,9 +24,11 @@ contract DirectAllocationStrategy is BaseStrategy {
     /// @param _data The data to allocate
     /// @param _sender The sender
     function _allocate(bytes memory _data, address _sender) internal virtual override {
-        (address recipientId, uint256 amount, address token) = abi.decode(_data, (address, uint256, address));
-        _transferAmountFrom(token, TransferData({from: _sender, to: recipientId, amount: amount}));
-        emit Allocated(recipientId, amount, token, _sender);
+        (address profileOwner, uint256 amount, address token, uint256 nonce) = abi.decode(_data, (address, uint256, address, uint256));
+        bytes32 profileId = keccak256(abi.encodePacked(nonce, profileOwner));
+
+        _transferAmountFrom(token, TransferData({from: _sender, to: profileOwner, amount: amount}));
+        emit DirectAllocated(profileId, profileOwner, amount, token, _sender);
     }
 
     receive() external payable {
