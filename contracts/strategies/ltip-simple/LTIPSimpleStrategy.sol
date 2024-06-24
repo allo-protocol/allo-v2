@@ -657,7 +657,7 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @dev This is used to check if the allocator is a pool manager and able to allocate funds from the pool
     /// @param _allocator Address of the allocator
     /// @return 'true' if the allocator is a pool manager, otherwise false
-    function _isValidAllocator(address _allocator) internal view override returns (bool) {
+    function _isValidAllocator(address _allocator) internal view virtual override returns (bool) {
         return allo.isPoolManager(poolId, _allocator);
     }
 

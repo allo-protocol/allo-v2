@@ -29,7 +29,7 @@ import {IERC20} from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 
 /// @notice interface paramters to call Governor contract and get votes at a specific block
 interface IGovernor {
-    function getVotes(address recipient, uint256 blockNumer) external returns (uint256 votingPower);
+    function getVotes(address recipient, uint256 blockNumer) external view returns (uint256 votingPower);
 }
 
 /// @title LTIP Hedgey Governor Strategy
