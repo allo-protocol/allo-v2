@@ -673,14 +673,13 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     function _getRecipientStatus(address _recipientId) internal view override returns (Status) {
         return _getRecipient(_recipientId).recipientStatus;
     }
- 
+
     /// @notice Get the payout summary for the accepted recipient.
     /// @return Returns the payout summary for the accepted recipient
     function _getPayout(address _recipientId, bytes memory) internal view override returns (PayoutSummary memory) {
         Recipient memory recipient = _recipients[_recipientId];
         return PayoutSummary(recipient.recipientAddress, recipient.allocationAmount);
     }
-
 
     /// @notice Checks if the registration is active and reverts if not.
     /// @dev This will revert if the registration has not started or if the registration has ended.
