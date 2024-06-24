@@ -25,6 +25,10 @@ contract DirectAllocationStrategyTest is Test, AlloSetup, RegistrySetupFull, Eve
     uint256 internal poolId;
     Metadata internal poolMetadata;
 
+    event DirectAllocated(
+        bytes32 indexed profileId, address profileOwner, uint256 amount, address token, address sender
+    );
+
     function setUp() public {
         __RegistrySetupFull();
         __AlloSetup(address(registry()));
@@ -49,33 +53,33 @@ contract DirectAllocationStrategyTest is Test, AlloSetup, RegistrySetupFull, Eve
     }
 
     function test_allocate_NATIVE() public {
-        bytes memory data = abi.encode(recipient1(), 1000, NATIVE);
+        bytes memory data = abi.encode(profile1_owner(), 1000, NATIVE, 0);
 
-        uint256 balanceBefore = recipient1().balance;
+        uint256 balanceBefore = profile1_owner().balance;
 
         vm.expectEmit(true, true, true, false);
-        emit Allocated(recipient1(), 1000, NATIVE, address(this));
+        emit DirectAllocated(profile1_id(), profile1_owner(), 1000, NATIVE, address(this));
 
         allo().allocate{value: 1000}(poolId, data);
 
-        uint256 balanceAfter = recipient1().balance;
+        uint256 balanceAfter = profile1_owner().balance;
 
         assertEq(balanceAfter, balanceBefore + 1000);
     }
 
     function test_allocate_ERC20() public {
-        bytes memory data = abi.encode(recipient1(), 1000, address(mockERC20));
+        bytes memory data = abi.encode(profile1_owner(), 1000, address(mockERC20), 0);
 
         mockERC20.approve(address(strategy), 1000);
 
-        uint256 balanceBefore = mockERC20.balanceOf(recipient1());
+        uint256 balanceBefore = mockERC20.balanceOf(profile1_owner());
 
         vm.expectEmit(true, true, true, false);
-        emit Allocated(recipient1(), 1000, address(mockERC20), address(this));
+        emit DirectAllocated(profile1_id(), profile1_owner(), 1000, address(mockERC20), address(this));
 
         allo().allocate(poolId, data);
 
-        uint256 balanceAfter = mockERC20.balanceOf(recipient1());
+        uint256 balanceAfter = mockERC20.balanceOf(profile1_owner());
 
         assertEq(balanceAfter, balanceBefore + 1000);
     }
