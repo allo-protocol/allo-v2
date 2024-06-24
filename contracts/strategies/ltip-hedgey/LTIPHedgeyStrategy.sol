@@ -42,15 +42,14 @@ interface ITokenVestingPlans {
     ) external returns (uint256 newPlanId);
 }
 
-/// @title LTIP Simple Strategy
+/// @title LTIP Hedgey Strategy
 /// @author @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>, @0xZakk <zakk@gitcoin.co>, @nfrgosselin <nate@gitcoin.co>, @bitbeckers
-/// @notice Strategy for Long-Term Incentive Programs (LTIP) allocation with distribution vested over time. The simple strategy retains the funds in the round untill the period has expired
+/// @notice Strategy for Long-Term Incentive Programs (LTIP) allocation with distribution vested over time. Vesting plans are created using Hedgey.
 contract LTIPHedgeyStrategy is LTIPSimpleStrategy {
     /// ================================
     /// ========== Struct ==============
     /// ================================
 
-    // TODO packing
     /// @notice The parameters used to initialize the strategy
     struct InitializeParamsHedgey {
         address hedgeyContract;
@@ -67,23 +66,35 @@ contract LTIPHedgeyStrategy is LTIPSimpleStrategy {
     /// ========== Events =============
     /// ===============================
 
+    /// @notice Emitted when the admin address of the Hedgey vesting plan is updated
+    /// @param adminAddress The new admin address
+    /// @param sender The address that sent the transaction
+    /// @dev This does not impact already created plans
     event AdminAddressUpdated(address adminAddress, address sender);
+
+    /// @notice Emitted when the admin transfer OBO is updated
+    /// @param adminTransferOBO The new admin transfer OBO
+    /// @param sender The address that sent the transaction
     event AdminTransferOBOUpdated(bool adminTransferOBO, address sender);
 
     /// ================================
     /// ========== Storage =============
     /// ================================
 
+    /// @notice The contract that mints the Hedgey vesting plans
     address public hedgeyContract;
+
+    /// @notice The admin address of the Hedgey vesting plan, this address can revoke created plans
     address public vestingAdmin;
+
+    /// @notice Toggle to allow the vestingAdmin to transfer a plan and NFT to another wallet on behalf of (OBO) a beneficiary. To be used only for emergencies.
     bool public adminTransferOBO;
-    mapping(address => uint256) internal _recipientLockupTerm;
 
     /// ===============================
     /// ======== Constructor ==========
     /// ===============================
 
-    /// @notice Constructor for the RFP Simple Strategy
+    /// @notice Constructor for the LTIP Hedgey Strategy
     /// @param _allo The 'Allo' contract
     /// @param _name The name of the strategy
     constructor(address _allo, string memory _name) LTIPSimpleStrategy(_allo, _name) {}
@@ -95,7 +106,7 @@ contract LTIPHedgeyStrategy is LTIPSimpleStrategy {
     // @notice Initialize the strategy
     /// @param _poolId ID of the pool
     /// @param _data The data to be decoded
-    /// @custom:data (bool registryGating, bool metadataRequired, uint256 allocationThreshold, uint64 registrationStartTime, uint64 registrationEndTime, uint64 allocationStartTime, uint64 allocationEndTime)
+    /// @custom:data (address hedgeyContract, address vestingAdmin, bool adminTransferOBO, InitializeParams initializeParams)
     function initialize(uint256 _poolId, bytes memory _data) external virtual override {
         (InitializeParamsHedgey memory initializeParamsHedgey) = abi.decode(_data, (InitializeParamsHedgey));
         __LTIPHedgeyStrategy_init(_poolId, initializeParamsHedgey);
@@ -118,20 +129,18 @@ contract LTIPHedgeyStrategy is LTIPSimpleStrategy {
     /// ============ Views ============
     /// ===============================
 
-    // TODO do we need a custom getPayouts because of the Hedgey data?
-
     /// ===============================
     /// ======= External/Custom =======
     /// ===============================
 
-    /// @notice Update the default Admin wallet used when creating Hedgey plans
+    /// @notice Update the default admin wallet used when creating Hedgey plans
     /// @param _vestingAdmin The new admin address
     function setVestingAdmin(address _vestingAdmin) external onlyPoolManager(msg.sender) {
         vestingAdmin = _vestingAdmin;
         emit AdminAddressUpdated(vestingAdmin, msg.sender);
     }
 
-    /// @notice Update the default Admin wallet used when creating Hedgey plans
+    /// @notice Update the default sdmin wallet used when creating Hedgey plans
     /// @param _adminTransferOBO Set if the admin is allowed to transfer on behalf of the recipient
     function setAdminTransferOBO(bool _adminTransferOBO) external onlyPoolManager(msg.sender) {
         adminTransferOBO = _adminTransferOBO;
@@ -142,6 +151,11 @@ contract LTIPHedgeyStrategy is LTIPSimpleStrategy {
     /// ============ Internal ==============
     /// ====================================
 
+    /// @notice Creates a Hedgey vesting plan for the recipient
+    /// @param recipientId The recipient ID
+    /// @param recipientAddress The recipient address
+    /// @param _token The address of the tokens to vest
+    /// @param _amount The amount to vest
     function _vestAmount(address recipientId, address recipientAddress, address _token, uint256 _amount)
         internal
         virtual
@@ -151,7 +165,6 @@ contract LTIPHedgeyStrategy is LTIPSimpleStrategy {
 
         IERC20(_token).approve(hedgeyContract, _amount);
 
-        // TODO is there a rate?
         uint256 rate = _amount / recipient.allocationAmount;
         uint256 hedgeyId = ITokenVestingPlans(hedgeyContract).createPlan(
             recipientAddress,
@@ -174,4 +187,5 @@ contract LTIPHedgeyStrategy is LTIPSimpleStrategy {
     /// ====================================
     /// ============== Hooks ===============
     /// ====================================
+    
 }

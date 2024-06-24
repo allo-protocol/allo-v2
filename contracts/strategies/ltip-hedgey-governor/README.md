@@ -1,8 +1,9 @@
-# LTIPHedgeyStrategy.sol
+# LTIPHedgeyGovernorStrategy.sol
 
-The `LTIPHedgeyStrategy` contract represents a smart contract for Long-Term Incentive Programs (LTIP). It extends the capabilities of the `LTIPSimpleStrategy` contract and replaced the TokenTimeLock vesting with Hedgey vesting. The contract also incorporates the `ReentrancyGuard` library to prevent reentrant attacks.
+The `LTIPHedgeyGovernorStrategy` contract represents a smart contract for Long-Term Incentive Programs (LTIP). It extends the capabilities of the `LTIPHedgeyStrategy` contract and replaced the voting mechanism with weighted voting based on -delegated- voting balances.
 
 ## Table of Contents
+
 - [RFPSimpleStrategy.sol](#rfpsimplestrategysol)
   - [Table of Contents](#table-of-contents)
   - [Sequence Diagram](#sequence-diagram)
@@ -25,10 +26,9 @@ The `LTIPHedgeyStrategy` contract represents a smart contract for Long-Term Ince
     - [Distributing Milestone](#distributing-milestone)
     - [Withdrawing Funds from Pool](#withdrawing-funds-from-pool)
 
+## Sequence Diagram
 
-## Sequence Diagram 
-
-## Sequence Diagram 
+## Sequence Diagram
 
 ```mermaid
 sequenceDiagram
@@ -51,7 +51,7 @@ sequenceDiagram
 
 ## Smart Contract Overview
 
-- **License:** The `LTIPHedgeyStrategy` contract operates under the AGPL-3.0-only License, fostering open-source usage under specific terms.
+- **License:** The `LTIPHedgeyGovernorStrategy` contract operates under the AGPL-3.0-only License, fostering open-source usage under specific terms.
 - **Solidity Version:** Developed using Solidity version 0.8.19, capitalizing on the latest Ethereum smart contract functionalities.
 - **External Libraries:** Utilizes the `ReentrancyGuard` library from the OpenZeppelin contracts to prevent reentrant attacks.
 - **Interfaces:** Imports interfaces from the Allo core and external libraries.
@@ -59,35 +59,24 @@ sequenceDiagram
 
 ### Structs
 
-1. `Recipient`: Contains recipient-related data, such as the recipient's address, proposal bid, use of registry anchor, and status.
-2. `Milestone`: Holds details about a milestone, including the amount percentage, metadata, and status.
+1. `InitializeParamsGovernor`: Initializes the strategy with specific parameters for the governor contract and nested parameters for the underlying strategies.
 
 ### Errors
 
-1. `INVALID_MILESTONE`: Thrown when a milestone is invalid.
-2. `MILESTONE_ALREADY_ACCEPTED`: Thrown when a milestone is already accepted.
-3. `EXCEEDING_MAX_BID`: Thrown when a proposal bid exceeds the maximum bid.
-4. `MILESTONES_ALREADY_SET`: Thrown when milestones are already set or approved.
-5. `AMOUNT_TOO_LOW`: Thrown when the max bid increase amount is too low.
+1. `VOTING_WEIGHT_ZERO`: Thrown when a voter has no voting weight - i.e. no -delegated- tokens.
+2. `VOTING_EXCEEDS_WEIGHT`: Thrown when a voter will exceed their voting weight.
 
 ### Events
 
-1. `MaxBidIncreased`: Emitted when the maximum bid is increased.
-2. `MilestoneSubmitted`: Emitted when a milestone is submitted.
-3. `MilestoneStatusChanged`: Emitted for the status change of a milestone.
-4. `MilestonesSet`: Emitted when milestones are set.
+1. `VotingBlockUpdated`: Emitted when block to check voting weight against is updated.
+2. `VotesRevoked`: Emitted when votes are revoked.
 
 ### Storage Variables
 
-1. `useRegistryAnchor`: Flag indicating whether to use the registry anchor for recipient registration.
-2. `metadataRequired`: Flag indicating whether metadata is required for recipient registration.
-3. `acceptedRecipientId`: The accepted recipient who can submit milestones.
-4. `_registry`: Reference to the Allo registry contract.
-5. `maxBid`: The maximum bid for the RFP pool.
-6. `upcomingMilestone`: Index of the upcoming milestone.
-7. `_recipientIds`: Collection of recipient addresses.
-8. `milestones`: Collection of submitted milestones.
-9. `_recipients`: Mapping from recipient addresses to recipient data.
+1. `governorContract`: The address of the governor contract to get voting power from
+2. `votingBlock`: The block number to get voting balances from the Governor contract
+3. `votesCasted`: Tracks the total number of votes casted by an address
+4. `votesCasterFor`: Maps the total number of votes casted by an address for a specific recipient
 
 ### Constructor
 
@@ -99,30 +88,24 @@ The `initialize` function decodes and initializes parameters passed during strat
 
 ### Views
 
-1. `getRecipient`: Retrieves recipient details.
-2. `getMilestone`: Retrieves milestone details.
-3. `getMilestoneStatus`: Retrieves the status of a milestone.
+See the `Views` section in the `LTIPSimpleStrategy` contract.
 
 ### External Functions
 
-1. `setMilestones`: Sets milestones for the accepted recipient.
-2. `submitUpcomingMilestone`: Submits a milestone for the accepted recipient.
-3. `rejectMilestone`: Rejects a pending milestone.
-4. `increaseMaxBid`: Updates the maximum bid for the RFP pool.
-5. `withdraw`: Allows pool managers to withdraw funds from the pool.
+1. `setVotingBlock`: Update the block number to get voting balances from the Governor contract
+2. `revokeVotes`: Revokes allocated votes from a recipient
 
 ### Internal Functions
 
-1. `_registerRecipient`: Handles recipient registration, processing the provided data.
-2. `_allocate`: Allocates funds to the accepted recipient.
-3. `_distribute`: Distributes upcoming milestone funds to the accepted recipient.
+1. `_allocate`: Allocate (delegated) voting power to a recipient. 
+2. `_isValidAllocator`: Check if the allocator has enough voting power to allocate to a recipient.
 
 ## User Flows
 
-### Distributing Vesting 
+### Weighted voting 
 
-* User initiates a distribution request.
-* Verifies if sender is authorized to distribute funds.
-* Checks if a recipient passess voting threshols exists.
-* Creates a vesting plan and deposits funds for the recipient into the plan.
-* Emits `VestingPlanCreated` and `Distributed` events.
+- A delegate can vote on behalf of a voter as managed in the Governor contract.
+- The delegate can vote on behalf of multiple voters by aggregating balances.
+- The delegate casts votes on a recipient based on the aggregated balance.
+- The contract checks alread allocated balances and throws an error if the delegate exceeds the allocated balance.
+
