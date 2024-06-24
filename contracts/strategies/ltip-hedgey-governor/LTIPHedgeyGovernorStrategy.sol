@@ -198,4 +198,12 @@ contract LTIPHedgeyGovernorStrategy is LTIPHedgeyStrategy {
     /// ====================================
     /// ============== Hooks ===============
     /// ====================================
+
+    /// @notice Checks if address is eligible allocator.
+    /// @dev This is used to check if the allocator is a pool manager and able to allocate funds from the pool
+    /// @param _allocator Address of the allocator
+    /// @return 'true' if the allocator is a pool manager, otherwise false
+    function _isValidAllocator(address _allocator) internal view override returns (bool) {
+        return IGovernor(governorContract).getVotes(_allocator, votingBlock) > 0;
+    }
 }

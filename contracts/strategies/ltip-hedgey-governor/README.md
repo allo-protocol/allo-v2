@@ -98,6 +98,7 @@ See the `Views` section in the `LTIPSimpleStrategy` contract.
 ### Internal Functions
 
 1. `_allocate`: Allocate (delegated) voting power to a recipient. 
+2. `_isValidAllocator`: Check if the allocator has enough voting power to allocate to a recipient.
 
 ## User Flows
 
