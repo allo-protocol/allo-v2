@@ -61,6 +61,8 @@ scripts=(
     # "strategies/deployDonationVotingMerkleDistributionDirect"
     # "strategies/deployDirectGrants"
     # "strategies/deployDirectGrantsLite"
+
+    # "strategies/deployDirectAllocation"   
     
     # "core/transferProxyAdminOwnership"
     # "strategies/deployDonationVotingMerkleDistributionVault"
