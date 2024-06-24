@@ -1,5 +1,3 @@
-//TODO Update for LTIP Strategy
-
 # LTIPSimpleStrategy.sol
 
 The `LTIPSimpleStrategy` contract represents a smart contract for Long-Term Incentive Programs (LTIP). It extends the capabilities of the `BaseStrategy` contract and integrates features specifically tailored for managing applications and distributing funds. The contract also incorporates the `ReentrancyGuard` library to prevent reentrant attacks.
@@ -63,20 +61,24 @@ sequenceDiagram
 
 1. `APPLICATION_CANCELLED`: Thrown when an application has been cancelled. After cancellation, reapplying is blocked.
 2. `ALREADY_ALLOCATED`: Thrown when recipients already have received a funds allocation.
+3. `REVIEW_NOT_ACTIVE`: Thrown when the review period is not active.
+4. `INSUFFICIENT_VOTES`: Thrown when the recipient hasn't met the distribution threshold.
 
 ### Events
 
-1. `UpdatedRegistration`: Emitted when a recipient updates their registration.
-2. `AllocationRevoked`: Emitted when allocated funds are revoked and returned to the pool.
-3. `Voted`: Emitted when a vote is cast.
-4. `VestingPlanCreated`: Emitted when a vesting plan is created.
-5. `AllocationPeriodExtended` 
+1. `UpdatedRegistration`: Emitted when a recipient updates their registration
+2. `Reviewed`: Emitted when a recipient is reviewed.
+3. `RecipientStatusUpdated`: Emitted when the recipient status is updated.
+4. `Canceled`: Emitted when a recipient's application is canceled
+5. `AllocationRevoked`: Emitted when allocated funds are revoked and returned to the pool
+6. `Voted`: Emitted when a vote is casted by an approved allocator
+7. `VestingPlanCreated`: Emitted when a vesting plan is created for a recipient
+8. `TimestampsUpdated`: Emitted when the pool timestamps are updated
 
 ### Storage Variables
 
-1. `useRegistryAnchor`: Flag to indicate whether to use the registry anchor or not.
-metadataRequired: Flag to indicate whether metadata is required or not.
-2. `registryGating`: (No notice provided)
+1. `registryGating`: (No notice provided)
+2. `metadataRequired`: Flag to indicate whether metadata is required or not.
 3. `votingThreshold`: The voting threshold for a recipient to be accepted.
 4. `registrationStartTime`: Start time for registration.
 5. `registrationEndTime`: End time for registration.
@@ -87,11 +89,12 @@ metadataRequired: Flag to indicate whether metadata is required or not.
 10. `distributionStartTime`: Start time for distribution.
 11. `distributionEndTime`: End time for distribution.
 12. `vestingPeriod`: Vesting period in seconds.
-13. `acceptedRecipientId`: The accepted recipient who can submit milestones.
-14. `_registry`: The registry contract interface. (Private)
-15. `_recipientIds`: Internal collection of recipients. (Private)
-16. `_recipients`: This maps accepted recipients to their details. 'recipientId' to 'Recipient'. (Internal)
-17. `_vestingPlans`: This maps accepted recipients to their vesting plans. 'recipientId' to 'VestingPlan'. (Internal)
+13. `_registry`: The registry contract interface. (Private)
+14. `_recipientIds`: Internal collection of recipients. (Private)
+15. `_recipients`: This maps accepted recipients to their details. 'recipientId' to 'Recipient'. (Internal)
+16. `_vestingPlans`: This maps accepted recipients to their vesting plans. 'recipientId' to 'VestingPlan'. (Internal)
+17. `votedFor`: This maps the allocator the the recipient they voted for. (Internal)
+18. `votes`: This maps the recipient to the number of votes they have received. (Internal)
 
 ### Constructor
 
@@ -109,18 +112,26 @@ The `initialize` function decodes and initializes parameters passed during strat
 
 ### External Functions
 
-1. `withdraw`: Allows pool managers to withdraw funds from the pool.
-2. `setPoolActive`: Sets the pool to active.
-3. `extendAllocationEndTime`: Extends the allocation end time.
+1. `reviewRecipients`: Allows pool managers to review recipients.
+2. `cancelRecipients`: Allows pool managers to cancel recipient applications.
+3. `setPoolActive`: Sets the pool to active.
+4. `withdraw`: Allows pool managers to withdraw funds from the pool.
+3. `updatePoolTimestamps`: Extends the timestamp parameters of the round.
 
 ### Internal Functions
 
 1. `_registerRecipient`: Submit a proposal to receive funds from LTIP pool.
 2. `_allocate`: Select recipient for LTIP allocation
+3. `_vestAmount`: Create a vesting plan and deposit funds for the recipient.
 3. `_distribute`: Distributes upcoming milestone funds to the accepted recipient.
-4. `_transferAmount`: Creates a vesting plan and deposits funds for the recipient into the plan.
-5. `_getRecipientStatus`: Retrieves the status of a recipient.
-6. `_isProfileMember`: Check is msg.sender is a linked to a profile in the registry.
+4. `_isPoolTimestampValid`: Validated the pool timestamps.
+5. `_isProfileMember`: Check is msg.sender is a linked to a profile in the registry.
+6. `_getRecipient`: Retrieves the recipient details.
+7. `_getRecipientStatus`: Retrieves the status of a recipient.
+8. `_getPayout`: Retrieves the payout details for a recipient.
+9. `_checkOnlyActiveRegistration`: Checks if the registration period is active.
+10. `_checkOnlyActiveAllocation`: Checks if the allocation period is active.
+11. `_checkOnlyActiveReview`: Checks if the review period is active.
 
 ## User Flows
 
