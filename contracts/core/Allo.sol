@@ -255,12 +255,42 @@ contract Allo is
         _grantRole(pools[_poolId].managerRole, _manager);
     }
 
+    /// @notice Add multiple pool managers
+    /// @dev Emits 'RoleGranted()' event. 'msg.sender' must be a pool admin.
+    /// @param _poolId ID of the pool
+    /// @param _managers The addresses to add
+    function addPoolManagers(uint256 _poolId, address[] memory _managers) external onlyPoolAdmin(_poolId) {
+        for (uint256 i; i < _managers.length;) {
+            if (_managers[i] == address(0)) revert ZERO_ADDRESS();
+
+            _grantRole(pools[_poolId].managerRole, _managers[i]);
+
+            unchecked {
+                ++i;
+            }
+        }
+    }
+
     /// @notice Remove a pool manager
     /// @dev Emits 'RoleRevoked()' event. 'msg.sender' must be a pool admin.
     /// @param _poolId ID of the pool
     /// @param _manager The address to remove
     function removePoolManager(uint256 _poolId, address _manager) external onlyPoolAdmin(_poolId) {
         _revokeRole(pools[_poolId].managerRole, _manager);
+    }
+
+    /// @notice Remove multiple pool managers
+    /// @dev Emits 'RoleRevoked()' event. 'msg.sender' must be a pool admin.
+    /// @param _poolId ID of the pool
+    /// @param _managers The addresses to remove
+    function removePoolManagers(uint256 _poolId, address[] memory _managers) external onlyPoolAdmin(_poolId) {
+        for (uint256 i; i < _managers.length;) {
+            _revokeRole(pools[_poolId].managerRole, _managers[i]);
+
+            unchecked {
+                ++i;
+            }
+        }
     }
 
     /// @notice Transfer the funds recovered  to the recipient
