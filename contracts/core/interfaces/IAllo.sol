@@ -202,7 +202,7 @@ interface IAllo {
     /// @dev 'msg.sender' must be a pool admin.
     /// @param _poolId The ID of the pool to remove the managers from
     /// @param _managers The addresses of the managers to remove
-    function removePoolManager(uint256 _poolId, address _manager) external;
+    function removePoolManagers(uint256 _poolId, address[] memory _managers) external;
 
     /// @notice Recovers funds from a pool.
     /// @dev 'msg.sender' must be a pool admin.
