@@ -370,7 +370,6 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
         for (uint256 i = 0; i < _poolManagersToAdd.length; i++) {
             assertTrue(allo().isPoolManager(poolId, _poolManagersToAdd[i]));
         }
-        
     }
 
     function testRevert_addPoolManagers_UNAUTHORIZED(address[] memory _poolManagersToAdd) public {
@@ -420,7 +419,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
 
         vm.prank(pool_admin());
         allo().removePoolManagers(poolId, _poolManagersToRemove);
-        
+
         for (uint256 i = 0; i < _poolManagersToRemove.length; i++) {
             assertFalse(allo().isPoolManager(poolId, _poolManagersToRemove[i]));
         }
