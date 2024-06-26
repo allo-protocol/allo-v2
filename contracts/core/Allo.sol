@@ -259,7 +259,7 @@ contract Allo is
     /// @dev Emits 'RoleGranted()' event. 'msg.sender' must be a pool admin.
     /// @param _poolId ID of the pool
     /// @param _managers The addresses to add
-    function addPoolManagers(uint256 _poolId, address[] memory _managers) external onlyPoolAdmin(_poolId) {
+    function addPoolManagers(uint256 _poolId, address[] calldata _managers) external onlyPoolAdmin(_poolId) {
         for (uint256 i; i < _managers.length;) {
             if (_managers[i] == address(0)) revert ZERO_ADDRESS();
 
@@ -283,7 +283,7 @@ contract Allo is
     /// @dev Emits 'RoleRevoked()' event. 'msg.sender' must be a pool admin.
     /// @param _poolId ID of the pool
     /// @param _managers The addresses to remove
-    function removePoolManagers(uint256 _poolId, address[] memory _managers) external onlyPoolAdmin(_poolId) {
+    function removePoolManagers(uint256 _poolId, address[] calldata _managers) external onlyPoolAdmin(_poolId) {
         for (uint256 i; i < _managers.length;) {
             _revokeRole(pools[_poolId].managerRole, _managers[i]);
 
