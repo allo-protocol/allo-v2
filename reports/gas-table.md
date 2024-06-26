@@ -1,10 +1,10 @@
 | contracts/core/Allo.sol:Allo contract |                 |         |        |         |         |
 |---------------------------------------|-----------------|---------|--------|---------|---------|
 | Deployment Cost                       | Deployment Size |         |        |         |         |
-| 3001876                               | 13722           |         |        |         |         |
+| 2982877                               | 13634           |         |        |         |         |
 | Function Name                         | min             | avg     | median | max     | # calls |
-| addPoolManager                        | 26337           | 35379   | 26531  | 53270   | 3       |
-| addPoolManagers                       | 26559           | 1513696 | 116552 | 6556305 | 1024    |
+| addPoolManager                        | 26358           | 35397   | 26531  | 53304   | 3       |
+| addPoolManagers                       | 26559           | 1498895 | 116150 | 6509907 | 1024    |
 | allocate                              | 38534           | 87818   | 75130  | 187732  | 78      |
 | batchAllocate                         | 46074           | 77370   | 77370  | 108666  | 2       |
 | batchRegisterRecipient                | 46573           | 78349   | 78349  | 110126  | 2       |
@@ -20,11 +20,11 @@
 | getTreasury                           | 399             | 399     | 399    | 399     | 2       |
 | initialize                            | 25595           | 143473  | 143574 | 163546  | 980     |
 | isPoolAdmin                           | 950             | 1950    | 1950   | 2950    | 2       |
-| isPoolManager                         | 999             | 2802    | 3488   | 9488    | 119227  |
+| isPoolManager                         | 999             | 2801    | 3488   | 9488    | 118833  |
 | recoverFunds                          | 24158           | 45301   | 52832  | 58913   | 3       |
 | registerRecipient                     | 54289           | 161046  | 183137 | 203037  | 48      |
 | removePoolManager                     | 26574           | 28944   | 28944  | 31315   | 2       |
-| removePoolManagers                    | 26569           | 412416  | 108207 | 1692596 | 512     |
+| removePoolManagers                    | 26569           | 411198  | 105580 | 1692596 | 512     |
 | transferOwnership                     | 28567           | 28567   | 28567  | 28567   | 50      |
 | updateBaseFee                         | 23708           | 41126   | 46933  | 46933   | 4       |
 | updatePercentFee                      | 23670           | 24995   | 24985  | 29857   | 234     |
@@ -300,4 +300,4 @@
 
 
 
-Ran 30 test suites in 3.94s (8.55s CPU time): 1085 tests passed, 0 failed, 0 skipped (1085 total tests)
+Ran 30 test suites in 3.95s (5.53s CPU time): 1085 tests passed, 0 failed, 0 skipped (1085 total tests)
