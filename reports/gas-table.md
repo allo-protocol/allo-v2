@@ -38,19 +38,19 @@
 | Function Name                                 | min             | avg                 | median  | max                 | # calls |
 | ALLO_OWNER                                    | 240             | 240                 | 240     | 240                 | 1       |
 | addMembers                                    | 25550           | 49621               | 50337   | 75598               | 67      |
-| addOwners                                     | 25097           | 2965439             | 2946252 | 6477660             | 514     |
+| addOwners                                     | 25097           | 2974559             | 2819212 | 6503032             | 514     |
 | anchorToProfileId                             | 609             | 609                 | 609     | 609                 | 258     |
-| createProfile                                 | 29386           | 943211              | 727588  | 7157548             | 3721    |
+| createProfile                                 | 29386           | 935124              | 727588  | 7157704             | 3721    |
 | getProfileByAnchor                            | 3894            | 12317               | 17407   | 35358               | 623     |
 | getProfileById                                | 3576            | 3580                | 3576    | 5040                | 3191    |
 | hasRole                                       | 742             | 742                 | 742     | 742                 | 1       |
 | initialize                                    | 44040           | 70051               | 70077   | 70077               | 1011    |
 | isMemberOfProfile                             | 816             | 835                 | 816     | 2816                | 524     |
-| isOwnerOfProfile                              | 967             | 967                 | 967     | 2967                | 90880   |
+| isOwnerOfProfile                              | 967             | 967                 | 967     | 2967                | 89741   |
 | isOwnerOrMemberOfProfile                      | 0               | 3171                | 2983    | 5303                | 1329    |
 | recoverFunds                                  | 24236           | 40887               | 40082   | 59149               | 4       |
 | removeMembers                                 | 26126           | 29036               | 28558   | 32902               | 4       |
-| removeOwners                                  | 25140           | 773997              | 699764  | 1680620             | 257     |
+| removeOwners                                  | 25140           | 813462              | 836236  | 1687132             | 257     |
 | updateProfileMetadata                         | 25913           | 29441               | 25925   | 36487               | 3       |
 | updateProfileName                             | 25354           | 2553540988718944051 | 545717  | 8937393460515966616 | 7       |
 
@@ -165,7 +165,7 @@
 | contracts/strategies/qv-simple/QVSimpleStrategy.sol:QVSimpleStrategy contract |                 |        |        |        |         |
 |-------------------------------------------------------------------------------|-----------------|--------|--------|--------|---------|
 | Deployment Cost                                                               | Deployment Size |        |        |        |         |
-| 3080287                                                                       | 14665           |        |        |        |         |
+| 3080335                                                                       | 14665           |        |        |        |         |
 | Function Name                                                                 | min             | avg    | median | max    | # calls |
 | addAllocator                                                                  | 35647           | 49496  | 40136  | 60036  | 112     |
 | allocate                                                                      | 27888           | 100589 | 157784 | 157784 | 13      |
@@ -247,4 +247,4 @@
 
 
 
-Ran 29 test suites in 5.93s (21.31s CPU time): 1034 tests passed, 0 failed, 0 skipped (1034 total tests)
+Ran 29 test suites in 3.90s (7.72s CPU time): 1034 tests passed, 0 failed, 0 skipped (1034 total tests)

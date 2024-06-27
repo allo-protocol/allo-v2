@@ -101,11 +101,12 @@ contract RegistryTest is Test, RegistrySetup, Native, Errors {
 
     function testRevert_createProfile_owner_ZERO_ADDRESS() public {
         vm.expectRevert(ZERO_ADDRESS.selector);
+
         address[] memory _owners = new address[](1);
         _owners[0] = address(0);
         // create profile
         vm.prank(profile1_owner());
-        registry().createProfile(nonce, name, metadata, _owners, new address[](0));
+        registry().createProfile(nonce, name, metadata, _owners, profile1_members());
     }
 
     function testRevert_createProfile_member_ZERO_ADDRESS() public {
