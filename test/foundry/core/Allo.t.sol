@@ -330,28 +330,6 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
         allo().updateBaseFee(1e16);
     }
 
-    function test_addPoolManager() public {
-        uint256 poolId = _utilCreatePool(0);
-
-        assertFalse(allo().isPoolManager(poolId, makeAddr("add manager")));
-        vm.prank(pool_admin());
-        allo().addPoolManager(poolId, makeAddr("add manager"));
-        assertTrue(allo().isPoolManager(poolId, makeAddr("add manager")));
-    }
-
-    function testRevert_addPoolManager_UNAUTHORIZED() public {
-        uint256 poolId = _utilCreatePool(0);
-        vm.expectRevert(UNAUTHORIZED.selector);
-        allo().addPoolManager(poolId, makeAddr("add manager"));
-    }
-
-    function testRevert_addPoolManager_ZERO_ADDRESS() public {
-        uint256 poolId = _utilCreatePool(0);
-        vm.expectRevert(ZERO_ADDRESS.selector);
-        vm.prank(pool_admin());
-        allo().addPoolManager(poolId, address(0));
-    }
-
     function test_addPoolManagers(address[] memory _poolManagersToAdd) public {
         for (uint256 i = 0; i < _poolManagersToAdd.length; i++) {
             vm.assume(_poolManagersToAdd[i] != address(0));
@@ -385,21 +363,6 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
         vm.expectRevert(ZERO_ADDRESS.selector);
         vm.prank(pool_admin());
         allo().addPoolManagers(poolId, _poolManagersToAdd);
-    }
-
-    function test_removePoolManager() public {
-        uint256 poolId = _utilCreatePool(0);
-
-        assertTrue(allo().isPoolManager(poolId, pool_manager1()));
-        vm.prank(pool_admin());
-        allo().removePoolManager(poolId, pool_manager1());
-        assertFalse(allo().isPoolManager(poolId, pool_manager1()));
-    }
-
-    function testRevert_removePoolManager_UNAUTHORIZED() public {
-        uint256 poolId = _utilCreatePool(0);
-        vm.expectRevert(UNAUTHORIZED.selector);
-        allo().removePoolManager(poolId, makeAddr("add manager"));
     }
 
     function test_removePoolManagers(address[] memory _poolManagersToRemove) public {

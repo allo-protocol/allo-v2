@@ -1,32 +1,30 @@
 | contracts/core/Allo.sol:Allo contract |                 |         |        |         |         |
 |---------------------------------------|-----------------|---------|--------|---------|---------|
 | Deployment Cost                       | Deployment Size |         |        |         |         |
-| 2982877                               | 13634           |         |        |         |         |
+| 2951699                               | 13490           |         |        |         |         |
 | Function Name                         | min             | avg     | median | max     | # calls |
-| addPoolManager                        | 26358           | 35397   | 26531  | 53304   | 3       |
-| addPoolManagers                       | 26559           | 1498895 | 116150 | 6509907 | 1024    |
-| allocate                              | 38534           | 87818   | 75130  | 187732  | 78      |
+| addPoolManagers                       | 26559           | 1551318 | 118919 | 6509907 | 1024    |
+| allocate                              | 38512           | 87796   | 75108  | 187710  | 78      |
 | batchAllocate                         | 46074           | 77370   | 77370  | 108666  | 2       |
 | batchRegisterRecipient                | 46573           | 78349   | 78349  | 110126  | 2       |
 | createPool                            | 49070           | 526533  | 541491 | 541491  | 51      |
-| createPoolWithCustomStrategy          | 26948           | 403451  | 346947 | 573094  | 2190    |
-| distribute                            | 65408           | 135067  | 167627 | 167627  | 9       |
+| createPoolWithCustomStrategy          | 26948           | 403580  | 346947 | 573094  | 2185    |
+| distribute                            | 65386           | 135045  | 167605 | 167605  | 9       |
 | fundPool                              | 43858           | 132336  | 136003 | 162034  | 171     |
 | getBaseFee                            | 372             | 372     | 372    | 372     | 2       |
-| getPercentFee                         | 382             | 382     | 382    | 382     | 2       |
+| getPercentFee                         | 360             | 360     | 360    | 360     | 2       |
 | getPool                               | 2944            | 10582   | 12944  | 16944   | 216     |
 | getRegistry                           | 398             | 983     | 398    | 2398    | 1237    |
 | getStrategy                           | 550             | 550     | 550    | 550     | 42      |
-| getTreasury                           | 399             | 399     | 399    | 399     | 2       |
-| initialize                            | 25595           | 143473  | 143574 | 163546  | 980     |
+| getTreasury                           | 443             | 443     | 443    | 443     | 2       |
+| initialize                            | 25595           | 143473  | 143574 | 163546  | 975     |
 | isPoolAdmin                           | 950             | 1950    | 1950   | 2950    | 2       |
-| isPoolManager                         | 999             | 2801    | 3488   | 9488    | 118833  |
+| isPoolManager                         | 999             | 2802    | 3488   | 9488    | 123129  |
 | recoverFunds                          | 24158           | 45301   | 52832  | 58913   | 3       |
 | registerRecipient                     | 54289           | 161046  | 183137 | 203037  | 48      |
-| removePoolManager                     | 26574           | 28944   | 28944  | 31315   | 2       |
-| removePoolManagers                    | 26569           | 411198  | 105580 | 1692596 | 512     |
-| transferOwnership                     | 28567           | 28567   | 28567  | 28567   | 50      |
-| updateBaseFee                         | 23708           | 41126   | 46933  | 46933   | 4       |
+| removePoolManagers                    | 26569           | 421954  | 108747 | 1692568 | 512     |
+| transferOwnership                     | 28567           | 28567   | 28567  | 28567   | 45      |
+| updateBaseFee                         | 23686           | 41104   | 46911  | 46911   | 4       |
 | updatePercentFee                      | 23670           | 24995   | 24985  | 29857   | 234     |
 | updatePoolMetadata                    | 32107           | 37390   | 37390  | 42674   | 2       |
 | updateRegistry                        | 23800           | 25954   | 23942  | 30121   | 3       |
@@ -42,14 +40,14 @@
 | acceptProfileOwnership                        | 24178           | 25801               | 24178  | 29047               | 3       |
 | addMembers                                    | 25322           | 49393               | 50109  | 75370               | 67      |
 | anchorToProfileId                             | 608             | 608                 | 608    | 608                 | 4       |
-| createProfile                                 | 28412           | 723874              | 723897 | 853983              | 2972    |
+| createProfile                                 | 28412           | 723873              | 723897 | 853983              | 2957    |
 | getProfileByAnchor                            | 4071            | 20282               | 20071  | 37535               | 369     |
-| getProfileById                                | 3776            | 3780                | 3776   | 5240                | 2952    |
+| getProfileById                                | 3776            | 3780                | 3776   | 5240                | 2937    |
 | hasRole                                       | 743             | 743                 | 743    | 743                 | 1       |
-| initialize                                    | 44040           | 70051               | 70077  | 70077               | 1018    |
+| initialize                                    | 44040           | 70051               | 70077  | 70077               | 1013    |
 | isMemberOfProfile                             | 816             | 1649                | 816    | 2816                | 12      |
 | isOwnerOfProfile                              | 713             | 713                 | 713    | 713                 | 7       |
-| isOwnerOrMemberOfProfile                      | 0               | 2604                | 2696   | 5016                | 2609    |
+| isOwnerOrMemberOfProfile                      | 0               | 2604                | 2696   | 5016                | 2604    |
 | profileIdToPendingOwner                       | 523             | 523                 | 523    | 523                 | 3       |
 | recoverFunds                                  | 24258           | 40909               | 40104  | 59171               | 4       |
 | removeMembers                                 | 25894           | 28804               | 28311  | 32702               | 4       |
@@ -63,7 +61,7 @@
 | Deployment Cost                                                  | Deployment Size |        |        |        |         |
 | 381784                                                           | 1483            |        |        |        |         |
 | Function Name                                                    | min             | avg    | median | max    | # calls |
-| deploy                                                           | 67918           | 353831 | 354513 | 638380 | 4       |
+| deploy                                                           | 67906           | 353819 | 354501 | 638368 | 4       |
 | isDeployer                                                       | 530             | 2030   | 2530   | 2530   | 4       |
 | setDeployer                                                      | 24207           | 43626  | 46401  | 46401  | 8       |
 
@@ -71,7 +69,7 @@
 | contracts/strategies/_poc/qv-impact-stream/QVImpactStreamStrategy.sol:QVImpactStreamStrategy contract |                 |        |        |        |         |
 |-------------------------------------------------------------------------------------------------------|-----------------|--------|--------|--------|---------|
 | Deployment Cost                                                                                       | Deployment Size |        |        |        |         |
-| 2677951                                                                                               | 12791           |        |        |        |         |
+| 2677939                                                                                               | 12791           |        |        |        |         |
 | Function Name                                                                                         | min             | avg    | median | max    | # calls |
 | addAllocator                                                                                          | 36195           | 45783  | 45783  | 55372  | 2       |
 | allocationEndTime                                                                                     | 420             | 420    | 420    | 420    | 3       |
@@ -114,7 +112,7 @@
 | contracts/strategies/_poc/sqf-superfluid/SQFSuperFluidStrategy.sol:SQFSuperFluidStrategy contract |                 |         |         |         |         |
 |---------------------------------------------------------------------------------------------------|-----------------|---------|---------|---------|---------|
 | Deployment Cost                                                                                   | Deployment Size |         |         |         |         |
-| 3869257                                                                                           | 18232           |         |         |         |         |
+| 3869245                                                                                           | 18232           |         |         |         |         |
 | Function Name                                                                                     | min             | avg     | median  | max     | # calls |
 | adjustWeightings                                                                                  | 23914           | 23914   | 23914   | 23914   | 1       |
 | allocationEndTime                                                                                 | 420             | 420     | 420     | 420     | 2       |
@@ -150,7 +148,7 @@
 | contracts/strategies/donation-voting-merkle-distribution-direct-transfer/DonationVotingMerkleDistributionDirectTransferStrategy.sol:DonationVotingMerkleDistributionDirectTransferStrategy contract |                 |        |        |        |         |
 |-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------|--------|--------|--------|---------|
 | Deployment Cost                                                                                                                                                                                     | Deployment Size |        |        |        |         |
-| 3790978                                                                                                                                                                                             | 18140           |        |        |        |         |
+| 3790966                                                                                                                                                                                             | 18140           |        |        |        |         |
 | Function Name                                                                                                                                                                                       | min             | avg    | median | max    | # calls |
 | allocationEndTime                                                                                                                                                                                   | 404             | 1404   | 1404   | 2404   | 2       |
 | allocationStartTime                                                                                                                                                                                 | 441             | 441    | 441    | 441    | 2       |
@@ -300,4 +298,4 @@
 
 
 
-Ran 30 test suites in 3.95s (5.53s CPU time): 1085 tests passed, 0 failed, 0 skipped (1085 total tests)
+Ran 30 test suites in 4.14s (21.58s CPU time): 1080 tests passed, 0 failed, 0 skipped (1080 total tests)

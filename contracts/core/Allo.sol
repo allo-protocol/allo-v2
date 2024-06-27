@@ -243,14 +243,6 @@ contract Allo is
         _updateBaseFee(_baseFee);
     }
 
-    /// @notice Add a pool manager
-    /// @dev Emits 'RoleGranted()' event. 'msg.sender' must be a pool admin.
-    /// @param _poolId ID of the pool
-    /// @param _manager The address to add
-    function addPoolManager(uint256 _poolId, address _manager) external onlyPoolAdmin(_poolId) {
-        _addPoolManager(_poolId, _manager);
-    }
-
     /// @notice Add multiple pool managers
     /// @dev Emits 'RoleGranted()' event. 'msg.sender' must be a pool admin.
     /// @param _poolId ID of the pool
@@ -263,14 +255,6 @@ contract Allo is
                 ++i;
             }
         }
-    }
-
-    /// @notice Remove a pool manager
-    /// @dev Emits 'RoleRevoked()' event. 'msg.sender' must be a pool admin.
-    /// @param _poolId ID of the pool
-    /// @param _manager The address to remove
-    function removePoolManager(uint256 _poolId, address _manager) external onlyPoolAdmin(_poolId) {
-        _revokeRole(pools[_poolId].managerRole, _manager);
     }
 
     /// @notice Remove multiple pool managers
