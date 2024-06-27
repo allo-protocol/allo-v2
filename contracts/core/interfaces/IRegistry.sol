@@ -155,6 +155,22 @@ interface IRegistry {
     /// @param _members The members to remove from the '_profileId' passed in
     function removeMembers(bytes32 _profileId, address[] memory _members) external;
 
+    /// @dev Adds owners to the '_profileId' passed in
+    ///
+    /// Requirements: Only the 'Profile' owner can add owners
+    ///
+    /// @param _profileId The 'profileId' to add owners to
+    /// @param _owners The owners to add to the '_profileId' passed in
+    function addOwners(bytes32 _profileId, address[] memory _owners) external;
+
+    /// @dev Removes owners from the '_profileId' passed in
+    ///
+    /// Requirements: Only the 'Profile' owner can remove owners
+    ///
+    /// @param _profileId The 'profileId' to remove owners from
+    /// @param _owners The owners to remove from the '_profileId' passed in
+    function removeOwners(bytes32 _profileId, address[] memory _owners) external;
+
     /// @dev Recovers funds from the contract
     ///
     /// Requirements: Must be the Allo owner

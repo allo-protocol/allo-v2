@@ -411,4 +411,70 @@ contract RegistryTest is Test, RegistrySetup, Native, Errors {
         registry().recoverFunds(address(token), recipient);
         assertEq(token.balanceOf(recipient), amount, "amount");
     }
+
+    function test_addOwners(address[] memory _ownersToAdd) public {
+        for (uint256 i = 0; i < _ownersToAdd.length; i++) {
+            vm.assume(_ownersToAdd[i] != address(0));
+            vm.assume(_ownersToAdd[i] != profile1_owner());
+        }
+
+        vm.prank(profile1_owner());
+        bytes32 newProfileId = registry().createProfile(nonce, name, metadata, profile1Owners, profile1_members());
+
+        vm.prank(profile1_owner());
+        registry().addOwners(newProfileId, _ownersToAdd);
+
+        for (uint256 i = 0; i < _ownersToAdd.length; i++) {
+            assertTrue(registry().isOwnerOfProfile(newProfileId, _ownersToAdd[i]));
+        }
+    }
+
+    function testRevert_addOwners_UNAUTHORIZED() public {
+        bytes32 newProfileId = registry().createProfile(nonce, name, metadata, profile1Owners, new address[](0));
+
+        vm.prank(profile1_member1());
+        vm.expectRevert(UNAUTHORIZED.selector);
+        registry().addOwners(newProfileId, new address[](0));
+    }
+
+    function testRevert_addOwners_ZERO_ADDRESS() public {
+        vm.prank(profile1_owner());
+        bytes32 newProfileId = registry().createProfile(nonce, name, metadata, profile1Owners, new address[](0));
+
+        vm.expectRevert(ZERO_ADDRESS.selector);
+
+        address[] memory _owners = new address[](1);
+        _owners[0] = address(0);
+
+        vm.prank(profile1_owner());
+        registry().addOwners(newProfileId, _owners);
+    }
+
+    function test_removeOwners(address[] memory _ownersToRemove) public {
+        for (uint256 i = 0; i < _ownersToRemove.length; i++) {
+            vm.assume(_ownersToRemove[i] != address(0));
+            vm.assume(_ownersToRemove[i] != profile1_owner());
+        }
+
+        vm.prank(profile1_owner());
+        bytes32 newProfileId = registry().createProfile(nonce, name, metadata, profile1Owners, profile1_members());
+
+        vm.prank(profile1_owner());
+        registry().addOwners(newProfileId, _ownersToRemove);
+
+        vm.prank(profile1_owner());
+        registry().removeOwners(newProfileId, _ownersToRemove);
+
+        for (uint256 i = 0; i < _ownersToRemove.length; i++) {
+            assertFalse(registry().isOwnerOfProfile(newProfileId, _ownersToRemove[i]));
+        }
+    }
+
+    function testRevert_removeOwners_UNAUTHORIZED() public {
+        bytes32 newProfileId = registry().createProfile(nonce, name, metadata, profile1Owners, new address[](0));
+
+        vm.prank(profile1_member1());
+        vm.expectRevert(UNAUTHORIZED.selector);
+        registry().removeOwners(newProfileId, new address[](0));
+    }
 }

@@ -289,6 +289,42 @@ contract Registry is IRegistry, Initializable, Native, AccessControlUpgradeable,
         }
     }
 
+    /// @notice Adds owners to the profile
+    /// @dev 'msg.sender' must be the owner of the profile.
+    /// @param _profileId The ID of the profile
+    /// @param _owners The owners to add
+    function addOwners(bytes32 _profileId, address[] memory _owners) external onlyProfileOwner(_profileId) {
+        // Loop through the owners and add them to the profile by granting the role
+        for (uint256 i; i < _owners.length;) {
+            address owner = _owners[i];
+
+            // Will revert if any of the addresses are a zero address
+            if (owner == address(0)) revert ZERO_ADDRESS();
+
+            // Grant the role to the owner and emit the event for each owner
+            _grantRole(keccak256(abi.encodePacked(_profileId, "owner")), owner);
+            unchecked {
+                ++i;
+            }
+        }
+    }
+
+    /// @notice Removes owners from the profile
+    /// @dev 'msg.sender' must be the owner of the profile.
+    /// @param _profileId The ID of the profile
+    /// @param _owners The owners to remove
+    function removeOwners(bytes32 _profileId, address[] memory _owners) external onlyProfileOwner(_profileId) {
+        // Loop through the owners and remove them from the profile by revoking the role
+        for (uint256 i; i < _owners.length;) {
+            // Revoke the role from the owner and emit the event for each owner
+            _revokeRole(keccak256(abi.encodePacked(_profileId, "owner")), _owners[i]);
+
+            unchecked {
+                ++i;
+            }
+        }
+    }
+
     /// ====================================
     /// ======== Internal Functions ========
     /// ====================================
