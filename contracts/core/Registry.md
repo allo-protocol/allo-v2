@@ -24,7 +24,7 @@ The `Registry` contract is a fundamental component of the Allo ecosystem, enabli
     - [Add Members to Profile](#add-members-to-profile)
     - [Remove Members from Profile](#remove-members-from-profile)
     - [Add Owners to Profile](#add-owners-to-profile)
-    - [Remove Owners to Profile](#remove-owners-to-profile)
+    - [Remove Owners from Profile](#remove-owners-from-profile)
     - [Retrieve Profile Information](#retrieve-profile-information)
     - [Check Ownership and Membership](#check-ownership-and-membership)
     - [Recover Funds](#recover-funds)
@@ -127,7 +127,7 @@ The contract constructor initializes the Allo owner role and assigns the provide
 2. **`_generateProfileId`**: Generate a profile ID based on the provided nonce and the caller's address.
 3. **`_isOwnerOfProfile`**: Check if an address is the owner of a profile.
 4. **`_isMemberOfProfile`**: Check if an address is a member of a profile.
-5. **`_addOwners`**: Add owner to a profil.
+5. **`_addOwners`**: Add owner to a profile.
 
 ### Actors
 
@@ -173,7 +173,7 @@ In summary, the `Registry` smart contract provides a comprehensive system for cr
   * The profile owner initiates a transaction to the `addOwners` function with the `_profileId` and an array of `_owners`.
   * The contract grants roles to the new owners using the `_grantRole` function.
   * The contract emits events to indicate the successful addition of owners.
-### Remove Owners to Profile
+### Remove Owners from Profile
       
   * The profile owner initiates a transaction to the `removeOwners` function with the `_profileId` and an array of `_owners`.
   * The contract revokes roles from the owners using the `_revokeRole` function.
