@@ -40,21 +40,27 @@ contract RegistrySetupFull is RegistrySetup {
     }
 
     function _createProfiles() internal {
+        address[] memory ownersArrayPf0 = new address[](1);
+        ownersArrayPf0[0] = pool_admin();
         vm.prank(pool_admin());
         _poolProfileId_ = _registry_.createProfile(
-            0, "Pool Profile 1", Metadata({protocol: 1, pointer: "PoolProfile1"}), pool_admin(), pool_managers()
+            0, "Pool Profile 1", Metadata({protocol: 1, pointer: "PoolProfile1"}), ownersArrayPf0, pool_managers()
         );
         _poolProfileAnchor_ = _registry_.getProfileById(_poolProfileId_).anchor;
 
+        address[] memory ownersArrayPf1 = new address[](1);
+        ownersArrayPf1[0] = profile1_owner();
         vm.prank(profile1_owner());
         _profile1Id_ = _registry_.createProfile(
-            0, "Profile 1", Metadata({protocol: 1, pointer: "Profile1"}), profile1_owner(), profile1_members()
+            0, "Profile 1", Metadata({protocol: 1, pointer: "Profile1"}), ownersArrayPf1, profile1_members()
         );
         _profile1Anchor_ = _registry_.getProfileById(_profile1Id_).anchor;
 
+        address[] memory ownersArrayPf2 = new address[](1);
+        ownersArrayPf2[0] = profile2_owner();
         vm.prank(profile2_owner());
         _profile2Id_ = _registry_.createProfile(
-            0, "Profile 2", Metadata({protocol: 1, pointer: "Profile2"}), profile2_owner(), profile2_members()
+            0, "Profile 2", Metadata({protocol: 1, pointer: "Profile2"}), ownersArrayPf2, profile2_members()
         );
         _profile2Anchor_ = _registry_.getProfileById(_profile2Id_).anchor;
     }

@@ -84,23 +84,21 @@ contract AlloV1ToV2ProfileMigration {
         bytes32[] memory migratedProfileIds = new bytes32[](_profilesLength);
 
         for (uint256 i = 0; i < _profilesLength;) {
-            bytes32 alloV1 = _projectIds[i];
-            uint256 alloV1ChainId = _sourceChainIds[i];
-            uint256 nonce = _nonces[i];
-
             // create allo v2 profile
+            address[] memory ownersArray = new address[](1);
+            ownersArray[0] = _owners[i];
             bytes32 alloV2Profile =
-                IRegistry(_registry).createProfile(nonce, _names[i], _metadatas[i], _owners[i], new address[](0));
+                IRegistry(_registry).createProfile(_nonces[i], _names[i], _metadatas[i], ownersArray, new address[](0));
 
             migratedProfileIds[i] = alloV2Profile;
 
             AlloV1V2Profile memory alloV1V2Profile =
-                AlloV1V2Profile({alloV1: alloV1, alloV1ChainId: alloV1ChainId, alloV2: alloV2Profile, nonce: nonce});
+                AlloV1V2Profile({alloV1: _projectIds[i], alloV1ChainId: _sourceChainIds[i], alloV2: alloV2Profile, nonce: _nonces[i]});
 
-            alloV1ToAlloV1V2Profile[alloV1] = alloV1V2Profile;
+            alloV1ToAlloV1V2Profile[_projectIds[i]] = alloV1V2Profile;
             alloV2ToAlloV1V2Profile[alloV2Profile] = alloV1V2Profile;
 
-            emit ProfileMigrated(alloV1, alloV1ChainId, alloV2Profile, nonce);
+            emit ProfileMigrated(_projectIds[i], _sourceChainIds[i], alloV2Profile, _nonces[i]);
 
             unchecked {
                 i++;

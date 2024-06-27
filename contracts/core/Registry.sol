@@ -112,24 +112,21 @@ contract Registry is IRegistry, Initializable, Native, AccessControlUpgradeable,
     ///               for each profile.
     /// @param _name The name of the profile
     /// @param _metadata The metadata of the profile
-    /// @param _owner The owner of the profile
+    /// @param _owners The owners of the profile
     /// @param _members The members of the profile (can be set only if msg.sender == _owner)
     /// @return The ID for the created profile
     function createProfile(
         uint256 _nonce,
         string memory _name,
         Metadata memory _metadata,
-        address _owner,
+        address[] memory _owners,
         address[] memory _members
     ) external returns (bytes32) {
         // Generate a profile ID using a nonce and the msg.sender
-        bytes32 profileId = _generateProfileId(_nonce, _owner);
+        bytes32 profileId = _generateProfileId(_nonce, msg.sender);
 
         // Make sure the nonce is available
         if (profilesById[profileId].anchor != address(0)) revert NONCE_NOT_AVAILABLE();
-
-        // Make sure the owner is not the zero address
-        if (_owner == address(0)) revert ZERO_ADDRESS();
 
         // Create a new Profile instance, also generates the anchor address
         Profile memory profile = Profile({
@@ -137,36 +134,47 @@ contract Registry is IRegistry, Initializable, Native, AccessControlUpgradeable,
             nonce: _nonce,
             name: _name,
             metadata: _metadata,
-            owner: _owner,
             anchor: _generateAnchor(profileId, _name)
         });
 
         profilesById[profileId] = profile;
         anchorToProfileId[profile.anchor] = profileId;
 
-        // Assign roles for the profile members
-        uint256 memberLength = _members.length;
+        bytes32 PROFILE_MEMBER_ROLE = profileId;
+        bytes32 PROFILE_OWNER_ROLE = keccak256(abi.encodePacked(profileId, "owner"));
 
-        // Only profile owner can add members
-        if (memberLength > 0 && _owner != msg.sender) {
-            revert UNAUTHORIZED();
+        // Assign roles for the profile owners
+        _grantRole(PROFILE_OWNER_ROLE, msg.sender);
+
+        for (uint256 i; i < _owners.length;) {
+            address owner = _owners[i];
+
+            // Will revert if any of the addresses are a zero address
+            if (owner == address(0)) revert ZERO_ADDRESS();
+
+            // Grant the role to the owner and emit the event for each owner
+            _grantRole(PROFILE_OWNER_ROLE, owner);
+            unchecked {
+                ++i;
+            }
         }
 
-        for (uint256 i; i < memberLength;) {
+        // Assign roles for the profile members
+        for (uint256 i; i < _members.length;) {
             address member = _members[i];
 
             // Will revert if any of the addresses are a zero address
             if (member == address(0)) revert ZERO_ADDRESS();
 
             // Grant the role to the member and emit the event for each member
-            _grantRole(profileId, member);
+            _grantRole(PROFILE_MEMBER_ROLE, member);
             unchecked {
                 ++i;
             }
         }
 
         // Emit the event that the profile was created
-        emit ProfileCreated(profileId, profile.nonce, profile.name, profile.metadata, profile.owner, profile.anchor);
+        emit ProfileCreated(profileId, profile.nonce, profile.name, profile.metadata, msg.sender, profile.anchor);
 
         // Return the profile ID
         return profileId;
@@ -265,21 +273,21 @@ contract Registry is IRegistry, Initializable, Native, AccessControlUpgradeable,
     /// @dev 'msg.sender' must be the pending owner of the profile. [2]*This is step two of two when transferring ownership.
     /// @param _profileId The ID of the profile
     function acceptProfileOwnership(bytes32 _profileId) external {
-        // Get the profile from the mapping
-        Profile storage profile = profilesById[_profileId];
+        // // Get the profile from the mapping
+        // Profile storage profile = profilesById[_profileId];
 
-        // Get the pending owner from the mapping that was set when the owner was updated
-        address newOwner = profileIdToPendingOwner[_profileId];
+        // // Get the pending owner from the mapping that was set when the owner was updated
+        // address newOwner = profileIdToPendingOwner[_profileId];
 
-        // Revert if the 'msg.sender' is not the pending owner
-        if (msg.sender != newOwner) revert NOT_PENDING_OWNER();
+        // // Revert if the 'msg.sender' is not the pending owner
+        // if (msg.sender != newOwner) revert NOT_PENDING_OWNER();
 
-        // Set the new owner and delete the pending owner from the mapping
-        profile.owner = newOwner;
-        delete profileIdToPendingOwner[_profileId];
+        // // Set the new owner and delete the pending owner from the mapping
+        // profile.owner = newOwner;
+        // delete profileIdToPendingOwner[_profileId];
 
-        // Emit the event that the owner was accepted and updated
-        emit ProfileOwnerUpdated(_profileId, profile.owner);
+        // // Emit the event that the owner was accepted and updated
+        // emit ProfileOwnerUpdated(_profileId, profile.owner);
     }
 
     /// @notice Adds members to the profile
@@ -373,7 +381,7 @@ contract Registry is IRegistry, Initializable, Native, AccessControlUpgradeable,
     /// @param _owner The address to check
     /// @return 'true' if the address is an owner of the profile, otherwise 'false'
     function _isOwnerOfProfile(bytes32 _profileId, address _owner) internal view returns (bool) {
-        return profilesById[_profileId].owner == _owner;
+        return hasRole(keccak256(abi.encodePacked(_profileId, "owner")), _owner);
     }
 
     /// @notice Checks if an address is a member of the profile

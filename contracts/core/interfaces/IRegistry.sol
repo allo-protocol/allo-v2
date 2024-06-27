@@ -41,7 +41,6 @@ interface IRegistry {
         uint256 nonce;
         string name;
         Metadata metadata;
-        address owner;
         address anchor;
     }
 
@@ -114,14 +113,14 @@ interface IRegistry {
     /// @param _nonce The nonce to use to generate the 'anchor' address
     /// @param _name The name to use to generate the 'anchor' address
     /// @param _metadata The 'Metadata' to use to generate the 'anchor' address
-    /// @param _owner The 'owner' to use to generate the 'anchor' address
+    /// @param _owners The 'owners' to set the owner roles for the new profile
     /// @param _members The 'members' to use to generate the 'anchor' address
     /// @return profileId The 'profileId' of the new profile
     function createProfile(
         uint256 _nonce,
         string memory _name,
         Metadata memory _metadata,
-        address _owner,
+        address[] memory _owners,
         address[] memory _members
     ) external returns (bytes32 profileId);
 

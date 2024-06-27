@@ -553,9 +553,12 @@ contract HackathonQVStrategyTest is QVBaseStrategyTest, Native {
             string memory hackerName = string(abi.encode("Hacker ", i));
             hacker[i] = makeAddr(hackerName);
 
+            address[] memory owners = new address[](1);
+            owners[0] = hacker[i];
+
             vm.prank(hacker[i]);
             bytes32 profileId =
-                registry().createProfile(0, hackerName, Metadata(1, hackerName), hacker[i], new address[](0));
+                registry().createProfile(0, hackerName, Metadata(1, hackerName), owners, new address[](0));
 
             hackerAnchors[i] = registry().getProfileById(profileId).anchor;
         }
