@@ -57,7 +57,12 @@ contract RegistryTest is Test, RegistrySetup, Native, Errors {
         newRegistry.initialize(address(0));
     }
 
-    function test_createProfile() public {
+    function test_createProfile(address[] memory _owners) public {
+        for (uint256 i = 0; i < _owners.length; i++) {
+            vm.assume(_owners[i] != address(0));
+            vm.assume(_owners[i] != profile1_owner());
+        }
+
         vm.expectEmit(true, false, false, true);
 
         bytes32 testProfileId = TestUtilities._testUtilGenerateProfileId(nonce, profile1_owner());
@@ -67,7 +72,7 @@ contract RegistryTest is Test, RegistrySetup, Native, Errors {
 
         // create profile
         vm.prank(profile1_owner());
-        bytes32 newProfileId = registry().createProfile(nonce, name, metadata, profile1Owners, profile1_members());
+        bytes32 newProfileId = registry().createProfile(nonce, name, metadata, _owners, profile1_members());
 
         // Check if the new profile was created
         Registry.Profile memory profile = registry().getProfileById(newProfileId);
@@ -80,44 +85,27 @@ contract RegistryTest is Test, RegistrySetup, Native, Errors {
         assertEq(profile.metadata.pointer, metadata.pointer, "metadata.pointer");
         assertEq(registry().anchorToProfileId(profile.anchor), newProfileId, "anchorToProfileId");
 
-        Registry.Profile memory profileByAnchor = registry().getProfileByAnchor(profile.anchor);
-        assertEq(profileByAnchor.name, name, "getProfileByAnchor: name");
-    }
+        // Check roles
+        assertTrue(registry().isOwnerOfProfile(newProfileId, profile1_owner()));
+        for (uint256 i = 0; i < _owners.length; i++) {
+            assertTrue(registry().isOwnerOfProfile(newProfileId, _owners[i]));
+        }
 
-    // FIX
-    function test_createProfile_forAnotherOwner() public {
-        vm.expectEmit(true, false, false, true);
-
-        bytes32 testProfileId = TestUtilities._testUtilGenerateProfileId(nonce, address(this));
-        address testAnchor = TestUtilities._testUtilGenerateAnchor(testProfileId, name, address(registry()));
-
-        emit ProfileCreated(testProfileId, nonce, name, metadata, address(this), testAnchor);
-
-        // create profile
-        bytes32 newProfileId = registry().createProfile(nonce, name, metadata, profile1Owners, new address[](0));
-
-        // Check if the new profile was created
-        Registry.Profile memory profile = registry().getProfileById(newProfileId);
-
-        assertEq(testProfileId, newProfileId, "profileId");
-
-        assertEq(profile.id, newProfileId, "newProfileId");
-        assertEq(profile.name, name, "name");
-        assertEq(profile.metadata.protocol, metadata.protocol, "metadata.protocol");
-        assertEq(profile.metadata.pointer, metadata.pointer, "metadata.pointer");
-        assertEq(registry().anchorToProfileId(profile.anchor), newProfileId, "anchorToProfileId");
+        for (uint256 i = 0; i < profile1_members().length; i++) {
+            assertTrue(registry().isMemberOfProfile(newProfileId, profile1_members()[i]));
+        }
 
         Registry.Profile memory profileByAnchor = registry().getProfileByAnchor(profile.anchor);
         assertEq(profileByAnchor.name, name, "getProfileByAnchor: name");
     }
 
-    // DELETE
     function testRevert_createProfile_owner_ZERO_ADDRESS() public {
-        // vm.expectRevert(ZERO_ADDRESS.selector);
-
-        // // create profile
-        // vm.prank(profile1_owner());
-        // registry().createProfile(nonce, name, metadata, address(0), profile1_members());
+        vm.expectRevert(ZERO_ADDRESS.selector);
+        address[] memory _owners = new address[](1);
+        _owners[0] = address(0);
+        // create profile
+        vm.prank(profile1_owner());
+        registry().createProfile(nonce, name, metadata, _owners, new address[](0));
     }
 
     function testRevert_createProfile_member_ZERO_ADDRESS() public {
@@ -127,13 +115,6 @@ contract RegistryTest is Test, RegistrySetup, Native, Errors {
         // create profile
         vm.prank(profile1_owner());
         registry().createProfile(nonce, name, metadata, profile1Owners, _members);
-    }
-
-    // DELETE
-    function testRevert_createProfile_UNAUTHORIZED_AddMemberWhenNotOwner() public {
-        // vm.expectRevert(UNAUTHORIZED.selector);
-        // // create profile
-        // registry().createProfile(nonce, name, metadata, profile1_owner(), profile1_members());
     }
 
     function testRevert_createProfile_NONCE_NOT_AVAILABLE() public {
