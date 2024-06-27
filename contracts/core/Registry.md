@@ -10,7 +10,6 @@ The `Registry` contract is a fundamental component of the Allo ecosystem, enabli
     - [Creating A Profile](#creating-a-profile)
     - [Updates Profile](#updates-profile)
     - [Member Management](#member-management)
-    - [Profile Owner Transfer](#profile-owner-transfer)
   - [Smart Contract Overview](#smart-contract-overview)
     - [Storage Variables](#storage-variables)
     - [Modifiers](#modifiers)
@@ -24,8 +23,8 @@ The `Registry` contract is a fundamental component of the Allo ecosystem, enabli
     - [Update Profile Metadata](#update-profile-metadata)
     - [Add Members to Profile](#add-members-to-profile)
     - [Remove Members from Profile](#remove-members-from-profile)
-    - [Update Pending Owner](#update-pending-owner)
-    - [Accept Profile Ownership](#accept-profile-ownership)
+    - [Add Owners to Profile](#add-owners-to-profile)
+    - [Remove Owners to Profile](#remove-owners-to-profile)
     - [Retrieve Profile Information](#retrieve-profile-information)
     - [Check Ownership and Membership](#check-ownership-and-membership)
     - [Recover Funds](#recover-funds)
@@ -85,19 +84,6 @@ sequenceDiagram
     Registry -->>- Alice: Bob removed from members of profileId
 ```
 
-### Profile Owner Transfer
-```mermaid
-sequenceDiagram
-    participant Alice
-    participant Bob
-    participant Registry
-
-    Alice ->>+ Registry: updateProfilePendingOwner(profileId, Bob)
-    Registry -->>- Alice: Pending owner updated for profileId
-    Bob ->>+ Registry: acceptProfileOwnership(profileId)
-    Registry -->>- Bob: Ownership transferred for profileId
-```
-
 
 ## Smart Contract Overview
 
@@ -110,8 +96,7 @@ sequenceDiagram
 
 1. `anchorToProfileId` (Public Mapping): This mapping correlates anchor addresses to corresponding profile IDs, providing efficient lookup capabilities.
 2. `profilesById` (Public Mapping): A mapping associating profile IDs with instances of the `Profile` struct. This struct encapsulates profile-specific information.
-3. `profileIdToPendingOwner` (Public Mapping): This mapping links profile IDs to addresses representing pending owners, enabling controlled ownership transfer.
-4. `ALLO_OWNER` (Public Constant): A constant representing the role of the Allo owner for fund recovery.
+3. `ALLO_OWNER` (Public Constant): A constant representing the role of the Allo owner for fund recovery.
 
 ### Modifiers
 
@@ -131,10 +116,10 @@ The contract constructor initializes the Allo owner role and assigns the provide
 6. **`isOwnerOrMemberOfProfile`**: Check if an address is either an owner or a member of a profile.
 7. **`isOwnerOfProfile`**: Check if an address is the owner of a profile.
 8. **`isMemberOfProfile`**: Check if an address is a member of a profile.
-9. **`updateProfilePendingOwner`**: Update the pending owner of a profile, restricted to the current owner.
-10. **`acceptProfileOwnership`**: Transfer profile ownership to the pending owner, initiated by the pending owner.
-11. **`addMembers`**: Add members to a profile, restricted to the profile's owner.
-12. **`removeMembers`**: Remove members from a profile, restricted to the profile's owner.
+9.  **`addMembers`**: Add members to a profile, restricted to the profile's owner.
+10. **`removeMembers`**: Remove members from a profile, restricted to the profile's owner.
+11. **`addOwners`**: Add owners to a profile, restricted to the profile's owner.
+12. **`removeOwners`**: Remove owners from a profile, restricted to the profile's owner.
 
 ### Internal Functions
 
@@ -142,6 +127,7 @@ The contract constructor initializes the Allo owner role and assigns the provide
 2. **`_generateProfileId`**: Generate a profile ID based on the provided nonce and the caller's address.
 3. **`_isOwnerOfProfile`**: Check if an address is the owner of a profile.
 4. **`_isMemberOfProfile`**: Check if an address is a member of a profile.
+5. **`_addOwners`**: Add owner to a profil.
 
 ### Actors
 
@@ -156,7 +142,7 @@ In summary, the `Registry` smart contract provides a comprehensive system for cr
 ## User Flows
 
 ### Create a Profile   
-  * User initiates a transaction to the `createProfile` function with the required parameters: `_nonce`, `_name`, `_metadata`, `_owner`, and `_members`.
+  * User initiates a transaction to the `createProfile` function with the required parameters: `_nonce`, `_name`, `_metadata`, `_owners`, and `_members`.
   * The contract generates a unique `profileId` based on `_nonce` and the caller's address using the `_generateProfileId` function.
   * The contract creates a new `Profile` object containing the provided data and assigns it to the `profilesById` mapping using the generated `profileId`.
   * Roles are granted to the `_members` of the profile using the `_grantRole` function.
@@ -178,21 +164,20 @@ In summary, the `Registry` smart contract provides a comprehensive system for cr
   * The contract grants roles to the new members using the `_grantRole` function.
   * The contract emits events to indicate the successful addition of members.
 ### Remove Members from Profile
-    
+
   * The profile owner initiates a transaction to the `removeMembers` function with the `_profileId` and an array of `_members`.
   * The contract revokes roles from the members using the `_revokeRole` function.
   * The contract emits events to indicate the successful removal of members.
-### Update Pending Owner
-    
-  * The profile owner initiates a transaction to the `updateProfilePendingOwner` function with the `_profileId` and the new `_pendingOwner`.
-  * The contract updates the pending owner for the profile identified by `_profileId`.
-  * The contract emits the `ProfilePendingOwnerUpdated` event to indicate the successful update of the pending owner.
-### Accept Profile Ownership
-    
-  * The pending owner initiates a transaction to the `acceptProfileOwnership` function with the `_profileId`.
-  * The contract checks if the caller is the pending owner of the profile.
-  * If the caller is the pending owner, the contract updates the owner of the profile and clears the pending owner.
-  * The contract emits the `ProfileOwnerUpdated` event to indicate the successful transfer of ownership.
+### Add Owners to Profile
+      
+  * The profile owner initiates a transaction to the `addOwners` function with the `_profileId` and an array of `_owners`.
+  * The contract grants roles to the new owners using the `_grantRole` function.
+  * The contract emits events to indicate the successful addition of owners.
+### Remove Owners to Profile
+      
+  * The profile owner initiates a transaction to the `removeOwners` function with the `_profileId` and an array of `_owners`.
+  * The contract revokes roles from the owners using the `_revokeRole` function.
+  * The contract emits events to indicate the successful removal of owners.
 ### Retrieve Profile Information
     
   * Users can query profile information using the `getProfileById` and `getProfileByAnchor` functions by providing the `_profileId` or `_anchor`.
