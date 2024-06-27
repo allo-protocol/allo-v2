@@ -296,13 +296,8 @@ contract Registry is IRegistry, Initializable, Native, AccessControlUpgradeable,
     function addOwners(bytes32 _profileId, address[] memory _owners) external onlyProfileOwner(_profileId) {
         // Loop through the owners and add them to the profile by granting the role
         for (uint256 i; i < _owners.length;) {
-            address owner = _owners[i];
+            _addOwner(_profileId, _owners[i]);
 
-            // Will revert if any of the addresses are a zero address
-            if (owner == address(0)) revert ZERO_ADDRESS();
-
-            // Grant the role to the owner and emit the event for each owner
-            _grantRole(keccak256(abi.encodePacked(_profileId, "owner")), owner);
             unchecked {
                 ++i;
             }
@@ -387,6 +382,18 @@ contract Registry is IRegistry, Initializable, Native, AccessControlUpgradeable,
     /// @return 'true' if the address is a member of the profile, otherwise 'false'
     function _isMemberOfProfile(bytes32 _profileId, address _member) internal view returns (bool) {
         return hasRole(_profileId, _member);
+    }
+
+    /// @notice Grants the `owner` role to an address
+    /// @dev Internal function used to grant a role to an address
+    /// @param _profileId The ID of the profile
+    /// @param _owner The address to grant the role to
+    function _addOwner(bytes32 _profileId, address _owner) internal {
+        // Will revert if any of the addresses are a zero address
+        if (_owner == address(0)) revert ZERO_ADDRESS();
+
+        // Grant the role to the owner and emit the event for each owner
+        _grantRole(keccak256(abi.encodePacked(_profileId, "owner")), _owner);
     }
 
     /// @notice Transfers any fund balance in Allo to the recipient
