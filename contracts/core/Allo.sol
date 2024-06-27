@@ -456,9 +456,8 @@ contract Allo is
         uint256 managersLength = _managers.length;
         for (uint256 i; i < managersLength;) {
             address manager = _managers[i];
-            if (manager == address(0)) revert ZERO_ADDRESS();
+            _addPoolManager(poolId, manager);
 
-            _grantRole(POOL_MANAGER_ROLE, manager);
             unchecked {
                 ++i;
             }

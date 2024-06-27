@@ -1,14 +1,14 @@
 | contracts/core/Allo.sol:Allo contract |                 |         |        |         |         |
 |---------------------------------------|-----------------|---------|--------|---------|---------|
 | Deployment Cost                       | Deployment Size |         |        |         |         |
-| 2951699                               | 13490           |         |        |         |         |
+| 2940679                               | 13439           |         |        |         |         |
 | Function Name                         | min             | avg     | median | max     | # calls |
-| addPoolManagers                       | 26559           | 1551318 | 118919 | 6509907 | 1024    |
+| addPoolManagers                       | 26559           | 1510133 | 114738 | 6484537 | 1024    |
 | allocate                              | 38512           | 87796   | 75108  | 187710  | 78      |
 | batchAllocate                         | 46074           | 77370   | 77370  | 108666  | 2       |
 | batchRegisterRecipient                | 46573           | 78349   | 78349  | 110126  | 2       |
-| createPool                            | 49070           | 526533  | 541491 | 541491  | 51      |
-| createPoolWithCustomStrategy          | 26948           | 403580  | 346947 | 573094  | 2185    |
+| createPool                            | 49070           | 526895  | 541861 | 541861  | 51      |
+| createPoolWithCustomStrategy          | 26948           | 403948  | 347317 | 573464  | 2185    |
 | distribute                            | 65386           | 135045  | 167605 | 167605  | 9       |
 | fundPool                              | 43858           | 132336  | 136003 | 162034  | 171     |
 | getBaseFee                            | 372             | 372     | 372    | 372     | 2       |
@@ -19,10 +19,10 @@
 | getTreasury                           | 443             | 443     | 443    | 443     | 2       |
 | initialize                            | 25595           | 143473  | 143574 | 163546  | 975     |
 | isPoolAdmin                           | 950             | 1950    | 1950   | 2950    | 2       |
-| isPoolManager                         | 999             | 2802    | 3488   | 9488    | 123129  |
+| isPoolManager                         | 999             | 2790    | 3488   | 9488    | 119849  |
 | recoverFunds                          | 24158           | 45301   | 52832  | 58913   | 3       |
 | registerRecipient                     | 54289           | 161046  | 183137 | 203037  | 48      |
-| removePoolManagers                    | 26569           | 421954  | 108747 | 1692568 | 512     |
+| removePoolManagers                    | 26569           | 423396  | 108619 | 1686067 | 512     |
 | transferOwnership                     | 28567           | 28567   | 28567  | 28567   | 45      |
 | updateBaseFee                         | 23686           | 41104   | 46911  | 46911   | 4       |
 | updatePercentFee                      | 23670           | 24995   | 24985  | 29857   | 234     |
@@ -298,4 +298,4 @@
 
 
 
-Ran 30 test suites in 4.14s (21.58s CPU time): 1080 tests passed, 0 failed, 0 skipped (1080 total tests)
+Ran 30 test suites in 3.92s (11.39s CPU time): 1080 tests passed, 0 failed, 0 skipped (1080 total tests)
