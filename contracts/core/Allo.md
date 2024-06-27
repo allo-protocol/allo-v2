@@ -27,8 +27,8 @@ The Allo contract serves as a platform to create and manage pools with customiza
     - [Update Treasury Address](#update-treasury-address)
     - [Update Fee Percentage](#update-fee-percentage)
     - [Update Base Fee](#update-base-fee)
-    - [Add Pool Manager](#add-pool-manager)
-    - [Remove Pool Manager](#remove-pool-manager)
+    - [Add Pool Managers](#add-pool-managers)
+    - [Remove Pool Managers](#remove-pool-managers)
     - [Recover Funds](#recover-funds)
     - [Register Recipient](#register-recipient-1)
     - [Batch Register Recipients](#batch-register-recipients)
@@ -254,14 +254,14 @@ In summary, the "Allo" smart contract provides a framework for creating and mana
     
  * The contract owner can update the base fee by calling the `updateBaseFee` function.
  * The function requires the new `_baseFee` as a parameter, and it updates the base fee accordingly.
-### Add Pool Manager
+### Add Pool Managers
+
+ * Pool admins can add multiple pool managers to a pool by calling the `addPoolManagers` function.
+ * The function requires the `_poolId` and an array of `_managers` addresses as parameters, and it grants the pool manager role to each address.
+### Remove Pool Managers
     
- * Pool admins can add a pool manager to a pool by calling the `addPoolManager` function.
- * The function requires the `_poolId` and `_manager` address as parameters, and it grants the pool manager role to the address.
-### Remove Pool Manager
-   
- * Pool admins can remove a pool manager from a pool by calling the `removePoolManager` function.
- * The function requires the `_poolId` and `_manager` address as parameters, and it revokes the pool manager role from the address.
+ * Pool admins can remove multiple pool managers from a pool by calling the `removePoolManagers` function.
+ * The function requires the `_poolId` and an array of `_managers` addresses as parameters, and it revokes the pool manager role from each address.
 ### Recover Funds
     
  * The contract owner can recover funds from the contract by calling the `recoverFunds` function.
