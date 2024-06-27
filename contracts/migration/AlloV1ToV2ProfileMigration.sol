@@ -92,8 +92,12 @@ contract AlloV1ToV2ProfileMigration {
 
             migratedProfileIds[i] = alloV2Profile;
 
-            AlloV1V2Profile memory alloV1V2Profile =
-                AlloV1V2Profile({alloV1: _projectIds[i], alloV1ChainId: _sourceChainIds[i], alloV2: alloV2Profile, nonce: _nonces[i]});
+            AlloV1V2Profile memory alloV1V2Profile = AlloV1V2Profile({
+                alloV1: _projectIds[i],
+                alloV1ChainId: _sourceChainIds[i],
+                alloV2: alloV2Profile,
+                nonce: _nonces[i]
+            });
 
             alloV1ToAlloV1V2Profile[_projectIds[i]] = alloV1V2Profile;
             alloV2ToAlloV1V2Profile[alloV2Profile] = alloV1V2Profile;

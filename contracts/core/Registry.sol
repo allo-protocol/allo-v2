@@ -49,10 +49,6 @@ contract Registry is IRegistry, Initializable, Native, AccessControlUpgradeable,
     /// @dev Profile.id -> Profile
     mapping(bytes32 => Profile) public profilesById;
 
-    /// @notice This maps the profile ID to the pending owner
-    /// @dev Profile.id -> pending owner
-    mapping(bytes32 => address) public profileIdToPendingOwner;
-
     /// @notice Allo Owner Role for fund recovery
     bytes32 public constant ALLO_OWNER = keccak256("ALLO_OWNER");
 
@@ -252,42 +248,6 @@ contract Registry is IRegistry, Initializable, Native, AccessControlUpgradeable,
     /// @return 'true' if the address is a member of the profile, otherwise 'false'
     function isMemberOfProfile(bytes32 _profileId, address _member) external view returns (bool) {
         return _isMemberOfProfile(_profileId, _member);
-    }
-
-    /// @notice Updates the pending owner of the profile. Emits a 'ProfilePendingOwnership()' event.
-    /// @dev 'msg.sender' must be the owner of the profile. [1]*This is step one of two when transferring ownership.
-    /// @param _profileId The ID of the profile
-    /// @param _pendingOwner The new pending owner
-    function updateProfilePendingOwner(bytes32 _profileId, address _pendingOwner)
-        external
-        onlyProfileOwner(_profileId)
-    {
-        // Set the pending owner to the profile
-        profileIdToPendingOwner[_profileId] = _pendingOwner;
-
-        // Emit the event that the pending owner was updated
-        emit ProfilePendingOwnerUpdated(_profileId, _pendingOwner);
-    }
-
-    /// @notice Transfers the ownership of the profile to the pending owner and Emits a 'ProfileOwnerUdpated()' event.
-    /// @dev 'msg.sender' must be the pending owner of the profile. [2]*This is step two of two when transferring ownership.
-    /// @param _profileId The ID of the profile
-    function acceptProfileOwnership(bytes32 _profileId) external {
-        // // Get the profile from the mapping
-        // Profile storage profile = profilesById[_profileId];
-
-        // // Get the pending owner from the mapping that was set when the owner was updated
-        // address newOwner = profileIdToPendingOwner[_profileId];
-
-        // // Revert if the 'msg.sender' is not the pending owner
-        // if (msg.sender != newOwner) revert NOT_PENDING_OWNER();
-
-        // // Set the new owner and delete the pending owner from the mapping
-        // profile.owner = newOwner;
-        // delete profileIdToPendingOwner[_profileId];
-
-        // // Emit the event that the owner was accepted and updated
-        // emit ProfileOwnerUpdated(_profileId, profile.owner);
     }
 
     /// @notice Adds members to the profile

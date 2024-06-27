@@ -59,12 +59,6 @@ interface IRegistry {
     /// @dev Emitted when a profile's metadata is updated.
     event ProfileMetadataUpdated(bytes32 indexed profileId, Metadata metadata);
 
-    /// @dev Emitted when a profile owner is updated.
-    event ProfileOwnerUpdated(bytes32 indexed profileId, address owner);
-
-    /// @dev Emitted when a profile pending owner is updated.
-    event ProfilePendingOwnerUpdated(bytes32 indexed profileId, address pendingOwner);
-
     /// =========================
     /// ==== View Functions =====
     /// =========================
@@ -144,21 +138,6 @@ interface IRegistry {
     /// @param _profileId The 'profileId' to update the metadata for
     /// @param _metadata The new 'Metadata' value
     function updateProfileMetadata(bytes32 _profileId, Metadata memory _metadata) external;
-
-    /// @dev Updates the pending 'owner' of the '_profileId' passed in
-    ///
-    /// Requirements: Only the 'Profile' owner can update the pending owner
-    ///
-    /// @param _profileId The 'profileId' to update the pending owner for
-    /// @param _pendingOwner The new pending 'owner' value
-    function updateProfilePendingOwner(bytes32 _profileId, address _pendingOwner) external;
-
-    /// @dev Accepts the pending 'owner' of the '_profileId' passed in
-    ///
-    /// Requirements: Only the pending owner can accept the ownership
-    ///
-    /// @param _profileId The 'profileId' to accept the ownership for
-    function acceptProfileOwnership(bytes32 _profileId) external;
 
     /// @dev Adds members to the '_profileId' passed in
     ///
