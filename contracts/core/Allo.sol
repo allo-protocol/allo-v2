@@ -374,6 +374,17 @@ contract Allo is
         pools[_poolId].strategy.distribute(_recipientIds, _data, msg.sender);
     }
 
+    /// @notice Revoke the admin role of an account and transfer it to another account
+    /// @dev 'msg.sender' must be a pool admin.
+    /// @param _poolId ID of the pool
+    /// @param _newAdmin The address of the new admin
+    function changeAdmin(uint256 _poolId, address _newAdmin) external onlyPoolAdmin(_poolId) {
+        if (_newAdmin == address(0)) revert ZERO_ADDRESS();
+
+        _revokeRole(pools[_poolId].adminRole, msg.sender);
+        _grantRole(pools[_poolId].adminRole, _newAdmin);
+    }
+
     /// ====================================
     /// ======= Internal Functions =========
     /// ====================================

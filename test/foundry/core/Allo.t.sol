@@ -531,4 +531,37 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
 
         assertEq(address(allo().getStrategy(poolId)), strategy);
     }
+
+    function test_changeAdmin(address _newAdmin) public {
+        vm.assume(_newAdmin != address(0));
+
+        uint256 poolId = _utilCreatePool(0);
+
+        vm.prank(pool_admin());
+        allo().changeAdmin(poolId, _newAdmin);
+
+        assertTrue(allo().isPoolAdmin(poolId, _newAdmin));
+        assertFalse(allo().isPoolAdmin(poolId, pool_admin()));
+    }
+
+    function testRevert_changeAdmin_UNAUTHORIZED(address _newAdmin, address _notAdmin) public {
+        vm.assume(_newAdmin != address(0));
+        vm.assume(_notAdmin != pool_admin());
+
+        uint256 poolId = _utilCreatePool(0);
+        
+        vm.expectRevert(UNAUTHORIZED.selector);
+
+        vm.prank(_notAdmin);
+        allo().changeAdmin(poolId, _newAdmin);
+    }
+
+    function testRevert_changeAdmin_ZERO_ADDRESS() public {
+        uint256 poolId = _utilCreatePool(0);
+        
+        vm.expectRevert(ZERO_ADDRESS.selector);
+
+        vm.prank(pool_admin());
+        allo().changeAdmin(poolId, address(0));
+    }
 }
