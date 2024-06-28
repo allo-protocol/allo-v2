@@ -549,7 +549,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
         vm.assume(_notAdmin != pool_admin());
 
         uint256 poolId = _utilCreatePool(0);
-        
+
         vm.expectRevert(UNAUTHORIZED.selector);
 
         vm.prank(_notAdmin);
@@ -558,7 +558,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
 
     function testRevert_changeAdmin_ZERO_ADDRESS() public {
         uint256 poolId = _utilCreatePool(0);
-        
+
         vm.expectRevert(ZERO_ADDRESS.selector);
 
         vm.prank(pool_admin());
