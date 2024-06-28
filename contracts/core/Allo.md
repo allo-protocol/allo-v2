@@ -29,6 +29,7 @@ The Allo contract serves as a platform to create and manage pools with customiza
     - [Update Base Fee](#update-base-fee)
     - [Add Pool Manager](#add-pool-manager)
     - [Remove Pool Manager](#remove-pool-manager)
+    - [Change Pool Admin](#change-pool-admin)
     - [Recover Funds](#recover-funds)
     - [Register Recipient](#register-recipient-1)
     - [Batch Register Recipients](#batch-register-recipients)
@@ -262,6 +263,10 @@ In summary, the "Allo" smart contract provides a framework for creating and mana
    
  * Pool admins can remove a pool manager from a pool by calling the `removePoolManager` function.
  * The function requires the `_poolId` and `_manager` address as parameters, and it revokes the pool manager role from the address.
+### Change Pool Admin
+
+ * Pool admins can change the pool admin of a pool by calling the `changePoolAdmin` function.
+ * The function requires the `_poolId` and `_newAdmin` address as parameters, and it changes the pool admin to the new address, revoking the access to the caller.
 ### Recover Funds
     
  * The contract owner can recover funds from the contract by calling the `recoverFunds` function.

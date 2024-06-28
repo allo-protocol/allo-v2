@@ -1,32 +1,33 @@
 | contracts/core/Allo.sol:Allo contract |                 |        |        |        |         |
 |---------------------------------------|-----------------|--------|--------|--------|---------|
 | Deployment Cost                       | Deployment Size |        |        |        |         |
-| 2900525                               | 13253           |        |        |        |         |
+| 2932596                               | 13401           |        |        |        |         |
 | Function Name                         | min             | avg    | median | max    | # calls |
 | addPoolManager                        | 26337           | 35379  | 26531  | 53270  | 3       |
 | allocate                              | 38534           | 87818  | 75130  | 187732 | 78      |
 | batchAllocate                         | 46001           | 77297  | 77297  | 108593 | 2       |
 | batchRegisterRecipient                | 46573           | 78349  | 78349  | 110126 | 2       |
-| createPool                            | 49070           | 526554 | 541513 | 541513 | 51      |
-| createPoolWithCustomStrategy          | 26904           | 482905 | 463132 | 573072 | 910     |
+| changeAdmin                           | 26303           | 39171  | 26531  | 52034  | 513     |
+| createPool                            | 49070           | 526533 | 541491 | 541491 | 51      |
+| createPoolWithCustomStrategy          | 26904           | 433862 | 440296 | 573050 | 1423    |
 | distribute                            | 65408           | 135067 | 167627 | 167627 | 9       |
-| fundPool                              | 43880           | 132358 | 136025 | 162056 | 171     |
+| fundPool                              | 43858           | 132336 | 136003 | 162034 | 171     |
 | getBaseFee                            | 372             | 372    | 372    | 372    | 2       |
 | getPercentFee                         | 382             | 382    | 382    | 382    | 2       |
 | getPool                               | 2944            | 10582  | 12944  | 16944  | 216     |
-| getRegistry                           | 420             | 1005   | 420    | 2420   | 1237    |
+| getRegistry                           | 398             | 983    | 398    | 2398   | 1237    |
 | getStrategy                           | 572             | 572    | 572    | 572    | 42      |
 | getTreasury                           | 399             | 399    | 399    | 399    | 2       |
-| initialize                            | 25552           | 143430 | 143531 | 163503 | 975     |
-| isPoolAdmin                           | 972             | 1972   | 1972   | 2972   | 2       |
+| initialize                            | 25552           | 143430 | 143531 | 163503 | 978     |
+| isPoolAdmin                           | 972             | 975    | 972    | 2972   | 514     |
 | isPoolManager                         | 999             | 7657   | 9488   | 9488   | 1345    |
 | recoverFunds                          | 24158           | 45301  | 52832  | 58913  | 3       |
 | registerRecipient                     | 54289           | 161046 | 183137 | 203037 | 48      |
 | removePoolManager                     | 26574           | 28944  | 28944  | 31315  | 2       |
-| transferOwnership                     | 28567           | 28567  | 28567  | 28567  | 45      |
+| transferOwnership                     | 28567           | 28567  | 28567  | 28567  | 48      |
 | updateBaseFee                         | 23708           | 41126  | 46933  | 46933  | 4       |
 | updatePercentFee                      | 23670           | 24995  | 24985  | 29857  | 234     |
-| updatePoolMetadata                    | 32065           | 37348  | 37348  | 42632  | 2       |
+| updatePoolMetadata                    | 32107           | 37390  | 37390  | 42674  | 2       |
 | updateRegistry                        | 23800           | 25954  | 23942  | 30121  | 3       |
 | updateTreasury                        | 23821           | 25979  | 23963  | 30153  | 3       |
 
@@ -40,14 +41,14 @@
 | acceptProfileOwnership                        | 24178           | 25801               | 24178  | 29047               | 3       |
 | addMembers                                    | 25322           | 49393               | 50109  | 75370               | 67      |
 | anchorToProfileId                             | 608             | 608                 | 608    | 608                 | 4       |
-| createProfile                                 | 28412           | 723873              | 723897 | 853983              | 2957    |
+| createProfile                                 | 28412           | 723873              | 723897 | 853983              | 2966    |
 | getProfileByAnchor                            | 4071            | 20282               | 20071  | 37535               | 369     |
-| getProfileById                                | 3776            | 3780                | 3776   | 5240                | 2937    |
+| getProfileById                                | 3776            | 3780                | 3776   | 5240                | 2946    |
 | hasRole                                       | 743             | 743                 | 743    | 743                 | 1       |
-| initialize                                    | 44040           | 70051               | 70077  | 70077               | 1013    |
+| initialize                                    | 44040           | 70051               | 70077  | 70077               | 1016    |
 | isMemberOfProfile                             | 816             | 1649                | 816    | 2816                | 12      |
 | isOwnerOfProfile                              | 713             | 713                 | 713    | 713                 | 7       |
-| isOwnerOrMemberOfProfile                      | 0               | 2517                | 2696   | 5016                | 1329    |
+| isOwnerOrMemberOfProfile                      | 0               | 2566                | 2696   | 5016                | 1842    |
 | profileIdToPendingOwner                       | 523             | 523                 | 523    | 523                 | 3       |
 | recoverFunds                                  | 24258           | 40909               | 40104  | 59171               | 4       |
 | removeMembers                                 | 25894           | 28804               | 28311  | 32702               | 4       |
@@ -84,7 +85,7 @@
 | getVoiceCreditsCastByAllocator                                                                        | 610             | 610    | 610    | 610    | 2       |
 | getVoiceCreditsCastByAllocatorToRecipient                                                             | 784             | 784    | 784    | 784    | 4       |
 | getVotesCastByAllocatorToRecipient                                                                    | 807             | 807    | 807    | 807    | 4       |
-| initialize                                                                                            | 30284           | 89872  | 115237 | 120628 | 5       |
+| initialize                                                                                            | 30284           | 89859  | 115215 | 120606 | 5       |
 | isPoolActive                                                                                          | 671             | 1670   | 1670   | 2670   | 2       |
 | isValidAllocator                                                                                      | 667             | 1667   | 1667   | 2667   | 12      |
 | maxVoiceCreditsPerAllocator                                                                           | 2396            | 2396   | 2396   | 2396   | 2       |
@@ -230,7 +231,7 @@
 | getRecipientStatus                                                            | 2534            | 4716   | 4534   | 14360  | 10      |
 | getStrategyId                                                                 | 249             | 249    | 249    | 249    | 1       |
 | increasePoolAmount                                                            | 23855           | 23855  | 23855  | 23855  | 1       |
-| initialize                                                                    | 23532           | 124344 | 125582 | 125582 | 263     |
+| initialize                                                                    | 23532           | 124322 | 125560 | 125560 | 263     |
 | isPoolActive                                                                  | 634             | 1569   | 1569   | 2505   | 2       |
 | isValidAllocator                                                              | 2667            | 2667   | 2667   | 2667   | 3       |
 | maxVoiceCreditsPerAllocator                                                   | 2396            | 2396   | 2396   | 2396   | 1       |
@@ -255,7 +256,7 @@
 | getPoolId                                                                                 | 349             | 349    | 349    | 349    | 9       |
 | getRecipientStatus                                                                        | 2758            | 2758   | 2758   | 2758   | 1       |
 | getStrategyId                                                                             | 282             | 282    | 282    | 282    | 1       |
-| initialize                                                                                | 23590           | 94655  | 95186  | 164659 | 4       |
+| initialize                                                                                | 23590           | 94644  | 95175  | 164637 | 4       |
 | maxBid                                                                                    | 406             | 406    | 406    | 406    | 1       |
 | metadataRequired                                                                          | 410             | 410    | 410    | 410    | 1       |
 | registerRecipient                                                                         | 178095          | 190911 | 195183 | 195183 | 4       |
@@ -269,7 +270,7 @@
 | contracts/strategies/rfp-simple/RFPSimpleStrategy.sol:RFPSimpleStrategy contract |                 |        |        |        |         |
 |----------------------------------------------------------------------------------|-----------------|--------|--------|--------|---------|
 | Deployment Cost                                                                  | Deployment Size |        |        |        |         |
-| 2797624                                                                          | 13272           |        |        |        |         |
+| 2797636                                                                          | 13272           |        |        |        |         |
 | Function Name                                                                    | min             | avg    | median | max    | # calls |
 | allocate                                                                         | 23208           | 63738  | 68925  | 68925  | 22      |
 | distribute                                                                       | 23327           | 98310  | 99489  | 141589 | 11      |
@@ -282,7 +283,7 @@
 | getRecipientStatus                                                               | 2539            | 2615   | 2615   | 2691   | 2       |
 | getStrategyId                                                                    | 304             | 304    | 304    | 304    | 1       |
 | increaseMaxBid                                                                   | 36174           | 38898  | 38251  | 42270  | 3       |
-| initialize                                                                       | 23259           | 102698 | 141884 | 141896 | 6       |
+| initialize                                                                       | 23259           | 102683 | 141862 | 141874 | 6       |
 | isPoolActive                                                                     | 393             | 393    | 393    | 393    | 1       |
 | isValidAllocator                                                                 | 6578            | 10828  | 10828  | 15078  | 2       |
 | maxBid                                                                           | 341             | 341    | 341    | 341    | 2       |
@@ -298,4 +299,4 @@
 
 
 
-Ran 30 test suites in 2.21s (4.31s CPU time): [32m1080[0m tests passed, [31m0[0m failed, [33m0[0m skipped (1080 total tests)
+Ran 30 test suites in 1.17s (2.44s CPU time): 1083 tests passed, 0 failed, 0 skipped (1083 total tests)

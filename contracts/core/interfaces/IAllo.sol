@@ -233,6 +233,12 @@ interface IAllo {
     /// @param _data The data to pass to the strategy and may be handled differently by each strategy
     function distribute(uint256 _poolId, address[] memory _recipientIds, bytes memory _data) external;
 
+    /// @notice Revoke the admin role of an account and transfer it to another account
+    /// @dev 'msg.sender' must be a pool admin.
+    /// @param _poolId ID of the pool
+    /// @param _newAdmin The address of the new admin
+    function changeAdmin(uint256 _poolId, address _newAdmin) external;
+
     /// =========================
     /// ==== View Functions =====
     /// =========================
