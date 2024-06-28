@@ -143,13 +143,8 @@ contract Registry is IRegistry, Initializable, Native, AccessControlUpgradeable,
         _grantRole(PROFILE_OWNER_ROLE, msg.sender);
 
         for (uint256 i; i < _owners.length;) {
-            address owner = _owners[i];
+            _addOwner(profileId, _owners[i]);
 
-            // Will revert if any of the addresses are a zero address
-            if (owner == address(0)) revert ZERO_ADDRESS();
-
-            // Grant the role to the owner and emit the event for each owner
-            _grantRole(PROFILE_OWNER_ROLE, owner);
             unchecked {
                 ++i;
             }
