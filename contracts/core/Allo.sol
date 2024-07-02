@@ -349,7 +349,11 @@ contract Allo is
     /// @param _poolIds IDs of the pools
     /// @param _values amounts of native tokens to allocate for each pool
     /// @param _datas encoded data unique to the strategy for that pool
-    function batchAllocate(uint256[] calldata _poolIds, uint256[] calldata _values, bytes[] memory _datas) external payable nonReentrant {
+    function batchAllocate(uint256[] calldata _poolIds, uint256[] calldata _values, bytes[] memory _datas)
+        external
+        payable
+        nonReentrant
+    {
         uint256 numPools = _poolIds.length;
 
         // Reverts if the length of _poolIds does not match the length of _datas with 'MISMATCH()' error
