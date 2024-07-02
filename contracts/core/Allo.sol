@@ -340,28 +340,34 @@ contract Allo is
     /// @param _poolId ID of the pool
     /// @param _data Encoded data unique to the strategy for that pool
     function allocate(uint256 _poolId, bytes memory _data) external payable nonReentrant {
-        _allocate(_poolId, _data);
+        _allocate(_poolId, msg.value, _data);
     }
 
     /// @notice Allocate to multiple pools
     /// @dev The encoded data will be specific to a given strategy requirements, reference the strategy
-    ///      implementation of allocate(). Please note that this is not a 'payable' function, so if you
-    ///      want to send funds to the strategy, you must send the funds using 'fundPool()'.
+    ///      implementation of allocate().
     /// @param _poolIds IDs of the pools
+    /// @param _values amounts of native tokens to allocate for each pool
     /// @param _datas encoded data unique to the strategy for that pool
-    function batchAllocate(uint256[] calldata _poolIds, bytes[] memory _datas) external nonReentrant {
+    function batchAllocate(uint256[] calldata _poolIds, uint256[] calldata _values, bytes[] memory _datas) external payable nonReentrant {
         uint256 numPools = _poolIds.length;
 
         // Reverts if the length of _poolIds does not match the length of _datas with 'MISMATCH()' error
         if (numPools != _datas.length) revert MISMATCH();
+        // Reverts if the length of _poolIds does not match the length of _values with 'MISMATCH()' error
+        if (numPools != _values.length) revert MISMATCH();
 
         // Loop through the _poolIds & _datas and call the internal _allocate() function
+        uint256 totalValue;
         for (uint256 i; i < numPools;) {
-            _allocate(_poolIds[i], _datas[i]);
+            _allocate(_poolIds[i], _values[i], _datas[i]);
+            totalValue += _values[i];
             unchecked {
                 ++i;
             }
         }
+        // Reverts if the sum of all the allocated values is different than 'msg.value' with 'MISMATCH()' error
+        if (totalValue != msg.value) revert ETH_MISMATCH();
     }
 
     /// @notice Distribute to a recipient or multiple recipients.
@@ -478,9 +484,10 @@ contract Allo is
     /// @dev Passes '_data' & 'msg.sender' through to the strategy for that pool.
     ///      This is an internal function that is called by the 'allocate()' & 'batchAllocate()' functions.
     /// @param _poolId ID of the pool
+    /// @param _value amount of native tokens to allocate to strategy
     /// @param _data Encoded data unique to the strategy for that pool
-    function _allocate(uint256 _poolId, bytes memory _data) internal {
-        pools[_poolId].strategy.allocate{value: msg.value}(_data, msg.sender);
+    function _allocate(uint256 _poolId, uint256 _value, bytes memory _data) internal {
+        pools[_poolId].strategy.allocate{value: _value}(_data, msg.sender);
     }
 
     /// @notice Fund a pool.
