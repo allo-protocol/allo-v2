@@ -30,6 +30,9 @@ contract Errors {
     /// @notice Thrown when mismatch in decoding data
     error MISMATCH();
 
+    /// @notice Thrown when there is a mismatch in ETH needed vs ETH provided
+    error ETH_MISMATCH();
+
     /// @notice Thrown when not enough funds are available
     error NOT_ENOUGH_FUNDS();
 

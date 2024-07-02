@@ -224,7 +224,9 @@ interface IAllo {
 
     /// @notice Allocates funds to multiple recipients.
     /// @dev Each strategy will handle the allocation of funds differently
-    function batchAllocate(uint256[] calldata _poolIds, bytes[] memory _datas) external;
+    function batchAllocate(uint256[] calldata _poolIds, uint256[] calldata _values, bytes[] memory _datas)
+        external
+        payable;
 
     /// @notice Distributes funds to recipients and emits {Distributed} event if successful
     /// @dev Each strategy will handle the distribution of funds differently

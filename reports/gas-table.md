@@ -1,14 +1,14 @@
 | contracts/core/Allo.sol:Allo contract |                 |        |        |        |         |
 |---------------------------------------|-----------------|--------|--------|--------|---------|
 | Deployment Cost                       | Deployment Size |        |        |        |         |
-| 2900525                               | 13253           |        |        |        |         |
+| 2950571                               | 13486           |        |        |        |         |
 | Function Name                         | min             | avg    | median | max    | # calls |
 | addPoolManager                        | 26337           | 35379  | 26531  | 53270  | 3       |
-| allocate                              | 38534           | 87818  | 75130  | 187732 | 78      |
-| batchAllocate                         | 46001           | 77297  | 77297  | 108593 | 2       |
+| allocate                              | 38537           | 87818  | 75134  | 187737 | 78      |
+| batchAllocate                         | 46868           | 92846  | 123187 | 123290 | 5       |
 | batchRegisterRecipient                | 46573           | 78349  | 78349  | 110126 | 2       |
 | createPool                            | 49070           | 526554 | 541513 | 541513 | 51      |
-| createPoolWithCustomStrategy          | 26904           | 482905 | 463132 | 573072 | 910     |
+| createPoolWithCustomStrategy          | 26904           | 481958 | 453112 | 573072 | 916     |
 | distribute                            | 65408           | 135067 | 167627 | 167627 | 9       |
 | fundPool                              | 43880           | 132358 | 136025 | 162056 | 171     |
 | getBaseFee                            | 372             | 372    | 372    | 372    | 2       |
@@ -17,13 +17,13 @@
 | getRegistry                           | 420             | 1005   | 420    | 2420   | 1237    |
 | getStrategy                           | 572             | 572    | 572    | 572    | 42      |
 | getTreasury                           | 399             | 399    | 399    | 399    | 2       |
-| initialize                            | 25552           | 143430 | 143531 | 163503 | 975     |
-| isPoolAdmin                           | 972             | 1972   | 1972   | 2972   | 2       |
+| initialize                            | 25574           | 143452 | 143553 | 163525 | 978     |
+| isPoolAdmin                           | 949             | 1949   | 1949   | 2949   | 2       |
 | isPoolManager                         | 999             | 7657   | 9488   | 9488   | 1345    |
 | recoverFunds                          | 24158           | 45301  | 52832  | 58913  | 3       |
 | registerRecipient                     | 54289           | 161046 | 183137 | 203037 | 48      |
 | removePoolManager                     | 26574           | 28944  | 28944  | 31315  | 2       |
-| transferOwnership                     | 28567           | 28567  | 28567  | 28567  | 45      |
+| transferOwnership                     | 28567           | 28567  | 28567  | 28567  | 48      |
 | updateBaseFee                         | 23708           | 41126  | 46933  | 46933  | 4       |
 | updatePercentFee                      | 23670           | 24995  | 24985  | 29857  | 234     |
 | updatePoolMetadata                    | 32065           | 37348  | 37348  | 42632  | 2       |
@@ -40,14 +40,14 @@
 | acceptProfileOwnership                        | 24178           | 25801               | 24178  | 29047               | 3       |
 | addMembers                                    | 25322           | 49393               | 50109  | 75370               | 67      |
 | anchorToProfileId                             | 608             | 608                 | 608    | 608                 | 4       |
-| createProfile                                 | 28412           | 723873              | 723897 | 853983              | 2957    |
+| createProfile                                 | 28412           | 723873              | 723897 | 853983              | 2966    |
 | getProfileByAnchor                            | 4071            | 20282               | 20071  | 37535               | 369     |
-| getProfileById                                | 3776            | 3780                | 3776   | 5240                | 2937    |
+| getProfileById                                | 3776            | 3780                | 3776   | 5240                | 2946    |
 | hasRole                                       | 743             | 743                 | 743    | 743                 | 1       |
-| initialize                                    | 44040           | 70051               | 70077  | 70077               | 1013    |
+| initialize                                    | 44040           | 70051               | 70077  | 70077               | 1016    |
 | isMemberOfProfile                             | 816             | 1649                | 816    | 2816                | 12      |
 | isOwnerOfProfile                              | 713             | 713                 | 713    | 713                 | 7       |
-| isOwnerOrMemberOfProfile                      | 0               | 2517                | 2696   | 5016                | 1329    |
+| isOwnerOrMemberOfProfile                      | 0               | 2517                | 2696   | 5016                | 1335    |
 | profileIdToPendingOwner                       | 523             | 523                 | 523    | 523                 | 3       |
 | recoverFunds                                  | 24258           | 40909               | 40104  | 59171               | 4       |
 | removeMembers                                 | 25894           | 28804               | 28311  | 32702               | 4       |
@@ -93,56 +93,6 @@
 | removeAllocator                                                                                       | 33432           | 34802  | 34802  | 36172  | 2       |
 | setPayouts                                                                                            | 35989           | 105941 | 137944 | 140971 | 11      |
 | updatePoolTimestamps                                                                                  | 32050           | 35749  | 36436  | 38763  | 3       |
-
-
-| contracts/strategies/_poc/sqf-superfluid/RecipientSuperApp.sol:RecipientSuperApp contract |                 |        |        |        |         |
-|-------------------------------------------------------------------------------------------|-----------------|--------|--------|--------|---------|
-| Deployment Cost                                                                           | Deployment Size |        |        |        |         |
-| 0                                                                                         | 0               |        |        |        |         |
-| Function Name                                                                             | min             | avg    | median | max    | # calls |
-| acceptedToken                                                                             | 284             | 284    | 284    | 284    | 1       |
-| beforeAgreementTerminated                                                                 | 13870           | 13870  | 13870  | 13870  | 3       |
-| beforeAgreementUpdated                                                                    | 13877           | 13877  | 13877  | 13877  | 1       |
-| closeIncomingStream                                                                       | 23968           | 308033 | 308033 | 592099 | 2       |
-| emergencyWithdraw                                                                         | 23947           | 205538 | 205538 | 387130 | 2       |
-| recipient                                                                                 | 426             | 426    | 426    | 426    | 1       |
-| strategy                                                                                  | 238             | 238    | 238    | 238    | 1       |
-
-
-| contracts/strategies/_poc/sqf-superfluid/SQFSuperFluidStrategy.sol:SQFSuperFluidStrategy contract |                 |         |         |         |         |
-|---------------------------------------------------------------------------------------------------|-----------------|---------|---------|---------|---------|
-| Deployment Cost                                                                                   | Deployment Size |         |         |         |         |
-| 3869257                                                                                           | 18232           |         |         |         |         |
-| Function Name                                                                                     | min             | avg     | median  | max     | # calls |
-| adjustWeightings                                                                                  | 23914           | 23914   | 23914   | 23914   | 1       |
-| allocationEndTime                                                                                 | 420             | 420     | 420     | 420     | 2       |
-| allocationStartTime                                                                               | 420             | 420     | 420     | 420     | 2       |
-| allocationSuperToken                                                                              | 395             | 395     | 395     | 395     | 1       |
-| cancelRecipients                                                                                  | 44032           | 184875  | 184875  | 325718  | 2       |
-| closeStream                                                                                       | 862115          | 862115  | 862115  | 862115  | 1       |
-| gdaPool                                                                                           | 439             | 439     | 439     | 439     | 3       |
-| getAllo                                                                                           | 271             | 271     | 271     | 271     | 48      |
-| getPayouts                                                                                        | 3103            | 3103    | 3103    | 3103    | 1       |
-| getPoolId                                                                                         | 382             | 382     | 382     | 382     | 48      |
-| getRecipient                                                                                      | 3069            | 3640    | 3069    | 5069    | 14      |
-| getRecipientStatus                                                                                | 2346            | 2346    | 2346    | 2346    | 1       |
-| getStrategyId                                                                                     | 260             | 260     | 260     | 260     | 1       |
-| getSuperApp                                                                                       | 667             | 667     | 667     | 667     | 4       |
-| initialSuperAppBalance                                                                            | 362             | 362     | 362     | 362     | 1       |
-| isValidAllocator                                                                                  | 1590            | 1590    | 1590    | 1590    | 15      |
-| metadataRequired                                                                                  | 432             | 432     | 432     | 432     | 1       |
-| minPassportScore                                                                                  | 407             | 407     | 407     | 407     | 2       |
-| passportDecoder                                                                                   | 394             | 394     | 394     | 394     | 1       |
-| recipientFlowRate                                                                                 | 581             | 581     | 581     | 581     | 13      |
-| registrationEndTime                                                                               | 413             | 413     | 413     | 413     | 2       |
-| registrationStartTime                                                                             | 381             | 381     | 381     | 381     | 2       |
-| reviewRecipients                                                                                  | 42262           | 2084241 | 2358406 | 4475869 | 26      |
-| superfluidHost                                                                                    | 416             | 416     | 416     | 416     | 1       |
-| totalUnitsByRecipient                                                                             | 604             | 604     | 604     | 604     | 15      |
-| updateMinPassportScore                                                                            | 45131           | 45131   | 45131   | 45131   | 1       |
-| updatePoolTimestamps                                                                              | 39868           | 43559   | 43559   | 47251   | 2       |
-| useRegistryAnchor                                                                                 | 400             | 400     | 400     | 400     | 1       |
-| withdraw                                                                                          | 41460           | 51545   | 43785   | 69390   | 3       |
 
 
 | contracts/strategies/donation-voting-merkle-distribution-direct-transfer/DonationVotingMerkleDistributionDirectTransferStrategy.sol:DonationVotingMerkleDistributionDirectTransferStrategy contract |                 |        |        |        |         |
@@ -269,7 +219,7 @@
 | contracts/strategies/rfp-simple/RFPSimpleStrategy.sol:RFPSimpleStrategy contract |                 |        |        |        |         |
 |----------------------------------------------------------------------------------|-----------------|--------|--------|--------|---------|
 | Deployment Cost                                                                  | Deployment Size |        |        |        |         |
-| 2797624                                                                          | 13272           |        |        |        |         |
+| 2797636                                                                          | 13272           |        |        |        |         |
 | Function Name                                                                    | min             | avg    | median | max    | # calls |
 | allocate                                                                         | 23208           | 63738  | 68925  | 68925  | 22      |
 | distribute                                                                       | 23327           | 98310  | 99489  | 141589 | 11      |
@@ -298,4 +248,10 @@
 
 
 
-Ran 30 test suites in 2.21s (4.31s CPU time): [32m1080[0m tests passed, [31m0[0m failed, [33m0[0m skipped (1080 total tests)
+Ran 30 test suites in 4.12s (3.55s CPU time): 1039 tests passed, 1 failed, 0 skipped (1040 total tests)
+
+Failing tests:
+Encountered 1 failing test in test/foundry/strategies/SQFSuperFluidStrategy.t.sol:SQFSuperFluidStrategyTest
+[FAIL. Reason: setup failed: Failed to resolve env var `OPGOERLI_RPC_URL` in `${OPGOERLI_RPC_URL}`: environment variable not found] setUp() (gas: 0)
+
+Encountered a total of 1 failing tests, 1039 tests succeeded
