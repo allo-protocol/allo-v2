@@ -482,11 +482,17 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
         bytes[] memory datas = new bytes[](2);
         datas[0] = bytes("data1");
         datas[1] = "data2";
+
+        uint256[] memory values = new uint256[](2);
+        values[0] = 100;
+        values[1] = 20;
         // allocate to the pool should not revert
-        allo().batchAllocate(poolIds, datas);
+        vm.deal(makeAddr("anon"), 120);
+        vm.prank(makeAddr("anon"));
+        allo().batchAllocate{value: 120}(poolIds, values, datas);
     }
 
-    function testRevert_batchAllocate_MISMATCH() public {
+    function testRevert_batchAllocate_MISMATCH_datas() public {
         uint256[] memory poolIds = new uint256[](2);
 
         poolIds[0] = _utilCreatePool(0);
@@ -500,9 +506,93 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
         bytes[] memory datas = new bytes[](1);
         datas[0] = bytes("data1");
 
+        uint256[] memory values = new uint256[](2);
+        values[0] = 100;
+        values[1] = 20;
+
         vm.expectRevert(MISMATCH.selector);
 
-        allo().batchAllocate(poolIds, datas);
+        vm.deal(makeAddr("anon"), 120);
+        vm.prank(makeAddr("anon"));
+        allo().batchAllocate{value: 120}(poolIds, values, datas);
+    }
+
+    function testRevert_batchAllocate_MISMATCH_values() public {
+        uint256[] memory poolIds = new uint256[](2);
+
+        poolIds[0] = _utilCreatePool(0);
+
+        address mockStrategy = address(new MockStrategy(address(allo())));
+        vm.prank(pool_admin());
+        poolIds[1] = allo().createPoolWithCustomStrategy(
+            poolProfile_id(), mockStrategy, "0x", address(token), 0, metadata, pool_managers()
+        );
+
+        bytes[] memory datas = new bytes[](2);
+        datas[0] = bytes("data1");
+        datas[1] = "data2";
+
+        uint256[] memory values = new uint256[](1);
+        values[0] = 100;
+
+        vm.expectRevert(MISMATCH.selector);
+
+        vm.deal(makeAddr("anon"), 100);
+        vm.prank(makeAddr("anon"));
+        allo().batchAllocate{value: 100}(poolIds, values, datas);
+    }
+
+    function testRevert_batchAllocate_ETH_MISMATCH_less() public {
+        uint256[] memory poolIds = new uint256[](2);
+
+        poolIds[0] = _utilCreatePool(0);
+
+        address mockStrategy = address(new MockStrategy(address(allo())));
+        vm.prank(pool_admin());
+        poolIds[1] = allo().createPoolWithCustomStrategy(
+            poolProfile_id(), mockStrategy, "0x", address(token), 0, metadata, pool_managers()
+        );
+
+        bytes[] memory datas = new bytes[](2);
+        datas[0] = bytes("data1");
+        datas[1] = "data2";
+
+        uint256[] memory values = new uint256[](2);
+        values[0] = 100;
+        values[1] = 20;
+
+        vm.expectRevert(ETH_MISMATCH.selector);
+
+        vm.deal(address(allo()), 1);
+        vm.deal(makeAddr("anon"), 119);
+        vm.prank(makeAddr("anon"));
+        allo().batchAllocate{value: 119}(poolIds, values, datas);
+    }
+
+    function testRevert_batchAllocate_ETH_MISMATCH_more() public {
+        uint256[] memory poolIds = new uint256[](2);
+
+        poolIds[0] = _utilCreatePool(0);
+
+        address mockStrategy = address(new MockStrategy(address(allo())));
+        vm.prank(pool_admin());
+        poolIds[1] = allo().createPoolWithCustomStrategy(
+            poolProfile_id(), mockStrategy, "0x", address(token), 0, metadata, pool_managers()
+        );
+
+        bytes[] memory datas = new bytes[](2);
+        datas[0] = bytes("data1");
+        datas[1] = "data2";
+
+        uint256[] memory values = new uint256[](2);
+        values[0] = 100;
+        values[1] = 20;
+
+        vm.expectRevert(ETH_MISMATCH.selector);
+
+        vm.deal(makeAddr("anon"), 121);
+        vm.prank(makeAddr("anon"));
+        allo().batchAllocate{value: 121}(poolIds, values, datas);
     }
 
     function test_distribute() public {
