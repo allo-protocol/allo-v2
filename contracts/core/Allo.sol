@@ -165,7 +165,9 @@ contract Allo is
         if (_strategy == address(0)) revert ZERO_ADDRESS();
 
         // Call the internal '_createPool()' function and return the pool ID
-        return _createPool(_msgSender(), _profileId, IStrategy(_strategy), _initStrategyData, _token, _amount, _metadata, _managers);
+        return _createPool(
+            _msgSender(), _profileId, IStrategy(_strategy), _initStrategyData, _token, _amount, _metadata, _managers
+        );
     }
 
     /// @notice Creates a new pool (by cloning a deployed strategies).
@@ -552,14 +554,10 @@ contract Allo is
         }
 
         if (_token == NATIVE) {
-            _transferAmountFrom(
-                _token, TransferData({from: _funder, to: address(_strategy), amount: amountAfterFee})
-            );
+            _transferAmountFrom(_token, TransferData({from: _funder, to: address(_strategy), amount: amountAfterFee}));
         } else {
             uint256 balanceBeforeFundingPool = _getBalance(_token, address(_strategy));
-            _transferAmountFrom(
-                _token, TransferData({from: _funder, to: address(_strategy), amount: amountAfterFee})
-            );
+            _transferAmountFrom(_token, TransferData({from: _funder, to: address(_strategy), amount: amountAfterFee}));
             uint256 balanceAfterFundingPool = _getBalance(_token, address(_strategy));
             // Track actual fee paid to account for fee on ERC20 token transfers
             amountAfterFee = balanceAfterFundingPool - balanceBeforeFundingPool;
