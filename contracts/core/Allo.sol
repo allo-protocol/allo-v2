@@ -166,7 +166,15 @@ contract Allo is
 
         // Call the internal '_createPool()' function and return the pool ID
         return _createPool(
-            _msgSender(), _profileId, IStrategy(_strategy), _initStrategyData, _token, _amount, _metadata, _managers
+            _msgSender(),
+            msg.value,
+            _profileId,
+            IStrategy(_strategy),
+            _initStrategyData,
+            _token,
+            _amount,
+            _metadata,
+            _managers
         );
     }
 
@@ -198,6 +206,7 @@ contract Allo is
         address creator = _msgSender();
         return _createPool(
             creator,
+            msg.value,
             _profileId,
             IStrategy(Clone.createClone(_strategy, _nonces[creator]++)),
             _initStrategyData,
@@ -431,6 +440,7 @@ contract Allo is
     ///      It is used to create a new pool and is called by both functions. The 'msg.sender' must be a member or owner of
     ///      a profile to create a pool.
     /// @param _creator The address that is creating the pool
+    /// @param _msgValue The value paid by the sender of this transaciton
     /// @param _profileId The ID of the profile of for pool creator in the registry
     /// @param _strategy The address of strategy
     /// @param _initStrategyData The data to initialize the strategy
@@ -441,6 +451,7 @@ contract Allo is
     /// @return poolId The ID of the pool
     function _createPool(
         address _creator,
+        uint256 _msgValue,
         bytes32 _profileId,
         IStrategy _strategy,
         bytes memory _initStrategyData,
@@ -495,9 +506,9 @@ contract Allo is
 
         if (baseFee > 0) {
             // To prevent paying the baseFee from the Allo contract's balance
-            // If _token is NATIVE, then baseFee + _amount should be > than msg.value.
-            // If _token is not NATIVE, then baseFee should be > than msg.value.
-            if ((_token == NATIVE && (baseFee + _amount != msg.value)) || (_token != NATIVE && baseFee != msg.value)) {
+            // If _token is NATIVE, then baseFee + _amount should be equal to _msgValue.
+            // If _token is not NATIVE, then baseFee should be equal to _msgValue.
+            if ((_token == NATIVE && (baseFee + _amount != _msgValue)) || (_token != NATIVE && baseFee != _msgValue)) {
                 revert NOT_ENOUGH_FUNDS();
             }
             _transferAmount(NATIVE, treasury, baseFee);
