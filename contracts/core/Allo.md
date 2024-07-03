@@ -255,10 +255,10 @@ In summary, the "Allo" smart contract provides a framework for creating and mana
     
  * The contract owner can update the base fee by calling the `updateBaseFee` function.
  * The function requires the new `_baseFee` as a parameter, and it updates the base fee accordingly.
-### Add Pool Manager
-    
- * Pool admins can add a pool manager to a pool by calling the `addPoolManager` function.
- * The function requires the `_poolId` and `_manager` address as parameters, and it grants the pool manager role to the address.
+### Add Pool Managers
+
+ * Pool admins can add multiple pool managers to a pool by calling the `addPoolManagers` function.
+ * The function requires the `_poolId` and an array of `_managers` addresses as parameters, and it grants the pool manager role to each address.
 ### Remove Pool Manager
    
  * Pool admins can remove a pool manager from a pool by calling the `removePoolManager` function.

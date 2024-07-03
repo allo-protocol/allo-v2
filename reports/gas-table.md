@@ -62,7 +62,7 @@
 | Deployment Cost                                                  | Deployment Size |        |        |        |         |
 | 381784                                                           | 1483            |        |        |        |         |
 | Function Name                                                    | min             | avg    | median | max    | # calls |
-| deploy                                                           | 67918           | 353831 | 354513 | 638380 | 4       |
+| deploy                                                           | 67906           | 353819 | 354501 | 638368 | 4       |
 | isDeployer                                                       | 530             | 2030   | 2530   | 2530   | 4       |
 | setDeployer                                                      | 24207           | 43626  | 46401  | 46401  | 8       |
 
@@ -70,7 +70,7 @@
 | contracts/strategies/_poc/qv-impact-stream/QVImpactStreamStrategy.sol:QVImpactStreamStrategy contract |                 |        |        |        |         |
 |-------------------------------------------------------------------------------------------------------|-----------------|--------|--------|--------|---------|
 | Deployment Cost                                                                                       | Deployment Size |        |        |        |         |
-| 2677951                                                                                               | 12791           |        |        |        |         |
+| 2677939                                                                                               | 12791           |        |        |        |         |
 | Function Name                                                                                         | min             | avg    | median | max    | # calls |
 | addAllocator                                                                                          | 36195           | 45783  | 45783  | 55372  | 2       |
 | allocationEndTime                                                                                     | 420             | 420    | 420    | 420    | 3       |
@@ -113,7 +113,7 @@
 | contracts/strategies/_poc/sqf-superfluid/SQFSuperFluidStrategy.sol:SQFSuperFluidStrategy contract |                 |         |         |         |         |
 |---------------------------------------------------------------------------------------------------|-----------------|---------|---------|---------|---------|
 | Deployment Cost                                                                                   | Deployment Size |         |         |         |         |
-| 3869257                                                                                           | 18232           |         |         |         |         |
+| 3869245                                                                                           | 18232           |         |         |         |         |
 | Function Name                                                                                     | min             | avg     | median  | max     | # calls |
 | adjustWeightings                                                                                  | 23914           | 23914   | 23914   | 23914   | 1       |
 | allocationEndTime                                                                                 | 420             | 420     | 420     | 420     | 2       |
@@ -149,7 +149,7 @@
 | contracts/strategies/donation-voting-merkle-distribution-direct-transfer/DonationVotingMerkleDistributionDirectTransferStrategy.sol:DonationVotingMerkleDistributionDirectTransferStrategy contract |                 |        |        |        |         |
 |-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------|--------|--------|--------|---------|
 | Deployment Cost                                                                                                                                                                                     | Deployment Size |        |        |        |         |
-| 3790978                                                                                                                                                                                             | 18140           |        |        |        |         |
+| 3790966                                                                                                                                                                                             | 18140           |        |        |        |         |
 | Function Name                                                                                                                                                                                       | min             | avg    | median | max    | # calls |
 | allocationEndTime                                                                                                                                                                                   | 404             | 1404   | 1404   | 2404   | 2       |
 | allocationStartTime                                                                                                                                                                                 | 441             | 441    | 441    | 441    | 2       |
