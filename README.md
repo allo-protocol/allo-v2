@@ -110,7 +110,7 @@ The Allo Protocol delegates distinct roles to participants to foster efficient g
     
 * **Pool Creator** A user who can create new pools using custom or cloneable strategies. They can specify metadata, strategy addresses, managers, and other parameters during pool creation.
     
-* **Pool Administrator** Users with administrative control over specific pools. They can manage pool managers, enabling effective pool governance.
+* **Pool Administrator** Users with administrative control over specific pools. They can manage pool managers, enabling effective pool governance. Using a multisig account (Safe) as admin is adviced to increase the security of the system.
     
 * **Pool Manager** Users who manage funds within specific pools. They can allocate and distribute funds according to the pool's strategy.
     

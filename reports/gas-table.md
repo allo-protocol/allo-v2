@@ -1,34 +1,35 @@
-| contracts/core/Allo.sol:Allo contract |                 |         |        |         |         |
-|---------------------------------------|-----------------|---------|--------|---------|---------|
-| Deployment Cost                       | Deployment Size |         |        |         |         |
-| 2940679                               | 13439           |         |        |         |         |
-| Function Name                         | min             | avg     | median | max     | # calls |
-| addPoolManagers                       | 26559           | 1510133 | 114738 | 6484537 | 1024    |
-| allocate                              | 38512           | 87796   | 75108  | 187710  | 78      |
-| batchAllocate                         | 46074           | 77370   | 77370  | 108666  | 2       |
-| batchRegisterRecipient                | 46573           | 78349   | 78349  | 110126  | 2       |
-| createPool                            | 49070           | 526895  | 541861 | 541861  | 51      |
-| createPoolWithCustomStrategy          | 26948           | 403948  | 347317 | 573464  | 2185    |
-| distribute                            | 65386           | 135045  | 167605 | 167605  | 9       |
-| fundPool                              | 43858           | 132336  | 136003 | 162034  | 171     |
-| getBaseFee                            | 372             | 372     | 372    | 372     | 2       |
-| getPercentFee                         | 360             | 360     | 360    | 360     | 2       |
-| getPool                               | 2944            | 10582   | 12944  | 16944   | 216     |
-| getRegistry                           | 398             | 983     | 398    | 2398    | 1237    |
-| getStrategy                           | 550             | 550     | 550    | 550     | 42      |
-| getTreasury                           | 443             | 443     | 443    | 443     | 2       |
-| initialize                            | 25595           | 143473  | 143574 | 163546  | 975     |
-| isPoolAdmin                           | 950             | 1950    | 1950   | 2950    | 2       |
-| isPoolManager                         | 999             | 2790    | 3488   | 9488    | 119849  |
-| recoverFunds                          | 24158           | 45301   | 52832  | 58913   | 3       |
-| registerRecipient                     | 54289           | 161046  | 183137 | 203037  | 48      |
-| removePoolManagers                    | 26569           | 423396  | 108619 | 1686067 | 512     |
-| transferOwnership                     | 28567           | 28567   | 28567  | 28567   | 45      |
-| updateBaseFee                         | 23686           | 41104   | 46911  | 46911   | 4       |
-| updatePercentFee                      | 23670           | 24995   | 24985  | 29857   | 234     |
-| updatePoolMetadata                    | 32107           | 37390   | 37390  | 42674   | 2       |
-| updateRegistry                        | 23800           | 25954   | 23942  | 30121   | 3       |
-| updateTreasury                        | 23821           | 25979   | 23963  | 30153   | 3       |
+| contracts/core/Allo.sol:Allo contract |                 |        |        |        |         |
+|---------------------------------------|-----------------|--------|--------|--------|---------|
+| Deployment Cost                       | Deployment Size |        |        |        |         |
+| 2932596                               | 13401           |        |        |        |         |
+| Function Name                         | min             | avg    | median | max    | # calls |
+| addPoolManager                        | 26337           | 35379  | 26531  | 53270  | 3       |
+| allocate                              | 38534           | 87818  | 75130  | 187732 | 78      |
+| batchAllocate                         | 46001           | 77297  | 77297  | 108593 | 2       |
+| batchRegisterRecipient                | 46573           | 78349  | 78349  | 110126 | 2       |
+| changeAdmin                           | 26303           | 39171  | 26531  | 52034  | 513     |
+| createPool                            | 49070           | 526533 | 541491 | 541491 | 51      |
+| createPoolWithCustomStrategy          | 26904           | 433862 | 440296 | 573050 | 1423    |
+| distribute                            | 65408           | 135067 | 167627 | 167627 | 9       |
+| fundPool                              | 43858           | 132336 | 136003 | 162034 | 171     |
+| getBaseFee                            | 372             | 372    | 372    | 372    | 2       |
+| getPercentFee                         | 382             | 382    | 382    | 382    | 2       |
+| getPool                               | 2944            | 10582  | 12944  | 16944  | 216     |
+| getRegistry                           | 398             | 983    | 398    | 2398   | 1237    |
+| getStrategy                           | 572             | 572    | 572    | 572    | 42      |
+| getTreasury                           | 399             | 399    | 399    | 399    | 2       |
+| initialize                            | 25552           | 143430 | 143531 | 163503 | 978     |
+| isPoolAdmin                           | 972             | 975    | 972    | 2972   | 514     |
+| isPoolManager                         | 999             | 7657   | 9488   | 9488   | 1345    |
+| recoverFunds                          | 24158           | 45301  | 52832  | 58913  | 3       |
+| registerRecipient                     | 54289           | 161046 | 183137 | 203037 | 48      |
+| removePoolManager                     | 26574           | 28944  | 28944  | 31315  | 2       |
+| transferOwnership                     | 28567           | 28567  | 28567  | 28567  | 48      |
+| updateBaseFee                         | 23708           | 41126  | 46933  | 46933  | 4       |
+| updatePercentFee                      | 23670           | 24995  | 24985  | 29857  | 234     |
+| updatePoolMetadata                    | 32107           | 37390  | 37390  | 42674  | 2       |
+| updateRegistry                        | 23800           | 25954  | 23942  | 30121  | 3       |
+| updateTreasury                        | 23821           | 25979  | 23963  | 30153  | 3       |
 
 
 | contracts/core/Registry.sol:Registry contract |                 |                     |        |                     |         |
@@ -40,14 +41,14 @@
 | acceptProfileOwnership                        | 24178           | 25801               | 24178  | 29047               | 3       |
 | addMembers                                    | 25322           | 49393               | 50109  | 75370               | 67      |
 | anchorToProfileId                             | 608             | 608                 | 608    | 608                 | 4       |
-| createProfile                                 | 28412           | 723873              | 723897 | 853983              | 2957    |
+| createProfile                                 | 28412           | 723873              | 723897 | 853983              | 2966    |
 | getProfileByAnchor                            | 4071            | 20282               | 20071  | 37535               | 369     |
-| getProfileById                                | 3776            | 3780                | 3776   | 5240                | 2937    |
+| getProfileById                                | 3776            | 3780                | 3776   | 5240                | 2946    |
 | hasRole                                       | 743             | 743                 | 743    | 743                 | 1       |
-| initialize                                    | 44040           | 70051               | 70077  | 70077               | 1013    |
+| initialize                                    | 44040           | 70051               | 70077  | 70077               | 1016    |
 | isMemberOfProfile                             | 816             | 1649                | 816    | 2816                | 12      |
 | isOwnerOfProfile                              | 713             | 713                 | 713    | 713                 | 7       |
-| isOwnerOrMemberOfProfile                      | 0               | 2604                | 2696   | 5016                | 2604    |
+| isOwnerOrMemberOfProfile                      | 0               | 2566                | 2696   | 5016                | 1842    |
 | profileIdToPendingOwner                       | 523             | 523                 | 523    | 523                 | 3       |
 | recoverFunds                                  | 24258           | 40909               | 40104  | 59171               | 4       |
 | removeMembers                                 | 25894           | 28804               | 28311  | 32702               | 4       |
@@ -298,4 +299,4 @@
 
 
 
-Ran 30 test suites in 3.92s (11.39s CPU time): 1080 tests passed, 0 failed, 0 skipped (1080 total tests)
+Ran 30 test suites in 1.17s (2.44s CPU time): 1083 tests passed, 0 failed, 0 skipped (1083 total tests)
