@@ -243,24 +243,32 @@ contract Allo is
         _updateBaseFee(_baseFee);
     }
 
-    /// @notice Add a pool manager
+    /// @notice Add multiple pool managers
     /// @dev Emits 'RoleGranted()' event. 'msg.sender' must be a pool admin.
     /// @param _poolId ID of the pool
-    /// @param _manager The address to add
-    function addPoolManager(uint256 _poolId, address _manager) external onlyPoolAdmin(_poolId) {
-        // Reverts if the address is the zero address with 'ZERO_ADDRESS()'
-        if (_manager == address(0)) revert ZERO_ADDRESS();
+    /// @param _managers The addresses to add
+    function addPoolManagers(uint256 _poolId, address[] calldata _managers) external onlyPoolAdmin(_poolId) {
+        for (uint256 i; i < _managers.length;) {
+            _addPoolManager(_poolId, _managers[i]);
 
-        // Grants the pool manager role to the '_manager' address
-        _grantRole(pools[_poolId].managerRole, _manager);
+            unchecked {
+                ++i;
+            }
+        }
     }
 
-    /// @notice Remove a pool manager
+    /// @notice Remove multiple pool managers
     /// @dev Emits 'RoleRevoked()' event. 'msg.sender' must be a pool admin.
     /// @param _poolId ID of the pool
-    /// @param _manager The address to remove
-    function removePoolManager(uint256 _poolId, address _manager) external onlyPoolAdmin(_poolId) {
-        _revokeRole(pools[_poolId].managerRole, _manager);
+    /// @param _managers The addresses to remove
+    function removePoolManagers(uint256 _poolId, address[] calldata _managers) external onlyPoolAdmin(_poolId) {
+        for (uint256 i; i < _managers.length;) {
+            _revokeRole(pools[_poolId].managerRole, _managers[i]);
+
+            unchecked {
+                ++i;
+            }
+        }
     }
 
     /// @notice Transfer the funds recovered  to the recipient
@@ -448,9 +456,8 @@ contract Allo is
         uint256 managersLength = _managers.length;
         for (uint256 i; i < managersLength;) {
             address manager = _managers[i];
-            if (manager == address(0)) revert ZERO_ADDRESS();
+            _addPoolManager(poolId, manager);
 
-            _grantRole(POOL_MANAGER_ROLE, manager);
             unchecked {
                 ++i;
             }
@@ -592,6 +599,18 @@ contract Allo is
         baseFee = _baseFee;
 
         emit BaseFeeUpdated(baseFee);
+    }
+
+    /// @notice Adds a pool manager
+    /// @dev Internal function used to add a pool manager.
+    /// @param _poolId The ID of the pool
+    /// @param _manager The address to add
+    function _addPoolManager(uint256 _poolId, address _manager) internal {
+        // Reverts if the address is the zero address with 'ZERO_ADDRESS()'
+        if (_manager == address(0)) revert ZERO_ADDRESS();
+
+        // Grants the pool manager role to the '_manager' address
+        _grantRole(pools[_poolId].managerRole, _manager);
     }
 
     // =========================
