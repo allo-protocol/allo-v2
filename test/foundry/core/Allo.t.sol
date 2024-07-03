@@ -333,41 +333,68 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
         allo().updateBaseFee(1e16);
     }
 
-    function test_addPoolManager() public {
+    function test_addPoolManagers(address[] memory _poolManagersToAdd) public {
+        for (uint256 i = 0; i < _poolManagersToAdd.length; i++) {
+            vm.assume(_poolManagersToAdd[i] != address(0));
+            vm.assume(_poolManagersToAdd[i] != pool_admin());
+        }
+
         uint256 poolId = _utilCreatePool(0);
 
-        assertFalse(allo().isPoolManager(poolId, makeAddr("add manager")));
+        for (uint256 i = 0; i < _poolManagersToAdd.length; i++) {
+            assertFalse(allo().isPoolManager(poolId, _poolManagersToAdd[i]));
+        }
+
         vm.prank(pool_admin());
-        allo().addPoolManager(poolId, makeAddr("add manager"));
-        assertTrue(allo().isPoolManager(poolId, makeAddr("add manager")));
+        allo().addPoolManagers(poolId, _poolManagersToAdd);
+
+        for (uint256 i = 0; i < _poolManagersToAdd.length; i++) {
+            assertTrue(allo().isPoolManager(poolId, _poolManagersToAdd[i]));
+        }
     }
 
-    function testRevert_addPoolManager_UNAUTHORIZED() public {
+    function testRevert_addPoolManagers_UNAUTHORIZED(address[] memory _poolManagersToAdd) public {
         uint256 poolId = _utilCreatePool(0);
         vm.expectRevert(UNAUTHORIZED.selector);
-        allo().addPoolManager(poolId, makeAddr("add manager"));
+        allo().addPoolManagers(poolId, _poolManagersToAdd);
     }
 
-    function testRevert_addPoolManager_ZERO_ADDRESS() public {
+    function testRevert_addPoolManagers_ZERO_ADDRESS(address[] memory _poolManagersToAdd) public {
+        vm.assume(_poolManagersToAdd.length > 0);
+        _poolManagersToAdd[0] = address(0);
         uint256 poolId = _utilCreatePool(0);
         vm.expectRevert(ZERO_ADDRESS.selector);
         vm.prank(pool_admin());
-        allo().addPoolManager(poolId, address(0));
+        allo().addPoolManagers(poolId, _poolManagersToAdd);
     }
 
-    function test_removePoolManager() public {
+    function test_removePoolManagers(address[] memory _poolManagersToRemove) public {
+        for (uint256 i = 0; i < _poolManagersToRemove.length; i++) {
+            vm.assume(_poolManagersToRemove[i] != address(0));
+            vm.assume(_poolManagersToRemove[i] != pool_admin());
+        }
         uint256 poolId = _utilCreatePool(0);
 
-        assertTrue(allo().isPoolManager(poolId, pool_manager1()));
+        // Add pool managers
         vm.prank(pool_admin());
-        allo().removePoolManager(poolId, pool_manager1());
-        assertFalse(allo().isPoolManager(poolId, pool_manager1()));
+        allo().addPoolManagers(poolId, _poolManagersToRemove);
+
+        for (uint256 i = 0; i < _poolManagersToRemove.length; i++) {
+            assertTrue(allo().isPoolManager(poolId, _poolManagersToRemove[i]));
+        }
+
+        vm.prank(pool_admin());
+        allo().removePoolManagers(poolId, _poolManagersToRemove);
+
+        for (uint256 i = 0; i < _poolManagersToRemove.length; i++) {
+            assertFalse(allo().isPoolManager(poolId, _poolManagersToRemove[i]));
+        }
     }
 
-    function testRevert_removePoolManager_UNAUTHORIZED() public {
+    function testRevert_removePoolManagers_UNAUTHORIZED(address[] memory _poolManagersToRemove) public {
         uint256 poolId = _utilCreatePool(0);
         vm.expectRevert(UNAUTHORIZED.selector);
-        allo().removePoolManager(poolId, makeAddr("add manager"));
+        allo().removePoolManagers(poolId, _poolManagersToRemove);
     }
 
     function test_recoverFunds() public {
@@ -627,5 +654,38 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
         uint256 poolId = _utilCreatePool(0);
 
         assertEq(address(allo().getStrategy(poolId)), strategy);
+    }
+
+    function test_changeAdmin(address _newAdmin) public {
+        vm.assume(_newAdmin != address(0));
+
+        uint256 poolId = _utilCreatePool(0);
+
+        vm.prank(pool_admin());
+        allo().changeAdmin(poolId, _newAdmin);
+
+        assertTrue(allo().isPoolAdmin(poolId, _newAdmin));
+        assertFalse(allo().isPoolAdmin(poolId, pool_admin()));
+    }
+
+    function testRevert_changeAdmin_UNAUTHORIZED(address _newAdmin, address _notAdmin) public {
+        vm.assume(_newAdmin != address(0));
+        vm.assume(_notAdmin != pool_admin());
+
+        uint256 poolId = _utilCreatePool(0);
+
+        vm.expectRevert(UNAUTHORIZED.selector);
+
+        vm.prank(_notAdmin);
+        allo().changeAdmin(poolId, _newAdmin);
+    }
+
+    function testRevert_changeAdmin_ZERO_ADDRESS() public {
+        uint256 poolId = _utilCreatePool(0);
+
+        vm.expectRevert(ZERO_ADDRESS.selector);
+
+        vm.prank(pool_admin());
+        allo().changeAdmin(poolId, address(0));
     }
 }
