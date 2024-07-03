@@ -125,14 +125,14 @@ contract Allo is
     /// @notice Reverts UNAUTHORIZED() if the caller is not a pool manager
     /// @param _poolId The pool id
     modifier onlyPoolManager(uint256 _poolId) {
-        _checkOnlyPoolManager(_poolId);
+        _checkOnlyPoolManager(_poolId, _msgSender());
         _;
     }
 
     /// @notice Reverts UNAUTHORIZED() if the caller is not a pool admin
     /// @param _poolId The pool id
     modifier onlyPoolAdmin(uint256 _poolId) {
-        _checkOnlyPoolAdmin(_poolId);
+        _checkOnlyPoolAdmin(_poolId, _msgSender());
         _;
     }
 
@@ -165,7 +165,7 @@ contract Allo is
         if (_strategy == address(0)) revert ZERO_ADDRESS();
 
         // Call the internal '_createPool()' function and return the pool ID
-        return _createPool(_profileId, IStrategy(_strategy), _initStrategyData, _token, _amount, _metadata, _managers);
+        return _createPool(_msgSender(), _profileId, IStrategy(_strategy), _initStrategyData, _token, _amount, _metadata, _managers);
     }
 
     /// @notice Creates a new pool (by cloning a deployed strategies).
@@ -193,9 +193,11 @@ contract Allo is
         if (_strategy == address(0)) revert ZERO_ADDRESS();
 
         // Returns the created pool ID
+        address creator = _msgSender();
         return _createPool(
+            creator,
             _profileId,
-            IStrategy(Clone.createClone(_strategy, _nonces[msg.sender]++)),
+            IStrategy(Clone.createClone(_strategy, _nonces[creator]++)),
             _initStrategyData,
             _token,
             _amount,
@@ -295,7 +297,7 @@ contract Allo is
     /// @return recipientId The recipient ID that has been registered
     function registerRecipient(uint256 _poolId, bytes memory _data) external payable nonReentrant returns (address) {
         // Return the recipientId (address) from the strategy
-        return pools[_poolId].strategy.registerRecipient{value: msg.value}(_data, msg.sender);
+        return pools[_poolId].strategy.registerRecipient{value: msg.value}(_data, _msgSender());
     }
 
     /// @notice Register multiple recipients to multiple pools.
@@ -317,7 +319,7 @@ contract Allo is
 
         // Loop through the '_poolIds' & '_data' and call the 'strategy.registerRecipient()' function
         for (uint256 i; i < poolIdLength;) {
-            recipientIds[i] = pools[_poolIds[i]].strategy.registerRecipient(_data[i], msg.sender);
+            recipientIds[i] = pools[_poolIds[i]].strategy.registerRecipient(_data[i], _msgSender());
             unchecked {
                 ++i;
             }
@@ -339,7 +341,7 @@ contract Allo is
         if (pool.token == NATIVE && _amount != msg.value) revert NOT_ENOUGH_FUNDS();
 
         // Call the internal fundPool() function
-        _fundPool(_amount, _poolId, pool.strategy);
+        _fundPool(_amount, _msgSender(), _poolId, pool.strategy);
     }
 
     /// @notice Allocate to a recipient or multiple recipients.
@@ -348,7 +350,7 @@ contract Allo is
     /// @param _poolId ID of the pool
     /// @param _data Encoded data unique to the strategy for that pool
     function allocate(uint256 _poolId, bytes memory _data) external payable nonReentrant {
-        _allocate(_poolId, msg.value, _data);
+        _allocate(_poolId, _msgSender(), msg.value, _data);
     }
 
     /// @notice Allocate to multiple pools
@@ -371,8 +373,9 @@ contract Allo is
 
         // Loop through the _poolIds & _datas and call the internal _allocate() function
         uint256 totalValue;
+        address msgSender = _msgSender();
         for (uint256 i; i < numPools;) {
-            _allocate(_poolIds[i], _values[i], _datas[i]);
+            _allocate(_poolIds[i], msgSender, _values[i], _datas[i]);
             totalValue += _values[i];
             unchecked {
                 ++i;
@@ -389,7 +392,7 @@ contract Allo is
     /// @param _recipientIds Ids of the recipients of the distribution
     /// @param _data Encoded data unique to the strategy
     function distribute(uint256 _poolId, address[] memory _recipientIds, bytes memory _data) external nonReentrant {
-        pools[_poolId].strategy.distribute(_recipientIds, _data, msg.sender);
+        pools[_poolId].strategy.distribute(_recipientIds, _data, _msgSender());
     }
 
     /// @notice Revoke the admin role of an account and transfer it to another account
@@ -399,7 +402,7 @@ contract Allo is
     function changeAdmin(uint256 _poolId, address _newAdmin) external onlyPoolAdmin(_poolId) {
         if (_newAdmin == address(0)) revert ZERO_ADDRESS();
 
-        _revokeRole(pools[_poolId].adminRole, msg.sender);
+        _revokeRole(pools[_poolId].adminRole, _msgSender());
         _grantRole(pools[_poolId].adminRole, _newAdmin);
     }
 
@@ -409,20 +412,23 @@ contract Allo is
 
     /// @notice Internal function to check is caller is pool manager
     /// @param _poolId The pool id
-    function _checkOnlyPoolManager(uint256 _poolId) internal view {
-        if (!_isPoolManager(_poolId, msg.sender)) revert UNAUTHORIZED();
+    /// @param _address The address to check
+    function _checkOnlyPoolManager(uint256 _poolId, address _address) internal view {
+        if (!_isPoolManager(_poolId, _address)) revert UNAUTHORIZED();
     }
 
     /// @notice Internal function to check is caller is pool admin
     /// @param _poolId The pool id
-    function _checkOnlyPoolAdmin(uint256 _poolId) internal view {
-        if (!_isPoolAdmin(_poolId, msg.sender)) revert UNAUTHORIZED();
+    /// @param _address The address to check
+    function _checkOnlyPoolAdmin(uint256 _poolId, address _address) internal view {
+        if (!_isPoolAdmin(_poolId, _address)) revert UNAUTHORIZED();
     }
 
     /// @notice Creates a new pool.
     /// @dev This is an internal function that is called by the 'createPool()' & 'createPoolWithCustomStrategy()' functions
     ///      It is used to create a new pool and is called by both functions. The 'msg.sender' must be a member or owner of
     ///      a profile to create a pool.
+    /// @param _creator The address that is creating the pool
     /// @param _profileId The ID of the profile of for pool creator in the registry
     /// @param _strategy The address of strategy
     /// @param _initStrategyData The data to initialize the strategy
@@ -432,6 +438,7 @@ contract Allo is
     /// @param _managers The managers of the pool
     /// @return poolId The ID of the pool
     function _createPool(
+        address _creator,
         bytes32 _profileId,
         IStrategy _strategy,
         bytes memory _initStrategyData,
@@ -440,7 +447,7 @@ contract Allo is
         Metadata memory _metadata,
         address[] memory _managers
     ) internal returns (uint256 poolId) {
-        if (!registry.isOwnerOrMemberOfProfile(_profileId, msg.sender)) revert UNAUTHORIZED();
+        if (!registry.isOwnerOrMemberOfProfile(_profileId, _creator)) revert UNAUTHORIZED();
 
         poolId = ++_poolIndex;
 
@@ -462,7 +469,7 @@ contract Allo is
         pools[poolId] = pool;
 
         // Grant admin roles to the pool creator
-        _grantRole(POOL_ADMIN_ROLE, msg.sender);
+        _grantRole(POOL_ADMIN_ROLE, _creator);
 
         // Set admin role for POOL_MANAGER_ROLE
         _setRoleAdmin(POOL_MANAGER_ROLE, POOL_ADMIN_ROLE);
@@ -496,7 +503,7 @@ contract Allo is
         }
 
         if (_amount > 0) {
-            _fundPool(_amount, poolId, _strategy);
+            _fundPool(_amount, _creator, poolId, _strategy);
         }
 
         emit PoolCreated(poolId, _profileId, _strategy, _token, _amount, _metadata);
@@ -506,19 +513,21 @@ contract Allo is
     /// @dev Passes '_data' & 'msg.sender' through to the strategy for that pool.
     ///      This is an internal function that is called by the 'allocate()' & 'batchAllocate()' functions.
     /// @param _poolId ID of the pool
-    /// @param _value amount of native tokens to allocate to strategy
+    /// @param _allocator Address that is invoking the allocation
+    /// @param _value Amount of native tokens to allocate to strategy
     /// @param _data Encoded data unique to the strategy for that pool
-    function _allocate(uint256 _poolId, uint256 _value, bytes memory _data) internal {
-        pools[_poolId].strategy.allocate{value: _value}(_data, msg.sender);
+    function _allocate(uint256 _poolId, address _allocator, uint256 _value, bytes memory _data) internal {
+        pools[_poolId].strategy.allocate{value: _value}(_data, _allocator);
     }
 
     /// @notice Fund a pool.
     /// @dev Deducts the fee and transfers the amount to the distribution strategy.
     ///      Emits a 'PoolFunded' event.
     /// @param _amount The amount to transfer
+    /// @param _funder The address providing the funding
     /// @param _poolId The 'poolId' for the pool you are funding
     /// @param _strategy The address of the strategy
-    function _fundPool(uint256 _amount, uint256 _poolId, IStrategy _strategy) internal {
+    function _fundPool(uint256 _amount, address _funder, uint256 _poolId, IStrategy _strategy) internal {
         uint256 feeAmount;
         uint256 amountAfterFee = _amount;
 
@@ -532,10 +541,10 @@ contract Allo is
             if (feeAmount + amountAfterFee != _amount) revert INVALID();
 
             if (_token == NATIVE) {
-                _transferAmountFrom(_token, TransferData({from: msg.sender, to: treasury, amount: feeAmount}));
+                _transferAmountFrom(_token, TransferData({from: _funder, to: treasury, amount: feeAmount}));
             } else {
                 uint256 balanceBeforeFee = _getBalance(_token, treasury);
-                _transferAmountFrom(_token, TransferData({from: msg.sender, to: treasury, amount: feeAmount}));
+                _transferAmountFrom(_token, TransferData({from: _funder, to: treasury, amount: feeAmount}));
                 uint256 balanceAfterFee = _getBalance(_token, treasury);
                 // Track actual fee paid to account for fee on ERC20 token transfers
                 feeAmount = balanceAfterFee - balanceBeforeFee;
@@ -544,12 +553,12 @@ contract Allo is
 
         if (_token == NATIVE) {
             _transferAmountFrom(
-                _token, TransferData({from: msg.sender, to: address(_strategy), amount: amountAfterFee})
+                _token, TransferData({from: _funder, to: address(_strategy), amount: amountAfterFee})
             );
         } else {
             uint256 balanceBeforeFundingPool = _getBalance(_token, address(_strategy));
             _transferAmountFrom(
-                _token, TransferData({from: msg.sender, to: address(_strategy), amount: amountAfterFee})
+                _token, TransferData({from: _funder, to: address(_strategy), amount: amountAfterFee})
             );
             uint256 balanceAfterFundingPool = _getBalance(_token, address(_strategy));
             // Track actual fee paid to account for fee on ERC20 token transfers
