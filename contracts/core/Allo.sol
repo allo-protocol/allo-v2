@@ -71,8 +71,8 @@ contract Allo is
     /// @notice Registry contract
     IRegistry private registry;
 
-    /// @notice Maps the `msg.sender` to a `nonce` to prevent duplicates
-    /// @dev 'msg.sender' -> 'nonce' for cloning strategies
+    /// @notice Maps the `_msgSender` to a `nonce` to prevent duplicates
+    /// @dev '_msgSender' -> 'nonce' for cloning strategies
     mapping(address => uint256) private _nonces;
 
     /// @notice Maps the pool ID to the pool details
@@ -141,10 +141,10 @@ contract Allo is
     //  ====================================
 
     /// @notice Creates a new pool (with a custom strategy)
-    /// @dev 'msg.sender' must be a member or owner of a profile to create a pool with or without a custom strategy, The encoded data
+    /// @dev '_msgSender' must be a member or owner of a profile to create a pool with or without a custom strategy, The encoded data
     ///      will be specific to a given strategy requirements, reference the strategy implementation of 'initialize()'. The strategy
-    ///      address passed must not be the zero address. 'msg.sender' must be a member or owner of the profile id passed as '_profileId'.
-    /// @param _profileId The 'profileId' of the registry profile, used to check if 'msg.sender' is a member or owner of the profile
+    ///      address passed must not be the zero address. '_msgSender' must be a member or owner of the profile id passed as '_profileId'.
+    /// @param _profileId The 'profileId' of the registry profile, used to check if '_msgSender' is a member or owner of the profile
     /// @param _strategy The address of the deployed custom strategy
     /// @param _initStrategyData The data to initialize the strategy
     /// @param _token The address of the token you want to use in your pool
@@ -179,9 +179,9 @@ contract Allo is
     }
 
     /// @notice Creates a new pool (by cloning a deployed strategies).
-    /// @dev 'msg.sender' must be owner or member of the profile id passed as '_profileId'. The strategy address passed
+    /// @dev '_msgSender' must be owner or member of the profile id passed as '_profileId'. The strategy address passed
     ///      must not be the zero address.
-    /// @param _profileId The ID of the registry profile, used to check if 'msg.sender' is a member or owner of the profile
+    /// @param _profileId The ID of the registry profile, used to check if '_msgSender' is a member or owner of the profile
     /// @param _strategy The address of the strategy contract the pool will use.
     /// @param _initStrategyData The data to initialize the strategy
     /// @param _token The address of the token
@@ -218,7 +218,7 @@ contract Allo is
     }
 
     /// @notice Update pool metadata
-    /// @dev 'msg.sender' must be a pool manager. Emits 'PoolMetadataUpdated()' event.
+    /// @dev '_msgSender' must be a pool manager. Emits 'PoolMetadataUpdated()' event.
     /// @param _poolId ID of the pool
     /// @param _metadata The new metadata of the pool
     function updatePoolMetadata(uint256 _poolId, Metadata memory _metadata) external onlyPoolManager(_poolId) {
@@ -257,7 +257,7 @@ contract Allo is
     }
 
     /// @notice Add multiple pool managers
-    /// @dev Emits 'RoleGranted()' event. 'msg.sender' must be a pool admin.
+    /// @dev Emits 'RoleGranted()' event. '_msgSender' must be a pool admin.
     /// @param _poolId ID of the pool
     /// @param _managers The addresses to add
     function addPoolManagers(uint256 _poolId, address[] calldata _managers) external onlyPoolAdmin(_poolId) {
@@ -271,7 +271,7 @@ contract Allo is
     }
 
     /// @notice Remove multiple pool managers
-    /// @dev Emits 'RoleRevoked()' event. 'msg.sender' must be a pool admin.
+    /// @dev Emits 'RoleRevoked()' event. '_msgSender' must be a pool admin.
     /// @param _poolId ID of the pool
     /// @param _managers The addresses to remove
     function removePoolManagers(uint256 _poolId, address[] calldata _managers) external onlyPoolAdmin(_poolId) {
@@ -407,7 +407,7 @@ contract Allo is
     }
 
     /// @notice Revoke the admin role of an account and transfer it to another account
-    /// @dev 'msg.sender' must be a pool admin.
+    /// @dev '_msgSender' must be a pool admin.
     /// @param _poolId ID of the pool
     /// @param _newAdmin The address of the new admin
     function changeAdmin(uint256 _poolId, address _newAdmin) external onlyPoolAdmin(_poolId) {
@@ -437,7 +437,7 @@ contract Allo is
 
     /// @notice Creates a new pool.
     /// @dev This is an internal function that is called by the 'createPool()' & 'createPoolWithCustomStrategy()' functions
-    ///      It is used to create a new pool and is called by both functions. The 'msg.sender' must be a member or owner of
+    ///      It is used to create a new pool and is called by both functions. The '_msgSender' must be a member or owner of
     ///      a profile to create a pool.
     /// @param _creator The address that is creating the pool
     /// @param _msgValue The value paid by the sender of this transaciton
@@ -523,7 +523,7 @@ contract Allo is
     }
 
     /// @notice Allocate to recipient(s).
-    /// @dev Passes '_data' & 'msg.sender' through to the strategy for that pool.
+    /// @dev Passes '_data' & '_allocator' through to the strategy for that pool.
     ///      This is an internal function that is called by the 'allocate()' & 'batchAllocate()' functions.
     /// @param _poolId ID of the pool
     /// @param _allocator Address that is invoking the allocation

@@ -111,10 +111,10 @@ interface IAllo {
     ) external;
 
     /// @notice Creates a new pool (with a custom strategy)
-    /// @dev 'msg.sender' must be a member or owner of a profile to create a pool with or without a custom strategy, The encoded data
+    /// @dev '_msgSender' must be a member or owner of a profile to create a pool with or without a custom strategy, The encoded data
     ///      will be specific to a given strategy requirements, reference the strategy implementation of 'initialize()'. The strategy
-    ///      address passed must not be the zero address. 'msg.sender' must be a member or owner of the profile id passed as '_profileId'.
-    /// @param _profileId The 'profileId' of the registry profile, used to check if 'msg.sender' is a member or owner of the profile
+    ///      address passed must not be the zero address. '_msgSender' must be a member or owner of the profile id passed as '_profileId'.
+    /// @param _profileId The 'profileId' of the registry profile, used to check if '_msgSender' is a member or owner of the profile
     /// @param _strategy The address of the deployed custom strategy
     /// @param _initStrategyData The data to initialize the strategy
     /// @param _token The address of the token you want to use in your pool
@@ -133,9 +133,9 @@ interface IAllo {
     ) external payable returns (uint256 poolId);
 
     /// @notice Creates a new pool (by cloning a deployed strategies).
-    /// @dev 'msg.sender' must be owner or member of the profile id passed as '_profileId'. The strategy address passed
+    /// @dev '_msgSender' must be owner or member of the profile id passed as '_profileId'. The strategy address passed
     ///      must not be the zero address.
-    /// @param _profileId The ID of the registry profile, used to check if 'msg.sender' is a member or owner of the profile
+    /// @param _profileId The ID of the registry profile, used to check if '_msgSender' is a member or owner of the profile
     /// @param _strategy The address of the strategy contract the pool will use.
     /// @param _initStrategyData The data to initialize the strategy
     /// @param _token The address of the token
@@ -155,7 +155,7 @@ interface IAllo {
     ) external payable returns (uint256 poolId);
 
     /// @notice Updates a pools metadata.
-    /// @dev 'msg.sender' must be a pool admin.
+    /// @dev '_msgSender' must be a pool admin.
     /// @param _poolId The ID of the pool to update
     /// @param _metadata The new metadata to set
     function updatePoolMetadata(uint256 _poolId, Metadata memory _metadata) external;
@@ -181,13 +181,13 @@ interface IAllo {
     function updateBaseFee(uint256 _baseFee) external;
 
     /// @notice Adds multiple pool managers to the pool.
-    /// @dev 'msg.sender' must be a pool admin.
+    /// @dev '_msgSender' must be a pool admin.
     /// @param _poolId The ID of the pool to add the managers to
     /// @param _managers The addresses of the managers to add
     function addPoolManagers(uint256 _poolId, address[] memory _managers) external;
 
     /// @notice Removes multiple pool managers from the pool.
-    /// @dev 'msg.sender' must be a pool admin.
+    /// @dev '_msgSender' must be a pool admin.
     /// @param _poolId The ID of the pool to remove the managers from
     /// @param _managers The addresses of the managers to remove
     function removePoolManagers(uint256 _poolId, address[] memory _managers) external;
@@ -236,7 +236,7 @@ interface IAllo {
     function distribute(uint256 _poolId, address[] memory _recipientIds, bytes memory _data) external;
 
     /// @notice Revoke the admin role of an account and transfer it to another account
-    /// @dev 'msg.sender' must be a pool admin.
+    /// @dev '_msgSender' must be a pool admin.
     /// @param _poolId ID of the pool
     /// @param _newAdmin The address of the new admin
     function changeAdmin(uint256 _poolId, address _newAdmin) external;
