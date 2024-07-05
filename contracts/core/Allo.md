@@ -291,7 +291,7 @@ In summary, the "Allo" smart contract provides a framework for creating and mana
 ### Batch Allocate Funds to Strategies
     
  * Users can allocate funds to strategies of multiple pools by calling the `batchAllocate` function.
- * The function requires arrays of `_poolIds` and `_datas` as parameters, and it allocates funds to strategies for each pool.
+ * The function requires arrays of `_poolIds`, `_values` and `_datas` as parameters, and it allocates funds to strategies for each pool.
 ### Distribute Funds to Recipients
     
  * Users can distribute funds to recipients using a pool's distribution strategy by calling the `distribute` function.
