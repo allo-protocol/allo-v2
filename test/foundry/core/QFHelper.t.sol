@@ -74,7 +74,7 @@ contract MockQFHelperTest is Test {
         _donation2[0] = 100;
 
         /// Custom donation amounts
-        for(uint256 i = 0; i < 5; i++) {
+        for (uint256 i = 0; i < 5; i++) {
             /// Donate 5 times to recipient 1, 1 amount
             mockQFHelper.fundRecipients(_recipient1, _donation1);
         }

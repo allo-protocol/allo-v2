@@ -51,13 +51,9 @@ library QFHelper {
     /// @param _amounts The amounts to donate to each recipient
     /// @dev The number of recipients and amounts should be equal and the same index
     ///      should correspond to the same recipient and amount
-    function fundRecipients(
-        State storage _state,
-        address[] memory _recipients,
-        uint256[] memory _amounts
-    ) internal {
+    function fundRecipients(State storage _state, address[] memory _recipients, uint256[] memory _amounts) internal {
         /// Check if the number of recipients and amounts are equal
-        if(_recipients.length != _amounts.length) revert QFHelper_LengthMissmatch();
+        if (_recipients.length != _amounts.length) revert QFHelper_LengthMissmatch();
 
         for (uint256 i = 0; i < _recipients.length; i++) {
             /// Add the recipient to the set if it doesn't exist
@@ -65,10 +61,7 @@ library QFHelper {
                 _state.recipients.add(_recipients[i]);
             }
             /// Add the donation to the recipient
-            _state.donations[_recipients[i]].push(Donation({
-                amount: _amounts[i],
-                funder: msg.sender
-            }));
+            _state.donations[_recipients[i]].push(Donation({amount: _amounts[i], funder: msg.sender}));
         }
     }
 
@@ -77,7 +70,11 @@ library QFHelper {
     /// @param _matchingAmount The total matching amount
     /// @return _recipients The recipients
     /// @return _payouts The matching amount for each recipient
-    function calculateMatching(State storage _state, uint256 _matchingAmount) internal view returns (address[] memory _recipients, uint256[] memory _payouts) {
+    function calculateMatching(State storage _state, uint256 _matchingAmount)
+        internal
+        view
+        returns (address[] memory _recipients, uint256[] memory _payouts)
+    {
         /// Get the number of recipients
         uint256 _numRecipients = _state.recipients.length();
         /// Initialize the arrays
