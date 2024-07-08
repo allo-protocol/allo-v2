@@ -10,8 +10,8 @@ contract MockQFHelper {
 
     QFHelper.State internal state;
 
-    function fundRecipients(address[] memory _recipients, uint256[] memory _amounts) public {
-        state.fundRecipients(_recipients, _amounts);
+    function fund(address[] memory _recipients, uint256[] memory _amounts) public {
+        state.fund(_recipients, _amounts);
     }
 
     function getDonations(address _recipient) public view returns (QFHelper.Donation[] memory) {
@@ -21,7 +21,7 @@ contract MockQFHelper {
     function getCalcuateMatchingAmount(uint256 _matchingAmount)
         public
         view
-        returns (address[] memory _recipients, uint256[] memory _payouts)
+        returns (address[] memory _recipients, uint256[] memory _amounts)
     {
         return state.calculateMatching(_matchingAmount);
     }
