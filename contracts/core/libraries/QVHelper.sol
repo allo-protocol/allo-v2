@@ -8,10 +8,11 @@ library QVHelper {
     /// @notice Error thrown when the number of recipients and amounts are not equal on voting
     error QVHelper_LengthMissmatch();
 
-    /// Struct that holds the state of the voting
-    /// totalVoiceCredits: the total amount of voice credits casted
-    /// recipientVoiceCredits: the amount of voice credits a recipient has
-    /// recipientVotes: the amount of votes a recipient has
+    /// @notice Struct that holds the state of the voting
+    /// @param totalVotes The total amount of votes casted
+    /// @param totalVoiceCredits The total amount of voice credits casted
+    /// @param recipientVoiceCredits The voice credits casted for each recipient
+    /// @param recipientVotes The votes casted for each recipient
     struct VotingState {
         uint256 totalVotes;
         uint256 totalVoiceCredits;
@@ -35,8 +36,7 @@ library QVHelper {
     /// @param _state The voting state
     /// @param _recipients The recipients to vote
     /// @param _voiceCredits The amounts of voice credits to for each recipient
-    /// @dev The number of recipients and voiceCredits should be equal and the same index
-    ///      should correspond to the same recipient and amount
+    /// @dev The number of recipients and voiceCredits should be equal and the same index should correspond to the same recipient and amount
     function _voteWithVoiceCredits(
         VotingState storage _state,
         address[] memory _recipients,
@@ -62,8 +62,7 @@ library QVHelper {
     /// @param _state The voting state
     /// @param _recipients The recipients to vote
     /// @param _votes The amounts of votes to for each recipient
-    /// @dev The number of recipients and votes should be equal and the same index
-    ///      should correspond to the same recipient and amount
+    /// @dev The number of recipients and votes should be equal and the same index should correspond to the same recipient and amount
     function _vote(VotingState storage _state, address[] memory _recipients, uint256[] memory _votes) internal {
         /// Check if the number of recipients and amounts are equal
         if (_recipients.length != _votes.length) revert QVHelper_LengthMissmatch();
