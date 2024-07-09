@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.19;
+pragma solidity 0.8.19;
 
 /// @title QV Helper Library
 /// @notice A helper library for Quadratic Voting
@@ -21,14 +21,14 @@ library QVHelper {
     }
 
     /// @notice Calculate the square root of a number (Babylonian method)
-    /// @param x The number
-    /// @return y The square root
-    function _sqrt(uint256 x) internal pure returns (uint256 y) {
-        uint256 z = (x + 1) / 2;
-        y = x;
-        while (z < y) {
-            y = z;
-            z = (x / z + z) / 2;
+    /// @param _x The number
+    /// @return _y The square root
+    function _sqrt(uint256 _x) internal pure returns (uint256 _y) {
+        uint256 _z = (_x + 1) / 2;
+        _y = _x;
+        while (_z < _y) {
+            _y = _z;
+            _z = (_x / _z + _z) / 2;
         }
     }
 
