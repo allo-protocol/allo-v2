@@ -95,13 +95,15 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
             address(registry()), // _registry
             allo_treasury(), // _treasury
             1e16, // _percentFee
-            1e15 // _baseFee
+            1e15, // _baseFee
+            trustedForwarder() // _trustedForwarder
         );
 
         assertEq(address(coreContract.getRegistry()), address(registry()));
         assertEq(coreContract.getTreasury(), allo_treasury());
         assertEq(coreContract.getPercentFee(), 1e16);
         assertEq(coreContract.getBaseFee(), 1e15);
+        assertTrue(coreContract.isTrustedForwarder(trustedForwarder()));
     }
 
     function testRevert_initialize_ALREADY_INITIALIZED() public {
@@ -112,7 +114,8 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
             address(registry()), // _registry
             allo_treasury(), // _treasury
             1e16, // _percentFee
-            1e15 // _baseFee
+            1e15, // _baseFee
+            trustedForwarder() // _trustedForwarder
         );
     }
 

@@ -289,4 +289,9 @@ interface IAllo {
     /// @dev 1e18 represents 100%
     /// @return feeDenominator The current fee denominator
     function getFeeDenominator() external view returns (uint256);
+
+    /// @notice Returns TRUE if the forwarder is trusted
+    /// @param forwarder The address of the forwarder to check
+    /// @return 'true' if the forwarder is trusted, otherwise 'false'
+    function isTrustedForwarder(address forwarder) external view returns (bool);
 }
