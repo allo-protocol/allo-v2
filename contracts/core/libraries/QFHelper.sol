@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.19;
+pragma solidity 0.8.19;
 
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 /// @title QF Helper Library
@@ -11,8 +10,6 @@ import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 library QFHelper {
     /// Using EnumerableSet for EnumerableSet.AddressSet to store the recipients
     using EnumerableSet for EnumerableSet.AddressSet;
-    /// Using SafeMath for uint256 calculations
-    using SafeMath for uint256;
 
     /// @notice Error thrown when the number of recipients and amounts are not equal
     error QFHelper_LengthMissmatch();
@@ -34,14 +31,14 @@ library QFHelper {
     }
 
     /// @notice Calculate the square root of a number (Babylonian method)
-    /// @param x The number
-    /// @return y The square root
-    function _sqrt(uint256 x) internal pure returns (uint256 y) {
-        uint256 z = (x + 1) / 2;
-        y = x;
-        while (z < y) {
-            y = z;
-            z = (x / z + z) / 2;
+    /// @param _x The number
+    /// @return _y The square root
+    function _sqrt(uint256 _x) internal pure returns (uint256 _y) {
+        uint256 _z = (_x + 1) / 2;
+        _y = _x;
+        while (_z < _y) {
+            _y = _z;
+            _z = (_x / _z + _z) / 2;
         }
     }
 
@@ -49,9 +46,12 @@ library QFHelper {
     /// @param _state The state of the donations
     /// @param _recipients The recipients to donate to
     /// @param _amounts The amounts to donate to each recipient
+    /// @param _funder The address of the funder
     /// @dev The number of recipients and amounts should be equal and the same index
     ///      should correspond to the same recipient and amount
-    function fund(State storage _state, address[] memory _recipients, uint256[] memory _amounts) internal {
+    function fund(State storage _state, address[] memory _recipients, uint256[] memory _amounts, address _funder)
+        internal
+    {
         /// Check if the number of recipients and amounts are equal
         if (_recipients.length != _amounts.length) revert QFHelper_LengthMissmatch();
 
@@ -61,7 +61,7 @@ library QFHelper {
                 _state.recipients.add(_recipients[i]);
             }
             /// Add the donation to the recipient
-            _state.donations[_recipients[i]].push(Donation({amount: _amounts[i], funder: msg.sender}));
+            _state.donations[_recipients[i]].push(Donation({amount: _amounts[i], funder: _funder}));
         }
     }
 
@@ -82,7 +82,7 @@ library QFHelper {
         _amounts = new uint256[](_numRecipients);
 
         uint256[] memory _donationsSum = new uint256[](_numRecipients);
-        uint256 _totalContributions = 0;
+        uint256 _totalContributions;
         uint256 _sumOfSquareRoots;
         /// Calculate the matching amount for each recipient
         for (uint256 i = 0; i < _numRecipients; i++) {
@@ -109,12 +109,12 @@ library QFHelper {
         }
 
         /// Calculate the divisor
-        uint256 _divisor = _matchingAmount.div(_totalContributions);
+        uint256 _divisor = _matchingAmount / _totalContributions;
 
         /// Calculate the matching amount for each recipient
         for (uint256 i = 0; i < _numRecipients; i++) {
             /// Calculate the payout for the recipient
-            _amounts[i] = _donationsSum[i].mul(_divisor);
+            _amounts[i] = _donationsSum[i] * _divisor;
         }
     }
 }
