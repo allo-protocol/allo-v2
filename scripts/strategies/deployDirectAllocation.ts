@@ -2,7 +2,7 @@ import { ethers } from "hardhat";
 import { strategyConfig } from "../config/strategies.config";
 import { deployStrategies, deployStrategyDirectly } from "./deployStrategies";
 
-export const deployDirectGrants = async () => {
+export const deployDirectAllocation = async () => {
   const network = await ethers.provider.getNetwork();
   const chainId = Number(network.chainId);
 
@@ -19,7 +19,7 @@ export const deployDirectGrants = async () => {
 
 // Check if this script is the main module (being run directly)
 if (require.main === module) {
-  deployDirectGrants().catch((error) => {
+  deployDirectAllocation().catch((error) => {
     console.error(error);
     process.exitCode = 1;
   });
