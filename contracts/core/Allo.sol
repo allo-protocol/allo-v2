@@ -79,8 +79,9 @@ contract Allo is
     /// @dev 'Pool.id' -> 'Pool'
     mapping(uint256 => Pool) private pools;
 
-    /// @custom:oz-upgrades-renamed-from cloneableStrategies
-    mapping(address => bool) private _unusedSlot;
+    /// @notice The trusted forwarder contract address
+    /// @dev Based on ERC2771ContextUpgradeable OZ contracts
+    address private _trustedForwarder;
 
     // ====================================
     // =========== Initializer =============
@@ -93,12 +94,14 @@ contract Allo is
     /// @param _treasury The address of the treasury
     /// @param _percentFee The percentage fee
     /// @param _baseFee The base fee
+    /// @param __trustedForwarder The address of the trusted forwarder
     function initialize(
         address _owner,
         address _registry,
         address payable _treasury,
         uint256 _percentFee,
-        uint256 _baseFee
+        uint256 _baseFee,
+        address __trustedForwarder
     ) external reinitializer(1) {
         // Initialize the owner using Solady ownable library
         _initializeOwner(_owner);
@@ -114,6 +117,8 @@ contract Allo is
 
         // Set the base fee
         _updateBaseFee(_baseFee);
+
+        _trustedForwarder = __trustedForwarder;
     }
 
     // ====================================
@@ -653,6 +658,33 @@ contract Allo is
         _grantRole(pools[_poolId].managerRole, _manager);
     }
 
+    /// @dev Logic copied from ERC2771ContextUpgradeable OZ contracts
+    function _msgSender() internal view virtual override returns (address) {
+        uint256 calldataLength = msg.data.length;
+        uint256 contextSuffixLength = _contextSuffixLength();
+        if (isTrustedForwarder(msg.sender) && calldataLength >= contextSuffixLength) {
+            return address(bytes20(msg.data[calldataLength - contextSuffixLength:]));
+        } else {
+            return super._msgSender();
+        }
+    }
+
+    /// @dev Logic copied from ERC2771ContextUpgradeable OZ contracts
+    function _msgData() internal view virtual override returns (bytes calldata) {
+        uint256 calldataLength = msg.data.length;
+        uint256 contextSuffixLength = _contextSuffixLength();
+        if (isTrustedForwarder(msg.sender) && calldataLength >= contextSuffixLength) {
+            return msg.data[:calldataLength - contextSuffixLength];
+        } else {
+            return super._msgData();
+        }
+    }
+
+    /// @dev Logic copied from ERC2771ContextUpgradeable OZ contracts
+    function _contextSuffixLength() internal view returns (uint256) {
+        return 20;
+    }
+
     // =========================
     // ==== View Functions =====
     // =========================
@@ -715,5 +747,10 @@ contract Allo is
     /// @return The 'Pool' struct
     function getPool(uint256 _poolId) external view returns (Pool memory) {
         return pools[_poolId];
+    }
+
+    /// @dev Logic copied from ERC2771ContextUpgradeable OZ contracts
+    function isTrustedForwarder(address forwarder) public view returns (bool) {
+        return forwarder == _trustedForwarder;
     }
 }
