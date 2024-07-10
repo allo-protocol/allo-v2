@@ -745,7 +745,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
         // decode the received data
         bytes memory decodedData = abi.decode(encodedData, (bytes));
 
-        // since the slicing inside of _msgData keeps the padding at the end, 
+        // since the slicing inside of _msgData keeps the padding at the end,
         // we need to extract only the selector in order to compare it
         assertEq(mockAllo.extractSelector(decodedData), abi.encodeWithSelector(mockAllo.mockMsgData.selector));
     }
