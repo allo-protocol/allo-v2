@@ -735,16 +735,18 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
         assertEq(mockAllo.mockMsgData(), abi.encodeWithSelector(mockAllo.mockMsgData.selector));
     }
 
-    function test__msgData_trustedForwarder(bytes memory _data) public {
-        vm.skip(true);
-
-        // append the data to the data
-        bytes memory data = abi.encodeWithSelector(mockAllo.mockMsgData.selector, _data);
+    function test__msgData_trustedForwarder(address _sender) public {
+        // append the sender to the data
+        bytes memory data = abi.encodeWithSelector(mockAllo.mockMsgData.selector, _sender);
 
         vm.prank(trustedForwarder());
         (, bytes memory encodedData) = address(mockAllo).call(data);
 
-        // decode the received sender
-        assertEq(abi.decode(encodedData, (bytes)), abi.encodeWithSelector(mockAllo.mockMsgData.selector));
+        // decode the received data
+        bytes memory decodedData = abi.decode(encodedData, (bytes));
+
+        // since the slicing inside of _msgData keeps the padding at the end, 
+        // we need to extract only the selector in order to compare it
+        assertEq(mockAllo.extractSelector(decodedData), abi.encodeWithSelector(mockAllo.mockMsgData.selector));
     }
 }

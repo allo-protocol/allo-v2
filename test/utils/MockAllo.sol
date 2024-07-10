@@ -11,4 +11,9 @@ contract MockAllo is Allo {
     function mockMsgData() external view returns (bytes calldata) {
         return _msgData();
     }
+
+    /// @notice Slices the selector from the data
+    function extractSelector(bytes calldata _data) external pure returns (bytes memory) {
+        return _data[:4];
+    }
 }
