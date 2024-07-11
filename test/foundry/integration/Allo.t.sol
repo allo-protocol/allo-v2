@@ -6,6 +6,8 @@ import {Allo} from "../../../contracts/core/Allo.sol";
 import {Registry, Metadata} from "../../../contracts/core/Registry.sol";
 import {DonationVotingMerkleDistributionDirectTransferStrategy} from "../../../contracts/strategies/donation-voting-merkle-distribution-direct-transfer/DonationVotingMerkleDistributionDirectTransferStrategy.sol";
 import {ISignatureTransfer} from "permit2/ISignatureTransfer.sol";
+import {IBiconomyForwarder} from "./IBiconomyForwarder.sol";
+import {ECDSA} from 'openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol';
 
 contract IntegrationAllo is Test {
     struct InitializeData {
@@ -23,9 +25,9 @@ contract IntegrationAllo is Test {
     DonationVotingMerkleDistributionDirectTransferStrategy public strategy;
 
     address public owner;
-    address public user;
-    address public relay;
+    address public relayer;
     address public treasury;
+    address public user;
 
     bytes32 public profileId;
 
@@ -72,18 +74,38 @@ contract IntegrationAllo is Test {
             allowedTokens: new address[](0)
         }));
 
-        vm.prank(user);
-        allo.createPool(
-            profileId,
-            address(strategy),
-            _initStrategyData,
-            dai,
-            0,
-            Metadata({
-                protocol: 1,
-                pointer: ''
+        bytes32 domainSeparator = 0x4fde6db5140ab711910b567033f2d5e64dc4f7123d722004dd748edf6ed07abb; // Biconomy Forwarder
+
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(0x00, '');
+        bytes memory sig = abi.encodePacked(r, s, v);
+
+        vm.prank(relayer);
+        IBiconomyForwarder(biconomyForwarder).executeEIP712(
+            IBiconomyForwarder.ERC20ForwardRequest({
+                from: user,
+                to: address(allo),
+                token: dai,
+                txGas: 0,
+                tokenGasPrice: 0,
+                batchId: 0,
+                batchNonce: 0,
+                deadline: block.timestamp + 1 days,
+                data: abi.encodeWithSelector(
+                    allo.createPool.selector,
+                    profileId,
+                    address(strategy),
+                    _initStrategyData,
+                    dai,
+                    0,
+                    Metadata({
+                        protocol: 1,
+                        pointer: ''
+                    }),
+                    new address[](0)
+                )
             }),
-            new address[](0)
+            domainSeparator,
+            sig
         );
     }
 }
