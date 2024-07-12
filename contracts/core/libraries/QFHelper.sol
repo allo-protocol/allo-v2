@@ -26,10 +26,11 @@ library QFHelper {
 
     /// Struct that defines the state of the donations to recipients
     /// @param recipients The set of recipients
+    /// @param sqrtDonationsSum The sum of the square root of the donations for each recipient
     /// @param donations The donations for each recipient
+    /// @param totalContributions The total contributions of all recipients
     struct State {
         EnumerableSet.AddressSet recipients;
-        // EnumerableSet.UintSet sqrtDonationsSum;
         mapping(address => uint256) sqrtDonationsSum;
         mapping(address => Donation[]) donations;
         uint256 totalContributions;
