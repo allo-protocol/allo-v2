@@ -11,7 +11,6 @@ import "solady/utils/FixedPointMathLib.sol";
 library QFHelper {
     /// Using EnumerableSet for EnumerableSet.AddressSet to store the recipients
     using EnumerableSet for EnumerableSet.AddressSet;
-    using EnumerableSet for EnumerableSet.UintSet;
 
     /// @notice Error thrown when the number of recipients and amounts are not equal
     error QFHelper_LengthMissmatch();
