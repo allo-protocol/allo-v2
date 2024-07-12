@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.19;
 
+import "solady/utils/FixedPointMathLib.sol";
+
 /// @title QV Helper Library
 /// @notice A helper library for Quadratic Voting
 /// @dev Handles the voting of recipients and calculates the payout amount for each recipient
@@ -20,18 +22,6 @@ library QVHelper {
         mapping(address => uint256) recipientVotes;
     }
 
-    /// @notice Calculate the square root of a number (Babylonian method)
-    /// @param _x The number
-    /// @return _y The square root
-    function _sqrt(uint256 _x) internal pure returns (uint256 _y) {
-        uint256 _z = (_x + 1) / 2;
-        _y = _x;
-        while (_z < _y) {
-            _y = _z;
-            _z = (_x / _z + _z) / 2;
-        }
-    }
-
     /// @notice Votes for recipients
     /// @param _state The voting state
     /// @param _recipients The recipients to vote
@@ -48,7 +38,7 @@ library QVHelper {
         for (uint256 i = 0; i < _recipients.length; i++) {
             /// Add the voice credits to the recipient
             _state.recipientVoiceCredits[_recipients[i]] += _voiceCredits[i];
-            uint256 _votes = _sqrt(_voiceCredits[i] * 1e18);
+            uint256 _votes = FixedPointMathLib.sqrt(_voiceCredits[i] * 1e18);
             /// Add the votes to the recipient
             _state.recipientVotes[_recipients[i]] += _votes;
             /// Add the total voice credits
