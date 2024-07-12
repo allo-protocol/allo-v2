@@ -22,10 +22,6 @@ contract MockQFHelper {
         return _state.totalContributions;
     }
 
-    function calculateTotalContributions() public {
-        _state.calculateTotalContributions();
-    }
-
     function getCalcuateMatchingAmount(uint256 _matchingAmount, address _recipient)
         public
         returns (uint256 _amount)

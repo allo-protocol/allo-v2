@@ -67,25 +67,6 @@ contract MockQFHelperTest is Test {
         mockQFHelper.fund(_recipients, _amounts);
     }
 
-    function test_calculateTotalContributions() public {
-        /// Custom donation amounts
-        for (uint256 i = 0; i < 5; i++) {
-            /// Donate 5 times to recipient 1, 1 amount
-            mockQFHelper.fund(recipient1, donation1);
-        }
-        /// Donate 1 time to recipient 2, 100 amount
-        mockQFHelper.fund(recipient2, donation2);
-
-        mockQFHelper.calculateTotalContributions();
-
-        uint256 _totalContributions = mockQFHelper.getTotalContributions();
-        /// Sum of the square of the square root of the donations for recipient 1
-        /// 5 * sqrt(1) = 5, 5^2 = 25
-        /// Sum of the square of the square root of the donations for recipient 2
-        /// sqrt(100) = 10, 10^2 = 100
-        assertEq(_totalContributions, 125);
-    }
-
     /// @notice Test the calculateMatching function using the QF formula, happy path
     function test_calculateMatching() public {
         /// Custom donation amounts
@@ -96,7 +77,9 @@ contract MockQFHelperTest is Test {
         /// Donate 1 time to recipient 2, 100 amount
         mockQFHelper.fund(recipient2, donation2);
 
-        mockQFHelper.calculateTotalContributions();
+        /// Total contributions should be 125
+        /// (5 * sqrt(1))^2 + (1 * sqrt(100))^2 = 125
+        assertEq(mockQFHelper.getTotalContributions(), 125);
 
         uint256 _firstRecipientMatchingAmount = mockQFHelper.getCalcuateMatchingAmount(MATCHING_AMOUNT, recipient1[0]);
         uint256 _secondRecipientMatchingAmount = mockQFHelper.getCalcuateMatchingAmount(MATCHING_AMOUNT, recipient2[0]);
