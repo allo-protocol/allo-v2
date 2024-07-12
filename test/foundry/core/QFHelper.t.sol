@@ -11,25 +11,33 @@ contract MockQFHelperTest is Test {
     MockQFHelper public mockQFHelper;
 
     address public funder = makeAddr("funder");
-    address public recipient1 = makeAddr("recipient1");
-    address public recipient2 = makeAddr("recipient2");
-    uint256 public constant DONATION_1 = 100;
-    uint256 public constant DONATION_2 = 200;
+    address[] public recipient1 = new address[](1);
+    address[] public recipient2 = new address[](1);
+    uint256[] public donation1 = new uint256[](1);
+    uint256[] public donation2 = new uint256[](1);
+    uint256 public constant DONATION_1 = 1;
+    uint256 public constant DONATION_2 = 100;
     uint256 public constant MATCHING_AMOUNT = 1000;
 
     function setUp() public {
         mockQFHelper = new MockQFHelper();
+
+        recipient1[0] = makeAddr("recipient1");
+        recipient2[0] = makeAddr("recipient2");
+        donation1[0] = DONATION_1;
+        donation2[0] = DONATION_2;
     }
 
     /// @notice Test the fund function, happy path
     function test_fund() public {
+        /// Fund more than one recipient at a time
         uint256[] memory _donations = new uint256[](2);
         _donations[0] = DONATION_1;
         _donations[1] = DONATION_2;
 
         address[] memory _recipients = new address[](2);
-        _recipients[0] = recipient1;
-        _recipients[1] = recipient2;
+        _recipients[0] = recipient1[0];
+        _recipients[1] = recipient2[0];
 
         vm.prank(funder);
         mockQFHelper.fund(_recipients, _donations);
@@ -49,44 +57,53 @@ contract MockQFHelperTest is Test {
     /// @notice Test the fund function revert when the length of recipients and amounts are not equal, unhappy path
     function testRevert_fund_LengthMissmatch() public {
         uint256[] memory _amounts = new uint256[](1);
-        _amounts[0] = 100;
+        _amounts[0] = DONATION_1;
 
         address[] memory _recipients = new address[](2);
-        _recipients[0] = recipient1;
-        _recipients[1] = recipient2;
+        _recipients[0] = recipient1[0];
+        _recipients[1] = recipient2[0];
 
         vm.expectRevert(QFHelper.QFHelper_LengthMissmatch.selector);
         mockQFHelper.fund(_recipients, _amounts);
     }
 
-    /// @notice Test the calculateMatching function using the QF formula, happy path
-    function test_calculateMatching() public {
-        address[] memory _recipient1 = new address[](1);
-        _recipient1[0] = recipient1;
-
-        address[] memory _recipient2 = new address[](1);
-        _recipient2[0] = recipient2;
-
-        uint256[] memory _donation1 = new uint256[](1);
-        _donation1[0] = 1;
-
-        uint256[] memory _donation2 = new uint256[](1);
-        _donation2[0] = 100;
-
+    function test_calculateTotalContributions() public {
         /// Custom donation amounts
         for (uint256 i = 0; i < 5; i++) {
             /// Donate 5 times to recipient 1, 1 amount
-            mockQFHelper.fund(_recipient1, _donation1);
+            mockQFHelper.fund(recipient1, donation1);
         }
         /// Donate 1 time to recipient 2, 100 amount
-        mockQFHelper.fund(_recipient2, _donation2);
+        mockQFHelper.fund(recipient2, donation2);
 
-        (, uint256[] memory _amounts) = mockQFHelper.getCalcuateMatchingAmount(MATCHING_AMOUNT);
+        mockQFHelper.calculateTotalContributions();
+
+        uint256 _totalContributions = mockQFHelper.getTotalContributions();
+        /// Sum of the square of the square root of the donations for recipient 1
+        /// 5 * sqrt(1) = 5, 5^2 = 25
+        /// Sum of the square of the square root of the donations for recipient 2
+        /// sqrt(100) = 10, 10^2 = 100
+        assertEq(_totalContributions, 125);
+    }
+
+    /// @notice Test the calculateMatching function using the QF formula, happy path
+    function test_calculateMatching() public {
+        /// Custom donation amounts
+        for (uint256 i = 0; i < 5; i++) {
+            /// Donate 5 times to recipient 1, 1 amount
+            mockQFHelper.fund(recipient1, donation1);
+        }
+        /// Donate 1 time to recipient 2, 100 amount
+        mockQFHelper.fund(recipient2, donation2);
+
+        mockQFHelper.calculateTotalContributions();
+
+        uint256 _firstRecipientMatchingAmount = mockQFHelper.getCalcuateMatchingAmount(MATCHING_AMOUNT, recipient1[0]);
+        uint256 _secondRecipientMatchingAmount = mockQFHelper.getCalcuateMatchingAmount(MATCHING_AMOUNT, recipient2[0]);
 
         /// Based on this example https://qf.gitcoin.co/?grant=1,1,1,1,1&grant=100&grant=&grant=&match=1000
         /// the payout should be 200 for recipient 1 and 800 for recipient 2
-        assertEq(_amounts.length, 2);
-        assertEq(_amounts[0], 200);
-        assertEq(_amounts[1], 800);
+        assertEq(_firstRecipientMatchingAmount, 200);
+        assertEq(_secondRecipientMatchingAmount, 800);
     }
 }

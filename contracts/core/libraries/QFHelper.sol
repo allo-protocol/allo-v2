@@ -2,6 +2,7 @@
 pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import "solady/utils/FixedPointMathLib.sol";
 
 /// @title QF Helper Library
 /// @notice A helper library for Quadratic Funding
@@ -10,6 +11,7 @@ import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 library QFHelper {
     /// Using EnumerableSet for EnumerableSet.AddressSet to store the recipients
     using EnumerableSet for EnumerableSet.AddressSet;
+    using EnumerableSet for EnumerableSet.UintSet;
 
     /// @notice Error thrown when the number of recipients and amounts are not equal
     error QFHelper_LengthMissmatch();
@@ -27,19 +29,10 @@ library QFHelper {
     /// @param donations The donations for each recipient
     struct State {
         EnumerableSet.AddressSet recipients;
+        // EnumerableSet.UintSet sqrtDonationsSum;
+        mapping(address => uint256) sqrtDonationsSum;
         mapping(address => Donation[]) donations;
-    }
-
-    /// @notice Calculate the square root of a number (Babylonian method)
-    /// @param _x The number
-    /// @return _y The square root
-    function _sqrt(uint256 _x) internal pure returns (uint256 _y) {
-        uint256 _z = (_x + 1) / 2;
-        _y = _x;
-        while (_z < _y) {
-            _y = _z;
-            _z = (_x / _z + _z) / 2;
-        }
+        uint256 totalContributions;
     }
 
     /// @notice Votes for recipients by donating
@@ -52,69 +45,57 @@ library QFHelper {
     function fund(State storage _state, address[] memory _recipients, uint256[] memory _amounts, address _funder)
         internal
     {
+        uint256 _recipientsLength = _recipients.length;
         /// Check if the number of recipients and amounts are equal
-        if (_recipients.length != _amounts.length) revert QFHelper_LengthMissmatch();
+        if (_recipientsLength != _amounts.length) revert QFHelper_LengthMissmatch();
 
-        for (uint256 i = 0; i < _recipients.length; i++) {
+        for (uint256 i = 0; i < _recipientsLength; i++) {
             /// Add the recipient to the set if it doesn't exist
             if (!_state.recipients.contains(_recipients[i])) {
                 _state.recipients.add(_recipients[i]);
             }
             /// Add the donation to the recipient
             _state.donations[_recipients[i]].push(Donation({amount: _amounts[i], funder: _funder}));
+
+            /// Calculate the square root of the donation amount and add it to the sum of donations
+            uint256 _sqrtDonationsSum = _state.sqrtDonationsSum[_recipients[i]];
+            _sqrtDonationsSum += FixedPointMathLib.sqrt(_amounts[i]);
+            _state.sqrtDonationsSum[_recipients[i]] = _sqrtDonationsSum;
         }
     }
 
-    /// @notice Calculates the matching amount for each recipient using the Quadratic Funding formula
+    /// @notice Calculates and stores the total contributions of all recipients
+    /// @dev The total contributions is the sum of the square of the square root of the donations
+    ///      for each recipient. This should only be called once after all donations have been made
+    /// @param _state The state of the donations
+    function calculateTotalContributions(State storage _state) internal {
+        uint256 _totalContributions;
+        for (uint256 i = 0; i < _state.recipients.length(); i++) {
+            address _recipient = _state.recipients.at(i);
+            uint256 _sqrtDonationsSum = _state.sqrtDonationsSum[_recipient];
+            _totalContributions += _sqrtDonationsSum * _sqrtDonationsSum;
+        }
+
+        _state.totalContributions = _totalContributions;
+    }
+
+    /// @notice Calculates the matching amount for a recipient using the Quadratic Funding formula
     /// @param _state The state of the donations
     /// @param _matchingAmount The total matching amount
-    /// @return _recipients The recipients
-    /// @return _amounts The matching amount for each recipient
-    function calculateMatching(State storage _state, uint256 _matchingAmount)
+    /// @param _recipient The recipient to calculate the matching amount for
+    /// @return _amount The matching amount for the recipient
+    function calculateMatching(State storage _state, uint256 _matchingAmount, address _recipient)
         internal
-        view
-        returns (address[] memory _recipients, uint256[] memory _amounts)
+        returns (uint256 _amount)
     {
-        /// Get the number of recipients
-        uint256 _numRecipients = _state.recipients.length();
-        /// Initialize the arrays
-        _recipients = new address[](_numRecipients);
-        _amounts = new uint256[](_numRecipients);
+        /// get the sqrt sum of donations for the recipient
+        uint256 _sqrtDonationsSum = _state.sqrtDonationsSum[_recipient];
+        /// square the sqrt sum of donations
+        uint256 _squareDonationsSum = _sqrtDonationsSum * _sqrtDonationsSum;
 
-        uint256[] memory _donationsSum = new uint256[](_numRecipients);
-        uint256 _totalContributions;
-        uint256 _sumOfSquareRoots;
-        /// Calculate the matching amount for each recipient
-        for (uint256 i = 0; i < _numRecipients; i++) {
-            /// Get the recipient
-            address recipient = _state.recipients.at(i);
-            /// Set the recipient in the array
-            _recipients[i] = recipient;
-            /// Get the donations for the recipient
-            Donation[] memory _donations = _state.donations[recipient];
-            /// Calculate the sum of the square roots of the donations
-            _sumOfSquareRoots = 0;
-            for (uint256 j = 0; j < _donations.length; j++) {
-                _sumOfSquareRoots += _sqrt(_donations[j].amount);
-            }
-
-            /// Calculate the square of the sum
-            uint256 _squareOfSum = _sumOfSquareRoots * _sumOfSquareRoots;
-
-            /// Store the sum of square roots
-            _donationsSum[i] = _squareOfSum;
-
-            /// Calculate the total contributions
-            _totalContributions += _squareOfSum;
-        }
-
-        /// Calculate the divisor
-        uint256 _divisor = _matchingAmount / _totalContributions;
-
-        /// Calculate the matching amount for each recipient
-        for (uint256 i = 0; i < _numRecipients; i++) {
-            /// Calculate the payout for the recipient
-            _amounts[i] = _donationsSum[i] * _divisor;
-        }
+        /// calculate the divisor
+        uint256 _divisor = _matchingAmount / _state.totalContributions;
+        /// calculate the matching amount
+        _amount = _squareDonationsSum * _divisor;
     }
 }

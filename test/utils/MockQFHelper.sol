@@ -8,21 +8,28 @@ import "contracts/core/libraries/QFHelper.sol";
 contract MockQFHelper {
     using QFHelper for QFHelper.State;
 
-    QFHelper.State internal state;
+    QFHelper.State internal _state;
 
     function fund(address[] memory _recipients, uint256[] memory _amounts) public {
-        state.fund(_recipients, _amounts, msg.sender);
+        _state.fund(_recipients, _amounts, msg.sender);
     }
 
     function getDonations(address _recipient) public view returns (QFHelper.Donation[] memory) {
-        return state.donations[_recipient];
+        return _state.donations[_recipient];
     }
 
-    function getCalcuateMatchingAmount(uint256 _matchingAmount)
+    function getTotalContributions() public view returns (uint256 _totalContributions) {
+        return _state.totalContributions;
+    }
+
+    function calculateTotalContributions() public {
+        _state.calculateTotalContributions();
+    }
+
+    function getCalcuateMatchingAmount(uint256 _matchingAmount, address _recipient)
         public
-        view
-        returns (address[] memory _recipients, uint256[] memory _amounts)
+        returns (uint256 _amount)
     {
-        return state.calculateMatching(_matchingAmount);
+        return _state.calculateMatching(_matchingAmount, _recipient);
     }
 }
