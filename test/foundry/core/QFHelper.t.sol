@@ -39,19 +39,11 @@ contract MockQFHelperTest is Test {
         _recipients[0] = recipient1[0];
         _recipients[1] = recipient2[0];
 
+        assertEq(mockQFHelper.getTotalContributions(), 0);
         vm.prank(funder);
         mockQFHelper.fund(_recipients, _donations);
 
-        QFHelper.Donation[] memory donations1 = mockQFHelper.getDonations(_recipients[0]);
-        QFHelper.Donation[] memory donations2 = mockQFHelper.getDonations(_recipients[1]);
-
-        assertEq(donations1.length, 1);
-        assertEq(donations1[0].amount, DONATION_1);
-        assertEq(donations1[0].funder, funder);
-
-        assertEq(donations2.length, 1);
-        assertEq(donations2[0].amount, DONATION_2);
-        assertEq(donations2[0].funder, funder);
+        assertGt(mockQFHelper.getTotalContributions(), 0);
     }
 
     /// @notice Test the fund function revert when the length of recipients and amounts are not equal, unhappy path

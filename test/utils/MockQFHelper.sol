@@ -14,10 +14,6 @@ contract MockQFHelper {
         _state.fund(_recipients, _amounts, msg.sender);
     }
 
-    function getDonations(address _recipient) public view returns (QFHelper.Donation[] memory) {
-        return _state.donations[_recipient];
-    }
-
     function getTotalContributions() public view returns (uint256 _totalContributions) {
         return _state.totalContributions;
     }

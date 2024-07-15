@@ -11,21 +11,11 @@ library QFHelper {
     /// @notice Error thrown when the number of recipients and amounts are not equal
     error QFHelper_LengthMissmatch();
 
-    /// Struct that defines a donation
-    /// @param amount The amount of the donation
-    /// @param funder The address of the funder
-    struct Donation {
-        uint256 amount;
-        address funder;
-    }
-
     /// Struct that defines the state of the donations to recipients
     /// @param sqrtDonationsSum The sum of the square root of the donations for each recipient
-    /// @param donations The donations for each recipient
     /// @param totalContributions The total contributions of all recipients
     struct State {
         mapping(address => uint256) sqrtDonationsSum;
-        mapping(address => Donation[]) donations;
         uint256 totalContributions;
     }
 
@@ -47,9 +37,6 @@ library QFHelper {
 
         uint256 _totalContributionsDelta;
         for (uint256 i = 0; i < _recipientsLength; i++) {
-            /// Add the donation to the recipient
-            _state.donations[_recipients[i]].push(Donation({amount: _amounts[i], funder: _funder}));
-
             /// Calculate the square root of the donation amount and add it to the sum of donations
             uint256 _sqrtDonationsSum = _state.sqrtDonationsSum[_recipients[i]];
             _sqrtDonationsSum += FixedPointMathLib.sqrt(_amounts[i]);
@@ -76,9 +63,7 @@ library QFHelper {
         /// square the sqrt sum of donations
         uint256 _squareDonationsSum = _sqrtDonationsSum * _sqrtDonationsSum;
 
-        /// calculate the divisor
-        uint256 _divisor = _matchingAmount / _state.totalContributions;
         /// calculate the matching amount
-        _amount = _squareDonationsSum * _divisor;
+        _amount = _squareDonationsSum * _matchingAmount / _state.totalContributions;
     }
 }
