@@ -79,6 +79,9 @@ contract Allo is
     /// @dev 'Pool.id' -> 'Pool'
     mapping(uint256 => Pool) private pools;
 
+    /// @custom:oz-upgrades-renamed-from cloneableStrategies
+    mapping(address => bool) private _unusedSlot;
+
     /// @notice The trusted forwarder contract address
     /// @dev Based on ERC2771ContextUpgradeable OZ contracts
     address private _trustedForwarder;
