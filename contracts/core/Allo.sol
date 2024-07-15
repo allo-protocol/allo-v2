@@ -681,9 +681,8 @@ contract Allo is
     /// @dev Logic copied from ERC2771ContextUpgradeable OZ contracts
     function _msgSender() internal view virtual override returns (address) {
         uint256 calldataLength = msg.data.length;
-        uint256 contextSuffixLength = _contextSuffixLength();
-        if (isTrustedForwarder(msg.sender) && calldataLength >= contextSuffixLength) {
-            return address(bytes20(msg.data[calldataLength - contextSuffixLength:]));
+        if (isTrustedForwarder(msg.sender) && calldataLength >= 20) {
+            return address(bytes20(msg.data[calldataLength - 20:]));
         } else {
             return super._msgSender();
         }
@@ -692,17 +691,11 @@ contract Allo is
     /// @dev Logic copied from ERC2771ContextUpgradeable OZ contracts
     function _msgData() internal view virtual override returns (bytes calldata) {
         uint256 calldataLength = msg.data.length;
-        uint256 contextSuffixLength = _contextSuffixLength();
-        if (isTrustedForwarder(msg.sender) && calldataLength >= contextSuffixLength) {
-            return msg.data[:calldataLength - contextSuffixLength];
+        if (isTrustedForwarder(msg.sender) && calldataLength >= 20) {
+            return msg.data[:calldataLength - 20];
         } else {
             return super._msgData();
         }
-    }
-
-    /// @dev Logic copied from ERC2771ContextUpgradeable OZ contracts
-    function _contextSuffixLength() internal view returns (uint256) {
-        return 20;
     }
 
     // =========================
