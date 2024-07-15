@@ -40,6 +40,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
     event RegistryUpdated(address registry);
     event StrategyApproved(address strategy);
     event StrategyRemoved(address strategy);
+    event TrustedForwarderUpdated(address trustedForwarder);
 
     error AlreadyInitialized();
 
@@ -347,6 +348,24 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
 
         vm.prank(makeAddr("anon"));
         allo().updateBaseFee(1e16);
+    }
+
+    function test_updateTrustedForwarder(address _trustedForwarder) public {
+        vm.assume(_trustedForwarder != address(0));
+
+        vm.expectEmit(true, false, false, false);
+
+        emit TrustedForwarderUpdated(_trustedForwarder);
+
+        allo().updateTrustedForwarder(_trustedForwarder);
+
+        assertTrue(allo().isTrustedForwarder(_trustedForwarder));
+    }
+
+    function test_updateTrustedForwarder_UNAUTHORIZED() public {
+        vm.expectRevert(Errors.ZERO_ADDRESS.selector);
+
+        allo().updateTrustedForwarder(address(0));
     }
 
     function test_addPoolManagers(address[] memory _poolManagersToAdd) public {

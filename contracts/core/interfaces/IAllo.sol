@@ -92,6 +92,10 @@ interface IAllo {
     /// @param registry Address of the new registry
     event RegistryUpdated(address registry);
 
+    /// @notice Emitted when the trusted forwarder is updated
+    /// @param trustedForwarder Address of the new trusted forwarder
+    event TrustedForwarderUpdated(address trustedForwarder);
+
     /// ====================================
     /// ==== External/Public Functions =====
     /// ====================================

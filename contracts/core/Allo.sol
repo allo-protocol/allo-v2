@@ -118,7 +118,8 @@ contract Allo is
         // Set the base fee
         _updateBaseFee(_baseFee);
 
-        _trustedForwarder = __trustedForwarder;
+        // Set the trusted forwarder
+        _updateTrustedForwarder(__trustedForwarder);
     }
 
     // ====================================
@@ -259,6 +260,13 @@ contract Allo is
     /// @param _baseFee The new base fee
     function updateBaseFee(uint256 _baseFee) external onlyOwner {
         _updateBaseFee(_baseFee);
+    }
+
+    /// @notice Updates the trusted forwarder address.
+    /// @dev Use this to update the trusted forwarder address.
+    /// @param __trustedForwarder The new trusted forwarder address
+    function updateTrustedForwarder(address __trustedForwarder) external onlyOwner {
+        _updateTrustedForwarder(__trustedForwarder);
     }
 
     /// @notice Add multiple pool managers
@@ -644,6 +652,18 @@ contract Allo is
         baseFee = _baseFee;
 
         emit BaseFeeUpdated(baseFee);
+    }
+
+    /// @notice Updates the trusted forwarder address
+    /// @dev Internal function used to update the trusted forwarder address.
+    ///      Emits a TrustedForwarderUpdated event.
+    /// @param __trustedForwarder The new trusted forwarder address
+    function _updateTrustedForwarder(address __trustedForwarder) internal {
+        if (__trustedForwarder == address(0)) revert ZERO_ADDRESS();
+
+        _trustedForwarder = __trustedForwarder;
+
+        emit TrustedForwarderUpdated(__trustedForwarder);
     }
 
     /// @notice Adds a pool manager
