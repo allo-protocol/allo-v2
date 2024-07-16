@@ -59,17 +59,9 @@ abstract contract RecipientsExtension is CoreBaseStrategy, Errors, IRecipientsEx
         useRegistryAnchor = _initializeData.useRegistryAnchor;
         metadataRequired = _initializeData.metadataRequired;
 
-        // Set the updated timestamps
-        registrationStartTime = _initializeData.registrationStartTime;
-        registrationEndTime = _initializeData.registrationEndTime;
+        _updatePoolTimestamps(_initializeData.registrationStartTime, _initializeData.registrationEndTime);
 
         recipientsCounter = 1;
-
-        // If the timestamps are invalid this will revert - See details in '_isPoolTimestampValid'
-        _isPoolTimestampValid(_initializeData.registrationStartTime, _initializeData.registrationEndTime);
-
-        // Emit that the timestamps have been updated with the updated values
-        emit TimestampsUpdated(_initializeData.registrationStartTime, _initializeData.registrationEndTime, msg.sender);
     }
 
     /// @notice Get a recipient with a '_recipientId'
@@ -131,14 +123,21 @@ abstract contract RecipientsExtension is CoreBaseStrategy, Errors, IRecipientsEx
     }
 
     /// @notice Sets the start and end dates.
-    /// @dev The timestamps are in seconds for the start and end times. The 'msg.sender' must be a pool manager.
-    ///      Emits a 'TimestampsUpdated()' event.
+    /// @dev The 'msg.sender' must be a pool manager.
     /// @param _registrationStartTime The start time for the registration
     /// @param _registrationEndTime The end time for the registration
     function updatePoolTimestamps(uint64 _registrationStartTime, uint64 _registrationEndTime)
         external
         onlyPoolManager(msg.sender)
     {
+        _updatePoolTimestamps(_registrationStartTime, _registrationEndTime);
+    }
+
+    /// @notice Sets the start and end dates.
+    /// @dev The timestamps are in seconds for the start and end times. Emits a 'TimestampsUpdated()' event.
+    /// @param _registrationStartTime The start time for the registration
+    /// @param _registrationEndTime The end time for the registration
+    function _updatePoolTimestamps(uint64 _registrationStartTime, uint64 _registrationEndTime) internal {
         // If the timestamps are invalid this will revert - See details in '_isPoolTimestampValid'
         _isPoolTimestampValid(_registrationStartTime, _registrationEndTime);
 
