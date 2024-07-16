@@ -107,7 +107,7 @@ export const strategyConfig: DeployParams = {
     },
     "direct-allocation": {
       name: "DirectAllocationStrategy",
-      version: "v1.0",
+      version: "v1.1",
     },
   },
   // Optimism
