@@ -43,6 +43,13 @@ interface IRecipientsExtension {
         Metadata metadata;
     }
 
+    struct RecipientInitializeData {
+        bool useRegistryAnchor;
+        bool metadataRequired;
+        uint64 registrationStartTime;
+        uint64 registrationEndTime;
+    }
+
     /// @notice Emitted when a recipient updates their registration
     /// @param recipientId Id of the recipient
     /// @param data The encoded data - (address recipientId, address recipientAddress, Metadata metadata)

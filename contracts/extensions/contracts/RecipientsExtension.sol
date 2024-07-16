@@ -51,6 +51,27 @@ abstract contract RecipientsExtension is CoreBaseStrategy, Errors, IRecipientsEx
         _;
     }
 
+    /// @notice Initializes this strategy as well as the BaseStrategy.
+    /// @dev This function MUST be called by the 'initialize' function in the strategy.
+    /// @param _initializeData The data to be decoded to initialize the strategy
+    function __RecipientsExtension_init(RecipientInitializeData memory _initializeData) internal {
+        // Initialize required values
+        useRegistryAnchor = _initializeData.useRegistryAnchor;
+        metadataRequired = _initializeData.metadataRequired;
+
+        // Set the updated timestamps
+        registrationStartTime = _initializeData.registrationStartTime;
+        registrationEndTime = _initializeData.registrationEndTime;
+
+        recipientsCounter = 1;
+
+        // If the timestamps are invalid this will revert - See details in '_isPoolTimestampValid'
+        _isPoolTimestampValid(_initializeData.registrationStartTime, _initializeData.registrationEndTime);
+
+        // Emit that the timestamps have been updated with the updated values
+        emit TimestampsUpdated(_initializeData.registrationStartTime, _initializeData.registrationEndTime, msg.sender);
+    }
+
     /// @notice Get a recipient with a '_recipientId'
     /// @param _recipientId ID of the recipient
     /// @return recipient The recipient details
