@@ -29,7 +29,8 @@
     "deploy-deployer": "npx hardhat run scripts/core/deployContractFactory.ts --network",
     "/////// deploy-test ///////": "echo 'deploy test scripts'",
     "create-profile": "npx hardhat run scripts/test/createProfile.ts --network",
-    "create-pool": "npx hardhat run scripts/test/createPool.ts --network"
+    "create-pool": "npx hardhat run scripts/test/createPool.ts --network",
+    "create-da-pool": "npx hardhat run scripts/test/createDirectAllocationPool.ts --network"
   },
   "devDependencies": {
     "@matterlabs/hardhat-zksync-deploy": "^1.2.1",
