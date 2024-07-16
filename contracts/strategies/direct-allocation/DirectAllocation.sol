@@ -39,6 +39,10 @@ contract DirectAllocationStrategy is BaseStrategy {
         revert NOT_IMPLEMENTED();
     }
 
+    function _beforeIncreasePoolAmount(uint256) internal virtual override {
+        revert NOT_IMPLEMENTED();
+    }
+
     // Not implemented
 
     function _distribute(address[] memory, bytes memory, address) internal virtual override {
