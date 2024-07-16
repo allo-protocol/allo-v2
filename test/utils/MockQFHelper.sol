@@ -11,7 +11,7 @@ contract MockQFHelper {
     QFHelper.State internal _state;
 
     function fund(address[] memory _recipients, uint256[] memory _amounts) public {
-        _state.fund(_recipients, _amounts, msg.sender);
+        _state.fund(_recipients, _amounts);
     }
 
     function getTotalContributions() public view returns (uint256 _totalContributions) {
