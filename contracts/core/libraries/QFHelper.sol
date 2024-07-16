@@ -27,10 +27,7 @@ library QFHelper {
     /// @param _state The state of the donations
     /// @param _recipients The recipients to donate to
     /// @param _amounts The amounts to donate to each recipient
-    /// @param _funder The address of the funder
-    function fund(State storage _state, address[] memory _recipients, uint256[] memory _amounts, address _funder)
-        internal
-    {
+    function fund(State storage _state, address[] memory _recipients, uint256[] memory _amounts) internal {
         uint256 _recipientsLength = _recipients.length;
         /// Check if the number of recipients and amounts are equal
         if (_recipientsLength != _amounts.length) revert QFHelper_LengthMissmatch();
@@ -56,6 +53,7 @@ library QFHelper {
     /// @return _amount The matching amount for the recipient
     function calculateMatching(State storage _state, uint256 _matchingAmount, address _recipient)
         internal
+        view
         returns (uint256 _amount)
     {
         /// get the sqrt sum of donations for the recipient
