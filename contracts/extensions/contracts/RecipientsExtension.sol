@@ -180,84 +180,98 @@ abstract contract RecipientsExtension is CoreBaseStrategy, Errors, IRecipientsEx
         return false;
     }
 
-    /// @notice Submit recipient to pool and set their status.
-    /// @param _data The data to be decoded.
-    /// @custom:data if 'useRegistryAnchor' is 'true' (address recipientId, address recipientAddress, Metadata metadata)
-    /// @custom:data if 'useRegistryAnchor' is 'false' (address registryAnchor, address recipientAddress, Metadata metadata)
+    /// @notice Submit recipients to pool and set their status.
+    /// @param _data An array of bytes to be decoded.
+    /// @dev Each item of the array can be decoded as follows:
+    /// if 'useRegistryAnchor' is 'true' (address recipientId, Metadata metadata)
+    /// if 'useRegistryAnchor' is 'false' (address registryAnchor, Metadata metadata)
     /// @param _sender The sender of the transaction
-    /// @return recipientId The ID of the recipient
-    function _registerRecipient(bytes memory _data, address _sender)
+    /// @return _recipientIds The IDs of the recipients
+    function _register(address[] memory __recipients, bytes memory _data, address _sender)
         internal
+        override
         onlyActiveRegistration
-        returns (address recipientId)
+        returns (address[] memory _recipientIds)
     {
         if (msg.value != 0) revert NON_ZERO_VALUE();
 
-        bool isUsingRegistryAnchor;
-        address recipientAddress;
-        address registryAnchor;
-        Metadata memory metadata;
+        // Decode the data, datas array must be same length as recipients array
+        bytes[] memory datas = abi.decode(_data, (bytes[]));
 
-        // decode data custom to this strategy
-        if (useRegistryAnchor) {
-            (recipientId, recipientAddress, metadata) = abi.decode(_data, (address, address, Metadata));
+        _recipientIds = new address[](__recipients.length);
 
-            // If the sender is not a profile member this will revert
-            if (!_isProfileMember(recipientId, _sender)) {
-                revert UNAUTHORIZED();
+        for (uint256 i; i < __recipients.length; i++) {
+            bool isUsingRegistryAnchor;
+            address registryAnchor;
+            Metadata memory metadata;
+            address recipientId;
+
+            address recipientAddress = __recipients[i];
+            bytes memory data = datas[i];
+
+            // If the recipient address is the zero address this will revert
+            if (recipientAddress == address(0)) {
+                revert RECIPIENT_ERROR(recipientId);
             }
-        } else {
-            (registryAnchor, recipientAddress, metadata) = abi.decode(_data, (address, address, Metadata));
 
-            // Set this to 'true' if the registry anchor is not the zero address
-            isUsingRegistryAnchor = registryAnchor != address(0);
+            // decode data custom to this strategy
+            if (useRegistryAnchor) {
+                (recipientId, metadata) = abi.decode(data, (address, Metadata));
 
-            // If using the 'registryAnchor' we set the 'recipientId' to the 'registryAnchor', otherwise we set it to the 'msg.sender'
-            recipientId = isUsingRegistryAnchor ? registryAnchor : _sender;
+                // If the sender is not a profile member this will revert
+                if (!_isProfileMember(recipientId, _sender)) {
+                    revert UNAUTHORIZED();
+                }
+            } else {
+                (registryAnchor, metadata) = abi.decode(data, (address, Metadata));
 
-            // Checks if the '_sender' is a member of the profile 'anchor' being used and reverts if not
-            if (isUsingRegistryAnchor && !_isProfileMember(recipientId, _sender)) {
-                revert UNAUTHORIZED();
+                // Set this to 'true' if the registry anchor is not the zero address
+                isUsingRegistryAnchor = registryAnchor != address(0);
+
+                // If using the 'registryAnchor' we set the 'recipientId' to the 'registryAnchor', otherwise we set it to the 'msg.sender'
+                recipientId = isUsingRegistryAnchor ? registryAnchor : _sender;
+
+                // Checks if the '_sender' is a member of the profile 'anchor' being used and reverts if not
+                if (isUsingRegistryAnchor && !_isProfileMember(recipientId, _sender)) {
+                    revert UNAUTHORIZED();
+                }
             }
-        }
 
-        // If the metadata is required and the metadata is invalid this will revert
-        if (metadataRequired && (bytes(metadata.pointer).length == 0 || metadata.protocol == 0)) {
-            revert INVALID_METADATA();
-        }
+            // If the metadata is required and the metadata is invalid this will revert
+            if (metadataRequired && (bytes(metadata.pointer).length == 0 || metadata.protocol == 0)) {
+                revert INVALID_METADATA();
+            }
 
-        // If the recipient address is the zero address this will revert
-        if (recipientAddress == address(0)) {
-            revert RECIPIENT_ERROR(recipientId);
-        }
+            // Get the recipient
+            Recipient storage recipient = _recipients[recipientId];
 
-        // Get the recipient
-        Recipient storage recipient = _recipients[recipientId];
+            // update the recipients data
+            recipient.recipientAddress = recipientAddress;
+            recipient.metadata = metadata;
+            recipient.useRegistryAnchor = useRegistryAnchor ? true : isUsingRegistryAnchor;
 
-        // update the recipients data
-        recipient.recipientAddress = recipientAddress;
-        recipient.metadata = metadata;
-        recipient.useRegistryAnchor = useRegistryAnchor ? true : isUsingRegistryAnchor;
-
-        if (recipientToStatusIndexes[recipientId] == 0) {
-            // recipient registering new application
-            recipientToStatusIndexes[recipientId] = recipientsCounter;
-            _setRecipientStatus(recipientId, uint8(Status.Pending));
-
-            bytes memory extendedData = abi.encode(_data, recipientsCounter);
-            emit Registered(recipientId, extendedData);
-
-            recipientsCounter++;
-        } else {
-            uint8 currentStatus = _getUintRecipientStatus(recipientId);
-            if (currentStatus == uint8(Status.Accepted) || currentStatus == uint8(Status.InReview)) {
-                // recipient updating accepted application
+            if (recipientToStatusIndexes[recipientId] == 0) {
+                // recipient registering new application
+                recipientToStatusIndexes[recipientId] = recipientsCounter;
                 _setRecipientStatus(recipientId, uint8(Status.Pending));
-            } else if (currentStatus == uint8(Status.Rejected)) {
-                // recipient updating rejected application
-                _setRecipientStatus(recipientId, uint8(Status.Appealed));
+
+                bytes memory extendedData = abi.encode(data, recipientsCounter);
+                emit Registered(recipientId, extendedData);
+
+                recipientsCounter++;
+            } else {
+                uint8 currentStatus = _getUintRecipientStatus(recipientId);
+                if (currentStatus == uint8(Status.Accepted) || currentStatus == uint8(Status.InReview)) {
+                    // recipient updating accepted application
+                    _setRecipientStatus(recipientId, uint8(Status.Pending));
+                } else if (currentStatus == uint8(Status.Rejected)) {
+                    // recipient updating rejected application
+                    _setRecipientStatus(recipientId, uint8(Status.Appealed));
+                }
+                emit UpdatedRegistration(recipientId, data, _sender, _getUintRecipientStatus(recipientId));
             }
-            emit UpdatedRegistration(recipientId, _data, _sender, _getUintRecipientStatus(recipientId));
+
+            _recipientIds[i] = recipientId;
         }
     }
 

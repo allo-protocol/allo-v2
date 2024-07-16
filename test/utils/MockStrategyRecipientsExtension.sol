@@ -14,12 +14,6 @@ contract MockStrategyRecipientsExtension is CoreBaseStrategy, RecipientsExtensio
         __RecipientsExtension_init(_initializeData);
     }
 
-    function _register(address[] memory _recipients, bytes memory _data, address _sender)
-        internal
-        override
-        returns (address[] memory _recipientIds)
-    {}
-
     function _allocate(address[] memory _recipients, uint256[] memory _amounts, bytes memory _data, address _sender)
         internal
         override
