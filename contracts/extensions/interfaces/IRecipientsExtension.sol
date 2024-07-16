@@ -14,7 +14,7 @@ interface IRecipientsExtension {
         InReview,
         Canceled
     }
-    
+
     /// @notice Struct to hold details of the application status
     /// @dev Application status is stored in a bitmap. Each 4 bits represents the status of a recipient,
     /// defined as 'index' here. The first 4 bits of the 256 bits represent the status of the first recipient,
