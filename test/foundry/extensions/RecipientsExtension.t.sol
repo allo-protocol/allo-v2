@@ -11,7 +11,7 @@ import {Errors} from "../../../contracts/core/libraries/Errors.sol";
 abstract contract BaseRecipientsExtensionUnit is Test, IRecipientsExtension {
     MockStrategyRecipientsExtension public recipientsExtension;
     address public allo;
-    uint public poolId;
+    uint256 public poolId;
 
     function setUp() public {
         allo = makeAddr("allo");
@@ -35,7 +35,8 @@ abstract contract BaseRecipientsExtensionUnit is Test, IRecipientsExtension {
 
 contract RecipientsExtension__RecipientsExtension_init is BaseRecipientsExtensionUnit {
     function test_Set_useRegistryAnchor(bool _useRegistryAnchor) public {
-        IRecipientsExtension.RecipientInitializeData memory _initializeData = IRecipientsExtension.RecipientInitializeData({
+        IRecipientsExtension.RecipientInitializeData memory _initializeData = IRecipientsExtension
+            .RecipientInitializeData({
             useRegistryAnchor: _useRegistryAnchor,
             metadataRequired: false, // irrelevant for the test
             registrationStartTime: uint64(block.timestamp), // irrelevant for the test
@@ -48,7 +49,8 @@ contract RecipientsExtension__RecipientsExtension_init is BaseRecipientsExtensio
     }
 
     function test_Set_metadataRequired(bool _metadataRequired) public {
-        IRecipientsExtension.RecipientInitializeData memory _initializeData = IRecipientsExtension.RecipientInitializeData({
+        IRecipientsExtension.RecipientInitializeData memory _initializeData = IRecipientsExtension
+            .RecipientInitializeData({
             useRegistryAnchor: false, // irrelevant for the test
             metadataRequired: _metadataRequired,
             registrationStartTime: uint64(block.timestamp), // irrelevant for the test
@@ -60,16 +62,21 @@ contract RecipientsExtension__RecipientsExtension_init is BaseRecipientsExtensio
         assertEq(recipientsExtension.metadataRequired(), _metadataRequired);
     }
 
-    function test_Call__updatePoolTimestamps(IRecipientsExtension.RecipientInitializeData memory _initializeData) public {
+    function test_Call__updatePoolTimestamps(IRecipientsExtension.RecipientInitializeData memory _initializeData)
+        public
+    {
         vm.assume(_initializeData.registrationStartTime < _initializeData.registrationEndTime);
 
-        recipientsExtension.expectCall__updatePoolTimestamps(_initializeData.registrationStartTime, _initializeData.registrationEndTime);
+        recipientsExtension.expectCall__updatePoolTimestamps(
+            _initializeData.registrationStartTime, _initializeData.registrationEndTime
+        );
 
         recipientsExtension.call___RecipientsExtension_init(_initializeData);
     }
 
     function test_Set_recipientsCounter() public {
-        IRecipientsExtension.RecipientInitializeData memory _initializeData = IRecipientsExtension.RecipientInitializeData({
+        IRecipientsExtension.RecipientInitializeData memory _initializeData = IRecipientsExtension
+            .RecipientInitializeData({
             useRegistryAnchor: false, // irrelevant for the test
             metadataRequired: false, // irrelevant for the test
             registrationStartTime: uint64(block.timestamp), // irrelevant for the test
@@ -99,17 +106,25 @@ contract RecipientsExtension_getRecipientStatus is BaseRecipientsExtensionUnit {
 }
 
 contract RecipientsExtensionReviewRecipients is BaseRecipientsExtensionUnit {
-    function test_Revert_IfCalledByNonManager(address _caller, IRecipientsExtension.ApplicationStatus[] memory _statuses, uint256 _refRecipientsCounter) public {
+    function test_Revert_IfCalledByNonManager(
+        address _caller,
+        IRecipientsExtension.ApplicationStatus[] memory _statuses,
+        uint256 _refRecipientsCounter
+    ) public {
         // force allo to return false
         vm.mockCall(allo, abi.encodeWithSelector(IAllo.isPoolManager.selector, poolId, _caller), abi.encode(false));
-        
+
         vm.expectRevert(IBaseStrategy.BaseStrategy_UNAUTHORIZED.selector);
-        
+
         vm.prank(_caller);
         recipientsExtension.reviewRecipients(_statuses, _refRecipientsCounter);
     }
 
-    function test_Revert_IfWrongRefRecipientsCounter(IRecipientsExtension.ApplicationStatus[] memory _statuses, uint256 _refRecipientsCounter, uint _recipientsCounter) public {
+    function test_Revert_IfWrongRefRecipientsCounter(
+        IRecipientsExtension.ApplicationStatus[] memory _statuses,
+        uint256 _refRecipientsCounter,
+        uint256 _recipientsCounter
+    ) public {
         vm.assume(_recipientsCounter != _refRecipientsCounter);
 
         // force allo to return true
@@ -124,7 +139,7 @@ contract RecipientsExtensionReviewRecipients is BaseRecipientsExtensionUnit {
 
     function test_Set_statusesBitMap(IRecipientsExtension.ApplicationStatus[] memory _statuses) public {
         // prevent duplicates on the indexes
-        for (uint i = 0; i < _statuses.length; i++) {
+        for (uint256 i = 0; i < _statuses.length; i++) {
             _statuses[i].index = i;
         }
 
@@ -133,21 +148,21 @@ contract RecipientsExtensionReviewRecipients is BaseRecipientsExtensionUnit {
 
         recipientsExtension.reviewRecipients(_statuses, 1);
 
-        for (uint i = 0; i < _statuses.length; i++) {
+        for (uint256 i = 0; i < _statuses.length; i++) {
             assertEq(recipientsExtension.statusesBitMap(_statuses[i].index), _statuses[i].statusRow);
         }
     }
 
     function test_Emit_Event(IRecipientsExtension.ApplicationStatus[] memory _statuses, address _caller) public {
         // prevent duplicates on the indexes
-        for (uint i = 0; i < _statuses.length; i++) {
+        for (uint256 i = 0; i < _statuses.length; i++) {
             _statuses[i].index = i;
         }
 
         // force allo to return true
         vm.mockCall(allo, abi.encodeWithSelector(IAllo.isPoolManager.selector), abi.encode(true));
 
-        for (uint i = 0; i < _statuses.length; i++) {
+        for (uint256 i = 0; i < _statuses.length; i++) {
             vm.expectEmit();
             emit IRecipientsExtension.RecipientStatusUpdated(_statuses[i].index, _statuses[i].statusRow, _caller);
         }
@@ -157,22 +172,123 @@ contract RecipientsExtensionReviewRecipients is BaseRecipientsExtensionUnit {
     }
 }
 
-contract RecipientsExtensionUpdatePoolTimestamps is BaseRecipientsExtensionUnit {}
+contract RecipientsExtensionUpdatePoolTimestamps is BaseRecipientsExtensionUnit {
+    function test_Revert_IfCalledByNonManager(address _caller) public {
+        // force allo to return false
+        vm.mockCall(allo, abi.encodeWithSelector(IAllo.isPoolManager.selector, poolId, _caller), abi.encode(false));
 
-contract RecipientsExtension_updatePoolTimestamps is BaseRecipientsExtensionUnit {}
+        vm.expectRevert(IBaseStrategy.BaseStrategy_UNAUTHORIZED.selector);
 
-contract RecipientsExtension_checkOnlyActiveRegistration is BaseRecipientsExtensionUnit {}
+        vm.prank(_caller);
+        recipientsExtension.updatePoolTimestamps(0, 0);
+    }
 
-contract RecipientsExtension_isPoolTimestampValid is BaseRecipientsExtensionUnit {}
+    function test_Call__updatePoolTimestamps(uint64 _registrationStartTime, uint64 _registrationEndTime) public {
+        // force allo to return true
+        vm.mockCall(allo, abi.encodeWithSelector(IAllo.isPoolManager.selector), abi.encode(true));
 
-contract RecipientsExtension_isPoolActive is BaseRecipientsExtensionUnit {}
+        vm.assume(_registrationStartTime < _registrationEndTime);
 
-contract RecipientsExtension_register is BaseRecipientsExtensionUnit {}
+        recipientsExtension.expectCall__updatePoolTimestamps(_registrationStartTime, _registrationEndTime);
 
-contract RecipientsExtension_getRecipient is BaseRecipientsExtensionUnit {}
+        recipientsExtension.updatePoolTimestamps(_registrationStartTime, _registrationEndTime);
+    }
+}
 
-contract RecipientsExtension_setRecipientStatus is BaseRecipientsExtensionUnit {}
+contract RecipientsExtension_updatePoolTimestamps is BaseRecipientsExtensionUnit {
+    function test_Call__isPoolTimestampValid() public {}
 
-contract RecipientsExtension_getUintRecipientStatus is BaseRecipientsExtensionUnit {}
+    function test_Set_registrationStartTime() public {}
 
-contract RecipientsExtension_getStatusRowColumn is BaseRecipientsExtensionUnit {}
+    function test_Set_registrationEndTime() public {}
+
+    function test_Emit_Event() public {}
+}
+
+contract RecipientsExtension_checkOnlyActiveRegistration is BaseRecipientsExtensionUnit {
+    function test_Revert_IfTimestampSmallerThanRegistrationStartTime() public {}
+
+    function test_Revert_IfTimestampGreaterThanRegistrationEndTime() public {}
+}
+
+contract RecipientsExtension_isPoolTimestampValid is BaseRecipientsExtensionUnit {
+    function test_Revert_IfInvalidTimestamps() public {}
+}
+
+contract RecipientsExtension_isPoolActive is BaseRecipientsExtensionUnit {
+    function test_Return_TrueIfPoolActive() public {}
+
+    function test_Return_FalseIfPoolInactive() public {}
+}
+
+contract RecipientsExtension_register is BaseRecipientsExtensionUnit {
+    function test_Revert_IfNotActiveRegistration() public {}
+
+    function test_Revert_IfValueNotZero() public {}
+
+    function test_Revert_RecipientZeroAddress() public {}
+
+    function test_Revert_IfUsingRegistryAnchorSenderAndSenderIsNotProfileMember() public {}
+
+    function test_Set_RecipientIdIfNotUsingRegistryAnchorAndProvidedRegistryAnchorIsZero() public {}
+
+    function test_Set_RecipientIdIfNotUsingRegistryAnchorAndProvidedRegistryAnchorIsNotZero() public {}
+
+    function test_Revert_IfNotUsingRegistryAnchorAndProvidedRegistryAnchorIsNotZeroAndSenderIsNotProfileMember()
+        public
+    {}
+
+    function test_Revert_IfMetadataRequiredAndMetadataPointerIsEmpty() public {}
+
+    function test_Revert_IfMetadataRequiredAndMetadataProtocolIsEmpty() public {}
+
+    function test_Set_recipientAddress() public {}
+
+    function test_Set_metadata() public {}
+
+    function test_Set_IfUseRegistryAnchor() public {}
+
+    function test_Set_IfNotUseRegistryAnchor() public {}
+
+    function test_Set_recipientsCounterIfRegisteringNewApplication() public {}
+
+    function test_Call__setRecipientStatusIfRegisteringNewApplication() public {}
+
+    function test_Emit_eventIfRegisteringNewApplication() public {}
+
+    function test_Increase_recipientsCounterIfRegisteringNewApplication() public {}
+
+    function test_Call__getUintRecipientStatusIfRegisteringNewApplication() public {}
+
+    function test_Call__setRecipientStatusIfAcceptedApplication() public {}
+
+    function test_Call__setRecipientStatusIfInReviewApplication() public {}
+
+    function test_Call__setRecipientStatusIfRejectedApplication() public {}
+
+    function test_Emit_UpdatedRegistration() public {}
+
+    function test_Return_recipientIds() public {}
+}
+
+contract RecipientsExtension_getRecipient is BaseRecipientsExtensionUnit {
+    function test_Return_recipient() public {}
+}
+
+contract RecipientsExtension_setRecipientStatus is BaseRecipientsExtensionUnit {
+    function test_Call__getStatusRowColumn() public {}
+
+    function test_Set_statusesBitMap() public {}
+}
+
+contract RecipientsExtension_getUintRecipientStatus is BaseRecipientsExtensionUnit {
+    function test_Return_zeroIfRecipientNotFound() public {}
+
+    function test_Call__getStatusRowColumn() public {}
+
+    function test_Return_status() public {}
+}
+
+contract RecipientsExtension_getStatusRowColumn is BaseRecipientsExtensionUnit {
+    function test_Return_statusRowColumn() public {}
+}
