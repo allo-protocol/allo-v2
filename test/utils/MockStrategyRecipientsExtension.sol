@@ -375,4 +375,8 @@ contract MockStrategyRecipientsExtension is CoreBaseStrategy, RecipientsExtensio
     function expectCall__getStatusRowColumn(address _recipientId) public {
         vm.expectCall(address(this), abi.encodeWithSignature("_getStatusRowColumn(address)", _recipientId));
     }
+
+    function set_recipientsCounter(uint256 _recipientsCounter) public {
+        recipientsCounter = _recipientsCounter;
+    }
 }
