@@ -88,7 +88,7 @@ contract MockQVHelperTest is Test {
 
         mockQVHelper.vote(_recipients, _votes);
 
-        (, uint256[] memory _payouts) = mockQVHelper.getPayoutAmount(_recipients, POOL_BALANCE);
+        (uint256[] memory _payouts) = mockQVHelper.getPayoutAmount(_recipients, POOL_BALANCE);
 
         assertEq(_payouts[0], 33);
         assertEq(_payouts[1], 66);
@@ -106,7 +106,7 @@ contract MockQVHelperTest is Test {
 
         mockQVHelper.voteWithCredits(_recipients, _voiceCredits);
 
-        (, uint256[] memory _payouts) = mockQVHelper.getPayoutAmount(_recipients, POOL_BALANCE);
+        (uint256[] memory _payouts) = mockQVHelper.getPayoutAmount(_recipients, POOL_BALANCE);
 
         assertEq(_payouts[0], 33);
         assertEq(_payouts[1], 66);

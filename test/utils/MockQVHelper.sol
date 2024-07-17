@@ -18,7 +18,7 @@ contract MockQVHelper {
         _votingState._voteWithVoiceCredits(_recipients, _voiceCredits);
     }
 
-    function getPayoutAmount(address[] memory _recipients, uint256 _poolAmount) public view returns (address[] memory __recipients, uint256[] memory _payouts) {
+    function getPayoutAmount(address[] memory _recipients, uint256 _poolAmount) public view returns (uint256[] memory _payouts) {
         return _votingState._getPayout(_recipients, _poolAmount);
     }
 
