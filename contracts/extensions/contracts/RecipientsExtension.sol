@@ -54,7 +54,7 @@ abstract contract RecipientsExtension is CoreBaseStrategy, Errors, IRecipientsEx
     /// @notice Initializes this strategy as well as the BaseStrategy.
     /// @dev This function MUST be called by the 'initialize' function in the strategy.
     /// @param _initializeData The data to be decoded to initialize the strategy
-    function __RecipientsExtension_init(RecipientInitializeData memory _initializeData) internal {
+    function __RecipientsExtension_init(RecipientInitializeData memory _initializeData) internal virtual {
         // Initialize required values
         useRegistryAnchor = _initializeData.useRegistryAnchor;
         metadataRequired = _initializeData.metadataRequired;
@@ -76,7 +76,7 @@ abstract contract RecipientsExtension is CoreBaseStrategy, Errors, IRecipientsEx
     ///      level and is different from the 'Status' which is used at the protocol level
     /// @param _recipientId ID of the recipient
     /// @return Status of the recipient
-    function _getRecipientStatus(address _recipientId) internal view returns (Status) {
+    function _getRecipientStatus(address _recipientId) internal view virtual returns (Status) {
         return Status(_getUintRecipientStatus(_recipientId));
     }
 
@@ -137,7 +137,7 @@ abstract contract RecipientsExtension is CoreBaseStrategy, Errors, IRecipientsEx
     /// @dev The timestamps are in seconds for the start and end times. Emits a 'TimestampsUpdated()' event.
     /// @param _registrationStartTime The start time for the registration
     /// @param _registrationEndTime The end time for the registration
-    function _updatePoolTimestamps(uint64 _registrationStartTime, uint64 _registrationEndTime) internal {
+    function _updatePoolTimestamps(uint64 _registrationStartTime, uint64 _registrationEndTime) internal virtual {
         // If the timestamps are invalid this will revert - See details in '_isPoolTimestampValid'
         _isPoolTimestampValid(_registrationStartTime, _registrationEndTime);
 
@@ -151,7 +151,7 @@ abstract contract RecipientsExtension is CoreBaseStrategy, Errors, IRecipientsEx
 
     /// @notice Checks if the registration is active and reverts if not.
     /// @dev This will revert if the registration has not started or if the registration has ended.
-    function _checkOnlyActiveRegistration() internal view {
+    function _checkOnlyActiveRegistration() internal view virtual {
         if (registrationStartTime > block.timestamp || block.timestamp > registrationEndTime) {
             revert REGISTRATION_NOT_ACTIVE();
         }
@@ -162,7 +162,7 @@ abstract contract RecipientsExtension is CoreBaseStrategy, Errors, IRecipientsEx
     /// and may vary from strategy to strategy. Checks if '_registrationStartTime' is greater than the '_registrationEndTime'
     /// @param _registrationStartTime The start time for the registration
     /// @param _registrationEndTime The end time for the registration
-    function _isPoolTimestampValid(uint64 _registrationStartTime, uint64 _registrationEndTime) internal pure {
+    function _isPoolTimestampValid(uint64 _registrationStartTime, uint64 _registrationEndTime) internal pure virtual {
         if (_registrationStartTime > _registrationEndTime) {
             revert INVALID();
         }
@@ -172,7 +172,7 @@ abstract contract RecipientsExtension is CoreBaseStrategy, Errors, IRecipientsEx
     /// @dev This will return true if the current 'block timestamp' is greater than or equal to the
     /// 'registrationStartTime' and less than or equal to the 'registrationEndTime'.
     /// @return 'true' if pool is active, otherwise 'false'
-    function _isPoolActive() internal view returns (bool) {
+    function _isPoolActive() internal view virtual returns (bool) {
         if (registrationStartTime <= block.timestamp && block.timestamp <= registrationEndTime) {
             return true;
         }
@@ -188,6 +188,7 @@ abstract contract RecipientsExtension is CoreBaseStrategy, Errors, IRecipientsEx
     /// @return _recipientIds The IDs of the recipients
     function _register(address[] memory __recipients, bytes memory _data, address _sender)
         internal
+        virtual
         override
         onlyActiveRegistration
         returns (address[] memory _recipientIds)
@@ -277,14 +278,14 @@ abstract contract RecipientsExtension is CoreBaseStrategy, Errors, IRecipientsEx
     /// @notice Get the recipient details.
     /// @param _recipientId Id of the recipient
     /// @return Recipient details
-    function _getRecipient(address _recipientId) internal view returns (Recipient memory) {
+    function _getRecipient(address _recipientId) internal view virtual returns (Recipient memory) {
         return _recipients[_recipientId];
     }
 
     /// @notice Set the recipient status.
     /// @param _recipientId ID of the recipient
     /// @param _status Status of the recipient
-    function _setRecipientStatus(address _recipientId, uint256 _status) internal {
+    function _setRecipientStatus(address _recipientId, uint256 _status) internal virtual {
         // Get the row index, column index and current row
         (uint256 rowIndex, uint256 colIndex, uint256 currentRow) = _getStatusRowColumn(_recipientId);
 
@@ -298,7 +299,7 @@ abstract contract RecipientsExtension is CoreBaseStrategy, Errors, IRecipientsEx
     /// @notice Get recipient status
     /// @param _recipientId ID of the recipient
     /// @return status The status of the recipient
-    function _getUintRecipientStatus(address _recipientId) internal view returns (uint8 status) {
+    function _getUintRecipientStatus(address _recipientId) internal view virtual returns (uint8 status) {
         if (recipientToStatusIndexes[_recipientId] == 0) return 0;
         // Get the column index and current row
         (, uint256 colIndex, uint256 currentRow) = _getStatusRowColumn(_recipientId);
@@ -313,7 +314,7 @@ abstract contract RecipientsExtension is CoreBaseStrategy, Errors, IRecipientsEx
     /// @notice Get recipient status 'rowIndex', 'colIndex' and 'currentRow'.
     /// @param _recipientId ID of the recipient
     /// @return (rowIndex, colIndex, currentRow)
-    function _getStatusRowColumn(address _recipientId) internal view returns (uint256, uint256, uint256) {
+    function _getStatusRowColumn(address _recipientId) internal view virtual returns (uint256, uint256, uint256) {
         uint256 recipientIndex = recipientToStatusIndexes[_recipientId] - 1;
 
         uint256 rowIndex = recipientIndex / 64; // 256 / 4
