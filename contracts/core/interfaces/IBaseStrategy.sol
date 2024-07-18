@@ -67,10 +67,6 @@ interface IBaseStrategy {
     /// @return _poolAmount The balance of the pool
     function getPoolAmount() external view returns (uint256 _poolAmount);
 
-    /// @notice Gets the timestamp of the phase at the given index.
-    /// @param _index The index of the phase
-    function getTimestampPhase(uint256 _index) external view returns (uint256 _timestamp);
-
     /// ======================
     /// ===== Functions ======
     /// ======================
