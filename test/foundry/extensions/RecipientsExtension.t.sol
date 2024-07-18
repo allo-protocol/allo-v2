@@ -421,5 +421,19 @@ contract RecipientsExtension_getUintRecipientStatus is BaseRecipientsExtensionUn
 }
 
 contract RecipientsExtension_getStatusRowColumn is BaseRecipientsExtensionUnit {
-    function test_Return_statusRowColumn() public {}
+    function test_Return_statusRowColumn(address _recipientId, uint256 _recipientIndex, uint256 _currentRow) public {
+        vm.assume(_recipientIndex > 0);
+        uint256 _recipientIndexMinusOne = _recipientIndex - 1;
+        vm.assume(_recipientIndexMinusOne > 64);
+
+        uint256 _rowIndex = _recipientIndexMinusOne / 64;
+        recipientsExtension.set_recipientToStatusIndexes(_recipientId, _recipientIndex);
+        recipientsExtension.set_statusesBitMap(_rowIndex, _currentRow);
+
+        (uint256 __rowIndex, uint256 _colIndex, uint256 __currentRow) =
+            recipientsExtension.call__getStatusRowColumn(_recipientId);
+        assertEq(_rowIndex, __rowIndex);
+        assertEq(_colIndex, (_recipientIndexMinusOne % 64) * 4);
+        assertEq(_currentRow, __currentRow);
+    }
 }
