@@ -24,6 +24,10 @@ contract Accounts is StdCheats {
         return payable(makeAddr("allo_treasury"));
     }
 
+    function trustedForwarder() public virtual returns (address) {
+        return makeAddr("trustedForwarder");
+    }
+
     // //////////////////////
     // Null Profile adresses
     // //////////////////////

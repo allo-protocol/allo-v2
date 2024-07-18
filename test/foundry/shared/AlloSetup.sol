@@ -19,7 +19,8 @@ contract AlloSetup is Test, Accounts {
             _registry, // _registry
             allo_treasury(), // _treasury
             1e16, // _percentFee
-            0 // _baseFee
+            0, // _baseFee
+            trustedForwarder() // _trustedForwarder
         );
         vm.stopPrank();
     }
