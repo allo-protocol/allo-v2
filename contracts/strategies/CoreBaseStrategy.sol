@@ -20,8 +20,6 @@ abstract contract CoreBaseStrategy is IBaseStrategy, Transfer {
     uint256 internal poolId;
     /// @notice The balance of the pool
     uint256 internal poolAmount;
-    /// @notice The timestamp phases of the strategy
-    uint256[] public timestampPhases;
 
     /// ====================================
     /// ========== Constructor =============
@@ -51,13 +49,6 @@ abstract contract CoreBaseStrategy is IBaseStrategy, Transfer {
         _;
     }
 
-    /// @notice Modifier to check if the pool is initialized.
-    /// @dev Reverts if the pool is not initialized.
-    modifier onlyInitialized() {
-        _checkOnlyInitialized();
-        _;
-    }
-
     /// ================================
     /// =========== Views ==============
     /// ================================
@@ -78,12 +69,6 @@ abstract contract CoreBaseStrategy is IBaseStrategy, Transfer {
     /// @return _poolAmount The balance of the pool
     function getPoolAmount() external view virtual override returns (uint256) {
         return poolAmount;
-    }
-
-    /// @notice Gets the timestamp of the phase at the given index.
-    /// @param _index The index of the phase
-    function getTimestampPhase(uint256 _index) external view override returns (uint256) {
-        return timestampPhases[_index];
     }
 
     /// ====================================
@@ -139,7 +124,6 @@ abstract contract CoreBaseStrategy is IBaseStrategy, Transfer {
         external
         payable
         onlyAllo
-        onlyInitialized
         returns (address[] memory _recipientIds)
     {
         _beforeRegisterRecipient(_recipients, _data, _sender);
@@ -158,7 +142,6 @@ abstract contract CoreBaseStrategy is IBaseStrategy, Transfer {
         external
         payable
         onlyAllo
-        onlyInitialized
     {
         _beforeAllocate(_recipients, _data, _sender);
         _allocate(_recipients, _amounts, _data, _sender);
@@ -174,7 +157,6 @@ abstract contract CoreBaseStrategy is IBaseStrategy, Transfer {
     function distribute(address[] memory _recipientIds, bytes memory _data, address _sender)
         external
         onlyAllo
-        onlyInitialized
     {
         _beforeDistribute(_recipientIds, _data, _sender);
         _distribute(_recipientIds, _data, _sender);
@@ -196,12 +178,6 @@ abstract contract CoreBaseStrategy is IBaseStrategy, Transfer {
     /// @param _sender The address to check if they are a pool manager
     function _checkOnlyPoolManager(address _sender) internal view {
         if (!allo.isPoolManager(poolId, _sender)) revert BaseStrategy_UNAUTHORIZED();
-    }
-
-    /// @notice Checks if the pool is initialized.
-    /// @dev Reverts if the pool is not initialized.
-    function _checkOnlyInitialized() internal view {
-        if (poolId == 0) revert BaseStrategy_NOT_INITIALIZED();
     }
 
     /// @notice This will register a recipient, set their status (and any other strategy specific values), and
