@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity ^0.8.19;
 
-import {Test} from "forge-std/Test.sol";
+import {Test, console} from "forge-std/Test.sol";
 import {MockStrategyRecipientsExtension} from "../../utils/MockStrategyRecipientsExtension.sol";
 import {IRecipientsExtension} from "../../../contracts/extensions/interfaces/IRecipientsExtension.sol";
 import {IAllo} from "../../../contracts/core/interfaces/IAllo.sol";
@@ -196,29 +196,116 @@ contract RecipientsExtensionUpdatePoolTimestamps is BaseRecipientsExtensionUnit 
 }
 
 contract RecipientsExtension_updatePoolTimestamps is BaseRecipientsExtensionUnit {
-    function test_Call__isPoolTimestampValid() public {}
+    function test_Call__isPoolTimestampValid(uint64 _registrationStartTime, uint64 _registrationEndTime) public {
+        vm.assume(_registrationStartTime < _registrationEndTime);
 
-    function test_Set_registrationStartTime() public {}
+        recipientsExtension.expectCall__isPoolTimestampValid(_registrationStartTime, _registrationEndTime);
 
-    function test_Set_registrationEndTime() public {}
+        recipientsExtension.call__updatePoolTimestamps(_registrationStartTime, _registrationEndTime);
+    }
 
-    function test_Emit_Event() public {}
+    function test_Set_registrationStartTime(uint64 _registrationStartTime, uint64 _registrationEndTime) public {
+        vm.assume(_registrationStartTime < _registrationEndTime);
+
+        recipientsExtension.call__updatePoolTimestamps(_registrationStartTime, _registrationEndTime);
+
+        assertEq(recipientsExtension.registrationStartTime(), _registrationStartTime);
+    }
+
+    function test_Set_registrationEndTime(uint64 _registrationStartTime, uint64 _registrationEndTime) public {
+        vm.assume(_registrationStartTime < _registrationEndTime);
+
+        recipientsExtension.call__updatePoolTimestamps(_registrationStartTime, _registrationEndTime);
+
+        assertEq(recipientsExtension.registrationEndTime(), _registrationEndTime);
+    }
+
+    function test_Emit_Event(uint64 _registrationStartTime, uint64 _registrationEndTime, address _caller) public {
+        vm.assume(_registrationStartTime < _registrationEndTime);
+
+        vm.expectEmit();
+        emit IRecipientsExtension.TimestampsUpdated(_registrationStartTime, _registrationEndTime, _caller);
+
+        vm.prank(_caller);
+        recipientsExtension.call__updatePoolTimestamps(_registrationStartTime, _registrationEndTime);
+    }
 }
 
 contract RecipientsExtension_checkOnlyActiveRegistration is BaseRecipientsExtensionUnit {
-    function test_Revert_IfTimestampSmallerThanRegistrationStartTime() public {}
+    function test_Revert_IfTimestampSmallerThanRegistrationStartTime(
+        uint64 _currentTimestamp,
+        uint64 _registrationStartTime,
+        uint64 _registrationEndTime
+    ) public {
+        vm.assume(_registrationStartTime < _currentTimestamp);
+        vm.assume(_registrationEndTime < _currentTimestamp);
 
-    function test_Revert_IfTimestampGreaterThanRegistrationEndTime() public {}
+        vm.warp(_currentTimestamp);
+        recipientsExtension.set_registrationStartTime(_registrationStartTime);
+        recipientsExtension.set_registrationEndTime(_registrationEndTime);
+
+        vm.expectRevert(Errors.REGISTRATION_NOT_ACTIVE.selector);
+
+        recipientsExtension.call__checkOnlyActiveRegistration();
+    }
+
+    function test_Revert_IfTimestampGreaterThanRegistrationEndTime(
+        uint64 _currentTimestamp,
+        uint64 _registrationStartTime,
+        uint64 _registrationEndTime
+    ) public {
+        vm.assume(_registrationStartTime > _currentTimestamp);
+        vm.assume(_registrationEndTime > _currentTimestamp);
+
+        vm.warp(_currentTimestamp);
+        recipientsExtension.set_registrationStartTime(_registrationStartTime);
+        recipientsExtension.set_registrationEndTime(_registrationEndTime);
+
+        vm.expectRevert(Errors.REGISTRATION_NOT_ACTIVE.selector);
+
+        recipientsExtension.call__checkOnlyActiveRegistration();
+    }
 }
 
 contract RecipientsExtension_isPoolTimestampValid is BaseRecipientsExtensionUnit {
-    function test_Revert_IfInvalidTimestamps() public {}
+    function test_Revert_IfInvalidTimestamps(uint64 _registrationStartTime, uint64 _registrationEndTime) public {
+        vm.assume(_registrationStartTime > _registrationEndTime);
+
+        vm.expectRevert(Errors.INVALID.selector);
+
+        recipientsExtension.call__isPoolTimestampValid(_registrationStartTime, _registrationEndTime);
+    }
 }
 
 contract RecipientsExtension_isPoolActive is BaseRecipientsExtensionUnit {
-    function test_Return_TrueIfPoolActive() public {}
+    function test_Return_TrueIfPoolActive(
+        uint64 _currentTimestamp,
+        uint64 _registrationStartTime,
+        uint64 _registrationEndTime
+    ) public {
+        vm.assume(_registrationStartTime <= _currentTimestamp);
+        vm.assume(_registrationEndTime >= _currentTimestamp);
 
-    function test_Return_FalseIfPoolInactive() public {}
+        vm.warp(_currentTimestamp);
+        recipientsExtension.set_registrationStartTime(_registrationStartTime);
+        recipientsExtension.set_registrationEndTime(_registrationEndTime);
+
+        assertTrue(recipientsExtension.call__isPoolActive());
+    }
+
+    function test_Return_FalseIfPoolInactive(
+        uint64 _currentTimestamp,
+        uint64 _registrationStartTime,
+        uint64 _registrationEndTime
+    ) public {
+        vm.assume(_registrationStartTime > _currentTimestamp || _registrationEndTime < _currentTimestamp);
+
+        vm.warp(_currentTimestamp);
+        recipientsExtension.set_registrationStartTime(_registrationStartTime);
+        recipientsExtension.set_registrationEndTime(_registrationEndTime);
+
+        assertFalse(recipientsExtension.call__isPoolActive());
+    }
 }
 
 contract RecipientsExtension_register is BaseRecipientsExtensionUnit {
@@ -272,21 +359,65 @@ contract RecipientsExtension_register is BaseRecipientsExtensionUnit {
 }
 
 contract RecipientsExtension_getRecipient is BaseRecipientsExtensionUnit {
-    function test_Return_recipient() public {}
+    function test_Return_recipient(address _recipientId, Recipient memory _recipient) public {
+        recipientsExtension.set__recipients(_recipientId, _recipient);
+
+        assertEq(recipientsExtension.call__getRecipient(_recipientId).useRegistryAnchor, _recipient.useRegistryAnchor);
+        assertEq(recipientsExtension.call__getRecipient(_recipientId).recipientAddress, _recipient.recipientAddress);
+        assertEq(recipientsExtension.call__getRecipient(_recipientId).metadata.pointer, _recipient.metadata.pointer);
+        assertEq(recipientsExtension.call__getRecipient(_recipientId).metadata.protocol, _recipient.metadata.protocol);
+    }
 }
 
 contract RecipientsExtension_setRecipientStatus is BaseRecipientsExtensionUnit {
-    function test_Call__getStatusRowColumn() public {}
+    function test_Call__getStatusRowColumn(address _recipientId, uint256 _status) public {
+        recipientsExtension.mock_call__getStatusRowColumn(_recipientId, 0, 0, 0);
 
-    function test_Set_statusesBitMap() public {}
+        recipientsExtension.expectCall__getStatusRowColumn(_recipientId);
+
+        recipientsExtension.call__setRecipientStatus(_recipientId, _status);
+    }
+
+    function test_Set_statusesBitMap(
+        address _recipientId,
+        uint256 _status,
+        uint256 _rowIndex,
+        uint256 _colIndex,
+        uint256 _currentRow
+    ) public {
+        recipientsExtension.mock_call__getStatusRowColumn(_recipientId, _rowIndex, _colIndex, _currentRow);
+
+        recipientsExtension.call__setRecipientStatus(_recipientId, _status);
+
+        uint256 newRow = _currentRow & ~(15 << _colIndex);
+
+        assertEq(recipientsExtension.statusesBitMap(_rowIndex), newRow | (_status << _colIndex));
+    }
 }
 
 contract RecipientsExtension_getUintRecipientStatus is BaseRecipientsExtensionUnit {
-    function test_Return_zeroIfRecipientNotFound() public {}
+    function test_Return_zeroIfRecipientNotFound(address _recipient) public {
+        recipientsExtension.set_recipientToStatusIndexes(_recipient, 0);
 
-    function test_Call__getStatusRowColumn() public {}
+        assertEq(recipientsExtension.call__getUintRecipientStatus(_recipient), 0);
+    }
 
-    function test_Return_status() public {}
+    function test_Call__getStatusRowColumn(address _recipient) public {
+        recipientsExtension.set_recipientToStatusIndexes(_recipient, 1); // force to return more than zero
+        recipientsExtension.mock_call__getStatusRowColumn(_recipient, 0, 0, 0);
+
+        recipientsExtension.expectCall__getStatusRowColumn(_recipient);
+
+        recipientsExtension.call__getUintRecipientStatus(_recipient);
+    }
+
+    function test_Return_status(address _recipient, uint256 _colIndex, uint256 _currentRow) public {
+        recipientsExtension.set_recipientToStatusIndexes(_recipient, 1); // force to return more than zero
+        recipientsExtension.mock_call__getStatusRowColumn(_recipient, 0, _colIndex, _currentRow);
+
+        uint8 _status = recipientsExtension.call__getUintRecipientStatus(_recipient);
+        assertEq(_status, uint8((_currentRow >> _colIndex) & 15));
+    }
 }
 
 contract RecipientsExtension_getStatusRowColumn is BaseRecipientsExtensionUnit {

@@ -379,4 +379,24 @@ contract MockStrategyRecipientsExtension is CoreBaseStrategy, RecipientsExtensio
     function set_recipientsCounter(uint256 _recipientsCounter) public {
         recipientsCounter = _recipientsCounter;
     }
+
+    function set_registrationStartTime(uint64 _registrationStartTime) public {
+        registrationStartTime = _registrationStartTime;
+    }
+
+    function set_registrationEndTime(uint64 _registrationEndTime) public {
+        registrationEndTime = _registrationEndTime;
+    }
+
+    function set__recipients(address _key0, IRecipientsExtension.Recipient memory _value) public {
+        _recipients[_key0] = _value;
+    }
+
+    function set_recipientToStatusIndexes(address _key0, uint256 _value) public {
+        recipientToStatusIndexes[_key0] = _value;
+    }
+
+    function set_statusesBitMap(uint256 _key0, uint256 _value) public {
+        statusesBitMap[_key0] = _value;
+    }
 }
