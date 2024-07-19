@@ -1,16 +1,19 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
+import {CoreBaseStrategy} from "../../contracts/strategies/CoreBaseStrategy.sol";
 import {GatingExtension} from "../../contracts/extensions/GatingExtension.sol";
 import {MockBaseStrategy} from "./MockBaseStrategy.sol";
 
-contract MockGatingExtension is GatingExtension {
+contract MockGatingExtension is CoreBaseStrategy, GatingExtension {
 
-    constructor (address _allo) GatingExtension(_allo) {}
+    constructor (address _allo) CoreBaseStrategy(_allo) {}
 
-    function initialize(uint256 _poolId, bytes memory _data) public override {
+    function initialize(uint256 _poolId, bytes memory _data) public {
+        __BaseStrategy_init(_poolId);
+
         GatingExtensionInitializeParams memory initializeParams = abi.decode(_data, (GatingExtensionInitializeParams));
-        __GatingExtension_init(_poolId, initializeParams);
+        __GatingExtension_init(initializeParams);
         emit Initialized(_poolId, _data);
     }
 

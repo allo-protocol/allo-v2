@@ -21,36 +21,11 @@ abstract contract GatingExtension is CoreBaseStrategy, IGatingExtension {
     address public eas;
 
     /// ===============================
-    /// ======== Constructor ==========
-    /// ===============================
-
-    /// @notice Constructor
-    /// @param _allo The 'Allo' contract
-    constructor(address _allo) CoreBaseStrategy(_allo) {}
-
-    /// ===============================
     /// ========= Initialize ==========
     /// ===============================
-
-    // @notice Initialize the strategy
-    /// @param _poolId ID of the pool
-    /// @param _data The data to be decoded
-    /// @custom:data (address eas)
-    function initialize(uint256 _poolId, bytes memory _data) external virtual override {
-        GatingExtensionInitializeParams memory initializeParams = abi.decode(_data, (GatingExtensionInitializeParams));
-        __GatingExtension_init(_poolId, initializeParams);
-        emit Initialized(_poolId, _data);
-    }
-
     /// @notice This initializes the strategy
-    /// @dev You only need to pass the 'poolId' to initialize the BaseStrategy and the rest is specific to the strategy
     /// @param _initializeParams The initialize params
-    function __GatingExtension_init(uint256 _poolId, GatingExtensionInitializeParams memory _initializeParams)
-        internal
-    {
-        // Initialize the BaseStrategy
-        __BaseStrategy_init(_poolId);
-
+    function __GatingExtension_init(GatingExtensionInitializeParams memory _initializeParams) internal {
         /// Set the EAS contract
         eas = _initializeParams.eas;
     }

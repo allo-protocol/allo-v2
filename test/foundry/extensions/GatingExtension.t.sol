@@ -70,10 +70,10 @@ contract GatingExtensionTest is Test {
     }
 
     function testRevert_onlyWithNFT_nftZeroAddress() public {
-        address nft = address(0);
+        address _nft = address(0);
         vm.expectRevert(IGatingExtension.GatingExtension_INVALID_TOKEN.selector);
         vm.prank(actor);
-        gatingExtension.onlyWithNFTHelper(nft);
+        gatingExtension.onlyWithNFTHelper(_nft);
     }
 
     function testRevert_onlyWithNFT_actorZeroAddress() public {
