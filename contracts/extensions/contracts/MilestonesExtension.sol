@@ -7,32 +7,9 @@ import {IMilestonesExtension} from "../interfaces/IMilestonesExtension.sol";
 import {CoreBaseStrategy} from "../../strategies/CoreBaseStrategy.sol";
 // Internal Libraries
 import {Metadata} from "../../core/libraries/Metadata.sol";
-import {Errors} from "../../core/libraries/Errors.sol";
 
-/// @title Milestone Strategy Extension
+/// @title Milestone Extension Strategy
 abstract contract MilestonesExtension is CoreBaseStrategy, IMilestonesExtension {
-
-    /// ===============================
-    /// ========== Errors =============
-    /// ===============================
-
-    /// @notice Thrown when the milestone is invalid
-    error INVALID_MILESTONE();
-
-    /// @notice Thrown when the milestone is not pending
-    error MILESTONE_NOT_PENDING();
-
-    /// @notice Thrown when the milestone is pending
-    error MILESTONE_PENDING();
-
-    /// @notice Thrown when the proposal bid exceeds maximum bid
-    error EXCEEDING_MAX_BID();
-
-    /// @notice Thrown when the milestone are already approved and cannot be changed
-    error MILESTONES_ALREADY_SET();
-
-    /// @notice Thrown when the pool manager attempts to the lower the max bid
-    error AMOUNT_TOO_LOW();
 
     /// ================================
     /// ========== Storage =============
@@ -55,34 +32,13 @@ abstract contract MilestonesExtension is CoreBaseStrategy, IMilestonesExtension 
     Milestone[] internal milestones;
 
     /// ===============================
-    /// ======== Constructor ==========
-    /// ===============================
-
-    /// @notice Constructor for the RFP Simple Strategy
-    /// @param _allo The 'Allo' contract
-    constructor(address _allo) CoreBaseStrategy(_allo) {}
-
-    /// ===============================
     /// ========= Initialize ==========
     /// ===============================
-
-    // @notice Initialize the strategy
-    /// @param _poolId ID of the pool
-    /// @param _data The data to be decoded
-    /// @custom:data (uint256 _maxBid)
-    function initialize(uint256 _poolId, bytes memory _data) external virtual override {
-        (InitializeParams memory initializeParams) = abi.decode(_data, (InitializeParams));
-        __MilestonesExtension_init(_poolId, initializeParams);
-        emit Initialized(_poolId, _data);
-    }
 
     /// @notice This initializes the BaseStrategy
     /// @dev You only need to pass the 'poolId' to initialize the BaseStrategy and the rest is specific to the strategy
     /// @param _initializeParams The initialize params
     function __MilestonesExtension_init(uint256 _poolId, InitializeParams memory _initializeParams) internal {
-        // Initialize the BaseStrategy
-        __BaseStrategy_init(_poolId);
-
         // Set the strategy specific variables
         _increaseMaxBid(_initializeParams.maxBid);
     }
@@ -204,7 +160,7 @@ abstract contract MilestonesExtension is CoreBaseStrategy, IMilestonesExtension 
     function _validateSubmitUpcomingMilestone(address _sender) internal virtual {
         // Check if the 'msg.sender' is the 'acceptedRecipientId' or
         // 'acceptedRecipientId' is a profile on the Registry and sender is a member of the profile
-        if (acceptedRecipientId != _sender) revert Errors.UNAUTHORIZED();
+        if (acceptedRecipientId != _sender) revert INVALID_SUBMITTER();
 
         // Check if a submission is ongoing to prevent front-running a milestone review.
         if (milestones[upcomingMilestone].status == Status.Pending) revert MILESTONE_PENDING();
