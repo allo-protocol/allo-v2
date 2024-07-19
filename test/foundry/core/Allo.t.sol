@@ -20,6 +20,7 @@ import {TestStrategy} from "../../utils/TestStrategy.sol";
 import {MockStrategy} from "../../utils/MockStrategy.sol";
 import {MockERC20} from "../../utils/MockERC20.sol";
 import {GasHelpers} from "../../utils/GasHelpers.sol";
+import {MockAllo} from "../../utils/MockAllo.sol";
 
 contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelpers {
     event PoolCreated(
@@ -39,6 +40,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
     event RegistryUpdated(address registry);
     event StrategyApproved(address strategy);
     event StrategyRemoved(address strategy);
+    event TrustedForwarderUpdated(address trustedForwarder);
 
     error AlreadyInitialized();
 
@@ -53,6 +55,8 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
     Metadata public metadata = Metadata({protocol: 1, pointer: "strategy pointer"});
     string public name;
     uint256 public nonce;
+
+    MockAllo mockAllo;
 
     function setUp() public {
         __RegistrySetupFull();
@@ -72,6 +76,16 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
         vm.startPrank(allo_owner());
         allo().transferOwnership(local());
         vm.stopPrank();
+
+        mockAllo = new MockAllo();
+        mockAllo.initialize(
+            address(allo_owner()), // _owner
+            address(registry()), // _registry
+            allo_treasury(), // _treasury
+            1e16, // _percentFee
+            1e15, // _baseFee
+            trustedForwarder() // _trustedForwarder
+        );
     }
 
     function _utilCreatePool(uint256 _amount) internal returns (uint256) {
@@ -95,13 +109,15 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
             address(registry()), // _registry
             allo_treasury(), // _treasury
             1e16, // _percentFee
-            1e15 // _baseFee
+            1e15, // _baseFee
+            trustedForwarder() // _trustedForwarder
         );
 
         assertEq(address(coreContract.getRegistry()), address(registry()));
         assertEq(coreContract.getTreasury(), allo_treasury());
         assertEq(coreContract.getPercentFee(), 1e16);
         assertEq(coreContract.getBaseFee(), 1e15);
+        assertTrue(coreContract.isTrustedForwarder(trustedForwarder()));
     }
 
     function testRevert_initialize_ALREADY_INITIALIZED() public {
@@ -112,7 +128,8 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
             address(registry()), // _registry
             allo_treasury(), // _treasury
             1e16, // _percentFee
-            1e15 // _baseFee
+            1e15, // _baseFee
+            trustedForwarder() // _trustedForwarder
         );
     }
 
@@ -331,6 +348,24 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
 
         vm.prank(makeAddr("anon"));
         allo().updateBaseFee(1e16);
+    }
+
+    function test_updateTrustedForwarder(address _trustedForwarder) public {
+        vm.assume(_trustedForwarder != address(0));
+
+        vm.expectEmit(true, false, false, false);
+
+        emit TrustedForwarderUpdated(_trustedForwarder);
+
+        allo().updateTrustedForwarder(_trustedForwarder);
+
+        assertTrue(allo().isTrustedForwarder(_trustedForwarder));
+    }
+
+    function test_updateTrustedForwarder_UNAUTHORIZED() public {
+        vm.expectRevert(Errors.ZERO_ADDRESS.selector);
+
+        allo().updateTrustedForwarder(address(0));
     }
 
     function test_addPoolManagers(address[] memory _poolManagersToAdd) public {
@@ -687,5 +722,50 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
 
         vm.prank(pool_admin());
         allo().changeAdmin(poolId, address(0));
+    }
+
+    function test__msgSender_notTrustedForwarder(address _sender) public {
+        vm.assume(_sender != address(mockAllo));
+        vm.assume(_sender != trustedForwarder());
+
+        vm.prank(_sender);
+        assertEq(mockAllo.mockMsgSender(), _sender);
+    }
+
+    function test__msgSender_trustedForwarder(address _sender) public {
+        vm.assume(_sender != address(mockAllo));
+        vm.assume(_sender != trustedForwarder());
+
+        // append the sender to the data
+        bytes memory data = abi.encodeWithSelector(mockAllo.mockMsgSender.selector, _sender);
+
+        vm.prank(trustedForwarder());
+        (, bytes memory encodedSender) = address(mockAllo).call(data);
+
+        // decode the received sender
+        assertEq(abi.decode(encodedSender, (address)), _sender);
+    }
+
+    function test__msgData_notTrustedForwarder(address _sender) public {
+        vm.assume(_sender != address(mockAllo));
+        vm.assume(_sender != trustedForwarder());
+
+        vm.prank(_sender);
+        assertEq(mockAllo.mockMsgData(), abi.encodeWithSelector(mockAllo.mockMsgData.selector));
+    }
+
+    function test__msgData_trustedForwarder(address _sender) public {
+        // append the sender to the data
+        bytes memory data = abi.encodeWithSelector(mockAllo.mockMsgData.selector, _sender);
+
+        vm.prank(trustedForwarder());
+        (, bytes memory encodedData) = address(mockAllo).call(data);
+
+        // decode the received data
+        bytes memory decodedData = abi.decode(encodedData, (bytes));
+
+        // since the slicing inside of _msgData keeps the padding at the end,
+        // we need to extract only the selector in order to compare it
+        assertEq(mockAllo.extractSelector(decodedData), abi.encodeWithSelector(mockAllo.mockMsgData.selector));
     }
 }
