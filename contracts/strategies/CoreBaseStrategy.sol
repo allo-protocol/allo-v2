@@ -274,4 +274,9 @@ abstract contract CoreBaseStrategy is IBaseStrategy, Transfer {
     /// @param _data The data to use to distribute to the recipients
     /// @param _sender The address of the sender
     function _afterDistribute(address[] memory _recipientIds, bytes memory _data, address _sender) internal virtual {}
+
+    /// @notice Strategies should be able to receive native token
+    /// @dev By default onlyAllo should be able to call this to fund the pool
+    /// @dev In case of a strategy that needs to receive native token from other sources, this function should be overridden
+    receive() external payable virtual onlyAllo {}
 }
