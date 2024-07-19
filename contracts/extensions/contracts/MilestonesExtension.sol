@@ -1,0 +1,233 @@
+// SPDX-License-Identifier: AGPL-3.0-only
+pragma solidity 0.8.19;
+
+// Interfaces
+import {IMilestonesExtension} from "../interfaces/IMilestonesExtension.sol";
+// Core Contracts
+import {CoreBaseStrategy} from "../../strategies/CoreBaseStrategy.sol";
+// Internal Libraries
+import {Metadata} from "../../core/libraries/Metadata.sol";
+import {Errors} from "../../core/libraries/Errors.sol";
+
+/// @title Milestone Strategy Extension
+abstract contract MilestonesExtension is CoreBaseStrategy, IMilestonesExtension {
+
+    /// ===============================
+    /// ========== Errors =============
+    /// ===============================
+
+    /// @notice Thrown when the milestone is invalid
+    error INVALID_MILESTONE();
+
+    /// @notice Thrown when the milestone is not pending
+    error MILESTONE_NOT_PENDING();
+
+    /// @notice Thrown when the milestone is pending
+    error MILESTONE_PENDING();
+
+    /// @notice Thrown when the proposal bid exceeds maximum bid
+    error EXCEEDING_MAX_BID();
+
+    /// @notice Thrown when the milestone are already approved and cannot be changed
+    error MILESTONES_ALREADY_SET();
+
+    /// @notice Thrown when the pool manager attempts to the lower the max bid
+    error AMOUNT_TOO_LOW();
+
+    /// ================================
+    /// ========== Storage =============
+    /// ================================
+
+    /// @notice The accepted recipient who can submit milestones.
+    address public acceptedRecipientId;
+
+    /// @notice The maximum bid allowed.
+    uint256 public maxBid;
+
+    /// @notice The upcoming milestone which is to be paid.
+    uint256 public upcomingMilestone;
+
+    /// @notice This maps recipients to their bids
+    /// @dev 'recipientId' to 'bid'
+    mapping(address => uint256) public bids;
+
+    /// @notice Collection of milestones submitted by the 'acceptedRecipientId'
+    Milestone[] internal milestones;
+
+    /// ===============================
+    /// ======== Constructor ==========
+    /// ===============================
+
+    /// @notice Constructor for the RFP Simple Strategy
+    /// @param _allo The 'Allo' contract
+    constructor(address _allo) CoreBaseStrategy(_allo) {}
+
+    /// ===============================
+    /// ========= Initialize ==========
+    /// ===============================
+
+    // @notice Initialize the strategy
+    /// @param _poolId ID of the pool
+    /// @param _data The data to be decoded
+    /// @custom:data (uint256 _maxBid)
+    function initialize(uint256 _poolId, bytes memory _data) external virtual override {
+        (InitializeParams memory initializeParams) = abi.decode(_data, (InitializeParams));
+        __MilestonesExtension_init(_poolId, initializeParams);
+        emit Initialized(_poolId, _data);
+    }
+
+    /// @notice This initializes the BaseStrategy
+    /// @dev You only need to pass the 'poolId' to initialize the BaseStrategy and the rest is specific to the strategy
+    /// @param _initializeParams The initialize params
+    function __MilestonesExtension_init(uint256 _poolId, InitializeParams memory _initializeParams) internal {
+        // Initialize the BaseStrategy
+        __BaseStrategy_init(_poolId);
+
+        // Set the strategy specific variables
+        _increaseMaxBid(_initializeParams.maxBid);
+    }
+
+    /// ===============================
+    /// ============ Views ============
+    /// ===============================
+
+    /// @notice Get the milestone
+    /// @param _milestoneId ID of the milestone
+    /// @return Milestone Returns the milestone
+    function getMilestone(uint256 _milestoneId) external view returns (Milestone memory) {
+        return milestones[_milestoneId];
+    }
+
+    /// @notice Get the status of the milestone
+    /// @param _milestoneId Id of the milestone
+    function getMilestoneStatus(uint256 _milestoneId) external view returns (Status) {
+        return milestones[_milestoneId].status;
+    }
+
+    /// ===============================
+    /// ======= External/Custom =======
+    /// ===============================
+
+    /// @notice Update max bid for RFP pool
+    /// @dev 'msg.sender' must be a pool manager to update the max bid.
+    /// @param _maxBid The max bid to be set
+    function increaseMaxBid(uint256 _maxBid) external onlyPoolManager(msg.sender) {
+        _increaseMaxBid(_maxBid);
+    }
+
+    /// @notice Set the milestones for the acceptedRecipientId.
+    /// @dev Emits 'MilestonesSet' event
+    /// @param _milestones Milestone[] The milestones to be set
+    function setMilestones(Milestone[] memory _milestones) external virtual {
+        _validateSetMilestones(msg.sender);
+        uint256 totalAmountPercentage;
+
+        // Loop through the milestones and add them to the milestones array
+        uint256 milestonesLength = _milestones.length;
+        for (uint256 i; i < milestonesLength;) {
+            uint256 amountPercentage = _milestones[i].amountPercentage;
+
+            if (amountPercentage == 0) revert INVALID_MILESTONE();
+
+            totalAmountPercentage += amountPercentage;
+            _milestones[i].status = Status.None;
+            milestones.push(_milestones[i]);
+
+            unchecked {
+                i++;
+            }
+        }
+
+        // Check if the all milestone amount percentage totals to 1e18 (100%)
+        if (totalAmountPercentage != 1e18) revert INVALID_MILESTONE();
+
+        emit MilestonesSet(milestonesLength);
+    }
+
+    /// @notice Submit milestone by the acceptedRecipientId.
+    /// @dev Emits a 'MilestonesSubmitted()' event.
+    /// @param _metadata The proof of work
+    function submitUpcomingMilestone(Metadata calldata _metadata) external virtual {
+        _validateSubmitUpcomingMilestone(msg.sender);
+
+        // Get the milestone and update the metadata and status
+        Milestone storage milestone = milestones[upcomingMilestone];
+        milestone.metadata = _metadata;
+
+        // Set the milestone status to 'Pending' to indicate that the milestone is submitted
+        milestone.status = Status.Pending;
+
+        // Emit event for the milestone
+        emit MilestoneSubmitted(upcomingMilestone);
+    }
+
+    /// @notice Review a pending milestone submitted by the acceptedRecipientId.
+    /// @dev Emits a 'MilestoneStatusChanged()' event.
+    /// @param _milestoneStatus New status of the milestone
+    function reviewMilestone(Status _milestoneStatus) external virtual {
+        _validateReviewMilestone(msg.sender, _milestoneStatus);
+        // Check if the milestone status is pending
+
+        milestones[upcomingMilestone].status = _milestoneStatus;
+
+        emit MilestoneStatusChanged(upcomingMilestone, _milestoneStatus);
+
+        if (_milestoneStatus == Status.Accepted) {
+            upcomingMilestone++;
+        }
+    }
+
+    /// ====================================
+    /// ============ Internal ==============
+    /// ====================================
+
+    function _setProposalBid(uint256 _proposalBid, address _bidderId) internal virtual {
+        if (_proposalBid > maxBid) {
+            // If the proposal bid is greater than the max bid this will revert
+            revert EXCEEDING_MAX_BID();
+        } else if (_proposalBid == 0) {
+            // If the proposal bid is 0, set it to the max bid
+            _proposalBid = maxBid;
+        }
+
+        bids[_bidderId] = _proposalBid;
+    }
+
+    function _validateSetMilestones(address _sender) internal virtual {
+        _checkOnlyPoolManager(_sender);
+        if (milestones.length > 0) {
+            if (milestones[0].status != Status.None) revert MILESTONES_ALREADY_SET();
+            delete milestones;
+        }
+    }
+
+    function _validateSubmitUpcomingMilestone(address _sender) internal virtual {
+        // Check if the 'msg.sender' is the 'acceptedRecipientId' or
+        // 'acceptedRecipientId' is a profile on the Registry and sender is a member of the profile
+        if (acceptedRecipientId != _sender) revert Errors.UNAUTHORIZED();
+
+        // Check if a submission is ongoing to prevent front-running a milestone review.
+        if (milestones[upcomingMilestone].status == Status.Pending) revert MILESTONE_PENDING();
+    }
+
+    function _validateReviewMilestone(address _sender, Status _milestoneStatus) internal virtual {
+        _checkOnlyPoolManager(_sender);
+        if (milestones[upcomingMilestone].status != Status.Pending) revert MILESTONE_NOT_PENDING();
+    }
+
+    /// @notice Increase max bid for RFP pool
+    /// @param _maxBid The new max bid to be set
+    function _increaseMaxBid(uint256 _maxBid) internal {
+        // make sure the new max bid is greater than the current max bid
+        if (_maxBid < maxBid) revert AMOUNT_TOO_LOW();
+
+        maxBid = _maxBid;
+
+        // emit the new max mid
+        emit MaxBidIncreased(maxBid);
+    }
+
+    function _getMilestonePayout(uint256 _milestoneId) internal view virtual returns (uint256) {
+        return (bids[acceptedRecipientId] * milestones[_milestoneId].amountPercentage) / 1e18;
+    }
+}
