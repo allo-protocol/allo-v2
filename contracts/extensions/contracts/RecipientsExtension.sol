@@ -181,9 +181,7 @@ abstract contract RecipientsExtension is CoreBaseStrategy, Errors, IRecipientsEx
 
     /// @notice Submit recipients to pool and set their status.
     /// @param _data An array of bytes to be decoded.
-    /// @dev Each item of the array can be decoded as follows:
-    /// if 'useRegistryAnchor' is 'true' (address recipientId, Metadata metadata)
-    /// if 'useRegistryAnchor' is 'false' (address registryAnchor, Metadata metadata)
+    /// @dev Each item of the array can be decoded as follows: (address _recipientIdOrRegistryAnchor, Metadata metadata)
     /// @param _sender The sender of the transaction
     /// @return _recipientIds The IDs of the recipients
     function _register(address[] memory __recipients, bytes memory _data, address _sender)
@@ -201,40 +199,15 @@ abstract contract RecipientsExtension is CoreBaseStrategy, Errors, IRecipientsEx
         _recipientIds = new address[](__recipients.length);
 
         for (uint256 i; i < __recipients.length; i++) {
-            bool isUsingRegistryAnchor;
-            address registryAnchor;
-            Metadata memory metadata;
-            address recipientId;
-
             address recipientAddress = __recipients[i];
             bytes memory data = datas[i];
+
+            // decode data
+            (address recipientId, bool isUsingRegistryAnchor, Metadata memory metadata) = _extractRecipientAndMetadata(data, _sender);
 
             // If the recipient address is the zero address this will revert
             if (recipientAddress == address(0)) {
                 revert RECIPIENT_ERROR(recipientId);
-            }
-
-            // decode data custom to this strategy
-            if (useRegistryAnchor) {
-                (recipientId, metadata) = abi.decode(data, (address, Metadata));
-
-                // If the sender is not a profile member this will revert
-                if (!_isProfileMember(recipientId, _sender)) {
-                    revert UNAUTHORIZED();
-                }
-            } else {
-                (registryAnchor, metadata) = abi.decode(data, (address, Metadata));
-
-                // Set this to 'true' if the registry anchor is not the zero address
-                isUsingRegistryAnchor = registryAnchor != address(0);
-
-                // If using the 'registryAnchor' we set the 'recipientId' to the 'registryAnchor', otherwise we set it to the 'msg.sender'
-                recipientId = isUsingRegistryAnchor ? registryAnchor : _sender;
-
-                // Checks if the '_sender' is a member of the profile 'anchor' being used and reverts if not
-                if (isUsingRegistryAnchor && !_isProfileMember(recipientId, _sender)) {
-                    revert UNAUTHORIZED();
-                }
             }
 
             // If the metadata is required and the metadata is invalid this will revert
@@ -248,7 +221,7 @@ abstract contract RecipientsExtension is CoreBaseStrategy, Errors, IRecipientsEx
             // update the recipients data
             recipient.recipientAddress = recipientAddress;
             recipient.metadata = metadata;
-            recipient.useRegistryAnchor = useRegistryAnchor ? true : isUsingRegistryAnchor;
+            recipient.useRegistryAnchor = isUsingRegistryAnchor;
 
             if (recipientToStatusIndexes[recipientId] == 0) {
                 // recipient registering new application
@@ -272,6 +245,32 @@ abstract contract RecipientsExtension is CoreBaseStrategy, Errors, IRecipientsEx
             }
 
             _recipientIds[i] = recipientId;
+        }
+    }
+
+    /// @notice Extract recipient and metadata from the data.
+    /// @param _data The data to be decoded
+    /// @param _sender The sender of the transaction
+    /// @return recipientId The ID of the recipient
+    /// @return isUsingRegistryAnchor A flag to indicate whether to use the registry anchor or not
+    /// @return metadata The metadata of the recipient
+    function _extractRecipientAndMetadata(bytes memory _data, address _sender) internal view virtual returns (address recipientId, bool isUsingRegistryAnchor, Metadata memory metadata) {
+        (address _recipientIdOrRegistryAnchor, Metadata memory _metadata) = abi.decode(_data, (address, Metadata));
+
+        metadata = _metadata;
+
+        // If the registry anchor is not the zero address check authorization
+        // Anchor can never be zero, so if zero, set '_sender' as the recipientId
+        if (_recipientIdOrRegistryAnchor != address(0)) {
+            if (!_isProfileMember(_recipientIdOrRegistryAnchor, _sender)) {
+                revert UNAUTHORIZED();
+            }
+            
+            isUsingRegistryAnchor = true;
+            recipientId = _recipientIdOrRegistryAnchor;
+        } else {
+            // Using 'isUsingRegistryAnchor' default value (false)
+            recipientId = _sender;
         }
     }
 
