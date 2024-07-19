@@ -4,6 +4,7 @@ pragma solidity 0.8.19;
 import {CoreBaseStrategy} from "../../contracts/strategies/CoreBaseStrategy.sol";
 import {RecipientsExtension} from "../../contracts/extensions/contracts/RecipientsExtension.sol";
 import {IRecipientsExtension} from "../../contracts/extensions/interfaces/IRecipientsExtension.sol";
+import {Metadata} from "../../contracts/core/libraries/Metadata.sol";
 import {Test} from "forge-std/Test.sol";
 
 contract MockStrategyRecipientsExtension is CoreBaseStrategy, RecipientsExtension, Test {
@@ -374,6 +375,71 @@ contract MockStrategyRecipientsExtension is CoreBaseStrategy, RecipientsExtensio
 
     function expectCall__getStatusRowColumn(address _recipientId) public {
         vm.expectCall(address(this), abi.encodeWithSignature("_getStatusRowColumn(address)", _recipientId));
+    }
+
+    function mock_call__extractRecipientAndMetadata(
+        bytes memory _data,
+        address _sender,
+        address _returnParam0,
+        bool _returnParam1,
+        Metadata memory _returnParam2
+    ) public {
+        vm.mockCall(
+            address(this),
+            abi.encodeWithSignature("_extractRecipientAndMetadata(bytes,address)", _data, _sender),
+            abi.encode(_returnParam0, _returnParam1, _returnParam2)
+        );
+    }
+
+    function _extractRecipientAndMetadata(bytes memory _data, address _sender)
+        internal
+        view
+        override
+        returns (address recipientId, bool isUsingRegistryAnchor, Metadata memory metadata)
+    {
+        (bool _success, bytes memory __data) = address(this).staticcall(
+            abi.encodeWithSignature("_extractRecipientAndMetadata(bytes,address)", _data, _sender)
+        );
+
+        if (_success) return abi.decode(__data, (address, bool, Metadata));
+        else return super._extractRecipientAndMetadata(_data, _sender);
+    }
+
+    function call__extractRecipientAndMetadata(bytes memory _data, address _sender)
+        public
+        returns (address recipientId, bool isUsingRegistryAnchor, Metadata memory metadata)
+    {
+        return _extractRecipientAndMetadata(_data, _sender);
+    }
+
+    function expectCall__extractRecipientAndMetadata(bytes memory _data, address _sender) public {
+        vm.expectCall(
+            address(this), abi.encodeWithSignature("_extractRecipientAndMetadata(bytes,address)", _data, _sender)
+        );
+    }
+
+    function mock_call__isProfileMember(address _anchor, address _sender, bool _returnParam0) public {
+        vm.mockCall(
+            address(this),
+            abi.encodeWithSignature("_isProfileMember(address,address)", _anchor, _sender),
+            abi.encode(_returnParam0)
+        );
+    }
+
+    function _isProfileMember(address _anchor, address _sender) internal view override returns (bool _returnParam0) {
+        (bool _success, bytes memory _data) =
+            address(this).staticcall(abi.encodeWithSignature("_isProfileMember(address,address)", _anchor, _sender));
+
+        if (_success) return abi.decode(_data, (bool));
+        else return super._isProfileMember(_anchor, _sender);
+    }
+
+    function call__isProfileMember(address _anchor, address _sender) public returns (bool _returnParam0) {
+        return _isProfileMember(_anchor, _sender);
+    }
+
+    function expectCall__isProfileMember(address _anchor, address _sender) public {
+        vm.expectCall(address(this), abi.encodeWithSignature("_isProfileMember(address,address)", _anchor, _sender));
     }
 
     function set_recipientsCounter(uint256 _recipientsCounter) public {

@@ -2,6 +2,7 @@
 pragma solidity 0.8.19;
 
 import {IRecipientsExtension} from "../interfaces/IRecipientsExtension.sol";
+import {IRegistry} from "../../core/interfaces/IRegistry.sol";
 import {CoreBaseStrategy} from "../../strategies/CoreBaseStrategy.sol";
 import {Metadata} from "../../core/libraries/Metadata.sol";
 import {Errors} from "../../core/libraries/Errors.sol";
@@ -80,9 +81,13 @@ abstract contract RecipientsExtension is CoreBaseStrategy, Errors, IRecipientsEx
         return Status(_getUintRecipientStatus(_recipientId));
     }
 
-    // TODO: remove once this function is implemented on the CoreBase
-    function _isProfileMember(address _anchor, address _sender) internal view returns (bool) {
-        return true;
+    /// @notice Check if sender is profile owner or member
+    /// @param _anchor Anchor of the profile
+    /// @param _sender The sender of the transaction
+    function _isProfileMember(address _anchor, address _sender) internal view virtual returns (bool) {
+        IRegistry registry = allo.getRegistry();
+        IRegistry.Profile memory profile = registry.getProfileByAnchor(_anchor);
+        return registry.isOwnerOrMemberOfProfile(profile.id, _sender);
     }
 
     /// @notice Sets recipient statuses.
@@ -203,7 +208,8 @@ abstract contract RecipientsExtension is CoreBaseStrategy, Errors, IRecipientsEx
             bytes memory data = datas[i];
 
             // decode data
-            (address recipientId, bool isUsingRegistryAnchor, Metadata memory metadata) = _extractRecipientAndMetadata(data, _sender);
+            (address recipientId, bool isUsingRegistryAnchor, Metadata memory metadata) =
+                _extractRecipientAndMetadata(data, _sender);
 
             // If the recipient address is the zero address this will revert
             if (recipientAddress == address(0)) {
@@ -254,7 +260,12 @@ abstract contract RecipientsExtension is CoreBaseStrategy, Errors, IRecipientsEx
     /// @return recipientId The ID of the recipient
     /// @return isUsingRegistryAnchor A flag to indicate whether to use the registry anchor or not
     /// @return metadata The metadata of the recipient
-    function _extractRecipientAndMetadata(bytes memory _data, address _sender) internal view virtual returns (address recipientId, bool isUsingRegistryAnchor, Metadata memory metadata) {
+    function _extractRecipientAndMetadata(bytes memory _data, address _sender)
+        internal
+        view
+        virtual
+        returns (address recipientId, bool isUsingRegistryAnchor, Metadata memory metadata)
+    {
         (address _recipientIdOrRegistryAnchor, Metadata memory _metadata) = abi.decode(_data, (address, Metadata));
 
         metadata = _metadata;
@@ -265,7 +276,7 @@ abstract contract RecipientsExtension is CoreBaseStrategy, Errors, IRecipientsEx
             if (!_isProfileMember(_recipientIdOrRegistryAnchor, _sender)) {
                 revert UNAUTHORIZED();
             }
-            
+
             isUsingRegistryAnchor = true;
             recipientId = _recipientIdOrRegistryAnchor;
         } else {

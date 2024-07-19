@@ -7,6 +7,7 @@ import {IRecipientsExtension} from "../../../contracts/extensions/interfaces/IRe
 import {IAllo} from "../../../contracts/core/interfaces/IAllo.sol";
 import {IBaseStrategy} from "../../../contracts/strategies/CoreBaseStrategy.sol";
 import {Errors} from "../../../contracts/core/libraries/Errors.sol";
+import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
 
 abstract contract BaseRecipientsExtensionUnit is Test, IRecipientsExtension {
     MockStrategyRecipientsExtension public recipientsExtension;
@@ -356,6 +357,55 @@ contract RecipientsExtension_register is BaseRecipientsExtensionUnit {
     function test_Emit_UpdatedRegistration() public {}
 
     function test_Return_recipientIds() public {}
+}
+
+contract RecipientsExtension_extractRecipientAndMetadata is BaseRecipientsExtensionUnit {
+    function test_Revert_IfRecipientIdOrRegistryAnchorIsNotMember(
+        address _recipientIdOrRegistryAnchor,
+        address _sender,
+        Metadata memory _metadata
+    ) public {
+        vm.assume(_recipientIdOrRegistryAnchor != address(0));
+
+        bytes memory _data = abi.encode(_recipientIdOrRegistryAnchor, _metadata);
+        recipientsExtension.mock_call__isProfileMember(_recipientIdOrRegistryAnchor, _sender, false);
+
+        vm.expectRevert(Errors.UNAUTHORIZED.selector);
+
+        recipientsExtension.call__extractRecipientAndMetadata(_data, _sender);
+    }
+
+    function test_Return_ValuesWhenRecipientIdOrRegistryAnchorNotZero(
+        address _recipientIdOrRegistryAnchor,
+        address _sender,
+        Metadata memory _metadata
+    ) public {
+        vm.assume(_recipientIdOrRegistryAnchor != address(0));
+        bytes memory _data = abi.encode(_recipientIdOrRegistryAnchor, _metadata);
+        recipientsExtension.mock_call__isProfileMember(_recipientIdOrRegistryAnchor, _sender, true);
+
+        (address __registryOrAnchor, bool _isUsingRegistryAnchor, Metadata memory __metadata) =
+            recipientsExtension.call__extractRecipientAndMetadata(_data, _sender);
+
+        assertEq(__registryOrAnchor, _recipientIdOrRegistryAnchor);
+        assertEq(__metadata.pointer, _metadata.pointer);
+        assertEq(__metadata.protocol, _metadata.protocol);
+        assertEq(_isUsingRegistryAnchor, true);
+    }
+
+    function test_Return_ValuesWhenRecipientIdOrRegistryAnchorIsZero(address _sender, Metadata memory _metadata)
+        public
+    {
+        bytes memory _data = abi.encode(address(0), _metadata);
+
+        (address __registryOrAnchor, bool _isUsingRegistryAnchor, Metadata memory __metadata) =
+            recipientsExtension.call__extractRecipientAndMetadata(_data, _sender);
+
+        assertEq(__registryOrAnchor, _sender);
+        assertEq(__metadata.pointer, _metadata.pointer);
+        assertEq(__metadata.protocol, _metadata.protocol);
+        assertEq(_isUsingRegistryAnchor, false);
+    }
 }
 
 contract RecipientsExtension_getRecipient is BaseRecipientsExtensionUnit {
