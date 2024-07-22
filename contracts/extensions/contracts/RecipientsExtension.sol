@@ -196,8 +196,6 @@ abstract contract RecipientsExtension is CoreBaseStrategy, Errors, IRecipientsEx
         onlyActiveRegistration
         returns (address[] memory _recipientIds)
     {
-        if (msg.value != 0) revert NON_ZERO_VALUE();
-
         // Decode the data, datas array must be same length as recipients array
         bytes[] memory datas = abi.decode(_data, (bytes[]));
 

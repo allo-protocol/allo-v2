@@ -465,4 +465,8 @@ contract MockStrategyRecipientsExtension is CoreBaseStrategy, RecipientsExtensio
     function set_statusesBitMap(uint256 _key0, uint256 _value) public {
         statusesBitMap[_key0] = _value;
     }
+
+    function set_metadataRequired(bool _metadataRequired) public {
+        metadataRequired = _metadataRequired;
+    }
 }
