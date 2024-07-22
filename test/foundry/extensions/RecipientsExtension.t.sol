@@ -5,6 +5,7 @@ import {Test, console} from "forge-std/Test.sol";
 import {MockStrategyRecipientsExtension} from "../../utils/MockStrategyRecipientsExtension.sol";
 import {IRecipientsExtension} from "../../../contracts/extensions/interfaces/IRecipientsExtension.sol";
 import {IAllo} from "../../../contracts/core/interfaces/IAllo.sol";
+import {IRegistry} from "../../../contracts/core/interfaces/IRegistry.sol";
 import {IBaseStrategy} from "../../../contracts/strategies/CoreBaseStrategy.sol";
 import {Errors} from "../../../contracts/core/libraries/Errors.sol";
 import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
@@ -12,12 +13,14 @@ import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
 abstract contract BaseRecipientsExtensionUnit is Test, IRecipientsExtension {
     MockStrategyRecipientsExtension public recipientsExtension;
     address public allo;
+    address public registry;
     uint256 public poolId;
 
     event Registered(address indexed _recipient, bytes _data);
 
     function setUp() public {
         allo = makeAddr("allo");
+        registry = makeAddr("registry");
         recipientsExtension = new MockStrategyRecipientsExtension(allo);
         poolId = 1;
 
@@ -33,6 +36,23 @@ abstract contract BaseRecipientsExtensionUnit is Test, IRecipientsExtension {
                 })
             )
         );
+
+        vm.mockCall(allo, abi.encodeWithSelector(IAllo.getRegistry.selector), abi.encode(registry));
+        vm.mockCall(
+            registry,
+            abi.encodeWithSelector(IRegistry.getProfileByAnchor.selector),
+            abi.encode(
+                IRegistry.Profile({
+                    id: bytes32(0),
+                    nonce: 0,
+                    name: "",
+                    metadata: Metadata({protocol: 0, pointer: ""}),
+                    owner: address(0),
+                    anchor: address(0)
+                })
+            )
+        );
+        vm.mockCall(registry, abi.encodeWithSelector(IRegistry.isOwnerOrMemberOfProfile.selector), abi.encode(true));
     }
 
     function _fixedArrayToMemory(address[10] memory _array) internal pure returns (address[] memory) {
@@ -129,6 +149,26 @@ contract RecipientsExtension_getRecipientStatus is BaseRecipientsExtensionUnit {
         recipientsExtension.expectCall__getUintRecipientStatus(_recipient);
 
         recipientsExtension.call__getUintRecipientStatus(_recipient);
+    }
+}
+
+contract RecipientsExtension_isProfileMember is BaseRecipientsExtensionUnit {
+    function test_Call_getRegistry(address _anchor, address _sender) public {
+        vm.expectCall(allo, abi.encodeWithSelector(IAllo.getRegistry.selector));
+
+        recipientsExtension.call__isProfileMember(_anchor, _sender);
+    }
+
+    function test_Call_getProfileByAnchor(address _anchor, address _sender) public {
+        vm.expectCall(registry, abi.encodeWithSelector(IRegistry.getProfileByAnchor.selector));
+
+        recipientsExtension.call__isProfileMember(_anchor, _sender);
+    }
+
+    function test_Call_isOwnerOrMemberOfProfile(address _anchor, address _sender) public {
+        vm.expectCall(registry, abi.encodeWithSelector(IRegistry.isOwnerOrMemberOfProfile.selector));
+
+        recipientsExtension.call__isProfileMember(_anchor, _sender);
     }
 }
 
