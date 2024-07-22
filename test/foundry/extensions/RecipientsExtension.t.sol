@@ -611,24 +611,29 @@ contract RecipientsExtension_register is BaseRecipientsExtensionUnit {
         bool[10] memory _booleans,
         address _sender
     ) public {
-        vm.skip(true);
         recipientsExtension.set_metadataRequired(false);
         _assumeNotZeroAddressInArray(_recipients);
         _assumeNoDuplicates(_recipientIds);
 
         uint256 _recipientsCounterBefore = recipientsExtension.recipientsCounter();
 
+        bytes[] memory _eventDataArray = new bytes[](_recipients.length);
         bytes[] memory _dataArray = new bytes[](_recipients.length);
+
         for (uint256 i = 0; i < _recipients.length; i++) {
             _dataArray[i] = abi.encode(_recipientIds[i], Metadata({protocol: 0, pointer: ""}));
             recipientsExtension.mock_call__extractRecipientAndMetadata(
                 _dataArray[i], _sender, _recipientIds[i], _booleans[i], Metadata({protocol: 0, pointer: ""})
             );
-            vm.expectEmit();
-            emit Registered(_recipientIds[i], abi.encode(_dataArray[i], i + 1));
+            _eventDataArray[i] = abi.encode(_dataArray[i], i + 1);
         }
-        bytes memory _datas = abi.encode(_dataArray);
 
+        for (uint256 i = 0; i < _recipients.length; i++) {
+            vm.expectEmit();
+            emit Registered(_recipientIds[i], _eventDataArray[i]);
+        }
+
+        bytes memory _datas = abi.encode(_dataArray);
         recipientsExtension.call__register(_fixedArrayToMemory(_recipients), _datas, _sender);
     }
 
@@ -792,12 +797,12 @@ contract RecipientsExtension_register is BaseRecipientsExtensionUnit {
         bool[10] memory _booleans,
         address _sender
     ) public {
-        vm.skip(true);
         recipientsExtension.set_metadataRequired(false);
         _assumeNotZeroAddressInArray(_recipients);
         _assumeNoDuplicates(_recipientIds);
 
         bytes[] memory _dataArray = new bytes[](_recipients.length);
+
         for (uint256 i = 0; i < _recipients.length; i++) {
             _dataArray[i] = abi.encode(_recipientIds[i], Metadata({protocol: 0, pointer: ""}));
             recipientsExtension.mock_call__extractRecipientAndMetadata(
@@ -810,14 +815,16 @@ contract RecipientsExtension_register is BaseRecipientsExtensionUnit {
             recipientsExtension.mock_call__getUintRecipientStatus(
                 _recipientIds[i], uint8(IRecipientsExtension.Status.Pending)
             );
+        }
 
+        for (uint256 i = 0; i < _recipients.length; i++) {
             vm.expectEmit();
             emit IRecipientsExtension.UpdatedRegistration(
                 _recipientIds[i], _dataArray[i], _sender, uint8(IRecipientsExtension.Status.Pending)
             );
         }
-        bytes memory _datas = abi.encode(_dataArray);
 
+        bytes memory _datas = abi.encode(_dataArray);
         recipientsExtension.call__register(_fixedArrayToMemory(_recipients), _datas, _sender);
     }
 
