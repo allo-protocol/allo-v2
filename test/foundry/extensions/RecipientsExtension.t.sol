@@ -618,17 +618,194 @@ contract RecipientsExtension_register is BaseRecipientsExtensionUnit {
         assertEq(recipientsExtension.recipientsCounter(), _recipientsCounterBefore + _recipientIds.length);
     }
 
-    function test_Call__getUintRecipientStatusIfUpdatingApplication() public {}
+    function test_Call__getUintRecipientStatusIfUpdatingApplication(
+        address[10] memory _recipients,
+        address[10] memory _recipientIds,
+        bool[10] memory _booleans,
+        address _sender
+    ) public {
+        recipientsExtension.set_metadataRequired(false);
+        _assumeNotZeroAddressInArray(_recipients);
+        _assumeNoDuplicates(_recipientIds);
 
-    function test_Call__setRecipientStatusIfAcceptedApplication() public {}
+        bytes[] memory _dataArray = new bytes[](_recipients.length);
+        for (uint256 i = 0; i < _recipients.length; i++) {
+            _dataArray[i] = abi.encode(_recipientIds[i], Metadata({protocol: 0, pointer: ""}));
+            recipientsExtension.mock_call__extractRecipientAndMetadata(
+                _dataArray[i], _sender, _recipientIds[i], _booleans[i], Metadata({protocol: 0, pointer: ""})
+            );
+            // set the index to simulate updating
+            recipientsExtension.set_recipientToStatusIndexes(_recipientIds[i], i + 1);
+        }
+        bytes memory _datas = abi.encode(_dataArray);
 
-    function test_Call__setRecipientStatusIfInReviewApplication() public {}
+        recipientsExtension.expectCall__getUintRecipientStatus(_recipientIds[0]);
 
-    function test_Call__setRecipientStatusIfRejectedApplication() public {}
+        recipientsExtension.call__register(_fixedArrayToMemory(_recipients), _datas, _sender);
+    }
 
-    function test_Emit_UpdatedRegistration() public {}
+    function test_Call__setRecipientStatusIfAcceptedApplication(
+        address[10] memory _recipients,
+        address[10] memory _recipientIds,
+        bool[10] memory _booleans,
+        address _sender
+    ) public {
+        recipientsExtension.set_metadataRequired(false);
+        _assumeNotZeroAddressInArray(_recipients);
+        _assumeNoDuplicates(_recipientIds);
 
-    function test_Return_recipientIds() public {}
+        bytes[] memory _dataArray = new bytes[](_recipients.length);
+        for (uint256 i = 0; i < _recipients.length; i++) {
+            _dataArray[i] = abi.encode(_recipientIds[i], Metadata({protocol: 0, pointer: ""}));
+            recipientsExtension.mock_call__extractRecipientAndMetadata(
+                _dataArray[i], _sender, _recipientIds[i], _booleans[i], Metadata({protocol: 0, pointer: ""})
+            );
+            // set the index to simulate updating
+            recipientsExtension.set_recipientToStatusIndexes(_recipientIds[i], i + 1);
+
+            // mock status
+            recipientsExtension.mock_call__getUintRecipientStatus(
+                _recipientIds[i], uint8(IRecipientsExtension.Status.Accepted)
+            );
+
+            // expect call
+            recipientsExtension.mock_call__setRecipientStatus(
+                _recipientIds[i], uint8(IRecipientsExtension.Status.Pending)
+            );
+        }
+        bytes memory _datas = abi.encode(_dataArray);
+
+        recipientsExtension.call__register(_fixedArrayToMemory(_recipients), _datas, _sender);
+    }
+
+    function test_Call__setRecipientStatusIfInReviewApplication(
+        address[10] memory _recipients,
+        address[10] memory _recipientIds,
+        bool[10] memory _booleans,
+        address _sender
+    ) public {
+        recipientsExtension.set_metadataRequired(false);
+        _assumeNotZeroAddressInArray(_recipients);
+        _assumeNoDuplicates(_recipientIds);
+
+        bytes[] memory _dataArray = new bytes[](_recipients.length);
+        for (uint256 i = 0; i < _recipients.length; i++) {
+            _dataArray[i] = abi.encode(_recipientIds[i], Metadata({protocol: 0, pointer: ""}));
+            recipientsExtension.mock_call__extractRecipientAndMetadata(
+                _dataArray[i], _sender, _recipientIds[i], _booleans[i], Metadata({protocol: 0, pointer: ""})
+            );
+            // set the index to simulate updating
+            recipientsExtension.set_recipientToStatusIndexes(_recipientIds[i], i + 1);
+
+            // mock status
+            recipientsExtension.mock_call__getUintRecipientStatus(
+                _recipientIds[i], uint8(IRecipientsExtension.Status.InReview)
+            );
+
+            // expect call
+            recipientsExtension.mock_call__setRecipientStatus(
+                _recipientIds[i], uint8(IRecipientsExtension.Status.Pending)
+            );
+        }
+        bytes memory _datas = abi.encode(_dataArray);
+
+        recipientsExtension.call__register(_fixedArrayToMemory(_recipients), _datas, _sender);
+    }
+
+    function test_Call__setRecipientStatusIfRejectedApplication(
+        address[10] memory _recipients,
+        address[10] memory _recipientIds,
+        bool[10] memory _booleans,
+        address _sender
+    ) public {
+        recipientsExtension.set_metadataRequired(false);
+        _assumeNotZeroAddressInArray(_recipients);
+        _assumeNoDuplicates(_recipientIds);
+
+        bytes[] memory _dataArray = new bytes[](_recipients.length);
+        for (uint256 i = 0; i < _recipients.length; i++) {
+            _dataArray[i] = abi.encode(_recipientIds[i], Metadata({protocol: 0, pointer: ""}));
+            recipientsExtension.mock_call__extractRecipientAndMetadata(
+                _dataArray[i], _sender, _recipientIds[i], _booleans[i], Metadata({protocol: 0, pointer: ""})
+            );
+            // set the index to simulate updating
+            recipientsExtension.set_recipientToStatusIndexes(_recipientIds[i], i + 1);
+
+            // mock status
+            recipientsExtension.mock_call__getUintRecipientStatus(
+                _recipientIds[i], uint8(IRecipientsExtension.Status.Rejected)
+            );
+
+            // expect call
+            recipientsExtension.mock_call__setRecipientStatus(
+                _recipientIds[i], uint8(IRecipientsExtension.Status.Appealed)
+            );
+        }
+        bytes memory _datas = abi.encode(_dataArray);
+
+        recipientsExtension.call__register(_fixedArrayToMemory(_recipients), _datas, _sender);
+    }
+
+    function test_Emit_UpdatedRegistration(
+        address[10] memory _recipients,
+        address[10] memory _recipientIds,
+        bool[10] memory _booleans,
+        address _sender
+    ) public {
+        vm.skip(true);
+        recipientsExtension.set_metadataRequired(false);
+        _assumeNotZeroAddressInArray(_recipients);
+        _assumeNoDuplicates(_recipientIds);
+
+        bytes[] memory _dataArray = new bytes[](_recipients.length);
+        for (uint256 i = 0; i < _recipients.length; i++) {
+            _dataArray[i] = abi.encode(_recipientIds[i], Metadata({protocol: 0, pointer: ""}));
+            recipientsExtension.mock_call__extractRecipientAndMetadata(
+                _dataArray[i], _sender, _recipientIds[i], _booleans[i], Metadata({protocol: 0, pointer: ""})
+            );
+            // set the index to simulate updating
+            recipientsExtension.set_recipientToStatusIndexes(_recipientIds[i], i + 1);
+
+            // mock status
+            recipientsExtension.mock_call__getUintRecipientStatus(
+                _recipientIds[i], uint8(IRecipientsExtension.Status.Pending)
+            );
+
+            vm.expectEmit();
+            emit IRecipientsExtension.UpdatedRegistration(
+                _recipientIds[i], _dataArray[i], _sender, uint8(IRecipientsExtension.Status.Pending)
+            );
+        }
+        bytes memory _datas = abi.encode(_dataArray);
+
+        recipientsExtension.call__register(_fixedArrayToMemory(_recipients), _datas, _sender);
+    }
+
+    function test_Return_recipientIds(
+        address[10] memory _recipients,
+        address[10] memory _recipientIds,
+        bool[10] memory _booleans,
+        address _sender
+    ) public {
+        recipientsExtension.set_metadataRequired(false);
+        _assumeNotZeroAddressInArray(_recipients);
+        _assumeNoDuplicates(_recipientIds);
+
+        bytes[] memory _dataArray = new bytes[](_recipients.length);
+        for (uint256 i = 0; i < _recipients.length; i++) {
+            _dataArray[i] = abi.encode(_recipientIds[i], Metadata({protocol: 0, pointer: ""}));
+            recipientsExtension.mock_call__extractRecipientAndMetadata(
+                _dataArray[i], _sender, _recipientIds[i], _booleans[i], Metadata({protocol: 0, pointer: ""})
+            );
+        }
+        bytes memory _datas = abi.encode(_dataArray);
+
+        address[] memory _receivedRecipients =
+            recipientsExtension.call__register(_fixedArrayToMemory(_recipients), _datas, _sender);
+        for (uint256 i = 0; i < _recipients.length; i++) {
+            assertEq(_receivedRecipients[i], _recipientIds[i]);
+        }
+    }
 }
 
 contract RecipientsExtension_extractRecipientAndMetadata is BaseRecipientsExtensionUnit {
