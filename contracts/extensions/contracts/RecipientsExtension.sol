@@ -8,9 +8,6 @@ import {Metadata} from "../../core/libraries/Metadata.sol";
 import {Errors} from "../../core/libraries/Errors.sol";
 
 abstract contract RecipientsExtension is CoreBaseStrategy, Errors, IRecipientsExtension {
-    /// @notice Flag to indicate whether to use the registry anchor or not.
-    bool public useRegistryAnchor;
-
     /// @notice Flag to indicate whether metadata is required or not.
     bool public metadataRequired;
 
@@ -57,7 +54,6 @@ abstract contract RecipientsExtension is CoreBaseStrategy, Errors, IRecipientsEx
     /// @param _initializeData The data to be decoded to initialize the strategy
     function __RecipientsExtension_init(RecipientInitializeData memory _initializeData) internal virtual {
         // Initialize required values
-        useRegistryAnchor = _initializeData.useRegistryAnchor;
         metadataRequired = _initializeData.metadataRequired;
 
         _updatePoolTimestamps(_initializeData.registrationStartTime, _initializeData.registrationEndTime);

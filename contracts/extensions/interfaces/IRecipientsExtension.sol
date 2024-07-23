@@ -44,7 +44,6 @@ interface IRecipientsExtension {
     }
 
     struct RecipientInitializeData {
-        bool useRegistryAnchor;
         bool metadataRequired;
         uint64 registrationStartTime;
         uint64 registrationEndTime;

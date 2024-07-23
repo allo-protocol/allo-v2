@@ -29,7 +29,6 @@ abstract contract BaseRecipientsExtensionUnit is Test, IRecipientsExtension {
             poolId,
             abi.encode(
                 IRecipientsExtension.RecipientInitializeData({
-                    useRegistryAnchor: false,
                     metadataRequired: false,
                     registrationStartTime: uint64(block.timestamp),
                     registrationEndTime: uint64(block.timestamp + 7 days)
@@ -81,24 +80,9 @@ abstract contract BaseRecipientsExtensionUnit is Test, IRecipientsExtension {
 }
 
 contract RecipientsExtension__RecipientsExtension_init is BaseRecipientsExtensionUnit {
-    function test_Set_useRegistryAnchor(bool _useRegistryAnchor) public {
-        IRecipientsExtension.RecipientInitializeData memory _initializeData = IRecipientsExtension
-            .RecipientInitializeData({
-            useRegistryAnchor: _useRegistryAnchor,
-            metadataRequired: false, // irrelevant for the test
-            registrationStartTime: uint64(block.timestamp), // irrelevant for the test
-            registrationEndTime: uint64(block.timestamp) // irrelevant for the test
-        });
-
-        recipientsExtension.call___RecipientsExtension_init(_initializeData);
-
-        assertEq(recipientsExtension.useRegistryAnchor(), _useRegistryAnchor);
-    }
-
     function test_Set_metadataRequired(bool _metadataRequired) public {
         IRecipientsExtension.RecipientInitializeData memory _initializeData = IRecipientsExtension
             .RecipientInitializeData({
-            useRegistryAnchor: false, // irrelevant for the test
             metadataRequired: _metadataRequired,
             registrationStartTime: uint64(block.timestamp), // irrelevant for the test
             registrationEndTime: uint64(block.timestamp) // irrelevant for the test
@@ -124,7 +108,6 @@ contract RecipientsExtension__RecipientsExtension_init is BaseRecipientsExtensio
     function test_Set_recipientsCounter() public {
         IRecipientsExtension.RecipientInitializeData memory _initializeData = IRecipientsExtension
             .RecipientInitializeData({
-            useRegistryAnchor: false, // irrelevant for the test
             metadataRequired: false, // irrelevant for the test
             registrationStartTime: uint64(block.timestamp), // irrelevant for the test
             registrationEndTime: uint64(block.timestamp) // irrelevant for the test
@@ -922,7 +905,6 @@ contract RecipientsExtension_getRecipient is BaseRecipientsExtensionUnit {
     function test_Return_recipient(address _recipientId, Recipient memory _recipient) public {
         recipientsExtension.set__recipients(_recipientId, _recipient);
 
-        assertEq(recipientsExtension.call__getRecipient(_recipientId).useRegistryAnchor, _recipient.useRegistryAnchor);
         assertEq(recipientsExtension.call__getRecipient(_recipientId).recipientAddress, _recipient.recipientAddress);
         assertEq(recipientsExtension.call__getRecipient(_recipientId).metadata.pointer, _recipient.metadata.pointer);
         assertEq(recipientsExtension.call__getRecipient(_recipientId).metadata.protocol, _recipient.metadata.protocol);
