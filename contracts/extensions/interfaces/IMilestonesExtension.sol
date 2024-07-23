@@ -10,25 +10,28 @@ interface IMilestonesExtension {
     /// ===============================
 
     /// @notice Thrown when the pool manager attempts to lower the max bid
-    error AMOUNT_TOO_LOW();
+    error MilestonesExtension_AMOUNT_TOO_LOW();
 
     /// @notice Thrown when the proposal bid exceeds maximum bid
-    error EXCEEDING_MAX_BID();
+    error MilestonesExtension_EXCEEDING_MAX_BID();
 
     /// @notice Thrown when an unauthorized address attempts to submit a milestone
-    error INVALID_SUBMITTER();
+    error MilestonesExtension_INVALID_SUBMITTER();
 
     /// @notice Thrown when the milestone is invalid
-    error INVALID_MILESTONE();
+    error MilestonesExtension_INVALID_MILESTONE();
+
+    /// @notice Thrown when the new milestone status being reviewed is invalid
+    error MilestonesExtension_INVALID_MILESTONE_STATUS();
 
     /// @notice Thrown when the milestone are already approved and cannot be changed
-    error MILESTONES_ALREADY_SET();
+    error MilestonesExtension_MILESTONES_ALREADY_SET();
 
     /// @notice Thrown when the milestone is not pending
-    error MILESTONE_NOT_PENDING();
+    error MilestonesExtension_MILESTONE_NOT_PENDING();
 
     /// @notice Thrown when the milestone is pending
-    error MILESTONE_PENDING();
+    error MilestonesExtension_MILESTONE_PENDING();
 
     /// ===============================
     /// ========== Events =============
@@ -38,6 +41,11 @@ interface IMilestonesExtension {
     /// @param maxBid The new maximum bid
     event MaxBidIncreased(uint256 maxBid);
 
+    /// @notice Emitted when a bidder places a bid.
+    /// @param bidderId The address of the bidder
+    /// @param newBid The bid amount
+    event SetBid(address indexed bidderId, uint256 newBid);
+
     /// @notice Emitted when a milestone is submitted.
     /// @param milestoneId Id of the milestone
     event MilestoneSubmitted(uint256 milestoneId);
@@ -45,7 +53,7 @@ interface IMilestonesExtension {
     /// @notice Emitted for the status change of a milestone.
     /// @param milestoneId Id of the milestone
     /// @param status Status of the milestone
-    event MilestoneStatusChanged(uint256 milestoneId, Status status);
+    event MilestoneStatusChanged(uint256 indexed milestoneId, Status status);
 
     /// @notice Emitted when milestones are set.
     /// @param milestonesLength Count of milestones
