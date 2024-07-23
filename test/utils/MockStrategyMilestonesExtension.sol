@@ -12,7 +12,8 @@ contract MockStrategyMilestonesExtension is CoreBaseStrategy, MilestonesExtensio
     function initialize(uint256 _poolId, bytes memory _data) external {
         __BaseStrategy_init(_poolId);
 
-        IMilestonesExtension.InitializeParams memory _initializeData = abi.decode(_data, (IMilestonesExtension.InitializeParams));
+        IMilestonesExtension.InitializeParams memory _initializeData =
+            abi.decode(_data, (IMilestonesExtension.InitializeParams));
         __MilestonesExtension_init(_initializeData);
     }
 
