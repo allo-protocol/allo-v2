@@ -10,7 +10,6 @@ import {Metadata} from "../../core/libraries/Metadata.sol";
 
 /// @title Milestone Extension Strategy
 abstract contract MilestonesExtension is CoreBaseStrategy, IMilestonesExtension {
-
     /// ================================
     /// ========== Storage =============
     /// ================================
