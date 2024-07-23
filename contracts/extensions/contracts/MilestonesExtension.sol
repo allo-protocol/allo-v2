@@ -38,7 +38,7 @@ abstract contract MilestonesExtension is CoreBaseStrategy, IMilestonesExtension 
     /// @notice This initializes the BaseStrategy
     /// @dev You only need to pass the 'poolId' to initialize the BaseStrategy and the rest is specific to the strategy
     /// @param _initializeParams The initialize params
-    function __MilestonesExtension_init(uint256 _poolId, InitializeParams memory _initializeParams) internal {
+    function __MilestonesExtension_init(InitializeParams memory _initializeParams) internal {
         // Set the strategy specific variables
         _increaseMaxBid(_initializeParams.maxBid);
     }
@@ -83,7 +83,7 @@ abstract contract MilestonesExtension is CoreBaseStrategy, IMilestonesExtension 
         for (uint256 i; i < milestonesLength;) {
             uint256 amountPercentage = _milestones[i].amountPercentage;
 
-            if (amountPercentage == 0) revert INVALID_MILESTONE();
+            if (amountPercentage == 0) revert MilestonesExtension_INVALID_MILESTONE();
 
             totalAmountPercentage += amountPercentage;
             _milestones[i].status = Status.None;
@@ -95,7 +95,7 @@ abstract contract MilestonesExtension is CoreBaseStrategy, IMilestonesExtension 
         }
 
         // Check if the all milestone amount percentage totals to 1e18 (100%)
-        if (totalAmountPercentage != 1e18) revert INVALID_MILESTONE();
+        if (totalAmountPercentage != 1e18) revert MilestonesExtension_INVALID_MILESTONE();
 
         emit MilestonesSet(milestonesLength);
     }
@@ -137,45 +137,46 @@ abstract contract MilestonesExtension is CoreBaseStrategy, IMilestonesExtension 
     /// ============ Internal ==============
     /// ====================================
 
-    function _setProposalBid(uint256 _proposalBid, address _bidderId) internal virtual {
+    function _setProposalBid(address _bidderId, uint256 _proposalBid) internal virtual {
         if (_proposalBid > maxBid) {
             // If the proposal bid is greater than the max bid this will revert
-            revert EXCEEDING_MAX_BID();
+            revert MilestonesExtension_EXCEEDING_MAX_BID();
         } else if (_proposalBid == 0) {
             // If the proposal bid is 0, set it to the max bid
             _proposalBid = maxBid;
         }
 
         bids[_bidderId] = _proposalBid;
+        emit SetBid(_bidderId, _proposalBid);
     }
 
     function _validateSetMilestones(address _sender) internal virtual {
         _checkOnlyPoolManager(_sender);
         if (milestones.length > 0) {
-            if (milestones[0].status != Status.None) revert MILESTONES_ALREADY_SET();
+            if (milestones[0].status != Status.None) revert MilestonesExtension_MILESTONES_ALREADY_SET();
             delete milestones;
         }
     }
 
     function _validateSubmitUpcomingMilestone(address _sender) internal virtual {
-        // Check if the 'msg.sender' is the 'acceptedRecipientId' or
-        // 'acceptedRecipientId' is a profile on the Registry and sender is a member of the profile
-        if (acceptedRecipientId != _sender) revert INVALID_SUBMITTER();
+        // Check if the 'msg.sender' is the 'acceptedRecipientId'
+        if (acceptedRecipientId != _sender) revert MilestonesExtension_INVALID_SUBMITTER();
 
         // Check if a submission is ongoing to prevent front-running a milestone review.
-        if (milestones[upcomingMilestone].status == Status.Pending) revert MILESTONE_PENDING();
+        if (milestones[upcomingMilestone].status == Status.Pending) revert MilestonesExtension_MILESTONE_PENDING();
     }
 
     function _validateReviewMilestone(address _sender, Status _milestoneStatus) internal virtual {
         _checkOnlyPoolManager(_sender);
-        if (milestones[upcomingMilestone].status != Status.Pending) revert MILESTONE_NOT_PENDING();
+        if (_milestoneStatus == Status.None) revert MilestonesExtension_INVALID_MILESTONE_STATUS();
+        if (milestones[upcomingMilestone].status != Status.Pending) revert MilestonesExtension_MILESTONE_NOT_PENDING();
     }
 
     /// @notice Increase max bid for RFP pool
     /// @param _maxBid The new max bid to be set
     function _increaseMaxBid(uint256 _maxBid) internal {
         // make sure the new max bid is greater than the current max bid
-        if (_maxBid < maxBid) revert AMOUNT_TOO_LOW();
+        if (_maxBid < maxBid) revert MilestonesExtension_AMOUNT_TOO_LOW();
 
         maxBid = _maxBid;
 
