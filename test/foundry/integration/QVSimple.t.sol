@@ -6,6 +6,7 @@ import {Allo} from "contracts/core/Allo.sol";
 import {Registry, Metadata} from "contracts/core/Registry.sol";
 import {QVSimple} from "contracts/strategies/QVSimple.sol";
 import {IRecipientsExtension} from "contracts/extensions/interfaces/IRecipientsExtension.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract IntegrationQVSimple is Test {
     Allo public allo;
@@ -70,6 +71,11 @@ contract IntegrationQVSimple is Test {
             0, "Test Profile", Metadata({protocol: 0, pointer: ""}), profileOwner, new address[](0)
         );
 
+        // Deal
+        deal(dai, profileOwner, 100000 ether);
+        vm.prank(profileOwner);
+        IERC20(dai).approve(address(allo), 100000 ether);
+
         // Creating pool (and deploying strategy)
         address[] memory managers = new address[](1);
         managers[0] = profileOwner;
@@ -90,7 +96,7 @@ contract IntegrationQVSimple is Test {
                 })
             ),
             dai,
-            0,
+            100000 ether,
             Metadata({protocol: 0, pointer: ""}),
             managers
         );
@@ -150,5 +156,27 @@ contract IntegrationQVSimple is Test {
 
         vm.prank(address(allo));
         strategy.allocate(recipients, amounts, "", allocator0);
+    }
+
+    function test_Distribute() public {
+        address[] memory recipients = new address[](3);
+        recipients[0] = recipient0;
+        recipients[1] = recipient1;
+        recipients[2] = recipient2;
+
+        uint256[] memory amounts = new uint256[](3);
+        amounts[0] = 10;
+        amounts[1] = 20;
+        amounts[2] = 30;
+
+        vm.prank(address(allo));
+        strategy.allocate(recipients, amounts, "", allocator0);
+
+        // Advance time
+        vm.roll(1);
+        vm.warp(block.timestamp + 8 days);
+
+        vm.prank(address(allo));
+        strategy.distribute(recipients, "", profileOwner);
     }
 }
