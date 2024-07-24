@@ -1,0 +1,32 @@
+
+    ////////////////////////////////////////////////////
+      Deploys DirectAllocationStrategy.sol on celo-mainnet
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────┐
+│     (index)     │                    Values                    │
+├─────────────────┼──────────────────────────────────────────────┤
+│    contract     │        'DirectAllocationStrategy.sol'        │
+│     chainId     │                    42220                     │
+│     network     │                'celo-mainnet'                │
+│ deployerAddress │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│     balance     │                '157.90486589'                │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying DirectAllocationStrategy.sol
+[35mContract DirectAllocationStrategy deployed at address: 0x56662F9c0174cD6ae14b214fC52Bd6Eb6B6eA602[0m
+
+Verifying contract...
+Successfully submitted source code for contract
+contracts/strategies/direct-allocation/DirectAllocation.sol:DirectAllocationStrategy at 0x56662F9c0174cD6ae14b214fC52Bd6Eb6B6eA602
+for verification on the block explorer. Waiting for verification result...
+
+Successfully verified contract DirectAllocationStrategy on the block explorer.
+https://celoscan.io/address/0x56662F9c0174cD6ae14b214fC52Bd6Eb6B6eA602#code
+[90m
+	Validating getAllo() == 0x1133eA7Af70876e64665ecD07C0A0476d09465a1[0m
+[32m	✅ PASSED with Result: 0x1133eA7Af70876e64665ecD07C0A0476d09465a1[0m
+[90m
+	Validating getStrategyId() == 0x4cd0051913234cdd7d165b208851240d334786d6e5afbb4d0eec203515a9c6f3[0m
+[32m	✅ PASSED with Result: 0x4cd0051913234cdd7d165b208851240d334786d6e5afbb4d0eec203515a9c6f3[0m
+Adding DirectAllocationStrategy v1.1 to cloneable strategies...
+DirectAllocationStrategy v1.1 added to cloneable strategies.

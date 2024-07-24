@@ -163,7 +163,10 @@ const config: HardhatUserConfig = {
       "arbitrum-mainnet",
       `https://arb-mainnet.g.alchemy.com/v2/${alchemyIdKey}`,
     ),
-    fantom: createMainnetConfig("fantom-mainnet", "https://rpc.ftm.tools"),
+    "fantom": { 
+      ...createMainnetConfig("fantom-mainnet"),
+      url: "https://fantom-pokt.nodies.app",
+    },
     "celo-mainnet": {
       ...createMainnetConfig("celo-mainnet"),
       url: "https://forno.celo.org",
@@ -174,8 +177,8 @@ const config: HardhatUserConfig = {
     },
     polygon: {
       ...createMainnetConfig("polygon"),
-      url: `https://polygon-mainnet.g.alchemy.com/v2/${alchemyIdKey}`,
-      gasPrice: 450000000000,
+      url: `https://polygon-pokt.nodies.app`,
+      // gasPrice: 450000000000,
     },
     avalanche: {
       ...createMainnetConfig("avalanche"),
