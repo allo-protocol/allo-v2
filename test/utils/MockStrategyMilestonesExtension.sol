@@ -7,6 +7,8 @@ import {IMilestonesExtension} from "../../contracts/extensions/interfaces/IMiles
 import {Test} from "forge-std/Test.sol";
 
 contract MockStrategyMilestonesExtension is CoreBaseStrategy, MilestonesExtension, Test {
+    address public acceptedRecipientId;
+
     constructor(address _allo) CoreBaseStrategy(_allo) {}
 
     function initialize(uint256 _poolId, bytes memory _data) external {
@@ -40,5 +42,9 @@ contract MockStrategyMilestonesExtension is CoreBaseStrategy, MilestonesExtensio
 
     function expose_setProposalBid(address _bidderId, uint256 _proposalBid) external {
         _setProposalBid(_bidderId, _proposalBid);
+    }
+
+    function _isAcceptedRecipient(address _recipientId) internal view override returns (bool) {
+        return _recipientId == acceptedRecipientId;
     }
 }

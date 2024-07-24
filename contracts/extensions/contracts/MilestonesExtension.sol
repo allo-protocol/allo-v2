@@ -14,9 +14,6 @@ abstract contract MilestonesExtension is CoreBaseStrategy, IMilestonesExtension 
     /// ========== Storage =============
     /// ================================
 
-    /// @notice The accepted recipient who can submit milestones.
-    address public acceptedRecipientId;
-
     /// @notice The maximum bid allowed.
     uint256 public maxBid;
 
@@ -27,7 +24,7 @@ abstract contract MilestonesExtension is CoreBaseStrategy, IMilestonesExtension 
     /// @dev 'recipientId' to 'bid'
     mapping(address => uint256) public bids;
 
-    /// @notice Collection of milestones submitted by the 'acceptedRecipientId'
+    /// @notice Collection of milestones
     Milestone[] internal milestones;
 
     /// ===============================
@@ -70,7 +67,7 @@ abstract contract MilestonesExtension is CoreBaseStrategy, IMilestonesExtension 
         _increaseMaxBid(_maxBid);
     }
 
-    /// @notice Set the milestones for the acceptedRecipientId.
+    /// @notice Set the milestones.
     /// @dev Emits 'MilestonesSet' event
     /// @param _milestones Milestone[] The milestones to be set
     function setMilestones(Milestone[] memory _milestones) external virtual {
@@ -99,7 +96,7 @@ abstract contract MilestonesExtension is CoreBaseStrategy, IMilestonesExtension 
         emit MilestonesSet(milestonesLength);
     }
 
-    /// @notice Submit milestone by the acceptedRecipientId.
+    /// @notice Submit milestone by an accepted recipient.
     /// @dev Emits a 'MilestonesSubmitted()' event.
     /// @param _metadata The proof of work
     function submitUpcomingMilestone(Metadata calldata _metadata) external virtual {
@@ -116,7 +113,7 @@ abstract contract MilestonesExtension is CoreBaseStrategy, IMilestonesExtension 
         emit MilestoneSubmitted(upcomingMilestone);
     }
 
-    /// @notice Review a pending milestone submitted by the acceptedRecipientId.
+    /// @notice Review a pending milestone submitted by an accepted recipient.
     /// @dev Emits a 'MilestoneStatusChanged()' event.
     /// @param _milestoneStatus New status of the milestone
     function reviewMilestone(Status _milestoneStatus) external virtual {
@@ -158,8 +155,8 @@ abstract contract MilestonesExtension is CoreBaseStrategy, IMilestonesExtension 
     }
 
     function _validateSubmitUpcomingMilestone(address _sender) internal virtual {
-        // Check if the 'msg.sender' is the 'acceptedRecipientId'
-        if (acceptedRecipientId != _sender) revert MilestonesExtension_INVALID_SUBMITTER();
+        // Check if the 'msg.sender' is accepted
+        if (!_isAcceptedRecipient(_sender)) revert MilestonesExtension_INVALID_SUBMITTER();
 
         // Check if a submission is ongoing to prevent front-running a milestone review.
         if (milestones[upcomingMilestone].status == Status.Pending) revert MilestonesExtension_MILESTONE_PENDING();
@@ -183,7 +180,13 @@ abstract contract MilestonesExtension is CoreBaseStrategy, IMilestonesExtension 
         emit MaxBidIncreased(maxBid);
     }
 
-    function _getMilestonePayout(uint256 _milestoneId) internal view virtual returns (uint256) {
-        return (bids[acceptedRecipientId] * milestones[_milestoneId].amountPercentage) / 1e18;
+    /// @notice Returns if the recipient is accepted
+    /// @param _recipientId The recipient id
+    /// @return If the recipient is accepted
+    function _isAcceptedRecipient(address _recipientId) internal view virtual returns (bool);
+
+    function _getMilestonePayout(address _recipientId, uint256 _milestoneId) internal view virtual returns (uint256) {
+        if (!_isAcceptedRecipient(_recipientId)) revert MilestonesExtension_INVALID_RECIPIENT();
+        return (bids[_recipientId] * milestones[_milestoneId].amountPercentage) / 1e18;
     }
 }

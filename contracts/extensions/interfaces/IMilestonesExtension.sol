@@ -14,6 +14,9 @@ interface IMilestonesExtension {
     /// @notice Thrown when the proposal bid exceeds maximum bid
     error MilestonesExtension_EXCEEDING_MAX_BID();
 
+    /// @notice Thrown when a recipient is not accepted
+    error MilestonesExtension_INVALID_RECIPIENT();
+
     /// @notice Thrown when an unauthorized address attempts to submit a milestone
     error MilestonesExtension_INVALID_SUBMITTER();
 
@@ -93,10 +96,6 @@ interface IMilestonesExtension {
     /// ========== Storage =============
     /// ================================
 
-    /// @notice The accepted recipient who can submit milestones.
-    /// @return acceptedRecipientId Returns the address of the accepted recipient
-    function acceptedRecipientId() external view returns (address);
-
     /// @notice The maximum bid for the RFP pool.
     /// @return maxBid Returns the maximum bid allowed
     function maxBid() external view returns (uint256);
@@ -132,17 +131,17 @@ interface IMilestonesExtension {
     /// @param _maxBid The max bid to be set
     function increaseMaxBid(uint256 _maxBid) external;
 
-    /// @notice Set the milestones for the acceptedRecipientId.
+    /// @notice Set the milestones.
     /// @dev Emits 'MilestonesSet' event
     /// @param _milestones Milestone[] The milestones to be set
     function setMilestones(Milestone[] memory _milestones) external;
 
-    /// @notice Submit milestone by the acceptedRecipientId.
+    /// @notice Submit milestone by an accepted recipient.
     /// @dev Emits a 'MilestonesSubmitted()' event.
     /// @param _metadata The proof of work
     function submitUpcomingMilestone(Metadata calldata _metadata) external;
 
-    /// @notice Reject pending milestone submmited by the acceptedRecipientId.
+    /// @notice Reject pending milestone submmited by an accepted recipient.
     /// @dev Emits a 'MilestoneStatusChanged()' event.
     /// @param _milestoneStatus ID of the milestone
     function reviewMilestone(Status _milestoneStatus) external;
