@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-// External Libraries
+// Interfaces
+import {IAllo} from "contracts/core/interfaces/IAllo.sol";
+import {IRecipientsExtension} from "contracts/extensions/interfaces/IRecipientsExtension.sol";
+// Contracts
 import {CoreBaseStrategy} from "contracts/strategies/CoreBaseStrategy.sol";
 import {RecipientsExtension} from "contracts/extensions/contracts/RecipientsExtension.sol";
-import {IRecipientsExtension} from "contracts/extensions/interfaces/IRecipientsExtension.sol";
 import {QVHelper} from "contracts/core/libraries/QVHelper.sol";
-import {IAllo} from "contracts/core/interfaces/IAllo.sol";
-// import {Multicall} from "openzeppelin-contracts/contracts/utils/Multicall.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⣿⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -29,7 +29,8 @@ contract QVSimple is CoreBaseStrategy, RecipientsExtension {
     /// ======================
     /// ======= Storage ======
     /// ======================
-
+    
+    /// @notice Stores the voting state for QVHelper library
     QVHelper.VotingState internal _votingState;
 
     /// @notice The maximum voice credits per allocator
@@ -47,11 +48,16 @@ contract QVSimple is CoreBaseStrategy, RecipientsExtension {
     /// @dev allocator => bool
     mapping(address => bool) public allowedAllocators;
 
+    /// @notice The voice credits allocated for each allocator
     mapping(address => uint256) public voiceCreditsAllocated;
 
     /// @notice Returns whether or not the recipient has been paid out using their ID
     /// @dev recipientId => paid out
     mapping(address => bool) public paidOut;
+
+    /// ===============================
+    /// ========= Constructor =========
+    /// ===============================
 
     constructor(address _allo) CoreBaseStrategy(_allo) {}
 
@@ -59,6 +65,9 @@ contract QVSimple is CoreBaseStrategy, RecipientsExtension {
     /// ========= Initialize ==========
     /// ===============================
 
+    /// @notice Initialize the strategy
+    /// @param _poolId The pool id
+    /// @param _data The data to initialize the strategy (Must include RecipientInitializeData and QVSimpleInitializeData)
     function initialize(uint256 _poolId, bytes memory _data) external override {
         __BaseStrategy_init(_poolId);
 
@@ -68,15 +77,12 @@ contract QVSimple is CoreBaseStrategy, RecipientsExtension {
         ) = abi.decode(_data, (IRecipientsExtension.RecipientInitializeData, QVSimpleInitializeData));
 
         __RecipientsExtension_init(recipientInitializeData);
-        __QVBaseStrategy_init(qvSimpleInitializeData);
+
+        maxVoiceCreditsPerAllocator = qvSimpleInitializeData.maxVoiceCreditsPerAllocator;
+        allocationStartTime = qvSimpleInitializeData.allocationStartTime;
+        allocationEndTime = qvSimpleInitializeData.allocationEndTime;
 
         emit Initialized(_poolId, _data);
-    }
-
-    function __QVBaseStrategy_init(QVSimpleInitializeData memory _data) internal {
-        maxVoiceCreditsPerAllocator = _data.maxVoiceCreditsPerAllocator;
-        allocationStartTime = _data.allocationStartTime;
-        allocationEndTime = _data.allocationEndTime;
     }
 
     /// ======================
@@ -141,14 +147,6 @@ contract QVSimple is CoreBaseStrategy, RecipientsExtension {
     /// ============ Internal ==============
     /// ====================================
 
-    /// @notice Check if the allocation is active
-    /// @dev Reverts if the allocation is not active
-    function _checkOnlyActiveAllocation() internal view virtual {
-        if (allocationStartTime > block.timestamp || block.timestamp > allocationEndTime) {
-            revert ALLOCATION_NOT_ACTIVE();
-        }
-    }
-
     /// @notice Check if the allocation has ended
     /// @dev Reverts if the allocation has not ended
     function _checkOnlyAfterAllocation() internal view virtual {
@@ -193,6 +191,11 @@ contract QVSimple is CoreBaseStrategy, RecipientsExtension {
         }
     }
 
+    /// @notice Allocate voice credits to an array of recipients
+    /// @param __recipients The recipients
+    /// @param _amounts The amounts of voice credits to allocate
+    /// @param _data The data 
+    /// @param _sender The actual sender of the transaction
     function _allocate(address[] memory __recipients, uint256[] memory _amounts, bytes memory _data, address _sender)
         internal
         override
@@ -250,12 +253,14 @@ contract QVSimple is CoreBaseStrategy, RecipientsExtension {
         return _voiceCreditsToAllocate + _allocatedVoiceCredits <= maxVoiceCreditsPerAllocator;
     }
 
+    /// @notice Ensure no withdrawals are allowed before the allocation end time
     function _beforeWithdraw(address, uint256, address) internal override {
         if (block.timestamp <= allocationEndTime + 30 days) {
             revert INVALID();
         }
     }
 
+    /// @notice Ensure no increase in pool amount is allowed after the distribution starts
     function _beforeIncreasePoolAmount(uint256) internal virtual override {
         if (distributionStarted) {
             revert INVALID();
