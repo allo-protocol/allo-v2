@@ -223,6 +223,8 @@ contract QVSimple is CoreBaseStrategy, RecipientsExtension {
 
         _votingState._voteWithVoiceCredits(__recipients, _amounts);
 
+        voiceCreditsAllocated[_sender] += voiceCreditsToAllocate;
+
         // TODO: fix it (recipients is an array and amounts too)
         // emit Allocated(recipientId, _sender, voiceCreditsToAllocate, _data);
     }
