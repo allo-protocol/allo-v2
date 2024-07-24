@@ -149,13 +149,25 @@ contract IntegrationQVSimple is Test {
         recipients[1] = recipient1;
         recipients[2] = recipient2;
 
-        uint256[] memory amounts = new uint256[](3);
-        amounts[0] = 10;
-        amounts[1] = 20;
-        amounts[2] = 30;
+        // Allocator 0
+        uint256[] memory amounts0 = new uint256[](3);
+        amounts0[0] = 10;
+        amounts0[1] = 20;
+        amounts0[2] = 30;
 
         vm.prank(address(allo));
-        strategy.allocate(recipients, amounts, "", allocator0);
+        strategy.allocate(recipients, amounts0, "", allocator0);
+        assertEq(strategy.voiceCreditsAllocated(allocator0), 60);
+
+        // Allocator 1
+        uint256[] memory amounts1 = new uint256[](3);
+        amounts1[0] = 50;
+        amounts1[1] = 20;
+        amounts1[2] = 10;
+
+        vm.prank(address(allo));
+        strategy.allocate(recipients, amounts1, "", allocator1);
+        assertEq(strategy.voiceCreditsAllocated(allocator1), 80);
     }
 
     function test_Distribute() public {
@@ -178,5 +190,9 @@ contract IntegrationQVSimple is Test {
 
         vm.prank(address(allo));
         strategy.distribute(recipients, "", profileOwner);
+
+        assertEq(IERC20(dai).balanceOf(recipient0), 25000 ether);
+        assertApproxEqRel(IERC20(dai).balanceOf(recipient1), 33333.33 ether, 0.01e18);
+        assertApproxEqRel(IERC20(dai).balanceOf(recipient2), 41666.66 ether, 0.01e18);
     }
 }
