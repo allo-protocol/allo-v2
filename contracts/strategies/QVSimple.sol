@@ -29,7 +29,7 @@ contract QVSimple is CoreBaseStrategy, RecipientsExtension {
     /// ======================
     /// ======= Storage ======
     /// ======================
-    
+
     /// @notice Stores the voting state for QVHelper library
     QVHelper.VotingState internal _votingState;
 
@@ -194,7 +194,7 @@ contract QVSimple is CoreBaseStrategy, RecipientsExtension {
     /// @notice Allocate voice credits to an array of recipients
     /// @param __recipients The recipients
     /// @param _amounts The amounts of voice credits to allocate
-    /// @param _data The data 
+    /// @param _data The data
     /// @param _sender The actual sender of the transaction
     function _allocate(address[] memory __recipients, uint256[] memory _amounts, bytes memory _data, address _sender)
         internal
