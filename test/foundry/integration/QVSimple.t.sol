@@ -27,6 +27,22 @@ contract IntegrationQVSimple is Test {
 
     address public constant dai = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
 
+    function _getApplicationStatus(address _recipientId, uint256 _status)
+        internal
+        view
+        returns (IRecipientsExtension.ApplicationStatus memory)
+    {
+        uint256 recipientIndex = strategy.recipientToStatusIndexes(_recipientId) - 1;
+
+        uint256 rowIndex = recipientIndex / 64;
+        uint256 colIndex = (recipientIndex % 64) * 4;
+        uint256 currentRow = strategy.statusesBitMap(rowIndex);
+        uint256 newRow = currentRow & ~(15 << colIndex);
+        uint256 statusRow = newRow | (_status << colIndex);
+
+        return IRecipientsExtension.ApplicationStatus({index: rowIndex, statusRow: statusRow});
+    }
+
     function setUp() public {
         vm.createSelectFork(vm.rpcUrl("mainnet"), 20289932);
 
@@ -58,7 +74,7 @@ contract IntegrationQVSimple is Test {
         address[] memory managers = new address[](1);
         managers[0] = profileOwner;
         vm.prank(profileOwner);
-        poolId = allo.createPool(
+        poolId = allo.createPoolWithCustomStrategy(
             profileId,
             address(strategy),
             abi.encode(
@@ -79,20 +95,60 @@ contract IntegrationQVSimple is Test {
             managers
         );
 
-        // // Adding allocators
-        // vm.startPrank(profileOwner);
-        // strategy.addAllocator(allocator0);
-        // strategy.addAllocator(allocator1);
+        // Adding allocators
+        vm.startPrank(profileOwner);
+        strategy.addAllocator(allocator0);
+        strategy.addAllocator(allocator1);
 
-        // // Adding recipients
-        // vm.startPrank(address(allo));
+        // Adding recipients
+        vm.startPrank(address(allo));
 
-        // address[] memory recipients = new address[](1);
-        // recipients[0] = recipient0;
-        // strategy.register(recipients, abi.encode(address(0), Metadata({protocol: 0, pointer: ""})), recipient0);
+        address[] memory recipients = new address[](1);
+        bytes[] memory data = new bytes[](1);
+
+        recipients[0] = recipient0;
+        data[0] = abi.encode(address(0), Metadata({protocol: 0, pointer: ""}));
+        strategy.register(recipients, abi.encode(data), recipient0);
+
+        recipients[0] = recipient1;
+        data[0] = abi.encode(address(0), Metadata({protocol: 0, pointer: ""}));
+        strategy.register(recipients, abi.encode(data), recipient1);
+
+        recipients[0] = recipient2;
+        data[0] = abi.encode(address(0), Metadata({protocol: 0, pointer: ""}));
+        strategy.register(recipients, abi.encode(data), recipient2);
+
+        vm.stopPrank();
+
+        // Review recipients (Mark them as accepted)
+        vm.startPrank(profileOwner);
+
+        // TODO: make them in batch
+        IRecipientsExtension.ApplicationStatus[] memory statuses = new IRecipientsExtension.ApplicationStatus[](1);
+        statuses[0] = _getApplicationStatus(recipient0, 2);
+        strategy.reviewRecipients(statuses, strategy.recipientsCounter());
+
+        statuses[0] = _getApplicationStatus(recipient1, 2);
+        strategy.reviewRecipients(statuses, strategy.recipientsCounter());
+
+        statuses[0] = _getApplicationStatus(recipient2, 2);
+        strategy.reviewRecipients(statuses, strategy.recipientsCounter());
+
+        vm.stopPrank();
     }
 
     function test_Allocate() public {
-        assertEq(poolId, strategy.getPoolId());
+        address[] memory recipients = new address[](3);
+        recipients[0] = recipient0;
+        recipients[1] = recipient1;
+        recipients[2] = recipient2;
+
+        uint256[] memory amounts = new uint256[](3);
+        amounts[0] = 10;
+        amounts[1] = 20;
+        amounts[2] = 30;
+
+        vm.prank(address(allo));
+        strategy.allocate(recipients, amounts, "", allocator0);
     }
 }

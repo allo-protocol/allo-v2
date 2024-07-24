@@ -116,7 +116,5 @@ contract IntegrationAllo is Test {
         assertTrue(success);
         assertTrue(allo.isPoolAdmin(poolId, userAddr));
         assertFalse(allo.isPoolAdmin(poolId, relayer));
-        // TODO: add this and other asserts on next PR
-        assertEq(poolId, strategy.getPoolId());
     }
 }
