@@ -135,6 +135,9 @@ abstract contract MilestonesExtension is CoreBaseStrategy, ContextUpgradeable, I
     /// ============ Internal ==============
     /// ====================================
 
+    /// @notice Sets the bid for a given `_bidderId` address, likely to match the recipient's address
+    /// @param _bidderId The address of the bidder
+    /// @param _proposalBid The amount that was bid
     function _setProposalBid(address _bidderId, uint256 _proposalBid) internal virtual {
         if (_proposalBid > maxBid) {
             // If the proposal bid is greater than the max bid this will revert
@@ -148,6 +151,8 @@ abstract contract MilestonesExtension is CoreBaseStrategy, ContextUpgradeable, I
         emit SetBid(_bidderId, _proposalBid);
     }
 
+    /// @notice Validates if the milestones can be set at this moment by the `_sender`
+    /// @param _sender The address setting the milestones
     function _validateSetMilestones(address _sender) internal virtual {
         _checkOnlyPoolManager(_sender);
         if (milestones.length > 0) {
@@ -156,6 +161,8 @@ abstract contract MilestonesExtension is CoreBaseStrategy, ContextUpgradeable, I
         }
     }
 
+    /// @notice Validates if the milestone can be submitted at this moment by the `_sender`
+    /// @param _sender The address of the submitter
     function _validateSubmitUpcomingMilestone(address _sender) internal virtual {
         // Check if the '_msgSender()' is accepted
         if (!_isAcceptedRecipient(_sender)) revert MilestonesExtension_INVALID_SUBMITTER();
@@ -164,6 +171,9 @@ abstract contract MilestonesExtension is CoreBaseStrategy, ContextUpgradeable, I
         if (milestones[upcomingMilestone].status == Status.Pending) revert MilestonesExtension_MILESTONE_PENDING();
     }
 
+    /// @notice Validates if the milestone can be reviewed at this moment by the `_sender` with `_milestoneStatus`
+    /// @param _sender The address of the reviewer
+    /// @param _milestoneStatus The new status to set the milestone to
     function _validateReviewMilestone(address _sender, Status _milestoneStatus) internal virtual {
         _checkOnlyPoolManager(_sender);
         if (_milestoneStatus == Status.None) revert MilestonesExtension_INVALID_MILESTONE_STATUS();
