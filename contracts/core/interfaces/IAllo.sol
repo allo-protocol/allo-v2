@@ -92,6 +92,10 @@ interface IAllo {
     /// @param registry Address of the new registry
     event RegistryUpdated(address registry);
 
+    /// @notice Emitted when the trusted forwarder is updated
+    /// @param trustedForwarder Address of the new trusted forwarder
+    event TrustedForwarderUpdated(address trustedForwarder);
+
     /// ====================================
     /// ==== External/Public Functions =====
     /// ====================================
@@ -102,12 +106,14 @@ interface IAllo {
     /// @param _treasury Address of the treasury
     /// @param _percentFee Percentage for the fee
     /// @param _baseFee Base fee amount
+    /// @param __trustedForwarder The address of the trusted forwarder
     function initialize(
         address _owner,
         address _registry,
         address payable _treasury,
         uint256 _percentFee,
-        uint256 _baseFee
+        uint256 _baseFee,
+        address __trustedForwarder
     ) external;
 
     /// @notice Creates a new pool (with a custom strategy)
@@ -287,4 +293,9 @@ interface IAllo {
     /// @dev 1e18 represents 100%
     /// @return feeDenominator The current fee denominator
     function getFeeDenominator() external view returns (uint256);
+
+    /// @notice Returns TRUE if the forwarder is trusted
+    /// @param forwarder The address of the forwarder to check
+    /// @return 'true' if the forwarder is trusted, otherwise 'false'
+    function isTrustedForwarder(address forwarder) external view returns (bool);
 }
