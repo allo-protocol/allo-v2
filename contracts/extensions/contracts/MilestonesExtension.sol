@@ -5,13 +5,11 @@ pragma solidity 0.8.19;
 import {IMilestonesExtension} from "../interfaces/IMilestonesExtension.sol";
 // Core Contracts
 import {CoreBaseStrategy} from "../../strategies/CoreBaseStrategy.sol";
-// External Contracts
-import {ContextUpgradeable} from "openzeppelin-contracts-upgradeable/contracts/utils/ContextUpgradeable.sol";
 // Internal Libraries
 import {Metadata} from "../../core/libraries/Metadata.sol";
 
 /// @title Milestone Extension Strategy
-abstract contract MilestonesExtension is CoreBaseStrategy, ContextUpgradeable, IMilestonesExtension {
+abstract contract MilestonesExtension is CoreBaseStrategy, IMilestonesExtension {
     /// ================================
     /// ========== Storage =============
     /// ================================
@@ -73,7 +71,7 @@ abstract contract MilestonesExtension is CoreBaseStrategy, ContextUpgradeable, I
     /// @dev Emits 'MilestonesSet' event
     /// @param _milestones Milestone[] The milestones to be set
     function setMilestones(Milestone[] memory _milestones) external virtual {
-        _validateSetMilestones(_msgSender());
+        _validateSetMilestones(msg.sender);
         uint256 totalAmountPercentage;
 
         // Loop through the milestones and add them to the milestones array
@@ -102,7 +100,7 @@ abstract contract MilestonesExtension is CoreBaseStrategy, ContextUpgradeable, I
     /// @dev Emits a 'MilestonesSubmitted()' event.
     /// @param _metadata The proof of work
     function submitUpcomingMilestone(Metadata calldata _metadata) external virtual {
-        _validateSubmitUpcomingMilestone(_msgSender());
+        _validateSubmitUpcomingMilestone(msg.sender);
 
         // Get the milestone and update the metadata and status
         Milestone storage milestone = milestones[upcomingMilestone];
@@ -119,7 +117,7 @@ abstract contract MilestonesExtension is CoreBaseStrategy, ContextUpgradeable, I
     /// @dev Emits a 'MilestoneStatusChanged()' event.
     /// @param _milestoneStatus New status of the milestone
     function reviewMilestone(Status _milestoneStatus) external virtual {
-        _validateReviewMilestone(_msgSender(), _milestoneStatus);
+        _validateReviewMilestone(msg.sender, _milestoneStatus);
         // Check if the milestone status is pending
 
         milestones[upcomingMilestone].status = _milestoneStatus;
@@ -164,7 +162,7 @@ abstract contract MilestonesExtension is CoreBaseStrategy, ContextUpgradeable, I
     /// @notice Validates if the milestone can be submitted at this moment by the `_sender`
     /// @param _sender The address of the submitter
     function _validateSubmitUpcomingMilestone(address _sender) internal virtual {
-        // Check if the '_msgSender()' is accepted
+        // Check if the 'msg.sender' is accepted
         if (!_isAcceptedRecipient(_sender)) revert MilestonesExtension_INVALID_SUBMITTER();
 
         // Check if a submission is ongoing to prevent front-running a milestone review.
