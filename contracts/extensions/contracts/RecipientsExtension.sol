@@ -102,7 +102,7 @@ abstract contract RecipientsExtension is CoreBaseStrategy, Errors, IRecipientsEx
     /// @param statuses new statuses
     /// @param refRecipientsCounter the recipientCounter the transaction is based on
     function reviewRecipients(ApplicationStatus[] memory statuses, uint256 refRecipientsCounter)
-        external
+        public
         virtual
         onlyPoolManager(msg.sender)
     {
