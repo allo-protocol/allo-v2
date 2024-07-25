@@ -216,6 +216,8 @@ contract QVSimple is CoreBaseStrategy, RecipientsExtension {
 
             // sum up the voice credits to allocate
             voiceCreditsToAllocate += _amounts[i];
+
+            emit Allocated(__recipients[i], _sender, voiceCreditsToAllocate, _data);
         }
 
         // check that the allocator has voice credits left to allocate
@@ -224,9 +226,6 @@ contract QVSimple is CoreBaseStrategy, RecipientsExtension {
         _votingState._voteWithVoiceCredits(__recipients, _amounts);
 
         voiceCreditsAllocated[_sender] += voiceCreditsToAllocate;
-
-        // TODO: fix it (recipients is an array and amounts too)
-        // emit Allocated(recipientId, _sender, voiceCreditsToAllocate, _data);
     }
 
     /// @notice Returns if the recipient is accepted
