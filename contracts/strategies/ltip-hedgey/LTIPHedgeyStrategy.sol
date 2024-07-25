@@ -2,12 +2,7 @@
 pragma solidity 0.8.19;
 
 // Interfaces
-import {IAllo} from "../../core/interfaces/IAllo.sol";
-import {IRegistry} from "../../core/interfaces/IRegistry.sol";
-// Internal Libraries
-import {Metadata} from "../../core/libraries/Metadata.sol";
-
-// Simple LTIP
+// Inherited simple LTIP
 import {LTIPSimpleStrategy} from "../ltip-simple/LTIPSimpleStrategy.sol";
 
 import {IERC20} from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
@@ -55,12 +50,11 @@ contract LTIPHedgeyStrategy is LTIPSimpleStrategy {
         address hedgeyContract;
         address vestingAdmin;
         bool adminTransferOBO;
+        uint256 cliff;
+        uint256 rate;
+        uint256 period;
         InitializeParams initializeParams;
     }
-
-    /// ===============================
-    /// ========== Errors =============
-    /// ===============================
 
     /// ===============================
     /// ========== Events =============
@@ -90,6 +84,15 @@ contract LTIPHedgeyStrategy is LTIPSimpleStrategy {
     /// @notice Toggle to allow the vestingAdmin to transfer a plan and NFT to another wallet on behalf of (OBO) a beneficiary. To be used only for emergencies.
     bool public adminTransferOBO;
 
+    /// @notice A cliff date which is a discrete date where tokens are not vested until this date, and then vest in a large single chunk on the cliff date
+    uint256 cliff;
+
+    /// @notice The amount of tokens that vest in a single period
+    uint256 rate;
+
+    /// @notice The amount of time in between each vesting time stamp, in seconds. A period of 1 means that tokens vest every second in a 'streaming' style.
+    uint256 period;
+
     /// ===============================
     /// ======== Constructor ==========
     /// ===============================
@@ -113,21 +116,22 @@ contract LTIPHedgeyStrategy is LTIPSimpleStrategy {
         emit Initialized(_poolId, _data);
     }
 
-    /// @notice This initializes the BaseStrategy
-    /// @dev You only need to pass the 'poolId' to initialize the BaseStrategy and the rest is specific to the strategy
+    /// @notice This initializes the LTIPSimpleStrategy
+    /// @dev You only need to pass the 'poolId' and the `initializeParams` to initialize the LTIPSimpleStrategy and the rest is specific to the strategy
     /// @param _initializeParams The initialize params
     function __LTIPHedgeyStrategy_init(uint256 _poolId, InitializeParamsHedgey memory _initializeParams) internal {
         // Initialize the BaseStrategy
         __LTIPSimpleStrategy_init(_poolId, _initializeParams.initializeParams);
 
+        if (_initializeParams.hedgeyContract == address(0)) revert ZERO_ADDRESS();
+        if (_initializeParams.vestingAdmin == address(0)) revert ZERO_ADDRESS();
         hedgeyContract = _initializeParams.hedgeyContract;
         vestingAdmin = _initializeParams.vestingAdmin;
         adminTransferOBO = _initializeParams.adminTransferOBO;
+        cliff = _initializeParams.cliff;
+        rate = _initializeParams.rate;
+        period = _initializeParams.period;
     }
-
-    /// ===============================
-    /// ============ Views ============
-    /// ===============================
 
     /// ===============================
     /// ======= External/Custom =======
@@ -136,11 +140,12 @@ contract LTIPHedgeyStrategy is LTIPSimpleStrategy {
     /// @notice Update the default admin wallet used when creating Hedgey plans
     /// @param _vestingAdmin The new admin address
     function setVestingAdmin(address _vestingAdmin) external onlyPoolManager(msg.sender) {
+        if (_vestingAdmin == address(0)) revert ZERO_ADDRESS();
         vestingAdmin = _vestingAdmin;
         emit AdminAddressUpdated(vestingAdmin, msg.sender);
     }
 
-    /// @notice Update the default sdmin wallet used when creating Hedgey plans
+    /// @notice Update the default admin wallet used when creating Hedgey plans
     /// @param _adminTransferOBO Set if the admin is allowed to transfer on behalf of the recipient
     function setAdminTransferOBO(bool _adminTransferOBO) external onlyPoolManager(msg.sender) {
         adminTransferOBO = _adminTransferOBO;
@@ -161,19 +166,16 @@ contract LTIPHedgeyStrategy is LTIPSimpleStrategy {
         virtual
         override
     {
-        Recipient memory recipient = _recipients[recipientId];
-
         IERC20(_token).approve(hedgeyContract, _amount);
 
-        uint256 rate = _amount / recipient.allocationAmount;
         uint256 hedgeyId = ITokenVestingPlans(hedgeyContract).createPlan(
             recipientAddress,
             _token,
             _amount,
             block.timestamp,
-            0, // No cliff
+            cliff, // No cliff
             rate,
-            1, // Linear period
+            period, // Linear period
             vestingAdmin,
             adminTransferOBO
         );
@@ -183,8 +185,4 @@ contract LTIPHedgeyStrategy is LTIPSimpleStrategy {
 
         emit VestingPlanCreated(recipientId, hedgeyContract, hedgeyId);
     }
-
-    /// ====================================
-    /// ============== Hooks ===============
-    /// ====================================
 }

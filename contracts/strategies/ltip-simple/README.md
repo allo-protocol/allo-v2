@@ -3,7 +3,7 @@
 The `LTIPSimpleStrategy` contract represents a smart contract for Long-Term Incentive Programs (LTIP). It extends the capabilities of the `BaseStrategy` contract and integrates features specifically tailored for managing applications and distributing funds. The contract also incorporates the `ReentrancyGuard` library to prevent reentrant attacks.
 
 ## Table of Contents
-- [RFPSimpleStrategy.sol](#rfpsimplestrategysol)
+- [LTIPSimpleStrategy.sol](#ltipsimplestrategysol)
   - [Table of Contents](#table-of-contents)
   - [Sequence Diagram](#sequence-diagram)
   - [Smart Contract Overview](#smart-contract-overview)

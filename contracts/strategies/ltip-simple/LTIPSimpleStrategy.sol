@@ -40,7 +40,6 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
     /// @notice Stores the details of the recipients.
     struct Recipient {
-        bool useRegistryAnchor;
         address recipientAddress;
         uint256 allocationAmount;
         Status recipientStatus;
@@ -82,13 +81,16 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     error APPLICATION_CANCELLED();
 
     /// @notice Thrown when the recipient already has allocation.
-    error ALREADY_ALLOCATED();
+    error ALREADY_VESTED();
 
     /// @notice Thrown when the review period has ended.
     error REVIEW_NOT_ACTIVE();
 
     /// @notice Thrown when the recipient doesn't have enough votes for fund distribution.
     error INSUFFICIENT_VOTES();
+
+    /// @notice Thrown when the rounds timestamps are configured incorrectly.
+    error INVALID_TIMESTAMPS(string reason);
 
     /// ===============================
     /// ========== Events =============
@@ -246,7 +248,7 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// ======== Constructor ==========
     /// ===============================
 
-    /// @notice Constructor for the RFP Simple Strategy
+    /// @notice Constructor for the LTIP Simple Strategy
     /// @param _allo The 'Allo' contract
     /// @param _name The name of the strategy
     constructor(address _allo, string memory _name) BaseStrategy(_allo, _name) {}
@@ -255,7 +257,7 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// ========= Initialize ==========
     /// ===============================
 
-    // @notice Initialize the strategy
+    /// @notice Initialize the strategy
     /// @param _poolId ID of the pool
     /// @param _data The data to be decoded
     /// @custom:data (bool registryGating, bool metadataRequired, uint256 votingThreshold, uint64 registrationStartTime, uint64 registrationEndTime, uint64 reviewStartTime, uint64 reviewEndTime, uint64 allocationStartTime, uint64 allocationEndTime, uint64 distributionStartTime, uint64 distributionEndTime, uint64 vestingPeriod)
@@ -272,6 +274,20 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         // Initialize the BaseStrategy
         __BaseStrategy_init(_poolId);
 
+        if (_initializeParams.votingThreshold == 0) revert INVALID();
+        if (_initializeParams.vestingPeriod == 0) revert INVALID();
+
+        _isPoolTimestampValid(
+            _initializeParams.allocationStartTime,
+            _initializeParams.allocationEndTime,
+            _initializeParams.distributionStartTime,
+            _initializeParams.distributionEndTime,
+            _initializeParams.registrationStartTime,
+            _initializeParams.registrationStartTime,
+            _initializeParams.reviewStartTime,
+            _initializeParams.reviewEndTime
+        );
+
         // Set the strategy specific variables
         registryGating = _initializeParams.registryGating;
         metadataRequired = _initializeParams.metadataRequired;
@@ -287,10 +303,6 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         vestingPeriod = _initializeParams.vestingPeriod;
 
         _registry = allo.getRegistry();
-
-        // Set the pool to active - this is required for the strategy to work and distribute funds
-        // NOTE: There may be some cases where you may want to not set this here, but will be strategy specific
-        _setPoolActive(true);
     }
 
     /// ===============================
@@ -301,7 +313,7 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _recipientId ID of the recipient
     /// @return Recipient Returns the recipient
     function getRecipient(address _recipientId) external view returns (Recipient memory) {
-        return _getRecipient(_recipientId);
+        return _recipients[_recipientId];
     }
 
     /// @notice Get the vesting plan
@@ -384,7 +396,7 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
             address recipientId = __recipientIds[i];
             Recipient storage recipient = _recipients[recipientId];
 
-            // if the status is none or appealed then revert
+            // if the status is none or canceled then revert
             if (recipient.recipientStatus == Status.None || recipient.recipientStatus == Status.Canceled) {
                 revert RECIPIENT_ERROR(recipientId);
             }
@@ -399,21 +411,13 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         }
     }
 
-    /// @notice Toggle the status between active and inactive.
-    /// @dev 'msg.sender' must be a pool manager to close the pool. Emits a 'PoolActive()' event.
-    /// @param _flag The flag to set the pool to active or inactive
-    function setPoolActive(bool _flag) external onlyPoolManager(msg.sender) {
-        _setPoolActive(_flag);
-    }
-
     /// @notice Withdraw the tokens from the pool
     /// @dev Callable by the pool manager
     /// @param _token The token to withdraw
     function withdraw(address _token) external virtual onlyPoolManager(msg.sender) {
         uint256 amount = _getBalance(_token, address(this));
 
-        IAllo.Pool memory pool = allo.getPool(poolId);
-        _transferAmount(pool.token, msg.sender, amount);
+        _transferAmount(_token, msg.sender, amount);
     }
 
     /// @notice Sets the start and end dates.
@@ -446,6 +450,12 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         // Set the updated timestamps
         registrationStartTime = _registrationStartTime;
         registrationEndTime = _registrationEndTime;
+        reviewStartTime = _reviewStartTime;
+        reviewEndTime = _reviewEndTime;
+        allocationStartTime = _allocationStartTime;
+        allocationEndTime = _allocationEndTime;
+        distributionStartTime = _distributionStartTime;
+        distributionEndTime = _distributionEndTime;
 
         // Emit that the timestamps have been updated with the updated values
         emit TimestampsUpdated(
@@ -516,22 +526,16 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
         // update the recipients data
         recipient.recipientAddress = recipientAddress;
-        recipient.useRegistryAnchor = registryGating ? true : isUsingRegistryAnchor;
         recipient.allocationAmount = allocationAmount;
         recipient.metadata = metadata;
         recipient.recipientStatus = Status.Pending;
 
-        if (recipient.recipientStatus == Status.None) {
-            // If the recipient status is 'None' add the recipient to the '_recipientIds' array
-            _recipientIds.push(recipientId);
-            emit Registered(recipientId, _data, _sender);
-        } else {
-            emit UpdatedRegistration(recipientId, _data, _sender);
-        }
+        _recipientIds.push(recipientId);
+        emit Registered(recipientId, _data, _sender);
     }
 
     /// @notice Allocate (delegated) voting power to a recipient. In the simple strategy, every authorized voter has 1 vote.
-    /// @dev '_sender' must be a pool manager to allocate.
+    /// @dev '_sender' must be allowed to allocate.
     /// @param _data The data to be decoded
     /// @param _sender The sender of the allocation
     function _allocate(bytes memory _data, address _sender)
@@ -541,6 +545,7 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         nonReentrant
         onlyActiveAllocation
     {
+        if (!_isValidAllocator(_sender)) revert UNAUTHORIZED();
         // Decode the '_data'
         address recipientId = abi.decode(_data, (address));
         Recipient storage recipient = _recipients[recipientId];
@@ -599,11 +604,13 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
             Recipient memory recipient = _recipients[recipientId];
 
-            // Check if the recipient is accepten
+            // Check if the recipient is accepted
+            
             if (recipient.recipientStatus != Status.Accepted) revert RECIPIENT_NOT_ACCEPTED();
-            if (votes[recipientId] < votingThreshold) revert INSUFFICIENT_VOTES();
 
-            if (_vestingPlans[recipientId].vestingContract != address(0)) revert ALREADY_ALLOCATED();
+            if(votes[recipientId] < votingThreshold) revert INSUFFICIENT_VOTES();
+            
+            if (_vestingPlans[recipientId].vestingContract != address(0)) revert ALREADY_VESTED();
 
             // Get the pool, subtract the amount and transfer to the recipient
             poolAmount -= recipient.allocationAmount;
@@ -619,6 +626,13 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         }
     }
 
+    /// @notice Checks if the pool is active.
+    /// @dev Used by the strategy implementation.
+    /// @return 'true' if the pool is active, otherwise 'false'
+    function _isPoolActive() internal view virtual override returns (bool) {
+        return block.timestamp >= allocationStartTime && block.timestamp <= distributionEndTime;
+    }
+
     function _isPoolTimestampValid(
         uint64 _allocationStartTime,
         uint64 _allocationEndTime,
@@ -629,18 +643,44 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         uint64 _reviewStartTime,
         uint64 _reviewEndTime
     ) internal view {
-        if (
-            block
-                // Register timestamps must be in the future
-                .timestamp > _registrationStartTime
+        if (block.timestamp > _registrationStartTime) {
+            // Register timestamps must be in the future
+            revert INVALID_TIMESTAMPS("block.timestamp > _registrationStartTime");
+        }
+
+        if (_allocationStartTime > _allocationEndTime) {
             // Start times must be before end times
-            || _allocationStartTime > _allocationEndTime || _distributionStartTime > _distributionEndTime
-                || _registrationStartTime > _registrationEndTime || _reviewStartTime > _reviewEndTime
+            revert INVALID_TIMESTAMPS("_allocationStartTime > _allocationEndTime");
+        }
+
+        if (_distributionStartTime > _distributionEndTime) {
+            // Start times must be before end times
+            revert INVALID_TIMESTAMPS("_distributionStartTime > _distributionEndTime");
+        }
+
+        if (_registrationStartTime > _registrationEndTime) {
+            // Start times must be before end times
+            revert INVALID_TIMESTAMPS("_registrationStartTime > _registrationEndTime");
+        }
+
+        if (_reviewStartTime > _reviewEndTime) {
+            // Start times must be before end times
+            revert INVALID_TIMESTAMPS("_reviewStartTime > _reviewEndTime");
+        }
+
+        if (_registrationEndTime > _allocationEndTime) {
             // Some end times must be after other end times
-            || _registrationEndTime > _allocationEndTime || _allocationEndTime > _distributionStartTime
-                || _reviewStartTime > allocationEndTime
-        ) {
-            revert INVALID();
+            revert INVALID_TIMESTAMPS("_registrationEndTime > _allocationEndTime");
+        }
+
+        if (_allocationEndTime > _distributionEndTime) {
+            // Some end times must be after other end times
+            revert INVALID_TIMESTAMPS("_allocationEndTime > _distributionEndTime");
+        }
+
+        if (_reviewStartTime > _allocationEndTime) {
+            // Some end times must be after other end times
+            revert INVALID_TIMESTAMPS("_reviewStartTime > _allocationEndTime");
         }
     }
 
@@ -661,17 +701,10 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         return allo.isPoolManager(poolId, _allocator);
     }
 
-    /// @notice Get the recipient.
-    /// @param _recipientId ID of the recipient
-    /// @return recipient Returns the recipient information
-    function _getRecipient(address _recipientId) internal view returns (Recipient memory recipient) {
-        recipient = _recipients[_recipientId];
-    }
-
     /// @notice Checks if msg.sender is eligible for RFP allocation
     /// @param _recipientId Id of the recipient
     function _getRecipientStatus(address _recipientId) internal view override returns (Status) {
-        return _getRecipient(_recipientId).recipientStatus;
+        return _recipients[_recipientId].recipientStatus;
     }
 
     /// @notice Get the payout summary for the accepted recipient.
