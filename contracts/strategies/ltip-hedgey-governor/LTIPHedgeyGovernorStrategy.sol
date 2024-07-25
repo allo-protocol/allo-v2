@@ -5,7 +5,6 @@ pragma solidity 0.8.19;
 // Inherited LTIP Hedgey Strategy
 import {LTIPHedgeyStrategy} from "../ltip-hedgey/LTIPHedgeyStrategy.sol";
 
-
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⣿⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣸⣿⣿⣿⢿⣿⣿⣿⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -108,9 +107,8 @@ contract LTIPHedgeyGovernorStrategy is LTIPHedgeyStrategy {
             abi.decode(_data, (address, uint256, InitializeParamsHedgey));
         __LTIPHedgeyStrategy_init(_poolId, _initializeParamsHedgey);
 
-        if(_timepoint == 0) revert INVALID();
-        if(_governorContract == address(0)) revert ZERO_ADDRESS();
-
+        if (_timepoint == 0) revert INVALID();
+        if (_governorContract == address(0)) revert ZERO_ADDRESS();
 
         timepoint = _timepoint;
         governorContract = _governorContract;
@@ -127,7 +125,7 @@ contract LTIPHedgeyGovernorStrategy is LTIPHedgeyStrategy {
     /// @notice Update the block number to get voting balances from the Governor contract
     /// @param _timepoint The new block number
     function setTimepoint(uint256 _timepoint) external onlyPoolManager(msg.sender) {
-       if(_timepoint == 0) revert INVALID();
+        if (_timepoint == 0) revert INVALID();
         timepoint = _timepoint;
         emit TimepointUpdated(msg.sender, _timepoint);
     }

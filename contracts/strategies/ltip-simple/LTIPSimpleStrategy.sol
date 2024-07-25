@@ -605,11 +605,11 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
             Recipient memory recipient = _recipients[recipientId];
 
             // Check if the recipient is accepted
-            
+
             if (recipient.recipientStatus != Status.Accepted) revert RECIPIENT_NOT_ACCEPTED();
 
-            if(votes[recipientId] < votingThreshold) revert INSUFFICIENT_VOTES();
-            
+            if (votes[recipientId] < votingThreshold) revert INSUFFICIENT_VOTES();
+
             if (_vestingPlans[recipientId].vestingContract != address(0)) revert ALREADY_VESTED();
 
             // Get the pool, subtract the amount and transfer to the recipient
