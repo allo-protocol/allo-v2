@@ -203,8 +203,11 @@ abstract contract RecipientsExtension is CoreBaseStrategy, Errors, IRecipientsEx
             bytes memory data = datas[i];
 
             // decode data
-            (address recipientId, bool isUsingRegistryAnchor, Metadata memory metadata,) =
+            (address recipientId, bool isUsingRegistryAnchor, Metadata memory metadata, bytes memory extraData) =
                 _extractRecipientAndMetadata(data, _sender);
+
+            // Call hook
+            _processRecipient(recipientId, isUsingRegistryAnchor, metadata, extraData);
 
             // If the recipient address is the zero address this will revert
             if (recipientAddress == address(0)) {
@@ -330,4 +333,16 @@ abstract contract RecipientsExtension is CoreBaseStrategy, Errors, IRecipientsEx
 
         return (rowIndex, colIndex, statusesBitMap[rowIndex]);
     }
+
+    /// @notice Hook to process recipient data
+    /// @param _recipientId ID of the recipient
+    /// @param _isUsingRegistryAnchor A flag to indicate whether to use the registry anchor or not
+    /// @param _metadata The metadata of the recipient
+    /// @param _extraData The extra data of the recipient
+    function _processRecipient(
+        address _recipientId,
+        bool _isUsingRegistryAnchor,
+        Metadata memory _metadata,
+        bytes memory _extraData
+    ) internal virtual {}
 }
