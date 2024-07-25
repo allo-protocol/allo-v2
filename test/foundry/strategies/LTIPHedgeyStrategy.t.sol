@@ -63,6 +63,9 @@ contract LTIPHedgeyStrategyTest is
     address public hedgeyContract;
     address public vestingAdmin;
     bool public adminTransferOBO;
+    uint256 public cliff;
+    uint256 public rate;
+    uint256 public period;
 
     function setUp() public {
         __RegistrySetupFull();
@@ -85,6 +88,8 @@ contract LTIPHedgeyStrategyTest is
         allocationStartTime = uint64(weekAfterNext());
         allocationEndTime = uint64(oneMonthFromNow());
         vestingPeriod = uint64(oneMonthFromNow());
+        distributionStartTime = uint64(oneMonthFromNow());
+        distributionEndTime = uint64(oneMonthFromNow() + 7 days);
 
         metadataRequired = true;
         registryGating = true;
@@ -95,6 +100,9 @@ contract LTIPHedgeyStrategyTest is
         hedgeyContract = address(_vesting_);
         vestingAdmin = pool_admin();
         adminTransferOBO = true;
+        cliff = oneMonthFromNow();
+        rate = 1;
+        period = 7 days;
 
         votingThreshold = 2;
 
@@ -123,6 +131,9 @@ contract LTIPHedgeyStrategyTest is
                     hedgeyContract,
                     vestingAdmin,
                     adminTransferOBO,
+                    cliff,
+                    rate,
+                    period,
                     LTIPSimpleStrategy.InitializeParams(
                         registryGating,
                         metadataRequired,
@@ -163,6 +174,9 @@ contract LTIPHedgeyStrategyTest is
                     hedgeyContract,
                     vestingAdmin,
                     adminTransferOBO,
+                    cliff,
+                    rate,
+                    period,
                     LTIPSimpleStrategy.InitializeParams(
                         registryGating,
                         metadataRequired,
@@ -259,7 +273,6 @@ contract LTIPHedgeyStrategyTest is
         address recipientId = ltipStrategy().registerRecipient(data, profile1_member1());
 
         LTIPHedgeyStrategy.Recipient memory receipt = ltipStrategy().getRecipient(recipientId);
-        assertTrue(receipt.useRegistryAnchor);
 
         return recipientId;
     }
@@ -272,7 +285,6 @@ contract LTIPHedgeyStrategyTest is
         address recipientId = ltipStrategy().registerRecipient(data, profile1_member1());
 
         LTIPHedgeyStrategy.Recipient memory receipt = ltipStrategy().getRecipient(recipientId);
-        assertTrue(receipt.useRegistryAnchor);
 
         // Fund pool
         token.mint(pool_manager1(), 100e18);
@@ -293,7 +305,6 @@ contract LTIPHedgeyStrategyTest is
         address recipientId = ltipStrategy().registerRecipient(data, profile2_member1());
 
         LTIPHedgeyStrategy.Recipient memory receipt = ltipStrategy().getRecipient(recipientId);
-        assertTrue(receipt.useRegistryAnchor);
 
         return recipientId;
     }

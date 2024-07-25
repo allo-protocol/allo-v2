@@ -3,7 +3,8 @@
 The `LTIPSimpleStrategy` contract represents a smart contract for Long-Term Incentive Programs (LTIP). It extends the capabilities of the `BaseStrategy` contract and integrates features specifically tailored for managing applications and distributing funds. The contract also incorporates the `ReentrancyGuard` library to prevent reentrant attacks.
 
 ## Table of Contents
-- [RFPSimpleStrategy.sol](#rfpsimplestrategysol)
+
+- [LTIPSimpleStrategy.sol](#ltipsimplestrategysol)
   - [Table of Contents](#table-of-contents)
   - [Sequence Diagram](#sequence-diagram)
   - [Smart Contract Overview](#smart-contract-overview)
@@ -21,8 +22,7 @@ The `LTIPSimpleStrategy` contract represents a smart contract for Long-Term Ince
     - [Distributing Milestone](#distributing-milestone)
     - [Withdrawing Funds from Pool](#withdrawing-funds-from-pool)
 
-
-## Sequence Diagram 
+## Sequence Diagram
 
 ```mermaid
 sequenceDiagram
@@ -30,6 +30,7 @@ sequenceDiagram
     participant PoolManager
     participant Allo
     participant LTIPSimpleStrategy
+    participant TokenTimeLock
 
     PoolManager->>Allo: createPool() with LTIPSimpleStrategy
     Allo-->>PoolManager: poolId
@@ -37,10 +38,12 @@ sequenceDiagram
     Allo->>LTIPSimpleStrategy: registerRecipient()
     LTIPSimpleStrategy-->>Allo: recipient1
     Allo-->>-Alice: recipientId1
+    PoolManager->>Allo: reviewRecipient() (approves recipient)
     PoolManager->>+Allo: allocate() (votes on recipient)
     Allo-->>-LTIPSimpleStrategy: allocate() (accepts a recipient based on voting threshold and allocate proposed allocation amount)
     PoolManager->>+Allo: distribute() ( create vesting plan and deposit funds for recipient)
     Allo-->>-LTIPSimpleStrategy: distribute() (create TokenTimeLock)
+    LTIPSimpleStrategy->>+TokenTimeLock: deploy new TokenTimeLock contract 
 ```
 
 ## Smart Contract Overview
@@ -116,73 +119,76 @@ The `initialize` function decodes and initializes parameters passed during strat
 2. `cancelRecipients`: Allows pool managers to cancel recipient applications.
 3. `setPoolActive`: Sets the pool to active.
 4. `withdraw`: Allows pool managers to withdraw funds from the pool.
-3. `updatePoolTimestamps`: Extends the timestamp parameters of the round.
+5. `updatePoolTimestamps`: Extends the timestamp parameters of the round.
 
 ### Internal Functions
 
 1. `_registerRecipient`: Submit a proposal to receive funds from LTIP pool.
 2. `_allocate`: Select recipient for LTIP allocation
 3. `_vestAmount`: Create a vesting plan and deposit funds for the recipient.
-3. `_distribute`: Distributes upcoming milestone funds to the accepted recipient.
-4. `_isPoolTimestampValid`: Validated the pool timestamps.
-5. `_isProfileMember`: Check is msg.sender is a linked to a profile in the registry.
-6. `_getRecipient`: Retrieves the recipient details.
-7. `_getRecipientStatus`: Retrieves the status of a recipient.
-8. `_getPayout`: Retrieves the payout details for a recipient.
-9. `_checkOnlyActiveRegistration`: Checks if the registration period is active.
-10. `_checkOnlyActiveAllocation`: Checks if the allocation period is active.
-11. `_checkOnlyActiveReview`: Checks if the review period is active.
+4. `_distribute`: Distributes upcoming milestone funds to the accepted recipient.
+5. `_isPoolTimestampValid`: Validated the pool timestamps.
+6. `_isProfileMember`: Check is msg.sender is a linked to a profile in the registry.
+7. `_getRecipient`: Retrieves the recipient details.
+8. `_getRecipientStatus`: Retrieves the status of a recipient.
+9. `_getPayout`: Retrieves the payout details for a recipient.
+10. `_checkOnlyActiveRegistration`: Checks if the registration period is active.
+11. `_checkOnlyActiveAllocation`: Checks if the allocation period is active.
+12. `_checkOnlyActiveReview`: Checks if the review period is active.
 
 ## User Flows
 
 ### Registering a Recipient
 
-* Recipient or Profile Owner initiates a registration request.
-* If `useRegistryAnchor` is enabled:
-  * Submits recipient ID, proposal bid, and metadata.
-  * Verifies sender's authorization.
-  * Validates the provided data.
-  * Registers recipient as "Pending" with provided details.
-  * Emits `Registered` event.
-* If `useRegistryAnchor` is disabled:
-  * Submits recipient address, registry anchor, proposal bid, and metadata.
-  * Determines if the registry anchor is being used.
-  * Verifies sender's authorization.
-  * Validates the provided data.
-  * Registers recipient as "Pending" with provided details.
-  * Emits `Registered` event.
+- Recipient or Profile Owner initiates a registration request.
+- If `useRegistryAnchor` is enabled:
+  - Submits recipient ID, proposal bid, and metadata.
+  - Verifies sender's authorization.
+  - Validates the provided data.
+  - Registers recipient as "Pending" with provided details.
+  - Emits `Registered` event.
+- If `useRegistryAnchor` is disabled:
+  - Submits recipient address, registry anchor, proposal bid, and metadata.
+  - Determines if the registry anchor is being used.
+  - Verifies sender's authorization.
+  - Validates the provided data.
+  - Registers recipient as "Pending" with provided details.
+  - Emits `Registered` event.
 
 ### Accepting or rejecting an application
-* Recipient of Profile Owner registers on strategy by calling `registerRecipient` function.
-  * Emits `Registered` event.
-* If all checks are passed, the recipient is registered as "Pending".
-* When the review period is active, the PoolManager can vote on the acceptance of the recipient.
-  * If the recipient is accepted, the recipient status is set to "Accepted".
-  * If the recipient is rejected, the recipient status is set to "Rejected".
-* Emits `Reviewed` event.
+
+- Recipient of Profile Owner registers on strategy by calling `registerRecipient` function.
+  - Emits `Registered` event.
+- If all checks are passed, the recipient is registered as "Pending".
+- When the review period is active, the PoolManager can vote on the acceptance of the recipient.
+  - If the recipient is accepted, the recipient status is set to "Accepted".
+  - If the recipient is rejected, the recipient status is set to "Rejected".
+- Emits `Reviewed` event.
 
 ### Voting on acceptance of a recipient
-* Check is a vote has already been cast. 
-* All PoolManagers have a voting power of 1
-* PoolManager votes on the acceptance of the recipient.
-  * Assigns a vote to the recipient.
-  * Emits `Voted` event.
-* If the vote puts the recipient on the threshold, the recipient is accepted.
-  * Recipient status is set to "Accepted".
-  * Emits `Allocated` event.
+
+- Check is a vote has already been cast.
+- All PoolManagers have a voting power of 1
+- PoolManager votes on the acceptance of the recipient.
+  - Assigns a vote to the recipient.
+  - Emits `Voted` event.
+- If the vote puts the recipient on the threshold, the recipient is accepted.
+  - Recipient status is set to "Accepted".
+  - Emits `Allocated` event.
 
 ### Allocate funds in a vesting plan
-* Check if the recipient doesn't have an active vesting plan
-* Check if the recipient status is "Accepted".
-* Create a vesting plan for the recipient (a OZ TokenTimeLock contract instance).
-  * Transfer the allocated funds to the vesting plan.8
-  * Emits `VestingPlanCreated` event.
-* Emits `Distributed` event.
+
+- Check if the recipient doesn't have an active vesting plan
+- Check if the recipient status is "Accepted".
+- Create a vesting plan for the recipient (a OZ TokenTimeLock contract instance).
+  - Transfer the allocated funds to the vesting plan.8
+  - Emits `VestingPlanCreated` event.
+- Emits `Distributed` event.
 
 ### Withdrawing Funds from Pool
 
-* Pool Manager initiates a withdrawal request.
-* Verifies if sender is authorized to withdraw funds.
-* Checks if the pool is inactive.
-* Decreases the pool amount by the requested withdrawal amount.
-* Transfers the requested amount to the sender.
+- Pool Manager initiates a withdrawal request.
+- Verifies if sender is authorized to withdraw funds.
+- Checks if the pool is inactive.
+- Decreases the pool amount by the requested withdrawal amount.
+- Transfers the requested amount to the sender.

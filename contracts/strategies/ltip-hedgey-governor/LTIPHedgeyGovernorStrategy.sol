@@ -2,15 +2,8 @@
 pragma solidity 0.8.19;
 
 // Interfaces
-import {IAllo} from "../../core/interfaces/IAllo.sol";
-import {IRegistry} from "../../core/interfaces/IRegistry.sol";
-// Internal Libraries
-import {Metadata} from "../../core/libraries/Metadata.sol";
-
-// Simple LTIP
+// Inherited LTIP Hedgey Strategy
 import {LTIPHedgeyStrategy} from "../ltip-hedgey/LTIPHedgeyStrategy.sol";
-
-import {IERC20} from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⣿⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -29,7 +22,7 @@ import {IERC20} from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 
 /// @notice interface paramters to call Governor contract and get votes at a specific block
 interface IGovernor {
-    function getVotes(address recipient, uint256 blockNumer) external view returns (uint256 votingPower);
+    function getVotes(address recipient, uint256 timepoint) external view returns (uint256 votingPower);
 }
 
 /// @title LTIP Hedgey Governor Strategy
@@ -43,7 +36,7 @@ contract LTIPHedgeyGovernorStrategy is LTIPHedgeyStrategy {
     /// @notice The parameters used to initialize the strategy
     struct InitializeParamsGovernor {
         address governorContract;
-        uint256 votingBlock;
+        uint256 timepoint;
         InitializeParamsHedgey initializeParams;
     }
 
@@ -61,16 +54,15 @@ contract LTIPHedgeyGovernorStrategy is LTIPHedgeyStrategy {
     /// ========== Events =============
     /// ===============================
 
-    /// @notice Emitted when the block to check -delegated- token balances against is updated
+    /// @notice Emitted when the point in time to check -delegated- token balances against is updated
     /// @param adminAddress The address of the admin
-    /// @param blockNumber The new block number
-    event VotingBlockUpdated(address adminAddress, uint256 blockNumber);
+    /// @param timepoint The new block number (or timestamp given the contract supports it)
+    event TimepointUpdated(address adminAddress, uint256 timepoint);
 
     /// @notice Emitted when a voter -partially- revokes their allocated votes
     /// @param recipient The recipient of the votes
-    /// @param sender The sender of the votes
     /// @dev This could bring recipients below threshold, but won't affect already created plans
-    event VotesRevoked(address recipient, address sender);
+    event VotesRevoked(address recipient);
 
     /// ================================
     /// ========== Storage =============
@@ -78,8 +70,8 @@ contract LTIPHedgeyGovernorStrategy is LTIPHedgeyStrategy {
 
     /// @notice The address of the governor contract to get voting power from
     address public governorContract;
-    /// @notice The block number to get voting balances from the Governor contract
-    uint256 public votingBlock;
+    /// @notice The block number (or timestamp) to get voting balances from the Governor contract
+    uint256 public timepoint;
     /// @notice The total number of votes casted by an address
     mapping(address => uint256) public votesCasted;
     /// @notice The number of votes casted for a recipient by an address
@@ -111,11 +103,14 @@ contract LTIPHedgeyGovernorStrategy is LTIPHedgeyStrategy {
     /// @dev You only need to pass the 'poolId' to initialize the BaseStrategy and the rest is specific to the strategy
     /// @param _data The initialize params
     function __LTIPHedgeyGovernorStrategy_init(uint256 _poolId, bytes memory _data) internal {
-        (address _governorContract, uint256 _votingBlock, InitializeParamsHedgey memory _initializeParamsHedgey) =
+        (address _governorContract, uint256 _timepoint, InitializeParamsHedgey memory _initializeParamsHedgey) =
             abi.decode(_data, (address, uint256, InitializeParamsHedgey));
         __LTIPHedgeyStrategy_init(_poolId, _initializeParamsHedgey);
 
-        votingBlock = _votingBlock;
+        if (_timepoint == 0) revert INVALID();
+        if (_governorContract == address(0)) revert ZERO_ADDRESS();
+
+        timepoint = _timepoint;
         governorContract = _governorContract;
     }
 
@@ -128,10 +123,11 @@ contract LTIPHedgeyGovernorStrategy is LTIPHedgeyStrategy {
     /// ===============================
 
     /// @notice Update the block number to get voting balances from the Governor contract
-    /// @param _blockNumber The new block number
-    function setVotingBlock(uint256 _blockNumber) external onlyPoolManager(msg.sender) {
-        votingBlock = _blockNumber;
-        emit VotingBlockUpdated(msg.sender, _blockNumber);
+    /// @param _timepoint The new block number
+    function setTimepoint(uint256 _timepoint) external onlyPoolManager(msg.sender) {
+        if (_timepoint == 0) revert INVALID();
+        timepoint = _timepoint;
+        emit TimepointUpdated(msg.sender, _timepoint);
     }
 
     /// @notice Revokes allocated votes from a recipient
@@ -148,7 +144,7 @@ contract LTIPHedgeyGovernorStrategy is LTIPHedgeyStrategy {
         votesCasted[msg.sender] = _updatedVotesCasted;
         votesCastedFor[msg.sender][_recipientId] = _votesCastedFor;
 
-        emit VotesRevoked(_recipientId, msg.sender);
+        emit VotesRevoked(_recipientId);
 
         if (votes[_recipientId] < votingThreshold) {
             emit AllocationRevoked(_recipientId, msg.sender);
@@ -176,7 +172,7 @@ contract LTIPHedgeyGovernorStrategy is LTIPHedgeyStrategy {
 
         if (recipient.recipientStatus != Status.Accepted) revert RECIPIENT_NOT_ACCEPTED();
 
-        uint256 _votingPower = IGovernor(governorContract).getVotes(_sender, votingBlock);
+        uint256 _votingPower = IGovernor(governorContract).getVotes(_sender, timepoint);
         uint256 _votesCasted = votesCasted[_sender];
 
         if (_votingPower == 0) revert VOTING_WEIGHT_ZERO();
@@ -204,6 +200,6 @@ contract LTIPHedgeyGovernorStrategy is LTIPHedgeyStrategy {
     /// @param _allocator Address of the allocator
     /// @return 'true' if the allocator is a pool manager, otherwise false
     function _isValidAllocator(address _allocator) internal view override returns (bool) {
-        return IGovernor(governorContract).getVotes(_allocator, votingBlock) > 0;
+        return IGovernor(governorContract).getVotes(_allocator, timepoint) > 0;
     }
 }

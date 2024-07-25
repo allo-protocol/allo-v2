@@ -26,7 +26,6 @@ The `LTIPHedgeyGovernorStrategy` contract represents a smart contract for Long-T
     - [Distributing Milestone](#distributing-milestone)
     - [Withdrawing Funds from Pool](#withdrawing-funds-from-pool)
 
-## Sequence Diagram
 
 ## Sequence Diagram
 
@@ -36,6 +35,8 @@ sequenceDiagram
     participant PoolManager
     participant Allo
     participant LTIPHedgeyStrategy
+    participant GovernorContract
+    participant Hedgey
 
     PoolManager->>Allo: createPool() with LTIPHedgeyStrategy
     Allo-->>PoolManager: poolId
@@ -43,10 +44,15 @@ sequenceDiagram
     Allo->>LTIPHedgeyStrategy: registerRecipient()
     LTIPHedgeyStrategy-->>Allo: recipient1
     Allo-->>-Alice: recipientId1
+    PoolManager->>Allo: reviewRecipient() (approves recipient)
     PoolManager->>+Allo: allocate() (votes on recipient)
-    Allo-->>-LTIPHedgeyStrategy: allocate() (accepts a recipient based on voting threshold and allocate proposed allocation amount)
-    PoolManager->>+Allo: distribute() ( create vesting plan and deposit funds for recipient)
-    Allo-->>-LTIPHedgeyStrategy: distribute() (create TokenTimeLock)
+    Allo-->>-LTIPHedgeyStrategy: allocate() (accepts recipient and allocates proposed amount)
+    LTIPHedgeyStrategy->>+GovernorContract: getVotes() (returns voting power)
+    GovernorContract-->>-LTIPHedgeyStrategy: voting power is allocated to recipient
+    PoolManager->>+Allo: distribute() (create vesting plan and deposit funds for recipient)
+    Allo-->>-LTIPHedgeyStrategy: distribute() (create Hedgey vesting plan)
+    LTIPHedgeyStrategy->>+Hedgey: createVestingPlan()
+    Hedgey-->>-LTIPHedgeyStrategy: vestingPlanCreated
 ```
 
 ## Smart Contract Overview

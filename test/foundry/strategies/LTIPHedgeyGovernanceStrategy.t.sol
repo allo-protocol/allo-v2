@@ -40,6 +40,7 @@ contract LTIPHedgeyGovernanceStrategyTest is
     event AdminTransferOBOUpdated(bool adminTransferOBO, address sender);
 
     // Errors
+    error INSUFFICIENT_VOTES();
 
     // Storage
     address payable internal _strategy;
@@ -70,10 +71,13 @@ contract LTIPHedgeyGovernanceStrategyTest is
     address public hedgeyContract;
     address public vestingAdmin;
     bool public adminTransferOBO;
+    uint256 public cliff;
+    uint256 public rate;
+    uint256 public period;
 
     // Governor specific
     address public governorContract;
-    uint256 public votingBlock;
+    uint256 public timepoint;
 
     function setUp() public {
         __RegistrySetupFull();
@@ -96,6 +100,8 @@ contract LTIPHedgeyGovernanceStrategyTest is
         allocationStartTime = uint64(weekAfterNext());
         allocationEndTime = uint64(oneMonthFromNow());
         vestingPeriod = uint64(oneMonthFromNow());
+        distributionStartTime = uint64(oneMonthFromNow());
+        distributionEndTime = uint64(oneMonthFromNow() + 7 days);
 
         metadataRequired = true;
         registryGating = true;
@@ -106,9 +112,12 @@ contract LTIPHedgeyGovernanceStrategyTest is
         hedgeyContract = address(_vesting_);
         vestingAdmin = pool_admin();
         adminTransferOBO = true;
+        cliff = oneMonthFromNow();
+        rate = 1;
+        period = 7 days;
 
         governorContract = makeAddr("governorContract");
-        votingBlock = block.number;
+        timepoint = block.number;
 
         votingThreshold = 20;
 
@@ -135,11 +144,14 @@ contract LTIPHedgeyGovernanceStrategyTest is
             abi.encode(
                 LTIPHedgeyGovernorStrategy.InitializeParamsGovernor(
                     governorContract,
-                    votingBlock,
+                    timepoint,
                     LTIPHedgeyStrategy.InitializeParamsHedgey(
                         hedgeyContract,
                         vestingAdmin,
                         adminTransferOBO,
+                        cliff,
+                        rate,
+                        period,
                         LTIPSimpleStrategy.InitializeParams(
                             registryGating,
                             metadataRequired,
@@ -181,11 +193,14 @@ contract LTIPHedgeyGovernanceStrategyTest is
             abi.encode(
                 LTIPHedgeyGovernorStrategy.InitializeParamsGovernor(
                     governorContract,
-                    votingBlock,
+                    timepoint,
                     LTIPHedgeyStrategy.InitializeParamsHedgey(
                         hedgeyContract,
                         vestingAdmin,
                         adminTransferOBO,
+                        cliff,
+                        rate,
+                        period,
                         LTIPSimpleStrategy.InitializeParams(
                             registryGating,
                             metadataRequired,
@@ -222,7 +237,7 @@ contract LTIPHedgeyGovernanceStrategyTest is
         assertEq(testStrategy.adminTransferOBO(), adminTransferOBO);
 
         assertEq(testStrategy.governorContract(), governorContract);
-        assertEq(testStrategy.votingBlock(), votingBlock);
+        assertEq(testStrategy.timepoint(), timepoint);
     }
 
     function test_revoke_votes() public {
@@ -361,10 +376,42 @@ contract LTIPHedgeyGovernanceStrategyTest is
         assertEq(plan.vestingContract, hedgeyContract);
     }
 
+    function test_distribute_INSUFFICIENT_VOTES() public {
+        address recipientId = __register_recipient();
+        vm.warp(reviewStartTime + 10);
+
+        // Accept
+
+        address[] memory recipientIds = new address[](1);
+        recipientIds[0] = recipientId;
+        IStrategy.Status[] memory Statuses = new IStrategy.Status[](1);
+        Statuses[0] = IStrategy.Status.Accepted;
+
+        vm.prank(pool_manager1());
+        ltipStrategy().reviewRecipients(recipientIds, Statuses);
+
+        // Allocate
+        vm.warp(allocationStartTime + 10);
+
+        vm.startPrank(address(allo()));
+        // sufficient voting power
+        vm.mockCall(governorContract, abi.encodeWithSelector(IGovernor.getVotes.selector), abi.encode(11));
+        ltipStrategy().allocate(abi.encode(recipientId, 11), pool_manager1());
+        vm.stopPrank();
+
+        // any one can call distribute
+        address anon = makeAddr("anon");
+
+        vm.expectRevert(INSUFFICIENT_VOTES.selector);
+
+        vm.prank(address(allo()));
+        ltipStrategy().distribute(recipientIds, "", anon);
+    }
+
     function test_update_voting_block() public {
         vm.prank(pool_manager1());
-        ltipStrategy().setVotingBlock(100);
-        assertEq(ltipStrategy().votingBlock(), 100);
+        ltipStrategy().setTimepoint(100);
+        assertEq(ltipStrategy().timepoint(), 100);
     }
 
     // function __generateRecipientWithoutId(bool _isUsingRegistryAnchor) internal virtual returns (bytes memory) {
@@ -386,7 +433,6 @@ contract LTIPHedgeyGovernanceStrategyTest is
         address recipientId = ltipStrategy().registerRecipient(data, profile1_member1());
 
         LTIPHedgeyGovernorStrategy.Recipient memory receipt = ltipStrategy().getRecipient(recipientId);
-        assertTrue(receipt.useRegistryAnchor);
 
         return recipientId;
     }
@@ -399,7 +445,6 @@ contract LTIPHedgeyGovernanceStrategyTest is
         address recipientId = ltipStrategy().registerRecipient(data, profile1_member1());
 
         LTIPHedgeyGovernorStrategy.Recipient memory receipt = ltipStrategy().getRecipient(recipientId);
-        assertTrue(receipt.useRegistryAnchor);
 
         // Fund pool
         token.mint(pool_manager1(), 100e18);
@@ -420,7 +465,6 @@ contract LTIPHedgeyGovernanceStrategyTest is
         address recipientId = ltipStrategy().registerRecipient(data, profile2_member1());
 
         LTIPHedgeyGovernorStrategy.Recipient memory receipt = ltipStrategy().getRecipient(recipientId);
-        assertTrue(receipt.useRegistryAnchor);
 
         return recipientId;
     }

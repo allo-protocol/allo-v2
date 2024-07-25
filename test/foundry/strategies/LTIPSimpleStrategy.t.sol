@@ -29,7 +29,7 @@ contract LTIPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, StrategyS
 
     error REVIEW_NOT_ACTIVE();
     error INSUFFICIENT_VOTES();
-    error ALREADY_ALLOCATED();
+    error ALREADY_VESTED();
 
     address payable internal _strategy;
     MockERC20 public token;
@@ -77,6 +77,8 @@ contract LTIPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, StrategyS
         allocationStartTime = uint64(weekAfterNext());
         allocationEndTime = uint64(oneMonthFromNow());
         vestingPeriod = uint64(oneMonthFromNow());
+        distributionStartTime = uint64(oneMonthFromNow());
+        distributionEndTime = uint64(oneMonthFromNow() + 7 days);
 
         metadataRequired = true;
         registryGating = true;
@@ -233,7 +235,6 @@ contract LTIPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, StrategyS
         address recipientId = __register_recipient();
 
         LTIPSimpleStrategy.Recipient memory receipt = ltipStrategy().getRecipient(recipientId);
-        assertEq(receipt.useRegistryAnchor, useRegistryAnchor);
         assertEq(receipt.recipientAddress, recipient1());
         assertEq(receipt.metadata.pointer, "metadata");
         assertEq(receipt.metadata.protocol, 1);
@@ -445,8 +446,8 @@ contract LTIPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, StrategyS
 
         vm.expectRevert(UNAUTHORIZED.selector);
 
-        vm.prank(pool_notAManager());
-        ltipStrategy().allocate(abi.encode(recipientId), pool_manager1());
+        vm.prank(address(allo()));
+        ltipStrategy().allocate(abi.encode(recipientId), pool_notAManager());
 
         uint256 votes = ltipStrategy().votes(recipientId);
         assertEq(votes, 0);
@@ -560,7 +561,7 @@ contract LTIPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, StrategyS
         ltipStrategy().distribute(recipientIds, "", anon);
     }
 
-    function test_distribute_ALREADY_ALLOCATED() public {
+    function test_distribute_ALREADY_VESTED() public {
         address recipientId = __register_recipient_fund_pool();
         vm.warp(reviewStartTime + 10);
 
@@ -589,7 +590,7 @@ contract LTIPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, StrategyS
 
         ltipStrategy().distribute(recipientIds, "", anon);
 
-        vm.expectRevert(ALREADY_ALLOCATED.selector);
+        vm.expectRevert(ALREADY_VESTED.selector);
         ltipStrategy().distribute(recipientIds, "", anon);
     }
 
@@ -629,7 +630,6 @@ contract LTIPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, StrategyS
     function test_withdraw() public {
         allo().fundPool(poolId, 1e18);
         vm.startPrank(pool_admin());
-        ltipStrategy().setPoolActive(false);
         ltipStrategy().withdraw(address(token));
         assertEq(address(allo()).balance, 0);
     }
@@ -652,9 +652,6 @@ contract LTIPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, StrategyS
         vm.prank(address(allo()));
         address recipientId = ltipStrategy().registerRecipient(data, profile1_member1());
 
-        LTIPSimpleStrategy.Recipient memory receipt = ltipStrategy().getRecipient(recipientId);
-        assertTrue(receipt.useRegistryAnchor);
-
         return recipientId;
     }
 
@@ -664,9 +661,6 @@ contract LTIPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, StrategyS
 
         vm.prank(address(allo()));
         address recipientId = ltipStrategy().registerRecipient(data, profile1_member1());
-
-        LTIPSimpleStrategy.Recipient memory receipt = ltipStrategy().getRecipient(recipientId);
-        assertTrue(receipt.useRegistryAnchor);
 
         // Fund pool
         token.mint(pool_manager1(), 100e18);
@@ -685,9 +679,6 @@ contract LTIPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, StrategyS
 
         vm.prank(address(allo()));
         address recipientId = ltipStrategy().registerRecipient(data, profile2_member1());
-
-        LTIPSimpleStrategy.Recipient memory receipt = ltipStrategy().getRecipient(recipientId);
-        assertTrue(receipt.useRegistryAnchor);
 
         return recipientId;
     }
