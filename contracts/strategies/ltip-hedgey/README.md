@@ -1,10 +1,10 @@
 # LTIPHedgeyStrategy.sol
 
-The `LTIPHedgeyStrategy` contract represents a smart contract for Long-Term Incentive Programs (LTIP). It extends the capabilities of the `LTIPSimpleStrategy` contract and replaced the TokenTimeLock vesting with Hedgey vesting. The contract also incorporates the `ReentrancyGuard` library to prevent reentrant attacks.
+The `LTIPHedgeyStrategy` contract represents a smart contract for Long-Term Incentive Programs (LTIP). It extends the capabilities of the `LTIPSimpleStrategy` contract and replaced the TokenTimeLock vesting with [Hedgey](https://hedgey.gitbook.io/hedgey-community-docs/hedgey/vesting-plans) vesting. The contract also incorporates the `ReentrancyGuard` library to prevent reentrant attacks.
 
 ## Table of Contents
 
-- [RFPSimpleStrategy.sol](#rfpsimplestrategysol)
+- [LTIPHedgeyStrategy.sol](#ltiphedgeystrategysol)
   - [Table of Contents](#table-of-contents)
   - [Sequence Diagram](#sequence-diagram)
   - [Smart Contract Overview](#smart-contract-overview)
@@ -28,14 +28,13 @@ The `LTIPHedgeyStrategy` contract represents a smart contract for Long-Term Ince
 
 ## Sequence Diagram
 
-## Sequence Diagram
-
 ```mermaid
 sequenceDiagram
     participant Alice
     participant PoolManager
     participant Allo
     participant LTIPHedgeyStrategy
+    participant Hedgey
 
     PoolManager->>Allo: createPool() with LTIPHedgeyStrategy
     Allo-->>PoolManager: poolId
@@ -43,10 +42,13 @@ sequenceDiagram
     Allo->>LTIPHedgeyStrategy: registerRecipient()
     LTIPHedgeyStrategy-->>Allo: recipient1
     Allo-->>-Alice: recipientId1
+    PoolManager->>Allo: reviewRecipient() (approves recipient)
     PoolManager->>+Allo: allocate() (votes on recipient)
-    Allo-->>-LTIPHedgeyStrategy: allocate() (accepts a recipient based on voting threshold and allocate proposed allocation amount)
-    PoolManager->>+Allo: distribute() ( create vesting plan and deposit funds for recipient)
-    Allo-->>-LTIPHedgeyStrategy: distribute() (create TokenTimeLock)
+    Allo-->>-LTIPHedgeyStrategy: allocate() (accepts recipient and allocates proposed amount)
+    PoolManager->>+Allo: distribute() (create vesting plan and deposit funds for recipient)
+    Allo-->>-LTIPHedgeyStrategy: distribute() (create Hedgey vesting plan)
+    LTIPHedgeyStrategy->>+Hedgey: createVestingPlan()
+    Hedgey-->>-LTIPHedgeyStrategy: vestingPlanCreated
 ```
 
 ## Smart Contract Overview
