@@ -88,11 +88,18 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
         );
     }
 
+    // Create a pool with non-zero amount and calling the createPoolWithCustomStrategy function
     function _utilCreatePool(uint256 _amount) internal returns (uint256) {
         vm.prank(pool_admin());
         return allo().createPoolWithCustomStrategy(
             poolProfile_id(), strategy, "0x", address(token), _amount, metadata, pool_managers()
         );
+    }
+
+    // Create a pool with zero amount and calling the createPool function
+    function _utilCreatePool() internal returns (uint256) {
+        vm.prank(pool_admin());
+        return allo().createPool(poolProfile_id(), strategy, "0x", address(token), 0, metadata, pool_managers());
     }
 
     function test_initialize() public {
@@ -767,5 +774,69 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
         // since the slicing inside of _msgData keeps the padding at the end,
         // we need to extract only the selector in order to compare it
         assertEq(mockAllo.extractSelector(decodedData), abi.encodeWithSelector(mockAllo.mockMsgData.selector));
+    }
+
+    function test_addPoolManagersInMultiplePools() public {
+        uint256[] memory poolIds = new uint256[](2);
+
+        // Create pools
+        poolIds[0] = _utilCreatePool();
+        poolIds[1] = _utilCreatePool();
+
+        address[] memory poolManagers = new address[](2);
+        poolManagers[0] = makeAddr("manager1");
+        poolManagers[1] = makeAddr("manager2");
+
+        // Assert no managers registered
+        for (uint256 i = 0; i < poolIds.length; i++) {
+            for (uint256 j = 0; j < poolManagers.length; j++) {
+                assertFalse(allo().isPoolManager(poolIds[i], poolManagers[j]));
+            }
+        }
+
+        // Add pool managers
+        vm.prank(pool_admin());
+        allo().addPoolManagersInMultiplePools(poolIds, poolManagers);
+
+        // Assert managers registered
+        for (uint256 i = 0; i < poolIds.length; i++) {
+            for (uint256 j = 0; j < poolManagers.length; j++) {
+                assertTrue(allo().isPoolManager(poolIds[i], poolManagers[j]));
+            }
+        }
+    }
+
+    function test_removePoolManagersInMultiplePools() public {
+        uint256[] memory poolIds = new uint256[](2);
+
+        // Create pools
+        poolIds[0] = _utilCreatePool();
+        poolIds[1] = _utilCreatePool();
+
+        address[] memory poolManagers = new address[](2);
+        poolManagers[0] = makeAddr("manager1");
+        poolManagers[1] = makeAddr("manager2");
+
+        // Add pool managers
+        vm.prank(pool_admin());
+        allo().addPoolManagersInMultiplePools(poolIds, poolManagers);
+
+        // Assert managers registered
+        for (uint256 i = 0; i < poolIds.length; i++) {
+            for (uint256 j = 0; j < poolManagers.length; j++) {
+                assertTrue(allo().isPoolManager(poolIds[i], poolManagers[j]));
+            }
+        }
+
+        // Remove pool managers
+        vm.prank(pool_admin());
+        allo().removePoolManagersInMultiplePools(poolIds, poolManagers);
+
+        // Assert managers removed
+        for (uint256 i = 0; i < poolIds.length; i++) {
+            for (uint256 j = 0; j < poolManagers.length; j++) {
+                assertFalse(allo().isPoolManager(poolIds[i], poolManagers[j]));
+            }
+        }
     }
 }
