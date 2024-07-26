@@ -3,6 +3,7 @@ pragma solidity 0.8.19;
 
 // Interfaces
 import {IMilestonesExtension} from "../interfaces/IMilestonesExtension.sol";
+import {IRegistry} from "../../core/interfaces/IRegistry.sol";
 // Core Contracts
 import {CoreBaseStrategy} from "../../strategies/CoreBaseStrategy.sol";
 // Internal Libraries
@@ -98,9 +99,10 @@ abstract contract MilestonesExtension is CoreBaseStrategy, IMilestonesExtension 
 
     /// @notice Submit milestone by an accepted recipient.
     /// @dev Emits a 'MilestonesSubmitted()' event.
+    /// @param _recipientId The recipient id
     /// @param _metadata The proof of work
-    function submitUpcomingMilestone(Metadata calldata _metadata) external virtual {
-        _validateSubmitUpcomingMilestone(msg.sender);
+    function submitUpcomingMilestone(address _recipientId, Metadata calldata _metadata) external virtual {
+        _validateSubmitUpcomingMilestone(_recipientId, msg.sender);
 
         // Get the milestone and update the metadata and status
         Milestone storage milestone = milestones[upcomingMilestone];
@@ -133,6 +135,16 @@ abstract contract MilestonesExtension is CoreBaseStrategy, IMilestonesExtension 
     /// ============ Internal ==============
     /// ====================================
 
+    /// @notice Check if sender is profile owner or member
+    /// @param _anchor Anchor of the profile
+    /// @param _sender The sender of the transaction
+    /// @return 'true' if the sender is the owner or member of the profile, otherwise 'false'
+    function _isProfileMember(address _anchor, address _sender) internal view virtual returns (bool) {
+        IRegistry registry = allo.getRegistry();
+        IRegistry.Profile memory profile = registry.getProfileByAnchor(_anchor);
+        return registry.isOwnerOrMemberOfProfile(profile.id, _sender);
+    }
+
     /// @notice Sets the bid for a given `_bidderId` address, likely to match the recipient's address
     /// @param _bidderId The address of the bidder
     /// @param _proposalBid The amount that was bid
@@ -160,10 +172,12 @@ abstract contract MilestonesExtension is CoreBaseStrategy, IMilestonesExtension 
     }
 
     /// @notice Validates if the milestone can be submitted at this moment by the `_sender`
+    /// @param _recipientId The recipient id
     /// @param _sender The address of the submitter
-    function _validateSubmitUpcomingMilestone(address _sender) internal virtual {
+    function _validateSubmitUpcomingMilestone(address _recipientId, address _sender) internal virtual {
         // Check if the 'msg.sender' is accepted
-        if (!_isAcceptedRecipient(_sender)) revert MilestonesExtension_INVALID_SUBMITTER();
+        if (!_isAcceptedRecipient(_recipientId)) revert MilestonesExtension_INVALID_RECIPIENT();
+        if (_sender != _recipientId && !_isProfileMember(_recipientId, _sender)) revert MilestonesExtension_INVALID_SUBMITTER();
 
         // Check if a submission is ongoing to prevent front-running a milestone review.
         if (milestones[upcomingMilestone].status == Status.Pending) revert MilestonesExtension_MILESTONE_PENDING();
