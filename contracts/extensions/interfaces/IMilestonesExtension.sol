@@ -138,8 +138,9 @@ interface IMilestonesExtension {
 
     /// @notice Submit milestone by an accepted recipient.
     /// @dev Emits a 'MilestonesSubmitted()' event.
+    /// @param _recipientId The recipient id
     /// @param _metadata The proof of work
-    function submitUpcomingMilestone(Metadata calldata _metadata) external;
+    function submitUpcomingMilestone(address _recipientId, Metadata calldata _metadata) external;
 
     /// @notice Reject pending milestone submmited by an accepted recipient.
     /// @dev Emits a 'MilestoneStatusChanged()' event.

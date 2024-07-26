@@ -5,6 +5,7 @@ import {StdStorage, Test, console, stdStorage} from "forge-std/Test.sol";
 import {MockStrategyMilestonesExtension} from "../../utils/MockStrategyMilestonesExtension.sol";
 import {IMilestonesExtension} from "../../../contracts/extensions/interfaces/IMilestonesExtension.sol";
 import {IAllo} from "../../../contracts/core/interfaces/IAllo.sol";
+import {IRegistry} from "../../../contracts/core/interfaces/IRegistry.sol";
 import {IBaseStrategy} from "../../../contracts/strategies/CoreBaseStrategy.sol";
 import {Errors} from "../../../contracts/core/libraries/Errors.sol";
 import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
@@ -239,6 +240,32 @@ contract MilestonesExtensionSetMilestones is BaseMilestonesExtensionUnit {
 
 contract MilestonesExtension_validateSubmitUpcomingMilestone is BaseMilestonesExtensionUnit {
     using stdStorage for StdStorage;
+        
+    address internal _registry = makeAddr("registry");
+
+    function setUp() public override {
+        super.setUp();
+        IRegistry.Profile memory profile = IRegistry.Profile({
+            id: bytes32(0),
+            nonce: uint256(0),
+            name: "",
+            metadata: Metadata({protocol: uint256(0), pointer: ""}),
+            owner: address(0),
+            anchor: address(0)
+        });
+        vm.mockCall(allo, abi.encodeWithSelector(IAllo.getRegistry.selector), abi.encode(_registry));
+        vm.mockCall(_registry, abi.encodeWithSelector(IRegistry.getProfileByAnchor.selector), abi.encode(profile));
+    }
+
+    function test_Revert_invalidRecipient(address _acceptedRecipientId, address _sender) public {
+        vm.assume(_acceptedRecipientId != _sender);
+        stdstore.target(address(MilestonesExtension)).sig("acceptedRecipientId()").depth(0).checked_write(
+            _acceptedRecipientId
+        );
+
+        vm.expectRevert(IMilestonesExtension.MilestonesExtension_INVALID_RECIPIENT.selector);
+        MilestonesExtension.expose_validateSubmitUpcomingMilestone(_sender, _sender);
+    }
 
     function test_Revert_invalidSubmitter(address _acceptedRecipientId, address _sender) public {
         vm.assume(_acceptedRecipientId != _sender);
@@ -246,8 +273,9 @@ contract MilestonesExtension_validateSubmitUpcomingMilestone is BaseMilestonesEx
             _acceptedRecipientId
         );
 
+        vm.mockCall(_registry, abi.encodeWithSelector(IRegistry.isOwnerOrMemberOfProfile.selector), abi.encode(false));
         vm.expectRevert(IMilestonesExtension.MilestonesExtension_INVALID_SUBMITTER.selector);
-        MilestonesExtension.expose_validateSubmitUpcomingMilestone(_sender);
+        MilestonesExtension.expose_validateSubmitUpcomingMilestone(_acceptedRecipientId, _sender);
     }
 }
 
@@ -255,6 +283,7 @@ contract MilestonesExtensionSubmitUpcomingMilestone is BaseMilestonesExtensionUn
     using stdStorage for StdStorage;
 
     address internal _acceptedRecipientId = makeAddr("_acceptedRecipientId");
+    address internal _registry = makeAddr("registry");
 
     function setUp() public override {
         super.setUp();
@@ -264,6 +293,18 @@ contract MilestonesExtensionSubmitUpcomingMilestone is BaseMilestonesExtensionUn
         );
         StdStorage storage meStorage = stdstore.target(address(MilestonesExtension)).sig("acceptedRecipientId()");
         meStorage.depth(0).checked_write(_acceptedRecipientId);
+
+        IRegistry.Profile memory profile = IRegistry.Profile({
+            id: bytes32(0),
+            nonce: uint256(0),
+            name: "",
+            metadata: Metadata({protocol: uint256(0), pointer: ""}),
+            owner: address(0),
+            anchor: address(0)
+        });
+        vm.mockCall(allo, abi.encodeWithSelector(IAllo.getRegistry.selector), abi.encode(_registry));
+        vm.mockCall(_registry, abi.encodeWithSelector(IRegistry.getProfileByAnchor.selector), abi.encode(profile));
+        vm.mockCall(_registry, abi.encodeWithSelector(IRegistry.isOwnerOrMemberOfProfile.selector), abi.encode(true));
     }
 
     function test_storageUpdatesOnSubmitUpcomingMilestone(
@@ -274,7 +315,7 @@ contract MilestonesExtensionSubmitUpcomingMilestone is BaseMilestonesExtensionUn
         IMilestonesExtension.Milestone[] memory _milestones = _setMilestones(_rawMilestones);
 
         vm.prank(_acceptedRecipientId);
-        MilestonesExtension.submitUpcomingMilestone(_metadata);
+        MilestonesExtension.submitUpcomingMilestone(_acceptedRecipientId, _metadata);
 
         IMilestonesExtension.Milestone memory _milestone = MilestonesExtension.getMilestone(0);
         assertEq(uint256(_milestone.status), uint256(IMilestonesExtension.Status.Pending), "Incorrect status");
@@ -293,7 +334,7 @@ contract MilestonesExtensionSubmitUpcomingMilestone is BaseMilestonesExtensionUn
         vm.prank(_acceptedRecipientId);
         vm.expectEmit(true, true, true, true, address(MilestonesExtension));
         emit MilestoneSubmitted(0);
-        MilestonesExtension.submitUpcomingMilestone(_metadata);
+        MilestonesExtension.submitUpcomingMilestone(_acceptedRecipientId, _metadata);
     }
 
     function test_Revert_cannotSubmitMilestoneTwice(
@@ -305,10 +346,10 @@ contract MilestonesExtensionSubmitUpcomingMilestone is BaseMilestonesExtensionUn
 
         vm.startPrank(_acceptedRecipientId);
 
-        MilestonesExtension.submitUpcomingMilestone(_metadata);
+        MilestonesExtension.submitUpcomingMilestone(_acceptedRecipientId, _metadata);
 
         vm.expectRevert(IMilestonesExtension.MilestonesExtension_MILESTONE_PENDING.selector);
-        MilestonesExtension.submitUpcomingMilestone(_metadata);
+        MilestonesExtension.submitUpcomingMilestone(_acceptedRecipientId, _metadata);
 
         vm.stopPrank();
     }
@@ -335,6 +376,7 @@ contract MilestonesExtensionReviewMilestone is BaseMilestonesExtensionUnit {
     using stdStorage for StdStorage;
 
     address internal _acceptedRecipientId = makeAddr("_acceptedRecipientId");
+    address internal _registry = makeAddr("registry");
 
     function setUp() public override {
         super.setUp();
@@ -344,6 +386,18 @@ contract MilestonesExtensionReviewMilestone is BaseMilestonesExtensionUnit {
         );
         StdStorage storage meStorage = stdstore.target(address(MilestonesExtension)).sig("acceptedRecipientId()");
         meStorage.depth(0).checked_write(_acceptedRecipientId);
+
+        IRegistry.Profile memory profile = IRegistry.Profile({
+            id: bytes32(0),
+            nonce: uint256(0),
+            name: "",
+            metadata: Metadata({protocol: uint256(0), pointer: ""}),
+            owner: address(0),
+            anchor: address(0)
+        });
+        vm.mockCall(allo, abi.encodeWithSelector(IAllo.getRegistry.selector), abi.encode(_registry));
+        vm.mockCall(_registry, abi.encodeWithSelector(IRegistry.getProfileByAnchor.selector), abi.encode(profile));
+        vm.mockCall(_registry, abi.encodeWithSelector(IRegistry.isOwnerOrMemberOfProfile.selector), abi.encode(true));
     }
 
     function test_statusUpdatesOnReviewMilestone(
@@ -355,7 +409,7 @@ contract MilestonesExtensionReviewMilestone is BaseMilestonesExtensionUnit {
         IMilestonesExtension.Milestone[] memory _milestones = _setMilestones(_rawMilestones);
 
         vm.prank(_acceptedRecipientId);
-        MilestonesExtension.submitUpcomingMilestone(_metadata);
+        MilestonesExtension.submitUpcomingMilestone(_acceptedRecipientId, _metadata);
 
         IMilestonesExtension.Status _status = IMilestonesExtension.Status(bound(_statusSeed, 1, 6));
         vm.mockCall(allo, abi.encodeWithSelector(IAllo.isPoolManager.selector), abi.encode(true));
@@ -373,7 +427,7 @@ contract MilestonesExtensionReviewMilestone is BaseMilestonesExtensionUnit {
         IMilestonesExtension.Milestone[] memory _milestones = _setMilestones(_rawMilestones);
 
         vm.prank(_acceptedRecipientId);
-        MilestonesExtension.submitUpcomingMilestone(_metadata);
+        MilestonesExtension.submitUpcomingMilestone(_acceptedRecipientId, _metadata);
 
         vm.mockCall(allo, abi.encodeWithSelector(IAllo.isPoolManager.selector), abi.encode(true));
         MilestonesExtension.reviewMilestone(IMilestonesExtension.Status.Accepted);
@@ -390,7 +444,7 @@ contract MilestonesExtensionReviewMilestone is BaseMilestonesExtensionUnit {
         IMilestonesExtension.Milestone[] memory _milestones = _setMilestones(_rawMilestones);
 
         vm.prank(_acceptedRecipientId);
-        MilestonesExtension.submitUpcomingMilestone(_metadata);
+        MilestonesExtension.submitUpcomingMilestone(_acceptedRecipientId, _metadata);
 
         IMilestonesExtension.Status _status = IMilestonesExtension.Status(bound(_statusSeed, 1, 6));
         vm.assume(_status != IMilestonesExtension.Status.Accepted);
@@ -409,7 +463,7 @@ contract MilestonesExtensionReviewMilestone is BaseMilestonesExtensionUnit {
         IMilestonesExtension.Milestone[] memory _milestones = _setMilestones(_rawMilestones);
 
         vm.prank(_acceptedRecipientId);
-        MilestonesExtension.submitUpcomingMilestone(_metadata);
+        MilestonesExtension.submitUpcomingMilestone(_acceptedRecipientId, _metadata);
 
         IMilestonesExtension.Status _status = IMilestonesExtension.Status(bound(_statusSeed, 1, 6));
         vm.mockCall(allo, abi.encodeWithSelector(IAllo.isPoolManager.selector), abi.encode(true));
@@ -425,7 +479,7 @@ contract MilestonesExtensionReviewMilestone is BaseMilestonesExtensionUnit {
         IMilestonesExtension.Milestone[] memory _milestones = _setMilestones(_rawMilestones);
 
         vm.prank(_acceptedRecipientId);
-        MilestonesExtension.submitUpcomingMilestone(_metadata);
+        MilestonesExtension.submitUpcomingMilestone(_acceptedRecipientId, _metadata);
 
         vm.mockCall(allo, abi.encodeWithSelector(IAllo.isPoolManager.selector), abi.encode(true));
         vm.expectRevert(IMilestonesExtension.MilestonesExtension_INVALID_MILESTONE_STATUS.selector);
@@ -440,7 +494,7 @@ contract MilestonesExtensionReviewMilestone is BaseMilestonesExtensionUnit {
         IMilestonesExtension.Milestone[] memory _milestones = _setMilestones(_rawMilestones);
 
         vm.prank(_acceptedRecipientId);
-        MilestonesExtension.submitUpcomingMilestone(_metadata);
+        MilestonesExtension.submitUpcomingMilestone(_acceptedRecipientId, _metadata);
 
         vm.mockCall(allo, abi.encodeWithSelector(IAllo.isPoolManager.selector), abi.encode(false));
         vm.expectRevert(IBaseStrategy.BaseStrategy_UNAUTHORIZED.selector);

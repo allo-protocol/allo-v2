@@ -36,8 +36,8 @@ contract MockStrategyMilestonesExtension is CoreBaseStrategy, MilestonesExtensio
         __MilestonesExtension_init(_initializeParams);
     }
 
-    function expose_validateSubmitUpcomingMilestone(address _sender) external {
-        _validateSubmitUpcomingMilestone(_sender);
+    function expose_validateSubmitUpcomingMilestone(address _recipientId, address _sender) external {
+        _validateSubmitUpcomingMilestone(_recipientId, _sender);
     }
 
     function expose_setProposalBid(address _bidderId, uint256 _proposalBid) external {
