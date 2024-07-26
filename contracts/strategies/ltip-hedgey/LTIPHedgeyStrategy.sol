@@ -169,15 +169,7 @@ contract LTIPHedgeyStrategy is LTIPSimpleStrategy {
         IERC20(_token).approve(hedgeyContract, _amount);
 
         uint256 hedgeyId = ITokenVestingPlans(hedgeyContract).createPlan(
-            recipientAddress,
-            _token,
-            _amount,
-            block.timestamp,
-            cliff, 
-            rate,
-            period,
-            vestingAdmin,
-            adminTransferOBO
+            recipientAddress, _token, _amount, block.timestamp, cliff, rate, period, vestingAdmin, adminTransferOBO
         );
 
         _vestingPlans[recipientId] = VestingPlan(hedgeyContract, hedgeyId);
