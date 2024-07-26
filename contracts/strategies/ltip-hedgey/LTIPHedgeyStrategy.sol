@@ -85,13 +85,13 @@ contract LTIPHedgeyStrategy is LTIPSimpleStrategy {
     bool public adminTransferOBO;
 
     /// @notice A cliff date which is a discrete date where tokens are not vested until this date, and then vest in a large single chunk on the cliff date
-    uint256 cliff;
+    uint256 public cliff;
 
     /// @notice The amount of tokens that vest in a single period
-    uint256 rate;
+    uint256 public rate;
 
     /// @notice The amount of time in between each vesting time stamp, in seconds. A period of 1 means that tokens vest every second in a 'streaming' style.
-    uint256 period;
+    uint256 public period;
 
     /// ===============================
     /// ======== Constructor ==========
@@ -169,15 +169,7 @@ contract LTIPHedgeyStrategy is LTIPSimpleStrategy {
         IERC20(_token).approve(hedgeyContract, _amount);
 
         uint256 hedgeyId = ITokenVestingPlans(hedgeyContract).createPlan(
-            recipientAddress,
-            _token,
-            _amount,
-            block.timestamp,
-            cliff, // No cliff
-            rate,
-            period, // Linear period
-            vestingAdmin,
-            adminTransferOBO
+            recipientAddress, _token, _amount, block.timestamp, cliff, rate, period, vestingAdmin, adminTransferOBO
         );
 
         _vestingPlans[recipientId] = VestingPlan(hedgeyContract, hedgeyId);
