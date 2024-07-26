@@ -177,7 +177,9 @@ abstract contract MilestonesExtension is CoreBaseStrategy, IMilestonesExtension 
     function _validateSubmitUpcomingMilestone(address _recipientId, address _sender) internal virtual {
         // Check if the 'msg.sender' is accepted
         if (!_isAcceptedRecipient(_recipientId)) revert MilestonesExtension_INVALID_RECIPIENT();
-        if (_sender != _recipientId && !_isProfileMember(_recipientId, _sender)) revert MilestonesExtension_INVALID_SUBMITTER();
+        if (_sender != _recipientId && !_isProfileMember(_recipientId, _sender)) {
+            revert MilestonesExtension_INVALID_SUBMITTER();
+        }
 
         // Check if a submission is ongoing to prevent front-running a milestone review.
         if (milestones[upcomingMilestone].status == Status.Pending) revert MilestonesExtension_MILESTONE_PENDING();
