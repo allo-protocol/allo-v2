@@ -10,14 +10,15 @@ export const deployDonationVotingMerkleDistributionDirect = async () => {
 
   const strategyParams = strategyConfig[chainId]["donation-voting-merkle-distribution-direct"];
 
-  // const address = await deployStrategies(
-  //   strategyParams.name,
-  //   strategyParams.version,
-  //   {
-  //     types: ["address"],
-  //     values: [commonConfig[chainId].permit2Address],
-  //   },
-  // );
+  const address = await deployStrategies(
+    strategyParams.name,
+    strategyParams.version,
+    true,
+    {
+      types: ["address"],
+      values: [commonConfig[chainId].permit2Address],
+    },
+  );
 
   // const validator = await new Validator(
   //   strategyParams.name,
@@ -26,12 +27,12 @@ export const deployDonationVotingMerkleDistributionDirect = async () => {
 
   // await validator.validate("PERMIT2", [], commonConfig[chainId].permit2Address);
 
-  await deployStrategyDirectly(
-    strategyParams.name,
-    strategyParams.version,
-    [commonConfig[chainId].permit2Address],
-    true,
-  );
+  // await deployStrategyDirectly(
+  //   strategyParams.name,
+  //   strategyParams.version,
+  //   [commonConfig[chainId].permit2Address],
+  //   true,
+  // );
 
 };
 

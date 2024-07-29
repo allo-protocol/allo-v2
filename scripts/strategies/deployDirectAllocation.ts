@@ -8,13 +8,13 @@ export const deployDirectAllocation = async () => {
 
   const strategyParams = strategyConfig[chainId]["direct-allocation"];
 
-  // await deployStrategies(strategyParams.name, strategyParams.version, true);
-  await deployStrategyDirectly(
-    strategyParams.name,
-    strategyParams.version,
-    [],
-    true,
-  );
+  await deployStrategies(strategyParams.name, strategyParams.version, true);
+  // await deployStrategyDirectly(
+  //   strategyParams.name,
+  //   strategyParams.version,
+  //   [],
+  //   true,
+  // );
 };
 
 // Check if this script is the main module (being run directly)

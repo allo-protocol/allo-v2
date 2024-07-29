@@ -8,13 +8,13 @@ export const deployDirectGrants = async () => {
 
   const strategyParams = strategyConfig[chainId]["direct-grants-lite"];
 
-  // await deployStrategies(strategyParams.name, strategyParams.version, true);
-  await deployStrategyDirectly(
-    strategyParams.name,
-    strategyParams.version,
-    [],
-    true,
-  );
+  await deployStrategies(strategyParams.name, strategyParams.version, true);
+  // await deployStrategyDirectly(
+  //   strategyParams.name,
+  //   strategyParams.version,
+  //   [],
+  //   true,
+  // );
 };
 
 // Check if this script is the main module (being run directly)
