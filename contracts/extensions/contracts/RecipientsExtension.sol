@@ -136,7 +136,7 @@ abstract contract RecipientsExtension is CoreBaseStrategy, Errors, IRecipientsEx
     }
 
     /// @notice Sets the start and end dates.
-    /// @dev The timestamps are in seconds for the start and end times. Emits a 'TimestampsUpdated()' event.
+    /// @dev The timestamps are in seconds for the start and end times. Emits a 'RegistrationTimestampsUpdated()' event.
     /// @param _registrationStartTime The start time for the registration
     /// @param _registrationEndTime The end time for the registration
     function _updatePoolTimestamps(uint64 _registrationStartTime, uint64 _registrationEndTime) internal virtual {
@@ -148,7 +148,7 @@ abstract contract RecipientsExtension is CoreBaseStrategy, Errors, IRecipientsEx
         registrationEndTime = _registrationEndTime;
 
         // Emit that the timestamps have been updated with the updated values
-        emit TimestampsUpdated(registrationStartTime, registrationEndTime, msg.sender);
+        emit RegistrationTimestampsUpdated(registrationStartTime, registrationEndTime, msg.sender);
     }
 
     /// @notice Checks if the registration is active and reverts if not.

@@ -274,7 +274,7 @@ contract RecipientsExtension_updatePoolTimestamps is BaseRecipientsExtensionUnit
         vm.assume(_registrationStartTime < _registrationEndTime);
 
         vm.expectEmit();
-        emit IRecipientsExtension.TimestampsUpdated(_registrationStartTime, _registrationEndTime, _caller);
+        emit IRecipientsExtension.RegistrationTimestampsUpdated(_registrationStartTime, _registrationEndTime, _caller);
 
         vm.prank(_caller);
         recipientsExtension.call__updatePoolTimestamps(_registrationStartTime, _registrationEndTime);
