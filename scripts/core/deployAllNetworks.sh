@@ -47,6 +47,7 @@ networks=(
 #   "sei-mainnet"
 #   "lukso-testnet"
 #   "lukso-mainnet"
+  "metis"
 
 #  === ZkSync Era ===
 #   "zkSyncTestnet"
@@ -55,7 +56,7 @@ networks=(
 )
 
 scripts=(
-    # "core/deployRegistry"
+    "core/deployRegistry"
     # "core/deployContractFactory"
     # "core/deployAllo"
    

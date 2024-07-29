@@ -141,4 +141,9 @@ export const commonConfig: DeployParams = {
     proxyAdminOwner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
     permit2Address: "0x3c795a334dE57813D8CA945D1A47D329D6Fc2151",
   },
+  // Metis andromeda
+  1088: {
+    proxyAdminOwner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
+    permit2Address: "0xb1F795776cB9DdAC6E7e162f31C7419Dd3d48297",
+  },
 };
