@@ -86,7 +86,7 @@ contract IntegrationAllo is Test {
                 0,
                 Metadata({protocol: 1, pointer: ""}),
                 new address[](0)
-                )
+            )
         });
         bytes32 structHash = keccak256(
             abi.encode(
