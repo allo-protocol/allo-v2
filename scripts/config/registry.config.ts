@@ -115,4 +115,8 @@ export const registryConfig: DeployParams = {
   42: {
     owner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
   },
+  // Metis andromeda
+  1088: {
+    owner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
+  },
 };

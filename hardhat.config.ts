@@ -50,6 +50,7 @@ const chainIds = {
   avalanche: 43114,
   scroll: 534352,
   "lukso-mainnet": 42,
+  metisAndromeda: 1088
 };
 
 let deployPrivateKey = process.env.DEPLOYER_PRIVATE_KEY as string;
@@ -196,6 +197,10 @@ const config: HardhatUserConfig = {
       ...createMainnetConfig("lukso-mainnet"),
       url: "https://42.rpc.thirdweb.com",
     },
+    metisAndromeda: {
+      ...createMainnetConfig("metisAndromeda"),
+      url: `https://andromeda.metis.io/?owner=1088`,
+    },
     // Test Networks
     goerli: createTestnetConfig(
       "goerli",
@@ -307,6 +312,7 @@ const config: HardhatUserConfig = {
       "sei-mainnet": process.env.SEITRACE_API_KEY || "",
       "lukso-mainnet": "no-api-key-needed",
       "lukso-testnet": "no-api-key-needed",
+      metisAndromeda: "no-api-key-needed",
     },
     customChains: [
       {
@@ -455,6 +461,15 @@ const config: HardhatUserConfig = {
           browserURL: "https://explorer.execution.mainnet.lukso.network/",
         },
       },
+      {
+        network: "metisAndromeda",
+        chainId: chainIds["metisAndromeda"],
+        urls: {
+          apiURL:
+            "https://api.routescan.io/v2/network/mainnet/evm/1088/etherscan",
+          browserURL: "https://explorer.metis.io",
+        },
+      }
     ],
   },
   abiExporter: abiExporter,

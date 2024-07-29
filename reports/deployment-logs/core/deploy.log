@@ -639,3 +639,21 @@
 20240724_153226 - Deployment finished with 0 error(s)
 20240724_153228 - Executing: bun hardhat run scripts/strategies/deployDirectAllocation.ts --no-compile --network polygon | tee ./reports/deployment-logs/strategies/deployDirectAllocation/polygon/20240724_153228/deploy-20240724_153228.log
 20240724_153531 - Deployment finished with 0 error(s)
+20240729_142656 - Executing: bun hardhat run scripts/core/deployRegistry.ts --no-compile --network metis | tee ./reports/deployment-logs/core/deployRegistry/metis/20240729_142656/deploy-20240729_142656.log
+20240729_142704 - Deployment finished with 0 error(s)
+20240729_143105 - Executing: bun hardhat run scripts/core/deployRegistry.ts --no-compile --network metis | tee ./reports/deployment-logs/core/deployRegistry/metis/20240729_143105/deploy-20240729_143105.log
+20240729_143108 - Deployment finished with 0 error(s)
+20240729_143120 - Executing: bun hardhat run scripts/core/deployRegistry.ts --no-compile --network metisAndromeda | tee ./reports/deployment-logs/core/deployRegistry/metisAndromeda/20240729_143120/deploy-20240729_143120.log
+20240729_143129 - Deployment finished with 0 error(s)
+20240729_143157 - Executing: bun hardhat run scripts/core/deployRegistry.ts --no-compile --network metisAndromeda | tee ./reports/deployment-logs/core/deployRegistry/metisAndromeda/20240729_143157/deploy-20240729_143157.log
+20240729_143457 - Deployment finished with 0 error(s)
+20240729_143511 - Executing: bun hardhat run scripts/core/deployContractFactory.ts --no-compile --network metisAndromeda | tee ./reports/deployment-logs/core/deployContractFactory/metisAndromeda/20240729_143511/deploy-20240729_143511.log
+20240729_143726 - Deployment finished with 0 error(s)
+20240729_143733 - Executing: bun hardhat run scripts/core/deployAllo.ts --no-compile --network metisAndromeda | tee ./reports/deployment-logs/core/deployAllo/metisAndromeda/20240729_143733/deploy-20240729_143733.log
+20240729_144011 - Deployment finished with 0 error(s)
+20240729_144147 - Executing: bun hardhat run scripts/strategies/deployDonationVotingMerkleDistributionDirect.ts --no-compile --network metisAndromeda | tee ./reports/deployment-logs/strategies/deployDonationVotingMerkleDistributionDirect/metisAndromeda/20240729_144147/deploy-20240729_144147.log
+20240729_144411 - Deployment finished with 0 error(s)
+20240729_144411 - Executing: bun hardhat run scripts/strategies/deployDirectGrantsLite.ts --no-compile --network metisAndromeda | tee ./reports/deployment-logs/strategies/deployDirectGrantsLite/metisAndromeda/20240729_144147/deploy-20240729_144147.log
+20240729_144601 - Deployment finished with 0 error(s)
+20240729_144601 - Executing: bun hardhat run scripts/strategies/deployDirectAllocation.ts --no-compile --network metisAndromeda | tee ./reports/deployment-logs/strategies/deployDirectAllocation/metisAndromeda/20240729_144147/deploy-20240729_144147.log
+20240729_144755 - Deployment finished with 0 error(s)

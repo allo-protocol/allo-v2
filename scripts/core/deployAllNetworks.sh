@@ -47,6 +47,7 @@ networks=(
 #   "sei-mainnet"
 #   "lukso-testnet"
 #   "lukso-mainnet"
+#   "metisAndromeda"
 
 #  === ZkSync Era ===
 #   "zkSyncTestnet"
