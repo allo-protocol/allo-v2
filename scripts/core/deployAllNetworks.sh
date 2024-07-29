@@ -47,7 +47,7 @@ networks=(
 #   "sei-mainnet"
 #   "lukso-testnet"
 #   "lukso-mainnet"
-  "metisAndromeda"
+#   "metisAndromeda"
 
 #  === ZkSync Era ===
 #   "zkSyncTestnet"
@@ -60,10 +60,10 @@ scripts=(
     # "core/deployContractFactory"
     # "core/deployAllo"
    
-    "strategies/deployDonationVotingMerkleDistributionDirect"
+    # "strategies/deployDonationVotingMerkleDistributionDirect"
     # "strategies/deployDirectGrants"
-    "strategies/deployDirectGrantsLite"
-    "strategies/deployDirectAllocation"
+    # "strategies/deployDirectGrantsLite"
+    # "strategies/deployDirectAllocation"
     
     # "core/transferProxyAdminOwnership"
     # "strategies/deployDonationVotingMerkleDistributionVault"

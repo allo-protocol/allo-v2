@@ -27,8 +27,8 @@ export async function createDirectAllocationPool() {
     const instance = await ethers.getContractAt('Allo', allo);
 
     await instance.createPool(
-        '0xea2ee6a4a803a669e1e1008e1b6993d073180bcddcc51f8f5d4fa89e9ae2894f', // _profileId
-        '0xeB6325d9daCD1E46A20C02F46E41d4CAE45C0980', // _strategy
+        '0x13ffe09671f07a4eb6bfcf96fa58d93bedabf721d26d0cc162f267504816f3db', // _profileId
+        '0x56662F9c0174cD6ae14b214fC52Bd6Eb6B6eA602', // _strategy
         "0x",   // _initStrategyData
         ZeroAddress, // _token
         0, // _amount
@@ -39,7 +39,7 @@ export async function createDirectAllocationPool() {
         ['0xB8cEF765721A6da910f14Be93e7684e9a3714123'] // _managers
     );
 
-    console.log("pool created at:", instance);
+    console.log("pool created on registry at:", instance.target);
   
     return instance.target;
 }
@@ -67,6 +67,7 @@ createDirectAllocationPool().catch((error) => {
 // Mainnet     | 0x56662F9c0174cD6ae14b214fC52Bd6Eb6B6eA602 | 0xb89425ca914da89f5da7a002dc7484c3a4eefe65034f0d8bba2144ef98b8e87d | 11
 // Sei         | 0x1cfa7A687cd18b99D255bFc25930d3a0b05EB00F | 0xc283992812559f990f71ec8b7e85aa7cebc50d908a2c93f6e69c7daf03dfc800 | 8
 // Lukso       | 0xeB6325d9daCD1E46A20C02F46E41d4CAE45C0980 | 0xea2ee6a4a803a669e1e1008e1b6993d073180bcddcc51f8f5d4fa89e9ae2894f | 3
+// Metis       | 0x56662F9c0174cD6ae14b214fC52Bd6Eb6B6eA602 | 0x13ffe09671f07a4eb6bfcf96fa58d93bedabf721d26d0cc162f267504816f3db | 1 
 // Polygon     | | | |
 // Zksync      | | | |
 // ```
