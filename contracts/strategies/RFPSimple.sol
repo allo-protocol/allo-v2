@@ -3,6 +3,8 @@ pragma solidity 0.8.19;
 
 // Interfaces
 import {IAllo} from "../core/interfaces/IAllo.sol";
+import {IRecipientsExtension} from "../extensions/interfaces/IRecipientsExtension.sol";
+import {IMilestonesExtension} from "../extensions/interfaces/IMilestonesExtension.sol";
 // Core Contracts
 import {CoreBaseStrategy} from "./CoreBaseStrategy.sol";
 import {MilestonesExtension} from "../extensions/contracts/MilestonesExtension.sol";
@@ -29,16 +31,6 @@ import {Errors} from "../core/libraries/Errors.sol";
 /// @title RFP Simple Strategy
 /// @notice Strategy for Request for Proposal (RFP) allocation with milestone submission and management.
 contract RFPSimple is CoreBaseStrategy, MilestonesExtension, RecipientsExtension {
-    /// ================================
-    /// ========== Struct ==============
-    /// ================================
-
-    /// @notice Stores the details needed for initializing strategy
-    struct InitializeParams {
-        IRecipientsExtension.RecipientInitializeData recipientExtensionInitializeData;
-        IMilestonesExtension.InitializeParams milestonesExtensionInitializeParams;
-    }
-
     /// ================================
     /// ========== Storage =============
     /// ================================
@@ -85,14 +77,14 @@ contract RFPSimple is CoreBaseStrategy, MilestonesExtension, RecipientsExtension
         for (uint256 i; i < statuses.length;) {
             uint256 fullRow = statuses[i].statusRow;
             for (uint256 col = 0; col < 64;) {
-                uint8 status = uint8((fullRow >> col * 4) & 0xFF);
+                uint8 status = uint8((fullRow >> col * 4) & 0xF);
                 if (IRecipientsExtension.Status(status) == IRecipientsExtension.Status.Accepted) {
                     if (recipientAccepted) {
                         // Only one recipient can be accepted
                         revert INVALID();
                     } else {
                         recipientAccepted = true;
-                        registrationEndTime = block.timestamp - 1;
+                        registrationEndTime = uint64(block.timestamp - 1);
                     }
                 }
                 unchecked {
@@ -112,8 +104,6 @@ contract RFPSimple is CoreBaseStrategy, MilestonesExtension, RecipientsExtension
 
     /// @notice Hook to process recipient data
     /// @param _recipientId ID of the recipient
-    /// @param _isUsingRegistryAnchor A flag to indicate whether to use the registry anchor or not
-    /// @param _metadata The metadata of the recipient
     /// @param _extraData The extra data of the recipient
     function _processRecipient(address _recipientId, bool, Metadata memory, bytes memory _extraData)
         internal
@@ -122,6 +112,20 @@ contract RFPSimple is CoreBaseStrategy, MilestonesExtension, RecipientsExtension
     {
         uint256 proposalBid = abi.decode(_extraData, (uint256));
         _setProposalBid(_recipientId, proposalBid);
+    }
+
+    /// @notice This will allocate to recipients.
+    /// @dev The encoded '_data' will be determined by the strategy implementation.
+    /// @param _recipients The addresses of the recipients to allocate to
+    /// @param _amounts The amounts to allocate to the recipients
+    /// @param _data The data to use to allocate to the recipient
+    /// @param _sender The address of the sender
+    function _allocate(address[] memory _recipients, uint256[] memory _amounts, bytes memory _data, address _sender)
+        internal
+        virtual
+        override
+    {
+        revert Errors.NOT_IMPLEMENTED();
     }
 
     /// @notice Distributes funds (tokens) to recipients.
@@ -142,14 +146,15 @@ contract RFPSimple is CoreBaseStrategy, MilestonesExtension, RecipientsExtension
             revert Errors.RECIPIENT_NOT_ACCEPTED();
         }
 
-        uint256 acceptedRecipientId = _recipientIds[0];
+        address acceptedRecipientId = _recipientIds[0];
         uint256[] memory milestoneIds = abi.decode(_data, (uint256[]));
         uint256 amount;
         for (uint256 i = 0; i < milestoneIds.length; i++) {
+            uint256 milestoneId = milestoneIds[i];
             Milestone storage milestone = milestones[milestoneId];
 
             // Check if the milestone is pending
-            if (milestone.milestoneStatus != Status.Accepted || wasMilestonePaid[milestoneId]) {
+            if (milestone.status != IMilestonesExtension.MilestoneStatus.Accepted || wasMilestonePaid[milestoneId]) {
                 revert IMilestonesExtension.MilestonesExtension_INVALID_MILESTONE_STATUS();
             }
 
@@ -164,7 +169,7 @@ contract RFPSimple is CoreBaseStrategy, MilestonesExtension, RecipientsExtension
         address recipientAddress = _recipients[acceptedRecipientId].recipientAddress;
         _transferAmount(pool.token, recipientAddress, amount);
 
-        emit Distributed(acceptedRecipientId, recipientAddress, amount, _sender);
+        emit Distributed(acceptedRecipientId, abi.encode(recipientAddress, amount, milestoneIds, _sender));
     }
 
     /// @notice Returns if the recipient is accepted
@@ -172,5 +177,13 @@ contract RFPSimple is CoreBaseStrategy, MilestonesExtension, RecipientsExtension
     /// @return If the recipient is accepted
     function _isAcceptedRecipient(address _recipientId) internal view virtual override returns (bool) {
         return _getRecipientStatus(_recipientId) == IRecipientsExtension.Status.Accepted;
+    }
+
+    /// @notice Check if sender is profile owner or member
+    /// @param _anchor Anchor of the profile
+    /// @param _sender The sender of the transaction
+    /// @return 'true' if the sender is the owner or member of the profile, otherwise 'false'
+    function _isProfileMember(address _anchor, address _sender) internal view virtual override(MilestonesExtension, RecipientsExtension) returns (bool) {
+        return MilestonesExtension._isProfileMember(_anchor, _sender);
     }
 }
