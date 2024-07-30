@@ -11,7 +11,6 @@ import {MilestonesExtension} from "../extensions/contracts/MilestonesExtension.s
 import {RecipientsExtension} from "../extensions/contracts/RecipientsExtension.sol";
 // Internal Libraries
 import {Metadata} from "../core/libraries/Metadata.sol";
-import {Errors} from "../core/libraries/Errors.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⣿⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -115,17 +114,8 @@ contract RFPSimple is CoreBaseStrategy, MilestonesExtension, RecipientsExtension
     }
 
     /// @notice This will allocate to recipients.
-    /// @dev The encoded '_data' will be determined by the strategy implementation.
-    /// @param _recipients The addresses of the recipients to allocate to
-    /// @param _amounts The amounts to allocate to the recipients
-    /// @param _data The data to use to allocate to the recipient
-    /// @param _sender The address of the sender
-    function _allocate(address[] memory _recipients, uint256[] memory _amounts, bytes memory _data, address _sender)
-        internal
-        virtual
-        override
-    {
-        revert Errors.NOT_IMPLEMENTED();
+    function _allocate(address[] memory, uint256[] memory, bytes memory, address) internal virtual override {
+        revert NOT_IMPLEMENTED();
     }
 
     /// @notice Distributes funds (tokens) to recipients.
@@ -140,10 +130,10 @@ contract RFPSimple is CoreBaseStrategy, MilestonesExtension, RecipientsExtension
         override
     {
         if (block.timestamp <= registrationEndTime) {
-            revert Errors.ALLOCATION_NOT_ENDED();
+            revert ALLOCATION_NOT_ENDED();
         }
         if (_recipientIds.length > 1) {
-            revert Errors.RECIPIENT_NOT_ACCEPTED();
+            revert RECIPIENT_NOT_ACCEPTED();
         }
 
         address acceptedRecipientId = _recipientIds[0];
