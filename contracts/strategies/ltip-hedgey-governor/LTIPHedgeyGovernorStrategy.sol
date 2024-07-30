@@ -115,10 +115,6 @@ contract LTIPHedgeyGovernorStrategy is LTIPHedgeyStrategy {
     }
 
     /// ===============================
-    /// ============ Views ============
-    /// ===============================
-
-    /// ===============================
     /// ======= External/Custom =======
     /// ===============================
 
@@ -168,7 +164,7 @@ contract LTIPHedgeyGovernorStrategy is LTIPHedgeyStrategy {
     {
         // Decode the '_data'
         (address recipientId, uint256 _votes) = abi.decode(_data, (address, uint256));
-        Recipient storage recipient = _recipients[recipientId];
+        Recipient memory recipient = _recipients[recipientId];
 
         if (recipient.recipientStatus != Status.Accepted) revert RECIPIENT_NOT_ACCEPTED();
 
@@ -187,7 +183,7 @@ contract LTIPHedgeyGovernorStrategy is LTIPHedgeyStrategy {
         emit Voted(recipientId, _sender);
 
         if (votes[recipientId] >= votingThreshold) {
-            emit Allocated(recipientId, recipient.allocationAmount, allo.getPool(poolId).token, address(0));
+            emit Allocated(recipientId, recipient.allocationAmount, allo.getPool(poolId).token, _sender);
         }
     }
 

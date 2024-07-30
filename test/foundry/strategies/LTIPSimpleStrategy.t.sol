@@ -431,7 +431,7 @@ contract LTIPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, StrategyS
         vm.expectEmit();
         emit Voted(recipientId, address(pool_manager2()));
         vm.expectEmit();
-        emit Allocated(recipientId, recipient.allocationAmount, address(token), address(0));
+        emit Allocated(recipientId, recipient.allocationAmount, address(token), address(pool_manager2()));
 
         ltipStrategy().allocate(abi.encode(recipientId), pool_manager2());
 

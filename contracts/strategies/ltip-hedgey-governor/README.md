@@ -4,7 +4,7 @@ The `LTIPHedgeyGovernorStrategy` contract represents a smart contract for Long-T
 
 ## Table of Contents
 
-- [RFPSimpleStrategy.sol](#rfpsimplestrategysol)
+- [LTIPHedgeyGovernorStrategy.sol](#ltiphedgeygovernorstrategysol)
   - [Table of Contents](#table-of-contents)
   - [Sequence Diagram](#sequence-diagram)
   - [Smart Contract Overview](#smart-contract-overview)

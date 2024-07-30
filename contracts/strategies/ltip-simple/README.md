@@ -167,7 +167,7 @@ The `initialize` function decodes and initializes parameters passed during strat
 
 ### Voting on acceptance of a recipient
 
-- Check is a vote has already been cast.
+- Check if a vote has already been cast.
 - All PoolManagers have a voting power of 1
 - PoolManager votes on the acceptance of the recipient.
   - Assigns a vote to the recipient.
@@ -181,7 +181,7 @@ The `initialize` function decodes and initializes parameters passed during strat
 - Check if the recipient doesn't have an active vesting plan
 - Check if the recipient status is "Accepted".
 - Create a vesting plan for the recipient (a OZ TokenTimeLock contract instance).
-  - Transfer the allocated funds to the vesting plan.8
+  - Transfer the allocated funds to the vesting plan.
   - Emits `VestingPlanCreated` event.
 - Emits `Distributed` event.
 
