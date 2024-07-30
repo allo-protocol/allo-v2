@@ -237,8 +237,8 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         _;
     }
 
-    /// @notice Modifier to check if the registration is active
-    /// @dev Reverts if the registration is not active
+    /// @notice Modifier to check if the review is active
+    /// @dev Reverts if the review is not active
     modifier onlyActiveReview() {
         _checkOnlyActiveReview();
         _;
@@ -521,17 +521,21 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         // If the recipient address is the zero address this will revert
         if (recipientAddress == address(0)) revert RECIPIENT_ERROR(recipientId);
 
-        // Get the recipient
         Recipient storage recipient = _recipients[recipientId];
-
         // update the recipients data
         recipient.recipientAddress = recipientAddress;
         recipient.allocationAmount = allocationAmount;
         recipient.metadata = metadata;
-        recipient.recipientStatus = Status.Pending;
 
-        _recipientIds.push(recipientId);
-        emit Registered(recipientId, _data, _sender);
+        if (recipient.recipientStatus == Status.None) {
+            recipient.recipientStatus = Status.Pending;
+            // If the recipient status is 'None' add the recipient to the '_recipientIds' array
+            _recipientIds.push(recipientId);
+            emit Registered(recipientId, _data, _sender);
+        } else {
+            /// if the recipient already exist we don't need to update their status to pending
+            emit UpdatedRegistration(recipientId, _data, _sender);
+        }
     }
 
     /// @notice Allocate (delegated) voting power to a recipient. In the simple strategy, every authorized voter has 1 vote.
@@ -568,7 +572,7 @@ contract LTIPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         emit Voted(recipientId, _sender);
 
         if (votes[recipientId] >= votingThreshold) {
-            emit Allocated(recipientId, recipient.allocationAmount, allo.getPool(poolId).token, address(0));
+            emit Allocated(recipientId, recipient.allocationAmount, allo.getPool(poolId).token, _sender);
         }
     }
 
