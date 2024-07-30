@@ -55,7 +55,7 @@ interface IMilestonesExtension {
     /// @notice Emitted for the status change of a milestone.
     /// @param milestoneId Id of the milestone
     /// @param status Status of the milestone
-    event MilestoneStatusChanged(uint256 indexed milestoneId, Status status);
+    event MilestoneStatusChanged(uint256 indexed milestoneId, MilestoneStatus status);
 
     /// @notice Emitted when milestones are set.
     /// @param milestonesLength Count of milestones
@@ -65,8 +65,8 @@ interface IMilestonesExtension {
     /// =========== Enums ==============
     /// ================================
 
-    /// @notice The Status enum that all milestones are based from
-    enum Status {
+    /// @notice The MilestoneStatus enum that all milestones are based from
+    enum MilestoneStatus {
         None,
         Pending,
         Accepted,
@@ -84,7 +84,7 @@ interface IMilestonesExtension {
     struct Milestone {
         uint256 amountPercentage;
         Metadata metadata;
-        Status status;
+        MilestoneStatus status;
     }
 
     /// @notice Stores the details needed for initializing strategy
@@ -120,7 +120,7 @@ interface IMilestonesExtension {
 
     /// @notice Get the status of the milestone
     /// @param _milestoneId Id of the milestone
-    function getMilestoneStatus(uint256 _milestoneId) external view returns (Status);
+    function getMilestoneStatus(uint256 _milestoneId) external view returns (MilestoneStatus);
 
     /// ===============================
     /// ======= External/Custom =======
@@ -145,5 +145,5 @@ interface IMilestonesExtension {
     /// @notice Reject pending milestone submmited by an accepted recipient.
     /// @dev Emits a 'MilestoneStatusChanged()' event.
     /// @param _milestoneStatus ID of the milestone
-    function reviewMilestone(Status _milestoneStatus) external;
+    function reviewMilestone(MilestoneStatus _milestoneStatus) external;
 }
