@@ -276,7 +276,7 @@ contract Allo is
     /// @dev Emits 'RoleGranted()' event. '_msgSender' must be a pool admin.
     /// @param _poolId ID of the pool
     /// @param _managers The addresses to add
-    function addPoolManagers(uint256 _poolId, address[] calldata _managers) external onlyPoolAdmin(_poolId) {
+    function addPoolManagers(uint256 _poolId, address[] calldata _managers) public onlyPoolAdmin(_poolId) {
         for (uint256 i; i < _managers.length;) {
             _addPoolManager(_poolId, _managers[i]);
 
@@ -290,10 +290,34 @@ contract Allo is
     /// @dev Emits 'RoleRevoked()' event. '_msgSender' must be a pool admin.
     /// @param _poolId ID of the pool
     /// @param _managers The addresses to remove
-    function removePoolManagers(uint256 _poolId, address[] calldata _managers) external onlyPoolAdmin(_poolId) {
+    function removePoolManagers(uint256 _poolId, address[] calldata _managers) public onlyPoolAdmin(_poolId) {
         for (uint256 i; i < _managers.length;) {
             _revokeRole(pools[_poolId].managerRole, _managers[i]);
 
+            unchecked {
+                ++i;
+            }
+        }
+    }
+
+    /// @notice Add multiple pool managers to multiple pools
+    /// @param _poolIds IDs of the pools
+    /// @param _managers The addresses to add
+    function addPoolManagersInMultiplePools(uint256[] calldata _poolIds, address[] calldata _managers) external {
+        for (uint256 i; i < _poolIds.length;) {
+            addPoolManagers(_poolIds[i], _managers);
+            unchecked {
+                ++i;
+            }
+        }
+    }
+
+    /// @notice Remove multiple pool managers from multiple pools
+    /// @param _poolIds IDs of the pools
+    /// @param _managers The addresses to remove
+    function removePoolManagersInMultiplePools(uint256[] calldata _poolIds, address[] calldata _managers) external {
+        for (uint256 i; i < _poolIds.length;) {
+            removePoolManagers(_poolIds[i], _managers);
             unchecked {
                 ++i;
             }
