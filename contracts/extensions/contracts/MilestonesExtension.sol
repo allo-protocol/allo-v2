@@ -177,10 +177,14 @@ abstract contract MilestonesExtension is CoreBaseStrategy, IMilestonesExtension 
     function _validateSubmitUpcomingMilestone(address _recipientId, address _sender) internal virtual {
         // Check if the 'msg.sender' is accepted
         if (!_isAcceptedRecipient(_recipientId)) revert MilestonesExtension_INVALID_RECIPIENT();
-        if (_sender != _recipientId && !_isProfileMember(_recipientId, _sender)) revert MilestonesExtension_INVALID_SUBMITTER();
+        if (_sender != _recipientId && !_isProfileMember(_recipientId, _sender)) {
+            revert MilestonesExtension_INVALID_SUBMITTER();
+        }
 
         // Check if a submission is ongoing to prevent front-running a milestone review.
-        if (milestones[upcomingMilestone].status == MilestoneStatus.Pending) revert MilestonesExtension_MILESTONE_PENDING();
+        if (milestones[upcomingMilestone].status == MilestoneStatus.Pending) {
+            revert MilestonesExtension_MILESTONE_PENDING();
+        }
     }
 
     /// @notice Validates if the milestone can be reviewed at this moment by the `_sender` with `_milestoneStatus`
@@ -189,7 +193,9 @@ abstract contract MilestonesExtension is CoreBaseStrategy, IMilestonesExtension 
     function _validateReviewMilestone(address _sender, MilestoneStatus _milestoneStatus) internal virtual {
         _checkOnlyPoolManager(_sender);
         if (_milestoneStatus == MilestoneStatus.None) revert MilestonesExtension_INVALID_MILESTONE_STATUS();
-        if (milestones[upcomingMilestone].status != MilestoneStatus.Pending) revert MilestonesExtension_MILESTONE_NOT_PENDING();
+        if (milestones[upcomingMilestone].status != MilestoneStatus.Pending) {
+            revert MilestonesExtension_MILESTONE_NOT_PENDING();
+        }
     }
 
     /// @notice Increase max bid for RFP pool

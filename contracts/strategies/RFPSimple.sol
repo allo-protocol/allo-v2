@@ -183,7 +183,13 @@ contract RFPSimple is CoreBaseStrategy, MilestonesExtension, RecipientsExtension
     /// @param _anchor Anchor of the profile
     /// @param _sender The sender of the transaction
     /// @return 'true' if the sender is the owner or member of the profile, otherwise 'false'
-    function _isProfileMember(address _anchor, address _sender) internal view virtual override(MilestonesExtension, RecipientsExtension) returns (bool) {
+    function _isProfileMember(address _anchor, address _sender)
+        internal
+        view
+        virtual
+        override(MilestonesExtension, RecipientsExtension)
+        returns (bool)
+    {
         return MilestonesExtension._isProfileMember(_anchor, _sender);
     }
 }

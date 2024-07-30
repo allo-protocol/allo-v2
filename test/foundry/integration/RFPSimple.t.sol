@@ -110,9 +110,7 @@ contract IntegrationRFPSimple is Test {
                     registrationStartTime: uint64(block.timestamp),
                     registrationEndTime: uint64(block.timestamp + 7 days)
                 }),
-                IMilestonesExtension.InitializeParams({
-                    maxBid: uint256(1000)
-                })
+                IMilestonesExtension.InitializeParams({maxBid: uint256(1000)})
             ),
             DAI,
             DAI_FUNDS,

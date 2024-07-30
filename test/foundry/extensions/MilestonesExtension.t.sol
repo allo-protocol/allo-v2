@@ -240,7 +240,7 @@ contract MilestonesExtensionSetMilestones is BaseMilestonesExtensionUnit {
 
 contract MilestonesExtension_validateSubmitUpcomingMilestone is BaseMilestonesExtensionUnit {
     using stdStorage for StdStorage;
-        
+
     address internal _registry = makeAddr("registry");
 
     function setUp() public override {
