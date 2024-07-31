@@ -32,12 +32,12 @@ abstract contract MilestonesExtension is CoreBaseStrategy, IMilestonesExtension 
     /// ========= Initialize ==========
     /// ===============================
 
-    /// @notice This initializes the BaseStrategy
-    /// @dev You only need to pass the 'poolId' to initialize the BaseStrategy and the rest is specific to the strategy
-    /// @param _initializeParams The initialize params
-    function __MilestonesExtension_init(InitializeParams memory _initializeParams) internal {
+    /// @notice This initializes the Milestones Extension
+    /// @dev This function MUST be called by the 'initialize' function in the strategy.
+    /// @param _maxBid The initialize params
+    function __MilestonesExtension_init(uint256 _maxBid) internal {
         // Set the strategy specific variables
-        _increaseMaxBid(_initializeParams.maxBid);
+        _increaseMaxBid(_maxBid);
     }
 
     /// ===============================

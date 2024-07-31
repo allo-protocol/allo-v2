@@ -87,11 +87,6 @@ interface IMilestonesExtension {
         Status status;
     }
 
-    /// @notice Stores the details needed for initializing strategy
-    struct InitializeParams {
-        uint256 maxBid;
-    }
-
     /// ================================
     /// ========== Storage =============
     /// ================================

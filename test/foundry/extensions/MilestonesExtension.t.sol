@@ -52,10 +52,8 @@ abstract contract BaseMilestonesExtensionUnit is Test {
 contract MilestonesExtension__MilestonesExtension_init is BaseMilestonesExtensionUnit {
     function test_initializeMaxBid(uint256 _maxBid) public {
         vm.assume(_maxBid > 0);
-        IMilestonesExtension.InitializeParams memory _initializeData =
-            IMilestonesExtension.InitializeParams({maxBid: _maxBid});
 
-        MilestonesExtension.expose__MilestonesExtension_init(_initializeData);
+        MilestonesExtension.expose__MilestonesExtension_init(_maxBid);
 
         assertEq(MilestonesExtension.maxBid(), _maxBid);
     }
@@ -65,9 +63,7 @@ contract MilestonesExtensionIncreaseMaxBid is BaseMilestonesExtensionUnit {
     function setUp() public override {
         super.setUp();
         vm.prank(allo);
-        MilestonesExtension.initialize(
-            poolId, abi.encode(IMilestonesExtension.InitializeParams({maxBid: INITIAL_MAX_BID}))
-        );
+        MilestonesExtension.initialize(poolId, abi.encode(INITIAL_MAX_BID));
     }
 
     function test_increaseMaxBid(address _caller, uint256 _maxBid) public {
@@ -108,9 +104,7 @@ contract MilestonesExtension_setProposalBid is BaseMilestonesExtensionUnit {
     function setUp() public override {
         super.setUp();
         vm.prank(allo);
-        MilestonesExtension.initialize(
-            poolId, abi.encode(IMilestonesExtension.InitializeParams({maxBid: INITIAL_MAX_BID}))
-        );
+        MilestonesExtension.initialize(poolId, abi.encode(INITIAL_MAX_BID));
     }
 
     function test_Revert_maxBidExceeded(address _bidder, uint256 _bid) public {
@@ -146,9 +140,7 @@ contract MilestonesExtensionSetMilestones is BaseMilestonesExtensionUnit {
     function setUp() public override {
         super.setUp();
         vm.prank(allo);
-        MilestonesExtension.initialize(
-            poolId, abi.encode(IMilestonesExtension.InitializeParams({maxBid: INITIAL_MAX_BID}))
-        );
+        MilestonesExtension.initialize(poolId, abi.encode(INITIAL_MAX_BID));
     }
 
     function test_Revert_unauthorizedSetMilestones(address _caller, MilestoneWithoutEnums[] memory _rawMilestones)
@@ -288,9 +280,7 @@ contract MilestonesExtensionSubmitUpcomingMilestone is BaseMilestonesExtensionUn
     function setUp() public override {
         super.setUp();
         vm.prank(allo);
-        MilestonesExtension.initialize(
-            poolId, abi.encode(IMilestonesExtension.InitializeParams({maxBid: INITIAL_MAX_BID}))
-        );
+        MilestonesExtension.initialize(poolId, abi.encode(INITIAL_MAX_BID));
         StdStorage storage meStorage = stdstore.target(address(MilestonesExtension)).sig("acceptedRecipientId()");
         meStorage.depth(0).checked_write(_acceptedRecipientId);
 
@@ -381,9 +371,7 @@ contract MilestonesExtensionReviewMilestone is BaseMilestonesExtensionUnit {
     function setUp() public override {
         super.setUp();
         vm.prank(allo);
-        MilestonesExtension.initialize(
-            poolId, abi.encode(IMilestonesExtension.InitializeParams({maxBid: INITIAL_MAX_BID}))
-        );
+        MilestonesExtension.initialize(poolId, abi.encode(INITIAL_MAX_BID));
         StdStorage storage meStorage = stdstore.target(address(MilestonesExtension)).sig("acceptedRecipientId()");
         meStorage.depth(0).checked_write(_acceptedRecipientId);
 
