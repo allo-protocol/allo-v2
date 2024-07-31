@@ -55,11 +55,11 @@ contract RFPSimple is CoreBaseStrategy, MilestonesExtension, RecipientsExtension
     function initialize(uint256 _poolId, bytes memory _data) external virtual override {
         (
             IRecipientsExtension.RecipientInitializeData memory _recipientExtensionInitializeData,
-            IMilestonesExtension.InitializeParams memory _milestonesExtensionInitializeParams
-        ) = abi.decode(_data, (IRecipientsExtension.RecipientInitializeData, IMilestonesExtension.InitializeParams));
+            uint256 _maxBid
+        ) = abi.decode(_data, (IRecipientsExtension.RecipientInitializeData, uint256));
         __BaseStrategy_init(_poolId);
         __RecipientsExtension_init(_recipientExtensionInitializeData);
-        __MilestonesExtension_init(_milestonesExtensionInitializeParams);
+        __MilestonesExtension_init(_maxBid);
         emit Initialized(_poolId, _data);
     }
 
@@ -168,19 +168,5 @@ contract RFPSimple is CoreBaseStrategy, MilestonesExtension, RecipientsExtension
     /// @return If the recipient is accepted
     function _isAcceptedRecipient(address _recipientId) internal view virtual override returns (bool) {
         return _getRecipientStatus(_recipientId) == IRecipientsExtension.Status.Accepted;
-    }
-
-    /// @notice Check if sender is profile owner or member
-    /// @param _anchor Anchor of the profile
-    /// @param _sender The sender of the transaction
-    /// @return 'true' if the sender is the owner or member of the profile, otherwise 'false'
-    function _isProfileMember(address _anchor, address _sender)
-        internal
-        view
-        virtual
-        override(MilestonesExtension, RecipientsExtension)
-        returns (bool)
-    {
-        return MilestonesExtension._isProfileMember(_anchor, _sender);
     }
 }

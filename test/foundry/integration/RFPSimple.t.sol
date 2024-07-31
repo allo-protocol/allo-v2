@@ -13,6 +13,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 contract IntegrationRFPSimple is Test {
     address public constant DAI = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
     uint256 public constant DAI_FUNDS = 10;
+    uint256 public constant MAX_BID = 1000;
 
     Allo public allo;
     Registry public registry;
@@ -111,7 +112,7 @@ contract IntegrationRFPSimple is Test {
                     registrationStartTime: uint64(block.timestamp),
                     registrationEndTime: uint64(block.timestamp + 7 days)
                 }),
-                IMilestonesExtension.InitializeParams({maxBid: uint256(1000)})
+                MAX_BID
             ),
             DAI,
             DAI_FUNDS,
