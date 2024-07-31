@@ -1,0 +1,44 @@
+
+    ////////////////////////////////////////////////////
+      Deploys DirectGrantsLiteStrategy.sol on lukso-mainnet
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────┐
+│     (index)     │                    Values                    │
+├─────────────────┼──────────────────────────────────────────────┤
+│    contract     │        'DirectGrantsLiteStrategy.sol'        │
+│     chainId     │                      42                      │
+│     network     │               'lukso-mainnet'                │
+│ deployerAddress │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│     balance     │           '75.274234579448019202'            │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying DirectGrantsLiteStrategy.sol
+[35mContract DirectGrantsLiteStrategy deployed at address: 0xF21E0915a0b7c541483962Cc7fB4705bBd4D5248[0m
+
+Verifying contract...
+Successfully submitted source code for contract
+contracts/strategies/direct-grants-lite/DirectGrantsLite.sol:DirectGrantsLiteStrategy at 0xF21E0915a0b7c541483962Cc7fB4705bBd4D5248
+for verification on the block explorer. Waiting for verification result...
+
+VerificationAPIUnexpectedMessageError: The API responded with an unexpected message.
+Please report this issue to the Hardhat team.
+Contract verification may have succeeded and should be checked manually.
+Message: Unknown UID
+    at SimpleTaskDefinition.action (/home/kurt/git/allo/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/index.ts:491:15)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Environment._runTaskDefinition (/home/kurt/git/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:359:14)
+    at async Environment.run (/home/kurt/git/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:192:14)
+    at async SimpleTaskDefinition.action (/home/kurt/git/allo/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/index.ts:298:9)
+    at async Environment._runTaskDefinition (/home/kurt/git/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:359:14)
+    at async hardhatVerify (/home/kurt/git/allo/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/verify-proxy.ts:118:12)
+    at async OverriddenTaskDefinition._action (/home/kurt/git/allo/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/index.ts:206:12)
+    at async Environment._runTaskDefinition (/home/kurt/git/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:359:14)
+    at async Environment.run (/home/kurt/git/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:192:14)
+[90m
+	Validating getAllo() == 0xB087535DB0df98fC4327136e897A5985E5Cfbd66[0m
+[32m	✅ PASSED with Result: 0xB087535DB0df98fC4327136e897A5985E5Cfbd66[0m
+[90m
+	Validating getStrategyId() == 0x103732a8e473467a510d4128ee11065262bdd978f0d9dad89ba68f2c56127e27[0m
+[32m	✅ PASSED with Result: 0x103732a8e473467a510d4128ee11065262bdd978f0d9dad89ba68f2c56127e27[0m
+Adding DirectGrantsLiteStrategy v1.0 to cloneable strategies...
+DirectGrantsLiteStrategy v1.0 added to cloneable strategies.

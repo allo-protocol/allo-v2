@@ -126,14 +126,24 @@ export const commonConfig: DeployParams = {
     proxyAdminOwner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
     permit2Address: "0xC1087157eF2aaeBcaDB913251EA5B82c678424F7",
   },
+  // Sei Mainnet
+  1329: {
+    proxyAdminOwner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
+    permit2Address: "0xb91DBEb018789d712EDC1a9e6C6AdC891BD5Ec2c",
+  },
   // Lukso
   42: {
     proxyAdminOwner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
-    permit2Address: "",
+    permit2Address: "0xb91DBEb018789d712EDC1a9e6C6AdC891BD5Ec2c",
   },
   // Lukso testnet
   4201: {
     proxyAdminOwner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
     permit2Address: "0x3c795a334dE57813D8CA945D1A47D329D6Fc2151",
+  },
+  // Metis andromeda
+  1088: {
+    proxyAdminOwner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
+    permit2Address: "0xb1F795776cB9DdAC6E7e162f31C7419Dd3d48297",
   },
 };

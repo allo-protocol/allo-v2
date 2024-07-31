@@ -104,12 +104,19 @@ export const registryConfig: DeployParams = {
   713715: {
     owner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
   },
+  1329: {
+    owner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
+  },
   // Lukso Testnet
   4201: {
     owner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
   },
   // Lukso Mainnet
   42: {
+    owner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
+  },
+  // Metis andromeda
+  1088: {
     owner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
   },
 };

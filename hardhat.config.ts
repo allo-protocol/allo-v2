@@ -35,6 +35,7 @@ const chainIds = {
   "filecoin-calibration": 314159,
   fuji: 43113,
   "sei-devnet": 713715,
+  "sei-mainnet": 1329,
   "lukso-testnet": 4201,
 
   // mainnet
@@ -49,6 +50,7 @@ const chainIds = {
   avalanche: 43114,
   scroll: 534352,
   "lukso-mainnet": 42,
+  metisAndromeda: 1088
 };
 
 let deployPrivateKey = process.env.DEPLOYER_PRIVATE_KEY as string;
@@ -162,7 +164,10 @@ const config: HardhatUserConfig = {
       "arbitrum-mainnet",
       `https://arb-mainnet.g.alchemy.com/v2/${alchemyIdKey}`,
     ),
-    fantom: createMainnetConfig("fantom-mainnet", "https://rpc.ftm.tools"),
+    "fantom": { 
+      ...createMainnetConfig("fantom-mainnet"),
+      url: "https://fantom-pokt.nodies.app",
+    },
     "celo-mainnet": {
       ...createMainnetConfig("celo-mainnet"),
       url: "https://forno.celo.org",
@@ -173,8 +178,8 @@ const config: HardhatUserConfig = {
     },
     polygon: {
       ...createMainnetConfig("polygon"),
-      url: `https://polygon-mainnet.g.alchemy.com/v2/${alchemyIdKey}`,
-      gasPrice: 300000000000,
+      url: `https://polygon-pokt.nodies.app`,
+      // gasPrice: 450000000000,
     },
     avalanche: {
       ...createMainnetConfig("avalanche"),
@@ -190,7 +195,11 @@ const config: HardhatUserConfig = {
     },
     "lukso-mainnet": {
       ...createMainnetConfig("lukso-mainnet"),
-      url: 'https://42.rpc.thirdweb.com',
+      url: "https://42.rpc.thirdweb.com",
+    },
+    metisAndromeda: {
+      ...createMainnetConfig("metisAndromeda"),
+      url: `https://andromeda.metis.io/?owner=1088`,
     },
     // Test Networks
     goerli: createTestnetConfig(
@@ -249,9 +258,13 @@ const config: HardhatUserConfig = {
       ...createTestnetConfig("sei-devnet"),
       url: `https://evm-rpc-arctic-1.sei-apis.com`,
     },
+    "sei-mainnet": {
+      ...createMainnetConfig("sei-mainnet"),
+      url: `https://evm-rpc.sei-apis.com`,
+    },
     "lukso-testnet": {
       ...createTestnetConfig("lukso-testnet"),
-      url: 'https://4201.rpc.thirdweb.com',
+      url: "https://4201.rpc.thirdweb.com",
     },
 
     // Local Networks
@@ -275,29 +288,31 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: {
-      mainnet: process.env.ETHERSCAN_API_KEY,
-      goerli: process.env.ETHERSCAN_API_KEY,
-      sepolia: process.env.ETHERSCAN_API_KEY,
-      optimisticEthereum: process.env.OPTIMISTIC_ETHERSCAN_API_KEY,
-      optimisticGoerli: process.env.OPTIMISTIC_ETHERSCAN_API_KEY,
-      ftmTestnet: process.env.FTMSCAN_API_KEY,
-      opera: process.env.FTMSCAN_API_KEY,
-      "celo-mainnet": process.env.CELOSCAN_API_KEY,
-      "celo-testnet": process.env.CELOSCAN_API_KEY,
-      base: process.env.BASESCAN_API_KEY,
-      "base-testnet": process.env.BASESCAN_API_KEY,
-      polygon: process.env.POLYGONSCAN_API_KEY,
-      mumbai: process.env.POLYGONSCAN_API_KEY,
-      "arbitrum-mainnet": process.env.ARBITRUMSCAN_API_KEY,
-      "arbitrum-sepolia": process.env.ARBITRUMSCAN_API_KEY,
-      "optimism-sepolia": process.env.OPTIMISTIC_ETHERSCAN_API_KEY,
-      "filecoin-mainnet": process.env.FILECOIN_ETHERSCAN_API_KEY,
+      mainnet: process.env.ETHERSCAN_API_KEY || "",
+      goerli: process.env.ETHERSCAN_API_KEY || "",
+      sepolia: process.env.ETHERSCAN_API_KEY || "",
+      optimisticEthereum: process.env.OPTIMISTIC_ETHERSCAN_API_KEY || "",
+      optimisticGoerli: process.env.OPTIMISTIC_ETHERSCAN_API_KEY || "",
+      ftmTestnet: process.env.FTMSCAN_API_KEY || "",
+      opera: process.env.FTMSCAN_API_KEY || "",
+      "celo-mainnet": process.env.CELOSCAN_API_KEY || "",
+      "celo-testnet": process.env.CELOSCAN_API_KEY || "",
+      base: process.env.BASESCAN_API_KEY || "",
+      "base-testnet": process.env.BASESCAN_API_KEY || "",
+      polygon: process.env.POLYGONSCAN_API_KEY || "",
+      mumbai: process.env.POLYGONSCAN_API_KEY || "",
+      "arbitrum-mainnet": process.env.ARBITRUMSCAN_API_KEY || "",
+      "arbitrum-sepolia": process.env.ARBITRUMSCAN_API_KEY || "",
+      "optimism-sepolia": process.env.OPTIMISTIC_ETHERSCAN_API_KEY || "",
+      "filecoin-mainnet": process.env.FILECOIN_ETHERSCAN_API_KEY || "",
       "filecoin-calibration": "no-api-key-needed",
       fuji: "no-api-key-needed",
       avalanche: "no-api-key-needed",
-      scroll: process.env.SCROLLSCAN_API_KEY,
+      scroll: process.env.SCROLLSCAN_API_KEY || "",
+      "sei-mainnet": process.env.SEITRACE_API_KEY || "",
       "lukso-mainnet": "no-api-key-needed",
       "lukso-testnet": "no-api-key-needed",
+      metisAndromeda: "no-api-key-needed",
     },
     customChains: [
       {
@@ -423,21 +438,38 @@ const config: HardhatUserConfig = {
         },
       },
       {
-        network: 'lukso-testnet',
-        chainId: chainIds["lukso-testnet"],
+        network: "sei-mainnet",
+        chainId: chainIds["sei-mainnet"],
         urls: {
-          apiURL: 'https://explorer.execution.testnet.lukso.network/api',
-          browserURL: 'https://explorer.execution.testnet.lukso.network/',
+          apiURL: "https://seitrace.com/api",
+          browserURL: "https://seitrace.com/",
         },
       },
       {
-        network: 'lukso-mainnet',
-        chainId: chainIds["lukso-mainnet"],
+        network: "lukso-testnet",
+        chainId: chainIds["lukso-testnet"],
         urls: {
-          apiURL: 'https://explorer.execution.mainnet.lukso.network/api',
-          browserURL: 'https://explorer.execution.mainnet.lukso.network/',
+          apiURL: "https://explorer.execution.testnet.lukso.network/api",
+          browserURL: "https://explorer.execution.testnet.lukso.network/",
         },
       },
+      {
+        network: "lukso-mainnet",
+        chainId: chainIds["lukso-mainnet"],
+        urls: {
+          apiURL: "https://explorer.execution.mainnet.lukso.network/api",
+          browserURL: "https://explorer.execution.mainnet.lukso.network/",
+        },
+      },
+      {
+        network: "metisAndromeda",
+        chainId: chainIds["metisAndromeda"],
+        urls: {
+          apiURL:
+            "https://api.routescan.io/v2/network/mainnet/evm/1088/etherscan",
+          browserURL: "https://explorer.metis.io",
+        },
+      }
     ],
   },
   abiExporter: abiExporter,

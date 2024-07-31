@@ -1,0 +1,39 @@
+
+    ////////////////////////////////////////////////////
+      Deploys DirectGrantsLiteStrategy.sol on optimism-sepolia
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────┐
+│     (index)     │                    Values                    │
+├─────────────────┼──────────────────────────────────────────────┤
+│    contract     │        'DirectGrantsLiteStrategy.sol'        │
+│     chainId     │                   11155420                   │
+│     network     │              'optimism-sepolia'              │
+│ deployerAddress │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│     balance     │            '0.118616960075119756'            │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying DirectGrantsLiteStrategy.sol
+[35mError calling deploy() function for contract DirectGrantsLiteStrategy
+ProviderError: execution reverted[0m
+
+Verifying contract...
+DeployedBytecodeNotFoundError: The address 0x79A5EEc2C87Cd2116195E71af7A38647f89C8Ffa has no bytecode. Is the contract deployed to this network?
+The selected network is optimism-sepolia.
+    at Function.getDeployedContractBytecode (/home/kurt/git/allo/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/internal/solc/bytecode.ts:73:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async SimpleTaskDefinition.action (/home/kurt/git/allo/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/index.ts:255:32)
+    at async Environment._runTaskDefinition (/home/kurt/git/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:359:14)
+    at async hardhatVerify (/home/kurt/git/allo/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/verify-proxy.ts:118:12)
+    at async OverriddenTaskDefinition._action (/home/kurt/git/allo/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/index.ts:206:12)
+    at async Environment._runTaskDefinition (/home/kurt/git/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:359:14)
+    at async Environment.run (/home/kurt/git/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:192:14)
+    at async SimpleTaskDefinition.action (/home/kurt/git/allo/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/index.ts:546:7)
+    at async Environment._runTaskDefinition (/home/kurt/git/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:359:14)
+[90m
+	Validating getAllo() == 0x1133eA7Af70876e64665ecD07C0A0476d09465a1[0m
+[31m	❌❌❌ FAILED with Error: Error: could not decode result data (value="0x", info={ "method": "getAllo", "signature": "getAllo()" }, code=BAD_DATA, version=6.11.1)[0m
+[90m
+	Validating getStrategyId() == 0x103732a8e473467a510d4128ee11065262bdd978f0d9dad89ba68f2c56127e27[0m
+[31m	❌❌❌ FAILED with Error: Error: could not decode result data (value="0x", info={ "method": "getStrategyId", "signature": "getStrategyId()" }, code=BAD_DATA, version=6.11.1)[0m
+Adding DirectGrantsLiteStrategy v1.0 to cloneable strategies...
+Error adding DirectGrantsLiteStrategy v1.0 to cloneable strategies.

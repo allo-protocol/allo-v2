@@ -27,12 +27,10 @@ handle_insufficient_funds_error() {
 
 networks=(
 #   "fuji"
-#   "mumbai"
 #   "sepolia"
-#   "base-testnet"
 #   "celo-testnet"
 #   "arbitrum-sepolia"
-#   "optimism-sepolia"
+#   "optimism-sepolia" # Error calling deploy() function for contract DirectGrantsLiteStrategy
 #   "optimism-mainnet"
 #   "celo-mainnet"
 #   "arbitrum-mainnet"
@@ -46,8 +44,10 @@ networks=(
 #   "filecoin-mainnet"
 #   "filecoin-calibration"
 #   "sei-devnet"
+#   "sei-mainnet"
 #   "lukso-testnet"
 #   "lukso-mainnet"
+#   "metisAndromeda"
 
 #  === ZkSync Era ===
 #   "zkSyncTestnet"
@@ -57,10 +57,14 @@ networks=(
 
 scripts=(
     # "core/deployRegistry"
-    # "core/deployAllo"
     # "core/deployContractFactory"
+    # "core/deployAllo"
+   
     # "strategies/deployDonationVotingMerkleDistributionDirect"
     # "strategies/deployDirectGrants"
+    # "strategies/deployDirectGrantsLite"
+    # "strategies/deployDirectAllocation"
+    
     # "core/transferProxyAdminOwnership"
     # "strategies/deployDonationVotingMerkleDistributionVault"
     # "strategies/deployQVSimple"
@@ -74,6 +78,9 @@ scripts=(
     # "zksync/deployEraContractFactory"
     # "zksync/strategies/deployEraDonationVotingMerkleDistributionDirect"
     # "zksync/strategies/deployEraDirectGrants"
+    # "zksync/strategies/deployEraDirectGrantsLite"
+    # "zksync/factory/deployDGLFactory"
+    # "zksync/factory/deployDVMDTFactory"
 )
 
 for script in "${scripts[@]}"; do
