@@ -62,9 +62,9 @@ interface IRecipientsExtension {
     /// @param sender The sender of the transaction
     event RecipientStatusUpdated(uint256 indexed rowIndex, uint256 fullRow, address sender);
 
-    /// @notice Emitted when the timestamps are updated
+    /// @notice Emitted when the registration timestamps are updated
     /// @param registrationStartTime The start time for the registration
     /// @param registrationEndTime The end time for the registration
     /// @param sender The sender of the transaction
-    event TimestampsUpdated(uint64 registrationStartTime, uint64 registrationEndTime, address sender);
+    event RegistrationTimestampsUpdated(uint64 registrationStartTime, uint64 registrationEndTime, address sender);
 }
