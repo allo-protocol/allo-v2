@@ -53,10 +53,8 @@ contract RFPSimple is CoreBaseStrategy, MilestonesExtension, RecipientsExtension
     /// @param _data The data to be decoded
     /// @custom:data (uint256 _maxBid, bool registryGating, bool metadataRequired)
     function initialize(uint256 _poolId, bytes memory _data) external virtual override {
-        (
-            IRecipientsExtension.RecipientInitializeData memory _recipientExtensionInitializeData,
-            uint256 _maxBid
-        ) = abi.decode(_data, (IRecipientsExtension.RecipientInitializeData, uint256));
+        (IRecipientsExtension.RecipientInitializeData memory _recipientExtensionInitializeData, uint256 _maxBid) =
+            abi.decode(_data, (IRecipientsExtension.RecipientInitializeData, uint256));
         __BaseStrategy_init(_poolId);
         __RecipientsExtension_init(_recipientExtensionInitializeData);
         __MilestonesExtension_init(_maxBid);
