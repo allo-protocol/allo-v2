@@ -97,7 +97,9 @@ abstract contract CoreBaseStrategy is IBaseStrategy, Transfer {
     }
 
     /// @notice Withdraws tokens from the pool.
-    /// @dev Withdraws '_amount' of '_token' to '_recipient'
+    /// @dev Keep in mind that this function also reduces the `poolAmount`
+    /// and this variable is used to make calculations. Extreme caution must be taken when calling this function
+    /// to avoid any problems.
     /// @param _token The address of the token
     /// @param _amount The amount to withdraw
     /// @param _recipient The address to withdraw to
@@ -107,7 +109,13 @@ abstract contract CoreBaseStrategy is IBaseStrategy, Transfer {
         onlyPoolManager(msg.sender)
     {
         _beforeWithdraw(_token, _amount, _recipient);
+
+        // If the token is the pool token, decrease the pool amount
+        if (_token == allo.getPool(poolId).token) {
+            poolAmount -= _amount;
+        }
         _transferAmount(_token, _recipient, _amount);
+
         _afterWithdraw(_token, _amount, _recipient);
 
         emit Withdrew(_token, _amount, _recipient);
