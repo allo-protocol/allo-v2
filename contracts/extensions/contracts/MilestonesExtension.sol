@@ -135,16 +135,6 @@ abstract contract MilestonesExtension is CoreBaseStrategy, IMilestonesExtension 
     /// ============ Internal ==============
     /// ====================================
 
-    /// @notice Check if sender is profile owner or member
-    /// @param _anchor Anchor of the profile
-    /// @param _sender The sender of the transaction
-    /// @return 'true' if the sender is the owner or member of the profile, otherwise 'false'
-    function _isProfileMember(address _anchor, address _sender) internal view virtual returns (bool) {
-        IRegistry registry = allo.getRegistry();
-        IRegistry.Profile memory profile = registry.getProfileByAnchor(_anchor);
-        return registry.isOwnerOrMemberOfProfile(profile.id, _sender);
-    }
-
     /// @notice Sets the bid for a given `_bidderId` address, likely to match the recipient's address
     /// @param _bidderId The address of the bidder
     /// @param _proposalBid The amount that was bid
@@ -177,9 +167,7 @@ abstract contract MilestonesExtension is CoreBaseStrategy, IMilestonesExtension 
     function _validateSubmitUpcomingMilestone(address _recipientId, address _sender) internal virtual {
         // Check if the 'msg.sender' is accepted
         if (!_isAcceptedRecipient(_recipientId)) revert MilestonesExtension_INVALID_RECIPIENT();
-        if (_sender != _recipientId && !_isProfileMember(_recipientId, _sender)) {
-            revert MilestonesExtension_INVALID_SUBMITTER();
-        }
+        if (_sender != _recipientId) revert MilestonesExtension_INVALID_SUBMITTER();
 
         // Check if a submission is ongoing to prevent front-running a milestone review.
         if (milestones[upcomingMilestone].status == Status.Pending) revert MilestonesExtension_MILESTONE_PENDING();
