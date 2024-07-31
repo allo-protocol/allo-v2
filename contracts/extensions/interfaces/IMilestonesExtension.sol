@@ -91,7 +91,7 @@ interface IMilestonesExtension {
     /// ========== Storage =============
     /// ================================
 
-    /// @notice The maximum bid for the RFP pool.
+    /// @notice The maximum bid allowed
     /// @return maxBid Returns the maximum bid allowed
     function maxBid() external view returns (uint256);
 
