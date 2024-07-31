@@ -15,7 +15,11 @@ contract MockBaseStrategy is CoreBaseStrategy {
     }
 
     // this is called via allo.sol to register recipients
-    function _register(address[] memory _recipients, bytes memory _data, address _sender) internal override returns (address[] memory _recipientIds) {
+    function _register(address[] memory _recipients, bytes memory _data, address _sender)
+        internal
+        override
+        returns (address[] memory _recipientIds)
+    {
         surpressStateMutabilityWarning++;
         _data;
         _sender;
@@ -23,7 +27,10 @@ contract MockBaseStrategy is CoreBaseStrategy {
     }
 
     // only called via allo.sol by users to allocate to a recipient
-    function _allocate(address[] memory _recipients, uint256[] memory _amounts, bytes memory _data, address _sender) internal override {
+    function _allocate(address[] memory _recipients, uint256[] memory _amounts, bytes memory _data, address _sender)
+        internal
+        override
+    {
         surpressStateMutabilityWarning++;
         _recipients;
         _amounts;

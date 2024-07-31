@@ -14,7 +14,7 @@ abstract contract BaseMilestonesExtensionUnit is Test {
     event MaxBidIncreased(uint256 maxBid);
     event SetBid(address indexed bidderId, uint256 newBid);
     event MilestoneSubmitted(uint256 milestoneId);
-    event MilestoneStatusChanged(uint256 indexed milestoneId, IMilestonesExtension.MilestoneStatus status);
+    event MilestoneStatusChanged(uint256 indexed milestoneId, IMilestonesExtension.Status status);
     event MilestonesSet(uint256 milestonesLength);
 
     struct MilestoneWithoutEnums {
@@ -44,7 +44,7 @@ abstract contract BaseMilestonesExtensionUnit is Test {
         for (uint256 i = 0; i < _milestones.length; i++) {
             _milestones[i].amountPercentage = bound(_rawMilestones[i].amountPercentage, 1, type(uint128).max);
             _milestones[i].metadata = _rawMilestones[i].metadata;
-            _milestones[i].status = IMilestonesExtension.MilestoneStatus(bound(uint256(_rawMilestones[i].status), 0, 6));
+            _milestones[i].status = IMilestonesExtension.Status(bound(uint256(_rawMilestones[i].status), 0, 6));
         }
     }
 }
@@ -52,10 +52,8 @@ abstract contract BaseMilestonesExtensionUnit is Test {
 contract MilestonesExtension__MilestonesExtension_init is BaseMilestonesExtensionUnit {
     function test_initializeMaxBid(uint256 _maxBid) public {
         vm.assume(_maxBid > 0);
-        IMilestonesExtension.InitializeParams memory _initializeData =
-            IMilestonesExtension.InitializeParams({maxBid: _maxBid});
 
-        MilestonesExtension.expose__MilestonesExtension_init(_initializeData);
+        MilestonesExtension.expose__MilestonesExtension_init(_maxBid);
 
         assertEq(MilestonesExtension.maxBid(), _maxBid);
     }
@@ -65,9 +63,7 @@ contract MilestonesExtensionIncreaseMaxBid is BaseMilestonesExtensionUnit {
     function setUp() public override {
         super.setUp();
         vm.prank(allo);
-        MilestonesExtension.initialize(
-            poolId, abi.encode(IMilestonesExtension.InitializeParams({maxBid: INITIAL_MAX_BID}))
-        );
+        MilestonesExtension.initialize(poolId, abi.encode(INITIAL_MAX_BID));
     }
 
     function test_increaseMaxBid(address _caller, uint256 _maxBid) public {
@@ -108,9 +104,7 @@ contract MilestonesExtension_setProposalBid is BaseMilestonesExtensionUnit {
     function setUp() public override {
         super.setUp();
         vm.prank(allo);
-        MilestonesExtension.initialize(
-            poolId, abi.encode(IMilestonesExtension.InitializeParams({maxBid: INITIAL_MAX_BID}))
-        );
+        MilestonesExtension.initialize(poolId, abi.encode(INITIAL_MAX_BID));
     }
 
     function test_Revert_maxBidExceeded(address _bidder, uint256 _bid) public {
@@ -146,9 +140,7 @@ contract MilestonesExtensionSetMilestones is BaseMilestonesExtensionUnit {
     function setUp() public override {
         super.setUp();
         vm.prank(allo);
-        MilestonesExtension.initialize(
-            poolId, abi.encode(IMilestonesExtension.InitializeParams({maxBid: INITIAL_MAX_BID}))
-        );
+        MilestonesExtension.initialize(poolId, abi.encode(INITIAL_MAX_BID));
     }
 
     function test_Revert_unauthorizedSetMilestones(address _caller, MilestoneWithoutEnums[] memory _rawMilestones)
@@ -228,12 +220,12 @@ contract MilestonesExtensionSetMilestones is BaseMilestonesExtensionUnit {
 
         for (uint256 i = 0; i < _milestones.length; i++) {
             IMilestonesExtension.Milestone memory _milestone = MilestonesExtension.getMilestone(i);
-            assertEq(uint256(_milestone.status), uint256(IMilestonesExtension.MilestoneStatus.None), "Incorrect status");
+            assertEq(uint256(_milestone.status), uint256(IMilestonesExtension.Status.None), "Incorrect status");
             assertEq(_milestone.amountPercentage, _milestones[i].amountPercentage, "Incorrect amountPercentage");
             assertEq(_milestone.metadata.protocol, _milestones[i].metadata.protocol, "Incorrect metadata.protocol");
             assertEq(_milestone.metadata.pointer, _milestones[i].metadata.pointer, "Incorrect metadata.pointer");
-            IMilestonesExtension.MilestoneStatus _status = MilestonesExtension.getMilestoneStatus(i);
-            assertEq(uint256(_status), uint256(IMilestonesExtension.MilestoneStatus.None), "Incorrect status");
+            IMilestonesExtension.Status _status = MilestonesExtension.getMilestoneStatus(i);
+            assertEq(uint256(_status), uint256(IMilestonesExtension.Status.None), "Incorrect status");
         }
     }
 }
@@ -288,9 +280,7 @@ contract MilestonesExtensionSubmitUpcomingMilestone is BaseMilestonesExtensionUn
     function setUp() public override {
         super.setUp();
         vm.prank(allo);
-        MilestonesExtension.initialize(
-            poolId, abi.encode(IMilestonesExtension.InitializeParams({maxBid: INITIAL_MAX_BID}))
-        );
+        MilestonesExtension.initialize(poolId, abi.encode(INITIAL_MAX_BID));
         StdStorage storage meStorage = stdstore.target(address(MilestonesExtension)).sig("acceptedRecipientId()");
         meStorage.depth(0).checked_write(_acceptedRecipientId);
 
@@ -318,7 +308,7 @@ contract MilestonesExtensionSubmitUpcomingMilestone is BaseMilestonesExtensionUn
         MilestonesExtension.submitUpcomingMilestone(_acceptedRecipientId, _metadata);
 
         IMilestonesExtension.Milestone memory _milestone = MilestonesExtension.getMilestone(0);
-        assertEq(uint256(_milestone.status), uint256(IMilestonesExtension.MilestoneStatus.Pending), "Incorrect status");
+        assertEq(uint256(_milestone.status), uint256(IMilestonesExtension.Status.Pending), "Incorrect status");
         assertEq(_milestone.amountPercentage, _milestones[0].amountPercentage, "Incorrect amountPercentage");
         assertEq(_milestone.metadata.protocol, _metadata.protocol, "Incorrect metadata.protocol");
         assertEq(_milestone.metadata.pointer, _metadata.pointer, "Incorrect metadata.pointer");
@@ -381,9 +371,7 @@ contract MilestonesExtensionReviewMilestone is BaseMilestonesExtensionUnit {
     function setUp() public override {
         super.setUp();
         vm.prank(allo);
-        MilestonesExtension.initialize(
-            poolId, abi.encode(IMilestonesExtension.InitializeParams({maxBid: INITIAL_MAX_BID}))
-        );
+        MilestonesExtension.initialize(poolId, abi.encode(INITIAL_MAX_BID));
         StdStorage storage meStorage = stdstore.target(address(MilestonesExtension)).sig("acceptedRecipientId()");
         meStorage.depth(0).checked_write(_acceptedRecipientId);
 
@@ -411,7 +399,7 @@ contract MilestonesExtensionReviewMilestone is BaseMilestonesExtensionUnit {
         vm.prank(_acceptedRecipientId);
         MilestonesExtension.submitUpcomingMilestone(_acceptedRecipientId, _metadata);
 
-        IMilestonesExtension.MilestoneStatus _status = IMilestonesExtension.MilestoneStatus(bound(_statusSeed, 1, 6));
+        IMilestonesExtension.Status _status = IMilestonesExtension.Status(bound(_statusSeed, 1, 6));
         vm.mockCall(allo, abi.encodeWithSelector(IAllo.isPoolManager.selector), abi.encode(true));
         MilestonesExtension.reviewMilestone(_status);
 
@@ -430,7 +418,7 @@ contract MilestonesExtensionReviewMilestone is BaseMilestonesExtensionUnit {
         MilestonesExtension.submitUpcomingMilestone(_acceptedRecipientId, _metadata);
 
         vm.mockCall(allo, abi.encodeWithSelector(IAllo.isPoolManager.selector), abi.encode(true));
-        MilestonesExtension.reviewMilestone(IMilestonesExtension.MilestoneStatus.Accepted);
+        MilestonesExtension.reviewMilestone(IMilestonesExtension.Status.Accepted);
 
         assertEq(MilestonesExtension.upcomingMilestone(), uint256(1), "Incorrect upcoming milestone");
     }
@@ -446,8 +434,8 @@ contract MilestonesExtensionReviewMilestone is BaseMilestonesExtensionUnit {
         vm.prank(_acceptedRecipientId);
         MilestonesExtension.submitUpcomingMilestone(_acceptedRecipientId, _metadata);
 
-        IMilestonesExtension.MilestoneStatus _status = IMilestonesExtension.MilestoneStatus(bound(_statusSeed, 1, 6));
-        vm.assume(_status != IMilestonesExtension.MilestoneStatus.Accepted);
+        IMilestonesExtension.Status _status = IMilestonesExtension.Status(bound(_statusSeed, 1, 6));
+        vm.assume(_status != IMilestonesExtension.Status.Accepted);
         vm.mockCall(allo, abi.encodeWithSelector(IAllo.isPoolManager.selector), abi.encode(true));
         MilestonesExtension.reviewMilestone(_status);
 
@@ -465,7 +453,7 @@ contract MilestonesExtensionReviewMilestone is BaseMilestonesExtensionUnit {
         vm.prank(_acceptedRecipientId);
         MilestonesExtension.submitUpcomingMilestone(_acceptedRecipientId, _metadata);
 
-        IMilestonesExtension.MilestoneStatus _status = IMilestonesExtension.MilestoneStatus(bound(_statusSeed, 1, 6));
+        IMilestonesExtension.Status _status = IMilestonesExtension.Status(bound(_statusSeed, 1, 6));
         vm.mockCall(allo, abi.encodeWithSelector(IAllo.isPoolManager.selector), abi.encode(true));
         vm.expectEmit(true, true, true, true, address(MilestonesExtension));
         emit MilestoneStatusChanged(0, _status);
@@ -483,7 +471,7 @@ contract MilestonesExtensionReviewMilestone is BaseMilestonesExtensionUnit {
 
         vm.mockCall(allo, abi.encodeWithSelector(IAllo.isPoolManager.selector), abi.encode(true));
         vm.expectRevert(IMilestonesExtension.MilestonesExtension_INVALID_MILESTONE_STATUS.selector);
-        MilestonesExtension.reviewMilestone(IMilestonesExtension.MilestoneStatus.None);
+        MilestonesExtension.reviewMilestone(IMilestonesExtension.Status.None);
     }
 
     function test_Revert_unauthorizedReviewMilestone(
@@ -498,7 +486,7 @@ contract MilestonesExtensionReviewMilestone is BaseMilestonesExtensionUnit {
 
         vm.mockCall(allo, abi.encodeWithSelector(IAllo.isPoolManager.selector), abi.encode(false));
         vm.expectRevert(IBaseStrategy.BaseStrategy_UNAUTHORIZED.selector);
-        MilestonesExtension.reviewMilestone(IMilestonesExtension.MilestoneStatus.None);
+        MilestonesExtension.reviewMilestone(IMilestonesExtension.Status.None);
     }
 
     function test_Revert_notPendingReviewMilestone(
@@ -510,7 +498,7 @@ contract MilestonesExtensionReviewMilestone is BaseMilestonesExtensionUnit {
 
         vm.mockCall(allo, abi.encodeWithSelector(IAllo.isPoolManager.selector), abi.encode(true));
         vm.expectRevert(IMilestonesExtension.MilestonesExtension_MILESTONE_NOT_PENDING.selector);
-        MilestonesExtension.reviewMilestone(IMilestonesExtension.MilestoneStatus.Accepted);
+        MilestonesExtension.reviewMilestone(IMilestonesExtension.Status.Accepted);
     }
 
     function _setMilestones(MilestoneWithoutEnums[] memory _rawMilestones)

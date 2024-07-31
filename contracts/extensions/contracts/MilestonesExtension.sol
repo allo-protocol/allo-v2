@@ -32,12 +32,12 @@ abstract contract MilestonesExtension is CoreBaseStrategy, IMilestonesExtension 
     /// ========= Initialize ==========
     /// ===============================
 
-    /// @notice This initializes the BaseStrategy
-    /// @dev You only need to pass the 'poolId' to initialize the BaseStrategy and the rest is specific to the strategy
-    /// @param _initializeParams The initialize params
-    function __MilestonesExtension_init(InitializeParams memory _initializeParams) internal {
+    /// @notice This initializes the Milestones Extension
+    /// @dev This function MUST be called by the 'initialize' function in the strategy.
+    /// @param _maxBid The initialize params
+    function __MilestonesExtension_init(uint256 _maxBid) internal {
         // Set the strategy specific variables
-        _increaseMaxBid(_initializeParams.maxBid);
+        _increaseMaxBid(_maxBid);
     }
 
     /// ===============================
@@ -53,7 +53,7 @@ abstract contract MilestonesExtension is CoreBaseStrategy, IMilestonesExtension 
 
     /// @notice Get the status of the milestone
     /// @param _milestoneId Id of the milestone
-    function getMilestoneStatus(uint256 _milestoneId) external view returns (MilestoneStatus) {
+    function getMilestoneStatus(uint256 _milestoneId) external view returns (Status) {
         return milestones[_milestoneId].status;
     }
 
@@ -61,7 +61,7 @@ abstract contract MilestonesExtension is CoreBaseStrategy, IMilestonesExtension 
     /// ======= External/Custom =======
     /// ===============================
 
-    /// @notice Update max bid for RFP pool
+    /// @notice Update max bid
     /// @dev 'msg.sender' must be a pool manager to update the max bid.
     /// @param _maxBid The max bid to be set
     function increaseMaxBid(uint256 _maxBid) external onlyPoolManager(msg.sender) {
@@ -83,7 +83,7 @@ abstract contract MilestonesExtension is CoreBaseStrategy, IMilestonesExtension 
             if (amountPercentage == 0) revert MilestonesExtension_INVALID_MILESTONE();
 
             totalAmountPercentage += amountPercentage;
-            _milestones[i].status = MilestoneStatus.None;
+            _milestones[i].status = Status.None;
             milestones.push(_milestones[i]);
 
             unchecked {
@@ -109,7 +109,7 @@ abstract contract MilestonesExtension is CoreBaseStrategy, IMilestonesExtension 
         milestone.metadata = _metadata;
 
         // Set the milestone status to 'Pending' to indicate that the milestone is submitted
-        milestone.status = MilestoneStatus.Pending;
+        milestone.status = Status.Pending;
 
         // Emit event for the milestone
         emit MilestoneSubmitted(upcomingMilestone);
@@ -118,7 +118,7 @@ abstract contract MilestonesExtension is CoreBaseStrategy, IMilestonesExtension 
     /// @notice Review a pending milestone submitted by an accepted recipient.
     /// @dev Emits a 'MilestoneStatusChanged()' event.
     /// @param _milestoneStatus New status of the milestone
-    function reviewMilestone(MilestoneStatus _milestoneStatus) external virtual {
+    function reviewMilestone(Status _milestoneStatus) external virtual {
         _validateReviewMilestone(msg.sender, _milestoneStatus);
         // Check if the milestone status is pending
 
@@ -126,7 +126,7 @@ abstract contract MilestonesExtension is CoreBaseStrategy, IMilestonesExtension 
 
         emit MilestoneStatusChanged(upcomingMilestone, _milestoneStatus);
 
-        if (_milestoneStatus == MilestoneStatus.Accepted) {
+        if (_milestoneStatus == Status.Accepted) {
             upcomingMilestone++;
         }
     }
@@ -134,16 +134,6 @@ abstract contract MilestonesExtension is CoreBaseStrategy, IMilestonesExtension 
     /// ====================================
     /// ============ Internal ==============
     /// ====================================
-
-    /// @notice Check if sender is profile owner or member
-    /// @param _anchor Anchor of the profile
-    /// @param _sender The sender of the transaction
-    /// @return 'true' if the sender is the owner or member of the profile, otherwise 'false'
-    function _isProfileMember(address _anchor, address _sender) internal view virtual returns (bool) {
-        IRegistry registry = allo.getRegistry();
-        IRegistry.Profile memory profile = registry.getProfileByAnchor(_anchor);
-        return registry.isOwnerOrMemberOfProfile(profile.id, _sender);
-    }
 
     /// @notice Sets the bid for a given `_bidderId` address, likely to match the recipient's address
     /// @param _bidderId The address of the bidder
@@ -166,7 +156,7 @@ abstract contract MilestonesExtension is CoreBaseStrategy, IMilestonesExtension 
     function _validateSetMilestones(address _sender) internal virtual {
         _checkOnlyPoolManager(_sender);
         if (milestones.length > 0) {
-            if (milestones[0].status != MilestoneStatus.None) revert MilestonesExtension_MILESTONES_ALREADY_SET();
+            if (milestones[0].status != Status.None) revert MilestonesExtension_MILESTONES_ALREADY_SET();
             delete milestones;
         }
     }
@@ -177,28 +167,22 @@ abstract contract MilestonesExtension is CoreBaseStrategy, IMilestonesExtension 
     function _validateSubmitUpcomingMilestone(address _recipientId, address _sender) internal virtual {
         // Check if the 'msg.sender' is accepted
         if (!_isAcceptedRecipient(_recipientId)) revert MilestonesExtension_INVALID_RECIPIENT();
-        if (_sender != _recipientId && !_isProfileMember(_recipientId, _sender)) {
-            revert MilestonesExtension_INVALID_SUBMITTER();
-        }
+        if (_sender != _recipientId) revert MilestonesExtension_INVALID_SUBMITTER();
 
         // Check if a submission is ongoing to prevent front-running a milestone review.
-        if (milestones[upcomingMilestone].status == MilestoneStatus.Pending) {
-            revert MilestonesExtension_MILESTONE_PENDING();
-        }
+        if (milestones[upcomingMilestone].status == Status.Pending) revert MilestonesExtension_MILESTONE_PENDING();
     }
 
     /// @notice Validates if the milestone can be reviewed at this moment by the `_sender` with `_milestoneStatus`
     /// @param _sender The address of the reviewer
     /// @param _milestoneStatus The new status to set the milestone to
-    function _validateReviewMilestone(address _sender, MilestoneStatus _milestoneStatus) internal virtual {
+    function _validateReviewMilestone(address _sender, Status _milestoneStatus) internal virtual {
         _checkOnlyPoolManager(_sender);
-        if (_milestoneStatus == MilestoneStatus.None) revert MilestonesExtension_INVALID_MILESTONE_STATUS();
-        if (milestones[upcomingMilestone].status != MilestoneStatus.Pending) {
-            revert MilestonesExtension_MILESTONE_NOT_PENDING();
-        }
+        if (_milestoneStatus == Status.None) revert MilestonesExtension_INVALID_MILESTONE_STATUS();
+        if (milestones[upcomingMilestone].status != Status.Pending) revert MilestonesExtension_MILESTONE_NOT_PENDING();
     }
 
-    /// @notice Increase max bid for RFP pool
+    /// @notice Increase max bid
     /// @param _maxBid The new max bid to be set
     function _increaseMaxBid(uint256 _maxBid) internal {
         // make sure the new max bid is greater than the current max bid

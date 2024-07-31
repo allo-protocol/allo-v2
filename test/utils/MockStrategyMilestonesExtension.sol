@@ -14,9 +14,8 @@ contract MockStrategyMilestonesExtension is CoreBaseStrategy, MilestonesExtensio
     function initialize(uint256 _poolId, bytes memory _data) external {
         __BaseStrategy_init(_poolId);
 
-        IMilestonesExtension.InitializeParams memory _initializeData =
-            abi.decode(_data, (IMilestonesExtension.InitializeParams));
-        __MilestonesExtension_init(_initializeData);
+        uint256 _maxBid = abi.decode(_data, (uint256));
+        __MilestonesExtension_init(_maxBid);
     }
 
     function _allocate(address[] memory _recipients, uint256[] memory _amounts, bytes memory _data, address _sender)
@@ -32,8 +31,8 @@ contract MockStrategyMilestonesExtension is CoreBaseStrategy, MilestonesExtensio
         returns (address[] memory _recipientIds)
     {}
 
-    function expose__MilestonesExtension_init(InitializeParams memory _initializeParams) external {
-        __MilestonesExtension_init(_initializeParams);
+    function expose__MilestonesExtension_init(uint256 _maxBid) external {
+        __MilestonesExtension_init(_maxBid);
     }
 
     function expose_validateSubmitUpcomingMilestone(address _recipientId, address _sender) external {

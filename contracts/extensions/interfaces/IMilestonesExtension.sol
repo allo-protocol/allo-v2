@@ -55,7 +55,7 @@ interface IMilestonesExtension {
     /// @notice Emitted for the status change of a milestone.
     /// @param milestoneId Id of the milestone
     /// @param status Status of the milestone
-    event MilestoneStatusChanged(uint256 indexed milestoneId, MilestoneStatus status);
+    event MilestoneStatusChanged(uint256 indexed milestoneId, Status status);
 
     /// @notice Emitted when milestones are set.
     /// @param milestonesLength Count of milestones
@@ -65,8 +65,8 @@ interface IMilestonesExtension {
     /// =========== Enums ==============
     /// ================================
 
-    /// @notice The MilestoneStatus enum that all milestones are based from
-    enum MilestoneStatus {
+    /// @notice The Status enum that all milestones are based from
+    enum Status {
         None,
         Pending,
         Accepted,
@@ -84,19 +84,14 @@ interface IMilestonesExtension {
     struct Milestone {
         uint256 amountPercentage;
         Metadata metadata;
-        MilestoneStatus status;
-    }
-
-    /// @notice Stores the details needed for initializing strategy
-    struct InitializeParams {
-        uint256 maxBid;
+        Status status;
     }
 
     /// ================================
     /// ========== Storage =============
     /// ================================
 
-    /// @notice The maximum bid for the RFP pool.
+    /// @notice The maximum bid allowed
     /// @return maxBid Returns the maximum bid allowed
     function maxBid() external view returns (uint256);
 
@@ -120,13 +115,13 @@ interface IMilestonesExtension {
 
     /// @notice Get the status of the milestone
     /// @param _milestoneId Id of the milestone
-    function getMilestoneStatus(uint256 _milestoneId) external view returns (MilestoneStatus);
+    function getMilestoneStatus(uint256 _milestoneId) external view returns (Status);
 
     /// ===============================
     /// ======= External/Custom =======
     /// ===============================
 
-    /// @notice Update max bid for RFP pool
+    /// @notice Update max bid
     /// @dev 'msg.sender' must be a pool manager to update the max bid.
     /// @param _maxBid The max bid to be set
     function increaseMaxBid(uint256 _maxBid) external;
@@ -145,5 +140,5 @@ interface IMilestonesExtension {
     /// @notice Reject pending milestone submmited by an accepted recipient.
     /// @dev Emits a 'MilestoneStatusChanged()' event.
     /// @param _milestoneStatus ID of the milestone
-    function reviewMilestone(MilestoneStatus _milestoneStatus) external;
+    function reviewMilestone(Status _milestoneStatus) external;
 }
