@@ -141,10 +141,11 @@ contract RFPSimple is CoreBaseStrategy, MilestonesExtension, RecipientsExtension
         uint256 amount;
         for (uint256 i = 0; i < milestoneIds.length; i++) {
             uint256 milestoneId = milestoneIds[i];
-            Milestone storage milestone = milestones[milestoneId];
-
-            // Check if the milestone is pending
-            if (milestone.status != IMilestonesExtension.MilestoneStatus.Accepted || wasMilestonePaid[milestoneId]) {
+            // Check if the milestone is accepted or if it was already paid
+            if (
+                milestones[milestoneId].status != IMilestonesExtension.MilestoneStatus.Accepted
+                    || wasMilestonePaid[milestoneId]
+            ) {
                 revert IMilestonesExtension.MilestonesExtension_INVALID_MILESTONE_STATUS();
             }
 
