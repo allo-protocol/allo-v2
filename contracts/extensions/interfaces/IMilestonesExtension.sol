@@ -126,7 +126,7 @@ interface IMilestonesExtension {
     /// ======= External/Custom =======
     /// ===============================
 
-    /// @notice Update max bid for RFP pool
+    /// @notice Update max bid
     /// @dev 'msg.sender' must be a pool manager to update the max bid.
     /// @param _maxBid The max bid to be set
     function increaseMaxBid(uint256 _maxBid) external;
