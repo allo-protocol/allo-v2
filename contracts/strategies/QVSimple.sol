@@ -110,6 +110,17 @@ contract QVSimple is CoreBaseStrategy, RecipientsExtension {
         uint256 maxVoiceCreditsPerAllocator;
     }
 
+    /// ================================
+    /// ========== Modifier ============
+    /// ================================
+
+    /// @notice Modifier to check if the allocation has ended
+    /// @dev Reverts if the allocation has not ended
+    modifier onlyAfterAllocation() {
+        _checkOnlyAfterAllocation();
+        _;
+    }
+
     /// ====================================
     /// ==== External/Public Functions =====
     /// ====================================
@@ -130,17 +141,6 @@ contract QVSimple is CoreBaseStrategy, RecipientsExtension {
         allowedAllocators[_allocator] = false;
 
         emit AllocatorRemoved(_allocator, msg.sender);
-    }
-
-    /// ================================
-    /// ========== Modifier ============
-    /// ================================
-
-    /// @notice Modifier to check if the allocation has ended
-    /// @dev Reverts if the allocation has not ended
-    modifier onlyAfterAllocation() {
-        _checkOnlyAfterAllocation();
-        _;
     }
 
     /// ====================================
@@ -168,7 +168,7 @@ contract QVSimple is CoreBaseStrategy, RecipientsExtension {
 
         for (uint256 i; i < payouts.length;) {
             address recipientId = _recipientIds[i];
-            Recipient storage recipient = _recipients[recipientId];
+            Recipient memory recipient = _recipients[recipientId];
 
             uint256 amount = payouts[i];
 
@@ -254,9 +254,9 @@ contract QVSimple is CoreBaseStrategy, RecipientsExtension {
         return _voiceCreditsToAllocate + _allocatedVoiceCredits <= maxVoiceCreditsPerAllocator;
     }
 
-    /// @notice Ensure no withdrawals are allowed before the allocation end time
+    /// @notice Ensure no withdrawals are allowed after the distribution starts
     function _beforeWithdraw(address, uint256, address) internal override {
-        if (block.timestamp <= allocationEndTime + 30 days) {
+        if (distributionStarted) {
             revert INVALID();
         }
     }
