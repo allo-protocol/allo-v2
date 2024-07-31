@@ -7,8 +7,9 @@ import {Registry, Metadata} from "contracts/core/Registry.sol";
 import {QVSimple} from "contracts/strategies/QVSimple.sol";
 import {IRecipientsExtension} from "contracts/extensions/interfaces/IRecipientsExtension.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {Errors} from "contracts/core/libraries/Errors.sol";
 
-contract IntegrationQVSimple is Test {
+contract IntegrationQVSimple is Test, Errors {
     Allo public allo;
     Registry public registry;
     QVSimple public strategy;
@@ -92,6 +93,7 @@ contract IntegrationQVSimple is Test {
                 QVSimple.QVSimpleInitializeData({
                     allocationStartTime: uint64(block.timestamp),
                     allocationEndTime: uint64(block.timestamp + 7 days),
+                    noWithdrawalsBefore: uint64(block.timestamp + 30 days),
                     maxVoiceCreditsPerAllocator: 100
                 })
             ),
@@ -194,5 +196,11 @@ contract IntegrationQVSimple is Test {
         assertEq(IERC20(dai).balanceOf(recipient0), 25000 ether);
         assertApproxEqRel(IERC20(dai).balanceOf(recipient1), 33333.33 ether, 0.01e18);
         assertApproxEqRel(IERC20(dai).balanceOf(recipient2), 41666.66 ether, 0.01e18);
+    }
+
+    function test_Revert_Withdraw() public {
+        vm.expectRevert(Errors.INVALID.selector);
+        vm.prank(profileOwner);
+        strategy.withdraw(dai, 100000 ether, profileOwner);
     }
 }

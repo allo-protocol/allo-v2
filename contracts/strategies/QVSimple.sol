@@ -41,6 +41,9 @@ contract QVSimple is CoreBaseStrategy, RecipientsExtension {
     uint64 public allocationStartTime;
     uint64 public allocationEndTime;
 
+    /// @notice The time before which no withdrawals are allowed
+    uint64 public noWithdrawalsBefore;
+
     /// @notice Whether the distribution started or not
     bool public distributionStarted;
 
@@ -81,6 +84,7 @@ contract QVSimple is CoreBaseStrategy, RecipientsExtension {
         maxVoiceCreditsPerAllocator = qvSimpleInitializeData.maxVoiceCreditsPerAllocator;
         allocationStartTime = qvSimpleInitializeData.allocationStartTime;
         allocationEndTime = qvSimpleInitializeData.allocationEndTime;
+        noWithdrawalsBefore = qvSimpleInitializeData.noWithdrawalsBefore;
 
         emit Initialized(_poolId, _data);
     }
@@ -107,7 +111,19 @@ contract QVSimple is CoreBaseStrategy, RecipientsExtension {
     struct QVSimpleInitializeData {
         uint64 allocationStartTime;
         uint64 allocationEndTime;
+        uint64 noWithdrawalsBefore;
         uint256 maxVoiceCreditsPerAllocator;
+    }
+
+    /// ================================
+    /// ========== Modifier ============
+    /// ================================
+
+    /// @notice Modifier to check if the allocation has ended
+    /// @dev Reverts if the allocation has not ended
+    modifier onlyAfterAllocation() {
+        _checkOnlyAfterAllocation();
+        _;
     }
 
     /// ====================================
@@ -130,17 +146,6 @@ contract QVSimple is CoreBaseStrategy, RecipientsExtension {
         allowedAllocators[_allocator] = false;
 
         emit AllocatorRemoved(_allocator, msg.sender);
-    }
-
-    /// ================================
-    /// ========== Modifier ============
-    /// ================================
-
-    /// @notice Modifier to check if the allocation has ended
-    /// @dev Reverts if the allocation has not ended
-    modifier onlyAfterAllocation() {
-        _checkOnlyAfterAllocation();
-        _;
     }
 
     /// ====================================
@@ -168,7 +173,7 @@ contract QVSimple is CoreBaseStrategy, RecipientsExtension {
 
         for (uint256 i; i < payouts.length;) {
             address recipientId = _recipientIds[i];
-            Recipient storage recipient = _recipients[recipientId];
+            Recipient memory recipient = _recipients[recipientId];
 
             uint256 amount = payouts[i];
 
@@ -254,9 +259,9 @@ contract QVSimple is CoreBaseStrategy, RecipientsExtension {
         return _voiceCreditsToAllocate + _allocatedVoiceCredits <= maxVoiceCreditsPerAllocator;
     }
 
-    /// @notice Ensure no withdrawals are allowed before the allocation end time
+    /// @notice Ensure no withdrawals are allowed before the specified time
     function _beforeWithdraw(address, uint256, address) internal override {
-        if (block.timestamp <= allocationEndTime + 30 days) {
+        if (block.timestamp <= noWithdrawalsBefore) {
             revert INVALID();
         }
     }
