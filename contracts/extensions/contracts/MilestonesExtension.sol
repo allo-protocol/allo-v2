@@ -194,7 +194,7 @@ abstract contract MilestonesExtension is CoreBaseStrategy, IMilestonesExtension 
         if (milestones[upcomingMilestone].status != Status.Pending) revert MilestonesExtension_MILESTONE_NOT_PENDING();
     }
 
-    /// @notice Increase max bid for RFP pool
+    /// @notice Increase max bid
     /// @param _maxBid The new max bid to be set
     function _increaseMaxBid(uint256 _maxBid) internal {
         // make sure the new max bid is greater than the current max bid
