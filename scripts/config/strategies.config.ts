@@ -81,6 +81,14 @@ export const strategyConfig: DeployParams = {
   },
   // Sepolia
   11155111: {
+    "ltip-hedgey-governor": {
+      name: "LTIPHedgeyGovernorStrategy",
+      version: "v0.1",
+    },
+    "ltip-hedgey": {
+      name: "LTIPHedgeyStrategy",
+      version: "v0.1",
+    },
     "rfp-simple": {
       name: "RFPSimpleStrategy",
       version: "v1.0",
