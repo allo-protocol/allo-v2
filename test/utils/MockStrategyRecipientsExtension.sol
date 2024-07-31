@@ -382,12 +382,13 @@ contract MockStrategyRecipientsExtension is CoreBaseStrategy, RecipientsExtensio
         address _sender,
         address _returnParam0,
         bool _returnParam1,
-        Metadata memory _returnParam2
+        Metadata memory _returnParam2,
+        bytes memory _returnParam3
     ) public {
         vm.mockCall(
             address(this),
             abi.encodeWithSignature("_extractRecipientAndMetadata(bytes,address)", _data, _sender),
-            abi.encode(_returnParam0, _returnParam1, _returnParam2)
+            abi.encode(_returnParam0, _returnParam1, _returnParam2, _returnParam3)
         );
     }
 
@@ -395,19 +396,19 @@ contract MockStrategyRecipientsExtension is CoreBaseStrategy, RecipientsExtensio
         internal
         view
         override
-        returns (address recipientId, bool isUsingRegistryAnchor, Metadata memory metadata)
+        returns (address recipientId, bool isUsingRegistryAnchor, Metadata memory metadata, bytes memory _extraData)
     {
         (bool _success, bytes memory __data) = address(this).staticcall(
             abi.encodeWithSignature("_extractRecipientAndMetadata(bytes,address)", _data, _sender)
         );
 
-        if (_success) return abi.decode(__data, (address, bool, Metadata));
+        if (_success) return abi.decode(__data, (address, bool, Metadata, bytes));
         else return super._extractRecipientAndMetadata(_data, _sender);
     }
 
     function call__extractRecipientAndMetadata(bytes memory _data, address _sender)
         public
-        returns (address recipientId, bool isUsingRegistryAnchor, Metadata memory metadata)
+        returns (address recipientId, bool isUsingRegistryAnchor, Metadata memory metadata, bytes memory _extraData)
     {
         return _extractRecipientAndMetadata(_data, _sender);
     }

@@ -274,7 +274,7 @@ contract RecipientsExtension_updatePoolTimestamps is BaseRecipientsExtensionUnit
         vm.assume(_registrationStartTime < _registrationEndTime);
 
         vm.expectEmit();
-        emit IRecipientsExtension.TimestampsUpdated(_registrationStartTime, _registrationEndTime, _caller);
+        emit IRecipientsExtension.RegistrationTimestampsUpdated(_registrationStartTime, _registrationEndTime, _caller);
 
         vm.prank(_caller);
         recipientsExtension.call__updatePoolTimestamps(_registrationStartTime, _registrationEndTime);
@@ -384,7 +384,7 @@ contract RecipientsExtension_register is BaseRecipientsExtensionUnit {
             _dataArray[i] = abi.encode(_recipientIds[i], _metadatas[i]);
             // mock the calls
             recipientsExtension.mock_call__extractRecipientAndMetadata(
-                _dataArray[i], _sender, _recipientIds[i], _booleans[i], _metadatas[i]
+                _dataArray[i], _sender, _recipientIds[i], _booleans[i], _metadatas[i], bytes("")
             );
             // expect the calls
             recipientsExtension.expectCall__extractRecipientAndMetadata(_dataArray[i], _sender);
@@ -409,7 +409,7 @@ contract RecipientsExtension_register is BaseRecipientsExtensionUnit {
             _dataArray[i] = abi.encode(_recipientIds[i], _metadatas[i]);
             // mock the calls
             recipientsExtension.mock_call__extractRecipientAndMetadata(
-                _dataArray[i], _sender, _recipientIds[i], _booleans[i], _metadatas[i]
+                _dataArray[i], _sender, _recipientIds[i], _booleans[i], _metadatas[i], bytes("")
             );
         }
 
@@ -434,7 +434,7 @@ contract RecipientsExtension_register is BaseRecipientsExtensionUnit {
             _dataArray[i] = abi.encode(_recipientIds[i], Metadata({protocol: 1, pointer: ""}));
             // mock the calls
             recipientsExtension.mock_call__extractRecipientAndMetadata(
-                _dataArray[i], _sender, _recipientIds[i], _booleans[i], Metadata({protocol: 1, pointer: ""})
+                _dataArray[i], _sender, _recipientIds[i], _booleans[i], Metadata({protocol: 1, pointer: ""}), bytes("")
             );
         }
 
@@ -458,7 +458,12 @@ contract RecipientsExtension_register is BaseRecipientsExtensionUnit {
             _dataArray[i] = abi.encode(_recipientIds[i], Metadata({protocol: 0, pointer: "0x"}));
             // mock the calls
             recipientsExtension.mock_call__extractRecipientAndMetadata(
-                _dataArray[i], _sender, _recipientIds[i], _booleans[i], Metadata({protocol: 0, pointer: "0x"})
+                _dataArray[i],
+                _sender,
+                _recipientIds[i],
+                _booleans[i],
+                Metadata({protocol: 0, pointer: "0x"}),
+                bytes("")
             );
         }
 
@@ -482,7 +487,7 @@ contract RecipientsExtension_register is BaseRecipientsExtensionUnit {
             _dataArray[i] = abi.encode(_recipientIds[i], Metadata({protocol: 0, pointer: ""}));
             // mock the calls
             recipientsExtension.mock_call__extractRecipientAndMetadata(
-                _dataArray[i], _sender, _recipientIds[i], _booleans[i], Metadata({protocol: 0, pointer: ""})
+                _dataArray[i], _sender, _recipientIds[i], _booleans[i], Metadata({protocol: 0, pointer: ""}), bytes("")
             );
         }
 
@@ -509,7 +514,7 @@ contract RecipientsExtension_register is BaseRecipientsExtensionUnit {
             _dataArray[i] = abi.encode(_recipientIds[i], _metadatas[i]);
             // mock the calls
             recipientsExtension.mock_call__extractRecipientAndMetadata(
-                _dataArray[i], _sender, _recipientIds[i], _booleans[i], _metadatas[i]
+                _dataArray[i], _sender, _recipientIds[i], _booleans[i], _metadatas[i], bytes("")
             );
         }
 
@@ -536,7 +541,7 @@ contract RecipientsExtension_register is BaseRecipientsExtensionUnit {
             _dataArray[i] = abi.encode(_recipientIds[i], Metadata({protocol: 0, pointer: ""}));
             // mock the calls
             recipientsExtension.mock_call__extractRecipientAndMetadata(
-                _dataArray[i], _sender, _recipientIds[i], _booleans[i], Metadata({protocol: 0, pointer: ""})
+                _dataArray[i], _sender, _recipientIds[i], _booleans[i], Metadata({protocol: 0, pointer: ""}), bytes("")
             );
         }
 
@@ -562,7 +567,7 @@ contract RecipientsExtension_register is BaseRecipientsExtensionUnit {
             _dataArray[i] = abi.encode(_recipientIds[i], Metadata({protocol: 0, pointer: ""}));
             // mock the calls
             recipientsExtension.mock_call__extractRecipientAndMetadata(
-                _dataArray[i], _sender, _recipientIds[i], _booleans[i], Metadata({protocol: 0, pointer: ""})
+                _dataArray[i], _sender, _recipientIds[i], _booleans[i], Metadata({protocol: 0, pointer: ""}), bytes("")
             );
         }
         bytes memory _datas = abi.encode(_dataArray);
@@ -587,7 +592,7 @@ contract RecipientsExtension_register is BaseRecipientsExtensionUnit {
             _dataArray[i] = abi.encode(_recipientIds[i], Metadata({protocol: 0, pointer: ""}));
             // mock the calls
             recipientsExtension.mock_call__extractRecipientAndMetadata(
-                _dataArray[i], _sender, _recipientIds[i], _booleans[i], Metadata({protocol: 0, pointer: ""})
+                _dataArray[i], _sender, _recipientIds[i], _booleans[i], Metadata({protocol: 0, pointer: ""}), bytes("")
             );
             // expect the calls
             recipientsExtension.expectCall__setRecipientStatus(
@@ -615,7 +620,7 @@ contract RecipientsExtension_register is BaseRecipientsExtensionUnit {
             _dataArray[i] = abi.encode(_recipientIds[i], Metadata({protocol: 0, pointer: ""}));
             // mock the calls
             recipientsExtension.mock_call__extractRecipientAndMetadata(
-                _dataArray[i], _sender, _recipientIds[i], _booleans[i], Metadata({protocol: 0, pointer: ""})
+                _dataArray[i], _sender, _recipientIds[i], _booleans[i], Metadata({protocol: 0, pointer: ""}), bytes("")
             );
             _eventDataArray[i] = abi.encode(_dataArray[i], i + 1);
         }
@@ -644,7 +649,7 @@ contract RecipientsExtension_register is BaseRecipientsExtensionUnit {
             _dataArray[i] = abi.encode(_recipientIds[i], Metadata({protocol: 0, pointer: ""}));
             // mock the calls
             recipientsExtension.mock_call__extractRecipientAndMetadata(
-                _dataArray[i], _sender, _recipientIds[i], _booleans[i], Metadata({protocol: 0, pointer: ""})
+                _dataArray[i], _sender, _recipientIds[i], _booleans[i], Metadata({protocol: 0, pointer: ""}), bytes("")
             );
         }
 
@@ -670,7 +675,7 @@ contract RecipientsExtension_register is BaseRecipientsExtensionUnit {
             _dataArray[i] = abi.encode(_recipientIds[i], Metadata({protocol: 0, pointer: ""}));
             // mock the calls
             recipientsExtension.mock_call__extractRecipientAndMetadata(
-                _dataArray[i], _sender, _recipientIds[i], _booleans[i], Metadata({protocol: 0, pointer: ""})
+                _dataArray[i], _sender, _recipientIds[i], _booleans[i], Metadata({protocol: 0, pointer: ""}), bytes("")
             );
             // set the index to simulate updating
             recipientsExtension.set_recipientToStatusIndexes(_recipientIds[i], i + 1);
@@ -697,7 +702,7 @@ contract RecipientsExtension_register is BaseRecipientsExtensionUnit {
             _dataArray[i] = abi.encode(_recipientIds[i], Metadata({protocol: 0, pointer: ""}));
             // mock the calls
             recipientsExtension.mock_call__extractRecipientAndMetadata(
-                _dataArray[i], _sender, _recipientIds[i], _booleans[i], Metadata({protocol: 0, pointer: ""})
+                _dataArray[i], _sender, _recipientIds[i], _booleans[i], Metadata({protocol: 0, pointer: ""}), bytes("")
             );
             // set the index to simulate updating
             recipientsExtension.set_recipientToStatusIndexes(_recipientIds[i], i + 1);
@@ -732,7 +737,7 @@ contract RecipientsExtension_register is BaseRecipientsExtensionUnit {
             _dataArray[i] = abi.encode(_recipientIds[i], Metadata({protocol: 0, pointer: ""}));
             // mock the calls
             recipientsExtension.mock_call__extractRecipientAndMetadata(
-                _dataArray[i], _sender, _recipientIds[i], _booleans[i], Metadata({protocol: 0, pointer: ""})
+                _dataArray[i], _sender, _recipientIds[i], _booleans[i], Metadata({protocol: 0, pointer: ""}), bytes("")
             );
             // set the index to simulate updating
             recipientsExtension.set_recipientToStatusIndexes(_recipientIds[i], i + 1);
@@ -767,7 +772,7 @@ contract RecipientsExtension_register is BaseRecipientsExtensionUnit {
             _dataArray[i] = abi.encode(_recipientIds[i], Metadata({protocol: 0, pointer: ""}));
             // mock the calls
             recipientsExtension.mock_call__extractRecipientAndMetadata(
-                _dataArray[i], _sender, _recipientIds[i], _booleans[i], Metadata({protocol: 0, pointer: ""})
+                _dataArray[i], _sender, _recipientIds[i], _booleans[i], Metadata({protocol: 0, pointer: ""}), bytes("")
             );
             // set the index to simulate updating
             recipientsExtension.set_recipientToStatusIndexes(_recipientIds[i], i + 1);
@@ -800,7 +805,7 @@ contract RecipientsExtension_register is BaseRecipientsExtensionUnit {
             _dataArray[i] = abi.encode(_recipientIds[i], Metadata({protocol: 0, pointer: ""}));
             // mock the calls
             recipientsExtension.mock_call__extractRecipientAndMetadata(
-                _dataArray[i], _sender, _recipientIds[i], _booleans[i], Metadata({protocol: 0, pointer: ""})
+                _dataArray[i], _sender, _recipientIds[i], _booleans[i], Metadata({protocol: 0, pointer: ""}), bytes("")
             );
             // set the index to simulate updating
             recipientsExtension.set_recipientToStatusIndexes(_recipientIds[i], i + 1);
@@ -838,7 +843,7 @@ contract RecipientsExtension_register is BaseRecipientsExtensionUnit {
             _dataArray[i] = abi.encode(_recipientIds[i], Metadata({protocol: 0, pointer: ""}));
             // mock the calls
             recipientsExtension.mock_call__extractRecipientAndMetadata(
-                _dataArray[i], _sender, _recipientIds[i], _booleans[i], Metadata({protocol: 0, pointer: ""})
+                _dataArray[i], _sender, _recipientIds[i], _booleans[i], Metadata({protocol: 0, pointer: ""}), bytes("")
             );
         }
 
@@ -860,7 +865,7 @@ contract RecipientsExtension_extractRecipientAndMetadata is BaseRecipientsExtens
     ) public {
         vm.assume(_recipientIdOrRegistryAnchor != address(0));
 
-        bytes memory _data = abi.encode(_recipientIdOrRegistryAnchor, _metadata);
+        bytes memory _data = abi.encode(_recipientIdOrRegistryAnchor, _metadata, bytes(""));
         recipientsExtension.mock_call__isProfileMember(_recipientIdOrRegistryAnchor, _sender, false);
 
         vm.expectRevert(Errors.UNAUTHORIZED.selector);
@@ -874,30 +879,32 @@ contract RecipientsExtension_extractRecipientAndMetadata is BaseRecipientsExtens
         Metadata memory _metadata
     ) public {
         vm.assume(_recipientIdOrRegistryAnchor != address(0));
-        bytes memory _data = abi.encode(_recipientIdOrRegistryAnchor, _metadata);
+        bytes memory _data = abi.encode(_recipientIdOrRegistryAnchor, _metadata, bytes(""));
         recipientsExtension.mock_call__isProfileMember(_recipientIdOrRegistryAnchor, _sender, true);
 
-        (address __registryOrAnchor, bool _isUsingRegistryAnchor, Metadata memory __metadata) =
+        (address __registryOrAnchor, bool _isUsingRegistryAnchor, Metadata memory __metadata, bytes memory _extraData) =
             recipientsExtension.call__extractRecipientAndMetadata(_data, _sender);
 
         assertEq(__registryOrAnchor, _recipientIdOrRegistryAnchor);
         assertEq(__metadata.pointer, _metadata.pointer);
         assertEq(__metadata.protocol, _metadata.protocol);
         assertEq(_isUsingRegistryAnchor, true);
+        assertEq(_extraData.length, 0);
     }
 
     function test_Return_ValuesWhenRecipientIdOrRegistryAnchorIsZero(address _sender, Metadata memory _metadata)
         public
     {
-        bytes memory _data = abi.encode(address(0), _metadata);
+        bytes memory _data = abi.encode(address(0), _metadata, bytes(""));
 
-        (address __registryOrAnchor, bool _isUsingRegistryAnchor, Metadata memory __metadata) =
+        (address __registryOrAnchor, bool _isUsingRegistryAnchor, Metadata memory __metadata, bytes memory _extraData) =
             recipientsExtension.call__extractRecipientAndMetadata(_data, _sender);
 
         assertEq(__registryOrAnchor, _sender);
         assertEq(__metadata.pointer, _metadata.pointer);
         assertEq(__metadata.protocol, _metadata.protocol);
         assertEq(_isUsingRegistryAnchor, false);
+        assertEq(_extraData.length, 0);
     }
 }
 
