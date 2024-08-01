@@ -11,6 +11,7 @@ import {RecipientsExtension} from "../extensions/contracts/RecipientsExtension.s
 // Internal Libraries
 import {Errors} from "../core/libraries/Errors.sol";
 import {Native} from "../core/libraries/Native.sol";
+import {QFHelper} from "../core/libraries/QFHelper.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⣿⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -29,22 +30,8 @@ import {Native} from "../core/libraries/Native.sol";
 
 /// @title RFP Simple Strategy
 /// @notice Strategy for Request for Proposal (RFP) allocation with milestone submission and management.
-contract DonationVoting is CoreBaseStrategy, RecipientsExtension {
-    /// ================================
-    /// ========== Struct ==============
-    /// ================================
-
-    /// @notice Payout summary struct to hold the payout data
-    struct PayoutSummary {
-        address recipientAddress;
-        uint256 amount;
-    }
-
-    /// @notice Struct to hold details of the allocations to claim
-    struct Claim {
-        address recipientId;
-        address token;
-    }
+contract DonationVotingOnchain is CoreBaseStrategy, RecipientsExtension {
+    using QFHelper for QFHelper.State;
 
     /// ================================
     /// ========== Storage =============
@@ -58,11 +45,19 @@ contract DonationVoting is CoreBaseStrategy, RecipientsExtension {
     uint256 public totalPayoutAmount;
 
     /// @notice token -> bool
-    mapping(address => bool) public allowedTokens;
-    /// @notice recipientId -> PayoutSummary
-    mapping(address => PayoutSummary) public payoutSummaries;
-    /// @notice recipientId -> token -> amount
-    mapping(address => mapping(address => uint256)) public claims;
+    address public allocationToken;
+    /// @notice recipientId -> amount
+    mapping(address => uint256) public amountAllocated;
+
+    /// @notice
+    QFHelper.State public QFState;
+
+    /// ===============================
+    /// ========== Errors =============
+    /// ===============================
+
+    /// @notice Thrown when a distribution is called on the same recipient more than once.
+    error ALREADY_DISTRIBUTED();
 
     /// ===============================
     /// ========== Events =============
@@ -70,7 +65,6 @@ contract DonationVoting is CoreBaseStrategy, RecipientsExtension {
 
     event Claimed(address indexed recipientId, address recipientAddress, uint256 amount, address token);
     event AllocationTimestampsUpdated(uint64 allocationStartTime, uint64 allocationEndTime, address sender);
-    event PayoutSet(bytes recipientIds);
 
     /// ================================
     /// ========== Modifier ============
@@ -116,8 +110,8 @@ contract DonationVoting is CoreBaseStrategy, RecipientsExtension {
             uint64 _allocationStartTime,
             uint64 _allocationEndTime,
             uint64 _withdrawalCooldown,
-            address[] memory _allowedTokens
-        ) = abi.decode(_data, (IRecipientsExtension.RecipientInitializeData, uint64, uint64, uint64, address[]));
+            address _allocationToken
+        ) = abi.decode(_data, (IRecipientsExtension.RecipientInitializeData, uint64, uint64, uint64, address));
         __BaseStrategy_init(_poolId);
         __RecipientsExtension_init(_recipientExtensionInitializeData);
 
@@ -127,15 +121,7 @@ contract DonationVoting is CoreBaseStrategy, RecipientsExtension {
         emit AllocationTimestampsUpdated(_allocationStartTime, _allocationEndTime, msg.sender);
 
         withdrawalCooldown = _withdrawalCooldown;
-
-        if (_allowedTokens.length == 0) {
-            // all tokens
-            allowedTokens[address(0)] = true;
-        } else {
-            for (uint256 i; i < _allowedTokens.length; i++) {
-                allowedTokens[_allowedTokens[i]] = true;
-            }
-        }
+        allocationToken = _allocationToken;
 
         emit Initialized(_poolId, _data);
     }
@@ -152,60 +138,6 @@ contract DonationVoting is CoreBaseStrategy, RecipientsExtension {
         super.reviewRecipients(statuses, refRecipientsCounter);
     }
 
-    /// @notice Claim allocated tokens
-    /// @param _claims Claims to be claimed
-    function claimAllocation(Claim[] calldata _claims) external onlyAfterAllocation {
-        uint256 claimsLength = _claims.length;
-        for (uint256 i; i < claimsLength; i++) {
-            Claim calldata claim = _claims[i];
-            uint256 amount = claims[claim.recipientId][claim.token];
-
-            if (amount == 0) {
-                revert INVALID();
-            }
-
-            delete claims[claim.recipientId][claim.token];
-
-            address recipientAddress = _recipients[claim.recipientId].recipientAddress;
-            _transferAmount(claim.token, recipientAddress, amount);
-
-            emit Claimed(claim.recipientId, recipientAddress, amount, claim.token);
-        }
-    }
-
-    /// @notice Set payout for the recipients
-    /// @param _recipientIds Ids of the recipients
-    /// @param _amounts Amounts to be paid out
-    function setPayout(address[] memory _recipientIds, uint256[] memory _amounts)
-        external
-        onlyPoolManager(msg.sender)
-        onlyAfterAllocation
-    {
-        for (uint256 i; i < _recipientIds.length; i++) {
-            address recipientId = _recipientIds[i];
-            if (!_isAcceptedRecipient(_recipientIds[i])) {
-                revert RECIPIENT_ERROR(_recipientIds[i]);
-            }
-
-            PayoutSummary storage payoutSummary = payoutSummaries[recipientId];
-            if (payoutSummary.amount != 0) {
-                revert RECIPIENT_ERROR(recipientId);
-            }
-
-            uint256 amount = _amounts[i];
-            totalPayoutAmount += amount;
-
-            if (totalPayoutAmount > poolAmount) {
-                revert INVALID();
-            }
-
-            payoutSummary.amount = amount;
-            payoutSummary.recipientAddress = _recipients[recipientId].recipientAddress;
-        }
-
-        emit PayoutSet(abi.encode(_recipientIds));
-    }
-
     /// ====================================
     /// ============ Internal ==============
     /// ====================================
@@ -214,41 +146,36 @@ contract DonationVoting is CoreBaseStrategy, RecipientsExtension {
     /// @dev The encoded '_data' will be determined by the strategy implementation.
     /// @param _recipients The addresses of the recipients to allocate to
     /// @param _amounts The amounts to allocate to the recipients
-    /// @param _data The data to use to allocate to the recipient
     /// @param _sender The address of the sender
-    function _allocate(address[] memory _recipients, uint256[] memory _amounts, bytes memory _data, address _sender)
+    function _allocate(address[] memory _recipients, uint256[] memory _amounts, bytes memory, address _sender)
         internal
         virtual
         override
         onlyActiveAllocation
     {
-        (address[] memory tokens) = abi.decode(_data, (address[]));
         uint256 totalNativeAmount;
-
         for (uint256 i = 0; i < _recipients.length; i++) {
             if (!_isAcceptedRecipient(_recipients[i])) {
                 revert RECIPIENT_ERROR(_recipients[i]);
             }
 
-            if (!allowedTokens[tokens[i]] && !allowedTokens[address(0)]) {
-                revert INVALID();
-            }
-
             // Update the total payout amount for the claim and the total claimable amount
-            claims[_recipients[i]][tokens[i]] += _amounts[i];
+            amountAllocated[_recipients[i]] += _amounts[i];
 
-            if (tokens[i] == NATIVE) {
+            if (allocationToken == NATIVE) {
                 totalNativeAmount += _amounts[i];
             } else {
-                SafeTransferLib.safeTransferFrom(tokens[i], _sender, address(this), _amounts[i]);
+                SafeTransferLib.safeTransferFrom(allocationToken, _sender, address(this), _amounts[i]);
             }
 
-            emit Allocated(_recipients[i], _sender, _amounts[i], abi.encode(tokens[i]));
+            emit Allocated(_recipients[i], _sender, _amounts[i], abi.encode(allocationToken));
         }
 
         if (msg.value != totalNativeAmount) {
             revert AMOUNT_MISMATCH();
         }
+
+        QFState.fund(_recipients, _amounts);
     }
 
     /// @notice Distributes funds (tokens) to recipients.
@@ -260,25 +187,30 @@ contract DonationVoting is CoreBaseStrategy, RecipientsExtension {
         internal
         virtual
         override
-        onlyPoolManager(_sender)
         onlyAfterAllocation
     {
+        if (totalPayoutAmount == 0) totalPayoutAmount = poolAmount;
+
         for (uint256 i; i < _recipientIds.length; i++) {
             address recipientId = _recipientIds[i];
-
-            uint256 amount = payoutSummaries[recipientId].amount;
-            delete payoutSummaries[recipientId].amount;
-
-            if (amount == 0) {
-                revert INVALID();
-            }
-            poolAmount -= amount;
-
             address recipientAddress = _recipients[recipientId].recipientAddress;
-            IAllo.Pool memory pool = allo.getPool(poolId);
-            _transferAmount(pool.token, recipientAddress, amount);
 
-            emit Distributed(recipientId, abi.encode(recipientAddress, amount, _sender));
+            if (amountAllocated[recipientId] == 0) revert ALREADY_DISTRIBUTED();
+
+            // Transfer allocation
+            uint256 allocationAmount = amountAllocated[recipientId];
+            amountAllocated[recipientId] = 0;
+            _transferAmount(allocationToken, recipientAddress, allocationAmount);
+
+            emit Distributed(recipientId, abi.encode(recipientAddress, allocationToken, allocationAmount, _sender));
+
+            // Transfer matching amount
+            uint256 matchingAmount = QFState.calculateMatching(totalPayoutAmount, recipientId);
+            poolAmount -= matchingAmount;
+            IAllo.Pool memory pool = allo.getPool(poolId);
+            _transferAmount(pool.token, recipientAddress, matchingAmount);
+
+            emit Distributed(recipientId, abi.encode(recipientAddress, pool.token, matchingAmount, _sender));
         }
     }
 
