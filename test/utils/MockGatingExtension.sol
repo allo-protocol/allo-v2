@@ -2,17 +2,20 @@
 pragma solidity 0.8.19;
 
 import {CoreBaseStrategy} from "../../contracts/strategies/CoreBaseStrategy.sol";
-import {GatingExtension} from "../../contracts/extensions/GatingExtension.sol";
+import {EASGatingExtension} from "../../contracts/extensions/EASGatingExtension.sol";
+import {NFTGatingExtension} from "../../contracts/extensions/NFTGatingExtension.sol";
+import {TokenGatingExtension} from "../../contracts/extensions/TokenGatingExtension.sol";
 import {MockBaseStrategy} from "./MockBaseStrategy.sol";
 
-contract MockGatingExtension is CoreBaseStrategy, GatingExtension {
+contract MockGatingExtension is EASGatingExtension, NFTGatingExtension, TokenGatingExtension {
     constructor(address _allo) CoreBaseStrategy(_allo) {}
 
     function initialize(uint256 _poolId, bytes memory _data) public {
         __BaseStrategy_init(_poolId);
 
-        GatingExtensionInitializeParams memory initializeParams = abi.decode(_data, (GatingExtensionInitializeParams));
-        __GatingExtension_init(initializeParams);
+        address _eas = abi.decode(_data, (address));
+
+        __EASGatingExtension_init(_eas);
         emit Initialized(_poolId, _data);
     }
 
