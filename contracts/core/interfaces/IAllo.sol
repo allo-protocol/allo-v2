@@ -198,6 +198,16 @@ interface IAllo {
     /// @param _managers The addresses of the managers to remove
     function removePoolManagers(uint256 _poolId, address[] memory _managers) external;
 
+    /// @notice Add multiple pool managers to multiple pools
+    /// @param _poolIds IDs of the pools
+    /// @param _managers The addresses to add
+    function addPoolManagersInMultiplePools(uint256[] memory _poolIds, address[] memory _managers) external;
+
+    /// @notice Remove multiple pool managers from multiple pools
+    /// @param _poolIds IDs of the pools
+    /// @param _managers The addresses to remove
+    function removePoolManagersInMultiplePools(uint256[] memory _poolIds, address[] memory _managers) external;
+
     /// @notice Recovers funds from a pool.
     /// @dev 'msg.sender' must be a pool admin.
     /// @param _token The token to recover
