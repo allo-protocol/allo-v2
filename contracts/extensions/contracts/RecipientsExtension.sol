@@ -39,7 +39,7 @@ abstract contract RecipientsExtension is CoreBaseStrategy, Errors, IRecipientsEx
     mapping(uint256 => uint256) public statusesBitMap;
 
     /// @notice 'statusIndex' of recipient in bitmap => 'recipientId'.
-    mapping(uint256 => address) public statusIndexToRecipientId;
+    mapping(uint256 => address) public recipientIndexToRecipientId;
 
     /// @notice 'recipientId' => 'Recipient' struct.
     mapping(address => Recipient) internal _recipients;
@@ -258,7 +258,7 @@ abstract contract RecipientsExtension is CoreBaseStrategy, Errors, IRecipientsEx
             if (recipient.statusIndex == 0) {
                 // recipient registering new application
                 recipient.statusIndex = recipientsCounter;
-                statusIndexToRecipientId[recipientsCounter] = recipientId;
+                recipientIndexToRecipientId[recipientsCounter] = recipientId;
                 _setRecipientStatus(recipientId, uint8(Status.Pending));
 
                 bytes memory extendedData = abi.encode(data, recipientsCounter);
