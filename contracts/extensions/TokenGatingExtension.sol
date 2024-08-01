@@ -10,7 +10,7 @@ import {CoreBaseStrategy} from "../strategies/CoreBaseStrategy.sol";
 /// @title Token Gating Extension
 /// @notice This contract is providing erc20 gating options
 /// @dev This contract is inheriting CoreBaseStrategy
-abstract contract TokenGatingExtension is CoreBaseStrategy{
+abstract contract TokenGatingExtension is CoreBaseStrategy {
     /// ================================
     /// ========== Errors ==============
     /// ================================

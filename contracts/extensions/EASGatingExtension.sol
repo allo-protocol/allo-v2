@@ -7,7 +7,7 @@ import {IEAS, Attestation} from "eas-contracts/IEAS.sol";
 // Core Contracts
 import {CoreBaseStrategy} from "../strategies/CoreBaseStrategy.sol";
 
-/// @title GatingExtension
+/// @title EAS Gating Extension
 /// @notice This contract is providing gating options for a strategy's calls
 /// @dev This contract is inheriting CoreBaseStrategy
 abstract contract EASGatingExtension is CoreBaseStrategy {
