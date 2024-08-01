@@ -42,7 +42,7 @@ contract RFPSimple is CoreBaseStrategy, MilestonesExtension, RecipientsExtension
 
     /// @notice Constructor for the RFP Simple Strategy
     /// @param _allo The 'Allo' contract
-    constructor(address _allo) CoreBaseStrategy(_allo) {}
+    constructor(address _allo) CoreBaseStrategy(_allo) RecipientsExtension(true) {}
 
     /// ===============================
     /// ========= Initialize ==========
@@ -61,43 +61,22 @@ contract RFPSimple is CoreBaseStrategy, MilestonesExtension, RecipientsExtension
         emit Initialized(_poolId, _data);
     }
 
-    /// ===============================
-    /// ======= External/Custom =======
-    /// ===============================
-
-    function reviewRecipients(ApplicationStatus[] memory statuses, uint256 refRecipientsCounter)
-        public
-        override
-        onlyActiveRegistration
-    {
-        bool recipientAccepted;
-        for (uint256 i; i < statuses.length;) {
-            uint256 fullRow = statuses[i].statusRow;
-            for (uint256 col = 0; col < 64;) {
-                uint8 status = uint8((fullRow >> col * 4) & 0xF);
-                if (IRecipientsExtension.Status(status) == IRecipientsExtension.Status.Accepted) {
-                    if (recipientAccepted) {
-                        // Only one recipient can be accepted
-                        revert INVALID();
-                    } else {
-                        recipientAccepted = true;
-                        registrationEndTime = uint64(block.timestamp - 1);
-                    }
-                }
-                unchecked {
-                    col++;
-                }
-            }
-            unchecked {
-                i++;
-            }
-        }
-        super.reviewRecipients(statuses, refRecipientsCounter);
-    }
-
     /// ====================================
     /// ============ Internal ==============
     /// ====================================
+
+    function _validateReviewRecipients(address _sender) internal virtual override {
+        _checkOnlyActiveRegistration();
+        super._validateReviewRecipients(_sender);
+    }
+
+    function _reviewRecipientStatus(Status _newStatus, uint256) internal virtual override {
+        if (_newStatus == IRecipientsExtension.Status.Accepted) {
+            if (block.timestamp > registrationEndTime) revert INVALID();
+            // THe registration pariod ends when a recipient is accepted.
+            registrationEndTime = uint64(block.timestamp - 1);
+        }
+    }
 
     /// @notice Hook to process recipient data
     /// @param _recipientId ID of the recipient
