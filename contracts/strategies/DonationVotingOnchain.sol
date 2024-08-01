@@ -130,6 +130,21 @@ contract DonationVotingOnchain is CoreBaseStrategy, RecipientsExtension {
     /// ======= External/Custom =======
     /// ===============================
 
+    /// @notice Set the start and end dates for the pool
+    /// @param _allocationStartTime The start time for the allocation
+    /// @param _allocationEndTime The end time for the allocation
+    function updateAllocationTimestamps(uint64 _allocationStartTime, uint64 _allocationEndTime)
+        external
+        onlyPoolManager(msg.sender)
+    {
+        _isAllocationTimestampValid(_allocationStartTime, _allocationEndTime);
+
+        allocationStartTime = _allocationStartTime;
+        allocationEndTime = _allocationEndTime;
+
+        emit AllocationTimestampsUpdated(allocationStartTime, allocationEndTime, msg.sender);
+    }
+
     function reviewRecipients(ApplicationStatus[] memory statuses, uint256 refRecipientsCounter)
         public
         override
@@ -226,20 +241,8 @@ contract DonationVotingOnchain is CoreBaseStrategy, RecipientsExtension {
         }
     }
 
-    /// @notice Set the start and end dates for the pool
-    /// @param _allocationStartTime The start time for the allocation
-    /// @param _allocationEndTime The end time for the allocation
-    function updateAllocationTimestamps(uint64 _allocationStartTime, uint64 _allocationEndTime)
-        external
-        onlyPoolManager(msg.sender)
-    {
-        _isAllocationTimestampValid(_allocationStartTime, _allocationEndTime);
-
-        allocationStartTime = _allocationStartTime;
-        allocationEndTime = _allocationEndTime;
-
-        emit AllocationTimestampsUpdated(allocationStartTime, allocationEndTime, msg.sender);
-    }
+    /// @notice Hook called before increasing the pool amount.
+    function _beforeIncreasePoolAmount(uint256) internal virtual override onlyAfterAllocation {}
 
     function _isAllocationTimestampValid(uint64 _allocationStartTime, uint64 _allocationEndTime) internal view {
         if (
