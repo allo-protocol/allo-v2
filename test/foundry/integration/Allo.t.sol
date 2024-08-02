@@ -25,7 +25,14 @@ contract IntegrationAllo is Test {
     address public treasury;
     address public userAddr;
 
+    address public recipient0Addr;
+    address public recipient1Addr;
+    address public recipient2Addr;
+
     uint256 public userPk;
+    uint256 public recipient0Pk;
+    uint256 public recipient1Pk;
+    uint256 public recipient2Pk;
 
     bytes32 public profileId;
 
@@ -40,7 +47,11 @@ contract IntegrationAllo is Test {
 
         owner = makeAddr("owner");
         treasury = makeAddr("treasury");
+
         (userAddr, userPk) = makeAddrAndKey("user");
+        (recipient0Addr, recipient0Pk) = makeAddrAndKey("recipient0");
+        (recipient1Addr, recipient1Pk) = makeAddrAndKey("recipient1");
+        (recipient2Addr, recipient2Pk) = makeAddrAndKey("recipient2");
 
         allo = new Allo();
         registry = new Registry();
@@ -57,6 +68,23 @@ contract IntegrationAllo is Test {
 
         // Deal 100k DAI to the user
         deal(dai, userAddr, 100_000 ether);
+    }
+
+    function _getApplicationStatus(address _recipientId, uint256 _status, address payable _strategy)
+        internal
+        view
+        returns (DonationVotingMerkleDistributionDirectTransferStrategy.ApplicationStatus memory)
+    {
+        uint256 recipientIndex =
+            DonationVotingMerkleDistributionBaseStrategy(_strategy).recipientToStatusIndexes(_recipientId) - 1;
+
+        uint256 rowIndex = recipientIndex / 64;
+        uint256 colIndex = (recipientIndex % 64) * 4;
+        uint256 currentRow = DonationVotingMerkleDistributionBaseStrategy(_strategy).statusesBitMap(rowIndex);
+        uint256 newRow = currentRow & ~(15 << colIndex);
+        uint256 statusRow = newRow | (_status << colIndex);
+
+        return DonationVotingMerkleDistributionBaseStrategy.ApplicationStatus({index: rowIndex, statusRow: statusRow});
     }
 
     /// @dev Send a transaction using the Biconomy Forwarder
@@ -103,6 +131,7 @@ contract IntegrationAllo is Test {
     /// @dev Test the full flow, using meta-tx when possible:
     /// - creating a pool
     /// - fundPool
+    /// - register recipients
     /// - allocate
     /// - distribute
     function test_fullFlowWithMetaTx() public {
@@ -139,15 +168,70 @@ contract IntegrationAllo is Test {
         assertTrue(allo.isPoolAdmin(poolId, userAddr));
         assertFalse(allo.isPoolAdmin(poolId, relayer));
 
+        DonationVotingMerkleDistributionDirectTransferStrategy deployedStrategy =
+            DonationVotingMerkleDistributionDirectTransferStrategy(payable(address(allo.getPool(poolId).strategy)));
+
         // Fund pool
         vm.prank(userAddr);
         IERC20(dai).approve(address(allo), 100_000 ether);
 
-        (, ret) = _sendWithRelayer(
+        _sendWithRelayer(
             userAddr, address(allo), abi.encodeWithSelector(allo.fundPool.selector, poolId, 100_000 ether), userPk
         );
         assertTrue(IERC20(dai).balanceOf(address(allo.getPool(poolId).strategy)) == 100_000 ether);
         assertTrue(IERC20(dai).balanceOf(userAddr) == 0);
+
+        // Register recipients
+        _sendWithRelayer(
+            recipient0Addr,
+            address(allo),
+            abi.encodeWithSelector(
+                allo.registerRecipient.selector,
+                poolId,
+                abi.encode(address(0), recipient0Addr, Metadata({protocol: 0, pointer: ""}))
+            ),
+            recipient0Pk
+        );
+        _sendWithRelayer(
+            recipient1Addr,
+            address(allo),
+            abi.encodeWithSelector(
+                allo.registerRecipient.selector,
+                poolId,
+                abi.encode(address(0), recipient1Addr, Metadata({protocol: 0, pointer: ""}))
+            ),
+            recipient1Pk
+        );
+        _sendWithRelayer(
+            recipient2Addr,
+            address(allo),
+            abi.encodeWithSelector(
+                allo.registerRecipient.selector,
+                poolId,
+                abi.encode(address(0), recipient2Addr, Metadata({protocol: 0, pointer: ""}))
+            ),
+            recipient2Pk
+        );
+        assertTrue(deployedStrategy.getRecipient(recipient0Addr).recipientAddress == recipient0Addr);
+        assertTrue(deployedStrategy.getRecipient(recipient1Addr).recipientAddress == recipient1Addr);
+        assertTrue(deployedStrategy.getRecipient(recipient2Addr).recipientAddress == recipient2Addr);
+
+        // Review recipient (it's needed to allocate)
+        vm.startPrank(userAddr);
+
+        // TODO: make them in batch
+        DonationVotingMerkleDistributionBaseStrategy.ApplicationStatus[] memory statuses =
+            new DonationVotingMerkleDistributionBaseStrategy.ApplicationStatus[](1);
+        statuses[0] = _getApplicationStatus(recipient0Addr, 2, payable(address(deployedStrategy)));
+        deployedStrategy.reviewRecipients(statuses, deployedStrategy.recipientsCounter());
+
+        statuses[0] = _getApplicationStatus(recipient1Addr, 2, payable(address(deployedStrategy)));
+        deployedStrategy.reviewRecipients(statuses, deployedStrategy.recipientsCounter());
+
+        statuses[0] = _getApplicationStatus(recipient2Addr, 2, payable(address(deployedStrategy)));
+        deployedStrategy.reviewRecipients(statuses, deployedStrategy.recipientsCounter());
+
+        vm.stopPrank();
 
         // Allocate
         // TODO
