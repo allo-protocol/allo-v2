@@ -5,7 +5,7 @@ pragma solidity 0.8.19;
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 // Core Contracts
-import {CoreBaseStrategy} from "../strategies/CoreBaseStrategy.sol";
+import {CoreBaseStrategy} from "contracts/strategies/CoreBaseStrategy.sol";
 
 /// @title Token Gating Extension
 /// @notice This contract is providing erc20 gating options

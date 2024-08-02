@@ -5,7 +5,7 @@ pragma solidity 0.8.19;
 import {IEAS, Attestation} from "eas-contracts/IEAS.sol";
 
 // Core Contracts
-import {CoreBaseStrategy} from "../strategies/CoreBaseStrategy.sol";
+import {CoreBaseStrategy} from "contracts/strategies/CoreBaseStrategy.sol";
 
 /// @title EAS Gating Extension
 /// @notice This contract is providing gating options for a strategy's calls
@@ -15,6 +15,8 @@ abstract contract EASGatingExtension is CoreBaseStrategy {
     /// ========== Errors ==============
     /// ================================
 
+    /// @notice Throws when EAS address is zero
+    error EASGatingExtension_INVALID_EAS_ADDRESS();
     /// @notice Throws when the attestation schema is wrong
     error EASGatingExtension_INVALID_ATTESTATION_SCHEMA();
     /// @notice Throws when the attester is wrong
@@ -32,6 +34,7 @@ abstract contract EASGatingExtension is CoreBaseStrategy {
     /// @notice This initializes the strategy
     /// @param _eas The eas address
     function __EASGatingExtension_init(address _eas) internal {
+        if (_eas == address(0)) revert EASGatingExtension_INVALID_EAS_ADDRESS();
         /// Set the EAS contract
         eas = _eas;
     }

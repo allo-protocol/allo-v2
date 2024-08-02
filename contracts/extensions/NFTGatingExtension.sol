@@ -5,7 +5,7 @@ pragma solidity 0.8.19;
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 // Core Contracts
-import {CoreBaseStrategy} from "../strategies/CoreBaseStrategy.sol";
+import {CoreBaseStrategy} from "contracts/strategies/CoreBaseStrategy.sol";
 
 /// @title NFT Gating Extension
 /// @notice This contract is providing nft gating options for a strategy's calls

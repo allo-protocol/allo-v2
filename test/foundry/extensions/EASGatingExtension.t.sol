@@ -16,6 +16,15 @@ contract EASGatingExtensionTest is BaseGatingExtension {
         assertEq(gatingExtension.eas(), eas);
     }
 
+    function testRevert_initialize_invalidEAS() public {
+        MockGatingExtension _gatingExtension = new MockGatingExtension(allo);
+
+        vm.expectRevert(EASGatingExtension.EASGatingExtension_INVALID_EAS_ADDRESS.selector);
+        /// initialize
+        vm.prank(allo);
+        _gatingExtension.initialize(poolId, abi.encode(address(0)));
+    }
+
     function test_onlyWithAttestation() public {
         /// mock values
         bytes32 _schema = keccak256("schema");
