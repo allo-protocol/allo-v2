@@ -66,8 +66,8 @@ contract IntegrationAllo is Test {
         profileId =
             registry.createProfile(0, "Test Profile", Metadata({protocol: 1, pointer: ""}), userAddr, new address[](0));
 
-        // Deal 100k DAI to the user
-        deal(dai, userAddr, 100_000 ether);
+        // Deal 130k DAI to the user
+        deal(dai, userAddr, 130_000 ether);
     }
 
     function _getApplicationStatus(address _recipientId, uint256 _status, address payable _strategy)
@@ -136,6 +136,9 @@ contract IntegrationAllo is Test {
     /// - distribute
     function test_fullFlowWithMetaTx() public {
         // Create pool
+        address[] memory _allowedTokens = new address[](1);
+        _allowedTokens[0] = dai;
+
         bytes memory _initStrategyData = abi.encode(
             DonationVotingMerkleDistributionBaseStrategy.InitializeData({
                 useRegistryAnchor: false,
@@ -144,7 +147,7 @@ contract IntegrationAllo is Test {
                 registrationEndTime: uint64(block.timestamp + 7 days),
                 allocationStartTime: uint64(block.timestamp),
                 allocationEndTime: uint64(block.timestamp + 7 days),
-                allowedTokens: new address[](0)
+                allowedTokens: _allowedTokens
             })
         );
 
@@ -179,7 +182,7 @@ contract IntegrationAllo is Test {
             userAddr, address(allo), abi.encodeWithSelector(allo.fundPool.selector, poolId, 100_000 ether), userPk
         );
         assertTrue(IERC20(dai).balanceOf(address(allo.getPool(poolId).strategy)) == 100_000 ether);
-        assertTrue(IERC20(dai).balanceOf(userAddr) == 0);
+        assertTrue(IERC20(dai).balanceOf(userAddr) == 30_000 ether);
 
         // Register recipients
         _sendWithRelayer(
@@ -234,12 +237,114 @@ contract IntegrationAllo is Test {
         vm.stopPrank();
 
         // Allocate
-        // TODO
+        vm.prank(userAddr);
+        IERC20(dai).approve(address(deployedStrategy), 30_000 ether);
+
+        _sendWithRelayer(
+            userAddr,
+            address(allo),
+            abi.encodeWithSelector(
+                allo.allocate.selector,
+                poolId,
+                abi.encode(
+                    recipient0Addr,
+                    DonationVotingMerkleDistributionBaseStrategy.PermitType.None,
+                    DonationVotingMerkleDistributionBaseStrategy.Permit2Data({
+                        permit: ISignatureTransfer.PermitTransferFrom({
+                            permitted: ISignatureTransfer.TokenPermissions({token: dai, amount: 10_000 ether}),
+                            nonce: 0,
+                            deadline: 0
+                        }),
+                        signature: new bytes(0)
+                    })
+                )
+            ),
+            userPk
+        );
+        _sendWithRelayer(
+            userAddr,
+            address(allo),
+            abi.encodeWithSelector(
+                allo.allocate.selector,
+                poolId,
+                abi.encode(
+                    recipient1Addr,
+                    DonationVotingMerkleDistributionBaseStrategy.PermitType.None,
+                    DonationVotingMerkleDistributionBaseStrategy.Permit2Data({
+                        permit: ISignatureTransfer.PermitTransferFrom({
+                            permitted: ISignatureTransfer.TokenPermissions({token: dai, amount: 10_000 ether}),
+                            nonce: 0,
+                            deadline: 0
+                        }),
+                        signature: new bytes(0)
+                    })
+                )
+            ),
+            userPk
+        );
+        assertTrue(IERC20(dai).balanceOf(address(deployedStrategy)) == 100_000 ether);
+        assertTrue(IERC20(dai).balanceOf(userAddr) == 10_000 ether);
+        assertTrue(IERC20(dai).balanceOf(recipient0Addr) == 10_000 ether);
+        assertTrue(IERC20(dai).balanceOf(recipient1Addr) == 10_000 ether);
+        assertTrue(IERC20(dai).balanceOf(recipient2Addr) == 0 ether);
+
+        // Move time after allocation end time
+        vm.warp(block.timestamp + 8 days);
+
+        // Update distribution
+        vm.prank(userAddr);
+        deployedStrategy.updateDistribution(
+            bytes32(0xadafbadc26201df820cf1beaba9576038fc21a3a81e19534389dbc7280c97014),
+            Metadata({protocol: 0, pointer: ""})
+        );
+
+        // Distribute
+        DonationVotingMerkleDistributionBaseStrategy.Distribution[] memory _distributions =
+            new DonationVotingMerkleDistributionBaseStrategy.Distribution[](3);
+
+        _distributions[0] = DonationVotingMerkleDistributionBaseStrategy.Distribution({
+            index: 0,
+            recipientId: recipient0Addr,
+            amount: 25_000 ether,
+            merkleProof: new bytes32[](2)
+        });
+        _distributions[0].merkleProof[0] = bytes32(0x4a4054703db6c08f7627a4cce111a61cff80f28bab8545a9968779af1152ac33);
+        _distributions[0].merkleProof[1] = bytes32(0x781f6f3993ddc773d04d8166adc14e50c7423289d4cd4a715b32f7f56410c411);
+
+        _distributions[1] = DonationVotingMerkleDistributionBaseStrategy.Distribution({
+            index: 1,
+            recipientId: recipient1Addr,
+            amount: 30_000 ether,
+            merkleProof: new bytes32[](2)
+        });
+        _distributions[1].merkleProof[0] = bytes32(0x40796454065a0d690bbf69ece420b5f54667e1eb5d9ae41c876484d416918659);
+        _distributions[1].merkleProof[1] = bytes32(0x781f6f3993ddc773d04d8166adc14e50c7423289d4cd4a715b32f7f56410c411);
+
+        _distributions[2] = DonationVotingMerkleDistributionBaseStrategy.Distribution({
+            index: 2,
+            recipientId: recipient2Addr,
+            amount: 35_000 ether,
+            merkleProof: new bytes32[](1)
+        });
+        _distributions[2].merkleProof[0] = bytes32(0x7be035e1b55d42f33a6304d14dcd5e117980643375603ba676a4d8e29ae461ef);
+
+        bytes memory _distributeData = abi.encode(_distributions);
+        _sendWithRelayer(
+            userAddr,
+            address(allo),
+            abi.encodeWithSelector(allo.distribute.selector, poolId, new address[](0), _distributeData),
+            userPk
+        );
+        assertTrue(IERC20(dai).balanceOf(address(deployedStrategy)) == 10_000 ether);
+        assertTrue(IERC20(dai).balanceOf(recipient0Addr) == 35_000 ether);
+        assertTrue(IERC20(dai).balanceOf(recipient1Addr) == 40_000 ether);
+        assertTrue(IERC20(dai).balanceOf(recipient2Addr) == 35_000 ether);
     }
 
     /// @dev Test the full flow:
     /// - creating a pool
     /// - fundPool
+    /// - register recipients
     /// - allocate
     /// - distribute
     function test_fullFlow() public {
