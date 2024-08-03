@@ -70,12 +70,18 @@ contract RFPSimple is CoreBaseStrategy, MilestonesExtension, RecipientsExtension
         super._validateReviewRecipients(_sender);
     }
 
-    function _reviewRecipientStatus(Status _newStatus, uint256) internal virtual override {
+    function _reviewRecipientStatus(Status _newStatus, Status _oldStatus, uint256 _recipientIndex)
+        internal
+        virtual
+        override
+        returns (Status _reviewedStatus)
+    {
         if (_newStatus == IRecipientsExtension.Status.Accepted) {
             if (block.timestamp > registrationEndTime) revert INVALID();
-            // THe registration pariod ends when a recipient is accepted.
+            // The registration period ends when a recipient is accepted.
             registrationEndTime = uint64(block.timestamp - 1);
         }
+        _reviewedStatus = _newStatus;
     }
 
     /// @notice Hook to process recipient data

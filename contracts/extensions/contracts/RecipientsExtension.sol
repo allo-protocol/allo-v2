@@ -50,7 +50,8 @@ abstract contract RecipientsExtension is CoreBaseStrategy, Errors, IRecipientsEx
 
     /// @notice Constructor to set the Allo contract
     /// @param _allo Address of the Allo contract.
-    constructor(bool _reviewEachStatus) {
+    /// @param _reviewEachStatus true if custom review logic was added.
+    constructor(address _allo, bool _reviewEachStatus) CoreBaseStrategy(_allo) {
         REVIEW_EACH_STATUS = _reviewEachStatus;
     }
 
@@ -113,44 +114,65 @@ abstract contract RecipientsExtension is CoreBaseStrategy, Errors, IRecipientsEx
     /// Emits the RecipientStatusUpdated() event.
     /// @param statuses new statuses
     /// @param refRecipientsCounter the recipientCounter the transaction is based on
-    function reviewRecipients(ApplicationStatus[] memory statuses, uint256 refRecipientsCounter) public virtual {
+    function reviewRecipients(ApplicationStatus[] calldata statuses, uint256 refRecipientsCounter) public virtual {
         _validateReviewRecipients(msg.sender);
         if (refRecipientsCounter != recipientsCounter) revert INVALID();
         // Loop through the statuses and set the status
-        for (uint256 i; i < statuses.length; i++) {
+        for (uint256 i; i < statuses.length;) {
             uint256 rowIndex = statuses[i].index;
             uint256 fullRow = statuses[i].statusRow;
 
             if (REVIEW_EACH_STATUS) {
-                // Loop through each status in the updated row
-                uint256 currentRow = statusesBitMap[rowIndex];
-                for (uint256 col = 0; j < 64; col++) {
-                    uint8 newStatus = uint8((fullRow >> col * 4) & 0xF);
-                    uint8 currentStatus = uint8((currentRow >> col * 4) & 0xF);
-
-                    if (newStatus != currentStatus) {
-                        uint256 recipientIndex = rowIndex * 64 + col + 1;
-                        _reviewRecipientStatus(Status(newStatus), recipientIndex);
-                    }
-
-                    unchecked {
-                        col++;
-                    }
-                }
+                fullRow = _processStatusRow(rowIndex, fullRow);
             }
 
             statusesBitMap[rowIndex] = fullRow;
 
             // Emit that the recipient status has been updated with the values
             emit RecipientStatusUpdated(rowIndex, fullRow, msg.sender);
+
+            unchecked {
+                i++;
+            }
         }
+    }
+
+    function _processStatusRow(uint256 _rowIndex, uint256 _fullRow) internal returns (uint256) {
+        // Loop through each status in the updated row
+        uint256 currentRow = statusesBitMap[_rowIndex];
+        for (uint256 col = 0; col < 64;) {
+            uint256 colIndex = col << 2; // col * 4
+            uint8 newStatus = uint8((_fullRow >> colIndex) & 0xF);
+            uint8 currentStatus = uint8((currentRow >> colIndex) & 0xF);
+
+            if (newStatus != currentStatus) {
+                uint256 recipientIndex = _rowIndex << 6 + col + 1; // _rowIndex * 64 + col + 1
+                Status reviewedStatus = _reviewRecipientStatus(Status(newStatus), Status(currentStatus), recipientIndex);
+                if (reviewedStatus != newStatus) {
+                    // Update `_fullRow` with the reviewed status.
+                    uint256 reviewedRow = _fullRow & ~(0xF << colIndex);
+                    _fullRow = reviewedRow | (reviewedStatus << colIndex);
+                }
+            }
+
+            unchecked {
+                col++;
+            }
+        }
+        return _fullRow;
     }
 
     function _validateReviewRecipients(address _sender) internal virtual {
         _checkOnlyPoolManager(_sender);
     }
 
-    function _reviewRecipientStatus(Status _newStatus, uint256 _recipientIndex) internal virtual {}
+    function _reviewRecipientStatus(Status _newStatus, Status _oldStatus, uint256 _recipientIndex)
+        internal
+        virtual
+        returns (Status _reviewedStatus)
+    {
+        _reviewedStatus = _newStatus;
+    }
 
     /// @notice Sets the start and end dates.
     /// @dev The 'msg.sender' must be a pool manager.
