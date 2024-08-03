@@ -73,18 +73,15 @@ contract DonationVotingOnchain is CoreBaseStrategy, RecipientsExtension {
     /// @notice Modifier to check if allocation is active
     /// @dev Reverts if allocation is not active
     modifier onlyActiveAllocation() {
-        if (allocationStartTime > block.timestamp || block.timestamp > allocationEndTime) {
-            revert ALLOCATION_NOT_ACTIVE();
-        }
+        if (block.timestamp < allocationStartTime) revert ALLOCATION_NOT_ACTIVE();
+        if (block.timestamp > allocationEndTime) revert ALLOCATION_NOT_ACTIVE();
         _;
     }
 
     /// @notice Modifier to check if allocation has ended
     /// @dev Reverts if allocation has not ended
     modifier onlyAfterAllocation() {
-        if (block.timestamp <= allocationEndTime) {
-            revert ALLOCATION_NOT_ENDED();
-        }
+        if (block.timestamp <= allocationEndTime) revert ALLOCATION_NOT_ENDED();
         _;
     }
 
@@ -103,7 +100,13 @@ contract DonationVotingOnchain is CoreBaseStrategy, RecipientsExtension {
     // @notice Initialize the strategy
     /// @param _poolId ID of the pool
     /// @param _data The data to be decoded
-    /// @custom:data (uint256 _maxBid, bool registryGating, bool metadataRequired)
+    /// @custom:data (
+    ///        IRecipientsExtension.RecipientInitializeData _recipientExtensionInitializeData,
+    ///        uint64 _allocationStartTime,
+    ///        uint64 _allocationEndTime,
+    ///        uint64 _withdrawalCooldown,
+    ///        address _allocationToken
+    ///    )
     function initialize(uint256 _poolId, bytes memory _data) external virtual override {
         (
             IRecipientsExtension.RecipientInitializeData memory _recipientExtensionInitializeData,
@@ -135,6 +138,7 @@ contract DonationVotingOnchain is CoreBaseStrategy, RecipientsExtension {
     /// @param _allocationEndTime The end time for the allocation
     function updateAllocationTimestamps(uint64 _allocationStartTime, uint64 _allocationEndTime)
         external
+        virtual
         onlyPoolManager(msg.sender)
     {
         _isAllocationTimestampValid(_allocationStartTime, _allocationEndTime);
@@ -168,26 +172,21 @@ contract DonationVotingOnchain is CoreBaseStrategy, RecipientsExtension {
         override
         onlyActiveAllocation
     {
-        uint256 totalNativeAmount;
+        uint256 totalAmount;
         for (uint256 i = 0; i < _recipients.length; i++) {
-            if (!_isAcceptedRecipient(_recipients[i])) {
-                revert RECIPIENT_ERROR(_recipients[i]);
-            }
+            if (!_isAcceptedRecipient(_recipients[i])) revert RECIPIENT_ERROR(_recipients[i]);
 
             // Update the total payout amount for the claim and the total claimable amount
             amountAllocated[_recipients[i]] += _amounts[i];
-
-            if (allocationToken == NATIVE) {
-                totalNativeAmount += _amounts[i];
-            } else {
-                SafeTransferLib.safeTransferFrom(allocationToken, _sender, address(this), _amounts[i]);
-            }
+            totalAmount += _amounts[i];
 
             emit Allocated(_recipients[i], _sender, _amounts[i], abi.encode(allocationToken));
         }
 
-        if (msg.value != totalNativeAmount) {
-            revert AMOUNT_MISMATCH();
+        if (allocationToken == NATIVE) {
+            if (msg.value != totalAmount) revert AMOUNT_MISMATCH();
+        } else {
+            SafeTransferLib.safeTransferFrom(allocationToken, _sender, address(this), totalAmount);
         }
 
         QFState.fund(_recipients, _amounts);
@@ -235,15 +234,15 @@ contract DonationVotingOnchain is CoreBaseStrategy, RecipientsExtension {
     }
 
     /// @notice Hook called before increasing the pool amount.
-    function _beforeIncreasePoolAmount(uint256) internal virtual override onlyAfterAllocation {}
+    function _beforeIncreasePoolAmount(uint256) internal virtual override {
+        if (block.timestamp > allocationEndTime) revert POOL_INACTIVE();
+    }
 
     function _isAllocationTimestampValid(uint64 _allocationStartTime, uint64 _allocationEndTime) internal view {
-        if (
-            block.timestamp > registrationStartTime || registrationStartTime > _allocationStartTime
-                || _allocationStartTime > _allocationEndTime || registrationEndTime > _allocationEndTime
-        ) {
-            revert INVALID();
-        }
+        if (block.timestamp > registrationStartTime) revert INVALID();
+        if (registrationStartTime > _allocationStartTime) revert INVALID();
+        if (_allocationStartTime > _allocationEndTime) revert INVALID();
+        if (registrationEndTime > _allocationEndTime) revert INVALID();
     }
 
     /// @notice Returns if the recipient is accepted
