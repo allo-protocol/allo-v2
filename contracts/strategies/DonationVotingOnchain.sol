@@ -230,15 +230,8 @@ contract DonationVotingOnchain is CoreBaseStrategy, RecipientsExtension {
     }
 
     /// @notice Hook called before withdrawing tokens from the pool.
-    /// @param _amount The amount to withdraw
-    function _beforeWithdraw(address, uint256 _amount, address) internal virtual override {
-        if (block.timestamp <= allocationEndTime + withdrawalCooldown) {
-            revert INVALID();
-        }
-
-        if (poolAmount - totalPayoutAmount < _amount) {
-            revert INVALID();
-        }
+    function _beforeWithdraw(address, uint256, address) internal virtual override {
+        if (block.timestamp <= allocationEndTime + withdrawalCooldown) revert INVALID();
     }
 
     /// @notice Hook called before increasing the pool amount.
