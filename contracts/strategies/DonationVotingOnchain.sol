@@ -115,16 +115,16 @@ contract DonationVotingOnchain is CoreBaseStrategy, RecipientsExtension {
             uint64 _withdrawalCooldown,
             address _allocationToken
         ) = abi.decode(_data, (IRecipientsExtension.RecipientInitializeData, uint64, uint64, uint64, address));
-        __BaseStrategy_init(_poolId);
-        __RecipientsExtension_init(_recipientExtensionInitializeData);
 
-        _isPoolTimestampValid(_allocationStartTime, _allocationEndTime);
         allocationStartTime = _allocationStartTime;
         allocationEndTime = _allocationEndTime;
         emit AllocationTimestampsUpdated(_allocationStartTime, _allocationEndTime, msg.sender);
 
         withdrawalCooldown = _withdrawalCooldown;
         allocationToken = _allocationToken;
+
+        __BaseStrategy_init(_poolId);
+        __RecipientsExtension_init(_recipientExtensionInitializeData);
 
         emit Initialized(_poolId, _data);
     }
@@ -133,20 +133,24 @@ contract DonationVotingOnchain is CoreBaseStrategy, RecipientsExtension {
     /// ======= External/Custom =======
     /// ===============================
 
-    /// @notice Set the start and end dates for the pool
+    /// @notice Sets the start and end dates.
+    /// @dev The 'msg.sender' must be a pool manager.
+    /// @param _registrationStartTime The start time for the registration
+    /// @param _registrationEndTime The end time for the registration
     /// @param _allocationStartTime The start time for the allocation
     /// @param _allocationEndTime The end time for the allocation
-    function updateAllocationTimestamps(uint64 _allocationStartTime, uint64 _allocationEndTime)
-        external
-        virtual
-        onlyPoolManager(msg.sender)
-    {
-        _isAllocationTimestampValid(_allocationStartTime, _allocationEndTime);
-
+    function updatePoolTimestamps(
+        uint64 _registrationStartTime,
+        uint64 _registrationEndTime,
+        uint64 _allocationStartTime,
+        uint64 _allocationEndTime
+    ) external onlyPoolManager(msg.sender) {
+        if (allocationStartTime > allocationEndTime) revert INVALID();
         allocationStartTime = _allocationStartTime;
         allocationEndTime = _allocationEndTime;
-
         emit AllocationTimestampsUpdated(allocationStartTime, allocationEndTime, msg.sender);
+
+        _updatePoolTimestamps(_registrationStartTime, _registrationEndTime);
     }
 
     function reviewRecipients(ApplicationStatus[] memory statuses, uint256 refRecipientsCounter)
@@ -238,11 +242,22 @@ contract DonationVotingOnchain is CoreBaseStrategy, RecipientsExtension {
         if (block.timestamp > allocationEndTime) revert POOL_INACTIVE();
     }
 
-    function _isAllocationTimestampValid(uint64 _allocationStartTime, uint64 _allocationEndTime) internal view {
-        if (block.timestamp > registrationStartTime) revert INVALID();
-        if (registrationStartTime > _allocationStartTime) revert INVALID();
-        if (_allocationStartTime > _allocationEndTime) revert INVALID();
-        if (registrationEndTime > _allocationEndTime) revert INVALID();
+    /// @notice Checks if the timestamps are valid.
+    /// @dev This will revert if any of the timestamps are invalid. This is determined by the strategy
+    /// and may vary from strategy to strategy. Checks if '_registrationStartTime' is greater than the '_registrationEndTime'
+    /// @param _registrationStartTime The start time for the registration
+    /// @param _registrationEndTime The end time for the registration
+    function _isPoolTimestampValid(uint64 _registrationStartTime, uint64 _registrationEndTime)
+        internal
+        pure
+        virtual
+        override
+    {
+        if (_registrationStartTime > _registrationEndTime) revert INVALID();
+        // Check consistency with allocation timestamps
+        if (block.timestamp > _registrationStartTime) revert INVALID();
+        if (_registrationStartTime > allocationStartTime) revert INVALID();
+        if (_registrationEndTime > allocationEndTime) revert INVALID();
     }
 
     /// @notice Returns if the recipient is accepted
