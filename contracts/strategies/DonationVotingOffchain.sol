@@ -27,8 +27,9 @@ import {Native} from "../core/libraries/Native.sol";
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⠙⠋⠛⠙⠋⠛⠙⠋⠛⠙⠋⠃⠀⠀⠀⠀⠀⠀⠀⠀⠠⠿⠻⠟⠿⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⠟⠿⠟⠿⠆⠀⠸⠿⠿⠟⠯⠀⠀⠀⠸⠿⠿⠿⠏⠀⠀⠀⠀⠀⠈⠉⠻⠻⡿⣿⢿⡿⡿⠿⠛⠁⠀⠀⠀⠀⠀⠀
 //                    allo.gitcoin.co
 
-/// @title RFP Simple Strategy
-/// @notice Strategy for Request for Proposal (RFP) allocation with milestone submission and management.
+/// @title Donation Voting Strategy with off-chain setup
+/// @notice Strategy that allows allocations in multiple tokens to accepted recipient. The actual payouts are set
+/// by the pool manager.
 contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension {
     /// ================================
     /// ========== Struct ==============
@@ -53,8 +54,9 @@ contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension {
     /// @notice The start and end times for allocations
     uint64 public allocationStartTime;
     uint64 public allocationEndTime;
+    /// @notice Cooldown time from allocationEndTime after which the pool manager is allowed to withdraw tokens.
     uint64 public withdrawalCooldown;
-
+    /// @notice amount to be distributed. `totalPayoutAmount` get reduced with each distribution.
     uint256 public totalPayoutAmount;
 
     /// @notice token -> bool
@@ -95,7 +97,7 @@ contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension {
     /// ======== Constructor ==========
     /// ===============================
 
-    /// @notice Constructor for the RFP Simple Strategy
+    /// @notice Constructor for the Donation Voting Offchain strategy
     /// @param _allo The 'Allo' contract
     constructor(address _allo) CoreBaseStrategy(_allo) {}
 
@@ -167,6 +169,9 @@ contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension {
         _updatePoolTimestamps(_registrationStartTime, _registrationEndTime);
     }
 
+    /// @notice Sets recipient statuses.
+    /// @param statuses new statuses
+    /// @param refRecipientsCounter the recipientCounter the transaction is based on
     function reviewRecipients(ApplicationStatus[] memory statuses, uint256 refRecipientsCounter)
         public
         override
@@ -234,7 +239,7 @@ contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension {
     /// ====================================
 
     /// @notice This will allocate to recipients.
-    /// @dev The encoded '_data' will be determined by the strategy implementation.
+    /// @dev The encoded '_data' is an array of token addresses corresponding to the _amounts array.
     /// @param _recipients The addresses of the recipients to allocate to
     /// @param _amounts The amounts to allocate to the recipients
     /// @param _data The data to use to allocate to the recipient
@@ -275,8 +280,6 @@ contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension {
     }
 
     /// @notice Distributes funds (tokens) to recipients.
-    /// @dev The encoded '_data' will be determined by the strategy implementation. Only 'Allo' contract can
-    ///      call this when it is initialized.
     /// @param _recipientIds The IDs of the recipients
     /// @param _sender The address of the sender
     function _distribute(address[] memory _recipientIds, bytes memory, address _sender)
@@ -315,8 +318,6 @@ contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension {
     }
 
     /// @notice Checks if the timestamps are valid.
-    /// @dev This will revert if any of the timestamps are invalid. This is determined by the strategy
-    /// and may vary from strategy to strategy. Checks if '_registrationStartTime' is greater than the '_registrationEndTime'
     /// @param _registrationStartTime The start time for the registration
     /// @param _registrationEndTime The end time for the registration
     function _isPoolTimestampValid(uint64 _registrationStartTime, uint64 _registrationEndTime)
