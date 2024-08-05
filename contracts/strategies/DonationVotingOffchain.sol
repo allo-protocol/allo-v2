@@ -29,7 +29,7 @@ import {Native} from "../core/libraries/Native.sol";
 
 /// @title RFP Simple Strategy
 /// @notice Strategy for Request for Proposal (RFP) allocation with milestone submission and management.
-contract DonationVoting is CoreBaseStrategy, RecipientsExtension {
+contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension {
     /// ================================
     /// ========== Struct ==============
     /// ================================
@@ -106,7 +106,13 @@ contract DonationVoting is CoreBaseStrategy, RecipientsExtension {
     // @notice Initialize the strategy
     /// @param _poolId ID of the pool
     /// @param _data The data to be decoded
-    /// @custom:data (uint256 _maxBid, bool registryGating, bool metadataRequired)
+    /// @custom:data (
+    ///        IRecipientsExtension.RecipientInitializeData _recipientExtensionInitializeData,
+    ///        uint64 _allocationStartTime,
+    ///        uint64 _allocationEndTime,
+    ///        uint64 _withdrawalCooldown,
+    ///        address _allocationToken
+    ///    )
     function initialize(uint256 _poolId, bytes memory _data) external virtual override {
         (
             IRecipientsExtension.RecipientInitializeData memory _recipientExtensionInitializeData,
@@ -153,7 +159,7 @@ contract DonationVoting is CoreBaseStrategy, RecipientsExtension {
         uint64 _allocationStartTime,
         uint64 _allocationEndTime
     ) external onlyPoolManager(msg.sender) {
-        if (allocationStartTime > allocationEndTime) revert INVALID();
+        if (_allocationStartTime > _allocationEndTime) revert INVALID();
         allocationStartTime = _allocationStartTime;
         allocationEndTime = _allocationEndTime;
         emit AllocationTimestampsUpdated(allocationStartTime, allocationEndTime, msg.sender);
@@ -315,7 +321,7 @@ contract DonationVoting is CoreBaseStrategy, RecipientsExtension {
     /// @param _registrationEndTime The end time for the registration
     function _isPoolTimestampValid(uint64 _registrationStartTime, uint64 _registrationEndTime)
         internal
-        pure
+        view
         virtual
         override
     {

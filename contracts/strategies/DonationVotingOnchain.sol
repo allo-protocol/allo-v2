@@ -145,7 +145,7 @@ contract DonationVotingOnchain is CoreBaseStrategy, RecipientsExtension {
         uint64 _allocationStartTime,
         uint64 _allocationEndTime
     ) external onlyPoolManager(msg.sender) {
-        if (allocationStartTime > allocationEndTime) revert INVALID();
+        if (_allocationStartTime > _allocationEndTime) revert INVALID();
         allocationStartTime = _allocationStartTime;
         allocationEndTime = _allocationEndTime;
         emit AllocationTimestampsUpdated(allocationStartTime, allocationEndTime, msg.sender);
@@ -249,13 +249,13 @@ contract DonationVotingOnchain is CoreBaseStrategy, RecipientsExtension {
     /// @param _registrationEndTime The end time for the registration
     function _isPoolTimestampValid(uint64 _registrationStartTime, uint64 _registrationEndTime)
         internal
-        pure
+        view
         virtual
         override
     {
         if (_registrationStartTime > _registrationEndTime) revert INVALID();
-        // Check consistency with allocation timestamps
         if (block.timestamp > _registrationStartTime) revert INVALID();
+        // Check consistency with allocation timestamps
         if (_registrationStartTime > allocationStartTime) revert INVALID();
         if (_registrationEndTime > allocationEndTime) revert INVALID();
     }
