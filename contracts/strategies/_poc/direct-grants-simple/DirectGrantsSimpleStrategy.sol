@@ -300,11 +300,9 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         Recipient storage recipient = _recipients[_recipientId];
 
         if (
-            milestones[_recipientId]
-                // Check if the recipient has any milestones, otherwise revert
-                .length == 0
+            // Check if the recipient has any milestones, otherwise revert
             // Check if the milestone hasn't been updated via frontrun, otherwise revert
-            || keccak256(abi.encode(milestones[_recipientId])) != milestonesHash
+            milestones[_recipientId].length == 0 || keccak256(abi.encode(milestones[_recipientId])) != milestonesHash
         ) {
             revert INVALID_MILESTONE();
         }
