@@ -43,4 +43,16 @@ contract CoreBaseStrategyTest is Test, AlloSetup {
         strategy.increasePoolAmount(100);
         assertEq(strategy.getPoolAmount(), 100);
     }
+
+    function test_withdraw() public {
+        vm.mockCall(address(allo()), abi.encodeWithSelector(IAllo.isPoolManager.selector), abi.encode(true));
+
+        vm.prank(address(allo()));
+        strategy.increasePoolAmount(100);
+
+        address _token = allo().getPool(0).token;
+        strategy.withdraw(_token, 50, address(this));
+
+        assertEq(strategy.getPoolAmount(), 50);
+    }
 }
