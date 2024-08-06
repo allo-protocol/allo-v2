@@ -70,22 +70,22 @@ contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension {
     /// ========== Events =============
     /// ===============================
 
-    /// @notice Emitted when a recipient updates their registration
+    /// @notice Emitted when a recipient claims the tokens allocated to it
     /// @param recipientId Id of the recipient
-    /// @param recipientAddress The encoded data - (address recipientId, address recipientAddress, Metadata metadata)
-    /// @param amount The sender of the transaction
-    /// @param token The updated status of the recipient
-    event Claimed(address indexed recipientId, address recipientAddress, uint256 amount, address token);
+    /// @param amount The amount of pool tokens claimed
+    /// @param token The token address of the amount being claimed
+    event Claimed(address indexed recipientId, uint256 amount, address token);
+
+    /// @notice Emitted when the payout amount for a recipient is set
+    /// @param recipientId Id of the recipient
+    /// @param amount The amount of pool tokens set
+    event PayoutSet(address indexed recipientId, uint256 amount);
 
     /// @notice Emitted when the allocation timestamps are updated
     /// @param allocationStartTime The start time for the allocation period
     /// @param allocationEndTime The end time for the allocation period
     /// @param sender The sender of the transaction
     event AllocationTimestampsUpdated(uint64 allocationStartTime, uint64 allocationEndTime, address sender);
-
-    /// @notice Emitted when the payout amounts for a list of recipients is set
-    /// @param recipientIds array of recipients ids (addresses)
-    event PayoutSet(bytes recipientIds);
 
     /// ================================
     /// ========== Modifier ============
@@ -210,7 +210,7 @@ contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension {
             address recipientAddress = _recipients[claim.recipientId].recipientAddress;
             _transferAmount(claim.token, recipientAddress, amount);
 
-            emit Claimed(claim.recipientId, recipientAddress, amount, claim.token);
+            emit Claimed(claim.recipientId, amount, claim.token);
         }
     }
 
@@ -222,29 +222,25 @@ contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension {
         onlyPoolManager(msg.sender)
         onlyAfterAllocation
     {
+        uint256 totalAmount;
         for (uint256 i; i < _recipientIds.length; i++) {
             address recipientId = _recipientIds[i];
-            if (!_isAcceptedRecipient(_recipientIds[i])) {
-                revert RECIPIENT_ERROR(_recipientIds[i]);
-            }
+            if (!_isAcceptedRecipient(_recipientIds[i])) revert RECIPIENT_ERROR(_recipientIds[i]);
 
             PayoutSummary storage payoutSummary = payoutSummaries[recipientId];
-            if (payoutSummary.amount != 0) {
-                revert RECIPIENT_ERROR(recipientId);
-            }
+            if (payoutSummary.amount != 0) revert RECIPIENT_ERROR(recipientId);
 
             uint256 amount = _amounts[i];
-            totalPayoutAmount += amount;
-
-            if (totalPayoutAmount > poolAmount) {
-                revert INVALID();
-            }
+            totalAmount += amount;
 
             payoutSummary.amount = amount;
             payoutSummary.recipientAddress = _recipients[recipientId].recipientAddress;
+
+            emit PayoutSet(recipientId, amount);
         }
 
-        emit PayoutSet(abi.encode(_recipientIds));
+        totalPayoutAmount += totalAmount;
+        if (totalPayoutAmount > poolAmount) revert INVALID();
     }
 
     /// ====================================
