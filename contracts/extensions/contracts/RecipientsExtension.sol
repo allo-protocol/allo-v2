@@ -163,6 +163,7 @@ abstract contract RecipientsExtension is CoreBaseStrategy, Errors, IRecipientsEx
     }
 
     function _validateReviewRecipients(address _sender) internal virtual {
+        _checkOnlyActiveRegistration();
         _checkOnlyPoolManager(_sender);
     }
 
