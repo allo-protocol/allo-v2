@@ -8,7 +8,7 @@ import {Metadata} from "../../contracts/core/libraries/Metadata.sol";
 import {Test} from "forge-std/Test.sol";
 
 contract MockStrategyRecipientsExtension is CoreBaseStrategy, RecipientsExtension, Test {
-    constructor(address _allo) CoreBaseStrategy(_allo) {}
+    constructor(address _allo, bool _reviewEachStatus) RecipientsExtension(_allo, _reviewEachStatus) {}
 
     function initialize(uint256 _poolId, bytes memory _data) external {
         __BaseStrategy_init(_poolId);
@@ -459,8 +459,12 @@ contract MockStrategyRecipientsExtension is CoreBaseStrategy, RecipientsExtensio
         _recipients[_key0] = _value;
     }
 
-    function set_recipientToStatusIndexes(address _key0, uint256 _value) public {
-        recipientToStatusIndexes[_key0] = _value;
+    function set_recipientToStatusIndexes(address _key0, uint64 _value) public {
+        _recipients[_key0].statusIndex = _value;
+    }
+
+    function set_recipientIndexToRecipientId(uint256 _key0, address _value) public {
+        recipientIndexToRecipientId[_key0] = _value;
     }
 
     function set_statusesBitMap(uint256 _key0, uint256 _value) public {

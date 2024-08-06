@@ -21,7 +21,7 @@ abstract contract BaseRecipientsExtensionUnit is Test, IRecipientsExtension {
     function setUp() public {
         allo = makeAddr("allo");
         registry = makeAddr("registry");
-        recipientsExtension = new MockStrategyRecipientsExtension(allo);
+        recipientsExtension = new MockStrategyRecipientsExtension(allo, true);
         poolId = 1;
 
         vm.prank(allo);
@@ -188,10 +188,7 @@ contract RecipientsExtensionReviewRecipients is BaseRecipientsExtensionUnit {
     }
 
     function test_Set_statusesBitMap(IRecipientsExtension.ApplicationStatus[] memory _statuses) public {
-        // prevent duplicates on the indexes
-        for (uint256 i = 0; i < _statuses.length; i++) {
-            _statuses[i].index = i;
-        }
+        _statuses = _boundStatuses(_statuses);
 
         // force allo to return true
         vm.mockCall(allo, abi.encodeWithSelector(IAllo.isPoolManager.selector), abi.encode(true));
@@ -204,10 +201,7 @@ contract RecipientsExtensionReviewRecipients is BaseRecipientsExtensionUnit {
     }
 
     function test_Emit_Event(IRecipientsExtension.ApplicationStatus[] memory _statuses, address _caller) public {
-        // prevent duplicates on the indexes
-        for (uint256 i = 0; i < _statuses.length; i++) {
-            _statuses[i].index = i;
-        }
+        _statuses = _boundStatuses(_statuses);
 
         // force allo to return true
         vm.mockCall(allo, abi.encodeWithSelector(IAllo.isPoolManager.selector), abi.encode(true));
@@ -219,6 +213,29 @@ contract RecipientsExtensionReviewRecipients is BaseRecipientsExtensionUnit {
 
         vm.prank(_caller);
         recipientsExtension.reviewRecipients(_statuses, 1);
+    }
+
+    function _boundStatuses(IRecipientsExtension.ApplicationStatus[] memory _statuses)
+        internal
+        view
+        returns (IRecipientsExtension.ApplicationStatus[] memory)
+    {
+        // prevent duplicates on the indexes and bound Status to 6
+        for (uint256 i = 0; i < _statuses.length; i++) {
+            _statuses[i].index = i;
+            uint256 fullRow = _statuses[i].statusRow;
+
+            for (uint256 col = 0; col < 64; col++) {
+                uint256 colIndex = col << 2; // col * 4
+                uint8 newStatus = uint8((fullRow >> colIndex) & 0xF);
+                newStatus = uint8(bound(newStatus, 0, 6)); // max enum value = 6
+
+                uint256 reviewedRow = fullRow & ~(0xF << colIndex);
+                fullRow = reviewedRow | (uint256(newStatus) << colIndex);
+            }
+            _statuses[i].statusRow = fullRow;
+        }
+        return _statuses;
     }
 }
 
@@ -574,7 +591,8 @@ contract RecipientsExtension_register is BaseRecipientsExtensionUnit {
         recipientsExtension.call__register(_fixedArrayToMemory(_recipients), _datas, _sender);
 
         for (uint256 i = 0; i < _recipients.length; i++) {
-            assertEq(recipientsExtension.recipientToStatusIndexes(_recipientIds[i]), i + 1);
+            Recipient memory recipient = recipientsExtension.getRecipient(_recipientIds[i]);
+            assertEq(recipient.statusIndex, uint64(i + 1));
         }
     }
 
@@ -678,7 +696,7 @@ contract RecipientsExtension_register is BaseRecipientsExtensionUnit {
                 _dataArray[i], _sender, _recipientIds[i], _booleans[i], Metadata({protocol: 0, pointer: ""}), bytes("")
             );
             // set the index to simulate updating
-            recipientsExtension.set_recipientToStatusIndexes(_recipientIds[i], i + 1);
+            recipientsExtension.set_recipientToStatusIndexes(_recipientIds[i], uint64(i + 1));
         }
 
         recipientsExtension.expectCall__getUintRecipientStatus(_recipientIds[0]);
@@ -705,7 +723,7 @@ contract RecipientsExtension_register is BaseRecipientsExtensionUnit {
                 _dataArray[i], _sender, _recipientIds[i], _booleans[i], Metadata({protocol: 0, pointer: ""}), bytes("")
             );
             // set the index to simulate updating
-            recipientsExtension.set_recipientToStatusIndexes(_recipientIds[i], i + 1);
+            recipientsExtension.set_recipientToStatusIndexes(_recipientIds[i], uint64(i + 1));
 
             // mock status
             recipientsExtension.mock_call__getUintRecipientStatus(
@@ -740,7 +758,7 @@ contract RecipientsExtension_register is BaseRecipientsExtensionUnit {
                 _dataArray[i], _sender, _recipientIds[i], _booleans[i], Metadata({protocol: 0, pointer: ""}), bytes("")
             );
             // set the index to simulate updating
-            recipientsExtension.set_recipientToStatusIndexes(_recipientIds[i], i + 1);
+            recipientsExtension.set_recipientToStatusIndexes(_recipientIds[i], uint64(i + 1));
 
             // mock status
             recipientsExtension.mock_call__getUintRecipientStatus(
@@ -775,7 +793,7 @@ contract RecipientsExtension_register is BaseRecipientsExtensionUnit {
                 _dataArray[i], _sender, _recipientIds[i], _booleans[i], Metadata({protocol: 0, pointer: ""}), bytes("")
             );
             // set the index to simulate updating
-            recipientsExtension.set_recipientToStatusIndexes(_recipientIds[i], i + 1);
+            recipientsExtension.set_recipientToStatusIndexes(_recipientIds[i], uint64(i + 1));
             // mock status
             recipientsExtension.mock_call__getUintRecipientStatus(
                 _recipientIds[i], uint8(IRecipientsExtension.Status.Rejected)
@@ -808,7 +826,7 @@ contract RecipientsExtension_register is BaseRecipientsExtensionUnit {
                 _dataArray[i], _sender, _recipientIds[i], _booleans[i], Metadata({protocol: 0, pointer: ""}), bytes("")
             );
             // set the index to simulate updating
-            recipientsExtension.set_recipientToStatusIndexes(_recipientIds[i], i + 1);
+            recipientsExtension.set_recipientToStatusIndexes(_recipientIds[i], uint64(i + 1));
 
             // mock status
             recipientsExtension.mock_call__getUintRecipientStatus(
@@ -971,12 +989,12 @@ contract RecipientsExtension_getUintRecipientStatus is BaseRecipientsExtensionUn
 
 contract RecipientsExtension_getStatusRowColumn is BaseRecipientsExtensionUnit {
     function test_Return_statusRowColumn(address _recipientId, uint256 _recipientIndex, uint256 _currentRow) public {
-        vm.assume(_recipientIndex > 0);
+        _recipientIndex = bound(_recipientIndex, 1, type(uint64).max);
         uint256 _recipientIndexMinusOne = _recipientIndex - 1;
         vm.assume(_recipientIndexMinusOne > 64);
 
         uint256 _rowIndex = _recipientIndexMinusOne / 64;
-        recipientsExtension.set_recipientToStatusIndexes(_recipientId, _recipientIndex);
+        recipientsExtension.set_recipientToStatusIndexes(_recipientId, uint64(_recipientIndex));
         recipientsExtension.set_statusesBitMap(_rowIndex, _currentRow);
 
         (uint256 __rowIndex, uint256 _colIndex, uint256 __currentRow) =
