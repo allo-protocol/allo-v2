@@ -168,6 +168,7 @@ contract IntegrationAllo is Test {
         );
 
         uint256 poolId = abi.decode(ret, (uint256));
+        // userAddr is the admin of the pool
         assertTrue(allo.isPoolAdmin(poolId, userAddr));
 
         DonationVotingMerkleDistributionDirectTransferStrategy deployedStrategy =
@@ -180,7 +181,8 @@ contract IntegrationAllo is Test {
         _sendWithRelayer(
             userAddr, address(allo), abi.encodeWithSelector(allo.fundPool.selector, poolId, 100_000 ether), userPk
         );
-        assertTrue(IERC20(dai).balanceOf(address(allo.getPool(poolId).strategy)) == 100_000 ether);
+        // userAddr transferred 100k DAI to the pool
+        assertTrue(IERC20(dai).balanceOf(address(deployedStrategy)) == 100_000 ether);
         assertTrue(IERC20(dai).balanceOf(userAddr) == 30_000 ether);
 
         // Register recipients
@@ -214,6 +216,7 @@ contract IntegrationAllo is Test {
             ),
             recipient2Pk
         );
+        // Recipients are registered
         assertTrue(deployedStrategy.getRecipient(recipient0Addr).recipientAddress == recipient0Addr);
         assertTrue(deployedStrategy.getRecipient(recipient1Addr).recipientAddress == recipient1Addr);
         assertTrue(deployedStrategy.getRecipient(recipient2Addr).recipientAddress == recipient2Addr);
@@ -281,10 +284,13 @@ contract IntegrationAllo is Test {
             ),
             userPk
         );
+        // Strategy still has 100k DAI, userAddr has 10k DAI
         assertTrue(IERC20(dai).balanceOf(address(deployedStrategy)) == 100_000 ether);
         assertTrue(IERC20(dai).balanceOf(userAddr) == 10_000 ether);
+        // Recipients 0 and 1 have 10k DAI each
         assertTrue(IERC20(dai).balanceOf(recipient0Addr) == 10_000 ether);
         assertTrue(IERC20(dai).balanceOf(recipient1Addr) == 10_000 ether);
+        // Recipient 2 has 0 DAI
         assertTrue(IERC20(dai).balanceOf(recipient2Addr) == 0 ether);
 
         // Move time after allocation end time
@@ -334,6 +340,7 @@ contract IntegrationAllo is Test {
             abi.encodeWithSelector(allo.distribute.selector, poolId, new address[](0), _distributeData),
             userPk
         );
+        // After distribution, the strategy has 10k DAI, recipients have 35k, 40k, and 35k DAI
         assertTrue(IERC20(dai).balanceOf(address(deployedStrategy)) == 10_000 ether);
         assertTrue(IERC20(dai).balanceOf(recipient0Addr) == 35_000 ether);
         assertTrue(IERC20(dai).balanceOf(recipient1Addr) == 40_000 ether);
@@ -374,6 +381,7 @@ contract IntegrationAllo is Test {
             new address[](0)
         );
 
+        // userAddr is the admin of the pool
         assertTrue(allo.isPoolAdmin(poolId, userAddr));
 
         DonationVotingMerkleDistributionDirectTransferStrategy deployedStrategy =
@@ -383,7 +391,8 @@ contract IntegrationAllo is Test {
         IERC20(dai).approve(address(allo), 100_000 ether);
         allo.fundPool(poolId, 100_000 ether);
 
-        assertTrue(IERC20(dai).balanceOf(address(allo.getPool(poolId).strategy)) == 100_000 ether);
+        // userAddr transferred 100k DAI to the pool
+        assertTrue(IERC20(dai).balanceOf(address(deployedStrategy)) == 100_000 ether);
         assertTrue(IERC20(dai).balanceOf(userAddr) == 30_000 ether);
 
         vm.stopPrank();
@@ -397,6 +406,7 @@ contract IntegrationAllo is Test {
 
         vm.prank(recipient2Addr);
         allo.registerRecipient(poolId, abi.encode(address(0), recipient2Addr, Metadata({protocol: 0, pointer: ""})));
+        // Recipients are registered
         assertTrue(deployedStrategy.getRecipient(recipient0Addr).recipientAddress == recipient0Addr);
         assertTrue(deployedStrategy.getRecipient(recipient1Addr).recipientAddress == recipient1Addr);
         assertTrue(deployedStrategy.getRecipient(recipient2Addr).recipientAddress == recipient2Addr);
@@ -449,10 +459,13 @@ contract IntegrationAllo is Test {
                 })
             )
         );
+        // Strategy still has 100k DAI, userAddr has 10k DAI
         assertTrue(IERC20(dai).balanceOf(address(deployedStrategy)) == 100_000 ether);
         assertTrue(IERC20(dai).balanceOf(userAddr) == 10_000 ether);
+        // Recipients 0 and 1 have 10k DAI each
         assertTrue(IERC20(dai).balanceOf(recipient0Addr) == 10_000 ether);
         assertTrue(IERC20(dai).balanceOf(recipient1Addr) == 10_000 ether);
+        // Recipient 2 has 0 DAI
         assertTrue(IERC20(dai).balanceOf(recipient2Addr) == 0 ether);
 
         // Move time after allocation end time
@@ -497,6 +510,7 @@ contract IntegrationAllo is Test {
         bytes memory _distributeData = abi.encode(_distributions);
         allo.distribute(poolId, new address[](0), _distributeData);
 
+        // After distribution, the strategy has 10k DAI, recipients have 35k, 40k, and 35k DAI
         assertTrue(IERC20(dai).balanceOf(address(deployedStrategy)) == 10_000 ether);
         assertTrue(IERC20(dai).balanceOf(recipient0Addr) == 35_000 ether);
         assertTrue(IERC20(dai).balanceOf(recipient1Addr) == 40_000 ether);
