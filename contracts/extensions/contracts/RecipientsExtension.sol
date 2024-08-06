@@ -137,44 +137,6 @@ abstract contract RecipientsExtension is CoreBaseStrategy, Errors, IRecipientsEx
         }
     }
 
-    function _processStatusRow(uint256 _rowIndex, uint256 _fullRow) internal returns (uint256) {
-        // Loop through each status in the updated row
-        uint256 currentRow = statusesBitMap[_rowIndex];
-        for (uint256 col = 0; col < 64;) {
-            uint256 colIndex = col << 2; // col * 4
-            uint8 newStatus = uint8((_fullRow >> colIndex) & 0xF);
-            uint8 currentStatus = uint8((currentRow >> colIndex) & 0xF);
-
-            if (newStatus != currentStatus) {
-                uint256 recipientIndex = _rowIndex << 6 + col + 1; // _rowIndex * 64 + col + 1
-                Status reviewedStatus = _reviewRecipientStatus(Status(newStatus), Status(currentStatus), recipientIndex);
-                if (reviewedStatus != Status(newStatus)) {
-                    // Update `_fullRow` with the reviewed status.
-                    uint256 reviewedRow = _fullRow & ~(0xF << colIndex);
-                    _fullRow = reviewedRow | (uint256(reviewedStatus) << colIndex);
-                }
-            }
-
-            unchecked {
-                col++;
-            }
-        }
-        return _fullRow;
-    }
-
-    function _validateReviewRecipients(address _sender) internal virtual {
-        _checkOnlyActiveRegistration();
-        _checkOnlyPoolManager(_sender);
-    }
-
-    function _reviewRecipientStatus(Status _newStatus, Status _oldStatus, uint256 _recipientIndex)
-        internal
-        virtual
-        returns (Status _reviewedStatus)
-    {
-        _reviewedStatus = _newStatus;
-    }
-
     /// @notice Sets the start and end dates.
     /// @dev The 'msg.sender' must be a pool manager.
     /// @param _registrationStartTime The start time for the registration
@@ -384,6 +346,56 @@ abstract contract RecipientsExtension is CoreBaseStrategy, Errors, IRecipientsEx
         uint256 colIndex = (recipientIndex % 64) * 4;
 
         return (rowIndex, colIndex, statusesBitMap[rowIndex]);
+    }
+
+    /// @notice Called from reviewRecipients if REVIEW_EACH_STATUS is set to true.
+    /// @dev Each new status in the statuses row (_fullrow) gets isolated and sent to _reviewRecipientStatus for review
+    /// @param _rowIndex Row index in the statusesBitMap mapping
+    /// @param _fullRow New row of statuses
+    function _processStatusRow(uint256 _rowIndex, uint256 _fullRow) internal returns (uint256) {
+        // Loop through each status in the updated row
+        uint256 currentRow = statusesBitMap[_rowIndex];
+        for (uint256 col = 0; col < 64;) {
+            // Extract the status at the column index
+            uint256 colIndex = col << 2; // col * 4
+            uint8 newStatus = uint8((_fullRow >> colIndex) & 0xF);
+            uint8 currentStatus = uint8((currentRow >> colIndex) & 0xF);
+
+            // Only do something if the status is being modified
+            if (newStatus != currentStatus) {
+                uint256 recipientIndex = _rowIndex << 6 + col + 1; // _rowIndex * 64 + col + 1
+                Status reviewedStatus = _reviewRecipientStatus(Status(newStatus), Status(currentStatus), recipientIndex);
+                if (reviewedStatus != Status(newStatus)) {
+                    // Update `_fullRow` with the reviewed status.
+                    uint256 reviewedRow = _fullRow & ~(0xF << colIndex);
+                    _fullRow = reviewedRow | (uint256(reviewedStatus) << colIndex);
+                }
+            }
+
+            unchecked {
+                col++;
+            }
+        }
+        return _fullRow;
+    }
+
+    /// @notice Hook validate whether `_sender` can call reviewRecipients at this point
+    /// @param _sender The address reviewing the recipients
+    function _validateReviewRecipients(address _sender) internal virtual {
+        _checkOnlyActiveRegistration();
+        _checkOnlyPoolManager(_sender);
+    }
+
+    /// @notice Hook to review each new recipient status
+    /// @param _newStatus New proposed status
+    /// @param _oldStatus Previous status
+    /// @param _recipientIndex The index of the recipient in case the recipient data needs to be accessed
+    function _reviewRecipientStatus(Status _newStatus, Status _oldStatus, uint256 _recipientIndex)
+        internal
+        virtual
+        returns (Status _reviewedStatus)
+    {
+        _reviewedStatus = _newStatus;
     }
 
     /// @notice Hook to process recipient data
