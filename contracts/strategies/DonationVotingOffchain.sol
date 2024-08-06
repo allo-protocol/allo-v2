@@ -70,8 +70,21 @@ contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension {
     /// ========== Events =============
     /// ===============================
 
+    /// @notice Emitted when a recipient updates their registration
+    /// @param recipientId Id of the recipient
+    /// @param recipientAddress The encoded data - (address recipientId, address recipientAddress, Metadata metadata)
+    /// @param amount The sender of the transaction
+    /// @param token The updated status of the recipient
     event Claimed(address indexed recipientId, address recipientAddress, uint256 amount, address token);
+
+    /// @notice Emitted when the allocation timestamps are updated
+    /// @param allocationStartTime The start time for the allocation period
+    /// @param allocationEndTime The end time for the allocation period
+    /// @param sender The sender of the transaction
     event AllocationTimestampsUpdated(uint64 allocationStartTime, uint64 allocationEndTime, address sender);
+
+    /// @notice Emitted when the payout amounts for a list of recipients is set
+    /// @param recipientIds array of recipients ids (addresses)
     event PayoutSet(bytes recipientIds);
 
     /// ================================
@@ -113,7 +126,7 @@ contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension {
     ///        uint64 _allocationStartTime,
     ///        uint64 _allocationEndTime,
     ///        uint64 _withdrawalCooldown,
-    ///        address _allocationToken
+    ///        address[] _allowedTokens
     ///    )
     function initialize(uint256 _poolId, bytes memory _data) external virtual override {
         (

@@ -65,7 +65,10 @@ contract DonationVotingOnchain is CoreBaseStrategy, RecipientsExtension {
     /// ========== Events =============
     /// ===============================
 
-    event Claimed(address indexed recipientId, address recipientAddress, uint256 amount, address token);
+    /// @notice Emitted when the allocation timestamps are updated
+    /// @param allocationStartTime The start time for the allocation period
+    /// @param allocationEndTime The end time for the allocation period
+    /// @param sender The sender of the transaction
     event AllocationTimestampsUpdated(uint64 allocationStartTime, uint64 allocationEndTime, address sender);
 
     /// ================================
