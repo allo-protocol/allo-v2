@@ -476,7 +476,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
         uint256 poolId = _utilCreatePool(0);
 
         // apply to the pool
-        allo().registerRecipient(poolId, bytes(""));
+        allo().registerRecipient(poolId, new address[](0), bytes(""));
     }
 
     function test_batchRegisterRecipient() public {
@@ -490,11 +490,15 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
             poolProfile_id(), mockStrategy, "0x", address(token), 0, metadata, pool_managers()
         );
 
+        address[][] memory recipientIds = new address[][](2);
+        recipientIds[0] = new address[](0);
+        recipientIds[1] = new address[](0);
+
         bytes[] memory datas = new bytes[](2);
         datas[0] = bytes("data1");
         datas[1] = "data2";
         // batch register to the pool should not revert
-        allo().batchRegisterRecipient(poolIds, datas);
+        allo().batchRegisterRecipient(poolIds, recipientIds, datas);
     }
 
     function testRevert_batchRegister_MISMATCH() public {
@@ -513,7 +517,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
 
         vm.expectRevert(MISMATCH.selector);
 
-        allo().batchRegisterRecipient(poolIds, datas);
+        allo().batchRegisterRecipient(poolIds, new address[][](0), datas);
     }
 
     function test_fundPool() public {
@@ -537,7 +541,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
     function test_allocate() public {
         uint256 poolId = _utilCreatePool(0);
         // allocate to the pool should not revert
-        allo().allocate(poolId, bytes(""));
+        allo().allocate(poolId, new address[](0), new uint[](0), bytes(""));
     }
 
     function test_batchAllocate() public {
@@ -551,6 +555,14 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
             poolProfile_id(), mockStrategy, "0x", address(token), 0, metadata, pool_managers()
         );
 
+        address[][] memory recipientIds = new address[][](2);
+        recipientIds[0] = new address[](0);
+        recipientIds[1] = new address[](0);
+
+        uint[][] memory amounts = new uint[][](2);
+        amounts[0] = new uint[](0);
+        amounts[1] = new uint[](0);
+
         bytes[] memory datas = new bytes[](2);
         datas[0] = bytes("data1");
         datas[1] = "data2";
@@ -562,7 +574,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
         uint256 totalValue = VALUE_1 + VALUE_2;
         vm.deal(makeAddr("anon"), totalValue);
         vm.prank(makeAddr("anon"));
-        allo().batchAllocate{value: totalValue}(poolIds, values, datas);
+        allo().batchAllocate{value: totalValue}(poolIds, recipientIds, amounts, values, datas);
     }
 
     function testRevert_batchAllocate_MISMATCH_datas() public {
@@ -576,6 +588,14 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
             poolProfile_id(), mockStrategy, "0x", address(token), 0, metadata, pool_managers()
         );
 
+        address[][] memory recipientIds = new address[][](2);
+        recipientIds[0] = new address[](0);
+        recipientIds[1] = new address[](0);
+
+        uint[][] memory amounts = new uint[][](2);
+        amounts[0] = new uint[](0);
+        amounts[1] = new uint[](0);
+
         bytes[] memory datas = new bytes[](1);
         datas[0] = bytes("data1");
 
@@ -588,7 +608,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
         uint256 totalValue = VALUE_1 + VALUE_2;
         vm.deal(makeAddr("anon"), totalValue);
         vm.prank(makeAddr("anon"));
-        allo().batchAllocate{value: totalValue}(poolIds, values, datas);
+        allo().batchAllocate{value: totalValue}(poolIds, recipientIds, amounts, values, datas);
     }
 
     function testRevert_batchAllocate_MISMATCH_values() public {
@@ -602,6 +622,14 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
             poolProfile_id(), mockStrategy, "0x", address(token), 0, metadata, pool_managers()
         );
 
+        address[][] memory recipientIds = new address[][](2);
+        recipientIds[0] = new address[](0);
+        recipientIds[1] = new address[](0);
+
+        uint[][] memory amounts = new uint[][](2);
+        amounts[0] = new uint[](0);
+        amounts[1] = new uint[](0);
+
         bytes[] memory datas = new bytes[](2);
         datas[0] = bytes("data1");
         datas[1] = "data2";
@@ -613,7 +641,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
 
         vm.deal(makeAddr("anon"), VALUE_1);
         vm.prank(makeAddr("anon"));
-        allo().batchAllocate{value: VALUE_1}(poolIds, values, datas);
+        allo().batchAllocate{value: VALUE_1}(poolIds, recipientIds, amounts, values, datas);
     }
 
     function testRevert_batchAllocate_ETH_MISMATCH_less() public {
@@ -626,6 +654,14 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
         poolIds[1] = allo().createPoolWithCustomStrategy(
             poolProfile_id(), mockStrategy, "0x", address(token), 0, metadata, pool_managers()
         );
+
+        address[][] memory recipientIds = new address[][](2);
+        recipientIds[0] = new address[](0);
+        recipientIds[1] = new address[](0);
+
+        uint[][] memory amounts = new uint[][](2);
+        amounts[0] = new uint[](0);
+        amounts[1] = new uint[](0);
 
         bytes[] memory datas = new bytes[](2);
         datas[0] = bytes("data1");
@@ -641,7 +677,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
         vm.deal(address(allo()), 1);
         vm.deal(makeAddr("anon"), totalValue - 1);
         vm.prank(makeAddr("anon"));
-        allo().batchAllocate{value: totalValue - 1}(poolIds, values, datas);
+        allo().batchAllocate{value: totalValue - 1}(poolIds, recipientIds, amounts, values, datas);
     }
 
     function testRevert_batchAllocate_ETH_MISMATCH_more() public {
@@ -654,6 +690,14 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
         poolIds[1] = allo().createPoolWithCustomStrategy(
             poolProfile_id(), mockStrategy, "0x", address(token), 0, metadata, pool_managers()
         );
+
+        address[][] memory recipientIds = new address[][](2);
+        recipientIds[0] = new address[](0);
+        recipientIds[1] = new address[](0);
+
+        uint[][] memory amounts = new uint[][](2);
+        amounts[0] = new uint[](0);
+        amounts[1] = new uint[](0);
 
         bytes[] memory datas = new bytes[](2);
         datas[0] = bytes("data1");
@@ -668,7 +712,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
         uint256 totalValue = VALUE_1 + VALUE_2;
         vm.deal(makeAddr("anon"), totalValue + 1);
         vm.prank(makeAddr("anon"));
-        allo().batchAllocate{value: totalValue + 1}(poolIds, values, datas);
+        allo().batchAllocate{value: totalValue + 1}(poolIds, recipientIds, amounts, values, datas);
     }
 
     function test_distribute() public {

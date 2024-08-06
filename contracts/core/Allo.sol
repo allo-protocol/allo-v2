@@ -373,7 +373,7 @@ contract Allo is
         uint256 poolIdLength = _poolIds.length;
         recipientIds = new address[][](poolIdLength);
 
-        if (poolIdLength != _data.length) revert MISMATCH();
+        if (poolIdLength != _data.length || poolIdLength != _recipientAddresses.length) revert MISMATCH();
 
         // Loop through the '_poolIds' & '_data' and call the 'strategy.register()' function
         for (uint256 i; i < poolIdLength;) {
@@ -438,6 +438,10 @@ contract Allo is
         if (numPools != _datas.length) revert MISMATCH();
         // Reverts if the length of _poolIds does not match the length of _values with 'MISMATCH()' error
         if (numPools != _values.length) revert MISMATCH();
+        // Reverts if the length of _poolIds does not match the length of _recipients with 'MISMATCH()' error
+        if (numPools != _recipients.length) revert MISMATCH();
+        // Reverts if the length of _poolIds does not match the length of _amounts with 'MISMATCH()' error
+        if (numPools != _amounts.length) revert MISMATCH();
 
         // Loop through the _poolIds & _datas and call the internal _allocate() function
         uint256 totalValue;
