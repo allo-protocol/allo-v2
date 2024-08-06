@@ -199,32 +199,32 @@ contract IntegrationDonationVotingOffchainTimestamps is IntegrationDonationVotin
         // Review recipients
         vm.startPrank(profileOwner);
 
-        vm.expectRevert(Errors.INVALID.selector);
+        vm.expectRevert(DonationVotingOffchain.DonationVotingOffchain_InvalidTimestamps.selector);
         // allocationStartTime > allocationEndTime
         strategy.updatePoolTimestamps(
             registrationStartTime, registrationEndTime, allocationEndTime, allocationStartTime
         );
 
-        vm.expectRevert(Errors.INVALID.selector);
+        vm.expectRevert(DonationVotingOffchain.DonationVotingOffchain_InvalidTimestamps.selector);
         // _registrationStartTime > _registrationEndTime
         strategy.updatePoolTimestamps(
             registrationEndTime, registrationStartTime, allocationStartTime, allocationEndTime
         );
 
-        vm.expectRevert(Errors.INVALID.selector);
+        vm.expectRevert(DonationVotingOffchain.DonationVotingOffchain_InvalidTimestamps.selector);
         // _registrationStartTime > allocationStartTime
         strategy.updatePoolTimestamps(
             allocationStartTime + 1, allocationEndTime, allocationStartTime, allocationEndTime
         );
 
-        vm.expectRevert(Errors.INVALID.selector);
+        vm.expectRevert(DonationVotingOffchain.DonationVotingOffchain_InvalidTimestamps.selector);
         // _registrationEndTime > allocationEndTime
         strategy.updatePoolTimestamps(
             registrationStartTime, allocationEndTime + 1, allocationStartTime, allocationEndTime
         );
 
         vm.warp(registrationStartTime + 1);
-        vm.expectRevert(Errors.INVALID.selector);
+        vm.expectRevert(DonationVotingOffchain.DonationVotingOffchain_InvalidTimestamps.selector);
         // block.timestamp > _registrationStartTime
         strategy.updatePoolTimestamps(
             registrationStartTime, registrationEndTime, allocationStartTime, allocationEndTime
@@ -285,7 +285,11 @@ contract IntegrationDonationVotingOffchainAllocateERC20 is IntegrationDonationVo
         assertEq(IERC20(allocationToken).balanceOf(address(strategy)), 4 + 25);
 
         recipients[0] = recipient2;
-        vm.expectRevert(abi.encodeWithSelector(Errors.RECIPIENT_ERROR.selector, recipient2));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                DonationVotingOffchain.DonationVotingOffchain_RecipientNotAccepted.selector, recipient2
+            )
+        );
         strategy.allocate(recipients, amounts, data, allocator0);
 
         vm.stopPrank();
@@ -348,7 +352,11 @@ contract IntegrationDonationVotingOffchainAllocateETH is IntegrationDonationVoti
         assertEq(IERC20(allocationToken).balanceOf(address(strategy)), 4);
 
         recipients[0] = recipient2;
-        vm.expectRevert(abi.encodeWithSelector(Errors.RECIPIENT_ERROR.selector, recipient2));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                DonationVotingOffchain.DonationVotingOffchain_RecipientNotAccepted.selector, recipient2
+            )
+        );
         strategy.allocate(recipients, amounts, data, allocator0);
 
         vm.stopPrank();
@@ -419,9 +427,6 @@ contract IntegrationDonationVotingOffchainClaim is IntegrationDonationVotingOffc
         assertEq(IERC20(allocationToken).balanceOf(recipient1), 25);
         assertEq(IERC20(allocationToken).balanceOf(address(strategy)), 0);
 
-        vm.expectRevert(Errors.INVALID.selector);
-        strategy.claimAllocation(claims);
-
         vm.stopPrank();
     }
 }
@@ -474,11 +479,17 @@ contract IntegrationDonationVotingOffchainSetPayout is IntegrationDonationVoting
         assertEq(recipientAddress, recipient1);
 
         // Reverts
-        vm.expectRevert(abi.encodeWithSelector(Errors.RECIPIENT_ERROR.selector, recipient0));
+        vm.expectRevert(
+            abi.encodeWithSelector(DonationVotingOffchain.DonationVotingOffchain_PayoutAlreadySet.selector, recipient0)
+        );
         strategy.setPayout(recipients, amounts);
 
         recipients[0] = recipient2;
-        vm.expectRevert(abi.encodeWithSelector(Errors.RECIPIENT_ERROR.selector, recipient2));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                DonationVotingOffchain.DonationVotingOffchain_RecipientNotAccepted.selector, recipient2
+            )
+        );
         strategy.setPayout(recipients, amounts);
 
         vm.stopPrank();
@@ -536,11 +547,20 @@ contract IntegrationDonationVotingOffchainDistribute is IntegrationDonationVotin
         assertEq(IERC20(DAI).balanceOf(address(strategy)), 0);
         assertEq(strategy.getPoolAmount(), 0);
 
-        vm.expectRevert(Errors.INVALID.selector);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                DonationVotingOffchain.DonationVotingOffchain_NothingToDistributed.selector, recipient0
+            )
+        );
         strategy.distribute(recipients, "", recipient2);
 
         recipients[0] = recipient2;
-        vm.expectRevert(Errors.INVALID.selector);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                DonationVotingOffchain.DonationVotingOffchain_NothingToDistributed.selector, recipient2
+            )
+        );
+
         strategy.distribute(recipients, "", recipient2);
     }
 }

@@ -198,32 +198,32 @@ contract IntegrationDonationVotingOnchainTimestamps is IntegrationDonationVoting
         // Review recipients
         vm.startPrank(profileOwner);
 
-        vm.expectRevert(Errors.INVALID.selector);
+        vm.expectRevert(DonationVotingOnchain.DonationVotingOnchain_InvalidTimestamps.selector);
         // allocationStartTime > allocationEndTime
         strategy.updatePoolTimestamps(
             registrationStartTime, registrationEndTime, allocationEndTime, allocationStartTime
         );
 
-        vm.expectRevert(Errors.INVALID.selector);
+        vm.expectRevert(DonationVotingOnchain.DonationVotingOnchain_InvalidTimestamps.selector);
         // _registrationStartTime > _registrationEndTime
         strategy.updatePoolTimestamps(
             registrationEndTime, registrationStartTime, allocationStartTime, allocationEndTime
         );
 
-        vm.expectRevert(Errors.INVALID.selector);
+        vm.expectRevert(DonationVotingOnchain.DonationVotingOnchain_InvalidTimestamps.selector);
         // _registrationStartTime > allocationStartTime
         strategy.updatePoolTimestamps(
             allocationStartTime + 1, allocationEndTime, allocationStartTime, allocationEndTime
         );
 
-        vm.expectRevert(Errors.INVALID.selector);
+        vm.expectRevert(DonationVotingOnchain.DonationVotingOnchain_InvalidTimestamps.selector);
         // _registrationEndTime > allocationEndTime
         strategy.updatePoolTimestamps(
             registrationStartTime, allocationEndTime + 1, allocationStartTime, allocationEndTime
         );
 
         vm.warp(registrationStartTime + 1);
-        vm.expectRevert(Errors.INVALID.selector);
+        vm.expectRevert(DonationVotingOnchain.DonationVotingOnchain_InvalidTimestamps.selector);
         // block.timestamp > _registrationStartTime
         strategy.updatePoolTimestamps(
             registrationStartTime, registrationEndTime, allocationStartTime, allocationEndTime
@@ -279,7 +279,11 @@ contract IntegrationDonationVotingOnchainAllocateERC20 is IntegrationDonationVot
         assertEq(IERC20(allocationToken).balanceOf(address(strategy)), 4 + 25);
 
         recipients[0] = recipient2;
-        vm.expectRevert(abi.encodeWithSelector(Errors.RECIPIENT_ERROR.selector, recipient2));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                DonationVotingOnchain.DonationVotingOnchain_RecipientNotAccepted.selector, recipient2
+            )
+        );
         strategy.allocate(recipients, amounts, "", allocator0);
 
         vm.stopPrank();
@@ -331,7 +335,11 @@ contract IntegrationDonationVotingOnchainAllocateETH is IntegrationDonationVotin
         assertEq(address(strategy).balance, 4 + 25);
 
         recipients[0] = recipient2;
-        vm.expectRevert(abi.encodeWithSelector(Errors.RECIPIENT_ERROR.selector, recipient2));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                DonationVotingOnchain.DonationVotingOnchain_RecipientNotAccepted.selector, recipient2
+            )
+        );
         strategy.allocate(recipients, amounts, "", allocator0);
 
         vm.stopPrank();
@@ -400,7 +408,11 @@ contract IntegrationDonationVotingOnchainDistributeERC20 is IntegrationDonationV
         assertEq(IERC20(allocationToken).balanceOf(recipient1), 25);
         assertEq(IERC20(allocationToken).balanceOf(address(strategy)), 0);
 
-        vm.expectRevert(DonationVotingOnchain.ALREADY_DISTRIBUTED.selector);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                DonationVotingOnchain.DonationVotingOnchain_NothingToDistributed.selector, recipient0
+            )
+        );
         strategy.distribute(recipients, "", recipient0);
 
         vm.stopPrank();
@@ -467,7 +479,11 @@ contract IntegrationDonationVotingOnchainDistributeETH is IntegrationDonationVot
         assertEq(recipient1.balance, 25);
         assertEq(address(strategy).balance, 0);
 
-        vm.expectRevert(DonationVotingOnchain.ALREADY_DISTRIBUTED.selector);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                DonationVotingOnchain.DonationVotingOnchain_NothingToDistributed.selector, recipient0
+            )
+        );
         strategy.distribute(recipients, "", recipient0);
 
         vm.stopPrank();

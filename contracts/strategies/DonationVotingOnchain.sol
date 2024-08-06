@@ -34,6 +34,29 @@ import {QFHelper} from "../core/libraries/QFHelper.sol";
 contract DonationVotingOnchain is CoreBaseStrategy, RecipientsExtension {
     using QFHelper for QFHelper.State;
 
+    /// ===============================
+    /// ========== Events =============
+    /// ===============================
+
+    /// @notice Emitted when the allocation timestamps are updated
+    /// @param allocationStartTime The start time for the allocation period
+    /// @param allocationEndTime The end time for the allocation period
+    /// @param sender The sender of the transaction
+    event AllocationTimestampsUpdated(uint64 allocationStartTime, uint64 allocationEndTime, address sender);
+
+    /// ===============================
+    /// ========== Errors =============
+    /// ===============================
+
+    /// @notice Thrown when a recipient which was not accepted is used in an action that requires so.
+    error DonationVotingOnchain_RecipientNotAccepted(address recipientId);
+
+    /// @notice Thrown when there is nothing to distribute for the given recipient.
+    error DonationVotingOnchain_NothingToDistributed(address recipientId);
+
+    /// @notice Thrown when the timestamps being set or updated don't meet the contracts requirements.
+    error DonationVotingOnchain_InvalidTimestamps();
+
     /// ================================
     /// ========== Storage =============
     /// ================================
@@ -53,23 +76,6 @@ contract DonationVotingOnchain is CoreBaseStrategy, RecipientsExtension {
 
     /// @notice
     QFHelper.State public QFState;
-
-    /// ===============================
-    /// ========== Errors =============
-    /// ===============================
-
-    /// @notice Thrown when a distribution is called on the same recipient more than once.
-    error ALREADY_DISTRIBUTED();
-
-    /// ===============================
-    /// ========== Events =============
-    /// ===============================
-
-    /// @notice Emitted when the allocation timestamps are updated
-    /// @param allocationStartTime The start time for the allocation period
-    /// @param allocationEndTime The end time for the allocation period
-    /// @param sender The sender of the transaction
-    event AllocationTimestampsUpdated(uint64 allocationStartTime, uint64 allocationEndTime, address sender);
 
     /// ================================
     /// ========== Modifier ============
@@ -150,7 +156,7 @@ contract DonationVotingOnchain is CoreBaseStrategy, RecipientsExtension {
         uint64 _allocationStartTime,
         uint64 _allocationEndTime
     ) external onlyPoolManager(msg.sender) {
-        if (_allocationStartTime > _allocationEndTime) revert INVALID();
+        if (_allocationStartTime > _allocationEndTime) revert DonationVotingOnchain_InvalidTimestamps();
         allocationStartTime = _allocationStartTime;
         allocationEndTime = _allocationEndTime;
         emit AllocationTimestampsUpdated(allocationStartTime, allocationEndTime, msg.sender);
@@ -185,7 +191,9 @@ contract DonationVotingOnchain is CoreBaseStrategy, RecipientsExtension {
     {
         uint256 totalAmount;
         for (uint256 i = 0; i < _recipients.length; i++) {
-            if (!_isAcceptedRecipient(_recipients[i])) revert RECIPIENT_ERROR(_recipients[i]);
+            if (!_isAcceptedRecipient(_recipients[i])) {
+                revert DonationVotingOnchain_RecipientNotAccepted(_recipients[i]);
+            }
 
             // Update the total payout amount for the claim and the total claimable amount
             amountAllocated[_recipients[i]] += _amounts[i];
@@ -218,7 +226,7 @@ contract DonationVotingOnchain is CoreBaseStrategy, RecipientsExtension {
             address recipientId = _recipientIds[i];
             address recipientAddress = _recipients[recipientId].recipientAddress;
 
-            if (amountAllocated[recipientId] == 0) revert ALREADY_DISTRIBUTED();
+            if (amountAllocated[recipientId] == 0) revert DonationVotingOnchain_NothingToDistributed(recipientId);
 
             // Transfer allocation
             uint256 allocationAmount = amountAllocated[recipientId];
@@ -256,11 +264,11 @@ contract DonationVotingOnchain is CoreBaseStrategy, RecipientsExtension {
         virtual
         override
     {
-        if (_registrationStartTime > _registrationEndTime) revert INVALID();
-        if (block.timestamp > _registrationStartTime) revert INVALID();
+        if (_registrationStartTime > _registrationEndTime) revert DonationVotingOnchain_InvalidTimestamps();
+        if (block.timestamp > _registrationStartTime) revert DonationVotingOnchain_InvalidTimestamps();
         // Check consistency with allocation timestamps
-        if (_registrationStartTime > allocationStartTime) revert INVALID();
-        if (_registrationEndTime > allocationEndTime) revert INVALID();
+        if (_registrationStartTime > allocationStartTime) revert DonationVotingOnchain_InvalidTimestamps();
+        if (_registrationEndTime > allocationEndTime) revert DonationVotingOnchain_InvalidTimestamps();
     }
 
     /// @notice Returns if the recipient is accepted
