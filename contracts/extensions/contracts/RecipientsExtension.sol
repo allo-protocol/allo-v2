@@ -148,10 +148,10 @@ abstract contract RecipientsExtension is CoreBaseStrategy, Errors, IRecipientsEx
             if (newStatus != currentStatus) {
                 uint256 recipientIndex = _rowIndex << 6 + col + 1; // _rowIndex * 64 + col + 1
                 Status reviewedStatus = _reviewRecipientStatus(Status(newStatus), Status(currentStatus), recipientIndex);
-                if (reviewedStatus != newStatus) {
+                if (reviewedStatus != Status(newStatus)) {
                     // Update `_fullRow` with the reviewed status.
                     uint256 reviewedRow = _fullRow & ~(0xF << colIndex);
-                    _fullRow = reviewedRow | (reviewedStatus << colIndex);
+                    _fullRow = reviewedRow | (uint256(reviewedStatus) << colIndex);
                 }
             }
 
@@ -280,7 +280,7 @@ abstract contract RecipientsExtension is CoreBaseStrategy, Errors, IRecipientsEx
 
             if (recipient.statusIndex == 0) {
                 // recipient registering new application
-                recipient.statusIndex = recipientsCounter;
+                recipient.statusIndex = uint64(recipientsCounter);
                 recipientIndexToRecipientId[recipientsCounter] = recipientId;
                 _setRecipientStatus(recipientId, uint8(Status.Pending));
 

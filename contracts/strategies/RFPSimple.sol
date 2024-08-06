@@ -34,6 +34,7 @@ contract RFPSimple is CoreBaseStrategy, MilestonesExtension, RecipientsExtension
     /// ========== Storage =============
     /// ================================
 
+    /// @notice set to true if the milestone id was already paid
     mapping(uint256 => bool) public wasMilestonePaid;
 
     /// ===============================
@@ -42,7 +43,7 @@ contract RFPSimple is CoreBaseStrategy, MilestonesExtension, RecipientsExtension
 
     /// @notice Constructor for the RFP Simple Strategy
     /// @param _allo The 'Allo' contract
-    constructor(address _allo) CoreBaseStrategy(_allo) RecipientsExtension(true) {}
+    constructor(address _allo) RecipientsExtension(_allo, true) {}
 
     /// ===============================
     /// ========= Initialize ==========
@@ -64,11 +65,6 @@ contract RFPSimple is CoreBaseStrategy, MilestonesExtension, RecipientsExtension
     /// ====================================
     /// ============ Internal ==============
     /// ====================================
-
-    function _validateReviewRecipients(address _sender) internal virtual override {
-        _checkOnlyActiveRegistration();
-        super._validateReviewRecipients(_sender);
-    }
 
     function _reviewRecipientStatus(Status _newStatus, Status _oldStatus, uint256 _recipientIndex)
         internal
