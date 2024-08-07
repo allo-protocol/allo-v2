@@ -22,6 +22,7 @@ abstract contract IntegrationBase is Test {
         vm.createSelectFork(vm.rpcUrl("mainnet"), 20289932);
 
         // Get the current protocol variables
+        // TODO: call admin() instead of reading storage 
         // alloAdmin = ITransparentUpgradeableProxy(ALLO_PROXY).admin();
         alloAdmin = address(
             uint160(uint256(vm.load(ALLO_PROXY, 0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103)))
