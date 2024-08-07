@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity ^0.8.19;
 
-import {Test} from "forge-std/Test.sol";
-import {Allo} from "contracts/core/Allo.sol";
-import {Registry, Metadata} from "contracts/core/Registry.sol";
+import {IAllo} from "contracts/core/interfaces/IAllo.sol";
+import {Metadata, IRegistry} from "contracts/core/Registry.sol";
 import {DonationVotingMerkleDistributionDirectTransferStrategy} from
     "contracts/strategies/donation-voting-merkle-distribution-direct-transfer/DonationVotingMerkleDistributionDirectTransferStrategy.sol";
 import {DonationVotingMerkleDistributionBaseStrategy} from
@@ -12,17 +11,15 @@ import {ISignatureTransfer} from "permit2/ISignatureTransfer.sol";
 import {IBiconomyForwarder} from "./IBiconomyForwarder.sol";
 import {ECDSA} from "openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol";
 import {IERC20} from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
+import {IntegrationBase} from "./IntegrationBase.sol";
 
-contract IntegrationAllo is Test {
+contract IntegrationAllo is IntegrationBase {
     using ECDSA for bytes32;
 
-    Allo public allo;
-    Registry public registry;
+    IAllo public allo;
     DonationVotingMerkleDistributionDirectTransferStrategy public strategy;
 
-    address public owner;
     address public relayer;
-    address public treasury;
     address public userAddr;
 
     address public recipient0Addr;
@@ -36,35 +33,29 @@ contract IntegrationAllo is Test {
 
     bytes32 public profileId;
 
-    address public constant biconomyForwarder = 0x84a0856b038eaAd1cC7E297cF34A7e72685A8693;
     address public constant dai = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
 
     /// @notice Biconomy Forwarder separator
     bytes32 public constant domainSeparator = 0x4fde6db5140ab711910b567033f2d5e64dc4f7123d722004dd748edf6ed07abb;
 
-    function setUp() public {
-        vm.createSelectFork(vm.rpcUrl("mainnet"), 20289932);
+    function setUp() public override {
+        super.setUp();
 
-        owner = makeAddr("owner");
-        treasury = makeAddr("treasury");
+        allo = IAllo(ALLO_PROXY);
 
         (userAddr, userPk) = makeAddrAndKey("user");
         (recipient0Addr, recipient0Pk) = makeAddrAndKey("recipient0");
         (recipient1Addr, recipient1Pk) = makeAddrAndKey("recipient1");
         (recipient2Addr, recipient2Pk) = makeAddrAndKey("recipient2");
 
-        allo = new Allo();
-        registry = new Registry();
         strategy = new DonationVotingMerkleDistributionDirectTransferStrategy(
             address(allo), "Test Strategy", ISignatureTransfer(address(1))
         );
 
-        allo.initialize(owner, address(registry), payable(treasury), 0, 0, biconomyForwarder);
-        registry.initialize(owner);
-
         vm.prank(userAddr);
-        profileId =
-            registry.createProfile(0, "Test Profile", Metadata({protocol: 1, pointer: ""}), userAddr, new address[](0));
+        profileId = IRegistry(registry).createProfile(
+            0, "Test Profile", Metadata({protocol: 1, pointer: ""}), userAddr, new address[](0)
+        );
 
         // Deal 130k DAI to the user
         deal(dai, userAddr, 130_000 ether);
@@ -106,14 +97,14 @@ contract IntegrationAllo is Test {
         });
         bytes32 structHash = keccak256(
             abi.encode(
-                IBiconomyForwarder(biconomyForwarder).REQUEST_TYPEHASH(),
+                IBiconomyForwarder(BICONOMY_FORWARDER).REQUEST_TYPEHASH(),
                 req.from,
                 req.to,
                 req.token,
                 req.txGas,
                 req.tokenGasPrice,
                 req.batchId,
-                IBiconomyForwarder(biconomyForwarder).getNonce(req.from, req.batchId),
+                IBiconomyForwarder(BICONOMY_FORWARDER).getNonce(req.from, req.batchId),
                 req.deadline,
                 keccak256(req.data)
             )
@@ -124,7 +115,7 @@ contract IntegrationAllo is Test {
 
         // Relayer submits the request
         vm.prank(relayer);
-        (_success, _returnData) = IBiconomyForwarder(biconomyForwarder).executeEIP712(req, domainSeparator, sig);
+        (_success, _returnData) = IBiconomyForwarder(BICONOMY_FORWARDER).executeEIP712(req, domainSeparator, sig);
         assertTrue(_success);
     }
 
