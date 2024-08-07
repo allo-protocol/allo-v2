@@ -474,4 +474,26 @@ contract MockStrategyRecipientsExtension is CoreBaseStrategy, RecipientsExtensio
     function set_metadataRequired(bool _metadataRequired) public {
         metadataRequired = _metadataRequired;
     }
+
+    bool internal forceAccept;
+    event ReviewRecipientStatus(Status _newStatus, Status _oldStatus, uint256 _recipientIndex);
+
+    function expose_processStatusRow(uint256 _rowIndex, uint256 _fullRow, bool _forceAccept) external returns(uint256) {
+        forceAccept = _forceAccept;
+        return _processStatusRow(_rowIndex, _fullRow);
+    }
+
+    function _reviewRecipientStatus(Status _newStatus, Status _oldStatus, uint256 _recipientIndex)
+        internal
+        virtual
+        override
+        returns (Status _reviewedStatus)
+    {
+        emit ReviewRecipientStatus(_newStatus, _oldStatus, _recipientIndex);
+        if (forceAccept) {
+            return Status.Accepted;
+        } else {
+            return super._reviewRecipientStatus(_newStatus, _oldStatus, _recipientIndex);
+        }
+    }
 }

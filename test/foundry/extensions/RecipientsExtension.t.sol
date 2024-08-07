@@ -239,6 +239,68 @@ contract RecipientsExtensionReviewRecipients is BaseRecipientsExtensionUnit {
     }
 }
 
+contract RecipientsExtensionReviewRecipientStatus is BaseRecipientsExtensionUnit {
+    event ReviewRecipientStatus(Status _newStatus, Status _oldStatus, uint256 _recipientIndex);
+
+    function test_Set_statusesBitMap(uint256 _fullRow) public {
+        uint8[] memory _statusValues;
+        (_fullRow, _statusValues) = _boundStatuses(_fullRow);
+
+        // force allo to return true
+        vm.mockCall(allo, abi.encodeWithSelector(IAllo.isPoolManager.selector), abi.encode(true));
+
+        uint256 reviewedFullRow = recipientsExtension.expose_processStatusRow(0, _fullRow, true);
+
+        for (uint256 col = 0; col < 64; col++) {
+            uint256 colIndex = col << 2; // col * 4
+            uint8 newStatus = uint8((reviewedFullRow >> colIndex) & 0xF);
+            uint8 proposedStatus = uint8((_fullRow >> colIndex) & 0xF);
+            if (proposedStatus == 0) {
+                assertEq(newStatus, uint8(Status.None));
+            } else {
+                assertEq(newStatus, uint8(Status.Accepted));
+            }
+            
+        }
+    }
+
+    function test_Emit_Test_Event(uint256 _fullRow) public {
+        uint8[] memory _statusValues;
+        (_fullRow, _statusValues) = _boundStatuses(_fullRow);
+
+        for (uint256 i = 0; i < _statusValues.length; i++) {
+            if (_statusValues[i] != 0) {
+                vm.expectEmit();
+                emit ReviewRecipientStatus(
+                    IRecipientsExtension.Status(_statusValues[i]),
+                    IRecipientsExtension.Status(0),
+                    i + 1
+                );
+            }
+        }
+
+        recipientsExtension.expose_processStatusRow(0, _fullRow, false);
+    }
+
+    function _boundStatuses(uint256 _fullRow)
+        internal
+        view
+        returns (uint256, uint8[] memory)
+    {
+        uint8[] memory _statusValues = new uint8[](64);
+        for (uint256 col = 0; col < 64; col++) {
+            uint256 colIndex = col << 2; // col * 4
+            uint8 newStatus = uint8((_fullRow >> colIndex) & 0xF);
+            newStatus = uint8(bound(newStatus, 0, 6)); // max enum value = 6
+            _statusValues[col] = newStatus;
+
+            uint256 reviewedRow = _fullRow & ~(0xF << colIndex);
+            _fullRow = reviewedRow | (uint256(newStatus) << colIndex);
+        }
+        return (_fullRow, _statusValues);
+    }
+}
+
 contract RecipientsExtensionUpdatePoolTimestamps is BaseRecipientsExtensionUnit {
     function test_Revert_IfCalledByNonManager(address _caller) public {
         // force allo to return false
