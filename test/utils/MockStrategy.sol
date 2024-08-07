@@ -18,7 +18,11 @@ contract MockStrategy is CoreBaseStrategy {
     // it can change their status all the way to Accepted, or to Pending if there are more steps
     // if there are more steps, additional functions should be added to allow the owner to check
     // this could also check attestations directly and then Accept
-    function _register(address[] memory _recipients, bytes memory _data, address _sender) internal override returns (address[] memory _recipientIds) {
+    function _register(address[] memory _recipients, bytes memory _data, address _sender)
+        internal
+        override
+        returns (address[] memory _recipientIds)
+    {
         surpressStateMutabilityWarning++;
         _data;
         return _recipients;
@@ -26,7 +30,10 @@ contract MockStrategy is CoreBaseStrategy {
 
     // only called via allo.sol by users to allocate to a recipient
     // this will update some data in this contract to store votes, etc.
-    function _allocate(address[] memory _recipients, uint256[] memory _amounts, bytes memory _data, address _sender) internal override {
+    function _allocate(address[] memory _recipients, uint256[] memory _amounts, bytes memory _data, address _sender)
+        internal
+        override
+    {
         surpressStateMutabilityWarning++;
         _data;
         _sender;

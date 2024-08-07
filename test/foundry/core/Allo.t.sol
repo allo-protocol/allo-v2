@@ -541,7 +541,7 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
     function test_allocate() public {
         uint256 poolId = _utilCreatePool(0);
         // allocate to the pool should not revert
-        allo().allocate(poolId, new address[](0), new uint[](0), bytes(""));
+        allo().allocate(poolId, new address[](0), new uint256[](0), bytes(""));
     }
 
     function test_batchAllocate() public {
@@ -559,9 +559,9 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
         recipientIds[0] = new address[](0);
         recipientIds[1] = new address[](0);
 
-        uint[][] memory amounts = new uint[][](2);
-        amounts[0] = new uint[](0);
-        amounts[1] = new uint[](0);
+        uint256[][] memory amounts = new uint256[][](2);
+        amounts[0] = new uint256[](0);
+        amounts[1] = new uint256[](0);
 
         bytes[] memory datas = new bytes[](2);
         datas[0] = bytes("data1");
@@ -592,9 +592,9 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
         recipientIds[0] = new address[](0);
         recipientIds[1] = new address[](0);
 
-        uint[][] memory amounts = new uint[][](2);
-        amounts[0] = new uint[](0);
-        amounts[1] = new uint[](0);
+        uint256[][] memory amounts = new uint256[][](2);
+        amounts[0] = new uint256[](0);
+        amounts[1] = new uint256[](0);
 
         bytes[] memory datas = new bytes[](1);
         datas[0] = bytes("data1");
@@ -626,9 +626,9 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
         recipientIds[0] = new address[](0);
         recipientIds[1] = new address[](0);
 
-        uint[][] memory amounts = new uint[][](2);
-        amounts[0] = new uint[](0);
-        amounts[1] = new uint[](0);
+        uint256[][] memory amounts = new uint256[][](2);
+        amounts[0] = new uint256[](0);
+        amounts[1] = new uint256[](0);
 
         bytes[] memory datas = new bytes[](2);
         datas[0] = bytes("data1");
@@ -659,9 +659,9 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
         recipientIds[0] = new address[](0);
         recipientIds[1] = new address[](0);
 
-        uint[][] memory amounts = new uint[][](2);
-        amounts[0] = new uint[](0);
-        amounts[1] = new uint[](0);
+        uint256[][] memory amounts = new uint256[][](2);
+        amounts[0] = new uint256[](0);
+        amounts[1] = new uint256[](0);
 
         bytes[] memory datas = new bytes[](2);
         datas[0] = bytes("data1");
@@ -695,9 +695,9 @@ contract AlloTest is Test, AlloSetup, RegistrySetupFull, Native, Errors, GasHelp
         recipientIds[0] = new address[](0);
         recipientIds[1] = new address[](0);
 
-        uint[][] memory amounts = new uint[][](2);
-        amounts[0] = new uint[](0);
-        amounts[1] = new uint[](0);
+        uint256[][] memory amounts = new uint256[][](2);
+        amounts[0] = new uint256[](0);
+        amounts[1] = new uint256[](0);
 
         bytes[] memory datas = new bytes[](2);
         datas[0] = bytes("data1");

@@ -218,14 +218,19 @@ interface IAllo {
     /// @param _poolId The ID of the pool to register the recipient for
     /// @param _recipientAddresses The addresses of the recipients to register
     /// @param _data The data to pass to the strategy and may be handled differently by each strategy
-    function registerRecipient(uint256 _poolId, address[] memory _recipientAddresses, bytes memory _data) external payable returns (address[] memory);
+    function registerRecipient(uint256 _poolId, address[] memory _recipientAddresses, bytes memory _data)
+        external
+        payable
+        returns (address[] memory);
 
     /// @notice Registers a batch of recipients.
     /// @param _poolIds The pool ID's to register the recipients for
     /// @param _data The data to pass to the strategy and may be handled differently by each strategy
-    function batchRegisterRecipient(uint256[] memory _poolIds, address[][] memory _recipientAddresses, bytes[] memory _data)
-        external
-        returns (address[][] memory);
+    function batchRegisterRecipient(
+        uint256[] memory _poolIds,
+        address[][] memory _recipientAddresses,
+        bytes[] memory _data
+    ) external returns (address[][] memory);
 
     /// @notice Funds a pool.
     /// @dev 'msg.value' must be greater than 0 if the token is the native token
@@ -240,13 +245,19 @@ interface IAllo {
     /// @param _recipients The recipients to allocate to
     /// @param _amounts The amounts to allocate to the recipients
     /// @param _data The data to pass to the strategy and may be handled differently by each strategy.
-    function allocate(uint256 _poolId, address[] memory _recipients, uint[] memory _amounts, bytes memory _data) external payable;
+    function allocate(uint256 _poolId, address[] memory _recipients, uint256[] memory _amounts, bytes memory _data)
+        external
+        payable;
 
     /// @notice Allocates funds to multiple recipients.
     /// @dev Each strategy will handle the allocation of funds differently
-    function batchAllocate(uint256[] calldata _poolIds, address[][] calldata _recipients, uint[][] calldata _amounts, uint256[] calldata _values, bytes[] memory _datas)
-        external
-        payable;
+    function batchAllocate(
+        uint256[] calldata _poolIds,
+        address[][] calldata _recipients,
+        uint256[][] calldata _amounts,
+        uint256[] calldata _values,
+        bytes[] memory _datas
+    ) external payable;
 
     /// @notice Distributes funds to recipients and emits {Distributed} event if successful
     /// @dev Each strategy will handle the distribution of funds differently
