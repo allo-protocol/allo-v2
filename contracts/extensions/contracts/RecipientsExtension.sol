@@ -349,7 +349,7 @@ abstract contract RecipientsExtension is CoreBaseStrategy, Errors, IRecipientsEx
     }
 
     /// @notice Called from reviewRecipients if REVIEW_EACH_STATUS is set to true.
-    /// @dev Each new status in the statuses row (_fullrow) gets isolated and sent to _reviewRecipientStatus for review
+    /// @dev Each new status in the statuses row (_fullrow) gets isolated and sent to _reviewRecipientStatus for review.
     /// @param _rowIndex Row index in the statusesBitMap mapping
     /// @param _fullRow New row of statuses
     function _processStatusRow(uint256 _rowIndex, uint256 _fullRow) internal returns (uint256) {
@@ -386,7 +386,8 @@ abstract contract RecipientsExtension is CoreBaseStrategy, Errors, IRecipientsEx
         _checkOnlyPoolManager(_sender);
     }
 
-    /// @notice Hook to review each new recipient status
+    /// @notice Hook to review each new recipient status when REVIEW_EACH_STATUS is set to true
+    /// @dev Beware of gas costs, since this function will be called for each reviewed recipient
     /// @param _newStatus New proposed status
     /// @param _oldStatus Previous status
     /// @param _recipientIndex The index of the recipient in case the recipient data needs to be accessed
