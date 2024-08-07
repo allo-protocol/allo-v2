@@ -58,16 +58,10 @@ contract IntegrationDirectAllocationStrategy is Test {
         managers[0] = profileOwner;
         vm.prank(profileOwner);
         poolId = allo.createPoolWithCustomStrategy(
-            profileId,
-            address(strategy),
-            abi.encode(),
-            dai,
-            0,
-            Metadata({protocol: 0, pointer: ""}),
-            managers
+            profileId, address(strategy), abi.encode(), dai, 0, Metadata({protocol: 0, pointer: ""}), managers
         );
     }
-    
+
     function test_Revert_Register() public {
         vm.expectRevert(DirectAllocationStrategy.NOT_IMPLEMENTED.selector);
 
