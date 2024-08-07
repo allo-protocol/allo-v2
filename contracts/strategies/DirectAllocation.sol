@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity 0.8.19;
 
 import {CoreBaseStrategy} from "./CoreBaseStrategy.sol";
 
@@ -55,17 +55,21 @@ contract DirectAllocationStrategy is CoreBaseStrategy {
     /// @param _amounts The amounts to allocate
     /// @param _data The data to decode
     /// @param _sender The sender
-    function _allocate(address[] memory _recipients, uint256[] memory _amounts, bytes memory _data, address _sender) internal virtual override {
+    function _allocate(address[] memory _recipients, uint256[] memory _amounts, bytes memory _data, address _sender)
+        internal
+        virtual
+        override
+    {
         /// Decode the data (data: tokens)
         address[] memory _tokens = abi.decode(_data, (address[]));
-        
+
         uint256 _recipientsLength = _recipients.length;
         /// Check if inputs match the decoded data
-        if(_recipientsLength != _amounts.length || _recipientsLength != _tokens.length) {
+        if (_recipientsLength != _amounts.length || _recipientsLength != _tokens.length) {
             revert INVALID_INPUT();
         }
-        
-        for(uint256 _i = 0; _i < _recipientsLength;) {
+
+        for (uint256 _i = 0; _i < _recipientsLength;) {
             /// Direct allocate the funds
             _transferAmountFrom(_tokens[_i], TransferData({from: _sender, to: _recipients[_i], amount: _amounts[_i]}));
 
@@ -81,7 +85,7 @@ contract DirectAllocationStrategy is CoreBaseStrategy {
     function _distribute(address[] memory, bytes memory, address) internal virtual override {
         revert NOT_IMPLEMENTED();
     }
-    
+
     /// @notice Register a recipient
     /// @dev This function is not implemented
     function _register(address[] memory, bytes memory, address) internal virtual override returns (address[] memory) {
