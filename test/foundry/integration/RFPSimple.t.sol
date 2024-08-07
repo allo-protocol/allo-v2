@@ -37,7 +37,8 @@ contract IntegrationRFPSimple is Test {
         view
         returns (IRecipientsExtension.ApplicationStatus memory)
     {
-        uint256 recipientIndex = strategy.recipientToStatusIndexes(_recipientId) - 1;
+        IRecipientsExtension.Recipient memory recipient = strategy.getRecipient(_recipientId);
+        uint256 recipientIndex = recipient.statusIndex - 1;
 
         uint256 rowIndex = recipientIndex / 64;
         uint256 colIndex = (recipientIndex % 64) * 4;
@@ -53,11 +54,15 @@ contract IntegrationRFPSimple is Test {
         view
         returns (IRecipientsExtension.ApplicationStatus memory)
     {
-        uint256 recipientIndex = strategy.recipientToStatusIndexes(_recipientIds[0]) - 1;
+        IRecipientsExtension.Recipient memory recipient = strategy.getRecipient(_recipientIds[0]);
+        uint256 recipientIndex = recipient.statusIndex - 1;
         uint256 rowIndex = recipientIndex / 64;
         uint256 statusRow = strategy.statusesBitMap(rowIndex);
+
         for (uint256 i = 0; i < _recipientIds.length; i++) {
-            recipientIndex = strategy.recipientToStatusIndexes(_recipientIds[i]) - 1;
+            recipient = strategy.getRecipient(_recipientIds[i]);
+            recipientIndex = recipient.statusIndex - 1;
+
             require(rowIndex == recipientIndex / 64, "_recipientIds belong to different rows");
             uint256 colIndex = (recipientIndex % 64) * 4;
             uint256 newRow = statusRow & ~(15 << colIndex);

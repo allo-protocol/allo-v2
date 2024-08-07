@@ -8,7 +8,7 @@ import {Metadata} from "../../contracts/core/libraries/Metadata.sol";
 import {Test} from "forge-std/Test.sol";
 
 contract MockStrategyRecipientsExtension is CoreBaseStrategy, RecipientsExtension, Test {
-    constructor(address _allo) CoreBaseStrategy(_allo) {}
+    constructor(address _allo, bool _reviewEachStatus) RecipientsExtension(_allo, _reviewEachStatus) {}
 
     function initialize(uint256 _poolId, bytes memory _data) external {
         __BaseStrategy_init(_poolId);
@@ -459,8 +459,12 @@ contract MockStrategyRecipientsExtension is CoreBaseStrategy, RecipientsExtensio
         _recipients[_key0] = _value;
     }
 
-    function set_recipientToStatusIndexes(address _key0, uint256 _value) public {
-        recipientToStatusIndexes[_key0] = _value;
+    function set_recipientToStatusIndexes(address _key0, uint64 _value) public {
+        _recipients[_key0].statusIndex = _value;
+    }
+
+    function set_recipientIndexToRecipientId(uint256 _key0, address _value) public {
+        recipientIndexToRecipientId[_key0] = _value;
     }
 
     function set_statusesBitMap(uint256 _key0, uint256 _value) public {
@@ -469,5 +473,31 @@ contract MockStrategyRecipientsExtension is CoreBaseStrategy, RecipientsExtensio
 
     function set_metadataRequired(bool _metadataRequired) public {
         metadataRequired = _metadataRequired;
+    }
+
+    bool internal forceAccept;
+
+    event ReviewRecipientStatus(Status _newStatus, Status _oldStatus, uint256 _recipientIndex);
+
+    function expose_processStatusRow(uint256 _rowIndex, uint256 _fullRow, bool _forceAccept)
+        external
+        returns (uint256)
+    {
+        forceAccept = _forceAccept;
+        return _processStatusRow(_rowIndex, _fullRow);
+    }
+
+    function _reviewRecipientStatus(Status _newStatus, Status _oldStatus, uint256 _recipientIndex)
+        internal
+        virtual
+        override
+        returns (Status _reviewedStatus)
+    {
+        emit ReviewRecipientStatus(_newStatus, _oldStatus, _recipientIndex);
+        if (forceAccept) {
+            return Status.Accepted;
+        } else {
+            return super._reviewRecipientStatus(_newStatus, _oldStatus, _recipientIndex);
+        }
     }
 }

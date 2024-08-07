@@ -40,6 +40,8 @@ interface IRecipientsExtension {
         // If false, the recipientAddress is the anchor of the profile
         bool useRegistryAnchor;
         address recipientAddress;
+        // 'statusIndex' is the index of the recipient in the 'statusesBitMap' bitmap.
+        uint64 statusIndex;
         Metadata metadata;
     }
 
