@@ -260,7 +260,6 @@ contract RecipientsExtensionReviewRecipientStatus is BaseRecipientsExtensionUnit
             } else {
                 assertEq(newStatus, uint8(Status.Accepted));
             }
-            
         }
     }
 
@@ -272,9 +271,7 @@ contract RecipientsExtensionReviewRecipientStatus is BaseRecipientsExtensionUnit
             if (_statusValues[i] != 0) {
                 vm.expectEmit();
                 emit ReviewRecipientStatus(
-                    IRecipientsExtension.Status(_statusValues[i]),
-                    IRecipientsExtension.Status(0),
-                    i + 1
+                    IRecipientsExtension.Status(_statusValues[i]), IRecipientsExtension.Status(0), i + 1
                 );
             }
         }
@@ -282,11 +279,7 @@ contract RecipientsExtensionReviewRecipientStatus is BaseRecipientsExtensionUnit
         recipientsExtension.expose_processStatusRow(0, _fullRow, false);
     }
 
-    function _boundStatuses(uint256 _fullRow)
-        internal
-        view
-        returns (uint256, uint8[] memory)
-    {
+    function _boundStatuses(uint256 _fullRow) internal view returns (uint256, uint8[] memory) {
         uint8[] memory _statusValues = new uint8[](64);
         for (uint256 col = 0; col < 64; col++) {
             uint256 colIndex = col << 2; // col * 4

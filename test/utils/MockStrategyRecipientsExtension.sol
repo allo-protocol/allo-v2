@@ -476,9 +476,13 @@ contract MockStrategyRecipientsExtension is CoreBaseStrategy, RecipientsExtensio
     }
 
     bool internal forceAccept;
+
     event ReviewRecipientStatus(Status _newStatus, Status _oldStatus, uint256 _recipientIndex);
 
-    function expose_processStatusRow(uint256 _rowIndex, uint256 _fullRow, bool _forceAccept) external returns(uint256) {
+    function expose_processStatusRow(uint256 _rowIndex, uint256 _fullRow, bool _forceAccept)
+        external
+        returns (uint256)
+    {
         forceAccept = _forceAccept;
         return _processStatusRow(_rowIndex, _fullRow);
     }
