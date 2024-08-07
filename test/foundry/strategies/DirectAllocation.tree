@@ -1,0 +1,25 @@
+DirectAllocation::initialize
+└── when called
+    ├── it should initialize the base strategy
+    └── it should emit event
+
+DirectAllocation::allocate
+├── when recipients and amounts length missmatch
+│   └── it should revert
+├── when recipients and tokens length missmatch
+│   └── it should revert
+└── when called with valid parameters
+    ├── it should transfer the tokens to the recipients
+    └── it should emit event
+
+DirectAllocation::distribute
+└── when called
+    └── it should revert
+
+DirectAllocation::register
+└── when called
+    └── it should revert
+
+DirectAllocation::receive
+└── when called
+    └── it should revert
