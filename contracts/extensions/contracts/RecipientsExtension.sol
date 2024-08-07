@@ -363,7 +363,7 @@ abstract contract RecipientsExtension is CoreBaseStrategy, Errors, IRecipientsEx
 
             // Only do something if the status is being modified
             if (newStatus != currentStatus) {
-                uint256 recipientIndex = _rowIndex << 6 + col + 1; // _rowIndex * 64 + col + 1
+                uint256 recipientIndex = (_rowIndex << 6) + col + 1; // _rowIndex * 64 + col + 1
                 Status reviewedStatus = _reviewRecipientStatus(Status(newStatus), Status(currentStatus), recipientIndex);
                 if (reviewedStatus != Status(newStatus)) {
                     // Update `_fullRow` with the reviewed status.
