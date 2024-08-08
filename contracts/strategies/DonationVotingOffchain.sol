@@ -238,17 +238,8 @@ contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension {
     /// @notice Set payout for the recipients
     /// @param _data The data to be decoded
     /// @custom:data (address[] _recipientIds, uint256[] _amounts)
-    function setPayout(bytes memory _data)
-        external
-        virtual
-        onlyPoolManager(msg.sender)
-        onlyAfterAllocation
-    {
-        (
-            address[] memory _recipientIds, uint256[] memory _amounts
-        ) = abi.decode(
-            _data, (address[], uint256[])
-        );
+    function setPayout(bytes memory _data) external virtual onlyPoolManager(msg.sender) onlyAfterAllocation {
+        (address[] memory _recipientIds, uint256[] memory _amounts) = abi.decode(_data, (address[], uint256[]));
 
         uint256 totalAmount;
         for (uint256 i; i < _recipientIds.length; i++) {

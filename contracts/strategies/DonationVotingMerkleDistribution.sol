@@ -85,23 +85,26 @@ contract DonationVotingMerkleDistribution is DonationVotingOffchain {
     mapping(uint256 => uint256) private _distributedBitMap;
 
     /// ===============================
+    /// ======== Constructor ==========
+    /// ===============================
+
+    /// @notice Constructor for the Donation Voting Offchain strategy
+    /// @param _allo The 'Allo' contract
+    constructor(address _allo) DonationVotingOffchain(_allo) {}
+
+    /// ===============================
     /// ======= External/Custom =======
     /// ===============================
 
     /// @notice Invoked by round operator to update the merkle root and distribution Metadata.
     /// @param _data The data to be decoded
     /// @custom:data (bytes32 _merkleRoot, Metadata _distributionMetadata)
-    function setPayout(bytes memory _data)
-        external
-        override
-        onlyPoolManager(msg.sender)
-        onlyAfterAllocation
-    {
+    function setPayout(bytes memory _data) external override onlyPoolManager(msg.sender) onlyAfterAllocation {
         // The merkleRoot can only be updated before the distribution has started
         if (distributionStarted) revert DISTRIBUTION_ALREADY_STARTED();
 
         (bytes32 _merkleRoot, Metadata memory _distributionMetadata) = abi.decode(_data, (bytes32, Metadata));
-        
+
         merkleRoot = _merkleRoot;
         distributionMetadata = _distributionMetadata;
 
@@ -197,12 +200,12 @@ contract DonationVotingMerkleDistribution is DonationVotingOffchain {
 
         // Generate the node that will be verified in the 'merkleRoot'
         bytes32 node = keccak256(abi.encode(index, recipientId, amount));
-    
+
         // Validate the distribution and transfer the funds to the recipient, otherwise revert if not valid
         if (MerkleProof.verify(merkleProof, merkleRoot, node)) {
             poolAmount -= amount;
             _setDistributed(index);
-        
+
             address recipientAddress = _recipients[recipientId].recipientAddress;
             _transferAmount(poolToken, recipientAddress, amount);
 
