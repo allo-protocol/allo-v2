@@ -216,11 +216,14 @@ contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension {
     }
 
     /// @notice Claim allocated tokens
-    /// @param _claims Claims to be claimed
-    function claimAllocation(Claim[] calldata _claims) external onlyAfterAllocation {
+    /// @param _data The data to be decoded
+    /// @custom:data (Claim[] _claims)
+    function claimAllocation(bytes memory _data) external virtual onlyAfterAllocation {
+        (Claim[] memory _claims) = abi.decode(_data, (Claim[]));
+
         uint256 claimsLength = _claims.length;
         for (uint256 i; i < claimsLength; i++) {
-            Claim calldata claim = _claims[i];
+            Claim memory claim = _claims[i];
             uint256 amount = amountAllocated[claim.recipientId][claim.token];
             address recipientAddress = _recipients[claim.recipientId].recipientAddress;
 
@@ -233,13 +236,20 @@ contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension {
     }
 
     /// @notice Set payout for the recipients
-    /// @param _recipientIds Ids of the recipients
-    /// @param _amounts Amounts to be paid out
-    function setPayout(address[] memory _recipientIds, uint256[] memory _amounts)
+    /// @param _data The data to be decoded
+    /// @custom:data (address[] _recipientIds, uint256[] _amounts)
+    function setPayout(bytes memory _data)
         external
+        virtual
         onlyPoolManager(msg.sender)
         onlyAfterAllocation
     {
+        (
+            address[] memory _recipientIds, uint256[] memory _amounts
+        ) = abi.decode(
+            _data, (address[], uint256[])
+        );
+
         uint256 totalAmount;
         for (uint256 i; i < _recipientIds.length; i++) {
             address recipientId = _recipientIds[i];
