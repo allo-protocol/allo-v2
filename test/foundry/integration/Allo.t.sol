@@ -15,6 +15,8 @@ contract IntegrationAllo is IntegrationBase {
     IAllo public allo;
     DonationVotingMerkleDistributionDirectTransferStrategy public strategy;
 
+    // TODO: once other strategies are implemented, move this to the base contract
+    // Also, use IRecipientsExtension instead of the DonationVotingMerkleDistributionBaseStrategy
     function _getApplicationStatus(address _recipientId, uint256 _status, address payable _strategy)
         internal
         view
