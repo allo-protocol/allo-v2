@@ -105,7 +105,7 @@ contract Allo is
         uint256 _percentFee,
         uint256 _baseFee,
         address __trustedForwarder
-    ) external reinitializer(1) {
+    ) external reinitializer(2) {
         // Initialize the owner using Solady ownable library
         _initializeOwner(_owner);
 
