@@ -1,0 +1,131 @@
+Allo::initialize
+├── it should call _initializeOwner
+├── it should call _updateRegistry
+├── it should call _updateTreasury
+├── it should call _updatePercentFee
+├── it should call _updateBaseFee
+└── it should call _updateTrustedForwarder
+
+Allo::createPoolWithCustomStrategy
+├── when strategy is zero address
+│   └── it should revert
+└── when calling with proper params
+    ├── it should call _createPool
+    └── it should return poolId
+
+Allo::createPool
+├── when strategy is zero address
+│   └── it should revert
+└── when calling with proper params
+    ├── it should call _createPool
+    └── it should return poolId
+
+Allo::updatePoolMetadata
+├── when sender is not manager of pool
+│   └── it should revert
+└── when sender is manager of pool
+    ├── it should update metadata
+    └── it should emit event
+
+Allo::updateRegistry
+├── when sender is not owner
+│   └── it should revert
+└── when sender is owner
+    └── it should call _updateRegistry
+
+Allo::updateTreasury
+├── when sender is not owner
+│   └── it should revert
+└── when sender is owner
+    └── it should call _updateTreasury
+
+Allo::updatePercentFee
+├── when sender is not owner
+│   └── it should revert
+└── when sender is owner
+    └── it should call _updatePercentFee
+
+Allo::updateBaseFee
+├── when sender is not owner
+│   └── it should revert
+└── when sender is owner
+    └── it should call _updateBaseFee
+
+Allo::updateTrustedForwarder
+├── when sender is not owner
+│   └── it should revert
+└── when sender is owner
+    └── it should call _updateTrustedForwarder
+
+Allo::addPoolManagers
+├── when sender is not admin of poolId
+│   └── it should revert
+└── when sender is admin of poolId
+    └── it should call _addPoolManager
+
+Allo::removePoolManagers
+├── when sender is not admin of poolId
+│   └── it should revert
+└── when sender is admin of poolId
+    └── it should call _revokeRole
+
+Allo::addPoolManagersInMultiplePools
+└── given sender is admin of all poolIds
+    └── it should call addPoolManagers
+
+Allo::removePoolManagersInMultiplePools
+└── given sender is admin of all poolIds
+    └── it should call removePoolManagers
+
+Allo::recoverFunds
+├── when sender is not owner
+│   └── it should revert
+└── when sender is owner
+    ├── when token is native
+    │   └── it should transfer native token
+    └── when token is not native
+        └── it should transfer token
+
+Allo::registerRecipient
+├── it should registerRecipient on the strategy
+└── it should return recipientId
+
+Allo::batchRegisterRecipient
+├── when poolId length does not match _data length
+│   └── it should revert
+└── when poolId length matches _data length
+    ├── it should call registerRecipient on the strategy
+    └── it should return recipientIds
+
+Allo::fundPool
+├── when amount is zero
+│   └── it should revert
+├── when token is native and value does not match amount
+│   └── it should revert
+└── when called with proper params
+    └── it should call _fundPool
+
+Allo::allocate
+└── it should call allocate
+
+Allo::batchAllocate
+├── when poolId length does not match _data length
+│   └── it should revert
+├── when poolId length does not match _values length
+│   └── it should revert
+├── when lengths matches
+│   └── it should call allocate
+└── when totalValue does not match value
+    └── it should revert
+
+Allo::distribute
+└── it should call distribute on the strategy
+
+Allo::changeAdmin
+├── when sender is not admin
+│   └── it should revert
+├── when new admin is zero address
+│   └── it should revert
+└── when sender is admin
+    ├── it should call _revokeRole
+    └── it should call _grantRole
