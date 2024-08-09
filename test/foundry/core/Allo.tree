@@ -21,9 +21,8 @@ Allo::createPool
     └── it should return poolId
 
 Allo::updatePoolMetadata
-├── when sender is not manager of pool
-│   └── it should revert
-└── when sender is manager of pool
+└── given sender is manager of pool
+    ├── it should call _checkOnlyPoolManager
     ├── it should update metadata
     └── it should emit event
 
@@ -58,15 +57,13 @@ Allo::updateTrustedForwarder
     └── it should call _updateTrustedForwarder
 
 Allo::addPoolManagers
-├── when sender is not admin of poolId
-│   └── it should revert
-└── when sender is admin of poolId
+└── given sender is admin of poolId
+    ├── it should call _checkOnlyPoolAdmin
     └── it should call _addPoolManager
 
 Allo::removePoolManagers
-├── when sender is not admin of poolId
-│   └── it should revert
-└── when sender is admin of poolId
+└── given sender is admin of poolId
+    ├── it should call _checkOnlyPoolAdmin
     └── it should call _revokeRole
 
 Allo::addPoolManagersInMultiplePools
@@ -122,10 +119,7 @@ Allo::distribute
 └── it should call distribute on the strategy
 
 Allo::changeAdmin
-├── when sender is not admin
-│   └── it should revert
-├── when new admin is zero address
-│   └── it should revert
-└── when sender is admin
+└── given sender is admin of poolId
+    ├── it should call _checkOnlyPoolAdmin
     ├── it should call _revokeRole
     └── it should call _grantRole
