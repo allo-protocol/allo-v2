@@ -152,7 +152,7 @@ Allo::_createPool
 ├── it should call _addPoolManager for each manager
 ├── when baseFee is more than zero
 │   ├── when token is native
-│   │   └── when baseFee + amount is diff from value
+│   │   └── when baseFee plus amount is diff from value
 │   │       └── it should revert
 │   ├── when token is not native
 │   │   └── when baseFee is diff from value
@@ -170,16 +170,16 @@ Allo::_allocate
 Allo::_fundPool
 ├── when percentFee is more than zero
 │   ├── it should call getFeeDenominator
-│   ├── when feeAmount + amountAfterFee != amount
+│   ├── when feeAmount plus amountAfterFee diff amount
 │   │   └── it should revert
 │   ├── when token is native
 │   │   └── it should call _transferAmountFrom
 │   └── when token is not native
 │       ├── it should call _getBalance
 │       └── it should call _transferAmountFrom
-├── when token is native
+├── when token is native token
 │   └── it should call _transferAmountFrom
-├── when token is not native
+├── when token is not native token
 │   ├── it should call _getBalance
 │   └── it should call _transferAmountFrom
 ├── it should call increasePoolAmount on the strategy
