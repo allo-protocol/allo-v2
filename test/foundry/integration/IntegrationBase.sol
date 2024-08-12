@@ -23,7 +23,7 @@ abstract contract IntegrationBase is Test {
     address public recipient0Addr;
     address public recipient1Addr;
     address public recipient2Addr;
-    
+
     uint256 public userPk;
     uint256 public recipient0Pk;
     uint256 public recipient1Pk;
@@ -90,7 +90,7 @@ abstract contract IntegrationBase is Test {
         (recipient2Addr, recipient2Pk) = makeAddrAndKey("recipient2");
 
         // Get the current protocol variables
-        // TODO: call admin() instead of reading storage 
+        // TODO: call admin() instead of reading storage
         // alloAdmin = ITransparentUpgradeableProxy(ALLO_PROXY).admin();
         alloAdmin = address(
             uint160(uint256(vm.load(ALLO_PROXY, 0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103)))
