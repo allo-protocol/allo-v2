@@ -716,7 +716,7 @@ contract Allo is
     }
 
     /// @dev Logic copied from ERC2771ContextUpgradeable OZ contracts
-    function _msgData() internal view virtual override returns (bytes calldata) {
+    function _msgData() internal view override returns (bytes calldata) {
         uint256 calldataLength = msg.data.length;
         if (isTrustedForwarder(msg.sender) && calldataLength >= 20) {
             return msg.data[:calldataLength - 20];
