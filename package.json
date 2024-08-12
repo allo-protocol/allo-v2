@@ -29,7 +29,8 @@
     "deploy-deployer": "npx hardhat run scripts/core/deployContractFactory.ts --network",
     "/////// deploy-test ///////": "echo 'deploy test scripts'",
     "create-profile": "npx hardhat run scripts/test/createProfile.ts --network",
-    "create-pool": "npx hardhat run scripts/test/createPool.ts --network"
+    "create-pool": "npx hardhat run scripts/test/createPool.ts --network",
+    "smock": "smock-foundry --contracts contracts/core"
   },
   "devDependencies": {
     "@matterlabs/hardhat-zksync-deploy": "^1.2.1",
@@ -75,6 +76,7 @@
     "zksync-ethers": "^6.6.0"
   },
   "dependencies": {
+    "@defi-wonderland/smock-foundry": "1.5.0",
     "@xyrusworx/hardhat-solidity-json": "^1.0.2"
   }
 }
