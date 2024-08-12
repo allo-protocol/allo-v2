@@ -39,7 +39,10 @@ extra_output = ["storageLayout"]
 allow_paths = ['node_modules']
 
 [fmt]
-ignore = ['contracts/strategies/_poc/qv-hackathon/SchemaResolver.sol']
+ignore = [
+  'contracts/strategies/_poc/qv-hackathon/SchemaResolver.sol',
+  'contracts/strategies/_poc/direct-grants-simple/DirectGrantsSimpleStrategy.sol'
+]
 
 [rpc_endpoints]
 mainnet = "${MAINNET_RPC_URL}"
