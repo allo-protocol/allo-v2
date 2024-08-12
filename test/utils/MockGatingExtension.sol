@@ -1,16 +1,21 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import "../../contracts/strategies/CoreBaseStrategy.sol";
+import {CoreBaseStrategy} from "../../contracts/strategies/CoreBaseStrategy.sol";
+import {EASGatingExtension} from "../../contracts/extensions/EASGatingExtension.sol";
+import {NFTGatingExtension} from "../../contracts/extensions/NFTGatingExtension.sol";
+import {TokenGatingExtension} from "../../contracts/extensions/TokenGatingExtension.sol";
+import {MockBaseStrategy} from "./MockBaseStrategy.sol";
 
-contract MockBaseStrategy is CoreBaseStrategy {
-    uint256 internal surpressStateMutabilityWarning;
-
+contract MockGatingExtension is EASGatingExtension, NFTGatingExtension, TokenGatingExtension {
     constructor(address _allo) CoreBaseStrategy(_allo) {}
 
-    function initialize(uint256 _poolId, bytes memory _data) external {
+    function initialize(uint256 _poolId, bytes memory _data) public {
         __BaseStrategy_init(_poolId);
-        _data;
+
+        address _eas = abi.decode(_data, (address));
+
+        __EASGatingExtension_init(_eas);
         emit Initialized(_poolId, _data);
     }
 
@@ -20,7 +25,6 @@ contract MockBaseStrategy is CoreBaseStrategy {
         override
         returns (address[] memory _recipientIds)
     {
-        surpressStateMutabilityWarning++;
         _data;
         _sender;
         return _recipients;
@@ -31,7 +35,6 @@ contract MockBaseStrategy is CoreBaseStrategy {
         internal
         override
     {
-        surpressStateMutabilityWarning++;
         _recipients;
         _amounts;
         _data;
@@ -40,9 +43,17 @@ contract MockBaseStrategy is CoreBaseStrategy {
 
     // this will distribute tokens to recipients
     function _distribute(address[] memory _recipientIds, bytes memory _data, address _sender) internal override {
-        surpressStateMutabilityWarning++;
         _recipientIds;
         _data;
         _sender;
     }
+
+    function onlyErc20Helper(address _token, uint256 _amount) public onlyWithToken(_token, _amount, msg.sender) {}
+
+    function onlyWithNFTHelper(address _nft) public onlyWithNFT(_nft, msg.sender) {}
+
+    function onlyWithAttestationHelper(bytes32 _schema, address _attester, bytes32 _uid)
+        public
+        onlyWithAttestation(_schema, _attester, _uid)
+    {}
 }
