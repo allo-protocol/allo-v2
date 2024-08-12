@@ -1,10 +1,11 @@
 Allo::initialize
-├── it should call _initializeOwner
-├── it should call _updateRegistry
-├── it should call _updateTreasury
-├── it should call _updatePercentFee
-├── it should call _updateBaseFee
-└── it should call _updateTrustedForwarder
+└── given upgrade version is correct
+    ├── it should call _initializeOwner
+    ├── it should call _updateRegistry
+    ├── it should call _updateTreasury
+    ├── it should call _updatePercentFee
+    ├── it should call _updateBaseFee
+    └── it should call _updateTrustedForwarder
 
 Allo::createPoolWithCustomStrategy
 ├── when strategy is zero address
