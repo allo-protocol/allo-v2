@@ -164,7 +164,13 @@ contract QVSimple is CoreBaseStrategy, RecipientsExtension {
         onlyPoolManager(_sender)
         onlyAfterAllocation
     {
+        if (!distributionStarted) {
+            distributionStarted = true;
+        }
+
         uint256[] memory payouts = _votingState._getPayout(_recipientIds, poolAmount);
+
+        IAllo.Pool memory pool = allo.getPool(poolId);
 
         for (uint256 i; i < payouts.length;) {
             address recipientId = _recipientIds[i];
@@ -176,7 +182,6 @@ contract QVSimple is CoreBaseStrategy, RecipientsExtension {
                 revert RECIPIENT_ERROR(recipientId);
             }
 
-            IAllo.Pool memory pool = allo.getPool(poolId);
             _transferAmount(pool.token, recipient.recipientAddress, amount);
 
             paidOut[recipientId] = true;
@@ -185,9 +190,6 @@ contract QVSimple is CoreBaseStrategy, RecipientsExtension {
             unchecked {
                 ++i;
             }
-        }
-        if (!distributionStarted) {
-            distributionStarted = true;
         }
     }
 
@@ -200,8 +202,6 @@ contract QVSimple is CoreBaseStrategy, RecipientsExtension {
         internal
         override
     {
-        uint256 voiceCreditsAlreadyAllocated = voiceCreditsAllocated[_sender];
-
         // check that the sender can allocate votes
         if (!_isValidAllocator(_sender)) revert UNAUTHORIZED();
 
@@ -221,7 +221,7 @@ contract QVSimple is CoreBaseStrategy, RecipientsExtension {
         }
 
         // check that the allocator has voice credits left to allocate
-        if (!_hasVoiceCreditsLeft(voiceCreditsToAllocate, voiceCreditsAlreadyAllocated)) revert INVALID();
+        if (!_hasVoiceCreditsLeft(voiceCreditsToAllocate, voiceCreditsAllocated[_sender])) revert INVALID();
 
         _votingState._voteWithVoiceCredits(__recipients, _amounts);
 
