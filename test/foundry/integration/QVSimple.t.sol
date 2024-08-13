@@ -33,7 +33,8 @@ contract IntegrationQVSimple is Test {
         view
         returns (IRecipientsExtension.ApplicationStatus memory)
     {
-        uint256 recipientIndex = strategy.recipientToStatusIndexes(_recipientId) - 1;
+        IRecipientsExtension.Recipient memory recipient = strategy.getRecipient(_recipientId);
+        uint256 recipientIndex = recipient.statusIndex - 1;
 
         uint256 rowIndex = recipientIndex / 64;
         uint256 colIndex = (recipientIndex % 64) * 4;

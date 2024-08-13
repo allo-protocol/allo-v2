@@ -59,7 +59,7 @@ contract QVSimple is CoreBaseStrategy, RecipientsExtension {
     /// ========= Constructor =========
     /// ===============================
 
-    constructor(address _allo) CoreBaseStrategy(_allo) {}
+    constructor(address _allo) RecipientsExtension(_allo, false) {}
 
     /// ===============================
     /// ========= Initialize ==========
