@@ -225,6 +225,7 @@ interface IAllo {
 
     /// @notice Registers a batch of recipients.
     /// @param _poolIds The pool ID's to register the recipients for
+    /// @param _recipientAddresses The addresses of the recipients to register
     /// @param _data The data to pass to the strategy and may be handled differently by each strategy
     function batchRegisterRecipient(
         uint256[] memory _poolIds,
