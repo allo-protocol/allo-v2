@@ -52,7 +52,7 @@ contract RFPSimple is CoreBaseStrategy, MilestonesExtension, RecipientsExtension
     // @notice Initialize the strategy
     /// @param _poolId ID of the pool
     /// @param _data The data to be decoded
-    /// @custom:data (uint256 _maxBid, bool registryGating, bool metadataRequired)
+    /// @custom:data (IRecipientsExtension.RecipientInitializeData _recipientExtensionInitializeData, uint256 _maxBid)
     function initialize(uint256 _poolId, bytes memory _data) external virtual override {
         (IRecipientsExtension.RecipientInitializeData memory _recipientExtensionInitializeData, uint256 _maxBid) =
             abi.decode(_data, (IRecipientsExtension.RecipientInitializeData, uint256));
@@ -66,7 +66,10 @@ contract RFPSimple is CoreBaseStrategy, MilestonesExtension, RecipientsExtension
     /// ============ Internal ==============
     /// ====================================
 
-    function _reviewRecipientStatus(Status _newStatus, Status _oldStatus, uint256 _recipientIndex)
+    /// @notice Hook to review each new recipient status when REVIEW_EACH_STATUS is set to true
+    /// @dev Beware of gas costs, since this function will be called for each reviewed recipient
+    /// @param _newStatus New proposed status
+    function _reviewRecipientStatus(Status _newStatus, Status, uint256)
         internal
         virtual
         override
@@ -101,19 +104,16 @@ contract RFPSimple is CoreBaseStrategy, MilestonesExtension, RecipientsExtension
     /// @dev The encoded '_data' will be determined by the strategy implementation. Only 'Allo' contract can
     ///      call this when it is initialized.
     /// @param _recipientIds The IDs of the recipients
-    /// @param _data The data to use to distribute to the recipients
+    /// @param _data The encoded milestones IDs array that will be distributed to the recipients
+    /// @custom:data (uint256[] milestoneIds)
     /// @param _sender The address of the sender
     function _distribute(address[] memory _recipientIds, bytes memory _data, address _sender)
         internal
         virtual
         override
     {
-        if (block.timestamp <= registrationEndTime) {
-            revert ALLOCATION_NOT_ENDED();
-        }
-        if (_recipientIds.length > 1) {
-            revert RECIPIENT_NOT_ACCEPTED();
-        }
+        if (block.timestamp <= registrationEndTime) revert ALLOCATION_NOT_ENDED();
+        if (_recipientIds.length > 1) revert RECIPIENT_NOT_ACCEPTED();
 
         address acceptedRecipientId = _recipientIds[0];
         uint256[] memory milestoneIds = abi.decode(_data, (uint256[]));
