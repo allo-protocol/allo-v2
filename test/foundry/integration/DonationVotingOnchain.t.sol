@@ -44,7 +44,8 @@ contract IntegrationDonationVotingOnchainBase is Test {
         view
         returns (IRecipientsExtension.ApplicationStatus memory)
     {
-        uint256 recipientIndex = strategy.recipientToStatusIndexes(_recipientId) - 1;
+        IRecipientsExtension.Recipient memory recipient = strategy.getRecipient(_recipientId);
+        uint256 recipientIndex = uint256(recipient.statusIndex) - 1;
 
         uint256 rowIndex = recipientIndex / 64;
         uint256 colIndex = (recipientIndex % 64) * 4;
@@ -60,11 +61,15 @@ contract IntegrationDonationVotingOnchainBase is Test {
         view
         returns (IRecipientsExtension.ApplicationStatus memory)
     {
-        uint256 recipientIndex = strategy.recipientToStatusIndexes(_recipientIds[0]) - 1;
+        IRecipientsExtension.Recipient memory recipient = strategy.getRecipient(_recipientIds[0]);
+        uint256 recipientIndex = uint256(recipient.statusIndex) - 1;
+
         uint256 rowIndex = recipientIndex / 64;
         uint256 statusRow = strategy.statusesBitMap(rowIndex);
         for (uint256 i = 0; i < _recipientIds.length; i++) {
-            recipientIndex = strategy.recipientToStatusIndexes(_recipientIds[i]) - 1;
+            recipient = strategy.getRecipient(_recipientIds[i]);
+            recipientIndex = uint256(recipient.statusIndex) - 1;
+
             require(rowIndex == recipientIndex / 64, "_recipientIds belong to different rows");
             uint256 colIndex = (recipientIndex % 64) * 4;
             uint256 newRow = statusRow & ~(15 << colIndex);
@@ -198,32 +203,32 @@ contract IntegrationDonationVotingOnchainTimestamps is IntegrationDonationVoting
         // Review recipients
         vm.startPrank(profileOwner);
 
-        vm.expectRevert(DonationVotingOnchain.DonationVotingOnchain_InvalidTimestamps.selector);
+        vm.expectRevert(DonationVotingOnchain.INVALID_TIMESTAMPS.selector);
         // allocationStartTime > allocationEndTime
         strategy.updatePoolTimestamps(
             registrationStartTime, registrationEndTime, allocationEndTime, allocationStartTime
         );
 
-        vm.expectRevert(DonationVotingOnchain.DonationVotingOnchain_InvalidTimestamps.selector);
+        vm.expectRevert(DonationVotingOnchain.INVALID_TIMESTAMPS.selector);
         // _registrationStartTime > _registrationEndTime
         strategy.updatePoolTimestamps(
             registrationEndTime, registrationStartTime, allocationStartTime, allocationEndTime
         );
 
-        vm.expectRevert(DonationVotingOnchain.DonationVotingOnchain_InvalidTimestamps.selector);
+        vm.expectRevert(DonationVotingOnchain.INVALID_TIMESTAMPS.selector);
         // _registrationStartTime > allocationStartTime
         strategy.updatePoolTimestamps(
             allocationStartTime + 1, allocationEndTime, allocationStartTime, allocationEndTime
         );
 
-        vm.expectRevert(DonationVotingOnchain.DonationVotingOnchain_InvalidTimestamps.selector);
+        vm.expectRevert(DonationVotingOnchain.INVALID_TIMESTAMPS.selector);
         // _registrationEndTime > allocationEndTime
         strategy.updatePoolTimestamps(
             registrationStartTime, allocationEndTime + 1, allocationStartTime, allocationEndTime
         );
 
         vm.warp(registrationStartTime + 1);
-        vm.expectRevert(DonationVotingOnchain.DonationVotingOnchain_InvalidTimestamps.selector);
+        vm.expectRevert(DonationVotingOnchain.INVALID_TIMESTAMPS.selector);
         // block.timestamp > _registrationStartTime
         strategy.updatePoolTimestamps(
             registrationStartTime, registrationEndTime, allocationStartTime, allocationEndTime
@@ -279,11 +284,7 @@ contract IntegrationDonationVotingOnchainAllocateERC20 is IntegrationDonationVot
         assertEq(IERC20(allocationToken).balanceOf(address(strategy)), 4 + 25);
 
         recipients[0] = recipient2;
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                DonationVotingOnchain.DonationVotingOnchain_RecipientNotAccepted.selector, recipient2
-            )
-        );
+        vm.expectRevert(Errors.RECIPIENT_NOT_ACCEPTED.selector);
         strategy.allocate(recipients, amounts, "", allocator0);
 
         vm.stopPrank();
@@ -335,11 +336,7 @@ contract IntegrationDonationVotingOnchainAllocateETH is IntegrationDonationVotin
         assertEq(address(strategy).balance, 4 + 25);
 
         recipients[0] = recipient2;
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                DonationVotingOnchain.DonationVotingOnchain_RecipientNotAccepted.selector, recipient2
-            )
-        );
+        vm.expectRevert(Errors.RECIPIENT_NOT_ACCEPTED.selector);
         strategy.allocate(recipients, amounts, "", allocator0);
 
         vm.stopPrank();
@@ -408,11 +405,7 @@ contract IntegrationDonationVotingOnchainDistributeERC20 is IntegrationDonationV
         assertEq(IERC20(allocationToken).balanceOf(recipient1), 25);
         assertEq(IERC20(allocationToken).balanceOf(address(strategy)), 0);
 
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                DonationVotingOnchain.DonationVotingOnchain_NothingToDistributed.selector, recipient0
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(DonationVotingOnchain.NOTHING_TO_DISTRIBUTE.selector, recipient0));
         strategy.distribute(recipients, "", recipient0);
 
         vm.stopPrank();
@@ -479,11 +472,7 @@ contract IntegrationDonationVotingOnchainDistributeETH is IntegrationDonationVot
         assertEq(recipient1.balance, 25);
         assertEq(address(strategy).balance, 0);
 
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                DonationVotingOnchain.DonationVotingOnchain_NothingToDistributed.selector, recipient0
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(DonationVotingOnchain.NOTHING_TO_DISTRIBUTE.selector, recipient0));
         strategy.distribute(recipients, "", recipient0);
 
         vm.stopPrank();

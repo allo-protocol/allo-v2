@@ -4,12 +4,10 @@ pragma solidity 0.8.19;
 import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 // Interfaces
 import {IAllo} from "../core/interfaces/IAllo.sol";
-import {IRecipientsExtension} from "../extensions/interfaces/IRecipientsExtension.sol";
 // Core Contracts
 import {CoreBaseStrategy} from "./CoreBaseStrategy.sol";
 import {RecipientsExtension} from "../extensions/contracts/RecipientsExtension.sol";
 // Internal Libraries
-import {Errors} from "../core/libraries/Errors.sol";
 import {Native} from "../core/libraries/Native.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -56,23 +54,20 @@ contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension {
     /// ========== Errors ==============
     /// ================================
 
-    /// @notice Thrown when a recipient which was not accepted is used in an action that requires so.
-    error DonationVotingOffchain_RecipientNotAccepted(address recipientId);
-
-    /// @notice Thrown when a the payout for a recipient is attempted to be overwritten.
-    error DonationVotingOffchain_PayoutAlreadySet(address recipientId);
-
     /// @notice Thrown when there is nothing to distribute for the given recipient.
-    error DonationVotingOffchain_NothingToDistributed(address recipientId);
-
-    /// @notice Thrown when the total payout amount is greater than the pool amount.
-    error DonationVotingOffchain_AmountsExceedPoolAmount();
-
-    /// @notice Thrown when the token used was not whitelisted.
-    error DonationVotingOffchain_TokenNotAllowed();
+    error NOTHING_TO_DISTRIBUTE(address recipientId);
 
     /// @notice Thrown when the timestamps being set or updated don't meet the contracts requirements.
-    error DonationVotingOffchain_InvalidTimestamps();
+    error INVALID_TIMESTAMPS();
+
+    /// @notice Thrown when a the payout for a recipient is attempted to be overwritten.
+    error PAYOUT_ALREADY_SET(address recipientId);
+
+    /// @notice Thrown when the total payout amount is greater than the pool amount.
+    error AMOUNTS_EXCEED_POOL_AMOUNT();
+
+    /// @notice Thrown when the token used was not whitelisted.
+    error TOKEN_NOT_ALLOWED();
 
     /// ================================
     /// ========== Struct ==============
@@ -134,7 +129,7 @@ contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension {
 
     /// @notice Constructor for the Donation Voting Offchain strategy
     /// @param _allo The 'Allo' contract
-    constructor(address _allo) CoreBaseStrategy(_allo) {}
+    constructor(address _allo) RecipientsExtension(_allo, false) {}
 
     /// ===============================
     /// ========= Initialize ==========
@@ -144,7 +139,7 @@ contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension {
     /// @param _poolId ID of the pool
     /// @param _data The data to be decoded
     /// @custom:data (
-    ///        IRecipientsExtension.RecipientInitializeData _recipientExtensionInitializeData,
+    ///        RecipientInitializeData _recipientExtensionInitializeData,
     ///        uint64 _allocationStartTime,
     ///        uint64 _allocationEndTime,
     ///        uint64 _withdrawalCooldown,
@@ -152,12 +147,12 @@ contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension {
     ///    )
     function initialize(uint256 _poolId, bytes memory _data) external virtual override {
         (
-            IRecipientsExtension.RecipientInitializeData memory _recipientExtensionInitializeData,
+            RecipientInitializeData memory _recipientExtensionInitializeData,
             uint64 _allocationStartTime,
             uint64 _allocationEndTime,
             uint64 _withdrawalCooldown,
             address[] memory _allowedTokens
-        ) = abi.decode(_data, (IRecipientsExtension.RecipientInitializeData, uint64, uint64, uint64, address[]));
+        ) = abi.decode(_data, (RecipientInitializeData, uint64, uint64, uint64, address[]));
 
         allocationStartTime = _allocationStartTime;
         allocationEndTime = _allocationEndTime;
@@ -196,23 +191,12 @@ contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension {
         uint64 _allocationStartTime,
         uint64 _allocationEndTime
     ) external onlyPoolManager(msg.sender) {
-        if (_allocationStartTime > _allocationEndTime) revert DonationVotingOffchain_InvalidTimestamps();
+        if (_allocationStartTime > _allocationEndTime) revert INVALID_TIMESTAMPS();
         allocationStartTime = _allocationStartTime;
         allocationEndTime = _allocationEndTime;
         emit AllocationTimestampsUpdated(allocationStartTime, allocationEndTime, msg.sender);
 
         _updatePoolTimestamps(_registrationStartTime, _registrationEndTime);
-    }
-
-    /// @notice Sets recipient statuses.
-    /// @param statuses new statuses
-    /// @param refRecipientsCounter the recipientCounter the transaction is based on
-    function reviewRecipients(ApplicationStatus[] memory statuses, uint256 refRecipientsCounter)
-        public
-        override
-        onlyActiveRegistration
-    {
-        super.reviewRecipients(statuses, refRecipientsCounter);
     }
 
     /// @notice Claim allocated tokens
@@ -243,12 +227,10 @@ contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension {
         uint256 totalAmount;
         for (uint256 i; i < _recipientIds.length; i++) {
             address recipientId = _recipientIds[i];
-            if (!_isAcceptedRecipient(recipientId)) {
-                revert DonationVotingOffchain_RecipientNotAccepted(recipientId);
-            }
+            if (!_isAcceptedRecipient(recipientId)) revert RECIPIENT_NOT_ACCEPTED();
 
             PayoutSummary storage payoutSummary = payoutSummaries[recipientId];
-            if (payoutSummary.amount != 0) revert DonationVotingOffchain_PayoutAlreadySet(recipientId);
+            if (payoutSummary.amount != 0) revert PAYOUT_ALREADY_SET(recipientId);
 
             uint256 amount = _amounts[i];
             totalAmount += amount;
@@ -260,7 +242,7 @@ contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension {
         }
 
         totalPayoutAmount += totalAmount;
-        if (totalPayoutAmount > poolAmount) revert DonationVotingOffchain_AmountsExceedPoolAmount();
+        if (totalPayoutAmount > poolAmount) revert AMOUNTS_EXCEED_POOL_AMOUNT();
     }
 
     /// ====================================
@@ -283,12 +265,10 @@ contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension {
         uint256 totalNativeAmount;
 
         for (uint256 i = 0; i < _recipients.length; i++) {
-            if (!_isAcceptedRecipient(_recipients[i])) {
-                revert DonationVotingOffchain_RecipientNotAccepted(_recipients[i]);
-            }
+            if (!_isAcceptedRecipient(_recipients[i])) revert RECIPIENT_NOT_ACCEPTED();
 
             if (!allowedTokens[tokens[i]] && !allowedTokens[address(0)]) {
-                revert DonationVotingOffchain_TokenNotAllowed();
+                revert TOKEN_NOT_ALLOWED();
             }
 
             // Update the total payout amount for the claim and the total claimable amount
@@ -303,9 +283,7 @@ contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension {
             emit Allocated(_recipients[i], _sender, _amounts[i], abi.encode(tokens[i]));
         }
 
-        if (msg.value != totalNativeAmount) {
-            revert AMOUNT_MISMATCH();
-        }
+        if (msg.value != totalNativeAmount) revert AMOUNT_MISMATCH();
     }
 
     /// @notice Distributes funds (tokens) to recipients.
@@ -323,7 +301,7 @@ contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension {
             uint256 amount = payoutSummaries[recipientId].amount;
             delete payoutSummaries[recipientId].amount;
 
-            if (amount == 0) revert DonationVotingOffchain_NothingToDistributed(recipientId);
+            if (amount == 0) revert NOTHING_TO_DISTRIBUTE(recipientId);
             poolAmount -= amount;
 
             address recipientAddress = _recipients[recipientId].recipientAddress;
@@ -353,17 +331,17 @@ contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension {
         virtual
         override
     {
-        if (_registrationStartTime > _registrationEndTime) revert DonationVotingOffchain_InvalidTimestamps();
-        if (block.timestamp > _registrationStartTime) revert DonationVotingOffchain_InvalidTimestamps();
+        if (_registrationStartTime > _registrationEndTime) revert INVALID_TIMESTAMPS();
+        if (block.timestamp > _registrationStartTime) revert INVALID_TIMESTAMPS();
         // Check consistency with allocation timestamps
-        if (_registrationStartTime > allocationStartTime) revert DonationVotingOffchain_InvalidTimestamps();
-        if (_registrationEndTime > allocationEndTime) revert DonationVotingOffchain_InvalidTimestamps();
+        if (_registrationStartTime > allocationStartTime) revert INVALID_TIMESTAMPS();
+        if (_registrationEndTime > allocationEndTime) revert INVALID_TIMESTAMPS();
     }
 
     /// @notice Returns if the recipient is accepted
     /// @param _recipientId The recipient id
     /// @return If the recipient is accepted
     function _isAcceptedRecipient(address _recipientId) internal view virtual returns (bool) {
-        return _getRecipientStatus(_recipientId) == IRecipientsExtension.Status.Accepted;
+        return _getRecipientStatus(_recipientId) == Status.Accepted;
     }
 }
