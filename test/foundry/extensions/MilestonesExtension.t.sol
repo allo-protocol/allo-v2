@@ -95,7 +95,7 @@ contract MilestonesExtensionIncreaseMaxBid is BaseMilestonesExtensionUnit {
         vm.assume(_maxBid < INITIAL_MAX_BID);
         vm.mockCall(allo, abi.encodeWithSelector(IAllo.isPoolManager.selector, poolId, _caller), abi.encode(true));
         vm.prank(_caller);
-        vm.expectRevert(IMilestonesExtension.MilestonesExtension_AMOUNT_TOO_LOW.selector);
+        vm.expectRevert(IMilestonesExtension.AMOUNT_TOO_LOW.selector);
         MilestonesExtension.increaseMaxBid(_maxBid);
     }
 }
@@ -110,7 +110,7 @@ contract MilestonesExtension_setProposalBid is BaseMilestonesExtensionUnit {
     function test_Revert_maxBidExceeded(address _bidder, uint256 _bid) public {
         vm.assume(_bid > INITIAL_MAX_BID);
 
-        vm.expectRevert(IMilestonesExtension.MilestonesExtension_EXCEEDING_MAX_BID.selector);
+        vm.expectRevert(IMilestonesExtension.EXCEEDING_MAX_BID.selector);
         MilestonesExtension.expose_setProposalBid(_bidder, _bid);
     }
 
@@ -165,7 +165,7 @@ contract MilestonesExtensionSetMilestones is BaseMilestonesExtensionUnit {
         _milestones[_zeroPercentageIndex].amountPercentage = 0;
 
         vm.mockCall(allo, abi.encodeWithSelector(IAllo.isPoolManager.selector), abi.encode(true));
-        vm.expectRevert(IMilestonesExtension.MilestonesExtension_INVALID_MILESTONE.selector);
+        vm.expectRevert(IMilestonesExtension.INVALID_MILESTONE.selector);
         MilestonesExtension.setMilestones(_milestones);
     }
 
@@ -181,7 +181,7 @@ contract MilestonesExtensionSetMilestones is BaseMilestonesExtensionUnit {
         if (_sum == 1e18) _milestones[0].amountPercentage += 1;
 
         vm.mockCall(allo, abi.encodeWithSelector(IAllo.isPoolManager.selector), abi.encode(true));
-        vm.expectRevert(IMilestonesExtension.MilestonesExtension_INVALID_MILESTONE.selector);
+        vm.expectRevert(IMilestonesExtension.INVALID_MILESTONE.selector);
         MilestonesExtension.setMilestones(_milestones);
     }
 
@@ -255,7 +255,7 @@ contract MilestonesExtension_validateSubmitUpcomingMilestone is BaseMilestonesEx
             _acceptedRecipientId
         );
 
-        vm.expectRevert(IMilestonesExtension.MilestonesExtension_INVALID_RECIPIENT.selector);
+        vm.expectRevert(IMilestonesExtension.INVALID_RECIPIENT.selector);
         MilestonesExtension.expose_validateSubmitUpcomingMilestone(_sender, _sender);
     }
 
@@ -266,7 +266,7 @@ contract MilestonesExtension_validateSubmitUpcomingMilestone is BaseMilestonesEx
         );
 
         vm.mockCall(_registry, abi.encodeWithSelector(IRegistry.isOwnerOrMemberOfProfile.selector), abi.encode(false));
-        vm.expectRevert(IMilestonesExtension.MilestonesExtension_INVALID_SUBMITTER.selector);
+        vm.expectRevert(IMilestonesExtension.INVALID_SUBMITTER.selector);
         MilestonesExtension.expose_validateSubmitUpcomingMilestone(_acceptedRecipientId, _sender);
     }
 }
@@ -338,7 +338,7 @@ contract MilestonesExtensionSubmitUpcomingMilestone is BaseMilestonesExtensionUn
 
         MilestonesExtension.submitUpcomingMilestone(_acceptedRecipientId, _metadata);
 
-        vm.expectRevert(IMilestonesExtension.MilestonesExtension_MILESTONE_PENDING.selector);
+        vm.expectRevert(IMilestonesExtension.MILESTONE_PENDING.selector);
         MilestonesExtension.submitUpcomingMilestone(_acceptedRecipientId, _metadata);
 
         vm.stopPrank();
@@ -470,7 +470,7 @@ contract MilestonesExtensionReviewMilestone is BaseMilestonesExtensionUnit {
         MilestonesExtension.submitUpcomingMilestone(_acceptedRecipientId, _metadata);
 
         vm.mockCall(allo, abi.encodeWithSelector(IAllo.isPoolManager.selector), abi.encode(true));
-        vm.expectRevert(IMilestonesExtension.MilestonesExtension_INVALID_MILESTONE_STATUS.selector);
+        vm.expectRevert(IMilestonesExtension.INVALID_MILESTONE_STATUS.selector);
         MilestonesExtension.reviewMilestone(IMilestonesExtension.MilestoneStatus.None);
     }
 
@@ -497,7 +497,7 @@ contract MilestonesExtensionReviewMilestone is BaseMilestonesExtensionUnit {
         IMilestonesExtension.Milestone[] memory _milestones = _setMilestones(_rawMilestones);
 
         vm.mockCall(allo, abi.encodeWithSelector(IAllo.isPoolManager.selector), abi.encode(true));
-        vm.expectRevert(IMilestonesExtension.MilestonesExtension_MILESTONE_NOT_PENDING.selector);
+        vm.expectRevert(IMilestonesExtension.MILESTONE_NOT_PENDING.selector);
         MilestonesExtension.reviewMilestone(IMilestonesExtension.MilestoneStatus.Accepted);
     }
 

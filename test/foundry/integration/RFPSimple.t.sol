@@ -226,12 +226,12 @@ contract IntegrationRFPSimple is Test {
         // Revert when attempting to claim twice
         _milestonesIds[0] = 0;
         _milestonesIds[1] = 0;
-        vm.expectRevert(IMilestonesExtension.MilestonesExtension_INVALID_MILESTONE_STATUS.selector);
+        vm.expectRevert(IMilestonesExtension.INVALID_MILESTONE_STATUS.selector);
         strategy.distribute(recipients, abi.encode(_milestonesIds), recipient0);
 
         // Revert when attempting to claim non-submitted milestone
         _milestonesIds[1] = 1;
-        vm.expectRevert(IMilestonesExtension.MilestonesExtension_INVALID_MILESTONE_STATUS.selector);
+        vm.expectRevert(IMilestonesExtension.INVALID_MILESTONE_STATUS.selector);
         strategy.distribute(recipients, abi.encode(_milestonesIds), recipient0);
 
         // Distribute

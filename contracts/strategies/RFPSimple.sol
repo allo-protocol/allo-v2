@@ -3,8 +3,6 @@ pragma solidity 0.8.19;
 
 // Interfaces
 import {IAllo} from "../core/interfaces/IAllo.sol";
-import {IRecipientsExtension} from "../extensions/interfaces/IRecipientsExtension.sol";
-import {IMilestonesExtension} from "../extensions/interfaces/IMilestonesExtension.sol";
 // Core Contracts
 import {CoreBaseStrategy} from "./CoreBaseStrategy.sol";
 import {MilestonesExtension} from "../extensions/contracts/MilestonesExtension.sol";
@@ -52,10 +50,10 @@ contract RFPSimple is CoreBaseStrategy, MilestonesExtension, RecipientsExtension
     // @notice Initialize the strategy
     /// @param _poolId ID of the pool
     /// @param _data The data to be decoded
-    /// @custom:data (IRecipientsExtension.RecipientInitializeData _recipientExtensionInitializeData, uint256 _maxBid)
+    /// @custom:data (RecipientInitializeData _recipientExtensionInitializeData, uint256 _maxBid)
     function initialize(uint256 _poolId, bytes memory _data) external virtual override {
-        (IRecipientsExtension.RecipientInitializeData memory _recipientExtensionInitializeData, uint256 _maxBid) =
-            abi.decode(_data, (IRecipientsExtension.RecipientInitializeData, uint256));
+        (RecipientInitializeData memory _recipientExtensionInitializeData, uint256 _maxBid) =
+            abi.decode(_data, (RecipientInitializeData, uint256));
         __BaseStrategy_init(_poolId);
         __RecipientsExtension_init(_recipientExtensionInitializeData);
         __MilestonesExtension_init(_maxBid);
@@ -75,7 +73,7 @@ contract RFPSimple is CoreBaseStrategy, MilestonesExtension, RecipientsExtension
         override
         returns (Status _reviewedStatus)
     {
-        if (_newStatus == IRecipientsExtension.Status.Accepted) {
+        if (_newStatus == Status.Accepted) {
             if (block.timestamp > registrationEndTime) revert INVALID();
             // The registration period ends when a recipient is accepted.
             registrationEndTime = uint64(block.timestamp - 1);
@@ -121,12 +119,8 @@ contract RFPSimple is CoreBaseStrategy, MilestonesExtension, RecipientsExtension
         for (uint256 i = 0; i < milestoneIds.length; i++) {
             uint256 milestoneId = milestoneIds[i];
             // Check if the milestone is accepted or if it was already paid
-            if (
-                milestones[milestoneId].status != IMilestonesExtension.MilestoneStatus.Accepted
-                    || wasMilestonePaid[milestoneId]
-            ) {
-                revert IMilestonesExtension.MilestonesExtension_INVALID_MILESTONE_STATUS();
-            }
+            if (milestones[milestoneId].status != MilestoneStatus.Accepted) revert INVALID_MILESTONE_STATUS();
+            if (wasMilestonePaid[milestoneId]) revert INVALID_MILESTONE_STATUS();
 
             // Calculate the amount to be distributed for the milestone
             // Reverts if the recipient is not actually accepted
@@ -146,6 +140,6 @@ contract RFPSimple is CoreBaseStrategy, MilestonesExtension, RecipientsExtension
     /// @param _recipientId The recipient id
     /// @return If the recipient is accepted
     function _isAcceptedRecipient(address _recipientId) internal view virtual override returns (bool) {
-        return _getRecipientStatus(_recipientId) == IRecipientsExtension.Status.Accepted;
+        return _getRecipientStatus(_recipientId) == Status.Accepted;
     }
 }
