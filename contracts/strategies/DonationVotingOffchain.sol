@@ -94,6 +94,8 @@ contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension {
     uint64 public withdrawalCooldown;
     /// @notice amount to be distributed. `totalPayoutAmount` get reduced with each distribution.
     uint256 public totalPayoutAmount;
+    /// @notice If true, allocations are directly sent to recipients. Otherwise, they they must be claimed later.
+    bool public directTransfer;
 
     /// @notice token -> bool
     mapping(address => bool) public allowedTokens;
@@ -149,14 +151,16 @@ contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension {
             uint64 _allocationStartTime,
             uint64 _allocationEndTime,
             uint64 _withdrawalCooldown,
+            bool _directTransfer,
             address[] memory _allowedTokens
-        ) = abi.decode(_data, (RecipientInitializeData, uint64, uint64, uint64, address[]));
+        ) = abi.decode(_data, (RecipientInitializeData, uint64, uint64, uint64, bool, address[]));
 
         allocationStartTime = _allocationStartTime;
         allocationEndTime = _allocationEndTime;
         emit AllocationTimestampsUpdated(_allocationStartTime, _allocationEndTime, msg.sender);
 
         withdrawalCooldown = _withdrawalCooldown;
+        directTransfer = _directTransfer;
 
         if (_allowedTokens.length == 0) {
             // all tokens
@@ -200,6 +204,8 @@ contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension {
     /// @param _data The data to be decoded
     /// @custom:data (Claim[] _claims)
     function claimAllocation(bytes memory _data) external virtual onlyAfterAllocation {
+        if (directTransfer) revert NOT_IMPLEMENTED();
+
         (Claim[] memory _claims) = abi.decode(_data, (Claim[]));
 
         uint256 claimsLength = _claims.length;
@@ -248,11 +254,11 @@ contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension {
 
     /// @notice This will allocate to recipients.
     /// @dev The encoded '_data' is an array of token addresses corresponding to the _amounts array.
-    /// @param _recipients The addresses of the recipients to allocate to
+    /// @param __recipients The addresses of the recipients to allocate to
     /// @param _amounts The amounts to allocate to the recipients
     /// @param _data The data to use to allocate to the recipient
     /// @param _sender The address of the sender
-    function _allocate(address[] memory _recipients, uint256[] memory _amounts, bytes memory _data, address _sender)
+    function _allocate(address[] memory __recipients, uint256[] memory _amounts, bytes memory _data, address _sender)
         internal
         virtual
         override
@@ -261,23 +267,22 @@ contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension {
         (address[] memory tokens) = abi.decode(_data, (address[]));
         uint256 totalNativeAmount;
 
-        for (uint256 i = 0; i < _recipients.length; i++) {
-            if (!_isAcceptedRecipient(_recipients[i])) revert RECIPIENT_NOT_ACCEPTED();
+        for (uint256 i = 0; i < __recipients.length; i++) {
+            if (!_isAcceptedRecipient(__recipients[i])) revert RECIPIENT_NOT_ACCEPTED();
 
-            if (!allowedTokens[tokens[i]] && !allowedTokens[address(0)]) {
-                revert TOKEN_NOT_ALLOWED();
-            }
+            if (!allowedTokens[tokens[i]] && !allowedTokens[address(0)]) revert TOKEN_NOT_ALLOWED();
 
-            // Update the total payout amount for the claim and the total claimable amount
-            amountAllocated[_recipients[i]][tokens[i]] += _amounts[i];
+            if (!directTransfer) amountAllocated[__recipients[i]][tokens[i]] += _amounts[i];
 
+            address recipientAddress = directTransfer ? _recipients[__recipients[i]].recipientAddress : address(this);
             if (tokens[i] == NATIVE) {
                 totalNativeAmount += _amounts[i];
+                if (directTransfer) SafeTransferLib.safeTransferETH(recipientAddress, _amounts[i]);
             } else {
-                SafeTransferLib.safeTransferFrom(tokens[i], _sender, address(this), _amounts[i]);
+                SafeTransferLib.safeTransferFrom(tokens[i], _sender, recipientAddress, _amounts[i]);
             }
 
-            emit Allocated(_recipients[i], _sender, _amounts[i], abi.encode(tokens[i]));
+            emit Allocated(__recipients[i], _sender, _amounts[i], abi.encode(tokens[i]));
         }
 
         if (msg.value != totalNativeAmount) revert AMOUNT_MISMATCH();
