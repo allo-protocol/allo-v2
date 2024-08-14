@@ -15,9 +15,8 @@ contract IntegrationAllo is IntegrationBase {
     IAllo public allo;
     DonationVotingMerkleDistributionDirectTransferStrategy public strategy;
 
-    // TODO: once other strategies are implemented, move this to the base contract
-    // Also, use IRecipientsExtension instead of the DonationVotingMerkleDistributionBaseStrategy
-    function _getApplicationStatus(address _recipientId, uint256 _status, address payable _strategy)
+    // TODO: use a new strategy and remove this function
+    function _getApplicationStatus2(address _recipientId, uint256 _status, address payable _strategy)
         internal
         view
         returns (DonationVotingMerkleDistributionDirectTransferStrategy.ApplicationStatus memory)
@@ -146,13 +145,13 @@ contract IntegrationAllo is IntegrationBase {
         // TODO: make them in batch
         DonationVotingMerkleDistributionBaseStrategy.ApplicationStatus[] memory statuses =
             new DonationVotingMerkleDistributionBaseStrategy.ApplicationStatus[](1);
-        statuses[0] = _getApplicationStatus(recipient0Addr, 2, payable(address(deployedStrategy)));
+        statuses[0] = _getApplicationStatus2(recipient0Addr, 2, payable(address(deployedStrategy)));
         deployedStrategy.reviewRecipients(statuses, deployedStrategy.recipientsCounter());
 
-        statuses[0] = _getApplicationStatus(recipient1Addr, 2, payable(address(deployedStrategy)));
+        statuses[0] = _getApplicationStatus2(recipient1Addr, 2, payable(address(deployedStrategy)));
         deployedStrategy.reviewRecipients(statuses, deployedStrategy.recipientsCounter());
 
-        statuses[0] = _getApplicationStatus(recipient2Addr, 2, payable(address(deployedStrategy)));
+        statuses[0] = _getApplicationStatus2(recipient2Addr, 2, payable(address(deployedStrategy)));
         deployedStrategy.reviewRecipients(statuses, deployedStrategy.recipientsCounter());
 
         vm.stopPrank();
@@ -336,13 +335,13 @@ contract IntegrationAllo is IntegrationBase {
         // TODO: make them in batch
         DonationVotingMerkleDistributionBaseStrategy.ApplicationStatus[] memory statuses =
             new DonationVotingMerkleDistributionBaseStrategy.ApplicationStatus[](1);
-        statuses[0] = _getApplicationStatus(recipient0Addr, 2, payable(address(deployedStrategy)));
+        statuses[0] = _getApplicationStatus2(recipient0Addr, 2, payable(address(deployedStrategy)));
         deployedStrategy.reviewRecipients(statuses, deployedStrategy.recipientsCounter());
 
-        statuses[0] = _getApplicationStatus(recipient1Addr, 2, payable(address(deployedStrategy)));
+        statuses[0] = _getApplicationStatus2(recipient1Addr, 2, payable(address(deployedStrategy)));
         deployedStrategy.reviewRecipients(statuses, deployedStrategy.recipientsCounter());
 
-        statuses[0] = _getApplicationStatus(recipient2Addr, 2, payable(address(deployedStrategy)));
+        statuses[0] = _getApplicationStatus2(recipient2Addr, 2, payable(address(deployedStrategy)));
         deployedStrategy.reviewRecipients(statuses, deployedStrategy.recipientsCounter());
 
         // Allocate

@@ -17,23 +17,6 @@ contract IntegrationQVSimple is IntegrationBase {
 
     uint256 public poolId;
 
-    function _getApplicationStatus(address _recipientId, uint256 _status)
-        internal
-        view
-        returns (IRecipientsExtension.ApplicationStatus memory)
-    {
-        IRecipientsExtension.Recipient memory recipient = strategy.getRecipient(_recipientId);
-        uint256 recipientIndex = recipient.statusIndex - 1;
-
-        uint256 rowIndex = recipientIndex / 64;
-        uint256 colIndex = (recipientIndex % 64) * 4;
-        uint256 currentRow = strategy.statusesBitMap(rowIndex);
-        uint256 newRow = currentRow & ~(15 << colIndex);
-        uint256 statusRow = newRow | (_status << colIndex);
-
-        return IRecipientsExtension.ApplicationStatus({index: rowIndex, statusRow: statusRow});
-    }
-
     function setUp() public override {
         super.setUp();
 
@@ -105,13 +88,13 @@ contract IntegrationQVSimple is IntegrationBase {
 
         // TODO: make them in batch
         IRecipientsExtension.ApplicationStatus[] memory statuses = new IRecipientsExtension.ApplicationStatus[](1);
-        statuses[0] = _getApplicationStatus(recipient0Addr, 2);
+        statuses[0] = _getApplicationStatus(recipient0Addr, 2, address(strategy));
         strategy.reviewRecipients(statuses, strategy.recipientsCounter());
 
-        statuses[0] = _getApplicationStatus(recipient1Addr, 2);
+        statuses[0] = _getApplicationStatus(recipient1Addr, 2, address(strategy));
         strategy.reviewRecipients(statuses, strategy.recipientsCounter());
 
-        statuses[0] = _getApplicationStatus(recipient2Addr, 2);
+        statuses[0] = _getApplicationStatus(recipient2Addr, 2, address(strategy));
         strategy.reviewRecipients(statuses, strategy.recipientsCounter());
 
         vm.stopPrank();

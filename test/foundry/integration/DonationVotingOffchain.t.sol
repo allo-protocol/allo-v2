@@ -29,44 +29,6 @@ contract IntegrationDonationVotingOffchainBase is IntegrationBase {
     uint64 internal allocationEndTime;
     uint64 internal withdrawalCooldown = 1 days;
 
-    function _getApplicationStatus(address _recipientId, uint256 _status)
-        internal
-        view
-        returns (IRecipientsExtension.ApplicationStatus memory)
-    {
-        IRecipientsExtension.Recipient memory recipient = strategy.getRecipient(_recipientId);
-        uint256 recipientIndex = uint256(recipient.statusIndex) - 1;
-
-        uint256 rowIndex = recipientIndex / 64;
-        uint256 colIndex = (recipientIndex % 64) * 4;
-        uint256 currentRow = strategy.statusesBitMap(rowIndex);
-        uint256 newRow = currentRow & ~(15 << colIndex);
-        uint256 statusRow = newRow | (_status << colIndex);
-
-        return IRecipientsExtension.ApplicationStatus({index: rowIndex, statusRow: statusRow});
-    }
-
-    function _getApplicationStatus(address[] memory _recipientIds, uint256[] memory _statuses)
-        internal
-        view
-        returns (IRecipientsExtension.ApplicationStatus memory)
-    {
-        IRecipientsExtension.Recipient memory recipient = strategy.getRecipient(_recipientIds[0]);
-        uint256 recipientIndex = uint256(recipient.statusIndex) - 1;
-        uint256 rowIndex = recipientIndex / 64;
-        uint256 statusRow = strategy.statusesBitMap(rowIndex);
-        for (uint256 i = 0; i < _recipientIds.length; i++) {
-            recipient = strategy.getRecipient(_recipientIds[i]);
-            recipientIndex = uint256(recipient.statusIndex) - 1;
-            require(rowIndex == recipientIndex / 64, "_recipientIds belong to different rows");
-            uint256 colIndex = (recipientIndex % 64) * 4;
-            uint256 newRow = statusRow & ~(15 << colIndex);
-            statusRow = newRow | (_statuses[i] << colIndex);
-        }
-
-        return IRecipientsExtension.ApplicationStatus({index: rowIndex, statusRow: statusRow});
-    }
-
     function setUp() public virtual override {
         super.setUp();
 
@@ -153,13 +115,13 @@ contract IntegrationDonationVotingOffchainReviewRecipients is IntegrationDonatio
         _recipientIds[1] = recipient1Addr;
         _newStatuses[0] = uint256(IRecipientsExtension.Status.Accepted);
         _newStatuses[1] = uint256(IRecipientsExtension.Status.Accepted);
-        statuses[0] = _getApplicationStatus(_recipientIds, _newStatuses);
+        statuses[0] = _getApplicationStatus(_recipientIds, _newStatuses, address(strategy));
         strategy.reviewRecipients(statuses, recipientsCounter);
 
         // Revert if the registration period has finished
         vm.warp(registrationEndTime + 1);
         _newStatuses[1] = uint256(IRecipientsExtension.Status.Rejected);
-        statuses[0] = _getApplicationStatus(_recipientIds, _newStatuses);
+        statuses[0] = _getApplicationStatus(_recipientIds, _newStatuses, address(strategy));
         vm.expectRevert(Errors.REGISTRATION_NOT_ACTIVE.selector);
         strategy.reviewRecipients(statuses, recipientsCounter);
 
@@ -225,7 +187,7 @@ contract IntegrationDonationVotingOffchainAllocateERC20 is IntegrationDonationVo
         _recipientIds[1] = recipient1Addr;
         _newStatuses[0] = uint256(IRecipientsExtension.Status.Accepted);
         _newStatuses[1] = uint256(IRecipientsExtension.Status.Accepted);
-        statuses[0] = _getApplicationStatus(_recipientIds, _newStatuses);
+        statuses[0] = _getApplicationStatus(_recipientIds, _newStatuses, address(strategy));
 
         uint256 recipientsCounter = strategy.recipientsCounter();
         strategy.reviewRecipients(statuses, recipientsCounter);
@@ -283,7 +245,7 @@ contract IntegrationDonationVotingOffchainAllocateETH is IntegrationDonationVoti
         _recipientIds[1] = recipient1Addr;
         _newStatuses[0] = uint256(IRecipientsExtension.Status.Accepted);
         _newStatuses[1] = uint256(IRecipientsExtension.Status.Accepted);
-        statuses[0] = _getApplicationStatus(_recipientIds, _newStatuses);
+        statuses[0] = _getApplicationStatus(_recipientIds, _newStatuses, address(strategy));
 
         uint256 recipientsCounter = strategy.recipientsCounter();
         strategy.reviewRecipients(statuses, recipientsCounter);
@@ -347,7 +309,7 @@ contract IntegrationDonationVotingOffchainClaim is IntegrationDonationVotingOffc
         _recipientIds[1] = recipient1Addr;
         _newStatuses[0] = uint256(IRecipientsExtension.Status.Accepted);
         _newStatuses[1] = uint256(IRecipientsExtension.Status.Accepted);
-        statuses[0] = _getApplicationStatus(_recipientIds, _newStatuses);
+        statuses[0] = _getApplicationStatus(_recipientIds, _newStatuses, address(strategy));
 
         uint256 recipientsCounter = strategy.recipientsCounter();
         strategy.reviewRecipients(statuses, recipientsCounter);
@@ -415,7 +377,7 @@ contract IntegrationDonationVotingOffchainSetPayout is IntegrationDonationVoting
         _recipientIds[1] = recipient1Addr;
         _newStatuses[0] = uint256(IRecipientsExtension.Status.Accepted);
         _newStatuses[1] = uint256(IRecipientsExtension.Status.Accepted);
-        statuses[0] = _getApplicationStatus(_recipientIds, _newStatuses);
+        statuses[0] = _getApplicationStatus(_recipientIds, _newStatuses, address(strategy));
 
         uint256 recipientsCounter = strategy.recipientsCounter();
         strategy.reviewRecipients(statuses, recipientsCounter);
@@ -474,7 +436,7 @@ contract IntegrationDonationVotingOffchainDistribute is IntegrationDonationVotin
         _recipientIds[1] = recipient1Addr;
         _newStatuses[0] = uint256(IRecipientsExtension.Status.Accepted);
         _newStatuses[1] = uint256(IRecipientsExtension.Status.Accepted);
-        statuses[0] = _getApplicationStatus(_recipientIds, _newStatuses);
+        statuses[0] = _getApplicationStatus(_recipientIds, _newStatuses, address(strategy));
 
         uint256 recipientsCounter = strategy.recipientsCounter();
         strategy.reviewRecipients(statuses, recipientsCounter);

@@ -9,6 +9,8 @@ import {ISignatureTransfer} from "permit2/ISignatureTransfer.sol";
 import {IBiconomyForwarder} from "./IBiconomyForwarder.sol";
 import {ECDSA} from "openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol";
 import {Metadata, IRegistry} from "contracts/core/Registry.sol";
+import {IRecipientsExtension} from "contracts/extensions/interfaces/IRecipientsExtension.sol";
+import {RecipientsExtension} from "contracts/extensions/contracts/RecipientsExtension.sol";
 
 abstract contract IntegrationBase is Test {
     using ECDSA for bytes32;
@@ -79,6 +81,46 @@ abstract contract IntegrationBase is Test {
         vm.prank(relayer);
         (_success, _returnData) = IBiconomyForwarder(BICONOMY_FORWARDER).executeEIP712(req, DOMAIN_SEPARATOR, sig);
         assertTrue(_success);
+    }
+
+    function _getApplicationStatus(address _recipientId, uint256 _status, address _strategy)
+        internal
+        view
+        returns (IRecipientsExtension.ApplicationStatus memory)
+    {
+        IRecipientsExtension.Recipient memory recipient = RecipientsExtension(payable(_strategy)).getRecipient(_recipientId);
+        uint256 recipientIndex = uint256(recipient.statusIndex) - 1;
+
+        uint256 rowIndex = recipientIndex / 64;
+        uint256 colIndex = (recipientIndex % 64) * 4;
+        uint256 currentRow = RecipientsExtension(payable(_strategy)).statusesBitMap(rowIndex);
+        uint256 newRow = currentRow & ~(15 << colIndex);
+        uint256 statusRow = newRow | (_status << colIndex);
+
+        return IRecipientsExtension.ApplicationStatus({index: rowIndex, statusRow: statusRow});
+    }
+
+    function _getApplicationStatus(address[] memory _recipientIds, uint256[] memory _statuses, address _strategy)
+        internal
+        view
+        returns (IRecipientsExtension.ApplicationStatus memory)
+    {
+        IRecipientsExtension.Recipient memory recipient = RecipientsExtension(payable(_strategy)).getRecipient(_recipientIds[0]);
+        uint256 recipientIndex = uint256(recipient.statusIndex) - 1;
+
+        uint256 rowIndex = recipientIndex / 64;
+        uint256 statusRow = RecipientsExtension(payable(_strategy)).statusesBitMap(rowIndex);
+        for (uint256 i = 0; i < _recipientIds.length; i++) {
+            recipient = RecipientsExtension(payable(_strategy)).getRecipient(_recipientIds[i]);
+            recipientIndex = uint256(recipient.statusIndex) - 1;
+
+            require(rowIndex == recipientIndex / 64, "_recipientIds belong to different rows");
+            uint256 colIndex = (recipientIndex % 64) * 4;
+            uint256 newRow = statusRow & ~(15 << colIndex);
+            statusRow = newRow | (_statuses[i] << colIndex);
+        }
+
+        return IRecipientsExtension.ApplicationStatus({index: rowIndex, statusRow: statusRow});
     }
 
     function setUp() public virtual {
