@@ -1,0 +1,44 @@
+QVImpactStream::batchAddAllocator
+└── when called by PoolManager
+    └── it should call _addAllocator
+
+QVImpactStream::batchRemoveAllocator
+└── when called by PoolManager
+    └── it should call _removeAllocator
+
+
+QVImpactStream::setPayouts
+├── when payoutSet is true
+│   └── it should revert
+├── when payout amount is zero
+│   └── it should revert
+├── when recipient status is not accepted
+│   └── it should revert
+├── when total payout is greater than pool amount
+│   └── it should revert
+├── when called with valid parameters
+│   └── it should set the payouts
+└── when total payout is less than pool amount
+    └── it should emit event
+
+QVImpactStream::_distribute
+├── when payout amount for recipient is zero
+│   └── it should revert
+└── when called
+    ├── it should remove the recipient from the payouts
+    ├── it should transfer to the recipient
+    └── it should emit event
+
+QVImpactStream::getTotalVotesForRecipient
+└── when called
+    └── it should return the total votes for the recipient
+
+QVImpactStream::getPayout
+└── when called
+    └── it should return the payout for the recipient
+
+QVImpactStream::recoverFunds
+├── when token is native
+│   └── it should transfer the native balance to the recipient
+└── when token is not native
+    └── it should transfer the token balance to the recipient
