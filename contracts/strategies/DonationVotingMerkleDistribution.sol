@@ -10,8 +10,6 @@ import {IAllo} from "../core/interfaces/IAllo.sol";
 import {DonationVotingOffchain} from "./DonationVotingOffchain.sol";
 // Internal Libraries
 import {Metadata} from "../core/libraries/Metadata.sol";
-import {Errors} from "../core/libraries/Errors.sol";
-import {Native} from "../core/libraries/Native.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⣿⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -99,7 +97,7 @@ contract DonationVotingMerkleDistribution is DonationVotingOffchain {
     /// @notice Invoked by round operator to update the merkle root and distribution Metadata.
     /// @param _data The data to be decoded
     /// @custom:data (bytes32 _merkleRoot, Metadata _distributionMetadata)
-    function setPayout(bytes memory _data) external override onlyPoolManager(msg.sender) onlyAfterAllocation {
+    function setPayout(bytes memory _data) external virtual override onlyPoolManager(msg.sender) onlyAfterAllocation {
         // The merkleRoot can only be updated before the distribution has started
         if (distributionStarted) revert DISTRIBUTION_ALREADY_STARTED();
 
@@ -194,9 +192,7 @@ contract DonationVotingMerkleDistribution is DonationVotingOffchain {
         uint256 amount = _distribution.amount;
         bytes32[] memory merkleProof = _distribution.merkleProof;
 
-        if (!_isAcceptedRecipient(recipientId)) {
-            revert DonationVotingOffchain_RecipientNotAccepted(recipientId);
-        }
+        if (!_isAcceptedRecipient(recipientId)) revert RECIPIENT_NOT_ACCEPTED();
 
         // Generate the node that will be verified in the 'merkleRoot'
         bytes32 node = keccak256(abi.encode(index, recipientId, amount));
