@@ -106,7 +106,6 @@ contract DonationVotingMerkleDistribution is DonationVotingOffchain {
         merkleRoot = _merkleRoot;
         distributionMetadata = _distributionMetadata;
 
-        // Emit that the distribution has been updated
         emit DistributionUpdated(_merkleRoot, _distributionMetadata);
     }
 
@@ -184,9 +183,11 @@ contract DonationVotingMerkleDistribution is DonationVotingOffchain {
     }
 
     /// @notice Distribute funds to recipient.
-    /// @dev Emits a 'FundsDistributed()' event
+    /// @dev Emits a 'Distributed()' event per distributed recipient
     /// @param _distribution Distribution to be distributed
-    function _distributeSingle(Distribution memory _distribution, address poolToken, address _sender) private {
+    /// @param _poolToken Token address of the strategy
+    /// @param _sender The address of the sender
+    function _distributeSingle(Distribution memory _distribution, address _poolToken, address _sender) private {
         uint256 index = _distribution.index;
         address recipientId = _distribution.recipientId; // TODO: is accepted?
         uint256 amount = _distribution.amount;
@@ -203,7 +204,7 @@ contract DonationVotingMerkleDistribution is DonationVotingOffchain {
             _setDistributed(index);
 
             address recipientAddress = _recipients[recipientId].recipientAddress;
-            _transferAmount(poolToken, recipientAddress, amount);
+            _transferAmount(_poolToken, recipientAddress, amount);
 
             emit Distributed(recipientId, abi.encode(recipientAddress, amount, _sender));
         }
