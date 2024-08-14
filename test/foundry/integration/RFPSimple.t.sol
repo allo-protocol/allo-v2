@@ -66,7 +66,7 @@ contract IntegrationRFPSimple is IntegrationBase {
         super.setUp();
 
         allo = IAllo(ALLO_PROXY);
-        
+
         allocator0 = makeAddr("allocator0");
         allocator1 = makeAddr("allocator1");
 
