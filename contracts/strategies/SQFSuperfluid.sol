@@ -73,7 +73,9 @@ contract SQFSuperFluidStrategy is CoreBaseStrategy, RecipientsExtension {
     /// ========== Storage =============
     /// ================================
 
+    /// @dev The initial balance for the super app
     uint256 public initialSuperAppBalance;
+
     /// @dev Available at https://console.superfluid.finance/
     /// @notice The host contract for the superfluid protocol
     address public superfluidHost;
@@ -121,13 +123,6 @@ contract SQFSuperFluidStrategy is CoreBaseStrategy, RecipientsExtension {
     /// @dev Reverts if the allocation is not active
     modifier onlyActiveAllocation() {
         _checkOnlyActiveAllocation();
-        _;
-    }
-
-    /// @notice Modifier to check if the allocation has ended
-    /// @dev Reverts if the allocation has not ended
-    modifier onlyAfterAllocation() {
-        _checkOnlyAfterAllocation();
         _;
     }
 
@@ -189,7 +184,7 @@ contract SQFSuperFluidStrategy is CoreBaseStrategy, RecipientsExtension {
         passportDecoder = IGitcoinPassportDecoder(_sqfSuperfluidInitializeParams.passportDecoder);
         gdaPool = SuperTokenV1Library.createPool(
             poolSuperToken,
-            address(this), // pool admin
+            address(this),
             PoolConfig(
                 /// @dev if true, the pool members can transfer their owned units
                 /// else, only the pool admin can manipulate the units for pool members
@@ -251,7 +246,6 @@ contract SQFSuperFluidStrategy is CoreBaseStrategy, RecipientsExtension {
     /// @param _recipientIds Ids of the recipients
     function cancelRecipients(address[] calldata _recipientIds)
         external
-        virtual
         onlyPoolManager(msg.sender)
         onlyBeforeAllocationEnds
     {
@@ -453,7 +447,7 @@ contract SQFSuperFluidStrategy is CoreBaseStrategy, RecipientsExtension {
 
     /// @notice Check if the registration is active
     /// @dev Reverts if the registration is not active
-    function _checkOnlyAfterRegistration() internal view virtual {
+    function _checkOnlyAfterRegistration() internal view {
         if (block.timestamp < registrationEndTime) {
             revert REGISTRATION_ACTIVE();
         }
@@ -461,16 +455,10 @@ contract SQFSuperFluidStrategy is CoreBaseStrategy, RecipientsExtension {
 
     /// @notice Check if the allocation is active
     /// @dev Reverts if the allocation is not active
-    function _checkOnlyActiveAllocation() internal view virtual {
+    function _checkOnlyActiveAllocation() internal view {
         if (allocationStartTime > block.timestamp || block.timestamp > allocationEndTime) {
             revert ALLOCATION_NOT_ACTIVE();
         }
-    }
-
-    /// @notice Check if the allocation has ended
-    /// @dev Reverts if the allocation has not ended
-    function _checkOnlyAfterAllocation() internal view virtual {
-        if (block.timestamp <= allocationEndTime) revert ALLOCATION_NOT_ENDED();
     }
 
     /// @notice Checks if the allocation has not ended and reverts if it has.
