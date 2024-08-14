@@ -413,37 +413,42 @@ contract SQFSuperFluidStrategy is CoreBaseStrategy, RecipientsExtension {
         emit Distributed(address(0), _data);
     }
 
-    /// @notice This will allocate to a recipient.
+    /// @notice This will allocate to recipients.
     /// @dev The encoded '_data' will be determined by the strategy implementation.
+    /// @param _recipientsAddresses The addresses of the recipients to allocate to
     /// @param _data The data to use to allocate to the recipient
     /// @param _sender The address of the sender
-    function _allocate(address[] memory, uint256[] memory, bytes memory _data, address _sender)
+    function _allocate(address[] memory _recipientsAddresses, uint256[] memory, bytes memory _data, address _sender)
         internal
         override
         onlyActiveAllocation
     {
         if (!_isValidAllocator(_sender)) revert UNAUTHORIZED();
 
-        (address recipientId, int96 flowRate) = abi.decode(_data, (address, int96));
+        int96[] memory flowRates = abi.decode(_data, (int96[]));
 
-        address superApp = recipientIdSuperApps[recipientId];
+        for (uint256 i; i < _recipientsAddresses.length; i++) {
+            address recipientId = _recipientsAddresses[i];
+            address superApp = recipientIdSuperApps[recipientId];
+            int96 flowRate = flowRates[i];
 
-        if (Status(_getUintRecipientStatus(recipientId)) != Status.Accepted || superApp == address(0)) {
-            revert RECIPIENT_ERROR(recipientId);
+            if (Status(_getUintRecipientStatus(recipientId)) != Status.Accepted || superApp == address(0)) {
+                revert RECIPIENT_ERROR(recipientId);
+            }
+
+            (uint256 lastUpdated, int96 currentFlowRate,,) = allocationSuperToken.getFlowInfo(_sender, superApp);
+
+            if (currentFlowRate == 0 || lastUpdated == 0) {
+                // create the flow
+                // TODO: explore making a factory which would be approved by allocator only once
+                allocationSuperToken.createFlowFrom(_sender, superApp, flowRate);
+            } else {
+                // update the flow
+                allocationSuperToken.updateFlowFrom(_sender, superApp, flowRate);
+            }
+
+            emit Allocated(recipientId, _sender, uint256(int256(flowRate)), _data);
         }
-
-        (uint256 lastUpdated, int96 currentFlowRate,,) = allocationSuperToken.getFlowInfo(_sender, superApp);
-
-        if (currentFlowRate == 0 || lastUpdated == 0) {
-            // create the flow
-            // enhancement: explore making a factory which would be approved by allocator only once
-            allocationSuperToken.createFlowFrom(_sender, superApp, flowRate);
-        } else {
-            // update the flow
-            allocationSuperToken.updateFlowFrom(_sender, superApp, flowRate);
-        }
-
-        emit Allocated(recipientId, _sender, uint256(int256(flowRate)), _data);
     }
 
     /// @notice Check if the registration is active
