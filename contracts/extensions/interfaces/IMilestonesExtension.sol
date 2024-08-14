@@ -9,31 +9,31 @@ interface IMilestonesExtension {
     /// ===============================
 
     /// @notice Thrown when the pool manager attempts to lower the max bid
-    error MilestonesExtension_AMOUNT_TOO_LOW();
+    error AMOUNT_TOO_LOW();
 
     /// @notice Thrown when the proposal bid exceeds maximum bid
-    error MilestonesExtension_EXCEEDING_MAX_BID();
+    error EXCEEDING_MAX_BID();
 
     /// @notice Thrown when a recipient is not accepted
-    error MilestonesExtension_INVALID_RECIPIENT();
+    error INVALID_RECIPIENT();
 
     /// @notice Thrown when an unauthorized address attempts to submit a milestone
-    error MilestonesExtension_INVALID_SUBMITTER();
+    error INVALID_SUBMITTER();
 
     /// @notice Thrown when the milestone is invalid
-    error MilestonesExtension_INVALID_MILESTONE();
+    error INVALID_MILESTONE();
 
     /// @notice Thrown when the new milestone status being reviewed is invalid
-    error MilestonesExtension_INVALID_MILESTONE_STATUS();
+    error INVALID_MILESTONE_STATUS();
 
     /// @notice Thrown when the milestone are already approved and cannot be changed
-    error MilestonesExtension_MILESTONES_ALREADY_SET();
+    error MILESTONES_ALREADY_SET();
 
     /// @notice Thrown when the milestone is not pending
-    error MilestonesExtension_MILESTONE_NOT_PENDING();
+    error MILESTONE_NOT_PENDING();
 
     /// @notice Thrown when the milestone is pending
-    error MilestonesExtension_MILESTONE_PENDING();
+    error MILESTONE_PENDING();
 
     /// ===============================
     /// ========== Events =============
@@ -55,7 +55,7 @@ interface IMilestonesExtension {
     /// @notice Emitted for the status change of a milestone.
     /// @param milestoneId Id of the milestone
     /// @param status Status of the milestone
-    event MilestoneStatusChanged(uint256 indexed milestoneId, Status status);
+    event MilestoneStatusChanged(uint256 indexed milestoneId, MilestoneStatus status);
 
     /// @notice Emitted when milestones are set.
     /// @param milestonesLength Count of milestones
@@ -66,7 +66,7 @@ interface IMilestonesExtension {
     /// ================================
 
     /// @notice The Status enum that all milestones are based from
-    enum Status {
+    enum MilestoneStatus {
         None,
         Pending,
         Accepted,
@@ -84,7 +84,7 @@ interface IMilestonesExtension {
     struct Milestone {
         uint256 amountPercentage;
         Metadata metadata;
-        Status status;
+        MilestoneStatus status;
     }
 
     /// ================================
@@ -115,7 +115,7 @@ interface IMilestonesExtension {
 
     /// @notice Get the status of the milestone
     /// @param _milestoneId Id of the milestone
-    function getMilestoneStatus(uint256 _milestoneId) external view returns (Status);
+    function getMilestoneStatus(uint256 _milestoneId) external view returns (MilestoneStatus);
 
     /// ===============================
     /// ======= External/Custom =======
@@ -140,5 +140,5 @@ interface IMilestonesExtension {
     /// @notice Reject pending milestone submmited by an accepted recipient.
     /// @dev Emits a 'MilestoneStatusChanged()' event.
     /// @param _milestoneStatus ID of the milestone
-    function reviewMilestone(Status _milestoneStatus) external;
+    function reviewMilestone(MilestoneStatus _milestoneStatus) external;
 }

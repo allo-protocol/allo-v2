@@ -4,13 +4,10 @@ pragma solidity 0.8.19;
 import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 // Interfaces
 import {IAllo} from "../core/interfaces/IAllo.sol";
-import {IRecipientsExtension} from "../extensions/interfaces/IRecipientsExtension.sol";
 // Core Contracts
 import {CoreBaseStrategy} from "./CoreBaseStrategy.sol";
 import {RecipientsExtension} from "../extensions/contracts/RecipientsExtension.sol";
 // Internal Libraries
-import {Errors} from "../core/libraries/Errors.sol";
-import {Native} from "../core/libraries/Native.sol";
 import {QFHelper} from "../core/libraries/QFHelper.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -48,14 +45,11 @@ contract DonationVotingOnchain is CoreBaseStrategy, RecipientsExtension {
     /// ========== Errors =============
     /// ===============================
 
-    /// @notice Thrown when a recipient which was not accepted is used in an action that requires so.
-    error DonationVotingOnchain_RecipientNotAccepted(address recipientId);
-
     /// @notice Thrown when there is nothing to distribute for the given recipient.
-    error DonationVotingOnchain_NothingToDistributed(address recipientId);
+    error NOTHING_TO_DISTRIBUTE(address recipientId);
 
     /// @notice Thrown when the timestamps being set or updated don't meet the contracts requirements.
-    error DonationVotingOnchain_InvalidTimestamps();
+    error INVALID_TIMESTAMPS();
 
     /// ================================
     /// ========== Storage =============
@@ -102,7 +96,7 @@ contract DonationVotingOnchain is CoreBaseStrategy, RecipientsExtension {
 
     /// @notice Constructor for the Donation Voting Onchain strategy
     /// @param _allo The 'Allo' contract
-    constructor(address _allo) CoreBaseStrategy(_allo) {}
+    constructor(address _allo) RecipientsExtension(_allo, false) {}
 
     /// ===============================
     /// ========= Initialize ==========
@@ -112,7 +106,7 @@ contract DonationVotingOnchain is CoreBaseStrategy, RecipientsExtension {
     /// @param _poolId ID of the pool
     /// @param _data The data to be decoded
     /// @custom:data (
-    ///        IRecipientsExtension.RecipientInitializeData _recipientExtensionInitializeData,
+    ///        RecipientInitializeData _recipientExtensionInitializeData,
     ///        uint64 _allocationStartTime,
     ///        uint64 _allocationEndTime,
     ///        uint64 _withdrawalCooldown,
@@ -120,12 +114,12 @@ contract DonationVotingOnchain is CoreBaseStrategy, RecipientsExtension {
     ///    )
     function initialize(uint256 _poolId, bytes memory _data) external virtual override {
         (
-            IRecipientsExtension.RecipientInitializeData memory _recipientExtensionInitializeData,
+            RecipientInitializeData memory _recipientExtensionInitializeData,
             uint64 _allocationStartTime,
             uint64 _allocationEndTime,
             uint64 _withdrawalCooldown,
             address _allocationToken
-        ) = abi.decode(_data, (IRecipientsExtension.RecipientInitializeData, uint64, uint64, uint64, address));
+        ) = abi.decode(_data, (RecipientInitializeData, uint64, uint64, uint64, address));
 
         allocationStartTime = _allocationStartTime;
         allocationEndTime = _allocationEndTime;
@@ -156,23 +150,12 @@ contract DonationVotingOnchain is CoreBaseStrategy, RecipientsExtension {
         uint64 _allocationStartTime,
         uint64 _allocationEndTime
     ) external onlyPoolManager(msg.sender) {
-        if (_allocationStartTime > _allocationEndTime) revert DonationVotingOnchain_InvalidTimestamps();
+        if (_allocationStartTime > _allocationEndTime) revert INVALID_TIMESTAMPS();
         allocationStartTime = _allocationStartTime;
         allocationEndTime = _allocationEndTime;
         emit AllocationTimestampsUpdated(allocationStartTime, allocationEndTime, msg.sender);
 
         _updatePoolTimestamps(_registrationStartTime, _registrationEndTime);
-    }
-
-    /// @notice Sets recipient statuses.
-    /// @param statuses new statuses
-    /// @param refRecipientsCounter the recipientCounter the transaction is based on
-    function reviewRecipients(ApplicationStatus[] memory statuses, uint256 refRecipientsCounter)
-        public
-        override
-        onlyActiveRegistration
-    {
-        super.reviewRecipients(statuses, refRecipientsCounter);
     }
 
     /// ====================================
@@ -191,9 +174,7 @@ contract DonationVotingOnchain is CoreBaseStrategy, RecipientsExtension {
     {
         uint256 totalAmount;
         for (uint256 i = 0; i < _recipients.length; i++) {
-            if (!_isAcceptedRecipient(_recipients[i])) {
-                revert DonationVotingOnchain_RecipientNotAccepted(_recipients[i]);
-            }
+            if (!_isAcceptedRecipient(_recipients[i])) revert RECIPIENT_NOT_ACCEPTED();
 
             // Update the total payout amount for the claim and the total claimable amount
             amountAllocated[_recipients[i]] += _amounts[i];
@@ -226,7 +207,7 @@ contract DonationVotingOnchain is CoreBaseStrategy, RecipientsExtension {
             address recipientId = _recipientIds[i];
             address recipientAddress = _recipients[recipientId].recipientAddress;
 
-            if (amountAllocated[recipientId] == 0) revert DonationVotingOnchain_NothingToDistributed(recipientId);
+            if (amountAllocated[recipientId] == 0) revert NOTHING_TO_DISTRIBUTE(recipientId);
 
             // Transfer allocation
             uint256 allocationAmount = amountAllocated[recipientId];
@@ -264,17 +245,17 @@ contract DonationVotingOnchain is CoreBaseStrategy, RecipientsExtension {
         virtual
         override
     {
-        if (_registrationStartTime > _registrationEndTime) revert DonationVotingOnchain_InvalidTimestamps();
-        if (block.timestamp > _registrationStartTime) revert DonationVotingOnchain_InvalidTimestamps();
+        if (_registrationStartTime > _registrationEndTime) revert INVALID_TIMESTAMPS();
+        if (block.timestamp > _registrationStartTime) revert INVALID_TIMESTAMPS();
         // Check consistency with allocation timestamps
-        if (_registrationStartTime > allocationStartTime) revert DonationVotingOnchain_InvalidTimestamps();
-        if (_registrationEndTime > allocationEndTime) revert DonationVotingOnchain_InvalidTimestamps();
+        if (_registrationStartTime > allocationStartTime) revert INVALID_TIMESTAMPS();
+        if (_registrationEndTime > allocationEndTime) revert INVALID_TIMESTAMPS();
     }
 
     /// @notice Returns if the recipient is accepted
     /// @param _recipientId The recipient id
     /// @return If the recipient is accepted
     function _isAcceptedRecipient(address _recipientId) internal view virtual returns (bool) {
-        return _getRecipientStatus(_recipientId) == IRecipientsExtension.Status.Accepted;
+        return _getRecipientStatus(_recipientId) == Status.Accepted;
     }
 }
