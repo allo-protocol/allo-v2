@@ -370,8 +370,7 @@ contract SQFSuperFluidStrategy is CoreBaseStrategy, RecipientsExtension {
         returns (Status _reviewedStatus)
     {
         if (_newStatus == Status.Accepted) {
-            // TODO: get the recipientId from the recipientIndex
-            address recipientId = address(0);
+            address recipientId = recipientIndexToRecipientId[_recipientIndex];
             address recipientAddress = _getRecipient(recipientId).recipientAddress;
             address superApp = recipientSuperAppFactory.createRecipientSuperApp(
                 recipientAddress, address(this), superfluidHost, allocationSuperToken, true, true, true
