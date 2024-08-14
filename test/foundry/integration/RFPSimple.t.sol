@@ -1,34 +1,24 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity ^0.8.19;
 
-import {Test, console} from "forge-std/Test.sol";
-import {Allo} from "contracts/core/Allo.sol";
-import {Registry, Metadata} from "contracts/core/Registry.sol";
+import {IAllo} from "contracts/core/interfaces/IAllo.sol";
+import {Metadata} from "contracts/core/Registry.sol";
 import {RFPSimple} from "contracts/strategies/RFPSimple.sol";
 import {Errors} from "contracts/core/libraries/Errors.sol";
 import {IRecipientsExtension} from "contracts/extensions/interfaces/IRecipientsExtension.sol";
 import {IMilestonesExtension} from "contracts/extensions/interfaces/IMilestonesExtension.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IntegrationBase} from "./IntegrationBase.sol";
 
-contract IntegrationRFPSimple is Test {
-    address public constant DAI = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
+contract IntegrationRFPSimple is IntegrationBase {
     uint256 public constant DAI_FUNDS = 10;
     uint256 public constant MAX_BID = 1000;
 
-    Allo public allo;
-    Registry public registry;
+    IAllo public allo;
     RFPSimple public strategy;
 
-    address public owner;
-    address public treasury;
-    address public profileOwner;
-    address public recipient0;
-    address public recipient1;
-    address public recipient2;
     address public allocator0;
     address public allocator1;
-
-    bytes32 public profileId;
 
     uint256 public poolId;
 
@@ -72,42 +62,26 @@ contract IntegrationRFPSimple is Test {
         return IRecipientsExtension.ApplicationStatus({index: rowIndex, statusRow: statusRow});
     }
 
-    function setUp() public {
-        vm.createSelectFork(vm.rpcUrl("mainnet"), 20289932);
+    function setUp() public override {
+        super.setUp();
 
-        owner = makeAddr("owner");
-        treasury = makeAddr("treasury");
-        profileOwner = makeAddr("profileOwner");
-        recipient0 = makeAddr("recipient0");
-        recipient1 = makeAddr("recipient1");
-        recipient2 = makeAddr("recipient2");
+        allo = IAllo(ALLO_PROXY);
+        
         allocator0 = makeAddr("allocator0");
         allocator1 = makeAddr("allocator1");
 
         // Deploying contracts
-        allo = new Allo();
-        registry = new Registry();
         strategy = new RFPSimple(address(allo));
 
-        // Initialize contracts
-        allo.initialize(owner, address(registry), payable(treasury), 0, 0, address(1)); // NOTE: trusted forwarder is not used
-        registry.initialize(owner);
-
-        // Creating profile
-        vm.prank(profileOwner);
-        profileId = registry.createProfile(
-            0, "Test Profile", Metadata({protocol: 0, pointer: ""}), profileOwner, new address[](0)
-        );
-
         // Deal
-        deal(DAI, profileOwner, DAI_FUNDS);
-        vm.prank(profileOwner);
+        deal(DAI, userAddr, DAI_FUNDS);
+        vm.prank(userAddr);
         IERC20(DAI).approve(address(allo), DAI_FUNDS);
 
         // Creating pool (and deploying strategy)
         address[] memory managers = new address[](1);
-        managers[0] = profileOwner;
-        vm.prank(profileOwner);
+        managers[0] = userAddr;
+        vm.prank(userAddr);
         poolId = allo.createPoolWithCustomStrategy(
             profileId,
             address(strategy),
@@ -130,29 +104,28 @@ contract IntegrationRFPSimple is Test {
 
         address[] memory recipients = new address[](1);
         bytes[] memory data = new bytes[](1);
-        bytes[] memory extraData = new bytes[](1);
 
-        recipients[0] = recipient0;
+        recipients[0] = recipient0Addr;
         uint256 proposalBid = 10;
         data[0] = abi.encode(address(0), Metadata({protocol: 0, pointer: ""}), abi.encode(uint256(proposalBid)));
-        strategy.register(recipients, abi.encode(data), recipient0);
+        strategy.register(recipients, abi.encode(data), recipient0Addr);
 
-        recipients[0] = recipient1;
+        recipients[0] = recipient1Addr;
         proposalBid = 20;
         data[0] = abi.encode(address(0), Metadata({protocol: 0, pointer: ""}), abi.encode(uint256(proposalBid)));
-        strategy.register(recipients, abi.encode(data), recipient1);
+        strategy.register(recipients, abi.encode(data), recipient1Addr);
 
-        recipients[0] = recipient2;
+        recipients[0] = recipient2Addr;
         proposalBid = 30;
         data[0] = abi.encode(address(0), Metadata({protocol: 0, pointer: ""}), abi.encode(uint256(proposalBid)));
-        strategy.register(recipients, abi.encode(data), recipient2);
+        strategy.register(recipients, abi.encode(data), recipient2Addr);
 
         vm.stopPrank();
     }
 
     function testReviewRecipients() public {
         // Review recipients
-        vm.startPrank(profileOwner);
+        vm.startPrank(userAddr);
 
         IRecipientsExtension.ApplicationStatus[] memory statuses = new IRecipientsExtension.ApplicationStatus[](1);
         uint256 recipientsCounter = strategy.recipientsCounter();
@@ -161,8 +134,8 @@ contract IntegrationRFPSimple is Test {
         uint256[] memory _newStatuses = new uint256[](2);
 
         // Block multiple acceptances
-        _recipientIds[0] = recipient0;
-        _recipientIds[1] = recipient1;
+        _recipientIds[0] = recipient0Addr;
+        _recipientIds[1] = recipient1Addr;
         _newStatuses[0] = uint256(IRecipientsExtension.Status.Accepted);
         _newStatuses[1] = uint256(IRecipientsExtension.Status.Accepted);
         statuses[0] = _getApplicationStatus(_recipientIds, _newStatuses);
@@ -195,10 +168,10 @@ contract IntegrationRFPSimple is Test {
 
     function test_Distribute() public {
         // Accept (review) recipient
-        vm.startPrank(profileOwner);
+        vm.startPrank(userAddr);
 
         IRecipientsExtension.ApplicationStatus[] memory statuses = new IRecipientsExtension.ApplicationStatus[](1);
-        statuses[0] = _getApplicationStatus(recipient0, uint256(IRecipientsExtension.Status.Accepted));
+        statuses[0] = _getApplicationStatus(recipient0Addr, uint256(IRecipientsExtension.Status.Accepted));
         strategy.reviewRecipients(statuses, strategy.recipientsCounter());
 
         // Set milestones
@@ -208,38 +181,38 @@ contract IntegrationRFPSimple is Test {
         strategy.setMilestones(_milestones);
 
         // Submit milestone
-        vm.startPrank(recipient0);
+        vm.startPrank(recipient0Addr);
         Metadata memory _metadata;
-        strategy.submitUpcomingMilestone(recipient0, _metadata);
+        strategy.submitUpcomingMilestone(recipient0Addr, _metadata);
 
         // Accept milestone
-        vm.startPrank(profileOwner);
+        vm.startPrank(userAddr);
         strategy.reviewMilestone(IMilestonesExtension.MilestoneStatus.Accepted);
 
         // Distribute funds
         vm.startPrank(address(allo));
 
         address[] memory recipients = new address[](1);
-        recipients[0] = recipient0;
+        recipients[0] = recipient0Addr;
         uint256[] memory _milestonesIds = new uint256[](2);
 
         // Revert when attempting to claim twice
         _milestonesIds[0] = 0;
         _milestonesIds[1] = 0;
         vm.expectRevert(IMilestonesExtension.INVALID_MILESTONE_STATUS.selector);
-        strategy.distribute(recipients, abi.encode(_milestonesIds), recipient0);
+        strategy.distribute(recipients, abi.encode(_milestonesIds), recipient0Addr);
 
         // Revert when attempting to claim non-submitted milestone
         _milestonesIds[1] = 1;
         vm.expectRevert(IMilestonesExtension.INVALID_MILESTONE_STATUS.selector);
-        strategy.distribute(recipients, abi.encode(_milestonesIds), recipient0);
+        strategy.distribute(recipients, abi.encode(_milestonesIds), recipient0Addr);
 
         // Distribute
         _milestonesIds = new uint256[](1);
         _milestonesIds[0] = 0;
-        strategy.distribute(recipients, abi.encode(_milestonesIds), recipient0);
+        strategy.distribute(recipients, abi.encode(_milestonesIds), recipient0Addr);
 
-        assertEq(IERC20(DAI).balanceOf(recipient0), 6);
+        assertEq(IERC20(DAI).balanceOf(recipient0Addr), 6);
         assertEq(IERC20(DAI).balanceOf(address(strategy)), 4);
         vm.stopPrank();
     }
