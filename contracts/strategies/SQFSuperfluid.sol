@@ -47,18 +47,6 @@ contract SQFSuperFluidStrategy is CoreBaseStrategy, RecipientsExtension {
     /// @param sender The sender of the transaction
     event AllocationTimestampsUpdated(uint64 allocationStartTime, uint64 allocationEndTime, address sender);
 
-    // /// @notice Emitted when a recipient updates their registration
-    // /// @param recipientId ID of the recipient
-    // /// @param data The encoded data - (address recipientId, address recipientAddress, Metadata metadata)
-    // /// @param sender The sender of the transaction
-    // event UpdatedRegistration(address indexed recipientId, bytes data, address sender);
-
-    /// @notice Emitted when a recipient is reviewed
-    /// @param recipientId ID of the recipient
-    /// @param status The status of the recipient
-    /// @param sender The sender of the transaction
-    event Reviewed(address indexed recipientId, Status status, address sender);
-
     /// @notice Emitted when a recipient is canceled
     /// @param recipientId ID of the recipient
     /// @param sender The sender of the transaction
@@ -162,7 +150,7 @@ contract SQFSuperFluidStrategy is CoreBaseStrategy, RecipientsExtension {
     /// ========= Initialize ==========
     /// ===============================
 
-    // @notice Initialize the strategy
+    /// @notice Initialize the strategy
     /// @dev This will revert if the strategy is already initialized and 'msg.sender' is not the 'Allo' contract.
     /// @param _poolId ID of the pool
     /// @param _data The data to be decoded
@@ -178,10 +166,6 @@ contract SQFSuperFluidStrategy is CoreBaseStrategy, RecipientsExtension {
         // Initialize the RecipientsExtension
         __RecipientsExtension_init(_recipientExtensionInitializeData);
 
-        superfluidHost = _sqfSuperfluidInitializeParams.superfluidHost;
-        minPassportScore = _sqfSuperfluidInitializeParams.minPassportScore;
-        recipientSuperAppFactory = IRecipientSuperAppFactory(_sqfSuperfluidInitializeParams.recipientSuperAppFactory);
-
         if (
             _sqfSuperfluidInitializeParams.superfluidHost == address(0)
                 || _sqfSuperfluidInitializeParams.allocationSuperToken == address(0)
@@ -196,12 +180,12 @@ contract SQFSuperFluidStrategy is CoreBaseStrategy, RecipientsExtension {
             revert INVALID_TIMESTAMPS();
         }
 
+        superfluidHost = _sqfSuperfluidInitializeParams.superfluidHost;
+        minPassportScore = _sqfSuperfluidInitializeParams.minPassportScore;
+        recipientSuperAppFactory = IRecipientSuperAppFactory(_sqfSuperfluidInitializeParams.recipientSuperAppFactory);
         allocationSuperToken = ISuperToken(_sqfSuperfluidInitializeParams.allocationSuperToken);
         poolSuperToken = ISuperToken(allo.getPool(_poolId).token);
-        allocationSuperToken.getUnderlyingToken();
-
         initialSuperAppBalance = _sqfSuperfluidInitializeParams.initialSuperAppBalance;
-
         passportDecoder = IGitcoinPassportDecoder(_sqfSuperfluidInitializeParams.passportDecoder);
         gdaPool = SuperTokenV1Library.createPool(
             poolSuperToken,
@@ -228,124 +212,8 @@ contract SQFSuperFluidStrategy is CoreBaseStrategy, RecipientsExtension {
     }
 
     /// ====================================
-    /// ============== Main ================
+    /// ============= External =============
     /// ====================================
-
-    // /// @notice Register Recipient to the pool
-    // /// @dev The '_data' parameter is encoded as follows:
-    // ///     - If useRegistryAnchor is true, then the data is encoded as (address recipientId, Metadata metadata)
-    // ///     - If useRegistryAnchor is false, then the data is encoded as (address recipientAddress, address registryAnchor, Metadata metadata)
-    // /// @param _data The data to be decoded
-    // /// @param _sender The sender of the transaction
-    // /// @return recipientId The ID of the recipient
-    // function _registerRecipient(bytes memory _data, address _sender)
-    //     internal
-    //     virtual
-    //     override
-    //     onlyActiveRegistration
-    //     returns (address recipientId)
-    // {
-    //     address recipientAddress;
-    //     address registryAnchor;
-    //     bool isUsingRegistryAnchor;
-
-    //     Metadata memory metadata;
-
-    //     // decode data custom to this strategy
-    //     if (useRegistryAnchor) {
-    //         (recipientId, recipientAddress, metadata) = abi.decode(_data, (address, address, Metadata));
-
-    //         // when registry gating is enabled, the recipientId must be a profile member
-    //         if (!_isProfileMember(recipientId, _sender)) revert UNAUTHORIZED();
-    //     } else {
-    //         (registryAnchor, recipientAddress, metadata) = abi.decode(_data, (address, address, Metadata));
-    //         isUsingRegistryAnchor = registryAnchor != address(0);
-    //         recipientId = isUsingRegistryAnchor ? registryAnchor : _sender;
-
-    //         // when using registry anchor, the ID of the recipient must be a profile member
-    //         if (isUsingRegistryAnchor && !_isProfileMember(recipientId, _sender)) revert UNAUTHORIZED();
-    //     }
-
-    //     // make sure that if metadata is required, it is provided
-    //     if (metadataRequired && (bytes(metadata.pointer).length == 0 || metadata.protocol == 0)) {
-    //         revert INVALID_METADATA();
-    //     }
-
-    //     // make sure the recipient address is not the zero address
-    //     if (recipientAddress == address(0)) revert RECIPIENT_ERROR(recipientId);
-
-    //     Recipient storage recipient = recipients[recipientId];
-
-    //     // update the recipients data
-    //     recipient.recipientAddress = recipientAddress;
-    //     recipient.metadata = metadata;
-    //     recipient.useRegistryAnchor = useRegistryAnchor ? true : isUsingRegistryAnchor;
-
-    //     Status currentStatus = recipient.recipientStatus;
-
-    //     if (currentStatus == Status.None) {
-    //         // recipient registering new application
-    //         recipient.recipientStatus = Status.Pending;
-    //         emit Registered(recipientId, _data, _sender);
-    //     } else if (currentStatus == Status.Pending) {
-    //         // emit the new status with the '_data' that was passed in
-    //         emit UpdatedRegistration(recipientId, _data, _sender);
-    //     } else {
-    //         revert INVALID();
-    //     }
-    // }
-
-    /// @notice This will distribute funds (tokens) to recipients.
-    /// @dev most strategies will track a TOTAL amount per recipient, and a PAID amount, and pay the difference
-    /// this contract will need to track the amount paid already, so that it doesn't double pay.
-    /// @param _data Data required will depend on the strategy implementation
-    /// @param _sender The address of the sender
-    function _distribute(address[] memory, bytes memory _data, address _sender)
-        internal
-        override
-        onlyPoolManager(_sender)
-    {
-        _checkOnlyAfterRegistration();
-
-        (int96 flowRate) = abi.decode(_data, (int96));
-        poolSuperToken.distributeFlow(address(this), gdaPool, flowRate);
-
-        emit Distributed(address(0), _data);
-    }
-
-    /// @notice This will allocate to a recipient.
-    /// @dev The encoded '_data' will be determined by the strategy implementation.
-    /// @param _data The data to use to allocate to the recipient
-    /// @param _sender The address of the sender
-    function _allocate(address[] memory, uint256[] memory, bytes memory _data, address _sender)
-        internal
-        override
-        onlyActiveAllocation
-    {
-        if (!_isValidAllocator(_sender)) revert UNAUTHORIZED();
-
-        (address recipientId, int96 flowRate) = abi.decode(_data, (address, int96));
-
-        Recipient storage recipient = _recipients[recipientId];
-        address superApp = recipientIdSuperApps[recipientId];
-
-        if (Status(_getUintRecipientStatus(recipientId)) != Status.Accepted || superApp == address(0)) {
-            revert RECIPIENT_ERROR(recipientId);
-        }
-
-        (uint256 lastUpdated, int96 currentFlowRate,,) = allocationSuperToken.getFlowInfo(_sender, superApp);
-
-        if (currentFlowRate == 0 || lastUpdated == 0) {
-            // create the flow
-            // enhancement: explore making a factory which would be approved by allocator only once
-            allocationSuperToken.createFlowFrom(_sender, superApp, flowRate);
-        } else {
-            // update the flow
-            allocationSuperToken.updateFlowFrom(_sender, superApp, flowRate);
-        }
-
-        emit Allocated(recipientId, _sender, uint256(int256(flowRate)), _data);
-    }
 
     /// @notice Set the start and end dates for the pool
     /// @param _registrationStartTime The start time for the registration
@@ -374,71 +242,8 @@ contract SQFSuperFluidStrategy is CoreBaseStrategy, RecipientsExtension {
     /// @param _minPassportScore The new min passport score
     function updateMinPassportScore(uint256 _minPassportScore) external onlyPoolManager(msg.sender) {
         minPassportScore = _minPassportScore;
+
         emit MinPassportScoreUpdated(_minPassportScore, msg.sender);
-    }
-
-    /// @notice Checks if the allocator is valid
-    /// @param _allocator The allocator address
-    /// @return 'true' if the allocator is valid, otherwise 'false'
-    function _isValidAllocator(address _allocator) internal view returns (bool) {
-        uint256 allocatorScore = passportDecoder.getScore(_allocator);
-        if (allocatorScore >= minPassportScore) {
-            return true;
-        }
-        return false;
-    }
-
-    /// @notice Review recipient(s) application(s)
-    /// @dev You can review multiple recipients at once or just one. This can only be called by a pool manager and
-    ///      only during active registration.
-    /// @param _recipientIds Ids of the recipients
-    /// @param _recipientStatuses Statuses of the recipients
-    function reviewRecipients(address[] calldata _recipientIds, Status[] calldata _recipientStatuses)
-        external
-        virtual
-        onlyPoolManager(msg.sender)
-        onlyBeforeAllocationEnds
-    {
-        // make sure the arrays are the same length
-        uint256 recipientLength = _recipientIds.length;
-        if (recipientLength != _recipientStatuses.length) revert INVALID();
-
-        for (uint256 i; i < recipientLength;) {
-            Status recipientStatus = _recipientStatuses[i];
-            address recipientId = _recipientIds[i];
-            Recipient storage recipient = _recipients[recipientId];
-
-            // only pending applications can be updated
-            // and the new status can only be Accepted or Rejected
-            if (
-                Status(_getUintRecipientStatus(recipientId)) != Status.Pending
-                    || (recipientStatus != Status.Accepted && recipientStatus != Status.Rejected)
-            ) {
-                revert RECIPIENT_ERROR(recipientId);
-            }
-            _setRecipientStatus(recipientId, uint256(recipientStatus));
-
-            emit Reviewed(recipientId, recipientStatus, msg.sender);
-
-            if (recipientStatus == Status.Accepted) {
-                address superApp = recipientSuperAppFactory.createRecipientSuperApp(
-                    recipient.recipientAddress, address(this), superfluidHost, allocationSuperToken, true, true, true
-                );
-
-                allocationSuperToken.transfer(address(superApp), initialSuperAppBalance);
-
-                // Add recipientAddress as member of the GDA with 1 unit
-                _updateMemberUnits(recipientId, recipient.recipientAddress, 1);
-
-                recipientIdSuperApps[recipientId] = superApp;
-                // superApps[address(superApp)] = recipientId;
-                // recipient.superApp = superApp;
-            }
-
-            unchecked {
-                ++i;
-            }
-        }
     }
 
     /// @notice Cancel (remove) recipient(s) application(s)
@@ -464,11 +269,10 @@ contract SQFSuperFluidStrategy is CoreBaseStrategy, RecipientsExtension {
 
             _setRecipientStatus(recipientId, uint256(Status.Canceled));
 
-            // address recipientSuperApp = recipient.superApp;
-
             // Update mappings as recipient is cancelled
-            // delete recipient.superApp;
-            // delete superApps[address(recipientSuperApp)];
+            address superApp = recipientIdSuperApps[recipientId];
+            delete superAppsRecipientIds[superApp];
+            delete recipientIdSuperApps[recipientId];
             delete recipientFlowRate[recipientId];
 
             // Set recipient units to 0 to stop streaming from GDA
@@ -537,39 +341,110 @@ contract SQFSuperFluidStrategy is CoreBaseStrategy, RecipientsExtension {
         emit TotalUnitsUpdated(recipientId, recipientTotalUnits);
     }
 
-    function _beforeWithdraw(address _token, uint256, address) internal override {
-        if (_token == address(poolSuperToken)) {
-            revert INVALID();
-        }
-    }
-
     /// @notice Close the stream
     function closeStream() external onlyPoolManager(msg.sender) {
         poolSuperToken.distributeFlow(address(this), gdaPool, 0, "0x");
         _transferAmount(address(poolSuperToken), msg.sender, poolSuperToken.balanceOf(address(this)));
     }
 
-    /// =========================
-    /// ==== View Functions =====
-    /// =========================
-
-    /// @notice Get the recipientId of a super app
-    /// @param _superApp The super app
-    /// @return The recipientId
-    function getRecipientIdOfSuperApp(address _superApp) external view returns (address) {
-        return superAppsRecipientIds[_superApp];
-    }
-
-    /// @notice Get the super app of a recipient
-    /// @param _recipientId The ID of the recipient
-    /// @return The super app
-    function getSuperAppOfRecipientId(address _recipientId) external view returns (address) {
-        return recipientIdSuperApps[_recipientId];
-    }
-
     /// ====================================
     /// ============ Internal ==============
     /// ====================================
+
+    /// @dev prevent the pool token from being withdrawn
+    function _beforeWithdraw(address _token, uint256, address) internal override {
+        if (_token == address(poolSuperToken)) {
+            revert INVALID();
+        }
+    }
+
+    /// @notice Checks if the allocator is valid
+    /// @param _allocator The allocator address
+    /// @return 'true' if the allocator is valid, otherwise 'false'
+    function _isValidAllocator(address _allocator) internal view returns (bool) {
+        uint256 allocatorScore = passportDecoder.getScore(_allocator);
+        if (allocatorScore >= minPassportScore) {
+            return true;
+        }
+        return false;
+    }
+
+    /// @dev If the recipient is accepted, create a super app for the recipient
+    function _reviewRecipientStatus(Status _newStatus, Status, uint256 _recipientIndex)
+        internal
+        override
+        returns (Status _reviewedStatus)
+    {
+        if (_newStatus == Status.Accepted) {
+            // TODO: get the recipientId from the recipientIndex
+            address recipientId = address(0);
+            address recipientAddress = _getRecipient(recipientId).recipientAddress;
+            address superApp = recipientSuperAppFactory.createRecipientSuperApp(
+                recipientAddress, address(this), superfluidHost, allocationSuperToken, true, true, true
+            );
+
+            allocationSuperToken.transfer(address(superApp), initialSuperAppBalance);
+
+            // Add recipientAddress as member of the GDA with 1 unit
+            _updateMemberUnits(recipientId, recipientAddress, 1);
+
+            recipientIdSuperApps[recipientId] = superApp;
+            superAppsRecipientIds[superApp] = recipientId;
+        }
+
+        _reviewedStatus = _newStatus;
+    }
+
+    /// @notice This will distribute funds (tokens) to recipients.
+    /// @dev most strategies will track a TOTAL amount per recipient, and a PAID amount, and pay the difference
+    /// this contract will need to track the amount paid already, so that it doesn't double pay.
+    /// @param _data Data required will depend on the strategy implementation
+    /// @param _sender The address of the sender
+    function _distribute(address[] memory, bytes memory _data, address _sender)
+        internal
+        override
+        onlyPoolManager(_sender)
+    {
+        _checkOnlyAfterRegistration();
+
+        (int96 flowRate) = abi.decode(_data, (int96));
+        poolSuperToken.distributeFlow(address(this), gdaPool, flowRate);
+
+        emit Distributed(address(0), _data);
+    }
+
+    /// @notice This will allocate to a recipient.
+    /// @dev The encoded '_data' will be determined by the strategy implementation.
+    /// @param _data The data to use to allocate to the recipient
+    /// @param _sender The address of the sender
+    function _allocate(address[] memory, uint256[] memory, bytes memory _data, address _sender)
+        internal
+        override
+        onlyActiveAllocation
+    {
+        if (!_isValidAllocator(_sender)) revert UNAUTHORIZED();
+
+        (address recipientId, int96 flowRate) = abi.decode(_data, (address, int96));
+
+        address superApp = recipientIdSuperApps[recipientId];
+
+        if (Status(_getUintRecipientStatus(recipientId)) != Status.Accepted || superApp == address(0)) {
+            revert RECIPIENT_ERROR(recipientId);
+        }
+
+        (uint256 lastUpdated, int96 currentFlowRate,,) = allocationSuperToken.getFlowInfo(_sender, superApp);
+
+        if (currentFlowRate == 0 || lastUpdated == 0) {
+            // create the flow
+            // enhancement: explore making a factory which would be approved by allocator only once
+            allocationSuperToken.createFlowFrom(_sender, superApp, flowRate);
+        } else {
+            // update the flow
+            allocationSuperToken.updateFlowFrom(_sender, superApp, flowRate);
+        }
+
+        emit Allocated(recipientId, _sender, uint256(int256(flowRate)), _data);
+    }
 
     /// @notice Check if the registration is active
     /// @dev Reverts if the registration is not active
@@ -608,6 +483,7 @@ contract SQFSuperFluidStrategy is CoreBaseStrategy, RecipientsExtension {
     function _updateMemberUnits(address _recipientId, address _recipientAddress, uint128 _units) internal {
         gdaPool.updateMemberUnits(_recipientAddress, _units);
         totalUnitsByRecipient[_recipientId] = _units;
+
         emit TotalUnitsUpdated(_recipientId, _units);
     }
 }
