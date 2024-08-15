@@ -177,7 +177,7 @@ abstract contract RecipientsExtension is CoreBaseStrategy, Errors, IRecipientsEx
     /// and may vary from strategy to strategy. Checks if '_registrationStartTime' is greater than the '_registrationEndTime'
     /// @param _registrationStartTime The start time for the registration
     /// @param _registrationEndTime The end time for the registration
-    function _isPoolTimestampValid(uint64 _registrationStartTime, uint64 _registrationEndTime) internal pure virtual {
+    function _isPoolTimestampValid(uint64 _registrationStartTime, uint64 _registrationEndTime) internal view virtual {
         if (_registrationStartTime > _registrationEndTime) {
             revert INVALID();
         }
