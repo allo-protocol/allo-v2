@@ -19,4 +19,6 @@ interface IBiconomyForwarder {
         returns (bool success, bytes memory ret);
 
     function REQUEST_TYPEHASH() external view returns (bytes32);
+
+    function getNonce(address from, uint256 batchId) external view returns (uint256 nonce);
 }
