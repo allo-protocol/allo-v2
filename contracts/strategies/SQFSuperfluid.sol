@@ -17,7 +17,7 @@ import {IRecipientSuperAppFactory} from "contracts/strategies/interfaces/IRecipi
 import {RecipientsExtension} from "contracts/extensions/contracts/RecipientsExtension.sol";
 import {CoreBaseStrategy} from "contracts/strategies/CoreBaseStrategy.sol";
 
-contract SQFSuperFluidStrategy is CoreBaseStrategy, RecipientsExtension {
+contract SQFSuperfluid is CoreBaseStrategy, RecipientsExtension {
     using SuperTokenV1Library for ISuperToken;
     using FixedPointMathLib for uint256;
 
@@ -339,6 +339,13 @@ contract SQFSuperFluidStrategy is CoreBaseStrategy, RecipientsExtension {
     function closeStream() external onlyPoolManager(msg.sender) {
         poolSuperToken.distributeFlow(address(this), gdaPool, 0, "0x");
         _transferAmount(address(poolSuperToken), msg.sender, poolSuperToken.balanceOf(address(this)));
+    }
+
+    /// @notice Checks if the allocator is valid
+    /// @param _allocator The allocator address
+    /// @return 'true' if the allocator is valid, otherwise 'false'
+    function isValidAllocator(address _allocator) external view returns (bool) {
+        return _isValidAllocator(_allocator);
     }
 
     /// ====================================
