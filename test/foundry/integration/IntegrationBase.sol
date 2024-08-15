@@ -88,7 +88,8 @@ abstract contract IntegrationBase is Test {
         view
         returns (IRecipientsExtension.ApplicationStatus memory)
     {
-        IRecipientsExtension.Recipient memory recipient = RecipientsExtension(payable(_strategy)).getRecipient(_recipientId);
+        IRecipientsExtension.Recipient memory recipient =
+            RecipientsExtension(payable(_strategy)).getRecipient(_recipientId);
         uint256 recipientIndex = uint256(recipient.statusIndex) - 1;
 
         uint256 rowIndex = recipientIndex / 64;
@@ -105,7 +106,8 @@ abstract contract IntegrationBase is Test {
         view
         returns (IRecipientsExtension.ApplicationStatus memory)
     {
-        IRecipientsExtension.Recipient memory recipient = RecipientsExtension(payable(_strategy)).getRecipient(_recipientIds[0]);
+        IRecipientsExtension.Recipient memory recipient =
+            RecipientsExtension(payable(_strategy)).getRecipient(_recipientIds[0]);
         uint256 recipientIndex = uint256(recipient.statusIndex) - 1;
 
         uint256 rowIndex = recipientIndex / 64;

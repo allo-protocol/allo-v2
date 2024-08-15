@@ -131,7 +131,8 @@ contract IntegrationRFPSimple is IntegrationBase {
         vm.startPrank(userAddr);
 
         IRecipientsExtension.ApplicationStatus[] memory statuses = new IRecipientsExtension.ApplicationStatus[](1);
-        statuses[0] = _getApplicationStatus(recipient0Addr, uint256(IRecipientsExtension.Status.Accepted), address(strategy));
+        statuses[0] =
+            _getApplicationStatus(recipient0Addr, uint256(IRecipientsExtension.Status.Accepted), address(strategy));
         strategy.reviewRecipients(statuses, strategy.recipientsCounter());
 
         // Set milestones
