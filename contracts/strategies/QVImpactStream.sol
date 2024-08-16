@@ -187,9 +187,8 @@ contract QVImpactStream is QVSimple, Multicall {
     /// @param _recipientId The ID of the recipient
     /// @return The payout as a 'Payout' struct
     function getPayout(address _recipientId) external view returns (Payout memory) {
-        address recipientAddress = _recipients[_recipientId].recipientAddress;
         uint256 amount = payouts[_recipientId];
-        return Payout(recipientAddress, amount);
+        return Payout(_recipientId, amount);
     }
 
     /// @notice Transfer the funds recovered  to the recipient

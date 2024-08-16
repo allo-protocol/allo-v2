@@ -16,9 +16,8 @@ QVImpactStream::setPayouts
 │   └── it should revert
 ├── when total payout is greater than pool amount
 │   └── it should revert
-├── when called with valid parameters
-│   └── it should set the payouts
-└── when total payout is less than pool amount
+└── when called with valid parameters
+    ├── it should set the payouts
     └── it should emit event
 
 QVImpactStream::_distribute

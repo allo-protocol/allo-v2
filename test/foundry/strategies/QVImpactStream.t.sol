@@ -1,16 +1,25 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.19;
 
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
 import {StdStorage, Test, stdStorage} from "forge-std/Test.sol";
 import {IAllo} from "../../../contracts/core/interfaces/IAllo.sol";
+import {IStrategy} from "../../../contracts/core/interfaces/IStrategy.sol";
 import {IRecipientsExtension} from "../../../contracts/extensions/interfaces/IRecipientsExtension.sol";
 import {QVSimple} from "../../../contracts/strategies/QVSimple.sol";
 import {QVImpactStream} from "../../../contracts/strategies/QVImpactStream.sol";
+import {IRecipientsExtension} from "../../../contracts/extensions/interfaces/IRecipientsExtension.sol";
+import {Errors} from "../../../contracts/core/libraries/Errors.sol";
+import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
 
 contract QVImpactStreamTest is Test {
     using stdStorage for StdStorage;
 
     event PayoutSet(QVImpactStream.Payout[] payouts, address sender);
+    event AllocatorAdded(address indexed allocator, address sender);
+    event AllocatorRemoved(address indexed allocator, address sender);
+    event Distributed(address indexed _recipient, bytes _data);
 
     QVImpactStream qvImpactStream;
 
@@ -56,44 +65,75 @@ contract QVImpactStreamTest is Test {
         payouts.push(QVImpactStream.Payout({recipientId: recipient2, amount: 40}));
     }
 
-    function test_BatchAddAllocatorWhenCalledByPoolManager() external {
+    modifier callWithPoolManager() {
         vm.mockCall(
             mockAlloAddress, abi.encodeWithSelector(IAllo.isPoolManager.selector, 1, poolManager), abi.encode(true)
         );
-        // it should call _addAllocator
-        vm.skip(true);
+        _;
     }
 
-    function test_BatchRemoveAllocatorWhenCalledByPoolManager() external {
-        vm.mockCall(
-            mockAlloAddress, abi.encodeWithSelector(IAllo.isPoolManager.selector, 1, poolManager), abi.encode(true)
-        );
-        // it should call _removeAllocator
-        vm.skip(true);
+    function test_BatchAddAllocatorWhenCalledByPoolManager() external callWithPoolManager {
+        // if AllocatorAdded event emits with the correct parameters then _addAllocator was also called
+        // with the correct parameters
+        vm.expectEmit(true, true, true, true);
+        emit AllocatorAdded(recipient1, poolManager);
+
+        address[] memory _recipients = new address[](1);
+        _recipients[0] = recipient1;
+
+        vm.prank(poolManager);
+        qvImpactStream.batchAddAllocator(_recipients);
+
+        assertTrue(qvImpactStream.allowedAllocators(recipient1));
     }
 
-    function test_SetPayoutsRevertWhen_PayoutSetIsTrue() external {
+    function test_BatchRemoveAllocatorWhenCalledByPoolManager() external callWithPoolManager {
+        // if AllocatorRemoved event emits with the correct parameters then _removeAllocator was also called
+        // with the correct parameters
+        vm.expectEmit(true, true, true, true);
+        emit AllocatorRemoved(recipient1, poolManager);
+
+        address[] memory _recipients = new address[](1);
+        _recipients[0] = recipient1;
+
+        vm.prank(poolManager);
+        qvImpactStream.batchRemoveAllocator(_recipients);
+
+        assertFalse(qvImpactStream.allowedAllocators(recipient1));
+    }
+
+    function test_SetPayoutsRevertWhen_PayoutSetIsTrue() external callWithPoolManager {
         stdstore.target(address(qvImpactStream)).sig("payoutSet()").checked_write(true);
         vm.expectRevert(QVImpactStream.PAYOUT_ALREADY_SET.selector);
 
         /// make it after allocation finished
         vm.warp(block.timestamp + allocationWindow + 1 days);
-        vm.mockCall(
-            mockAlloAddress, abi.encodeWithSelector(IAllo.isPoolManager.selector, 1, poolManager), abi.encode(true)
-        );
 
         vm.prank(poolManager);
         qvImpactStream.setPayouts(payouts);
     }
 
-    function test_SetPayoutsRevertWhen_PayoutAmountIsZero() external {
-        // it should revert
-        vm.skip(true);
+    function test_SetPayoutsRevertWhen_PayoutAmountIsZero() external callWithPoolManager {
+        vm.expectRevert(abi.encodeWithSelector(Errors.RECIPIENT_ERROR.selector, recipient1));
+        payouts.push(QVImpactStream.Payout({recipientId: recipient1, amount: 0}));
+
+        /// make it after allocation finished
+        vm.warp(block.timestamp + allocationWindow + 1 days);
+
+        vm.prank(poolManager);
+        qvImpactStream.setPayouts(payouts);
     }
 
-    function test_SetPayoutsRevertWhen_RecipientStatusIsNotAccepted() external {
-        // it should revert
-        vm.skip(true);
+    function test_SetPayoutsRevertWhen_RecipientStatusIsNotAccepted() external callWithPoolManager {
+        vm.expectRevert(abi.encodeWithSelector(Errors.RECIPIENT_ERROR.selector, recipient1));
+
+        /// make it after allocation finished
+        vm.warp(block.timestamp + allocationWindow + 1 days);
+
+        /// since the recipient is not registered, his status should be NONE
+        /// so setting payouts should fail
+        vm.prank(poolManager);
+        qvImpactStream.setPayouts(payouts);
     }
 
     function test_SetPayoutsRevertWhen_TotalPayoutIsGreaterThanPoolAmount() external {
@@ -106,21 +146,56 @@ contract QVImpactStreamTest is Test {
         vm.skip(true);
     }
 
-    function test_SetPayoutsWhenTotalPayoutIsLessThanPoolAmount() external {
-        // it should emit event
-        vm.skip(true);
+    function test__distributeRevertWhen_PayoutAmountForRecipientIsZero() external callWithPoolManager {
+        IAllo.Pool memory poolData = IAllo.Pool({
+            profileId: keccak256(abi.encodePacked(recipient1)),
+            strategy: IStrategy(address(qvImpactStream)),
+            token: address(0),
+            metadata: Metadata({protocol: 0, pointer: ""}),
+            managerRole: keccak256("MANAGER_ROLE"),
+            adminRole: keccak256("ADMIN_ROLE")
+        });
+        vm.mockCall(mockAlloAddress, abi.encodeWithSelector(IAllo.getPool.selector, 1), abi.encode(poolData));
+
+        /// make it after allocation finished
+        vm.warp(block.timestamp + allocationWindow + 1 days);
+
+        /// it should revert
+        vm.expectRevert(abi.encodeWithSelector(Errors.RECIPIENT_ERROR.selector, recipient1));
+
+        address[] memory _recipients = new address[](1);
+        _recipients[0] = recipient1;
+
+        vm.prank(mockAlloAddress);
+        qvImpactStream.distribute(_recipients, new bytes(0), poolManager);
     }
 
-    function test__distributeRevertWhen_PayoutAmountForRecipientIsZero() external {
-        // it should revert
-        vm.skip(true);
-    }
+    function test__distributeWhenCalled() external callWithPoolManager {
+        stdstore.target(address(qvImpactStream)).sig("payouts(address)").with_key(address(0)).checked_write(100);
 
-    function test__distributeWhenCalled() external {
-        // it should remove the recipient from the payouts
-        // it should transfer to the recipient
+        IAllo.Pool memory poolData = IAllo.Pool({
+            profileId: keccak256(abi.encodePacked(recipient1)),
+            strategy: IStrategy(address(qvImpactStream)),
+            token: address(0),
+            metadata: Metadata({protocol: 0, pointer: ""}),
+            managerRole: keccak256("MANAGER_ROLE"),
+            adminRole: keccak256("ADMIN_ROLE")
+        });
+        vm.mockCall(mockAlloAddress, abi.encodeWithSelector(IAllo.getPool.selector, 1), abi.encode(poolData));
+
         // it should emit event
-        vm.skip(true);
+        vm.expectEmit(true, true, true, true);
+        emit Distributed(address(0), abi.encode(address(0), 100, poolManager));
+
+        address[] memory _recipients = new address[](1);
+        /// normally it would be recipient1 instead of address(0) but we cant mock the _recipients mapping
+        _recipients[0] = address(0);
+
+        /// make it after allocation finished
+        vm.warp(block.timestamp + allocationWindow + 1 days);
+
+        vm.prank(mockAlloAddress);
+        qvImpactStream.distribute(_recipients, new bytes(0), poolManager);
     }
 
     function test_GetTotalVotesForRecipientWhenCalled() external {
@@ -129,13 +204,24 @@ contract QVImpactStreamTest is Test {
     }
 
     function test_GetPayoutWhenCalled() external {
-        // it should return the payout for the recipient
-        vm.skip(true);
+        stdstore.target(address(qvImpactStream)).sig("payouts(address)").with_key(recipient1).checked_write(100);
+
+        QVImpactStream.Payout memory payout = qvImpactStream.getPayout(recipient1);
+        assertEq(payout.amount, 100);
+        assertEq(payout.recipientId, recipient1);
     }
 
-    function test_RecoverFundsWhenTokenIsNative() external {
-        // it should transfer the native balance to the recipient
-        vm.skip(true);
+    function test_RecoverFundsWhenTokenIsNative() external callWithPoolManager {
+        /// send eth to strategy
+        deal(address(qvImpactStream), 100 ether);
+        assertEq(address(qvImpactStream).balance, 100 ether);
+
+        address native = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+        vm.prank(poolManager);
+        qvImpactStream.recoverFunds(native, poolManager);
+
+        assertEq(address(qvImpactStream).balance, 0);
+        assertEq(address(poolManager).balance, 100 ether);
     }
 
     function test_RecoverFundsWhenTokenIsNotNative() external {
