@@ -87,6 +87,9 @@ contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension {
     /// ========== Storage =============
     /// ================================
 
+    /// @notice If true, allocations are directly sent to recipients. Otherwise, they they must be claimed later.
+    bool public immutable DIRECT_TRANSFER;
+
     /// @notice The start and end times for allocations
     uint64 public allocationStartTime;
     uint64 public allocationEndTime;
@@ -94,8 +97,6 @@ contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension {
     uint64 public withdrawalCooldown;
     /// @notice amount to be distributed. `totalPayoutAmount` get reduced with each distribution.
     uint256 public totalPayoutAmount;
-    /// @notice If true, allocations are directly sent to recipients. Otherwise, they they must be claimed later.
-    bool public directTransfer;
 
     /// @notice token -> bool
     mapping(address => bool) public allowedTokens;
@@ -129,7 +130,10 @@ contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension {
 
     /// @notice Constructor for the Donation Voting Offchain strategy
     /// @param _allo The 'Allo' contract
-    constructor(address _allo) RecipientsExtension(_allo, false) {}
+    /// @param _directTransfer false if allocations must be manually claimed, true if they are sent during allocation.
+    constructor(address _allo, bool _directTransfer) RecipientsExtension(_allo, false) {
+        DIRECT_TRANSFER = _directTransfer;
+    }
 
     /// ===============================
     /// ========= Initialize ==========
@@ -151,16 +155,14 @@ contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension {
             uint64 _allocationStartTime,
             uint64 _allocationEndTime,
             uint64 _withdrawalCooldown,
-            bool _directTransfer,
             address[] memory _allowedTokens
-        ) = abi.decode(_data, (RecipientInitializeData, uint64, uint64, uint64, bool, address[]));
+        ) = abi.decode(_data, (RecipientInitializeData, uint64, uint64, uint64, address[]));
 
         allocationStartTime = _allocationStartTime;
         allocationEndTime = _allocationEndTime;
         emit AllocationTimestampsUpdated(_allocationStartTime, _allocationEndTime, msg.sender);
 
         withdrawalCooldown = _withdrawalCooldown;
-        directTransfer = _directTransfer;
 
         if (_allowedTokens.length == 0) {
             // all tokens
@@ -201,10 +203,13 @@ contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension {
         _updatePoolTimestamps(_registrationStartTime, _registrationEndTime);
     }
 
+    /// @notice Transfers the allocated tokens to recipients.
+    /// @dev This function is ignored if DIRECT_TRANSFER is enabled, in which case allocated tokens are not stored
+    /// in the contract for later claim but directly sent to recipients in `_allocate()`.
     /// @param _data The data to be decoded
     /// @custom:data (Claim[] _claims)
     function claimAllocation(bytes memory _data) external virtual onlyAfterAllocation {
-        if (directTransfer) revert NOT_IMPLEMENTED();
+        if (DIRECT_TRANSFER) revert NOT_IMPLEMENTED();
 
         (Claim[] memory _claims) = abi.decode(_data, (Claim[]));
 
@@ -222,6 +227,7 @@ contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension {
         }
     }
 
+    /// @notice Sets the payout amounts to be distributed to.
     /// @param _data The data to be decoded
     /// @custom:data (address[] _recipientIds, uint256[] _amounts)
     function setPayout(bytes memory _data) external virtual onlyPoolManager(msg.sender) onlyAfterAllocation {
@@ -272,12 +278,12 @@ contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension {
 
             if (!allowedTokens[tokens[i]] && !allowedTokens[address(0)]) revert TOKEN_NOT_ALLOWED();
 
-            if (!directTransfer) amountAllocated[__recipients[i]][tokens[i]] += _amounts[i];
+            if (!DIRECT_TRANSFER) amountAllocated[__recipients[i]][tokens[i]] += _amounts[i];
 
-            address recipientAddress = directTransfer ? _recipients[__recipients[i]].recipientAddress : address(this);
+            address recipientAddress = DIRECT_TRANSFER ? _recipients[__recipients[i]].recipientAddress : address(this);
             if (tokens[i] == NATIVE) {
                 totalNativeAmount += _amounts[i];
-                if (directTransfer) SafeTransferLib.safeTransferETH(recipientAddress, _amounts[i]);
+                if (DIRECT_TRANSFER) SafeTransferLib.safeTransferETH(recipientAddress, _amounts[i]);
             } else {
                 SafeTransferLib.safeTransferFrom(tokens[i], _sender, recipientAddress, _amounts[i]);
             }
