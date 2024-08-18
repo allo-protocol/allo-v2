@@ -165,8 +165,9 @@ contract DonationVotingOnchain is CoreBaseStrategy, RecipientsExtension {
     /// @notice This will allocate to recipients.
     /// @param _recipients The addresses of the recipients to allocate to
     /// @param _amounts The amounts to allocate to the recipients
+    /// @param _data The data containing permit data if needed (ignored if empty)
     /// @param _sender The address of the sender
-    function _allocate(address[] memory _recipients, uint256[] memory _amounts, bytes memory, address _sender)
+    function _allocate(address[] memory _recipients, uint256[] memory _amounts, bytes memory _data, address _sender)
         internal
         virtual
         override
@@ -186,6 +187,7 @@ contract DonationVotingOnchain is CoreBaseStrategy, RecipientsExtension {
         if (allocationToken == NATIVE) {
             if (msg.value != totalAmount) revert AMOUNT_MISMATCH();
         } else {
+            _usePermit(allocationToken, _sender, address(this), totalAmount, _data);
             SafeTransferLib.safeTransferFrom(allocationToken, _sender, address(this), totalAmount);
         }
 

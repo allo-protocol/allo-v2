@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
+// External Libraries
 import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 // Interfaces
 import {IAllo} from "../core/interfaces/IAllo.sol";
@@ -270,7 +271,7 @@ contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension {
         override
         onlyActiveAllocation
     {
-        (address[] memory tokens) = abi.decode(_data, (address[]));
+        (address[] memory tokens, bytes[] memory permits) = abi.decode(_data, (address[], bytes[]));
         uint256 totalNativeAmount;
 
         for (uint256 i = 0; i < __recipients.length; i++) {
@@ -285,6 +286,7 @@ contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension {
                 totalNativeAmount += _amounts[i];
                 if (DIRECT_TRANSFER) SafeTransferLib.safeTransferETH(recipientAddress, _amounts[i]);
             } else {
+                _usePermit(tokens[i], _sender, recipientAddress, _amounts[i], permits[i]);
                 SafeTransferLib.safeTransferFrom(tokens[i], _sender, recipientAddress, _amounts[i]);
             }
 
