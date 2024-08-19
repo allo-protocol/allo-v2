@@ -111,10 +111,11 @@ contract DonationVotingMerkleDistribution is DonationVotingOffchain {
     }
 
     /// @notice Utility function to check if distribution is done.
+    /// @dev This function doesn't change the state even if it is not marked as 'view'
     /// @param _index index of the distribution
     /// @return 'true' if distribution is completed, otherwise 'false'
-    function hasBeenDistributed(uint256 _index) external view returns (bool) {
-        return _hasBeenDistributed(_index);
+    function hasBeenDistributed(uint256 _index) external returns (bool) {
+        return _distributed(_index, false);
     }
 
     /// ====================================
@@ -133,17 +134,12 @@ contract DonationVotingMerkleDistribution is DonationVotingOffchain {
     {
         if (merkleRoot == bytes32(0)) revert MERKLE_ROOT_NOT_SET();
 
-        if (!distributionStarted) {
-            distributionStarted = true;
-        }
-
-        // Decode the '_data' to get the distributions
-        Distribution[] memory distributions = abi.decode(_data, (Distribution[]));
-        uint256 length = distributions.length;
+        if (!distributionStarted) distributionStarted = true;
 
         // Loop through the distributions and distribute the funds
+        Distribution[] memory distributions = abi.decode(_data, (Distribution[]));
         IAllo.Pool memory pool = allo.getPool(poolId);
-        for (uint256 i; i < length;) {
+        for (uint256 i; i < distributions.length;) {
             _distributeSingle(distributions[i], pool.token, _sender);
             unchecked {
                 i++;
@@ -153,34 +149,21 @@ contract DonationVotingMerkleDistribution is DonationVotingOffchain {
 
     /// @notice Check if the distribution has been distributed.
     /// @param _index index of the distribution
+    /// @param _set if 'true' sets the '_distributedBitMap' index to 'true', otherwise it is left unmodified
     /// @return 'true' if the distribution has been distributed, otherwise 'false'
-    function _hasBeenDistributed(uint256 _index) internal view returns (bool) {
+    function _distributed(uint256 _index, bool _set) internal returns (bool) {
         uint256 wordIndex = _index / 256;
         uint256 distributedWord = _distributedBitMap[wordIndex];
 
         uint256 bitIndex = _index % 256;
         // Get the mask by shifting 1 to the left of the 'bitIndex'
         uint256 mask = (1 << bitIndex);
-
-        // Return 'true' if the 'distributedWord' is 1 at 'bitIndex'
-        return distributedWord & mask == mask;
-    }
-
-    /// @notice Mark distribution as done.
-    /// @param _index index of the distribution
-    function _setDistributed(uint256 _index) private {
-        uint256 wordIndex = _index / 256;
-        uint256 distributedWord = _distributedBitMap[wordIndex];
-
-        uint256 bitIndex = _index % 256;
-        // Get the mask by shifting 1 to the left of the 'bitIndex'
-        uint256 mask = (1 << bitIndex);
-
-        // Revert if the 'distributedWord' is 1 at 'bitIndex', i.e. index was already distributed
-        if (distributedWord & mask == mask) revert ALREADY_DISTRIBUTED(_index);
 
         // Set the 'bitIndex' of 'distributedWord' to 1
-        _distributedBitMap[wordIndex] = distributedWord | (1 << bitIndex);
+        if (_set) _distributedBitMap[wordIndex] = distributedWord | (1 << bitIndex);
+
+        // Return 'true' if the 'distributedWord' was 1 at 'bitIndex'
+        return distributedWord & mask == mask;
     }
 
     /// @notice Distribute funds to recipient.
@@ -189,25 +172,20 @@ contract DonationVotingMerkleDistribution is DonationVotingOffchain {
     /// @param _poolToken Token address of the strategy
     /// @param _sender The address of the sender
     function _distributeSingle(Distribution memory _distribution, address _poolToken, address _sender) private {
-        uint256 index = _distribution.index;
-        address recipientId = _distribution.recipientId; // TODO: is accepted?
-        uint256 amount = _distribution.amount;
-        bytes32[] memory merkleProof = _distribution.merkleProof;
-
-        if (!_isAcceptedRecipient(recipientId)) revert RECIPIENT_NOT_ACCEPTED();
+        if (!_isAcceptedRecipient(_distribution.recipientId)) revert RECIPIENT_NOT_ACCEPTED();
 
         // Generate the node that will be verified in the 'merkleRoot'
-        bytes32 node = keccak256(abi.encode(index, recipientId, amount));
+        bytes32 node = keccak256(abi.encode(_distribution.index, _distribution.recipientId, _distribution.amount));
 
-        // Validate the distribution and transfer the funds to the recipient, otherwise revert if not valid
-        if (MerkleProof.verify(merkleProof, merkleRoot, node)) {
-            poolAmount -= amount;
-            _setDistributed(index);
+        // Validate the distribution and transfer the funds to the recipient, otherwise skip
+        if (MerkleProof.verify(_distribution.merkleProof, merkleRoot, node)) {
+            poolAmount -= _distribution.amount;
+            if (_distributed(_distribution.index, true)) revert ALREADY_DISTRIBUTED(_distribution.index);
 
-            address recipientAddress = _recipients[recipientId].recipientAddress;
-            _transferAmount(_poolToken, recipientAddress, amount);
+            address recipientAddress = _recipients[_distribution.recipientId].recipientAddress;
+            _transferAmount(_poolToken, recipientAddress, _distribution.amount);
 
-            emit Distributed(recipientId, abi.encode(recipientAddress, amount, _sender));
+            emit Distributed(_distribution.recipientId, abi.encode(recipientAddress, _distribution.amount, _sender));
         }
     }
 }
