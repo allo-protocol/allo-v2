@@ -17,6 +17,7 @@ contract IntegrationDonationVotingOffchainBase is Test {
     Allo internal allo;
     Registry internal registry;
     DonationVotingOffchain internal strategy;
+    DonationVotingOffchain internal strategyWithDirectTransfers;
 
     address internal allocationToken = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48; // USDC
 
@@ -92,7 +93,8 @@ contract IntegrationDonationVotingOffchainBase is Test {
         // Deploying contracts
         allo = new Allo();
         registry = new Registry();
-        strategy = new DonationVotingOffchain(address(allo));
+        strategy = new DonationVotingOffchain(address(allo), false);
+        strategyWithDirectTransfers = new DonationVotingOffchain(address(allo), true);
 
         // Initialize contracts
         // NOTE: trusted forwarder is not used
@@ -100,29 +102,50 @@ contract IntegrationDonationVotingOffchainBase is Test {
         registry.initialize(owner);
 
         // Creating profile
-        vm.prank(profileOwner);
+        vm.startPrank(profileOwner);
         profileId = registry.createProfile(
             0, "Test Profile", Metadata({protocol: 0, pointer: ""}), profileOwner, new address[](0)
         );
 
         // Deal
-        deal(DAI, profileOwner, POOL_AMOUNT);
-        vm.prank(profileOwner);
-        IERC20(DAI).approve(address(allo), POOL_AMOUNT);
+        deal(DAI, profileOwner, POOL_AMOUNT * 2);
+        IERC20(DAI).approve(address(allo), POOL_AMOUNT * 2);
 
         // Creating pool (and deploying strategy)
         address[] memory managers = new address[](1);
         managers[0] = profileOwner;
-        vm.prank(profileOwner);
 
         registrationStartTime = uint64(block.timestamp);
         registrationEndTime = uint64(block.timestamp + 7 days);
         allocationStartTime = uint64(block.timestamp + 7 days + 1);
         allocationEndTime = uint64(block.timestamp + 10 days);
         address[] memory allowedTokens = new address[](0);
+
+        // Deploy strategy with direct transfers disabled
         poolId = allo.createPoolWithCustomStrategy(
             profileId,
             address(strategy),
+            abi.encode(
+                IRecipientsExtension.RecipientInitializeData({
+                    metadataRequired: false,
+                    registrationStartTime: registrationStartTime,
+                    registrationEndTime: registrationEndTime
+                }),
+                allocationStartTime,
+                allocationEndTime,
+                withdrawalCooldown,
+                allowedTokens
+            ),
+            DAI,
+            POOL_AMOUNT,
+            Metadata({protocol: 0, pointer: ""}),
+            managers
+        );
+
+        // Deploy strategy with direct transfers enabled
+        allo.createPoolWithCustomStrategy(
+            profileId,
+            address(strategyWithDirectTransfers),
             abi.encode(
                 IRecipientsExtension.RecipientInitializeData({
                     metadataRequired: false,
@@ -150,16 +173,19 @@ contract IntegrationDonationVotingOffchainBase is Test {
         uint256 proposalBid = 10;
         data[0] = abi.encode(address(0), Metadata({protocol: 0, pointer: ""}), abi.encode(uint256(proposalBid)));
         strategy.register(recipients, abi.encode(data), recipient0);
+        strategyWithDirectTransfers.register(recipients, abi.encode(data), recipient0);
 
         recipients[0] = recipient1;
         proposalBid = 20;
         data[0] = abi.encode(address(0), Metadata({protocol: 0, pointer: ""}), abi.encode(uint256(proposalBid)));
         strategy.register(recipients, abi.encode(data), recipient1);
+        strategyWithDirectTransfers.register(recipients, abi.encode(data), recipient1);
 
         recipients[0] = recipient2;
         proposalBid = 30;
         data[0] = abi.encode(address(0), Metadata({protocol: 0, pointer: ""}), abi.encode(uint256(proposalBid)));
         strategy.register(recipients, abi.encode(data), recipient2);
+        strategyWithDirectTransfers.register(recipients, abi.encode(data), recipient2);
 
         vm.stopPrank();
     }
@@ -278,7 +304,10 @@ contract IntegrationDonationVotingOffchainAllocateERC20 is IntegrationDonationVo
         address[] memory tokens = new address[](2);
         tokens[0] = allocationToken;
         tokens[1] = allocationToken;
-        bytes memory data = abi.encode(tokens);
+
+        bytes[] memory permits = new bytes[](2);
+
+        bytes memory data = abi.encode(tokens, permits);
 
         vm.startPrank(address(allo));
 
@@ -341,7 +370,10 @@ contract IntegrationDonationVotingOffchainAllocateETH is IntegrationDonationVoti
         address[] memory tokens = new address[](2);
         tokens[0] = allocationToken;
         tokens[1] = NATIVE;
-        bytes memory data = abi.encode(tokens);
+
+        bytes[] memory permits = new bytes[](2);
+
+        bytes memory data = abi.encode(tokens, permits);
 
         strategy.allocate{value: 25}(recipients, amounts, data, allocator0);
 
@@ -353,6 +385,143 @@ contract IntegrationDonationVotingOffchainAllocateETH is IntegrationDonationVoti
         recipients[0] = recipient2;
         vm.expectRevert(Errors.RECIPIENT_NOT_ACCEPTED.selector);
         strategy.allocate(recipients, amounts, data, allocator0);
+
+        vm.stopPrank();
+    }
+}
+
+contract IntegrationDonationVotingOffchainDirectAllocateERC20 is IntegrationDonationVotingOffchainBase {
+    function setUp() public override {
+        super.setUp();
+
+        // Review recipients
+        vm.startPrank(profileOwner);
+
+        IRecipientsExtension.ApplicationStatus[] memory statuses = new IRecipientsExtension.ApplicationStatus[](1);
+        address[] memory _recipientIds = new address[](2);
+        uint256[] memory _newStatuses = new uint256[](2);
+
+        // Set accepted recipients
+        _recipientIds[0] = recipient0;
+        _recipientIds[1] = recipient1;
+        _newStatuses[0] = uint256(IRecipientsExtension.Status.Accepted);
+        _newStatuses[1] = uint256(IRecipientsExtension.Status.Accepted);
+        statuses[0] = _getApplicationStatus(_recipientIds, _newStatuses);
+
+        uint256 recipientsCounter = strategyWithDirectTransfers.recipientsCounter();
+        strategyWithDirectTransfers.reviewRecipients(statuses, recipientsCounter);
+
+        vm.stopPrank();
+    }
+
+    function test_allocate() public {
+        vm.warp(allocationStartTime);
+        deal(allocationToken, allocator0, 4 + 25);
+        vm.startPrank(allocator0);
+        IERC20(allocationToken).approve(address(strategyWithDirectTransfers), 4 + 25);
+
+        address[] memory recipients = new address[](2);
+        recipients[0] = recipient0;
+        recipients[1] = recipient1;
+
+        uint256[] memory amounts = new uint256[](2);
+        amounts[0] = 4;
+        amounts[1] = 25;
+
+        address[] memory tokens = new address[](2);
+        tokens[0] = allocationToken;
+        tokens[1] = allocationToken;
+
+        bytes[] memory permits = new bytes[](2);
+
+        bytes memory data = abi.encode(tokens, permits);
+
+        vm.startPrank(address(allo));
+
+        strategyWithDirectTransfers.allocate(recipients, amounts, data, allocator0);
+
+        assertEq(IERC20(allocationToken).balanceOf(allocator0), 0);
+        assertEq(IERC20(allocationToken).balanceOf(address(strategyWithDirectTransfers)), 0);
+        assertEq(IERC20(allocationToken).balanceOf(recipient0), 4);
+        assertEq(IERC20(allocationToken).balanceOf(recipient1), 25);
+
+        uint256 amountAllocated0 = strategyWithDirectTransfers.amountAllocated(recipient0, allocationToken);
+        uint256 amountAllocated1 = strategyWithDirectTransfers.amountAllocated(recipient0, allocationToken);
+        assertEq(amountAllocated0, 0);
+        assertEq(amountAllocated1, 0);
+
+        recipients[0] = recipient2;
+        vm.expectRevert(Errors.RECIPIENT_NOT_ACCEPTED.selector);
+        strategyWithDirectTransfers.allocate(recipients, amounts, data, allocator0);
+
+        vm.stopPrank();
+    }
+}
+
+contract IntegrationDonationVotingOffchainDirectAllocateETH is IntegrationDonationVotingOffchainBase {
+    function setUp() public override {
+        super.setUp();
+
+        // Review recipients
+        vm.startPrank(profileOwner);
+
+        IRecipientsExtension.ApplicationStatus[] memory statuses = new IRecipientsExtension.ApplicationStatus[](1);
+        address[] memory _recipientIds = new address[](2);
+        uint256[] memory _newStatuses = new uint256[](2);
+
+        // Set accepted recipients
+        _recipientIds[0] = recipient0;
+        _recipientIds[1] = recipient1;
+        _newStatuses[0] = uint256(IRecipientsExtension.Status.Accepted);
+        _newStatuses[1] = uint256(IRecipientsExtension.Status.Accepted);
+        statuses[0] = _getApplicationStatus(_recipientIds, _newStatuses);
+
+        uint256 recipientsCounter = strategyWithDirectTransfers.recipientsCounter();
+        strategyWithDirectTransfers.reviewRecipients(statuses, recipientsCounter);
+
+        vm.stopPrank();
+    }
+
+    function test_allocate() public {
+        vm.warp(allocationStartTime);
+
+        deal(allocationToken, allocator0, 4);
+        vm.startPrank(allocator0);
+        IERC20(allocationToken).approve(address(strategyWithDirectTransfers), 4);
+
+        vm.deal(address(allo), 25);
+
+        address[] memory recipients = new address[](2);
+        recipients[0] = recipient0;
+        recipients[1] = recipient1;
+
+        uint256[] memory amounts = new uint256[](2);
+        amounts[0] = 4;
+        amounts[1] = 25;
+
+        vm.startPrank(address(allo));
+
+        address[] memory tokens = new address[](2);
+        tokens[0] = allocationToken;
+        tokens[1] = NATIVE;
+
+        bytes[] memory permits = new bytes[](2);
+
+        bytes memory data = abi.encode(tokens, permits);
+
+        strategyWithDirectTransfers.allocate{value: 25}(recipients, amounts, data, allocator0);
+
+        assertEq(allocator0.balance, 0);
+        assertEq(address(strategyWithDirectTransfers).balance, 0);
+        assertEq(recipient1.balance, 25);
+
+        assertEq(IERC20(allocationToken).balanceOf(allocator0), 0);
+        assertEq(IERC20(allocationToken).balanceOf(address(strategyWithDirectTransfers)), 0);
+        assertEq(IERC20(allocationToken).balanceOf(recipient0), 4);
+
+        recipients[0] = recipient2;
+        vm.expectRevert(Errors.RECIPIENT_NOT_ACCEPTED.selector);
+        strategyWithDirectTransfers.allocate(recipients, amounts, data, allocator0);
 
         vm.stopPrank();
     }
@@ -397,7 +566,10 @@ contract IntegrationDonationVotingOffchainClaim is IntegrationDonationVotingOffc
         address[] memory tokens = new address[](2);
         tokens[0] = allocationToken;
         tokens[1] = allocationToken;
-        bytes memory data = abi.encode(tokens);
+
+        bytes[] memory permits = new bytes[](2);
+
+        bytes memory data = abi.encode(tokens, permits);
 
         vm.startPrank(address(allo));
         strategy.allocate(recipients, amounts, data, allocator0);
@@ -416,11 +588,31 @@ contract IntegrationDonationVotingOffchainClaim is IntegrationDonationVotingOffc
         claims[1].recipientId = recipient1;
         claims[1].token = allocationToken;
 
-        strategy.claimAllocation(claims);
+        strategy.claimAllocation(abi.encode(claims));
 
         assertEq(IERC20(allocationToken).balanceOf(recipient0), 4);
         assertEq(IERC20(allocationToken).balanceOf(recipient1), 25);
         assertEq(IERC20(allocationToken).balanceOf(address(strategy)), 0);
+
+        vm.stopPrank();
+    }
+}
+
+contract IntegrationDonationVotingOffchainDisabledClaim is IntegrationDonationVotingOffchainBase {
+    function test_claim() public {
+        // Claim allocation funds
+        vm.warp(allocationEndTime + 1);
+
+        vm.startPrank(recipient0);
+
+        DonationVotingOffchain.Claim[] memory claims = new DonationVotingOffchain.Claim[](2);
+        claims[0].recipientId = recipient0;
+        claims[0].token = allocationToken;
+        claims[1].recipientId = recipient1;
+        claims[1].token = allocationToken;
+
+        vm.expectRevert(Errors.NOT_IMPLEMENTED.selector);
+        strategyWithDirectTransfers.claimAllocation(abi.encode(claims));
 
         vm.stopPrank();
     }
@@ -463,7 +655,7 @@ contract IntegrationDonationVotingOffchainSetPayout is IntegrationDonationVoting
         amounts[0] = POOL_AMOUNT * 1 / 4;
         amounts[1] = POOL_AMOUNT * 3 / 4;
 
-        strategy.setPayout(recipients, amounts);
+        strategy.setPayout(abi.encode(recipients, amounts));
 
         (address recipientAddress, uint256 amount) = strategy.payoutSummaries(recipient0);
         assertEq(amount, amounts[0]);
@@ -475,11 +667,11 @@ contract IntegrationDonationVotingOffchainSetPayout is IntegrationDonationVoting
 
         // Reverts
         vm.expectRevert(abi.encodeWithSelector(DonationVotingOffchain.PAYOUT_ALREADY_SET.selector, recipient0));
-        strategy.setPayout(recipients, amounts);
+        strategy.setPayout(abi.encode(recipients, amounts));
 
         recipients[0] = recipient2;
         vm.expectRevert(Errors.RECIPIENT_NOT_ACCEPTED.selector);
-        strategy.setPayout(recipients, amounts);
+        strategy.setPayout(abi.encode(recipients, amounts));
 
         vm.stopPrank();
     }
@@ -518,7 +710,7 @@ contract IntegrationDonationVotingOffchainDistribute is IntegrationDonationVotin
         amounts[0] = POOL_AMOUNT * 1 / 4;
         amounts[1] = POOL_AMOUNT - POOL_AMOUNT * 1 / 4;
 
-        strategy.setPayout(recipients, amounts);
+        strategy.setPayout(abi.encode(recipients, amounts));
         vm.stopPrank();
     }
 
