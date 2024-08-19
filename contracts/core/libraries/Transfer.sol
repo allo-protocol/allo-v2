@@ -132,6 +132,7 @@ contract Transfer is Native {
     }
 
     /// @notice Uses a permit if given. Three permit formats are accepted: permit2, ERC20Permit and DAI-like permits
+    /// @dev permit data is ignored if empty
     /// @param _token The token address
     /// @param _from The address signing the permit
     /// @param _to The address to give allowance to
@@ -168,19 +169,19 @@ contract Transfer is Native {
     /// @notice Splits a signature into its r, s, v components
     /// @dev compact EIP-2098 signatures are accepted as well
     /// @param _signature The signature
-    function _splitSignature(bytes memory _signature) internal returns (bytes32 r, bytes32 s, uint8 v) {
+    function _splitSignature(bytes memory _signature) internal pure returns (bytes32 r, bytes32 s, uint8 v) {
         if (_signature.length == 65) {
             assembly {
-                r := mload(add(signature, 0x20))
-                s := mload(add(signature, 0x40))
-                v := byte(0, mload(add(signature, 0x60)))
+                r := mload(add(_signature, 0x20))
+                s := mload(add(_signature, 0x40))
+                v := byte(0, mload(add(_signature, 0x60)))
             }
         } else if (_signature.length == 64) {
             // EIP-2098
             bytes32 vs;
             assembly {
-                r := mload(add(signature, 0x20))
-                vs := mload(add(signature, 0x40))
+                r := mload(add(_signature, 0x20))
+                vs := mload(add(_signature, 0x40))
             }
             s = vs & (0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff);
             v = uint8(uint256(vs >> 255)) + 27;
