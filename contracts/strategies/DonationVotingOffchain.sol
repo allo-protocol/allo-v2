@@ -260,10 +260,15 @@ contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension {
     /// ====================================
 
     /// @notice This will allocate to recipients.
-    /// @dev The encoded '_data' is an array of token addresses corresponding to the _amounts array.
+    /// @dev The encoded '_data' is a tuple containing an array of token addresses corresponding to '_amounts' and
+    /// an array of permits data
     /// @param __recipients The addresses of the recipients to allocate to
     /// @param _amounts The amounts to allocate to the recipients
     /// @param _data The data to use to allocate to the recipient
+    /// @custom:data (
+    ///        address[] tokens,
+    ///        bytes[] permits
+    ///    )
     /// @param _sender The address of the sender
     function _allocate(address[] memory __recipients, uint256[] memory _amounts, bytes memory _data, address _sender)
         internal

@@ -165,7 +165,7 @@ contract DonationVotingOnchain is CoreBaseStrategy, RecipientsExtension {
     /// @notice This will allocate to recipients.
     /// @param _recipients The addresses of the recipients to allocate to
     /// @param _amounts The amounts to allocate to the recipients
-    /// @param _data The data containing permit data if needed (ignored if empty)
+    /// @param _data The data containing permit data for the sum of '_amounts' if needed (ignored if empty)
     /// @param _sender The address of the sender
     function _allocate(address[] memory _recipients, uint256[] memory _amounts, bytes memory _data, address _sender)
         internal
