@@ -96,6 +96,10 @@ contract IntegrationDonationVotingOnchainBase is IntegrationBase {
         strategy.register(recipients, abi.encode(data), recipient2Addr);
 
         vm.stopPrank();
+
+        // NOTE: removing all the ETH from the strategy before testing
+        vm.prank(address(strategy));
+        address(0).call{value: address(strategy).balance}("");
     }
 }
 
@@ -266,8 +270,7 @@ contract IntegrationDonationVotingOnchainAllocateETH is IntegrationDonationVotin
         strategy.allocate{value: 4 + 25}(recipients, amounts, "", allocator0);
 
         assertEq(allocator0.balance, 0);
-        // TODO: fix this
-        // assertEq(address(strategy).balance, 4 + 25);
+        assertEq(address(strategy).balance, 4 + 25);
 
         recipients[0] = recipient2Addr;
         vm.expectRevert(Errors.RECIPIENT_NOT_ACCEPTED.selector);
@@ -404,8 +407,7 @@ contract IntegrationDonationVotingOnchainDistributeETH is IntegrationDonationVot
 
         assertEq(recipient0Addr.balance, 4);
         assertEq(recipient1Addr.balance, 25);
-        // TODO: fix this
-        // assertEq(address(strategy).balance, 0);
+        assertEq(address(strategy).balance, 0);
 
         vm.expectRevert(abi.encodeWithSelector(DonationVotingOnchain.NOTHING_TO_DISTRIBUTE.selector, recipient0Addr));
         strategy.distribute(recipients, "", recipient0Addr);
