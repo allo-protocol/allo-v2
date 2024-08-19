@@ -3,7 +3,7 @@ pragma solidity ^0.8.19;
 
 // Interfaces
 import {IRegistry} from "./IRegistry.sol";
-import {IStrategy} from "./IStrategy.sol";
+import {IBaseStrategy} from "./IBaseStrategy.sol";
 // Internal Libraries
 import {Metadata} from "../libraries/Metadata.sol";
 
@@ -33,7 +33,7 @@ interface IAllo {
     /// @notice the Pool struct that all strategy pools are based from
     struct Pool {
         bytes32 profileId;
-        IStrategy strategy;
+        IBaseStrategy strategy;
         address token;
         Metadata metadata;
         bytes32 managerRole;
@@ -54,7 +54,7 @@ interface IAllo {
     event PoolCreated(
         uint256 indexed poolId,
         bytes32 indexed profileId,
-        IStrategy strategy,
+        IBaseStrategy strategy,
         address token,
         uint256 amount,
         Metadata metadata
@@ -216,14 +216,22 @@ interface IAllo {
 
     /// @notice Registers a recipient and emits {Registered} event if successful and may be handled differently by each strategy.
     /// @param _poolId The ID of the pool to register the recipient for
-    function registerRecipient(uint256 _poolId, bytes memory _data) external payable returns (address);
+    /// @param _recipientAddresses The addresses of the recipients to register
+    /// @param _data The data to pass to the strategy and may be handled differently by each strategy
+    function registerRecipient(uint256 _poolId, address[] memory _recipientAddresses, bytes memory _data)
+        external
+        payable
+        returns (address[] memory);
 
     /// @notice Registers a batch of recipients.
     /// @param _poolIds The pool ID's to register the recipients for
+    /// @param _recipientAddresses The addresses of the recipients to register
     /// @param _data The data to pass to the strategy and may be handled differently by each strategy
-    function batchRegisterRecipient(uint256[] memory _poolIds, bytes[] memory _data)
-        external
-        returns (address[] memory);
+    function batchRegisterRecipient(
+        uint256[] memory _poolIds,
+        address[][] memory _recipientAddresses,
+        bytes[] memory _data
+    ) external returns (address[][] memory);
 
     /// @notice Funds a pool.
     /// @dev 'msg.value' must be greater than 0 if the token is the native token
@@ -235,14 +243,22 @@ interface IAllo {
     /// @notice Allocates funds to a recipient.
     /// @dev Each strategy will handle the allocation of funds differently.
     /// @param _poolId The ID of the pool to allocate funds from
+    /// @param _recipients The recipients to allocate to
+    /// @param _amounts The amounts to allocate to the recipients
     /// @param _data The data to pass to the strategy and may be handled differently by each strategy.
-    function allocate(uint256 _poolId, bytes memory _data) external payable;
+    function allocate(uint256 _poolId, address[] memory _recipients, uint256[] memory _amounts, bytes memory _data)
+        external
+        payable;
 
     /// @notice Allocates funds to multiple recipients.
     /// @dev Each strategy will handle the allocation of funds differently
-    function batchAllocate(uint256[] calldata _poolIds, uint256[] calldata _values, bytes[] memory _datas)
-        external
-        payable;
+    function batchAllocate(
+        uint256[] calldata _poolIds,
+        address[][] calldata _recipients,
+        uint256[][] calldata _amounts,
+        uint256[] calldata _values,
+        bytes[] memory _datas
+    ) external payable;
 
     /// @notice Distributes funds to recipients and emits {Distributed} event if successful
     /// @dev Each strategy will handle the distribution of funds differently
