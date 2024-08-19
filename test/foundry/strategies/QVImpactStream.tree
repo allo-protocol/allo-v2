@@ -35,9 +35,3 @@ QVImpactStream::getTotalVotesForRecipient
 QVImpactStream::getPayout
 └── when called
     └── it should return the payout for the recipient
-
-QVImpactStream::recoverFunds
-├── when token is native
-│   └── it should transfer the native balance to the recipient
-└── when token is not native
-    └── it should transfer the token balance to the recipient

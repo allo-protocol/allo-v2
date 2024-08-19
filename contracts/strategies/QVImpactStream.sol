@@ -2,8 +2,7 @@
 pragma solidity 0.8.19;
 
 // External Libraries
-import {Multicall} from "openzeppelin-contracts/contracts/utils/Multicall.sol";
-import {IERC20Upgradeable} from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 // Interfaces
 import {IAllo} from "../core/interfaces/IAllo.sol";
@@ -24,7 +23,7 @@ import {QVSimple} from "./QVSimple.sol";
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠛⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⢰⣿⣿⣿⣿⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⣿⣿⣿⣿⣧⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠹⢿⣿⣿⣿⣿⣾⣾⣷⣿⣿⣿⣿⡿⠋⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⠙⠋⠛⠙⠋⠛⠙⠋⠛⠙⠋⠃⠀⠀⠀⠀⠀⠀⠀⠀⠠⠿⠻⠟⠿⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⠟⠿⠟⠿⠆⠀⠸⠿⠿⠟⠯⠀⠀⠀⠸⠿⠿⠿⠏⠀⠀⠀⠀⠀⠈⠉⠻⠻⡿⣿⢿⡿⡿⠿⠛⠁⠀⠀⠀⠀⠀⠀
 //                    allo.gitcoin.co
-contract QVImpactStream is QVSimple, Multicall {
+contract QVImpactStream is QVSimple {
     /// ======================
     /// ======= Events =======
     /// ======================
@@ -52,6 +51,7 @@ contract QVImpactStream is QVSimple, Multicall {
     /// @dev recipientId => payouts
     mapping(address => uint256) public payouts;
 
+    /// @notice Returns true if the payout is set
     bool public payoutSet;
 
     /// ======================
@@ -120,7 +120,7 @@ contract QVImpactStream is QVSimple, Multicall {
             address recipientId = payout.recipientId;
 
             if (amount == 0 || _getRecipientStatus(recipientId) != Status.Accepted) {
-                revert RECIPIENT_ERROR(payout.recipientId);
+                revert RECIPIENT_ERROR(recipientId);
             }
 
             payouts[recipientId] = amount;
@@ -189,17 +189,5 @@ contract QVImpactStream is QVSimple, Multicall {
     function getPayout(address _recipientId) external view returns (Payout memory) {
         uint256 amount = payouts[_recipientId];
         return Payout(_recipientId, amount);
-    }
-
-    /// @notice Transfer the funds recovered  to the recipient
-    /// @dev 'msg.sender' must be pool manager
-    /// @param _token The token to transfer
-    /// @param _recipient The recipient
-    function recoverFunds(address _token, address _recipient) external onlyPoolManager(msg.sender) {
-        // Get the amount of the token to transfer, which is always the entire balance of the contract address
-        uint256 amount = _token == NATIVE ? address(this).balance : IERC20Upgradeable(_token).balanceOf(address(this));
-
-        // Transfer the amount to the recipient (pool owner)
-        _transferAmount(_token, _recipient, amount);
     }
 }

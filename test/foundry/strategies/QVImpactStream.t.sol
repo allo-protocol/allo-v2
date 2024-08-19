@@ -210,22 +210,4 @@ contract QVImpactStreamTest is Test {
         assertEq(payout.amount, 100);
         assertEq(payout.recipientId, recipient1);
     }
-
-    function test_RecoverFundsWhenTokenIsNative() external callWithPoolManager {
-        /// send eth to strategy
-        deal(address(qvImpactStream), 100 ether);
-        assertEq(address(qvImpactStream).balance, 100 ether);
-
-        address native = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-        vm.prank(poolManager);
-        qvImpactStream.recoverFunds(native, poolManager);
-
-        assertEq(address(qvImpactStream).balance, 0);
-        assertEq(address(poolManager).balance, 100 ether);
-    }
-
-    function test_RecoverFundsWhenTokenIsNotNative() external {
-        // it should transfer the token balance to the recipient
-        vm.skip(true);
-    }
 }
