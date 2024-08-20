@@ -284,8 +284,7 @@ contract IntegrationDonationVotingOffchainAllocateETH is IntegrationDonationVoti
         strategy.allocate{value: 25}(recipients, amounts, data, allocator0);
 
         assertEq(allocator0.balance, 0);
-        // TODO: fix this
-        // assertEq(address(strategy).balance, 25);
+        assertEq(address(strategy).balance, 25);
         assertEq(IERC20(allocationToken).balanceOf(allocator0), 0);
         assertEq(IERC20(allocationToken).balanceOf(address(strategy)), 4);
 

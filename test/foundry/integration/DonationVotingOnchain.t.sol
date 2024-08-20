@@ -270,8 +270,7 @@ contract IntegrationDonationVotingOnchainAllocateETH is IntegrationDonationVotin
         strategy.allocate{value: 4 + 25}(recipients, amounts, "", allocator0);
 
         assertEq(allocator0.balance, 0);
-        // TODO: fix this
-        // assertEq(address(strategy).balance, 4 + 25);
+        assertEq(address(strategy).balance, 4 + 25);
 
         recipients[0] = recipient2Addr;
         vm.expectRevert(Errors.RECIPIENT_NOT_ACCEPTED.selector);
