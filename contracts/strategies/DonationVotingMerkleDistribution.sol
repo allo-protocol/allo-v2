@@ -179,8 +179,8 @@ contract DonationVotingMerkleDistribution is DonationVotingOffchain {
 
         // Validate the distribution and transfer the funds to the recipient, otherwise skip
         if (MerkleProof.verify(_distribution.merkleProof, merkleRoot, node)) {
-            poolAmount -= _distribution.amount;
             if (_distributed(_distribution.index, true)) revert ALREADY_DISTRIBUTED(_distribution.index);
+            poolAmount -= _distribution.amount;
 
             address recipientAddress = _recipients[_distribution.recipientId].recipientAddress;
             _transferAmount(_poolToken, recipientAddress, _distribution.amount);
