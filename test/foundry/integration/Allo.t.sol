@@ -1,120 +1,337 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity ^0.8.19;
 
-import {Test, console} from "forge-std/Test.sol";
-import {Allo} from "../../../contracts/core/Allo.sol";
-import {Registry, Metadata} from "../../../contracts/core/Registry.sol";
-import {DonationVotingMerkleDistributionDirectTransferStrategy} from
-    "../../../contracts/strategies/donation-voting-merkle-distribution-direct-transfer/DonationVotingMerkleDistributionDirectTransferStrategy.sol";
-import {DonationVotingMerkleDistributionBaseStrategy} from
-    "../../../contracts/strategies/donation-voting-merkle-base/DonationVotingMerkleDistributionBaseStrategy.sol";
+import {IAllo} from "contracts/core/interfaces/IAllo.sol";
+import {Metadata} from "contracts/core/Registry.sol";
 import {ISignatureTransfer} from "permit2/ISignatureTransfer.sol";
-import {IBiconomyForwarder} from "./IBiconomyForwarder.sol";
-import {ECDSA} from "openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol";
+import {IERC20} from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
+import {DonationVotingOffchain} from "contracts/strategies/DonationVotingOffchain.sol";
+import {IRecipientsExtension} from "contracts/extensions/interfaces/IRecipientsExtension.sol";
+import {IntegrationBase} from "./IntegrationBase.sol";
 
-contract IntegrationAllo is Test {
-    using ECDSA for bytes32;
+contract IntegrationAllo is IntegrationBase {
+    IAllo public allo;
+    DonationVotingOffchain public strategy;
 
-    Allo public allo;
-    Registry public registry;
-    DonationVotingMerkleDistributionDirectTransferStrategy public strategy;
+    function setUp() public override {
+        super.setUp();
 
-    address public owner;
-    address public relayer;
-    address public treasury;
-    address public userAddr;
+        allo = IAllo(ALLO_PROXY);
 
-    uint256 public userPk;
+        strategy = new DonationVotingOffchain(ALLO_PROXY, false);
 
-    bytes32 public profileId;
-
-    address public constant biconomyForwarder = 0x84a0856b038eaAd1cC7E297cF34A7e72685A8693;
-    address public constant dai = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
-
-    function setUp() public {
-        vm.createSelectFork(vm.rpcUrl("mainnet"), 20289932);
-
-        owner = makeAddr("owner");
-        treasury = makeAddr("treasury");
-        (userAddr, userPk) = makeAddrAndKey("user");
-
-        allo = new Allo();
-        registry = new Registry();
-        strategy = new DonationVotingMerkleDistributionDirectTransferStrategy(
-            address(allo), "Test Strategy", ISignatureTransfer(address(1))
-        );
-
-        allo.initialize(owner, address(registry), payable(treasury), 0, 0, biconomyForwarder);
-        registry.initialize(owner);
-
-        vm.prank(userAddr);
-        profileId =
-            registry.createProfile(0, "Test Profile", Metadata({protocol: 1, pointer: ""}), userAddr, new address[](0));
+        // Deal 130k DAI to the user
+        deal(DAI, userAddr, 130_000 ether);
     }
 
-    function test_CreatePoolWithMetaTx() public {
+    /// @dev Test the full flow, using meta-tx when possible:
+    /// - creating a pool
+    /// - fundPool
+    /// - register recipients
+    /// - allocate
+    /// - distribute
+    function test_fullFlowWithMetaTx() public {
+        // Create pool
+        address[] memory _allowedTokens = new address[](1);
+        _allowedTokens[0] = DAI;
+
         bytes memory _initStrategyData = abi.encode(
-            DonationVotingMerkleDistributionBaseStrategy.InitializeData({
-                useRegistryAnchor: false,
+            IRecipientsExtension.RecipientInitializeData({
                 metadataRequired: false,
                 registrationStartTime: uint64(block.timestamp),
-                registrationEndTime: uint64(block.timestamp + 7 days),
-                allocationStartTime: uint64(block.timestamp),
-                allocationEndTime: uint64(block.timestamp + 7 days),
-                allowedTokens: new address[](0)
-            })
+                registrationEndTime: uint64(block.timestamp + 7 days)
+            }),
+            uint64(block.timestamp),
+            uint64(block.timestamp + 7 days),
+            0,
+            _allowedTokens
         );
 
-        bytes32 domainSeparator = 0x4fde6db5140ab711910b567033f2d5e64dc4f7123d722004dd748edf6ed07abb; // Biconomy Forwarder
-
-        // User signs the request
-        IBiconomyForwarder.ERC20ForwardRequest memory req = IBiconomyForwarder.ERC20ForwardRequest({
-            from: userAddr,
-            to: address(allo),
-            token: dai,
-            txGas: 500_000,
-            tokenGasPrice: 0,
-            batchId: 0,
-            batchNonce: 0,
-            deadline: block.timestamp + 1 days,
-            data: abi.encodeWithSelector(
+        (, bytes memory ret) = _sendWithRelayer(
+            userAddr,
+            address(allo),
+            abi.encodeWithSelector(
                 allo.createPool.selector,
                 profileId,
                 address(strategy),
                 _initStrategyData,
-                dai,
+                DAI,
                 0,
                 Metadata({protocol: 1, pointer: ""}),
                 new address[](0)
-            )
-        });
-        bytes32 structHash = keccak256(
-            abi.encode(
-                IBiconomyForwarder(biconomyForwarder).REQUEST_TYPEHASH(),
-                req.from,
-                req.to,
-                req.token,
-                req.txGas,
-                req.tokenGasPrice,
-                req.batchId,
-                0, // TODO: remove hardcoded nonce
-                req.deadline,
-                keccak256(req.data)
-            )
+            ),
+            userPk
         );
-        bytes32 digest = domainSeparator.toTypedDataHash(structHash);
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(userPk, digest);
-        bytes memory sig = abi.encodePacked(r, s, v);
 
-        // Relayer submits the request
-        vm.prank(relayer);
-        (bool success, bytes memory ret) =
-            IBiconomyForwarder(biconomyForwarder).executeEIP712(req, domainSeparator, sig);
-
-        // Check that the pool was created
         uint256 poolId = abi.decode(ret, (uint256));
-        assertTrue(success);
+        // userAddr is the admin of the pool
         assertTrue(allo.isPoolAdmin(poolId, userAddr));
-        assertFalse(allo.isPoolAdmin(poolId, relayer));
+
+        DonationVotingOffchain deployedStrategy =
+            DonationVotingOffchain(payable(address(allo.getPool(poolId).strategy)));
+
+        // Fund pool
+        vm.prank(userAddr);
+        IERC20(DAI).approve(address(allo), 100_000 ether);
+
+        _sendWithRelayer(
+            userAddr, address(allo), abi.encodeWithSelector(allo.fundPool.selector, poolId, 100_000 ether), userPk
+        );
+        // userAddr transferred 100k DAI to the pool
+        assertTrue(IERC20(DAI).balanceOf(address(deployedStrategy)) == 100_000 ether);
+        assertTrue(IERC20(DAI).balanceOf(userAddr) == 30_000 ether);
+
+        // Register recipients
+        address[] memory recipients = new address[](1);
+        bytes[] memory datas = new bytes[](1);
+
+        recipients[0] = recipient0Addr;
+        datas[0] = abi.encode(address(0), Metadata({protocol: 0, pointer: ""}), bytes(""));
+        _sendWithRelayer(
+            recipient0Addr,
+            address(allo),
+            abi.encodeWithSelector(allo.registerRecipient.selector, poolId, recipients, abi.encode(datas)),
+            recipient0Pk
+        );
+
+        recipients[0] = recipient1Addr;
+        datas[0] = abi.encode(address(0), Metadata({protocol: 0, pointer: ""}), bytes(""));
+        _sendWithRelayer(
+            recipient1Addr,
+            address(allo),
+            abi.encodeWithSelector(allo.registerRecipient.selector, poolId, recipients, abi.encode(datas)),
+            recipient1Pk
+        );
+
+        recipients[0] = recipient2Addr;
+        datas[0] = abi.encode(address(0), Metadata({protocol: 0, pointer: ""}), bytes(""));
+        _sendWithRelayer(
+            recipient2Addr,
+            address(allo),
+            abi.encodeWithSelector(allo.registerRecipient.selector, poolId, recipients, abi.encode(datas)),
+            recipient2Pk
+        );
+        // Recipients are registered
+        assertTrue(deployedStrategy.getRecipient(recipient0Addr).recipientAddress == recipient0Addr);
+        assertTrue(deployedStrategy.getRecipient(recipient1Addr).recipientAddress == recipient1Addr);
+        assertTrue(deployedStrategy.getRecipient(recipient2Addr).recipientAddress == recipient2Addr);
+
+        // Review recipient (it's needed to allocate)
+        vm.startPrank(userAddr);
+
+        // TODO: make them in batch
+        IRecipientsExtension.ApplicationStatus[] memory statuses = new IRecipientsExtension.ApplicationStatus[](1);
+        statuses[0] = _getApplicationStatus(recipient0Addr, 2, payable(address(deployedStrategy)));
+        deployedStrategy.reviewRecipients(statuses, deployedStrategy.recipientsCounter());
+
+        statuses[0] = _getApplicationStatus(recipient1Addr, 2, payable(address(deployedStrategy)));
+        deployedStrategy.reviewRecipients(statuses, deployedStrategy.recipientsCounter());
+
+        statuses[0] = _getApplicationStatus(recipient2Addr, 2, payable(address(deployedStrategy)));
+        deployedStrategy.reviewRecipients(statuses, deployedStrategy.recipientsCounter());
+
+        vm.stopPrank();
+
+        // Allocate
+        vm.prank(userAddr);
+        IERC20(DAI).approve(address(deployedStrategy), 30_000 ether);
+
+        address[] memory _recipients = new address[](1);
+        uint256[] memory _amounts = new uint256[](1);
+        address[] memory _tokens = new address[](1);
+        _tokens[0] = DAI;
+        _amounts[0] = 10_000 ether;
+
+        _recipients[0] = recipient0Addr;
+        _sendWithRelayer(
+            userAddr,
+            address(allo),
+            abi.encodeWithSelector(allo.allocate.selector, poolId, _recipients, _amounts, abi.encode(_tokens)),
+            userPk
+        );
+
+        _recipients[0] = recipient1Addr;
+        _sendWithRelayer(
+            userAddr,
+            address(allo),
+            abi.encodeWithSelector(allo.allocate.selector, poolId, _recipients, _amounts, abi.encode(_tokens)),
+            userPk
+        );
+        // Strategy still has 120k DAI, userAddr has 10k DAI
+        assertTrue(IERC20(DAI).balanceOf(address(deployedStrategy)) == 120_000 ether);
+        assertTrue(IERC20(DAI).balanceOf(userAddr) == 10_000 ether);
+        // Recipients have 0 DAI
+        assertTrue(IERC20(DAI).balanceOf(recipient0Addr) == 0 ether);
+        assertTrue(IERC20(DAI).balanceOf(recipient1Addr) == 0 ether);
+        assertTrue(IERC20(DAI).balanceOf(recipient2Addr) == 0 ether);
+
+        // Move time after allocation end time
+        vm.warp(block.timestamp + 8 days);
+
+        address[] memory _recipientsToDistribute = new address[](3);
+        _recipientsToDistribute[0] = recipient0Addr;
+        _recipientsToDistribute[1] = recipient1Addr;
+        _recipientsToDistribute[2] = recipient2Addr;
+
+        uint256[] memory _amountsToDistribute = new uint256[](3);
+        _amountsToDistribute[0] = 25_000 ether;
+        _amountsToDistribute[1] = 30_000 ether;
+        _amountsToDistribute[2] = 35_000 ether;
+
+        // Set payout (it's needed to distribute)
+        vm.prank(userAddr);
+        deployedStrategy.setPayout(abi.encode(_recipientsToDistribute, _amountsToDistribute));
+
+        // Distribute
+        _sendWithRelayer(
+            userAddr,
+            address(allo),
+            abi.encodeWithSelector(allo.distribute.selector, poolId, _recipientsToDistribute, bytes("")),
+            userPk
+        );
+
+        // After distribution, the strategy has 10k DAI, recipients have 25k, 30k, and 35k DAI
+        assertTrue(IERC20(DAI).balanceOf(address(deployedStrategy)) == 30_000 ether);
+        assertTrue(IERC20(DAI).balanceOf(recipient0Addr) == 25_000 ether);
+        assertTrue(IERC20(DAI).balanceOf(recipient1Addr) == 30_000 ether);
+        assertTrue(IERC20(DAI).balanceOf(recipient2Addr) == 35_000 ether);
+    }
+
+    /// @dev Test the full flow:
+    /// - creating a pool
+    /// - fundPool
+    /// - register recipients
+    /// - allocate
+    /// - distribute
+    function test_fullFlow() public {
+        // Create pool
+        address[] memory _allowedTokens = new address[](1);
+        _allowedTokens[0] = DAI;
+
+        bytes memory _initStrategyData = abi.encode(
+            IRecipientsExtension.RecipientInitializeData({
+                metadataRequired: false,
+                registrationStartTime: uint64(block.timestamp),
+                registrationEndTime: uint64(block.timestamp + 7 days)
+            }),
+            uint64(block.timestamp),
+            uint64(block.timestamp + 7 days),
+            0,
+            _allowedTokens
+        );
+
+        vm.startPrank(userAddr);
+        uint256 poolId = allo.createPool(
+            profileId,
+            address(strategy),
+            _initStrategyData,
+            DAI,
+            0,
+            Metadata({protocol: 1, pointer: ""}),
+            new address[](0)
+        );
+
+        // userAddr is the admin of the pool
+        assertTrue(allo.isPoolAdmin(poolId, userAddr));
+
+        DonationVotingOffchain deployedStrategy =
+            DonationVotingOffchain(payable(address(allo.getPool(poolId).strategy)));
+
+        // Fund pool
+        IERC20(DAI).approve(address(allo), 100_000 ether);
+        allo.fundPool(poolId, 100_000 ether);
+
+        // userAddr transferred 100k DAI to the pool
+        assertTrue(IERC20(DAI).balanceOf(address(deployedStrategy)) == 100_000 ether);
+        assertTrue(IERC20(DAI).balanceOf(userAddr) == 30_000 ether);
+
+        vm.stopPrank();
+
+        // Register recipients
+        address[] memory recipients = new address[](1);
+        bytes[] memory datas = new bytes[](1);
+
+        recipients[0] = recipient0Addr;
+        datas[0] = abi.encode(address(0), Metadata({protocol: 0, pointer: ""}), bytes(""));
+        vm.prank(recipient0Addr);
+        allo.registerRecipient(poolId, recipients, abi.encode(datas));
+
+        recipients[0] = recipient1Addr;
+        datas[0] = abi.encode(address(0), Metadata({protocol: 0, pointer: ""}), bytes(""));
+        vm.prank(recipient1Addr);
+        allo.registerRecipient(poolId, recipients, abi.encode(datas));
+
+        recipients[0] = recipient2Addr;
+        datas[0] = abi.encode(address(0), Metadata({protocol: 0, pointer: ""}), bytes(""));
+        vm.prank(recipient2Addr);
+        allo.registerRecipient(poolId, recipients, abi.encode(datas));
+
+        // Recipients are registered
+        assertTrue(deployedStrategy.getRecipient(recipient0Addr).recipientAddress == recipient0Addr);
+        assertTrue(deployedStrategy.getRecipient(recipient1Addr).recipientAddress == recipient1Addr);
+        assertTrue(deployedStrategy.getRecipient(recipient2Addr).recipientAddress == recipient2Addr);
+
+        // Review recipient (it's needed to allocate)
+        vm.startPrank(userAddr);
+
+        // TODO: make them in batch
+        IRecipientsExtension.ApplicationStatus[] memory statuses = new IRecipientsExtension.ApplicationStatus[](1);
+        statuses[0] = _getApplicationStatus(recipient0Addr, 2, payable(address(deployedStrategy)));
+        deployedStrategy.reviewRecipients(statuses, deployedStrategy.recipientsCounter());
+
+        statuses[0] = _getApplicationStatus(recipient1Addr, 2, payable(address(deployedStrategy)));
+        deployedStrategy.reviewRecipients(statuses, deployedStrategy.recipientsCounter());
+
+        statuses[0] = _getApplicationStatus(recipient2Addr, 2, payable(address(deployedStrategy)));
+        deployedStrategy.reviewRecipients(statuses, deployedStrategy.recipientsCounter());
+
+        // Allocate
+        IERC20(DAI).approve(address(deployedStrategy), 30_000 ether);
+
+        address[] memory _recipients = new address[](1);
+        uint256[] memory _amounts = new uint256[](1);
+        address[] memory _tokens = new address[](1);
+        _tokens[0] = DAI;
+        _amounts[0] = 10_000 ether;
+
+        _recipients[0] = recipient0Addr;
+        allo.allocate(poolId, _recipients, _amounts, abi.encode(_tokens));
+
+        _recipients[0] = recipient1Addr;
+        allo.allocate(poolId, _recipients, _amounts, abi.encode(_tokens));
+        // Strategy still has 120k DAI, userAddr has 10k DAI
+        assertTrue(IERC20(DAI).balanceOf(address(deployedStrategy)) == 120_000 ether);
+        assertTrue(IERC20(DAI).balanceOf(userAddr) == 10_000 ether);
+        // Recipients have 0 DAI
+        assertTrue(IERC20(DAI).balanceOf(recipient0Addr) == 0 ether);
+        assertTrue(IERC20(DAI).balanceOf(recipient1Addr) == 0 ether);
+        assertTrue(IERC20(DAI).balanceOf(recipient2Addr) == 0 ether);
+
+        // Move time after allocation end time
+        vm.warp(block.timestamp + 8 days);
+
+        address[] memory _recipientsToDistribute = new address[](3);
+        _recipientsToDistribute[0] = recipient0Addr;
+        _recipientsToDistribute[1] = recipient1Addr;
+        _recipientsToDistribute[2] = recipient2Addr;
+
+        uint256[] memory _amountsToDistribute = new uint256[](3);
+        _amountsToDistribute[0] = 25_000 ether;
+        _amountsToDistribute[1] = 30_000 ether;
+        _amountsToDistribute[2] = 35_000 ether;
+
+        // Set payout (it's needed to distribute)
+        deployedStrategy.setPayout(abi.encode(_recipientsToDistribute, _amountsToDistribute));
+
+        // Distribute
+        allo.distribute(poolId, _recipientsToDistribute, bytes(""));
+
+        // After distribution, the strategy has 10k DAI, recipients have 25k, 30k, and 35k DAI
+        assertTrue(IERC20(DAI).balanceOf(address(deployedStrategy)) == 30_000 ether);
+        assertTrue(IERC20(DAI).balanceOf(recipient0Addr) == 25_000 ether);
+        assertTrue(IERC20(DAI).balanceOf(recipient1Addr) == 30_000 ether);
+        assertTrue(IERC20(DAI).balanceOf(recipient2Addr) == 35_000 ether);
+
+        vm.stopPrank();
     }
 }
