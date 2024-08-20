@@ -4,12 +4,9 @@ pragma solidity 0.8.19;
 import {
     ISuperfluid,
     ISuperToken,
-    ISuperApp,
-    SuperAppDefinitions
+    ISuperApp
 } from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
 import {SuperTokenV1Library} from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
-import {IInstantDistributionAgreementV1} from
-    "@superfluid-finance/ethereum-contracts/contracts/interfaces/agreements/IInstantDistributionAgreementV1.sol";
 import {SQFSuperfluid} from "contracts/strategies/SQFSuperfluid.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
@@ -20,8 +17,10 @@ contract RecipientSuperApp is ISuperApp {
     /// ======= Errors =======
     /// ======================
 
+    /// @dev Thrown when the caller is not authorized to perform the action
     error UNAUTHORIZED();
 
+    /// @dev Thrown when the address is zero
     error ZERO_ADDRESS();
 
     /// @dev Thrown when the callback caller is not the host.
@@ -37,19 +36,26 @@ contract RecipientSuperApp is ISuperApp {
     /// ========== Storage =============
     /// ================================
 
+    /// @notice The type of the agreement for the Constant Flow Agreement
     bytes32 public constant CFAV1_TYPE = keccak256("org.superfluid-finance.agreements.ConstantFlowAgreement.v1");
 
+    /// @notice The superfluid host contract
     ISuperfluid public immutable HOST;
 
-    /// @notice Index ID. Never changes.
-    uint32 public constant INDEX_ID = 0;
-
+    /// @notice The address of the recipient
     address public recipient;
 
+    /// @notice The strategy contract
     SQFSuperfluid public immutable strategy;
 
+    /// @notice The accepted super token
     ISuperToken public immutable acceptedToken;
 
+    /// ==============================
+    /// ========= Modifiers ==========
+    /// ==============================
+
+    /// @dev Check that only the recipient can call the function
     modifier onlyRecipient() {
         _checkOnlyRecipient();
         _;
@@ -101,11 +107,13 @@ contract RecipientSuperApp is ISuperApp {
         newCtx = _updateOutflow(ctx);
     }
 
+    /// @notice Perform sanity checks for the hooks
     function _checkHookParam(ISuperToken _superToken) internal view {
         if (msg.sender != address(HOST)) revert UnauthorizedHost();
         if (!isAcceptedSuperToken(_superToken)) revert NotAcceptedSuperToken();
     }
 
+    /// @notice Check that only the recipient can call the function
     function _checkOnlyRecipient() internal view virtual {
         if (msg.sender != recipient) {
             revert UNAUTHORIZED();
@@ -145,6 +153,7 @@ contract RecipientSuperApp is ISuperApp {
     /// ===== CREATED callbacks ========
     /// ================================
 
+    /// @dev This callback is called before the flow is created
     function beforeAgreementCreated(
         ISuperToken, /*superToken,*/
         address, /*agreementClass,*/
@@ -155,6 +164,7 @@ contract RecipientSuperApp is ISuperApp {
         return "0x";
     }
 
+    /// @dev This callback is called after the flow is created
     function afterAgreementCreated(
         ISuperToken superToken,
         address agreementClass,
@@ -181,6 +191,7 @@ contract RecipientSuperApp is ISuperApp {
     /// ===== UPDATED callbacks ========
     /// ================================
 
+    /// @dev This callback is called before the flow is updated
     function beforeAgreementUpdated(
         ISuperToken superToken,
         address agreementClass,
@@ -194,6 +205,7 @@ contract RecipientSuperApp is ISuperApp {
         return _createCbData(agreementData);
     }
 
+    /// @dev This callback is called after the flow is updated
     function afterAgreementUpdated(
         ISuperToken superToken,
         address agreementClass,
@@ -220,6 +232,7 @@ contract RecipientSuperApp is ISuperApp {
     /// ==== TERMINATED callbacks =======
     /// =================================
 
+    /// @dev This callback is called before the flow is terminated
     function beforeAgreementTerminated(
         ISuperToken superToken,
         address agreementClass,
@@ -234,6 +247,7 @@ contract RecipientSuperApp is ISuperApp {
         return _createCbData(agreementData);
     }
 
+    /// @dev This callback is called after the flow is terminated
     function afterAgreementTerminated(
         ISuperToken superToken,
         address agreementClass,

@@ -11,6 +11,16 @@ import {IRecipientSuperAppFactory} from "contracts/strategies/interfaces/IRecipi
 import {RecipientSuperApp} from "contracts/strategies/RecipientSuperApp.sol";
 
 contract RecipientSuperAppFactory is IRecipientSuperAppFactory {
+    
+    /// @notice Creates a new RecipientSuperApp
+    /// @param _recipient The address of the recipient
+    /// @param _strategy The address of the strategy
+    /// @param _host The address of the Superfluid host
+    /// @param _acceptedToken The address of the accepted token
+    /// @param _activateOnCreated Whether to activate on created
+    /// @param _activateOnUpdated Whether to activate on updated
+    /// @param _activateOnDeleted Whether to activate on deleted
+    /// @return recipientSuperApp The address of the recipient super app
     function createRecipientSuperApp(
         address _recipient,
         address _strategy,
