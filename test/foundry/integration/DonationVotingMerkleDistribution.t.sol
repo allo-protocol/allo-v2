@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import {Test, console} from "forge-std/Test.sol";
-import {Allo} from "contracts/core/Allo.sol";
-import {Registry, Metadata} from "contracts/core/Registry.sol";
+import {IAllo} from "contracts/core/interfaces/IAllo.sol";
+import {Metadata} from "contracts/core/Registry.sol";
 import {
     DonationVotingMerkleDistribution,
     DonationVotingOffchain
@@ -11,29 +10,20 @@ import {
 import {Errors} from "contracts/core/libraries/Errors.sol";
 import {IRecipientsExtension} from "contracts/extensions/interfaces/IRecipientsExtension.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IntegrationBase} from "./IntegrationBase.sol";
 
-contract IntegrationDonationVotingMerkleDistributionBase is Test {
+contract IntegrationDonationVotingMerkleDistributionBase is IntegrationBase {
     address internal constant NATIVE = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-    address internal constant DAI = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
     uint256 internal constant POOL_AMOUNT = 1000;
 
-    Allo internal allo;
-    Registry internal registry;
+    IAllo internal allo;
     DonationVotingMerkleDistribution internal strategy;
     DonationVotingMerkleDistribution internal strategyWithDirectTransfers;
 
     address internal allocationToken = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48; // USDC
 
-    address internal owner;
-    address internal treasury;
-    address internal profileOwner;
-    address internal recipient0;
-    address internal recipient1;
-    address internal recipient2;
     address internal allocator0;
     address internal allocator1;
-
-    bytes32 internal profileId;
 
     uint256 internal poolId;
 
@@ -43,80 +33,26 @@ contract IntegrationDonationVotingMerkleDistributionBase is Test {
     uint64 internal allocationEndTime;
     uint64 internal withdrawalCooldown = 1 days;
 
-    function _getApplicationStatus(address _recipientId, uint256 _status)
-        internal
-        view
-        returns (IRecipientsExtension.ApplicationStatus memory)
-    {
-        IRecipientsExtension.Recipient memory recipient = strategy.getRecipient(_recipientId);
-        uint256 recipientIndex = uint256(recipient.statusIndex) - 1;
+    function setUp() public virtual override {
+        super.setUp();
 
-        uint256 rowIndex = recipientIndex / 64;
-        uint256 colIndex = (recipientIndex % 64) * 4;
-        uint256 currentRow = strategy.statusesBitMap(rowIndex);
-        uint256 newRow = currentRow & ~(15 << colIndex);
-        uint256 statusRow = newRow | (_status << colIndex);
+        allo = IAllo(ALLO_PROXY);
 
-        return IRecipientsExtension.ApplicationStatus({index: rowIndex, statusRow: statusRow});
-    }
-
-    function _getApplicationStatus(address[] memory _recipientIds, uint256[] memory _statuses)
-        internal
-        view
-        returns (IRecipientsExtension.ApplicationStatus memory)
-    {
-        IRecipientsExtension.Recipient memory recipient = strategy.getRecipient(_recipientIds[0]);
-        uint256 recipientIndex = uint256(recipient.statusIndex) - 1;
-        uint256 rowIndex = recipientIndex / 64;
-        uint256 statusRow = strategy.statusesBitMap(rowIndex);
-        for (uint256 i = 0; i < _recipientIds.length; i++) {
-            recipient = strategy.getRecipient(_recipientIds[i]);
-            recipientIndex = uint256(recipient.statusIndex) - 1;
-            require(rowIndex == recipientIndex / 64, "_recipientIds belong to different rows");
-            uint256 colIndex = (recipientIndex % 64) * 4;
-            uint256 newRow = statusRow & ~(15 << colIndex);
-            statusRow = newRow | (_statuses[i] << colIndex);
-        }
-
-        return IRecipientsExtension.ApplicationStatus({index: rowIndex, statusRow: statusRow});
-    }
-
-    function setUp() public virtual {
-        vm.createSelectFork(vm.rpcUrl("mainnet"), 20289932);
-
-        owner = makeAddr("owner");
-        treasury = makeAddr("treasury");
-        profileOwner = makeAddr("profileOwner");
-        recipient0 = makeAddr("recipient0");
-        recipient1 = makeAddr("recipient1");
-        recipient2 = makeAddr("recipient2");
         allocator0 = makeAddr("allocator0");
         allocator1 = makeAddr("allocator1");
 
-        // Deploying contracts
-        allo = new Allo();
-        registry = new Registry();
         strategy = new DonationVotingMerkleDistribution(address(allo), false);
         strategyWithDirectTransfers = new DonationVotingMerkleDistribution(address(allo), true);
 
-        // Initialize contracts
-        // NOTE: trusted forwarder is not used
-        allo.initialize(owner, address(registry), payable(treasury), 0, 0, address(1));
-        registry.initialize(owner);
-
-        // Creating profile
-        vm.startPrank(profileOwner);
-        profileId = registry.createProfile(
-            0, "Test Profile", Metadata({protocol: 0, pointer: ""}), profileOwner, new address[](0)
-        );
-
         // Deal
-        deal(DAI, profileOwner, POOL_AMOUNT * 2);
+        deal(DAI, userAddr, POOL_AMOUNT * 2);
+        vm.prank(userAddr);
         IERC20(DAI).approve(address(allo), POOL_AMOUNT * 2);
 
         // Creating pool (and deploying strategy)
         address[] memory managers = new address[](1);
-        managers[0] = profileOwner;
+        managers[0] = userAddr;
+        vm.startPrank(userAddr);
 
         registrationStartTime = uint64(block.timestamp);
         registrationEndTime = uint64(block.timestamp + 7 days);
@@ -172,25 +108,29 @@ contract IntegrationDonationVotingMerkleDistributionBase is Test {
         address[] memory recipients = new address[](1);
         bytes[] memory data = new bytes[](1);
 
-        recipients[0] = recipient0;
+        recipients[0] = recipient0Addr;
         uint256 proposalBid = 10;
         data[0] = abi.encode(address(0), Metadata({protocol: 0, pointer: ""}), abi.encode(uint256(proposalBid)));
-        strategy.register(recipients, abi.encode(data), recipient0);
-        strategyWithDirectTransfers.register(recipients, abi.encode(data), recipient0);
+        strategy.register(recipients, abi.encode(data), recipient0Addr);
+        strategyWithDirectTransfers.register(recipients, abi.encode(data), recipient0Addr);
 
-        recipients[0] = recipient1;
+        recipients[0] = recipient1Addr;
         proposalBid = 20;
         data[0] = abi.encode(address(0), Metadata({protocol: 0, pointer: ""}), abi.encode(uint256(proposalBid)));
-        strategy.register(recipients, abi.encode(data), recipient1);
-        strategyWithDirectTransfers.register(recipients, abi.encode(data), recipient1);
+        strategy.register(recipients, abi.encode(data), recipient1Addr);
+        strategyWithDirectTransfers.register(recipients, abi.encode(data), recipient1Addr);
 
-        recipients[0] = recipient2;
+        recipients[0] = recipient2Addr;
         proposalBid = 30;
         data[0] = abi.encode(address(0), Metadata({protocol: 0, pointer: ""}), abi.encode(uint256(proposalBid)));
-        strategy.register(recipients, abi.encode(data), recipient2);
-        strategyWithDirectTransfers.register(recipients, abi.encode(data), recipient2);
+        strategy.register(recipients, abi.encode(data), recipient2Addr);
+        strategyWithDirectTransfers.register(recipients, abi.encode(data), recipient2Addr);
 
         vm.stopPrank();
+
+        // NOTE: removing all the ETH from the strategy before testing
+        vm.prank(address(strategy));
+        address(0).call{value: address(strategy).balance}("");
     }
 }
 
@@ -199,7 +139,7 @@ contract IntegrationDonationVotingMerkleDistributionReviewRecipients is
 {
     function test_reviewRecipients() public {
         // Review recipients
-        vm.startPrank(profileOwner);
+        vm.startPrank(userAddr);
 
         IRecipientsExtension.ApplicationStatus[] memory statuses = new IRecipientsExtension.ApplicationStatus[](1);
         uint256 recipientsCounter = strategy.recipientsCounter();
@@ -208,17 +148,17 @@ contract IntegrationDonationVotingMerkleDistributionReviewRecipients is
         uint256[] memory _newStatuses = new uint256[](2);
 
         // Set accepted recipients
-        _recipientIds[0] = recipient0;
-        _recipientIds[1] = recipient1;
+        _recipientIds[0] = recipient0Addr;
+        _recipientIds[1] = recipient1Addr;
         _newStatuses[0] = uint256(IRecipientsExtension.Status.Accepted);
         _newStatuses[1] = uint256(IRecipientsExtension.Status.Accepted);
-        statuses[0] = _getApplicationStatus(_recipientIds, _newStatuses);
+        statuses[0] = _getApplicationStatus(_recipientIds, _newStatuses, address(strategy));
         strategy.reviewRecipients(statuses, recipientsCounter);
 
         // Revert if the registration period has finished
         vm.warp(registrationEndTime + 1);
         _newStatuses[1] = uint256(IRecipientsExtension.Status.Rejected);
-        statuses[0] = _getApplicationStatus(_recipientIds, _newStatuses);
+        statuses[0] = _getApplicationStatus(_recipientIds, _newStatuses, address(strategy));
         vm.expectRevert(Errors.REGISTRATION_NOT_ACTIVE.selector);
         strategy.reviewRecipients(statuses, recipientsCounter);
 
@@ -231,7 +171,7 @@ contract IntegrationDonationVotingMerkleDistributionTimestamps is IntegrationDon
         vm.warp(registrationStartTime - 1 days);
 
         // Review recipients
-        vm.startPrank(profileOwner);
+        vm.startPrank(userAddr);
 
         vm.expectRevert(DonationVotingOffchain.INVALID_TIMESTAMPS.selector);
         // allocationStartTime > allocationEndTime
@@ -273,18 +213,18 @@ contract IntegrationDonationVotingMerkleDistributionAllocateERC20 is Integration
         super.setUp();
 
         // Review recipients
-        vm.startPrank(profileOwner);
+        vm.startPrank(userAddr);
 
         IRecipientsExtension.ApplicationStatus[] memory statuses = new IRecipientsExtension.ApplicationStatus[](1);
         address[] memory _recipientIds = new address[](2);
         uint256[] memory _newStatuses = new uint256[](2);
 
         // Set accepted recipients
-        _recipientIds[0] = recipient0;
-        _recipientIds[1] = recipient1;
+        _recipientIds[0] = recipient0Addr;
+        _recipientIds[1] = recipient1Addr;
         _newStatuses[0] = uint256(IRecipientsExtension.Status.Accepted);
         _newStatuses[1] = uint256(IRecipientsExtension.Status.Accepted);
-        statuses[0] = _getApplicationStatus(_recipientIds, _newStatuses);
+        statuses[0] = _getApplicationStatus(_recipientIds, _newStatuses, address(strategy));
 
         uint256 recipientsCounter = strategy.recipientsCounter();
         strategy.reviewRecipients(statuses, recipientsCounter);
@@ -299,8 +239,8 @@ contract IntegrationDonationVotingMerkleDistributionAllocateERC20 is Integration
         IERC20(allocationToken).approve(address(strategy), 4 + 25);
 
         address[] memory recipients = new address[](2);
-        recipients[0] = recipient0;
-        recipients[1] = recipient1;
+        recipients[0] = recipient0Addr;
+        recipients[1] = recipient1Addr;
 
         uint256[] memory amounts = new uint256[](2);
         amounts[0] = 4;
@@ -321,7 +261,7 @@ contract IntegrationDonationVotingMerkleDistributionAllocateERC20 is Integration
         assertEq(IERC20(allocationToken).balanceOf(allocator0), 0);
         assertEq(IERC20(allocationToken).balanceOf(address(strategy)), 4 + 25);
 
-        recipients[0] = recipient2;
+        recipients[0] = recipient2Addr;
         vm.expectRevert(Errors.RECIPIENT_NOT_ACCEPTED.selector);
         strategy.allocate(recipients, amounts, data, allocator0);
 
@@ -334,18 +274,18 @@ contract IntegrationDonationVotingMerkleDistributionAllocateETH is IntegrationDo
         super.setUp();
 
         // Review recipients
-        vm.startPrank(profileOwner);
+        vm.startPrank(userAddr);
 
         IRecipientsExtension.ApplicationStatus[] memory statuses = new IRecipientsExtension.ApplicationStatus[](1);
         address[] memory _recipientIds = new address[](2);
         uint256[] memory _newStatuses = new uint256[](2);
 
         // Set accepted recipients
-        _recipientIds[0] = recipient0;
-        _recipientIds[1] = recipient1;
+        _recipientIds[0] = recipient0Addr;
+        _recipientIds[1] = recipient1Addr;
         _newStatuses[0] = uint256(IRecipientsExtension.Status.Accepted);
         _newStatuses[1] = uint256(IRecipientsExtension.Status.Accepted);
-        statuses[0] = _getApplicationStatus(_recipientIds, _newStatuses);
+        statuses[0] = _getApplicationStatus(_recipientIds, _newStatuses, address(strategy));
 
         uint256 recipientsCounter = strategy.recipientsCounter();
         strategy.reviewRecipients(statuses, recipientsCounter);
@@ -363,8 +303,8 @@ contract IntegrationDonationVotingMerkleDistributionAllocateETH is IntegrationDo
         vm.deal(address(allo), 25);
 
         address[] memory recipients = new address[](2);
-        recipients[0] = recipient0;
-        recipients[1] = recipient1;
+        recipients[0] = recipient0Addr;
+        recipients[1] = recipient1Addr;
 
         uint256[] memory amounts = new uint256[](2);
         amounts[0] = 4;
@@ -387,7 +327,7 @@ contract IntegrationDonationVotingMerkleDistributionAllocateETH is IntegrationDo
         assertEq(IERC20(allocationToken).balanceOf(allocator0), 0);
         assertEq(IERC20(allocationToken).balanceOf(address(strategy)), 4);
 
-        recipients[0] = recipient2;
+        recipients[0] = recipient2Addr;
         vm.expectRevert(Errors.RECIPIENT_NOT_ACCEPTED.selector);
         strategy.allocate(recipients, amounts, data, allocator0);
 
@@ -402,18 +342,18 @@ contract IntegrationDonationVotingMerkleDistributionDirectAllocateERC20 is
         super.setUp();
 
         // Review recipients
-        vm.startPrank(profileOwner);
+        vm.startPrank(userAddr);
 
         IRecipientsExtension.ApplicationStatus[] memory statuses = new IRecipientsExtension.ApplicationStatus[](1);
         address[] memory _recipientIds = new address[](2);
         uint256[] memory _newStatuses = new uint256[](2);
 
         // Set accepted recipients
-        _recipientIds[0] = recipient0;
-        _recipientIds[1] = recipient1;
+        _recipientIds[0] = recipient0Addr;
+        _recipientIds[1] = recipient1Addr;
         _newStatuses[0] = uint256(IRecipientsExtension.Status.Accepted);
         _newStatuses[1] = uint256(IRecipientsExtension.Status.Accepted);
-        statuses[0] = _getApplicationStatus(_recipientIds, _newStatuses);
+        statuses[0] = _getApplicationStatus(_recipientIds, _newStatuses, address(strategyWithDirectTransfers));
 
         uint256 recipientsCounter = strategyWithDirectTransfers.recipientsCounter();
         strategyWithDirectTransfers.reviewRecipients(statuses, recipientsCounter);
@@ -428,8 +368,8 @@ contract IntegrationDonationVotingMerkleDistributionDirectAllocateERC20 is
         IERC20(allocationToken).approve(address(strategyWithDirectTransfers), 4 + 25);
 
         address[] memory recipients = new address[](2);
-        recipients[0] = recipient0;
-        recipients[1] = recipient1;
+        recipients[0] = recipient0Addr;
+        recipients[1] = recipient1Addr;
 
         uint256[] memory amounts = new uint256[](2);
         amounts[0] = 4;
@@ -449,15 +389,15 @@ contract IntegrationDonationVotingMerkleDistributionDirectAllocateERC20 is
 
         assertEq(IERC20(allocationToken).balanceOf(allocator0), 0);
         assertEq(IERC20(allocationToken).balanceOf(address(strategyWithDirectTransfers)), 0);
-        assertEq(IERC20(allocationToken).balanceOf(recipient0), 4);
-        assertEq(IERC20(allocationToken).balanceOf(recipient1), 25);
+        assertEq(IERC20(allocationToken).balanceOf(recipient0Addr), 4);
+        assertEq(IERC20(allocationToken).balanceOf(recipient1Addr), 25);
 
-        uint256 amountAllocated0 = strategyWithDirectTransfers.amountAllocated(recipient0, allocationToken);
-        uint256 amountAllocated1 = strategyWithDirectTransfers.amountAllocated(recipient0, allocationToken);
+        uint256 amountAllocated0 = strategyWithDirectTransfers.amountAllocated(recipient0Addr, allocationToken);
+        uint256 amountAllocated1 = strategyWithDirectTransfers.amountAllocated(recipient0Addr, allocationToken);
         assertEq(amountAllocated0, 0);
         assertEq(amountAllocated1, 0);
 
-        recipients[0] = recipient2;
+        recipients[0] = recipient2Addr;
         vm.expectRevert(Errors.RECIPIENT_NOT_ACCEPTED.selector);
         strategyWithDirectTransfers.allocate(recipients, amounts, data, allocator0);
 
@@ -472,18 +412,18 @@ contract IntegrationDonationVotingMerkleDistributionDirectAllocateETH is
         super.setUp();
 
         // Review recipients
-        vm.startPrank(profileOwner);
+        vm.startPrank(userAddr);
 
         IRecipientsExtension.ApplicationStatus[] memory statuses = new IRecipientsExtension.ApplicationStatus[](1);
         address[] memory _recipientIds = new address[](2);
         uint256[] memory _newStatuses = new uint256[](2);
 
         // Set accepted recipients
-        _recipientIds[0] = recipient0;
-        _recipientIds[1] = recipient1;
+        _recipientIds[0] = recipient0Addr;
+        _recipientIds[1] = recipient1Addr;
         _newStatuses[0] = uint256(IRecipientsExtension.Status.Accepted);
         _newStatuses[1] = uint256(IRecipientsExtension.Status.Accepted);
-        statuses[0] = _getApplicationStatus(_recipientIds, _newStatuses);
+        statuses[0] = _getApplicationStatus(_recipientIds, _newStatuses, address(strategyWithDirectTransfers));
 
         uint256 recipientsCounter = strategyWithDirectTransfers.recipientsCounter();
         strategyWithDirectTransfers.reviewRecipients(statuses, recipientsCounter);
@@ -501,8 +441,8 @@ contract IntegrationDonationVotingMerkleDistributionDirectAllocateETH is
         vm.deal(address(allo), 25);
 
         address[] memory recipients = new address[](2);
-        recipients[0] = recipient0;
-        recipients[1] = recipient1;
+        recipients[0] = recipient0Addr;
+        recipients[1] = recipient1Addr;
 
         uint256[] memory amounts = new uint256[](2);
         amounts[0] = 4;
@@ -522,13 +462,13 @@ contract IntegrationDonationVotingMerkleDistributionDirectAllocateETH is
 
         assertEq(allocator0.balance, 0);
         assertEq(address(strategyWithDirectTransfers).balance, 0);
-        assertEq(recipient1.balance, 25);
+        assertEq(recipient1Addr.balance, 25);
 
         assertEq(IERC20(allocationToken).balanceOf(allocator0), 0);
         assertEq(IERC20(allocationToken).balanceOf(address(strategyWithDirectTransfers)), 0);
-        assertEq(IERC20(allocationToken).balanceOf(recipient0), 4);
+        assertEq(IERC20(allocationToken).balanceOf(recipient0Addr), 4);
 
-        recipients[0] = recipient2;
+        recipients[0] = recipient2Addr;
         vm.expectRevert(Errors.RECIPIENT_NOT_ACCEPTED.selector);
         strategyWithDirectTransfers.allocate(recipients, amounts, data, allocator0);
 
@@ -541,18 +481,18 @@ contract IntegrationDonationVotingMerkleDistributionClaim is IntegrationDonation
         super.setUp();
 
         // Review recipients
-        vm.startPrank(profileOwner);
+        vm.startPrank(userAddr);
 
         IRecipientsExtension.ApplicationStatus[] memory statuses = new IRecipientsExtension.ApplicationStatus[](1);
         address[] memory _recipientIds = new address[](2);
         uint256[] memory _newStatuses = new uint256[](2);
 
         // Set accepted recipients
-        _recipientIds[0] = recipient0;
-        _recipientIds[1] = recipient1;
+        _recipientIds[0] = recipient0Addr;
+        _recipientIds[1] = recipient1Addr;
         _newStatuses[0] = uint256(IRecipientsExtension.Status.Accepted);
         _newStatuses[1] = uint256(IRecipientsExtension.Status.Accepted);
-        statuses[0] = _getApplicationStatus(_recipientIds, _newStatuses);
+        statuses[0] = _getApplicationStatus(_recipientIds, _newStatuses, address(strategy));
 
         uint256 recipientsCounter = strategy.recipientsCounter();
         strategy.reviewRecipients(statuses, recipientsCounter);
@@ -565,8 +505,8 @@ contract IntegrationDonationVotingMerkleDistributionClaim is IntegrationDonation
         IERC20(allocationToken).approve(address(strategy), 4 + 25);
 
         address[] memory recipients = new address[](2);
-        recipients[0] = recipient0;
-        recipients[1] = recipient1;
+        recipients[0] = recipient0Addr;
+        recipients[1] = recipient1Addr;
 
         uint256[] memory amounts = new uint256[](2);
         amounts[0] = 4;
@@ -589,18 +529,18 @@ contract IntegrationDonationVotingMerkleDistributionClaim is IntegrationDonation
         // Claim allocation funds
         vm.warp(allocationEndTime + 1);
 
-        vm.startPrank(recipient0);
+        vm.startPrank(recipient0Addr);
 
         DonationVotingMerkleDistribution.Claim[] memory claims = new DonationVotingMerkleDistribution.Claim[](2);
-        claims[0].recipientId = recipient0;
+        claims[0].recipientId = recipient0Addr;
         claims[0].token = allocationToken;
-        claims[1].recipientId = recipient1;
+        claims[1].recipientId = recipient1Addr;
         claims[1].token = allocationToken;
 
         strategy.claimAllocation(abi.encode(claims));
 
-        assertEq(IERC20(allocationToken).balanceOf(recipient0), 4);
-        assertEq(IERC20(allocationToken).balanceOf(recipient1), 25);
+        assertEq(IERC20(allocationToken).balanceOf(recipient0Addr), 4);
+        assertEq(IERC20(allocationToken).balanceOf(recipient1Addr), 25);
         assertEq(IERC20(allocationToken).balanceOf(address(strategy)), 0);
 
         vm.stopPrank();
@@ -612,12 +552,12 @@ contract IntegrationDonationVotingMerkleDistributionDisabledClaim is Integration
         // Claim allocation funds
         vm.warp(allocationEndTime + 1);
 
-        vm.startPrank(recipient0);
+        vm.startPrank(recipient0Addr);
 
         DonationVotingMerkleDistribution.Claim[] memory claims = new DonationVotingMerkleDistribution.Claim[](2);
-        claims[0].recipientId = recipient0;
+        claims[0].recipientId = recipient0Addr;
         claims[0].token = allocationToken;
-        claims[1].recipientId = recipient1;
+        claims[1].recipientId = recipient1Addr;
         claims[1].token = allocationToken;
 
         vm.expectRevert(Errors.NOT_IMPLEMENTED.selector);
@@ -632,18 +572,18 @@ contract IntegrationDonationVotingMerkleDistributionSetPayout is IntegrationDona
         super.setUp();
 
         // Review recipients
-        vm.startPrank(profileOwner);
+        vm.startPrank(userAddr);
 
         IRecipientsExtension.ApplicationStatus[] memory statuses = new IRecipientsExtension.ApplicationStatus[](1);
         address[] memory _recipientIds = new address[](2);
         uint256[] memory _newStatuses = new uint256[](2);
 
         // Set accepted recipients
-        _recipientIds[0] = recipient0;
-        _recipientIds[1] = recipient1;
+        _recipientIds[0] = recipient0Addr;
+        _recipientIds[1] = recipient1Addr;
         _newStatuses[0] = uint256(IRecipientsExtension.Status.Accepted);
         _newStatuses[1] = uint256(IRecipientsExtension.Status.Accepted);
-        statuses[0] = _getApplicationStatus(_recipientIds, _newStatuses);
+        statuses[0] = _getApplicationStatus(_recipientIds, _newStatuses, address(strategy));
 
         uint256 recipientsCounter = strategy.recipientsCounter();
         strategy.reviewRecipients(statuses, recipientsCounter);
@@ -654,7 +594,7 @@ contract IntegrationDonationVotingMerkleDistributionSetPayout is IntegrationDona
     function test_setPayout() public {
         vm.warp(allocationEndTime + 1);
 
-        vm.startPrank(profileOwner);
+        vm.startPrank(userAddr);
 
         bytes32 merkleRoot = keccak256(abi.encode("merkleRoot"));
         Metadata memory distributionMetadata = Metadata({protocol: 1, pointer: "A"});
@@ -677,29 +617,29 @@ contract IntegrationDonationVotingMerkleDistributionDistribute is IntegrationDon
         super.setUp();
 
         // Review recipients
-        vm.startPrank(profileOwner);
+        vm.startPrank(userAddr);
 
         IRecipientsExtension.ApplicationStatus[] memory statuses = new IRecipientsExtension.ApplicationStatus[](1);
         address[] memory _recipientIds = new address[](2);
         uint256[] memory _newStatuses = new uint256[](2);
 
         // Set accepted recipients
-        _recipientIds[0] = recipient0;
-        _recipientIds[1] = recipient1;
+        _recipientIds[0] = recipient0Addr;
+        _recipientIds[1] = recipient1Addr;
         _newStatuses[0] = uint256(IRecipientsExtension.Status.Accepted);
         _newStatuses[1] = uint256(IRecipientsExtension.Status.Accepted);
-        statuses[0] = _getApplicationStatus(_recipientIds, _newStatuses);
+        statuses[0] = _getApplicationStatus(_recipientIds, _newStatuses, address(strategy));
 
         uint256 recipientsCounter = strategy.recipientsCounter();
         strategy.reviewRecipients(statuses, recipientsCounter);
 
         // Set payouts
         vm.warp(allocationEndTime + 1);
-        vm.startPrank(profileOwner);
+        vm.startPrank(userAddr);
 
         address[] memory recipients = new address[](2);
-        recipients[0] = recipient0;
-        recipients[1] = recipient1;
+        recipients[0] = recipient0Addr;
+        recipients[1] = recipient1Addr;
 
         uint256[] memory amounts = new uint256[](2);
         amounts[0] = POOL_AMOUNT * 1 / 4;
@@ -720,17 +660,17 @@ contract IntegrationDonationVotingMerkleDistributionDistribute is IntegrationDon
         vm.startPrank(address(allo));
 
         bytes memory data = abi.encode(_distributions);
-        strategy.distribute(recipients, data, recipient2);
+        strategy.distribute(recipients, data, recipient2Addr);
 
-        assertEq(IERC20(DAI).balanceOf(recipient0), POOL_AMOUNT * 1 / 4);
-        assertEq(IERC20(DAI).balanceOf(recipient1), POOL_AMOUNT - POOL_AMOUNT * 1 / 4);
+        assertEq(IERC20(DAI).balanceOf(recipient0Addr), POOL_AMOUNT * 1 / 4);
+        assertEq(IERC20(DAI).balanceOf(recipient1Addr), POOL_AMOUNT - POOL_AMOUNT * 1 / 4);
         assertEq(IERC20(DAI).balanceOf(address(strategy)), 0);
         assertEq(strategy.getPoolAmount(), 0);
 
         vm.expectRevert(abi.encodeWithSelector(DonationVotingMerkleDistribution.ALREADY_DISTRIBUTED.selector, 0));
-        strategy.distribute(recipients, data, recipient2);
+        strategy.distribute(recipients, data, recipient2Addr);
 
-        vm.startPrank(address(profileOwner));
+        vm.startPrank(address(userAddr));
         vm.expectRevert(DonationVotingMerkleDistribution.DISTRIBUTION_ALREADY_STARTED.selector);
         bytes32 merkleRoot = keccak256(abi.encode("merkleRoot"));
         Metadata memory distributionMetadata = Metadata({protocol: 1, pointer: "A"});
