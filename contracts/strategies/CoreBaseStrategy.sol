@@ -109,15 +109,7 @@ abstract contract CoreBaseStrategy is IBaseStrategy, Transfer {
     {
         _beforeWithdraw(_token, _amount, _recipient);
         // If the token is the pool token, revert if the amount is greater than the pool amount
-        if (_token == allo.getPool(poolId).token) {
-            if (_token == NATIVE) {
-                if (address(this).balance - _amount < poolAmount) revert BaseStrategy_WITHDRAW_MORE_THAN_POOL_AMOUNT();
-            } else {
-                if (IERC20(_token).balanceOf(address(this)) - _amount < poolAmount) {
-                    revert BaseStrategy_WITHDRAW_MORE_THAN_POOL_AMOUNT();
-                }
-            }
-        }
+        if (_getBalance(_token, address(this)) - _amount < poolAmount) revert BaseStrategy_WITHDRAW_MORE_THAN_POOL_AMOUNT();
         _transferAmount(_token, _recipient, _amount);
         _afterWithdraw(_token, _amount, _recipient);
 
