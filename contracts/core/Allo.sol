@@ -485,14 +485,14 @@ contract Allo is
     /// @notice Internal function to check is caller is pool manager
     /// @param _poolId The pool id
     /// @param _address The address to check
-    function _checkOnlyPoolManager(uint256 _poolId, address _address) internal view {
+    function _checkOnlyPoolManager(uint256 _poolId, address _address) internal view virtual {
         if (!_isPoolManager(_poolId, _address)) revert UNAUTHORIZED();
     }
 
     /// @notice Internal function to check is caller is pool admin
     /// @param _poolId The pool id
     /// @param _address The address to check
-    function _checkOnlyPoolAdmin(uint256 _poolId, address _address) internal view {
+    function _checkOnlyPoolAdmin(uint256 _poolId, address _address) internal view virtual {
         if (!_isPoolAdmin(_poolId, _address)) revert UNAUTHORIZED();
     }
 
@@ -520,7 +520,7 @@ contract Allo is
         uint256 _amount,
         Metadata memory _metadata,
         address[] memory _managers
-    ) internal returns (uint256 poolId) {
+    ) internal virtual returns (uint256 poolId) {
         if (!registry.isOwnerOrMemberOfProfile(_profileId, _creator)) revert UNAUTHORIZED();
 
         poolId = ++_poolIndex;
@@ -599,7 +599,7 @@ contract Allo is
         bytes memory _data,
         uint256 _value,
         address _allocator
-    ) internal {
+    ) internal virtual {
         pools[_poolId].strategy.allocate{value: _value}(_recipients, _amounts, _data, _allocator);
     }
 
@@ -610,7 +610,7 @@ contract Allo is
     /// @param _funder The address providing the funding
     /// @param _poolId The 'poolId' for the pool you are funding
     /// @param _strategy The address of the strategy
-    function _fundPool(uint256 _amount, address _funder, uint256 _poolId, IBaseStrategy _strategy) internal {
+    function _fundPool(uint256 _amount, address _funder, uint256 _poolId, IBaseStrategy _strategy) internal virtual {
         uint256 feeAmount;
         uint256 amountAfterFee = _amount;
 
@@ -654,7 +654,7 @@ contract Allo is
     /// @param _poolId The ID of the pool
     /// @param _address The address to check
     /// @return This will return 'true' if the address is a pool admin, otherwise 'false'
-    function _isPoolAdmin(uint256 _poolId, address _address) internal view returns (bool) {
+    function _isPoolAdmin(uint256 _poolId, address _address) internal view virtual returns (bool) {
         return hasRole(pools[_poolId].adminRole, _address);
     }
 
@@ -663,7 +663,7 @@ contract Allo is
     /// @param _poolId The ID of the pool
     /// @param _address The address to check
     /// @return This will return 'true' if the address is a pool manager, otherwise 'false'
-    function _isPoolManager(uint256 _poolId, address _address) internal view returns (bool) {
+    function _isPoolManager(uint256 _poolId, address _address) internal view virtual returns (bool) {
         return hasRole(pools[_poolId].managerRole, _address) || _isPoolAdmin(_poolId, _address);
     }
 
@@ -671,7 +671,7 @@ contract Allo is
     /// @dev Internal function used to update the registry address.
     ///      Emits a RegistryUpdated event.
     /// @param _registry The new registry address
-    function _updateRegistry(address _registry) internal {
+    function _updateRegistry(address _registry) internal virtual {
         if (_registry == address(0)) revert ZERO_ADDRESS();
 
         registry = IRegistry(_registry);
@@ -682,7 +682,7 @@ contract Allo is
     /// @dev Internal function used to update the treasury address.
     ///      Emits a TreasuryUpdated event.
     /// @param _treasury The new treasury address
-    function _updateTreasury(address payable _treasury) internal {
+    function _updateTreasury(address payable _treasury) internal virtual {
         if (_treasury == address(0)) revert ZERO_ADDRESS();
 
         treasury = _treasury;
@@ -693,7 +693,7 @@ contract Allo is
     /// @dev Internal function used to update the percentage fee.
     ///      Emits a PercentFeeUpdated event.
     /// @param _percentFee The new fee
-    function _updatePercentFee(uint256 _percentFee) internal {
+    function _updatePercentFee(uint256 _percentFee) internal virtual {
         if (_percentFee > 1e18) revert INVALID_FEE();
 
         percentFee = _percentFee;
@@ -705,7 +705,7 @@ contract Allo is
     /// @dev Internal function used to update the base fee.
     ///      Emits a BaseFeeUpdated event.
     /// @param _baseFee The new base fee
-    function _updateBaseFee(uint256 _baseFee) internal {
+    function _updateBaseFee(uint256 _baseFee) internal virtual {
         baseFee = _baseFee;
 
         emit BaseFeeUpdated(baseFee);
@@ -715,7 +715,7 @@ contract Allo is
     /// @dev Internal function used to update the trusted forwarder address.
     ///      Emits a TrustedForwarderUpdated event.
     /// @param __trustedForwarder The new trusted forwarder address
-    function _updateTrustedForwarder(address __trustedForwarder) internal {
+    function _updateTrustedForwarder(address __trustedForwarder) internal virtual {
         if (__trustedForwarder == address(0)) revert ZERO_ADDRESS();
 
         _trustedForwarder = __trustedForwarder;
@@ -727,7 +727,7 @@ contract Allo is
     /// @dev Internal function used to add a pool manager.
     /// @param _poolId The ID of the pool
     /// @param _manager The address to add
-    function _addPoolManager(uint256 _poolId, address _manager) internal {
+    function _addPoolManager(uint256 _poolId, address _manager) internal virtual {
         // Reverts if the address is the zero address with 'ZERO_ADDRESS()'
         if (_manager == address(0)) revert ZERO_ADDRESS();
 
@@ -746,7 +746,7 @@ contract Allo is
     }
 
     /// @dev Logic copied from ERC2771ContextUpgradeable OZ contracts
-    function _msgData() internal view virtual override returns (bytes calldata) {
+    function _msgData() internal view override returns (bytes calldata) {
         uint256 calldataLength = msg.data.length;
         if (isTrustedForwarder(msg.sender) && calldataLength >= 20) {
             return msg.data[:calldataLength - 20];
