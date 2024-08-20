@@ -178,7 +178,7 @@ contract Allo is
             _msgSender(),
             msg.value,
             _profileId,
-            IStrategy(_strategy),
+            IBaseStrategy(_strategy),
             _initStrategyData,
             _token,
             _amount,
@@ -217,7 +217,7 @@ contract Allo is
             creator,
             msg.value,
             _profileId,
-            IStrategy(Clone.createClone(_strategy, _nonces[creator]++)),
+            IBaseStrategy(Clone.createClone(_strategy, _nonces[creator]++)),
             _initStrategyData,
             _token,
             _amount,
@@ -344,11 +344,17 @@ contract Allo is
     /// @dev The encoded data will be specific to a given strategy requirements, reference the strategy
     ///      implementation of registerRecipient().
     /// @param _poolId ID of the pool
+    /// @param _recipientAddresses Addresses of the recipients
     /// @param _data Encoded data unique to a strategy that registerRecipient() requires
-    /// @return recipientId The recipient ID that has been registered
-    function registerRecipient(uint256 _poolId, bytes memory _data) external payable nonReentrant returns (address) {
+    /// @return recipientIds The recipient IDs that have been registered
+    function registerRecipient(uint256 _poolId, address[] memory _recipientAddresses, bytes memory _data)
+        external
+        payable
+        nonReentrant
+        returns (address[] memory)
+    {
         // Return the recipientId (address) from the strategy
-        return pools[_poolId].strategy.registerRecipient{value: msg.value}(_data, _msgSender());
+        return pools[_poolId].strategy.register{value: msg.value}(_recipientAddresses, _data, _msgSender());
     }
 
     /// @notice Register multiple recipients to multiple pools.
@@ -356,21 +362,22 @@ contract Allo is
     ///      Encoded data unique to a strategy that registerRecipient() requires. Encoded '_data' length must match
     ///      '_poolIds' length or this will revert with MISMATCH(). Other requirements will be determined by the strategy.
     /// @param _poolIds ID's of the pools
+    /// @param _recipientAddresses An array of recipients addresses arrays
     /// @param _data An array of encoded data unique to a strategy that registerRecipient() requires.
     /// @return recipientIds The recipient IDs that have been registered
-    function batchRegisterRecipient(uint256[] memory _poolIds, bytes[] memory _data)
-        external
-        nonReentrant
-        returns (address[] memory recipientIds)
-    {
+    function batchRegisterRecipient(
+        uint256[] memory _poolIds,
+        address[][] memory _recipientAddresses,
+        bytes[] memory _data
+    ) external nonReentrant returns (address[][] memory recipientIds) {
         uint256 poolIdLength = _poolIds.length;
-        recipientIds = new address[](poolIdLength);
+        recipientIds = new address[][](poolIdLength);
 
-        if (poolIdLength != _data.length) revert MISMATCH();
+        if (poolIdLength != _data.length || poolIdLength != _recipientAddresses.length) revert MISMATCH();
 
-        // Loop through the '_poolIds' & '_data' and call the 'strategy.registerRecipient()' function
+        // Loop through the '_poolIds' & '_data' and call the 'strategy.register()' function
         for (uint256 i; i < poolIdLength;) {
-            recipientIds[i] = pools[_poolIds[i]].strategy.registerRecipient(_data[i], _msgSender());
+            recipientIds[i] = pools[_poolIds[i]].strategy.register(_recipientAddresses[i], _data[i], _msgSender());
             unchecked {
                 ++i;
             }
@@ -399,34 +406,48 @@ contract Allo is
     /// @dev The encoded data will be specific to a given strategy requirements, reference the strategy
     ///      implementation of allocate().
     /// @param _poolId ID of the pool
+    /// @param _recipients Addresses of the recipients
+    /// @param _amounts Amounts to allocate to each recipient
     /// @param _data Encoded data unique to the strategy for that pool
-    function allocate(uint256 _poolId, bytes memory _data) external payable nonReentrant {
-        _allocate(_poolId, _msgSender(), msg.value, _data);
+    function allocate(uint256 _poolId, address[] memory _recipients, uint256[] memory _amounts, bytes memory _data)
+        external
+        payable
+        nonReentrant
+    {
+        _allocate(_poolId, _recipients, _amounts, _data, msg.value, _msgSender());
     }
 
     /// @notice Allocate to multiple pools
     /// @dev The encoded data will be specific to a given strategy requirements, reference the strategy
     ///      implementation of allocate().
     /// @param _poolIds IDs of the pools
+    /// @param _recipients Addresses of the recipients
+    /// @param _amounts Amounts to allocate to each recipient
     /// @param _values amounts of native tokens to allocate for each pool
     /// @param _datas encoded data unique to the strategy for that pool
-    function batchAllocate(uint256[] calldata _poolIds, uint256[] calldata _values, bytes[] memory _datas)
-        external
-        payable
-        nonReentrant
-    {
+    function batchAllocate(
+        uint256[] calldata _poolIds,
+        address[][] calldata _recipients,
+        uint256[][] calldata _amounts,
+        uint256[] calldata _values,
+        bytes[] memory _datas
+    ) external payable nonReentrant {
         uint256 numPools = _poolIds.length;
 
         // Reverts if the length of _poolIds does not match the length of _datas with 'MISMATCH()' error
         if (numPools != _datas.length) revert MISMATCH();
         // Reverts if the length of _poolIds does not match the length of _values with 'MISMATCH()' error
         if (numPools != _values.length) revert MISMATCH();
+        // Reverts if the length of _poolIds does not match the length of _recipients with 'MISMATCH()' error
+        if (numPools != _recipients.length) revert MISMATCH();
+        // Reverts if the length of _poolIds does not match the length of _amounts with 'MISMATCH()' error
+        if (numPools != _amounts.length) revert MISMATCH();
 
         // Loop through the _poolIds & _datas and call the internal _allocate() function
         uint256 totalValue;
         address msgSender = _msgSender();
         for (uint256 i; i < numPools;) {
-            _allocate(_poolIds[i], msgSender, _values[i], _datas[i]);
+            _allocate(_poolIds[i], _recipients[i], _amounts[i], _datas[i], _values[i], msgSender);
             totalValue += _values[i];
             unchecked {
                 ++i;
@@ -464,14 +485,14 @@ contract Allo is
     /// @notice Internal function to check is caller is pool manager
     /// @param _poolId The pool id
     /// @param _address The address to check
-    function _checkOnlyPoolManager(uint256 _poolId, address _address) internal view {
+    function _checkOnlyPoolManager(uint256 _poolId, address _address) internal view virtual {
         if (!_isPoolManager(_poolId, _address)) revert UNAUTHORIZED();
     }
 
     /// @notice Internal function to check is caller is pool admin
     /// @param _poolId The pool id
     /// @param _address The address to check
-    function _checkOnlyPoolAdmin(uint256 _poolId, address _address) internal view {
+    function _checkOnlyPoolAdmin(uint256 _poolId, address _address) internal view virtual {
         if (!_isPoolAdmin(_poolId, _address)) revert UNAUTHORIZED();
     }
 
@@ -493,13 +514,13 @@ contract Allo is
         address _creator,
         uint256 _msgValue,
         bytes32 _profileId,
-        IStrategy _strategy,
+        IBaseStrategy _strategy,
         bytes memory _initStrategyData,
         address _token,
         uint256 _amount,
         Metadata memory _metadata,
         address[] memory _managers
-    ) internal returns (uint256 poolId) {
+    ) internal virtual returns (uint256 poolId) {
         if (!registry.isOwnerOrMemberOfProfile(_profileId, _creator)) revert UNAUTHORIZED();
 
         poolId = ++_poolIndex;
@@ -566,11 +587,20 @@ contract Allo is
     /// @dev Passes '_data' & '_allocator' through to the strategy for that pool.
     ///      This is an internal function that is called by the 'allocate()' & 'batchAllocate()' functions.
     /// @param _poolId ID of the pool
-    /// @param _allocator Address that is invoking the allocation
-    /// @param _value Amount of native tokens to allocate to strategy
+    /// @param _recipients Addresses of the recipients
+    /// @param _amounts Amount of tokens to allocate to strategy
     /// @param _data Encoded data unique to the strategy for that pool
-    function _allocate(uint256 _poolId, address _allocator, uint256 _value, bytes memory _data) internal {
-        pools[_poolId].strategy.allocate{value: _value}(_data, _allocator);
+    /// @param _value The native token value sent
+    /// @param _allocator Address that is invoking the allocation
+    function _allocate(
+        uint256 _poolId,
+        address[] memory _recipients,
+        uint256[] memory _amounts,
+        bytes memory _data,
+        uint256 _value,
+        address _allocator
+    ) internal virtual {
+        pools[_poolId].strategy.allocate{value: _value}(_recipients, _amounts, _data, _allocator);
     }
 
     /// @notice Fund a pool.
@@ -580,7 +610,7 @@ contract Allo is
     /// @param _funder The address providing the funding
     /// @param _poolId The 'poolId' for the pool you are funding
     /// @param _strategy The address of the strategy
-    function _fundPool(uint256 _amount, address _funder, uint256 _poolId, IStrategy _strategy) internal {
+    function _fundPool(uint256 _amount, address _funder, uint256 _poolId, IBaseStrategy _strategy) internal virtual {
         uint256 feeAmount;
         uint256 amountAfterFee = _amount;
 
@@ -624,7 +654,7 @@ contract Allo is
     /// @param _poolId The ID of the pool
     /// @param _address The address to check
     /// @return This will return 'true' if the address is a pool admin, otherwise 'false'
-    function _isPoolAdmin(uint256 _poolId, address _address) internal view returns (bool) {
+    function _isPoolAdmin(uint256 _poolId, address _address) internal view virtual returns (bool) {
         return hasRole(pools[_poolId].adminRole, _address);
     }
 
@@ -633,7 +663,7 @@ contract Allo is
     /// @param _poolId The ID of the pool
     /// @param _address The address to check
     /// @return This will return 'true' if the address is a pool manager, otherwise 'false'
-    function _isPoolManager(uint256 _poolId, address _address) internal view returns (bool) {
+    function _isPoolManager(uint256 _poolId, address _address) internal view virtual returns (bool) {
         return hasRole(pools[_poolId].managerRole, _address) || _isPoolAdmin(_poolId, _address);
     }
 
@@ -641,7 +671,7 @@ contract Allo is
     /// @dev Internal function used to update the registry address.
     ///      Emits a RegistryUpdated event.
     /// @param _registry The new registry address
-    function _updateRegistry(address _registry) internal {
+    function _updateRegistry(address _registry) internal virtual {
         if (_registry == address(0)) revert ZERO_ADDRESS();
 
         registry = IRegistry(_registry);
@@ -652,7 +682,7 @@ contract Allo is
     /// @dev Internal function used to update the treasury address.
     ///      Emits a TreasuryUpdated event.
     /// @param _treasury The new treasury address
-    function _updateTreasury(address payable _treasury) internal {
+    function _updateTreasury(address payable _treasury) internal virtual {
         if (_treasury == address(0)) revert ZERO_ADDRESS();
 
         treasury = _treasury;
@@ -663,7 +693,7 @@ contract Allo is
     /// @dev Internal function used to update the percentage fee.
     ///      Emits a PercentFeeUpdated event.
     /// @param _percentFee The new fee
-    function _updatePercentFee(uint256 _percentFee) internal {
+    function _updatePercentFee(uint256 _percentFee) internal virtual {
         if (_percentFee > 1e18) revert INVALID_FEE();
 
         percentFee = _percentFee;
@@ -675,7 +705,7 @@ contract Allo is
     /// @dev Internal function used to update the base fee.
     ///      Emits a BaseFeeUpdated event.
     /// @param _baseFee The new base fee
-    function _updateBaseFee(uint256 _baseFee) internal {
+    function _updateBaseFee(uint256 _baseFee) internal virtual {
         baseFee = _baseFee;
 
         emit BaseFeeUpdated(baseFee);
@@ -685,7 +715,7 @@ contract Allo is
     /// @dev Internal function used to update the trusted forwarder address.
     ///      Emits a TrustedForwarderUpdated event.
     /// @param __trustedForwarder The new trusted forwarder address
-    function _updateTrustedForwarder(address __trustedForwarder) internal {
+    function _updateTrustedForwarder(address __trustedForwarder) internal virtual {
         if (__trustedForwarder == address(0)) revert ZERO_ADDRESS();
 
         _trustedForwarder = __trustedForwarder;
@@ -697,7 +727,7 @@ contract Allo is
     /// @dev Internal function used to add a pool manager.
     /// @param _poolId The ID of the pool
     /// @param _manager The address to add
-    function _addPoolManager(uint256 _poolId, address _manager) internal {
+    function _addPoolManager(uint256 _poolId, address _manager) internal virtual {
         // Reverts if the address is the zero address with 'ZERO_ADDRESS()'
         if (_manager == address(0)) revert ZERO_ADDRESS();
 
@@ -716,7 +746,7 @@ contract Allo is
     }
 
     /// @dev Logic copied from ERC2771ContextUpgradeable OZ contracts
-    function _msgData() internal view virtual override returns (bytes calldata) {
+    function _msgData() internal view override returns (bytes calldata) {
         uint256 calldataLength = msg.data.length;
         if (isTrustedForwarder(msg.sender) && calldataLength >= 20) {
             return msg.data[:calldataLength - 20];

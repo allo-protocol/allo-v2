@@ -96,6 +96,10 @@ contract IntegrationDonationVotingOffchainBase is IntegrationBase {
         strategy.register(recipients, abi.encode(data), recipient2Addr);
 
         vm.stopPrank();
+
+        // NOTE: removing all the ETH from the strategy before testing
+        vm.prank(address(strategy));
+        address(0).call{value: address(strategy).balance}("");
     }
 }
 
