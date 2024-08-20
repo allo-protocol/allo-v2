@@ -134,8 +134,8 @@ contract Allo is Test {
         vm.skip(true);
     }
 
-    function test_RegisterRecipientShouldRegisterRecipientOnTheStrategy() external {
-        // it should registerRecipient on the strategy
+    function test_RegisterRecipientShouldCallRegisterOnTheStrategy() external {
+        // it should call register on the strategy
         vm.skip(true);
     }
 
@@ -150,7 +150,7 @@ contract Allo is Test {
     }
 
     function test_BatchRegisterRecipientWhenPoolIdLengthMatches_dataLength() external {
-        // it should call registerRecipient on the strategy
+        // it should call register on the strategy
         // it should return recipientIds
         vm.skip(true);
     }
@@ -181,6 +181,16 @@ contract Allo is Test {
     }
 
     function test_BatchAllocateRevertWhen_PoolIdLengthDoesNotMatch_valuesLength() external {
+        // it should revert
+        vm.skip(true);
+    }
+
+    function test_BatchAllocateRevertWhen_PoolIdLengthDoesNotMatch_recipientsLength() external {
+        // it should revert
+        vm.skip(true);
+    }
+
+    function test_BatchAllocateRevertWhen_PoolIdLengthDoesNotMatch_amountsLength() external {
         // it should revert
         vm.skip(true);
     }

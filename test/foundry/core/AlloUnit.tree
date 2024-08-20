@@ -85,14 +85,14 @@ Allo::recoverFunds
         └── it should transfer token
 
 Allo::registerRecipient
-├── it should registerRecipient on the strategy
+├── it should call register on the strategy
 └── it should return recipientId
 
 Allo::batchRegisterRecipient
 ├── when poolId length does not match _data length
 │   └── it should revert
 └── when poolId length matches _data length
-    ├── it should call registerRecipient on the strategy
+    ├── it should call register on the strategy
     └── it should return recipientIds
 
 Allo::fundPool
@@ -110,6 +110,10 @@ Allo::batchAllocate
 ├── when poolId length does not match _data length
 │   └── it should revert
 ├── when poolId length does not match _values length
+│   └── it should revert
+├── when poolId length does not match _recipients length
+│   └── it should revert
+├── when poolId length does not match _amounts length
 │   └── it should revert
 ├── when lengths matches
 │   └── it should call allocate
