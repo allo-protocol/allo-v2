@@ -80,7 +80,7 @@ contract DonationVotingMerkleDistribution is DonationVotingOffchain {
     /// @notice This is a packed array of booleans to keep track of claims distributed.
     /// @dev _distributedBitMap[0] is the first row of the bitmap and allows to store 256 bits to describe
     /// the status of 256 claims
-    mapping(uint256 => uint256) private _distributedBitMap;
+    mapping(uint256 => uint256) internal _distributedBitMap;
 
     /// ===============================
     /// ======== Constructor ==========
@@ -171,7 +171,7 @@ contract DonationVotingMerkleDistribution is DonationVotingOffchain {
     /// @param _distribution Distribution to be distributed
     /// @param _poolToken Token address of the strategy
     /// @param _sender The address of the sender
-    function _distributeSingle(Distribution memory _distribution, address _poolToken, address _sender) private {
+    function _distributeSingle(Distribution memory _distribution, address _poolToken, address _sender) internal {
         if (!_isAcceptedRecipient(_distribution.recipientId)) revert RECIPIENT_NOT_ACCEPTED();
 
         // Generate the node that will be verified in the 'merkleRoot'
