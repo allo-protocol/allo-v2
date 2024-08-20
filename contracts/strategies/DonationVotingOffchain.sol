@@ -4,10 +4,10 @@ pragma solidity 0.8.19;
 // External Libraries
 import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 // Interfaces
-import {IAllo} from "../core/interfaces/IAllo.sol";
+import {IAllo} from "contracts/core/interfaces/IAllo.sol";
 // Core Contracts
-import {CoreBaseStrategy} from "./CoreBaseStrategy.sol";
-import {RecipientsExtension} from "../extensions/contracts/RecipientsExtension.sol";
+import {CoreBaseStrategy} from "contracts/strategies/CoreBaseStrategy.sol";
+import {RecipientsExtension} from "contracts/extensions/contracts/RecipientsExtension.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⣿⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀

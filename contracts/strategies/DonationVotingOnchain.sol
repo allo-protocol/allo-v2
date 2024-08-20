@@ -3,12 +3,12 @@ pragma solidity 0.8.19;
 
 import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 // Interfaces
-import {IAllo} from "../core/interfaces/IAllo.sol";
+import {IAllo} from "contracts/core/interfaces/IAllo.sol";
 // Core Contracts
-import {CoreBaseStrategy} from "./CoreBaseStrategy.sol";
-import {RecipientsExtension} from "../extensions/contracts/RecipientsExtension.sol";
+import {CoreBaseStrategy} from "contracts/strategies/CoreBaseStrategy.sol";
+import {RecipientsExtension} from "contracts/extensions/contracts/RecipientsExtension.sol";
 // Internal Libraries
-import {QFHelper} from "../core/libraries/QFHelper.sol";
+import {QFHelper} from "contracts/core/libraries/QFHelper.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⣿⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
