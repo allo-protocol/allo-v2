@@ -13,8 +13,12 @@ import {Metadata, IRegistry} from "contracts/core/Registry.sol";
 import {IGitcoinPassportDecoder} from "contracts/strategies/interfaces/IGitcoinPassportDecoder.sol";
 import {RecipientsExtension} from "contracts/extensions/contracts/RecipientsExtension.sol";
 import {ISuperfluidGovernance} from "contracts/strategies/ISuperfluidGovernance.sol";
+import {ISuperToken} from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
+import {SuperTokenV1Library} from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
 
 contract IntegrationSQFSuperfluid is Test {
+    using SuperTokenV1Library for ISuperToken;
+
     SQFSuperfluid public strategy;
     IRecipientSuperAppFactory public recipientSuperAppFactory;
 
@@ -155,6 +159,9 @@ contract IntegrationSQFSuperfluid is Test {
         // Deal initial balance * recipients of DAIx to the strategy
         deal(ALLOCATION_SUPER_TOKEN, address(strategy), INITIAL_SUPER_APP_BALANCE * 2);
 
+        // Deal initial balance of DAIx to the user
+        deal(ALLOCATION_SUPER_TOKEN, userAddr, 100 ether);
+
         // Mock score in passport
         vm.mockCall(
             PASSPORT_DECODER,
@@ -199,20 +206,22 @@ contract IntegrationSQFSuperfluid is Test {
     }
 
     function test_Allocate() public {
-        vm.skip(true);
-
         address[] memory recipients = new address[](2);
         recipients[0] = recipient0Addr;
         recipients[1] = recipient1Addr;
 
         // wei of DAIx per second
         int96[] memory flowRates = new int96[](2);
-        flowRates[0] = 0.01 ether;
-        flowRates[1] = 0.02 ether;
+        flowRates[0] = 0.0001 ether;
+        flowRates[1] = 0.0002 ether;
 
-        // TODO: call the allocate function from Allo.sol after PR #641
-        vm.prank(ALLO_PROXY);
-        strategy.allocate(recipients, new uint256[](0), abi.encode(flowRates), userAddr);
+        vm.startPrank(userAddr);
+        // Approve the strategy to create flows
+        ISuperToken(ALLOCATION_SUPER_TOKEN).setMaxFlowPermissions(address(strategy));
+
+        // Call allocate
+        IAllo(ALLO_PROXY).allocate(poolId, recipients, new uint256[](0), abi.encode(flowRates));
+        vm.stopPrank();
     }
 
     function test_Distribute() public {
