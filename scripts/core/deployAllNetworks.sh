@@ -35,7 +35,7 @@ networks=(
 #   "celo-mainnet"
 #   "arbitrum-mainnet"
 #   "base"
-#   "polygon"
+  "polygon"
 #   "mainnet"
 #   "avalanche"
 #   "scroll"
@@ -63,7 +63,7 @@ scripts=(
     # "strategies/deployDonationVotingMerkleDistributionDirect"
     # "strategies/deployDirectGrants"
     # "strategies/deployDirectGrantsLite"
-    # "strategies/deployDirectAllocation"
+    "strategies/deployDirectAllocation"
     
     # "core/transferProxyAdminOwnership"
     # "strategies/deployDonationVotingMerkleDistributionVault"
