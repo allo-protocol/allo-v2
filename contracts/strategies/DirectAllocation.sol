@@ -1,18 +1,23 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import {CoreBaseStrategy} from "./CoreBaseStrategy.sol";
+// External Libraries
+import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
+// Core Contracts
+import {CoreBaseStrategy} from "contracts/strategies/CoreBaseStrategy.sol";
+// Internal Libraries
+import {Native} from "contracts/core/libraries/Native.sol";
+import {Errors} from "contracts/core/libraries/Errors.sol";
 
 /// @title DirectAllocationStrategy
 /// @dev The strategy only implements the allocate logic
 /// @notice A strategy that directly allocates funds to a recipient
-contract DirectAllocationStrategy is CoreBaseStrategy {
+contract DirectAllocationStrategy is CoreBaseStrategy, Native, Errors {
+    using SafeTransferLib for address;
+
     /// ===============================
     /// ============ Errors ===========
     /// ===============================
-
-    /// @notice Error when the function is not implemented
-    error NOT_IMPLEMENTED();
 
     /// @notice Error when the input is invalid
     error INVALID_INPUT();
@@ -69,15 +74,23 @@ contract DirectAllocationStrategy is CoreBaseStrategy {
             revert INVALID_INPUT();
         }
 
+        uint256 _totalNativeAmount;
         for (uint256 _i = 0; _i < _recipientsLength;) {
             /// Direct allocate the funds
-            _transferAmountFrom(_tokens[_i], TransferData({from: _sender, to: _recipients[_i], amount: _amounts[_i]}));
+            if (_tokens[_i] == NATIVE) {
+                _totalNativeAmount += _amounts[_i];
+                _recipients[_i].safeTransferETH(_amounts[_i]);
+            } else {
+                _tokens[_i].safeTransferFrom(_sender, _recipients[_i], _amounts[_i]);
+            }
 
             emit DirectAllocated(_recipients[_i], _amounts[_i], _tokens[_i], _sender);
             unchecked {
                 ++_i;
             }
         }
+
+        if (msg.value < _totalNativeAmount) revert ETH_MISMATCH();
     }
 
     /// @notice Distribute funds to recipients

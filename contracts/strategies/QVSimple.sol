@@ -7,6 +7,8 @@ import {IRecipientsExtension} from "contracts/extensions/interfaces/IRecipientsE
 // Contracts
 import {CoreBaseStrategy} from "contracts/strategies/CoreBaseStrategy.sol";
 import {RecipientsExtension} from "contracts/extensions/contracts/RecipientsExtension.sol";
+// Internal Libraries
+import {Transfer} from "contracts/core/libraries/Transfer.sol";
 import {QVHelper} from "contracts/core/libraries/QVHelper.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -25,6 +27,7 @@ import {QVHelper} from "contracts/core/libraries/QVHelper.sol";
 //                    allo.gitcoin.co
 contract QVSimple is CoreBaseStrategy, RecipientsExtension {
     using QVHelper for QVHelper.VotingState;
+    using Transfer for address;
 
     /// ======================
     /// ======= Storage ======
@@ -182,7 +185,7 @@ contract QVSimple is CoreBaseStrategy, RecipientsExtension {
                 revert RECIPIENT_ERROR(recipientId);
             }
 
-            _transferAmount(pool.token, recipient.recipientAddress, amount);
+            pool.token.transferAmount(recipient.recipientAddress, amount);
 
             paidOut[recipientId] = true;
 

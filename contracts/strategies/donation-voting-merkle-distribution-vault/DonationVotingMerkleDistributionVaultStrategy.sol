@@ -6,6 +6,7 @@ import {DonationVotingMerkleDistributionBaseStrategy} from
     "../donation-voting-merkle-base/DonationVotingMerkleDistributionBaseStrategy.sol";
 import "openzeppelin-contracts-upgradeable/contracts/security/ReentrancyGuardUpgradeable.sol";
 import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
+import {Transfer} from "../../core/libraries/Transfer.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⣿⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -29,6 +30,9 @@ contract DonationVotingMerkleDistributionVaultStrategy is
     DonationVotingMerkleDistributionBaseStrategy,
     ReentrancyGuardUpgradeable
 {
+    using SafeTransferLib for address;
+    using Transfer for address;
+
     /// @notice Stores the details of the allocations to claim.
     struct Claim {
         address recipientId;
@@ -92,7 +96,7 @@ contract DonationVotingMerkleDistributionVaultStrategy is
             totalClaimableAmount[token] -= amount;
 
             // Transfer the tokens to the recipient
-            _transferAmount(token, recipient.recipientAddress, amount);
+            token.transferAmount(recipient.recipientAddress, amount);
 
             // Emit that the tokens have been claimed and sent to the recipient
             emit Claimed(singleClaim.recipientId, recipient.recipientAddress, amount, token);
@@ -120,11 +124,11 @@ contract DonationVotingMerkleDistributionVaultStrategy is
         uint256 transferredAmount = amount;
         if (token == NATIVE) {
             if (msg.value < amount) {
-                revert AMOUNT_MISMATCH();
+                revert ETH_MISMATCH();
             }
-            SafeTransferLib.safeTransferETH(address(this), amount);
+            address(this).safeTransferETH(amount);
         } else {
-            uint256 balanceBefore = SafeTransferLib.balanceOf(token, address(this));
+            uint256 balanceBefore = token.balanceOf(address(this));
             PERMIT2.permitTransferFrom(
                 // The permit message.
                 p2Data.permit,
@@ -137,7 +141,7 @@ contract DonationVotingMerkleDistributionVaultStrategy is
                 p2Data.signature
             );
 
-            uint256 balanceAfter = SafeTransferLib.balanceOf(token, address(this));
+            uint256 balanceAfter = token.balanceOf(address(this));
             transferredAmount = balanceAfter - balanceBefore;
         }
 

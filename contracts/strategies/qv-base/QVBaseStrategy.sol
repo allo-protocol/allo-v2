@@ -8,6 +8,7 @@ import {IRegistry} from "../../core/interfaces/IRegistry.sol";
 import {BaseStrategy} from "../BaseStrategy.sol";
 // Internal Libraries
 import {Metadata} from "../../core/libraries/Metadata.sol";
+import {Transfer} from "contracts/core/libraries/Transfer.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⣿⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -28,6 +29,8 @@ import {Metadata} from "../../core/libraries/Metadata.sol";
 /// @notice Base strategy for quadratic voting strategies
 /// @author @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>, @0xZakk <zakk@gitcoin.co>, @nfrgosselin <nate@gitcoin.co>
 abstract contract QVBaseStrategy is BaseStrategy {
+    using Transfer for address;
+
     /// ======================
     /// ======= Events =======
     /// ======================
@@ -338,10 +341,10 @@ abstract contract QVBaseStrategy is BaseStrategy {
             revert INVALID();
         }
 
-        uint256 amount = _getBalance(_token, address(this));
+        uint256 amount = _token.getBalance(address(this));
 
         // Transfer the tokens to the 'msg.sender' (pool manager calling function)
-        _transferAmount(_token, msg.sender, amount);
+        _token.transferAmount(msg.sender, amount);
     }
 
     /// ====================================
@@ -505,7 +508,7 @@ abstract contract QVBaseStrategy is BaseStrategy {
             }
 
             IAllo.Pool memory pool = allo.getPool(poolId);
-            _transferAmount(pool.token, recipient.recipientAddress, amount);
+            pool.token.transferAmount(recipient.recipientAddress, amount);
 
             paidOut[recipientId] = true;
 

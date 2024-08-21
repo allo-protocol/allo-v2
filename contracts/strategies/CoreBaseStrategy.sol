@@ -2,15 +2,16 @@
 pragma solidity 0.8.19;
 
 /// Interfaces
-import "../core/interfaces/IBaseStrategy.sol";
-
-/// Libraries
-import {Transfer} from "./../core/libraries/Transfer.sol";
+import "contracts/core/interfaces/IBaseStrategy.sol";
+// Internal Libraries
+import {Transfer} from "contracts/core/libraries/Transfer.sol";
 
 /// @title BaseStrategy Contract
 /// @notice This contract is the base contract for all strategies
 /// @dev This contract is implemented by all strategies.
-abstract contract CoreBaseStrategy is IBaseStrategy, Transfer {
+abstract contract CoreBaseStrategy is IBaseStrategy {
+    using Transfer for address;
+
     /// ==========================
     /// === Storage Variables ====
     /// ==========================
@@ -107,7 +108,7 @@ abstract contract CoreBaseStrategy is IBaseStrategy, Transfer {
         onlyPoolManager(msg.sender)
     {
         _beforeWithdraw(_token, _amount, _recipient);
-        _transferAmount(_token, _recipient, _amount);
+        _token.transferAmount(_recipient, _amount);
         _afterWithdraw(_token, _amount, _recipient);
 
         emit Withdrew(_token, _amount, _recipient);

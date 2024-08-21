@@ -12,9 +12,11 @@ import {IAllo} from "../../../core/interfaces/IAllo.sol";
 import {IRegistry} from "../../../core/interfaces/IRegistry.sol";
 import {Metadata} from "../../../core/libraries/Metadata.sol";
 import {BaseStrategy} from "../../BaseStrategy.sol";
+import {Transfer} from "contracts/core/libraries/Transfer.sol";
 
 contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
     using SafeERC20 for IERC20;
+    using Transfer for address;
 
     /// ===============================
     /// ========== Errors =============
@@ -230,7 +232,7 @@ contract LockupLinearStrategy is BaseStrategy, ReentrancyGuard {
     /// @param _amount The amount to be withdrawn
     function withdraw(uint256 _amount) external onlyPoolManager(msg.sender) {
         poolAmount -= _amount;
-        _transferAmount(allo.getPool(poolId).token, msg.sender, _amount);
+        allo.getPool(poolId).token.transferAmount(msg.sender, _amount);
     }
 
     /// ====================================

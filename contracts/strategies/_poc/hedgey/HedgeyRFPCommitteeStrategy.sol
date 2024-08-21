@@ -7,6 +7,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 // Internal Libraries
 import {Metadata} from "../../../core/libraries/Metadata.sol";
+import {Transfer} from "contracts/core/libraries/Transfer.sol";
 
 interface ITokenVestingPlans {
     function createPlan(
@@ -23,6 +24,8 @@ interface ITokenVestingPlans {
 }
 
 contract HedgeyRFPCommitteeStrategy is RFPCommitteeStrategy {
+    using Transfer for address;
+
     /// ================================
     /// ========== Storage =============
     /// ================================
@@ -104,17 +107,17 @@ contract HedgeyRFPCommitteeStrategy is RFPCommitteeStrategy {
     /// @dev Callable by the pool manager
     /// @param _token The token to withdraw
     function withdraw(address _token) external virtual override onlyPoolManager(msg.sender) onlyInactivePool {
-        uint256 amount = _getBalance(_token, address(this));
+        uint256 amount = _token.getBalance(address(this));
 
         // Transfer the tokens to the 'msg.sender' (pool manager calling function)
-        super._transferAmount(_token, msg.sender, amount);
+        _token.transferAmount(msg.sender, amount);
     }
 
     /// ====================================
     /// ============ Internal ==============
     /// ====================================
 
-    function _transferAmount(address _token, address _recipient, uint256 _amount) internal override {
+    function _transferAmount(address _token, address _recipient, uint256 _amount) internal {
         IERC20(_token).approve(hedgeyContract, _amount);
 
         uint256 rate = _amount / _recipientLockupTerm[_recipient];
