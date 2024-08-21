@@ -32,7 +32,7 @@ library Transfer {
     /// @param _token The token to transfer
     /// @param _to The address to transfer to
     /// @param _amount The amount to transfer
-    function transferAmount(address _token, address _to, uint256 _amount) internal virtual {
+    function transferAmount(address _token, address _to, uint256 _amount) internal {
         if (_token == NATIVE) {
             _to.safeTransferETH(_amount);
         } else {
