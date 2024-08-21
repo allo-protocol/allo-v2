@@ -68,6 +68,6 @@ createDirectAllocationPool().catch((error) => {
 // Sei         | 0x1cfa7A687cd18b99D255bFc25930d3a0b05EB00F | 0xc283992812559f990f71ec8b7e85aa7cebc50d908a2c93f6e69c7daf03dfc800 | 8
 // Lukso       | 0xeB6325d9daCD1E46A20C02F46E41d4CAE45C0980 | 0xea2ee6a4a803a669e1e1008e1b6993d073180bcddcc51f8f5d4fa89e9ae2894f | 3
 // Metis       | 0x56662F9c0174cD6ae14b214fC52Bd6Eb6B6eA602 | 0x13ffe09671f07a4eb6bfcf96fa58d93bedabf721d26d0cc162f267504816f3db | 1 
-// Polygon     | | | |
-// Zksync      | | | |
+// Polygon     | | | 0x4315f7c2983ebdc482cd025602968c954b95c854d7fc15e73aa5e36e101a922b |
+// Zksync      | | | 0x4bceb0d414b15483adfac95ffe19e4378b703e619cf92798dd220641172ff728 |
 // ```
