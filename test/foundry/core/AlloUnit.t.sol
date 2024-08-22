@@ -2,27 +2,109 @@
 pragma solidity ^0.8.19;
 
 import {Test} from "forge-std/Test.sol";
+import {MockAllo} from "smock/MockAllo.sol";
+import {Errors} from "contracts/core/libraries/Errors.sol";
+import {Metadata} from "contracts/core/libraries/Metadata.sol";
+import {IBaseStrategy} from "contracts/core/interfaces/IBaseStrategy.sol";
 
 contract Allo is Test {
-    function test_InitializeGivenUpgradeVersionIsCorrect() external {
+    MockAllo allo;
+
+    function setUp() public virtual {
+        allo = new MockAllo();
+    }
+
+    function test_InitializeGivenUpgradeVersionIsCorrect(
+        address _owner,
+        address _registry,
+        address payable _treasury,
+        uint256 _percentFee,
+        uint256 _baseFee,
+        address _trustedForwarder
+    ) external {
+        allo.mock_call__updateRegistry(_registry);
+        allo.mock_call__updateTreasury(_treasury);
+        allo.mock_call__updatePercentFee(_percentFee);
+        allo.mock_call__updateBaseFee(_baseFee);
+        allo.mock_call__updateTrustedForwarder(_trustedForwarder);
+
         // it should call _initializeOwner
+        // TODO: expect _initializeOwner
+
         // it should call _updateRegistry
+        allo.expectCall__updateRegistry(_registry);
+
         // it should call _updateTreasury
+        allo.expectCall__updateTreasury(_treasury);
+
         // it should call _updatePercentFee
+        allo.expectCall__updatePercentFee(_percentFee);
+
         // it should call _updateBaseFee
+        allo.expectCall__updateBaseFee(_baseFee);
+
         // it should call _updateTrustedForwarder
-        vm.skip(true);
+        allo.expectCall__updateTrustedForwarder(_trustedForwarder);
+
+        allo.initialize(_owner, _registry, _treasury, _percentFee, _baseFee, _trustedForwarder);
     }
 
-    function test_CreatePoolWithCustomStrategyRevertWhen_StrategyIsZeroAddress() external {
+    function test_CreatePoolWithCustomStrategyRevertWhen_StrategyIsZeroAddress(
+        bytes32 _profileId,
+        bytes memory _initStrategyData,
+        address _token,
+        uint256 _amount,
+        Metadata memory _metadata,
+        address[] memory _managers
+    ) external {
         // it should revert
-        vm.skip(true);
+        vm.expectRevert(Errors.ZERO_ADDRESS.selector);
+
+        allo.createPoolWithCustomStrategy(
+            _profileId, address(0), _initStrategyData, _token, _amount, _metadata, _managers
+        );
     }
 
-    function test_CreatePoolWithCustomStrategyWhenCallingWithProperParams() external {
+    function test_CreatePoolWithCustomStrategyWhenCallingWithProperParams(
+        address _creator,
+        uint256 _msgValue,
+        bytes32 _profileId,
+        IBaseStrategy _strategy,
+        bytes memory _initStrategyData,
+        address _token,
+        uint256 _amount,
+        Metadata memory _metadata,
+        address[] memory _managers,
+        uint256 _poolId
+    ) external {
+        vm.assume(address(_strategy) != address(0));
+        vm.assume(_creator != address(0));
+        allo.mock_call__createPool(
+            _creator,
+            _msgValue,
+            _profileId,
+            _strategy,
+            _initStrategyData,
+            _token,
+            _amount,
+            _metadata,
+            _managers,
+            _poolId
+        );
+
         // it should call _createPool
+        allo.expectCall__createPool(
+            _creator, _msgValue, _profileId, _strategy, _initStrategyData, _token, _amount, _metadata, _managers
+        );
+
+        deal(_creator, _msgValue);
+        vm.prank(_creator);
+        uint256 poolId = allo.createPoolWithCustomStrategy{value: _msgValue}(
+            _profileId, address(_strategy), _initStrategyData, _token, _amount, _metadata, _managers
+        );
+
         // it should return poolId
-        vm.skip(true);
+        assertEq(poolId, _poolId);
     }
 
     function test_CreatePoolRevertWhen_StrategyIsZeroAddress() external {
