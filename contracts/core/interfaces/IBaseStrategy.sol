@@ -20,6 +20,9 @@ interface IBaseStrategy {
     /// @notice Error when the pool ID is invalid
     error BaseStrategy_INVALID_POOL_ID();
 
+    /// @notice Error when the withdraw amount leaves the pool with insufficient funds
+    error BaseStrategy_WITHDRAW_MORE_THAN_POOL_AMOUNT();
+
     /// ======================
     /// ======= Events =======
     /// ======================
