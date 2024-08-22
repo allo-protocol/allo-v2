@@ -6,9 +6,13 @@ import {MockAllo} from "smock/MockAllo.sol";
 import {Errors} from "contracts/core/libraries/Errors.sol";
 import {Metadata} from "contracts/core/libraries/Metadata.sol";
 import {IBaseStrategy} from "contracts/core/interfaces/IBaseStrategy.sol";
+import {ClonesUpgradeable} from "openzeppelin-contracts-upgradeable/contracts/proxy/ClonesUpgradeable.sol";
+import {Ownable} from "solady/auth/Ownable.sol";
 
 contract Allo is Test {
     MockAllo allo;
+
+    event PoolMetadataUpdated(uint256 indexed poolId, Metadata metadata);
 
     function setUp() public virtual {
         allo = new MockAllo();
@@ -107,42 +111,137 @@ contract Allo is Test {
         assertEq(poolId, _poolId);
     }
 
-    function test_CreatePoolRevertWhen_StrategyIsZeroAddress() external {
+    function test_CreatePoolRevertWhen_StrategyIsZeroAddress(
+        bytes32 _profileId,
+        bytes memory _initStrategyData,
+        address _token,
+        uint256 _amount,
+        Metadata memory _metadata,
+        address[] memory _managers) external {
         // it should revert
-        vm.skip(true);
+        vm.expectRevert(Errors.ZERO_ADDRESS.selector);
+
+        allo.createPool(
+            _profileId, address(0), _initStrategyData, _token, _amount, _metadata, _managers
+        );
     }
 
-    function test_CreatePoolWhenCallingWithProperParams() external {
+    function test_CreatePoolWhenCallingWithProperParams(
+        address _creator,
+        uint256 _msgValue,
+        bytes32 _profileId,
+        IBaseStrategy _strategy,
+        bytes memory _initStrategyData,
+        address _token,
+        uint256 _amount,
+        Metadata memory _metadata,
+        address[] memory _managers,
+        uint256 _poolId
+    ) external {
+        vm.skip(true);
+
+        vm.assume(address(_strategy) != address(0));
+        vm.assume(_creator != address(0));
+
+        address _expectedClonedStrategy = ClonesUpgradeable.predictDeterministicAddress(
+            address(_strategy), 
+            keccak256(abi.encodePacked(address(allo), uint(0))), 
+            address(allo)
+        );
+
+        allo.mock_call__createPool(
+            _creator,
+            _msgValue,
+            _profileId,
+            IBaseStrategy(_expectedClonedStrategy),
+            _initStrategyData,
+            _token,
+            _amount,
+            _metadata,
+            _managers,
+            _poolId
+        );
+
         // it should call _createPool
+        allo.expectCall__createPool(
+            _creator, _msgValue, _profileId, IBaseStrategy(_expectedClonedStrategy), _initStrategyData, _token, _amount, _metadata, _managers
+        );
+
+        deal(_creator, _msgValue);
+        vm.prank(_creator);
+        uint256 poolId = allo.createPool{value: _msgValue}(
+            _profileId, address(_strategy), _initStrategyData, _token, _amount, _metadata, _managers
+        );
+
         // it should return poolId
-        vm.skip(true);
+        assertEq(poolId, _poolId);
     }
 
-    function test_UpdatePoolMetadataGivenSenderIsManagerOfPool() external {
+    function test_UpdatePoolMetadataGivenSenderIsManagerOfPool(uint256 _poolId, Metadata memory _metadata) external {
+        allo.mock_call__checkOnlyPoolManager(_poolId, address(this));
+
         // it should call _checkOnlyPoolManager
-        // it should update metadata
+        allo.expectCall__checkOnlyPoolManager(_poolId, address(this));
+
         // it should emit event
-        vm.skip(true);
+        vm.expectEmit();
+        emit PoolMetadataUpdated(_poolId, _metadata);
+
+        allo.updatePoolMetadata(_poolId, _metadata);
+
+        // it should update metadata
+        assertEq(allo.call_pools(_poolId).metadata.pointer, _metadata.pointer);
+        assertEq(allo.call_pools(_poolId).metadata.protocol, _metadata.protocol);
     }
 
-    function test_UpdateRegistryRevertWhen_SenderIsNotOwner() external {
+    function test_UpdateRegistryRevertWhen_SenderIsNotOwner(address _caller, address _registry) external {
+        vm.assume(_caller != address(0)); // owner is not set so is eq to 0
+
         // it should revert
-        vm.skip(true);
+        vm.expectRevert(Ownable.Unauthorized.selector);
+
+        vm.prank(_caller);
+        allo.updateRegistry(_registry);
     }
 
-    function test_UpdateRegistryWhenSenderIsOwner() external {
+    function test_UpdateRegistryWhenSenderIsOwner(address _caller, address _registry) external {
+        vm.assume(_caller != address(0));
+
+        vm.prank(address(0));
+        allo.transferOwnership(_caller);
+
+        allo.mock_call__updateRegistry(_registry);
+
         // it should call _updateRegistry
-        vm.skip(true);
+        allo.expectCall__updateRegistry(_registry);
+
+        vm.prank(_caller);
+        allo.updateRegistry(_registry);
     }
 
-    function test_UpdateTreasuryRevertWhen_SenderIsNotOwner() external {
+    function test_UpdateTreasuryRevertWhen_SenderIsNotOwner(address _caller, address payable _treasury) external {
+        vm.assume(_caller != address(0)); // owner is not set so is eq to 0
+
         // it should revert
-        vm.skip(true);
+        vm.expectRevert(Ownable.Unauthorized.selector);
+
+        vm.prank(_caller);
+        allo.updateTreasury(_treasury);
     }
 
-    function test_UpdateTreasuryWhenSenderIsOwner() external {
+    function test_UpdateTreasuryWhenSenderIsOwner(address _caller,  address payable _treasury) external {
+        vm.assume(_caller != address(0));
+
+        vm.prank(address(0));
+        allo.transferOwnership(_caller);
+
+        allo.mock_call__updateTreasury(_treasury);
+
         // it should call _updateTreasury
-        vm.skip(true);
+        allo.expectCall__updateTreasury(_treasury);
+
+        vm.prank(_caller);
+        allo.updateTreasury(_treasury);
     }
 
     function test_UpdatePercentFeeRevertWhen_SenderIsNotOwner() external {
