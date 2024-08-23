@@ -479,12 +479,15 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard, Native {
             revert INVALID();
         }
 
-        if (token == NATIVE && msg.value < amount) revert ETH_MISMATCH();
-
-        uint256 balanceBefore = token.getBalance(address(this));
-        token.transferAmount(address(this), amount);
-        uint256 balanceAfter = token.getBalance(address(this));
-        uint256 transferredAmount = balanceAfter - balanceBefore;
+        uint256 transferredAmount = amount;
+        if (token == NATIVE) {
+            if (msg.value < amount) revert ETH_MISMATCH();
+        } else {
+            uint256 balanceBefore = token.getBalance(address(this));
+            token.transferAmountFrom(_sender, address(this), amount);
+            uint256 balanceAfter = token.getBalance(address(this));
+            transferredAmount = balanceAfter - balanceBefore;
+        }
 
         // Update the total payout amount for the claim and the total claimable amount
         claims[recipientId][token] += transferredAmount;
