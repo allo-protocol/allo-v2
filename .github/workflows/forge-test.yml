@@ -28,6 +28,11 @@ jobs:
         with:
           version: nightly
 
+      - name: Run Smock
+        run: |
+          bun smock
+        id: smock
+
       - name: Run Forge Format
         run: |
           forge fmt --check
