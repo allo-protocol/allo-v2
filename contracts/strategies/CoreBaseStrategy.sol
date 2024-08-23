@@ -108,6 +108,10 @@ abstract contract CoreBaseStrategy is IBaseStrategy {
         onlyPoolManager(msg.sender)
     {
         _beforeWithdraw(_token, _amount, _recipient);
+        // If the token is the pool token, revert if the amount is greater than the pool amount
+        if (_token.getBalance(address(this)) - _amount < poolAmount) {
+            revert BaseStrategy_WITHDRAW_MORE_THAN_POOL_AMOUNT();
+        }
         _token.transferAmount(_recipient, _amount);
         _afterWithdraw(_token, _amount, _recipient);
 
