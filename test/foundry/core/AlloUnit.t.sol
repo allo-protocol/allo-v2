@@ -141,9 +141,7 @@ contract Allo is Test {
         vm.assume(_creator != address(0));
 
         address _expectedClonedStrategy = ClonesUpgradeable.predictDeterministicAddress(
-            address(_strategy), 
-            keccak256(abi.encodePacked(_creator, uint256(0))), 
-            address(allo)
+            address(_strategy), keccak256(abi.encodePacked(_creator, uint256(0))), address(allo)
         );
 
         allo.mock_call__createPool(
