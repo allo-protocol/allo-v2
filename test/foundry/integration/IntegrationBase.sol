@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.22;
 
 import {Test} from "forge-std/Test.sol";
 import {Allo, IAllo} from "contracts/core/Allo.sol";

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity 0.8.19;
+pragma solidity 0.8.22;
 
 import {IRecipientsExtension} from "../interfaces/IRecipientsExtension.sol";
 import {IRegistry} from "../../core/interfaces/IRegistry.sol";

@@ -1,4 +1,4 @@
-// pragma solidity ^0.8.19;
+// pragma solidity ^0.8.22;
 
 // import {ISablierV2LockupLinear} from "@sablier/v2-core/src/interfaces/ISablierV2LockupLinear.sol";
 // import {Broker, LockupLinear} from "@sablier/v2-core/src/types/DataTypes.sol";

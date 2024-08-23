@@ -64,7 +64,7 @@ sequenceDiagram
 ## Smart Contract Overview
 
 - **License:** The `RFPSimpleStrategy` contract operates under the AGPL-3.0-only License, fostering open-source usage under specific terms.
-- **Solidity Version:** Developed using Solidity version 0.8.19, capitalizing on the latest Ethereum smart contract functionalities.
+- **Solidity Version:** Developed using Solidity version 0.8.22, capitalizing on the latest Ethereum smart contract functionalities.
 - **External Libraries:** Utilizes the `ReentrancyGuard` library from the OpenZeppelin contracts to prevent reentrant attacks.
 - **Interfaces:** Imports interfaces from the Allo core and external libraries.
 - **Internal Libraries:** Imports the `Metadata` library from the Allo core for metadata management.

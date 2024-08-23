@@ -167,7 +167,7 @@ sequenceDiagram
 ## Smart Contract Overview
 
 * **License:** The contract is licensed under the AGPL-3.0-only license.
-* **Solidity Version:** The contract is written in Solidity version 0.8.19.
+* **Solidity Version:** The contract is written in Solidity version 0.8.22.
 * **Inheritance:** The contract inherits from several other contracts: `Initializable`, `Ownable`, `AccessControl`, `IAllo`, `Native`, and `Transfer`.
 
 ### Storage Variables

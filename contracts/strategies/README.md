@@ -17,7 +17,7 @@ The `BaseStrategy` contract serves as a foundational building block within the A
 ## Smart Contract Overview
 
 * **License:** The `BaseStrategy` contract adheres to the AGPL-3.0-only License, promoting open-source usage with specific terms.
-* **Solidity Version:** Developed using Solidity version 0.8.19, leveraging the latest Ethereum smart contract advancements.
+* **Solidity Version:** Developed using Solidity version 0.8.22, leveraging the latest Ethereum smart contract advancements.
 * **External Libraries:** Imports `Transfer` library from the Allo core for optimized token transfers.
 * **Interfaces:** Implements the `IStrategy` interface, facilitating interaction with external components.
 
