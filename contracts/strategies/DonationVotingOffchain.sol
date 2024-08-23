@@ -7,7 +7,7 @@ import {IAllo} from "../core/interfaces/IAllo.sol";
 import {CoreBaseStrategy} from "./CoreBaseStrategy.sol";
 import {RecipientsExtension} from "../extensions/contracts/RecipientsExtension.sol";
 // Internal Libraries
-import {Transfer, SafeTransferLib} from "contracts/core/libraries/Transfer.sol";
+import {Transfer} from "contracts/core/libraries/Transfer.sol";
 import {Native} from "contracts/core/libraries/Native.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -30,7 +30,6 @@ import {Native} from "contracts/core/libraries/Native.sol";
 /// by the pool manager.
 contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension, Native {
     using Transfer for address;
-    using SafeTransferLib for address;
 
     /// ===============================
     /// ========== Events =============
@@ -280,7 +279,7 @@ contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension, Native
             if (tokens[i] == NATIVE) {
                 totalNativeAmount += _amounts[i];
             } else {
-                tokens[i].safeTransferFrom(_sender, address(this), _amounts[i]);
+                tokens[i].transferAmountFrom(_sender, address(this), _amounts[i]);
             }
 
             emit Allocated(_recipients[i], _sender, _amounts[i], abi.encode(tokens[i]));

@@ -9,7 +9,7 @@ import {RecipientsExtension} from "../extensions/contracts/RecipientsExtension.s
 // Internal Libraries
 import {QFHelper} from "../core/libraries/QFHelper.sol";
 import {Native} from "contracts/core/libraries/Native.sol";
-import {Transfer, SafeTransferLib} from "contracts/core/libraries/Transfer.sol";
+import {Transfer} from "contracts/core/libraries/Transfer.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⣿⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -32,7 +32,6 @@ import {Transfer, SafeTransferLib} from "contracts/core/libraries/Transfer.sol";
 contract DonationVotingOnchain is CoreBaseStrategy, RecipientsExtension, Native {
     using QFHelper for QFHelper.State;
     using Transfer for address;
-    using SafeTransferLib for address;
 
     /// ===============================
     /// ========== Events =============
@@ -189,7 +188,7 @@ contract DonationVotingOnchain is CoreBaseStrategy, RecipientsExtension, Native 
         if (allocationToken == NATIVE) {
             if (msg.value != totalAmount) revert ETH_MISMATCH();
         } else {
-            allocationToken.safeTransferFrom(_sender, address(this), totalAmount);
+            allocationToken.transferAmountFrom(_sender, address(this), totalAmount);
         }
 
         QFState.fund(_recipients, _amounts);

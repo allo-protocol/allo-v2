@@ -13,7 +13,7 @@ import "./interfaces/IAllo.sol";
 import {Clone} from "./libraries/Clone.sol";
 import {Errors} from "./libraries/Errors.sol";
 import {Native} from "./libraries/Native.sol";
-import {Transfer, SafeTransferLib} from "./libraries/Transfer.sol";
+import {Transfer} from "./libraries/Transfer.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⣿⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -36,7 +36,6 @@ import {Transfer, SafeTransferLib} from "./libraries/Transfer.sol";
 /// @dev The contract must be initialized with the 'initialize()' function.
 contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable, ReentrancyGuardUpgradeable, Errors {
     using Transfer for address;
-    using SafeTransferLib for address;
 
     // ==========================
     // === Storage Variables ====
@@ -565,7 +564,7 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
             if (_token == NATIVE && (baseFee + _amount != _msgValue)) revert NOT_ENOUGH_FUNDS();
             if (_token != NATIVE && baseFee != _msgValue) revert NOT_ENOUGH_FUNDS();
 
-            address(treasury).safeTransferETH(baseFee);
+            address(treasury).transferAmountNative(baseFee);
 
             emit BaseFeePaid(poolId, baseFee);
         }
@@ -611,25 +610,21 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
         Pool storage pool = pools[_poolId];
         address _token = pool.token;
 
-        if (_token == NATIVE) {
-            if (msg.value < _amount) revert ETH_MISMATCH();
-            if (feeAmount > 0) address(treasury).safeTransferETH(feeAmount);
-            address(_strategy).safeTransferETH(amountAfterFee);
-        } else {
-            if (feeAmount > 0) {
-                uint256 balanceBeforeFee = _token.balanceOf(treasury);
-                _token.safeTransferFrom(_funder, treasury, feeAmount);
-                uint256 balanceAfterFee = _token.balanceOf(treasury);
-                // Track actual fee paid to account for fee on ERC20 token transfers
-                feeAmount = balanceAfterFee - balanceBeforeFee;
-            }
+        if (_token == NATIVE && msg.value < _amount) revert ETH_MISMATCH();
 
-            uint256 balanceBeforeFundingPool = _token.balanceOf(address(_strategy));
-            _token.safeTransferFrom(_funder, address(_strategy), amountAfterFee);
-            uint256 balanceAfterFundingPool = _token.balanceOf(address(_strategy));
+        if (feeAmount > 0) {
+            uint256 balanceBeforeFee = _token.getBalance(treasury);
+            _token.transferAmountFrom(_funder, treasury, feeAmount);
+            uint256 balanceAfterFee = _token.getBalance(treasury);
             // Track actual fee paid to account for fee on ERC20 token transfers
-            amountAfterFee = balanceAfterFundingPool - balanceBeforeFundingPool;
+            feeAmount = balanceAfterFee - balanceBeforeFee;
         }
+
+        uint256 balanceBeforeFundingPool = _token.getBalance(address(_strategy));
+        _token.transferAmountFrom(_funder, address(_strategy), amountAfterFee);
+        uint256 balanceAfterFundingPool = _token.getBalance(address(_strategy));
+        // Track actual fee paid to account for fee on ERC20 token transfers
+        amountAfterFee = balanceAfterFundingPool - balanceBeforeFundingPool;
 
         _strategy.increasePoolAmount(amountAfterFee);
 

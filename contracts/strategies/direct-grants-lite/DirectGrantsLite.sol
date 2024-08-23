@@ -10,7 +10,7 @@ import {BaseStrategy} from "../BaseStrategy.sol";
 // Internal Libraries
 import {Metadata} from "../../core/libraries/Metadata.sol";
 import {Native} from "../../core/libraries/Native.sol";
-import {Transfer, SafeTransferLib} from "../../core/libraries/Transfer.sol";
+import {Transfer} from "../../core/libraries/Transfer.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⣿⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -32,7 +32,6 @@ import {Transfer, SafeTransferLib} from "../../core/libraries/Transfer.sol";
 /// @notice Strategy for direct grants
 contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
     using Transfer for address;
-    using SafeTransferLib for address;
 
     /// ================================
     /// ========== Struct ==============
@@ -463,12 +462,8 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
                 revert RECIPIENT_NOT_ACCEPTED();
             }
 
-            if (token == NATIVE) {
-                nativeAmount -= amount;
-                recipientAddress.safeTransferETH(amount);
-            } else {
-                token.safeTransferFrom(_sender, recipientAddress, amount);
-            }
+            if (token == NATIVE) nativeAmount -= amount;
+            token.transferAmountFrom(_sender, recipientAddress, amount);
 
             emit Allocated(recipientId, amount, token, _sender);
 
@@ -477,7 +472,7 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
             }
         }
 
-        if (nativeAmount > 0) _sender.safeTransferETH(nativeAmount);
+        if (nativeAmount > 0) _sender.transferAmountNative(nativeAmount);
     }
 
     /// @notice Check if sender is profile owner or member.

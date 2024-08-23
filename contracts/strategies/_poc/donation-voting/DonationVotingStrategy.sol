@@ -3,7 +3,6 @@ pragma solidity 0.8.19;
 
 // External Libraries
 import {ReentrancyGuard} from "openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
-import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 // Interfaces
 import {IAllo} from "../../../core/interfaces/IAllo.sol";
 import {IRegistry} from "../../../core/interfaces/IRegistry.sol";
@@ -31,6 +30,7 @@ import {Transfer} from "../../../core/libraries/Transfer.sol";
 
 contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard, Native {
     using Transfer for address;
+
     /// ================================
     /// ========== Struct ==============
     /// ================================
@@ -479,20 +479,12 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard, Native {
             revert INVALID();
         }
 
-        uint256 transferredAmount = amount;
-        if (token == NATIVE) {
-            if (msg.value < amount) {
-                revert ETH_MISMATCH();
-            }
-            SafeTransferLib.safeTransferETH(address(this), amount);
-        } else {
-            uint256 balanceBefore = SafeTransferLib.balanceOf(token, address(this));
+        if (token == NATIVE && msg.value < amount) revert ETH_MISMATCH();
 
-            token.transferAmount(address(this), amount);
-
-            uint256 balanceAfter = SafeTransferLib.balanceOf(token, address(this));
-            transferredAmount = balanceAfter - balanceBefore;
-        }
+        uint256 balanceBefore = token.getBalance(address(this));
+        token.transferAmount(address(this), amount);
+        uint256 balanceAfter = token.getBalance(address(this));
+        uint256 transferredAmount = balanceAfter - balanceBefore;
 
         // Update the total payout amount for the claim and the total claimable amount
         claims[recipientId][token] += transferredAmount;

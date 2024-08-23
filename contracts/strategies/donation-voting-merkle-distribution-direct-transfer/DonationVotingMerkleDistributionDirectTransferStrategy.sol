@@ -4,7 +4,6 @@ pragma solidity 0.8.19;
 import {ISignatureTransfer} from "permit2/ISignatureTransfer.sol";
 import {DonationVotingMerkleDistributionBaseStrategy} from
     "../donation-voting-merkle-base/DonationVotingMerkleDistributionBaseStrategy.sol";
-import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 import {IERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IDAI} from "../donation-voting-merkle-base/IDAI.sol";
@@ -28,7 +27,6 @@ import {Transfer} from "../../core/libraries/Transfer.sol";
 /// @author @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>, @0xZakk <zakk@gitcoin.co>, @nfrgosselin <nate@gitcoin.co>
 /// @notice Strategy for donation voting allocation with a merkle distribution
 contract DonationVotingMerkleDistributionDirectTransferStrategy is DonationVotingMerkleDistributionBaseStrategy {
-    using SafeTransferLib for address;
     using Transfer for address;
 
     /// ===============================
@@ -60,12 +58,8 @@ contract DonationVotingMerkleDistributionDirectTransferStrategy is DonationVotin
         address recipientAddress = _recipients[recipientId].recipientAddress;
         // Native or already approved
         if (permitType == PermitType.None) {
-            if (token == NATIVE) {
-                if (msg.value < amount) revert ETH_MISMATCH();
-                recipientAddress.safeTransferETH(amount);
-            } else {
-                token.safeTransferFrom(_sender, recipientAddress, amount);
-            }
+            if (token == NATIVE && msg.value < amount) revert ETH_MISMATCH();
+            token.transferAmountFrom(_sender, recipientAddress, amount);
         } else if (permitType == PermitType.Permit2) {
             PERMIT2.permitTransferFrom( // The permit message.
                 p2Data.permit,
