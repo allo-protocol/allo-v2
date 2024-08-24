@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity 0.8.22;
+pragma solidity ^0.8.19;
 
 // External Libraries
 import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";

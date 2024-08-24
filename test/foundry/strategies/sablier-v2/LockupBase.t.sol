@@ -1,4 +1,4 @@
-pragma solidity ^0.8.22;
+pragma solidity ^0.8.19;
 
 import {Broker} from "@sablier/v2-core/src/types/DataTypes.sol";
 import {UD60x18} from "@sablier/v2-core/src/types/Math.sol";

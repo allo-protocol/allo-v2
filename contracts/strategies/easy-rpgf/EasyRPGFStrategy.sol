@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.22;
+pragma solidity ^0.8.19;
 
 import {BaseStrategy} from "../BaseStrategy.sol";
 import {IAllo} from "../../core/interfaces/IAllo.sol";

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.22;
+pragma solidity ^0.8.19;
 
 // Code sourced from: https://github.com/ethereum-attestation-service/eas-contracts/blob/b50148418ea930426084e5e0508159b590ee6202/contracts/resolver/SchemaResolver.sol
 // Changes made:

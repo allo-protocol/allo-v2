@@ -1,5 +1,5 @@
 // SPDX-License Identifier: MIT
-pragma solidity ^0.8.22;
+pragma solidity ^0.8.19;
 
 import {QVBaseStrategy} from "../../contracts/strategies/qv-base/QVBaseStrategy.sol";
 

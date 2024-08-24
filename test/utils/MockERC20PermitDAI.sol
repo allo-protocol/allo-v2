@@ -2,7 +2,7 @@
 
 /// dai.sol -- Dai Stablecoin ERC-20 Token
 
-pragma solidity ^0.8.22;
+pragma solidity ^0.8.19;
 
 contract MockERC20PermitDAI {
     // --- EIP712 niceties ---

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity ^0.8.22;
+pragma solidity ^0.8.19;
 
 contract EventSetup {
     event Initialized(address allo, bytes32 profileId, uint256 poolId, bytes data);
