@@ -6,7 +6,7 @@ import "forge-std/Test.sol";
 // Core contracts
 import {TokenVestingPlans} from "hedgey-vesting/VestingPlans/TokenVestingPlans.sol";
 import {BatchPlanner} from "hedgey-vesting/Periphery/BatchPlanner.sol";
-import {Accounts} from "../../shared/Accounts.sol";
+import {Accounts} from "test/foundry/shared/Accounts.sol";
 
 contract HedgeySetup is Test, Accounts {
     TokenVestingPlans internal _vesting_;
