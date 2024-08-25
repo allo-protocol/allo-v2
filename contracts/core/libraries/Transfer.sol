@@ -47,7 +47,7 @@ contract Transfer is Native {
     {
         uint256 msgValue = msg.value;
 
-        for (uint256 i; i < _transferData.length;) {
+        for (uint256 i; i < _transferData.length; ++i) {
             TransferData memory transferData = _transferData[i];
 
             if (_token == NATIVE) {
@@ -55,10 +55,6 @@ contract Transfer is Native {
                 SafeTransferLib.safeTransferETH(transferData.to, transferData.amount);
             } else {
                 SafeTransferLib.safeTransferFrom(_token, transferData.from, transferData.to, transferData.amount);
-            }
-
-            unchecked {
-                i++;
             }
         }
 

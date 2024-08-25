@@ -77,7 +77,7 @@ abstract contract MilestonesExtension is CoreBaseStrategy, IMilestonesExtension 
 
         // Loop through the milestones and add them to the milestones array
         uint256 milestonesLength = _milestones.length;
-        for (uint256 i; i < milestonesLength;) {
+        for (uint256 i; i < milestonesLength; ++i) {
             uint256 amountPercentage = _milestones[i].amountPercentage;
 
             if (amountPercentage == 0) revert INVALID_MILESTONE();
@@ -85,10 +85,6 @@ abstract contract MilestonesExtension is CoreBaseStrategy, IMilestonesExtension 
             totalAmountPercentage += amountPercentage;
             _milestones[i].status = MilestoneStatus.None;
             milestones.push(_milestones[i]);
-
-            unchecked {
-                i++;
-            }
         }
 
         // Check if the all milestone amount percentage totals to 1e18 (100%)

@@ -238,7 +238,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
         // Loop through the milestones and add them to the milestones array
         uint256 milestonesLength = _milestones.length;
-        for (uint256 i; i < milestonesLength;) {
+        for (uint256 i; i < milestonesLength; ++i) {
             uint256 amountPercentage = _milestones[i].amountPercentage;
 
             if (amountPercentage == 0) revert INVALID_MILESTONE();
@@ -246,10 +246,6 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
             totalAmountPercentage += amountPercentage;
             _milestones[i].milestoneStatus = Status.None;
             milestones.push(_milestones[i]);
-
-            unchecked {
-                i++;
-            }
         }
 
         // Check if the all milestone amount percentage totals to 1e18(100%)

@@ -81,12 +81,8 @@ contract QVImpactStream is QVSimple {
     /// @param _allocators The allocator address array
     function batchAddAllocator(address[] memory _allocators) external onlyPoolManager(msg.sender) {
         uint256 length = _allocators.length;
-        for (uint256 i = 0; i < length;) {
+        for (uint256 i = 0; i < length; ++i) {
             _addAllocator(_allocators[i]);
-
-            unchecked {
-                ++i;
-            }
         }
     }
 
@@ -95,12 +91,8 @@ contract QVImpactStream is QVSimple {
     /// @param _allocators The allocators address array
     function batchRemoveAllocator(address[] memory _allocators) external onlyPoolManager(msg.sender) {
         uint256 length = _allocators.length;
-        for (uint256 i = 0; i < length;) {
+        for (uint256 i = 0; i < length; ++i) {
             _removeAllocator(_allocators[i]);
-
-            unchecked {
-                ++i;
-            }
         }
     }
 
@@ -114,7 +106,7 @@ contract QVImpactStream is QVSimple {
         uint256 totalAmount;
 
         uint256 length = _payouts.length;
-        for (uint256 i = 0; i < length;) {
+        for (uint256 i = 0; i < length; ++i) {
             Payout memory payout = _payouts[i];
             uint256 amount = payout.amount;
             address recipientId = payout.recipientId;
@@ -125,9 +117,6 @@ contract QVImpactStream is QVSimple {
 
             payouts[recipientId] = amount;
             totalAmount += amount;
-            unchecked {
-                ++i;
-            }
         }
 
         if (totalAmount > poolAmount) revert PAYOUT_MORE_THAN_POOL_BALANCE();
@@ -149,7 +138,7 @@ contract QVImpactStream is QVSimple {
         address poolToken = pool.token;
 
         uint256 length = _recipientIds.length;
-        for (uint256 i = 0; i < length;) {
+        for (uint256 i = 0; i < length; ++i) {
             address recipientId = _recipientIds[i];
             Recipient storage recipient = _recipients[recipientId];
 
@@ -165,10 +154,6 @@ contract QVImpactStream is QVSimple {
             bytes memory data = abi.encode(recipientAddress, amount, _sender);
 
             emit Distributed(recipientId, data);
-
-            unchecked {
-                ++i;
-            }
         }
     }
 

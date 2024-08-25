@@ -252,7 +252,7 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
         if (refRecipientsCounter != recipientsCounter) revert INVALID();
         // Loop through the statuses and set the status
         uint256 length = statuses.length;
-        for (uint256 i; i < length;) {
+        for (uint256 i; i < length; ++i) {
             uint256 rowIndex = statuses[i].index;
             uint256 fullRow = statuses[i].statusRow;
 
@@ -260,10 +260,6 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
 
             // Emit that the recipient status has been updated with the values
             emit RecipientStatusUpdated(rowIndex, fullRow, msg.sender);
-
-            unchecked {
-                i++;
-            }
         }
     }
 
@@ -442,7 +438,7 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
 
         if (length == 0) revert INVALID(); // nothing to allocate
 
-        for (uint256 i = 0; i < length;) {
+        for (uint256 i = 0; i < length; ++i) {
             Allocation memory allocation = allocations[i];
             address recipientId = allocation.recipientId;
             Recipient memory recipient = _getRecipient(recipientId);
@@ -465,10 +461,6 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
             _transferAmountFrom(token, TransferData({from: _sender, to: recipientAddress, amount: amount}));
 
             emit Allocated(recipientId, amount, token, _sender);
-
-            unchecked {
-                ++i;
-            }
         }
 
         if (nativeAmount > 0) _transferAmount(NATIVE, _sender, nativeAmount);

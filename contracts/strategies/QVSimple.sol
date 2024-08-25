@@ -168,7 +168,7 @@ contract QVSimple is CoreBaseStrategy, RecipientsExtension {
 
         IAllo.Pool memory pool = allo.getPool(poolId);
 
-        for (uint256 i; i < payouts.length;) {
+        for (uint256 i; i < payouts.length; ++i) {
             address recipientId = _recipientIds[i];
             Recipient memory recipient = _recipients[recipientId];
 
@@ -183,9 +183,6 @@ contract QVSimple is CoreBaseStrategy, RecipientsExtension {
             paidOut[recipientId] = true;
 
             emit Distributed(recipientId, abi.encode(recipient.recipientAddress, amount, _sender));
-            unchecked {
-                ++i;
-            }
         }
     }
 

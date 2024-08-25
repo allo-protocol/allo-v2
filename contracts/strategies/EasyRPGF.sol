@@ -71,7 +71,7 @@ contract EasyRPGF is CoreBaseStrategy {
         }
 
         IAllo.Pool memory pool = allo.getPool(poolId);
-        for (uint256 i; i < payoutLength;) {
+        for (uint256 i; i < payoutLength; ++i) {
             uint256 amount = amounts[i];
             address recipientAddress = _recipientIds[i];
 
@@ -79,10 +79,6 @@ contract EasyRPGF is CoreBaseStrategy {
             _transferAmount(pool.token, recipientAddress, amount);
 
             emit Distributed(recipientAddress, abi.encode(amount, _sender));
-
-            unchecked {
-                ++i;
-            }
         }
     }
 
