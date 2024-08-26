@@ -28,10 +28,12 @@ abstract contract AllocationExtension is CoreBaseStrategy, IAllocationExtension 
     /// @param _allowedTokens The allowed tokens
     /// @param _allocationStartTime The start time for the allocation period
     /// @param _allocationEndTime The end time for the allocation period
+    /// @param _isUsingAllocationMetadata Defines if the strategy is sending Metadata struct in the data parameter
     function __AllocationExtension_init(
         address[] memory _allowedTokens,
         uint64 _allocationStartTime,
-        uint64 _allocationEndTime
+        uint64 _allocationEndTime,
+        bool _isUsingAllocationMetadata
     ) internal {
         if (_allowedTokens.length == 0) {
             // all tokens
@@ -41,6 +43,8 @@ abstract contract AllocationExtension is CoreBaseStrategy, IAllocationExtension 
                 allowedTokens[_allowedTokens[i]] = true;
             }
         }
+
+        isUsingAllocationMetadata = _isUsingAllocationMetadata;
 
         _updateAllocationTimestamps(_allocationStartTime, _allocationEndTime);
     }
