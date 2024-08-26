@@ -34,7 +34,7 @@ abstract contract AllocationExtension is CoreBaseStrategy, IAllocationExtension 
         uint64 _allocationStartTime,
         uint64 _allocationEndTime,
         bool _isUsingAllocationMetadata
-    ) internal {
+    ) internal virtual {
         if (_allowedTokens.length == 0) {
             // all tokens
             allowedTokens[address(0)] = true;
@@ -133,6 +133,7 @@ abstract contract AllocationExtension is CoreBaseStrategy, IAllocationExtension 
     /// @param _allocationEndTime The end time for the allocation
     function updateAllocationTimestamps(uint64 _allocationStartTime, uint64 _allocationEndTime)
         external
+        virtual
         onlyPoolManager(msg.sender)
     {
         _updateAllocationTimestamps(_allocationStartTime, _allocationEndTime);
