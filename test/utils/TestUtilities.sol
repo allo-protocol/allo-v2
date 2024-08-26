@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity ^0.8.19;
 
-import {Anchor} from "../../contracts/core/Anchor.sol";
+import {Anchor} from "contracts/core/Anchor.sol";
 
 // External Libraries
 library TestUtilities {
