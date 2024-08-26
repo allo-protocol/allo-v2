@@ -19,7 +19,7 @@ The `Anchor` contract serves as a crucial utility within the Allo ecosystem, fac
 ## Smart Contract Overview
 
 * **License:** The `Anchor` contract is licensed under the AGPL-3.0-only license, promoting the use of open-source software.
-* **Solidity Version:** Developed using Solidity version 0.8.22, harnessing the latest advancements in Ethereum smart contract technology.
+* **Solidity Version:** Supports Solidity versions ^0.8.19, but developed using Solidity version 0.8.22, harnessing the latest advancements in Ethereum smart contract technology.
 
 ### Storage Variables
 

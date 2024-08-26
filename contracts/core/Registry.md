@@ -102,7 +102,7 @@ sequenceDiagram
 ## Smart Contract Overview
 
 * **License:** The `Registry` contract adheres to the MIT License, promoting permissive open-source usage.
-* **Solidity Version:** Developed using Solidity version 0.8.22, harnessing the latest advancements in Ethereum smart contract technology.
+* **Solidity Version:** Supports Solidity versions ^0.8.19, but developed using Solidity version 0.8.22, harnessing the latest advancements in Ethereum smart contract technology.
 * **External Libraries:** The contract incorporates the `AccessControl` and `CREATE3` external libraries, enhancing access control and facilitating contract deployment.
 * **Interfaces:** The contract utilizes the `IRegistry` interface for communication with external components.
 
