@@ -8,8 +8,11 @@ import {Metadata} from "contracts/core/libraries/Metadata.sol";
 import {IBaseStrategy} from "contracts/core/interfaces/IBaseStrategy.sol";
 import {ClonesUpgradeable} from "openzeppelin-contracts-upgradeable/contracts/proxy/ClonesUpgradeable.sol";
 import {Ownable} from "solady/auth/Ownable.sol";
+import {LibString} from "solady/utils/LibString.sol";
 
 contract Allo is Test {
+    using LibString for uint256;
+
     MockMockAllo allo;
 
     event PoolMetadataUpdated(uint256 indexed poolId, Metadata metadata);
@@ -357,34 +360,44 @@ contract Allo is Test {
         allo.removePoolManagers(_poolId, _managers);
     }
 
-    function test_AddPoolManagersInMultiplePoolsGivenSenderIsAdminOfAllPoolIds(
-        uint256[] memory _poolIds,
-        address[] memory _managers
-    ) external {
-        vm.skip(true);
-        // for (uint256 i = 0; i < _poolIds.length; i++) {
-        //     allo.mock_call_addPoolManagers(_poolIds[0], _managers);
-        // }
+    function test_AddPoolManagersInMultiplePoolsGivenSenderIsAdminOfAllPoolIds(uint256[] memory _poolIds) external {
+        vm.assume(_poolIds.length > 0);
+        vm.assume(_poolIds.length < 100);
+
+        address[] memory _managers = new address[](_poolIds.length);
+        for (uint256 i = 0; i < _poolIds.length; i++) {
+            allo.mock_call__checkOnlyPoolAdmin(_poolIds[i], address(this));
+            _managers[i] = makeAddr((i + 1).toString());
+        }
 
         // it should call addPoolManagers
-        // TODO: expect addPoolManagers
+        // NOTE: we cant expect addPoolManagers because is a public function.
+        // instead we expect the internal that is called inside addPoolManagers
+        for (uint256 i = 0; i < _poolIds.length; i++) {
+            allo.expectCall__addPoolManager(_poolIds[i], _managers[i]);
+        }
 
-        // allo.addPoolManagersInMultiplePools(_poolIds, _managers);
+        allo.addPoolManagersInMultiplePools(_poolIds, _managers);
     }
 
-    function test_RemovePoolManagersInMultiplePoolsGivenSenderIsAdminOfAllPoolIds(
-        uint256[] memory _poolIds,
-        address[] memory _managers
-    ) external {
-        vm.skip(true);
-        // for (uint256 i = 0; i < _poolIds.length; i++) {
-        //     allo.mock_call_removePoolManagers(_poolIds[0], _managers);
-        // }
+    function test_RemovePoolManagersInMultiplePoolsGivenSenderIsAdminOfAllPoolIds(uint256[] memory _poolIds) external {
+        vm.assume(_poolIds.length > 0);
+        vm.assume(_poolIds.length < 100);
+
+        address[] memory _managers = new address[](_poolIds.length);
+        for (uint256 i = 0; i < _poolIds.length; i++) {
+            allo.mock_call__checkOnlyPoolAdmin(_poolIds[i], address(this));
+            _managers[i] = makeAddr((i + 1).toString());
+        }
 
         // it should call removePoolManagers
-        // TODO: expect removePoolManagers
+        // NOTE: we cant expect removePoolManagers because is a public function.
+        // instead we expect the internal that is called inside removePoolManagers
+        for (uint256 i = 0; i < _poolIds.length; i++) {
+            allo.expectCall__revokeRole(allo.getPool(_poolIds[i]).managerRole, _managers[i]);
+        }
 
-        // allo.removePoolManagersInMultiplePools(_poolIds, _managers);
+        allo.removePoolManagersInMultiplePools(_poolIds, _managers);
     }
 
     function test_RecoverFundsRevertWhen_SenderIsNotOwner() external {
