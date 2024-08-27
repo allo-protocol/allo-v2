@@ -178,7 +178,7 @@ abstract contract CoreBaseStrategy is IBaseStrategy, Transfer {
     /// @notice Checks if the '_sender' is a pool manager.
     /// @dev Reverts if the '_sender' is not a pool manager.
     /// @param _sender The address to check if they are a pool manager
-    function _checkOnlyPoolManager(address _sender) internal view {
+    function _checkOnlyPoolManager(address _sender) internal view virtual {
         if (!allo.isPoolManager(poolId, _sender)) revert BaseStrategy_UNAUTHORIZED();
     }
 

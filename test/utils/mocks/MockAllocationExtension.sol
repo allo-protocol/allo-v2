@@ -48,6 +48,10 @@ contract MockAllocationExtension is CoreBaseStrategy, AllocationExtension {
         super._checkOnlyAfterAllocation();
     }
 
+    function _checkOnlyPoolManager(address _sender) internal view override virtual {
+        super._checkOnlyPoolManager(_sender);
+    }
+
     function _allocate(address[] memory, uint256[] memory, bytes memory, address) internal override {}
 
     function _distribute(address[] memory, bytes memory, address) internal override {}
