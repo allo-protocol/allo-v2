@@ -31,11 +31,12 @@ library Transfer {
     using SafeTransferLib for address;
 
     /// @notice Address of the native token
-    address public constant NATIVE = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;    
-    
+    address public constant NATIVE = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+
     /// @notice Thrown if a signature of a length different than 64 or 65 bytes is passed
     error INVALID_SIGNATURE_LENGTH();
 
+    /// @notice Supported permit formats
     enum PermitFormat {
         None,
         Permit,
