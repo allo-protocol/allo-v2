@@ -5,7 +5,7 @@ pragma solidity ^0.8.19;
 import "forge-std/Test.sol";
 /// import Mock Contract
 import "test/mocks/MockQFHelper.sol";
-import "contracts/core/libraries/QFHelper.sol";
+import "strategies/libraries/QFHelper.sol";
 
 contract MockQFHelperTest is Test {
     MockQFHelper public mockQFHelper;

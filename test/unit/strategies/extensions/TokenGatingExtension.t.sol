@@ -7,7 +7,7 @@ import "forge-std/Test.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 // Test libraries
-import {MockGatingExtension} from "../../../utils/MockGatingExtension.sol";
+import {MockGatingExtension} from "../../../mocks/MockGatingExtension.sol";
 import {BaseGatingExtension} from "./BaseGatingExtension.sol";
 import {TokenGatingExtension} from "strategies/extensions/gating/TokenGatingExtension.sol";
 

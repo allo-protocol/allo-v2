@@ -4,12 +4,12 @@ import "forge-std/Test.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 // Test libraries
-import {AlloSetup} from "../shared/AlloSetup.sol";
-import {MockBaseStrategy} from "../../utils/MockBaseStrategy.sol";
+import {AlloSetup} from "../../utils/AlloSetup.sol";
+import {MockBaseStrategy} from "../../mocks/MockBaseStrategy.sol";
 
 // Core contracts
-import {IBaseStrategy} from "../../../contracts/core/interfaces/IBaseStrategy.sol";
-import {IAllo} from "../../../contracts/core/interfaces/IAllo.sol";
+import {IBaseStrategy} from "strategies/IBaseStrategy.sol";
+import {IAllo} from "contracts/core/interfaces/IAllo.sol";
 
 contract CoreBaseStrategyTest is Test, AlloSetup {
     MockBaseStrategy strategy;

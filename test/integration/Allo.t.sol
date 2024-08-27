@@ -5,7 +5,7 @@ import {IAllo} from "contracts/core/interfaces/IAllo.sol";
 import {Metadata} from "contracts/core/Registry.sol";
 import {ISignatureTransfer} from "permit2/ISignatureTransfer.sol";
 import {IERC20} from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
-import {DonationVotingOffchain} from "strategies/DonationVotingOffchain.sol";
+import {DonationVotingOffchain} from "strategies/examples/donation-voting/DonationVotingOffchain.sol";
 import {IRecipientsExtension} from "strategies/extensions/register/IRecipientsExtension.sol";
 import {IntegrationBase} from "./IntegrationBase.sol";
 

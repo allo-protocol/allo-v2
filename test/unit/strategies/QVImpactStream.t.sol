@@ -4,14 +4,14 @@ pragma solidity 0.8.19;
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import {StdStorage, Test, stdStorage} from "forge-std/Test.sol";
-import {IAllo} from "../../../contracts/core/interfaces/IAllo.sol";
-import {IStrategy} from "../../../contracts/core/interfaces/IStrategy.sol";
-import {IRecipientsExtension} from "../../../contracts/extensions/interfaces/IRecipientsExtension.sol";
-import {QVSimple} from "../../../contracts/strategies/QVSimple.sol";
-import {QVImpactStream} from "../../../contracts/strategies/QVImpactStream.sol";
-import {IRecipientsExtension} from "../../../contracts/extensions/interfaces/IRecipientsExtension.sol";
-import {Errors} from "../../../contracts/core/libraries/Errors.sol";
-import {Metadata} from "../../../contracts/core/libraries/Metadata.sol";
+import {IAllo} from "contracts/core/interfaces/IAllo.sol";
+import {IBaseStrategy} from "strategies/IBaseStrategy.sol";
+import {IRecipientsExtension} from "strategies/extensions/register/IRecipientsExtension.sol";
+import {QVSimple} from "strategies/examples/quadratic-voting/QVSimple.sol";
+import {QVImpactStream} from "strategies/examples/impact-stream/QVImpactStream.sol";
+import {IRecipientsExtension} from "strategies/extensions/register/IRecipientsExtension.sol";
+import {Errors} from "contracts/core/libraries/Errors.sol";
+import {Metadata} from "contracts/core/libraries/Metadata.sol";
 
 contract QVImpactStreamTest is Test {
     using stdStorage for StdStorage;
@@ -149,7 +149,7 @@ contract QVImpactStreamTest is Test {
     function test__distributeRevertWhen_PayoutAmountForRecipientIsZero() external callWithPoolManager {
         IAllo.Pool memory poolData = IAllo.Pool({
             profileId: keccak256(abi.encodePacked(recipient1)),
-            strategy: IStrategy(address(qvImpactStream)),
+            strategy: IBaseStrategy(address(qvImpactStream)),
             token: address(0),
             metadata: Metadata({protocol: 0, pointer: ""}),
             managerRole: keccak256("MANAGER_ROLE"),
@@ -175,7 +175,7 @@ contract QVImpactStreamTest is Test {
 
         IAllo.Pool memory poolData = IAllo.Pool({
             profileId: keccak256(abi.encodePacked(recipient1)),
-            strategy: IStrategy(address(qvImpactStream)),
+            strategy: IBaseStrategy(address(qvImpactStream)),
             token: address(0),
             metadata: Metadata({protocol: 0, pointer: ""}),
             managerRole: keccak256("MANAGER_ROLE"),

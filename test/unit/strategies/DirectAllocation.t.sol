@@ -2,7 +2,7 @@
 pragma solidity 0.8.19;
 
 import {Test} from "forge-std/Test.sol";
-import {DirectAllocationStrategy} from "../../../contracts/strategies/DirectAllocation.sol";
+import {DirectAllocationStrategy} from "strategies/examples/direct-allocation/DirectAllocation.sol";
 
 contract DirectAllocationTest is Test {
     event Initialized(uint256 poolId, bytes data);
