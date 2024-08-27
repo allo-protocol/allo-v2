@@ -20,11 +20,13 @@ import {IRegistry} from "../../../core/interfaces/IRegistry.sol";
 // Core Contracts
 import {BaseStrategy} from "../../BaseStrategy.sol";
 // Internal Libraries
+import {Transfer} from "contracts/core/libraries/Transfer.sol";
 import {Metadata} from "../../../core/libraries/Metadata.sol";
 import {RecipientSuperApp} from "./RecipientSuperApp.sol";
 import {RecipientSuperAppFactory} from "./RecipientSuperAppFactory.sol";
 
 contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
+    using Transfer for address;
     using SuperTokenV1Library for ISuperToken;
     using FixedPointMathLib for uint256;
 
@@ -571,13 +573,13 @@ contract SQFSuperFluidStrategy is BaseStrategy, ReentrancyGuard {
         if (_token == address(poolSuperToken)) {
             revert INVALID();
         }
-        _transferAmount(_token, msg.sender, _amount);
+        _token.transferAmount(msg.sender, _amount);
     }
 
     /// @notice Close the stream
     function closeStream() external onlyPoolManager(msg.sender) {
         poolSuperToken.distributeFlow(address(this), gdaPool, 0, "0x");
-        _transferAmount(address(poolSuperToken), msg.sender, poolSuperToken.balanceOf(address(this)));
+        address(poolSuperToken).transferAmount(msg.sender, poolSuperToken.balanceOf(address(this)));
     }
 
     /// =========================

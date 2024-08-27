@@ -3,8 +3,11 @@ pragma solidity ^0.8.19;
 
 import {BaseStrategy} from "../BaseStrategy.sol";
 import {IAllo} from "../../core/interfaces/IAllo.sol";
+import {Transfer} from "contracts/core/libraries/Transfer.sol";
 
 contract EasyRPGFStrategy is BaseStrategy {
+    using Transfer for address;
+
     error INPUT_LENGTH_MISMATCH();
     error NOOP();
 
@@ -21,7 +24,7 @@ contract EasyRPGFStrategy is BaseStrategy {
     function withdraw(address _token, address _recipient) external onlyPoolManager(msg.sender) {
         uint256 _poolAmount = poolAmount;
         poolAmount = 0;
-        _transferAmount(_token, _recipient, _poolAmount);
+        _token.transferAmount(_recipient, _poolAmount);
     }
 
     /// @notice Distribute pool funds
@@ -53,7 +56,7 @@ contract EasyRPGFStrategy is BaseStrategy {
             address recipientAddress = _recipientIds[i];
 
             poolAmount -= amount;
-            _transferAmount(pool.token, recipientAddress, amount);
+            pool.token.transferAmount(recipientAddress, amount);
             emit Distributed(recipientAddress, recipientAddress, amount, _sender);
         }
     }

@@ -2,13 +2,14 @@
 pragma solidity ^0.8.19;
 
 // Interfaces
-import {IAllo} from "../core/interfaces/IAllo.sol";
+import {IAllo} from "contracts/core/interfaces/IAllo.sol";
 // Core Contracts
-import {CoreBaseStrategy} from "./CoreBaseStrategy.sol";
-import {MilestonesExtension} from "../extensions/contracts/MilestonesExtension.sol";
-import {RecipientsExtension} from "../extensions/contracts/RecipientsExtension.sol";
+import {CoreBaseStrategy} from "contracts/strategies/CoreBaseStrategy.sol";
+import {MilestonesExtension} from "contracts/extensions/contracts/MilestonesExtension.sol";
+import {RecipientsExtension} from "contracts/extensions/contracts/RecipientsExtension.sol";
 // Internal Libraries
-import {Metadata} from "../core/libraries/Metadata.sol";
+import {Transfer} from "contracts/core/libraries/Transfer.sol";
+import {Metadata} from "contracts/core/libraries/Metadata.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⣿⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -28,6 +29,8 @@ import {Metadata} from "../core/libraries/Metadata.sol";
 /// @title RFP Simple Strategy
 /// @notice Strategy for Request for Proposal (RFP) allocation with milestone submission and management.
 contract RFPSimple is CoreBaseStrategy, MilestonesExtension, RecipientsExtension {
+    using Transfer for address;
+
     /// ================================
     /// ========== Storage =============
     /// ================================
@@ -131,7 +134,7 @@ contract RFPSimple is CoreBaseStrategy, MilestonesExtension, RecipientsExtension
 
         IAllo.Pool memory pool = allo.getPool(poolId);
         address recipientAddress = _recipients[acceptedRecipientId].recipientAddress;
-        _transferAmount(pool.token, recipientAddress, amount);
+        pool.token.transferAmount(recipientAddress, amount);
 
         emit Distributed(acceptedRecipientId, abi.encode(recipientAddress, amount, milestoneIds, _sender));
     }

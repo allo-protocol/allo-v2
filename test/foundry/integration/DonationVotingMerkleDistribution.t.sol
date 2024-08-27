@@ -1,20 +1,23 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity ^0.8.19;
+pragma solidity 0.8.19;
 
 import {IAllo} from "contracts/core/interfaces/IAllo.sol";
 import {Metadata} from "contracts/core/Registry.sol";
-import {DonationVotingOffchain} from "contracts/strategies/DonationVotingOffchain.sol";
+import {
+    DonationVotingMerkleDistribution,
+    DonationVotingOffchain
+} from "contracts/strategies/DonationVotingMerkleDistribution.sol";
 import {Errors} from "contracts/core/libraries/Errors.sol";
 import {IRecipientsExtension} from "contracts/extensions/interfaces/IRecipientsExtension.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IntegrationBase} from "./IntegrationBase.sol";
 
-contract IntegrationDonationVotingOffchainBase is IntegrationBase {
+contract IntegrationDonationVotingMerkleDistributionBase is IntegrationBase {
     uint256 internal constant POOL_AMOUNT = 1000;
 
     IAllo internal allo;
-    DonationVotingOffchain internal strategy;
-    DonationVotingOffchain internal strategyWithDirectTransfers;
+    DonationVotingMerkleDistribution internal strategy;
+    DonationVotingMerkleDistribution internal strategyWithDirectTransfers;
 
     address internal allocationToken = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48; // USDC
 
@@ -37,8 +40,8 @@ contract IntegrationDonationVotingOffchainBase is IntegrationBase {
         allocator0 = makeAddr("allocator0");
         allocator1 = makeAddr("allocator1");
 
-        strategy = new DonationVotingOffchain(address(allo), false);
-        strategyWithDirectTransfers = new DonationVotingOffchain(address(allo), true);
+        strategy = new DonationVotingMerkleDistribution(address(allo), false);
+        strategyWithDirectTransfers = new DonationVotingMerkleDistribution(address(allo), true);
 
         // Deal
         deal(DAI, userAddr, POOL_AMOUNT * 2);
@@ -130,7 +133,9 @@ contract IntegrationDonationVotingOffchainBase is IntegrationBase {
     }
 }
 
-contract IntegrationDonationVotingOffchainReviewRecipients is IntegrationDonationVotingOffchainBase {
+contract IntegrationDonationVotingMerkleDistributionReviewRecipients is
+    IntegrationDonationVotingMerkleDistributionBase
+{
     function test_reviewRecipients() public {
         // Review recipients
         vm.startPrank(userAddr);
@@ -160,7 +165,7 @@ contract IntegrationDonationVotingOffchainReviewRecipients is IntegrationDonatio
     }
 }
 
-contract IntegrationDonationVotingOffchainTimestamps is IntegrationDonationVotingOffchainBase {
+contract IntegrationDonationVotingMerkleDistributionTimestamps is IntegrationDonationVotingMerkleDistributionBase {
     function test_updateTimestamps() public {
         vm.warp(registrationStartTime - 1 days);
 
@@ -202,7 +207,7 @@ contract IntegrationDonationVotingOffchainTimestamps is IntegrationDonationVotin
     }
 }
 
-contract IntegrationDonationVotingOffchainAllocateERC20 is IntegrationDonationVotingOffchainBase {
+contract IntegrationDonationVotingMerkleDistributionAllocateERC20 is IntegrationDonationVotingMerkleDistributionBase {
     function setUp() public override {
         super.setUp();
 
@@ -263,7 +268,7 @@ contract IntegrationDonationVotingOffchainAllocateERC20 is IntegrationDonationVo
     }
 }
 
-contract IntegrationDonationVotingOffchainAllocateETH is IntegrationDonationVotingOffchainBase {
+contract IntegrationDonationVotingMerkleDistributionAllocateETH is IntegrationDonationVotingMerkleDistributionBase {
     function setUp() public override {
         super.setUp();
 
@@ -329,7 +334,9 @@ contract IntegrationDonationVotingOffchainAllocateETH is IntegrationDonationVoti
     }
 }
 
-contract IntegrationDonationVotingOffchainDirectAllocateERC20 is IntegrationDonationVotingOffchainBase {
+contract IntegrationDonationVotingMerkleDistributionDirectAllocateERC20 is
+    IntegrationDonationVotingMerkleDistributionBase
+{
     function setUp() public override {
         super.setUp();
 
@@ -385,7 +392,7 @@ contract IntegrationDonationVotingOffchainDirectAllocateERC20 is IntegrationDona
         assertEq(IERC20(allocationToken).balanceOf(recipient1Addr), 25);
 
         uint256 amountAllocated0 = strategyWithDirectTransfers.amountAllocated(recipient0Addr, allocationToken);
-        uint256 amountAllocated1 = strategyWithDirectTransfers.amountAllocated(recipient1Addr, allocationToken);
+        uint256 amountAllocated1 = strategyWithDirectTransfers.amountAllocated(recipient0Addr, allocationToken);
         assertEq(amountAllocated0, 0);
         assertEq(amountAllocated1, 0);
 
@@ -397,7 +404,9 @@ contract IntegrationDonationVotingOffchainDirectAllocateERC20 is IntegrationDona
     }
 }
 
-contract IntegrationDonationVotingOffchainDirectAllocateETH is IntegrationDonationVotingOffchainBase {
+contract IntegrationDonationVotingMerkleDistributionDirectAllocateETH is
+    IntegrationDonationVotingMerkleDistributionBase
+{
     function setUp() public override {
         super.setUp();
 
@@ -466,7 +475,7 @@ contract IntegrationDonationVotingOffchainDirectAllocateETH is IntegrationDonati
     }
 }
 
-contract IntegrationDonationVotingOffchainClaim is IntegrationDonationVotingOffchainBase {
+contract IntegrationDonationVotingMerkleDistributionClaim is IntegrationDonationVotingMerkleDistributionBase {
     function setUp() public override {
         super.setUp();
 
@@ -521,7 +530,7 @@ contract IntegrationDonationVotingOffchainClaim is IntegrationDonationVotingOffc
 
         vm.startPrank(recipient0Addr);
 
-        DonationVotingOffchain.Claim[] memory claims = new DonationVotingOffchain.Claim[](2);
+        DonationVotingMerkleDistribution.Claim[] memory claims = new DonationVotingMerkleDistribution.Claim[](2);
         claims[0].recipientId = recipient0Addr;
         claims[0].token = allocationToken;
         claims[1].recipientId = recipient1Addr;
@@ -537,14 +546,14 @@ contract IntegrationDonationVotingOffchainClaim is IntegrationDonationVotingOffc
     }
 }
 
-contract IntegrationDonationVotingOffchainDisabledClaim is IntegrationDonationVotingOffchainBase {
+contract IntegrationDonationVotingMerkleDistributionDisabledClaim is IntegrationDonationVotingMerkleDistributionBase {
     function test_claim() public {
         // Claim allocation funds
         vm.warp(allocationEndTime + 1);
 
         vm.startPrank(recipient0Addr);
 
-        DonationVotingOffchain.Claim[] memory claims = new DonationVotingOffchain.Claim[](2);
+        DonationVotingMerkleDistribution.Claim[] memory claims = new DonationVotingMerkleDistribution.Claim[](2);
         claims[0].recipientId = recipient0Addr;
         claims[0].token = allocationToken;
         claims[1].recipientId = recipient1Addr;
@@ -557,7 +566,7 @@ contract IntegrationDonationVotingOffchainDisabledClaim is IntegrationDonationVo
     }
 }
 
-contract IntegrationDonationVotingOffchainSetPayout is IntegrationDonationVotingOffchainBase {
+contract IntegrationDonationVotingMerkleDistributionSetPayout is IntegrationDonationVotingMerkleDistributionBase {
     function setUp() public override {
         super.setUp();
 
@@ -586,37 +595,23 @@ contract IntegrationDonationVotingOffchainSetPayout is IntegrationDonationVoting
 
         vm.startPrank(userAddr);
 
-        address[] memory recipients = new address[](2);
-        recipients[0] = recipient0Addr;
-        recipients[1] = recipient1Addr;
+        bytes32 merkleRoot = keccak256(abi.encode("merkleRoot"));
+        Metadata memory distributionMetadata = Metadata({protocol: 1, pointer: "A"});
+        strategy.setPayout(abi.encode(merkleRoot, distributionMetadata));
 
-        uint256[] memory amounts = new uint256[](2);
-        amounts[0] = POOL_AMOUNT * 1 / 4;
-        amounts[1] = POOL_AMOUNT * 3 / 4;
-
-        strategy.setPayout(abi.encode(recipients, amounts));
-
-        (address recipientAddress, uint256 amount) = strategy.payoutSummaries(recipient0Addr);
-        assertEq(amount, amounts[0]);
-        assertEq(recipientAddress, recipient0Addr);
-
-        (recipientAddress, amount) = strategy.payoutSummaries(recipient1Addr);
-        assertEq(amount, amounts[1]);
-        assertEq(recipientAddress, recipient1Addr);
-
-        // Reverts
-        vm.expectRevert(abi.encodeWithSelector(DonationVotingOffchain.PAYOUT_ALREADY_SET.selector, recipient0Addr));
-        strategy.setPayout(abi.encode(recipients, amounts));
-
-        recipients[0] = recipient2Addr;
-        vm.expectRevert(Errors.RECIPIENT_NOT_ACCEPTED.selector);
-        strategy.setPayout(abi.encode(recipients, amounts));
+        (uint256 protocol, string memory pointer) = strategy.distributionMetadata();
+        assertEq(strategy.merkleRoot(), merkleRoot);
+        assertEq(protocol, 1);
+        assertEq(pointer, "A");
 
         vm.stopPrank();
     }
 }
 
-contract IntegrationDonationVotingOffchainDistribute is IntegrationDonationVotingOffchainBase {
+contract IntegrationDonationVotingMerkleDistributionDistribute is IntegrationDonationVotingMerkleDistributionBase {
+    DonationVotingMerkleDistribution.Distribution[] internal _distributions;
+    bytes32 internal _merkleRoot;
+
     function setUp() public override {
         super.setUp();
 
@@ -649,30 +644,66 @@ contract IntegrationDonationVotingOffchainDistribute is IntegrationDonationVotin
         amounts[0] = POOL_AMOUNT * 1 / 4;
         amounts[1] = POOL_AMOUNT - POOL_AMOUNT * 1 / 4;
 
-        strategy.setPayout(abi.encode(recipients, amounts));
+        (bytes32 merkleRoot, DonationVotingMerkleDistribution.Distribution[] memory distributions) =
+            _getMerkleRootAndDistributions(recipients, amounts);
+        _distributions.push(distributions[0]);
+        _distributions.push(distributions[1]);
+        Metadata memory distributionMetadata = Metadata({protocol: 1, pointer: "A"});
+        strategy.setPayout(abi.encode(merkleRoot, distributionMetadata));
         vm.stopPrank();
     }
 
     function test_distribute() public {
-        address[] memory recipients = new address[](2);
-        recipients[0] = recipient0Addr;
-        recipients[1] = recipient1Addr;
+        address[] memory recipients = new address[](0);
 
         vm.startPrank(address(allo));
 
-        strategy.distribute(recipients, "", recipient2Addr);
+        bytes memory data = abi.encode(_distributions);
+        strategy.distribute(recipients, data, recipient2Addr);
 
         assertEq(IERC20(DAI).balanceOf(recipient0Addr), POOL_AMOUNT * 1 / 4);
         assertEq(IERC20(DAI).balanceOf(recipient1Addr), POOL_AMOUNT - POOL_AMOUNT * 1 / 4);
         assertEq(IERC20(DAI).balanceOf(address(strategy)), 0);
         assertEq(strategy.getPoolAmount(), 0);
 
-        vm.expectRevert(abi.encodeWithSelector(DonationVotingOffchain.NOTHING_TO_DISTRIBUTE.selector, recipient0Addr));
-        strategy.distribute(recipients, "", recipient2Addr);
+        vm.expectRevert(abi.encodeWithSelector(DonationVotingMerkleDistribution.ALREADY_DISTRIBUTED.selector, 0));
+        strategy.distribute(recipients, data, recipient2Addr);
 
-        recipients[0] = recipient2Addr;
-        vm.expectRevert(abi.encodeWithSelector(DonationVotingOffchain.NOTHING_TO_DISTRIBUTE.selector, recipient2Addr));
+        vm.startPrank(address(userAddr));
+        vm.expectRevert(DonationVotingMerkleDistribution.DISTRIBUTION_ALREADY_STARTED.selector);
+        bytes32 merkleRoot = keccak256(abi.encode("merkleRoot"));
+        Metadata memory distributionMetadata = Metadata({protocol: 1, pointer: "A"});
+        strategy.setPayout(abi.encode(merkleRoot, distributionMetadata));
+    }
 
-        strategy.distribute(recipients, "", recipient2Addr);
+    function _getMerkleRootAndDistributions(address[] memory _recipientIds, uint256[] memory _amounts)
+        internal
+        pure
+        returns (bytes32, DonationVotingMerkleDistribution.Distribution[] memory)
+    {
+        DonationVotingMerkleDistribution.Distribution[] memory distributions =
+            new DonationVotingMerkleDistribution.Distribution[](2);
+
+        DonationVotingMerkleDistribution.Distribution memory distribution0 = DonationVotingMerkleDistribution
+            .Distribution({index: 0, recipientId: _recipientIds[0], amount: _amounts[0], merkleProof: new bytes32[](1)});
+        bytes32 node0 = keccak256(abi.encode(distribution0.index, distribution0.recipientId, distribution0.amount));
+
+        DonationVotingMerkleDistribution.Distribution memory distribution1 = DonationVotingMerkleDistribution
+            .Distribution({index: 1, recipientId: _recipientIds[1], amount: _amounts[1], merkleProof: new bytes32[](1)});
+        bytes32 node1 = keccak256(abi.encode(distribution1.index, distribution1.recipientId, distribution1.amount));
+
+        distribution0.merkleProof[0] = node1;
+        distribution1.merkleProof[0] = node0;
+
+        distributions[0] = distribution0;
+        distributions[1] = distribution1;
+
+        bytes32 merkleRoot = _hashPair(node1, node0);
+
+        return (merkleRoot, distributions);
+    }
+
+    function _hashPair(bytes32 a, bytes32 b) internal pure returns (bytes32) {
+        return a < b ? keccak256(abi.encode(a, b)) : keccak256(abi.encode(b, a));
     }
 }

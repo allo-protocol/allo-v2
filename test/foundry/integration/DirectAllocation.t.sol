@@ -6,6 +6,7 @@ import {Metadata} from "contracts/core/Registry.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {DirectAllocationStrategy} from "contracts/strategies/DirectAllocation.sol";
 import {IntegrationBase} from "./IntegrationBase.sol";
+import {Errors} from "contracts/core/libraries/Errors.sol";
 
 contract IntegrationDirectAllocationStrategy is IntegrationBase {
     IAllo public allo;
@@ -33,14 +34,14 @@ contract IntegrationDirectAllocationStrategy is IntegrationBase {
     }
 
     function test_Revert_Register() public {
-        vm.expectRevert(DirectAllocationStrategy.NOT_IMPLEMENTED.selector);
+        vm.expectRevert(Errors.NOT_IMPLEMENTED.selector);
 
         vm.prank(address(allo));
         strategy.register(new address[](0), "", address(0));
     }
 
     function test_Revert_Distribute() public {
-        vm.expectRevert(DirectAllocationStrategy.NOT_IMPLEMENTED.selector);
+        vm.expectRevert(Errors.NOT_IMPLEMENTED.selector);
 
         vm.prank(address(allo));
         strategy.distribute(new address[](0), "", address(0));
