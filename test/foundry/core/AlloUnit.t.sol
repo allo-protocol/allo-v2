@@ -2,7 +2,7 @@
 pragma solidity ^0.8.19;
 
 import {Test} from "forge-std/Test.sol";
-import {MockAllo} from "smock/MockAllo.sol";
+import {MockMockAllo} from "test/smock/MockMockAllo.sol";
 import {Errors} from "contracts/core/libraries/Errors.sol";
 import {Metadata} from "contracts/core/libraries/Metadata.sol";
 import {IBaseStrategy} from "contracts/core/interfaces/IBaseStrategy.sol";
@@ -10,12 +10,12 @@ import {ClonesUpgradeable} from "openzeppelin-contracts-upgradeable/contracts/pr
 import {Ownable} from "solady/auth/Ownable.sol";
 
 contract Allo is Test {
-    MockAllo allo;
+    MockMockAllo allo;
 
     event PoolMetadataUpdated(uint256 indexed poolId, Metadata metadata);
 
     function setUp() public virtual {
-        allo = new MockAllo();
+        allo = new MockMockAllo();
     }
 
     function test_InitializeGivenUpgradeVersionIsCorrect(
@@ -33,7 +33,7 @@ contract Allo is Test {
         allo.mock_call__updateTrustedForwarder(_trustedForwarder);
 
         // it should call _initializeOwner
-        // TODO: expect _initializeOwner
+        allo.expectCall__initializeOwner(_owner);
 
         // it should call _updateRegistry
         allo.expectCall__updateRegistry(_registry);
@@ -193,8 +193,8 @@ contract Allo is Test {
         allo.updatePoolMetadata(_poolId, _metadata);
 
         // it should update metadata
-        assertEq(allo.call_pools(_poolId).metadata.pointer, _metadata.pointer);
-        assertEq(allo.call_pools(_poolId).metadata.protocol, _metadata.protocol);
+        assertEq(allo.getPool(_poolId).metadata.pointer, _metadata.pointer);
+        assertEq(allo.getPool(_poolId).metadata.protocol, _metadata.protocol);
     }
 
     function test_UpdateRegistryRevertWhen_SenderIsNotOwner(address _caller, address _registry) external {
@@ -347,8 +347,12 @@ contract Allo is Test {
         // it should call _checkOnlyPoolAdmin
         allo.expectCall__checkOnlyPoolAdmin(_poolId, address(this));
 
+        bytes32 _role = allo.getPool(_poolId).managerRole;
+
         // it should call _revokeRole
-        // TODO: expect _revokeRole
+        for (uint256 i = 0; i < _managers.length; i++) {
+            allo.expectCall__revokeRole(_role, _managers[i]);
+        }
 
         allo.removePoolManagers(_poolId, _managers);
     }
@@ -358,14 +362,14 @@ contract Allo is Test {
         address[] memory _managers
     ) external {
         vm.skip(true);
-        for (uint256 i = 0; i < _poolIds.length; i++) {
-            allo.mock_call_addPoolManagers(_poolIds[0], _managers);
-        }
+        // for (uint256 i = 0; i < _poolIds.length; i++) {
+        //     allo.mock_call_addPoolManagers(_poolIds[0], _managers);
+        // }
 
         // it should call addPoolManagers
         // TODO: expect addPoolManagers
 
-        allo.addPoolManagersInMultiplePools(_poolIds, _managers);
+        // allo.addPoolManagersInMultiplePools(_poolIds, _managers);
     }
 
     function test_RemovePoolManagersInMultiplePoolsGivenSenderIsAdminOfAllPoolIds(
@@ -373,14 +377,14 @@ contract Allo is Test {
         address[] memory _managers
     ) external {
         vm.skip(true);
-        for (uint256 i = 0; i < _poolIds.length; i++) {
-            allo.mock_call_removePoolManagers(_poolIds[0], _managers);
-        }
+        // for (uint256 i = 0; i < _poolIds.length; i++) {
+        //     allo.mock_call_removePoolManagers(_poolIds[0], _managers);
+        // }
 
         // it should call removePoolManagers
         // TODO: expect removePoolManagers
 
-        allo.removePoolManagersInMultiplePools(_poolIds, _managers);
+        // allo.removePoolManagersInMultiplePools(_poolIds, _managers);
     }
 
     function test_RecoverFundsRevertWhen_SenderIsNotOwner() external {
