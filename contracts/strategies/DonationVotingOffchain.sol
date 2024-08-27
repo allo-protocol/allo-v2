@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 // Interfaces
 import {IAllo} from "../core/interfaces/IAllo.sol";
 // Core Contracts
 import {CoreBaseStrategy} from "./CoreBaseStrategy.sol";
 import {RecipientsExtension} from "../extensions/contracts/RecipientsExtension.sol";
+// Internal Libraries
+import {Transfer} from "contracts/core/libraries/Transfer.sol";
+import {Native} from "contracts/core/libraries/Native.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⣿⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -26,7 +28,9 @@ import {RecipientsExtension} from "../extensions/contracts/RecipientsExtension.s
 /// @title Donation Voting Strategy with off-chain setup
 /// @notice Strategy that allows allocations in multiple tokens to accepted recipient. The actual payouts are set
 /// by the pool manager.
-contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension {
+contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension, Native {
+    using Transfer for address;
+
     /// ===============================
     /// ========== Events =============
     /// ===============================
@@ -208,7 +212,7 @@ contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension {
 
             amountAllocated[claim.recipientId][claim.token] = 0;
 
-            _transferAmount(claim.token, recipientAddress, amount);
+            claim.token.transferAmount(recipientAddress, amount);
 
             emit Claimed(claim.recipientId, amount, claim.token);
         }
@@ -275,13 +279,13 @@ contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension {
             if (tokens[i] == NATIVE) {
                 totalNativeAmount += _amounts[i];
             } else {
-                SafeTransferLib.safeTransferFrom(tokens[i], _sender, address(this), _amounts[i]);
+                tokens[i].transferAmountFrom(_sender, address(this), _amounts[i]);
             }
 
             emit Allocated(_recipients[i], _sender, _amounts[i], abi.encode(tokens[i]));
         }
 
-        if (msg.value != totalNativeAmount) revert AMOUNT_MISMATCH();
+        if (msg.value != totalNativeAmount) revert ETH_MISMATCH();
     }
 
     /// @notice Distributes funds (tokens) to recipients.
@@ -304,7 +308,7 @@ contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension {
 
             address recipientAddress = _recipients[recipientId].recipientAddress;
             IAllo.Pool memory pool = allo.getPool(poolId);
-            _transferAmount(pool.token, recipientAddress, amount);
+            pool.token.transferAmount(recipientAddress, amount);
 
             emit Distributed(recipientId, abi.encode(recipientAddress, amount, _sender));
         }

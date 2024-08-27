@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 // Interfaces
 import {IAllo} from "../core/interfaces/IAllo.sol";
 // Core Contracts
@@ -9,6 +8,8 @@ import {CoreBaseStrategy} from "./CoreBaseStrategy.sol";
 import {RecipientsExtension} from "../extensions/contracts/RecipientsExtension.sol";
 // Internal Libraries
 import {QFHelper} from "../core/libraries/QFHelper.sol";
+import {Native} from "contracts/core/libraries/Native.sol";
+import {Transfer} from "contracts/core/libraries/Transfer.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⣿⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -28,8 +29,9 @@ import {QFHelper} from "../core/libraries/QFHelper.sol";
 /// @title Donation Voting Strategy with qudratic funding tracked on-chain
 /// @notice Strategy that allows allocations in a specified token to accepted recipient. Payouts are calculated from
 /// allocations based on the quadratic funding formula.
-contract DonationVotingOnchain is CoreBaseStrategy, RecipientsExtension {
+contract DonationVotingOnchain is CoreBaseStrategy, RecipientsExtension, Native {
     using QFHelper for QFHelper.State;
+    using Transfer for address;
 
     /// ===============================
     /// ========== Events =============
@@ -184,9 +186,9 @@ contract DonationVotingOnchain is CoreBaseStrategy, RecipientsExtension {
         }
 
         if (allocationToken == NATIVE) {
-            if (msg.value != totalAmount) revert AMOUNT_MISMATCH();
+            if (msg.value != totalAmount) revert ETH_MISMATCH();
         } else {
-            SafeTransferLib.safeTransferFrom(allocationToken, _sender, address(this), totalAmount);
+            allocationToken.transferAmountFrom(_sender, address(this), totalAmount);
         }
 
         QFState.fund(_recipients, _amounts);
@@ -212,7 +214,7 @@ contract DonationVotingOnchain is CoreBaseStrategy, RecipientsExtension {
             // Transfer allocation
             uint256 allocationAmount = amountAllocated[recipientId];
             amountAllocated[recipientId] = 0;
-            _transferAmount(allocationToken, recipientAddress, allocationAmount);
+            allocationToken.transferAmount(recipientAddress, allocationAmount);
 
             emit Distributed(recipientId, abi.encode(recipientAddress, allocationToken, allocationAmount, _sender));
 
@@ -220,7 +222,7 @@ contract DonationVotingOnchain is CoreBaseStrategy, RecipientsExtension {
             uint256 matchingAmount = QFState.calculateMatching(totalPayoutAmount, recipientId);
             poolAmount -= matchingAmount;
             IAllo.Pool memory pool = allo.getPool(poolId);
-            _transferAmount(pool.token, recipientAddress, matchingAmount);
+            pool.token.transferAmount(recipientAddress, matchingAmount);
 
             emit Distributed(recipientId, abi.encode(recipientAddress, pool.token, matchingAmount, _sender));
         }

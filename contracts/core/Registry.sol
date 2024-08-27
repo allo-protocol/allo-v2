@@ -11,8 +11,7 @@ import "./interfaces/IRegistry.sol";
 import {Anchor} from "./Anchor.sol";
 import {Errors} from "./libraries/Errors.sol";
 import {Metadata} from "./libraries/Metadata.sol";
-import "./libraries/Native.sol";
-import "./libraries/Transfer.sol";
+import {Transfer} from "./libraries/Transfer.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⣿⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -36,7 +35,9 @@ import "./libraries/Transfer.sol";
 ///      It is also used to deploy the anchor contract for each profile which acts as a proxy
 ///      for the profile and is used to receive funds and execute transactions on behalf of the profile
 ///      The Registry is also used to add and remove members from a profile and update the profile 'Metadata'
-contract Registry is IRegistry, Initializable, Native, AccessControlUpgradeable, Transfer, Errors {
+contract Registry is IRegistry, Initializable, AccessControlUpgradeable, Errors {
+    using Transfer for address;
+
     /// ==========================
     /// === Storage Variables ====
     /// ==========================
@@ -392,7 +393,7 @@ contract Registry is IRegistry, Initializable, Native, AccessControlUpgradeable,
     function recoverFunds(address _token, address _recipient) external onlyRole(ALLO_OWNER) {
         if (_recipient == address(0)) revert ZERO_ADDRESS();
 
-        uint256 amount = _token == NATIVE ? address(this).balance : ERC20(_token).balanceOf(address(this));
-        _transferAmount(_token, _recipient, amount);
+        uint256 amount = _token.getBalance(address(this));
+        _token.transferAmount(_recipient, amount);
     }
 }
