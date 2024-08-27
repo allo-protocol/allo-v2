@@ -12,6 +12,7 @@ import {IRegistry} from "../../../core/interfaces/IRegistry.sol";
 import {QVBaseStrategy} from "../../qv-base/QVBaseStrategy.sol";
 // Internal Libraries
 import {Metadata} from "../../../core/libraries/Metadata.sol";
+import {Transfer} from "contracts/core/libraries/Transfer.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⣿⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -28,6 +29,8 @@ import {Metadata} from "../../../core/libraries/Metadata.sol";
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⠙⠋⠛⠙⠋⠛⠙⠋⠛⠙⠋⠃⠀⠀⠀⠀⠀⠀⠀⠀⠠⠿⠻⠟⠿⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⠟⠿⠟⠿⠆⠀⠸⠿⠿⠟⠯⠀⠀⠀⠸⠿⠿⠿⠏⠀⠀⠀⠀⠀⠈⠉⠻⠻⡿⣿⢿⡿⡿⠿⠛⠁⠀⠀⠀⠀⠀⠀
 //                    allo.gitcoin.co
 contract QVImpactStreamStrategy is QVBaseStrategy, Multicall {
+    using Transfer for address;
+
     /// ======================
     /// ======= Events =======
     /// ======================
@@ -217,7 +220,7 @@ contract QVImpactStreamStrategy is QVBaseStrategy, Multicall {
 
             delete payouts[recipientId];
 
-            _transferAmount(poolToken, recipientAddress, amount);
+            poolToken.transferAmount(recipientAddress, amount);
 
             emit Distributed(recipientId, recipientAddress, amount, _sender);
 
@@ -418,9 +421,8 @@ contract QVImpactStreamStrategy is QVBaseStrategy, Multicall {
     /// @param _recipient The recipient
     function recoverFunds(address _token, address _recipient) external onlyPoolManager(msg.sender) {
         // Get the amount of the token to transfer, which is always the entire balance of the contract address
-        uint256 amount = _token == NATIVE ? address(this).balance : IERC20Upgradeable(_token).balanceOf(address(this));
-
+        uint256 amount = _token.getBalance(address(this));
         // Transfer the amount to the recipient (pool owner)
-        _transferAmount(_token, _recipient, amount);
+        _token.transferAmount(_recipient, amount);
     }
 }

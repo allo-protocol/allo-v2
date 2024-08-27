@@ -7,6 +7,8 @@ import {IRecipientsExtension} from "contracts/extensions/interfaces/IRecipientsE
 // Contracts
 import {CoreBaseStrategy} from "contracts/strategies/CoreBaseStrategy.sol";
 import {RecipientsExtension} from "contracts/extensions/contracts/RecipientsExtension.sol";
+// Internal Libraries
+import {Transfer} from "contracts/core/libraries/Transfer.sol";
 import {QVHelper} from "contracts/core/libraries/QVHelper.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -25,6 +27,7 @@ import {QVHelper} from "contracts/core/libraries/QVHelper.sol";
 //                    allo.gitcoin.co
 contract QVSimple is CoreBaseStrategy, RecipientsExtension {
     using QVHelper for QVHelper.VotingState;
+    using Transfer for address;
 
     /// ======================
     /// ======= Storage ======
@@ -68,7 +71,7 @@ contract QVSimple is CoreBaseStrategy, RecipientsExtension {
     /// @notice Initialize the strategy
     /// @param _poolId The pool id
     /// @param _data The data to initialize the strategy (Must include RecipientInitializeData and QVSimpleInitializeData)
-    function initialize(uint256 _poolId, bytes memory _data) external override {
+    function initialize(uint256 _poolId, bytes memory _data) external virtual override {
         __BaseStrategy_init(_poolId);
 
         (
@@ -129,18 +132,14 @@ contract QVSimple is CoreBaseStrategy, RecipientsExtension {
     /// @dev Only the pool manager(s) can call this function and emits an `AllocatorAdded` event
     /// @param _allocator The allocator address
     function addAllocator(address _allocator) external onlyPoolManager(msg.sender) {
-        allowedAllocators[_allocator] = true;
-
-        emit AllocatorAdded(_allocator, msg.sender);
+        _addAllocator(_allocator);
     }
 
     /// @notice Remove allocator
     /// @dev Only the pool manager(s) can call this function and emits an `AllocatorRemoved` event
     /// @param _allocator The allocator address
     function removeAllocator(address _allocator) external onlyPoolManager(msg.sender) {
-        allowedAllocators[_allocator] = false;
-
-        emit AllocatorRemoved(_allocator, msg.sender);
+        _removeAllocator(_allocator);
     }
 
     /// ====================================
@@ -182,7 +181,7 @@ contract QVSimple is CoreBaseStrategy, RecipientsExtension {
                 revert RECIPIENT_ERROR(recipientId);
             }
 
-            _transferAmount(pool.token, recipient.recipientAddress, amount);
+            pool.token.transferAmount(recipient.recipientAddress, amount);
 
             paidOut[recipientId] = true;
 
@@ -226,6 +225,24 @@ contract QVSimple is CoreBaseStrategy, RecipientsExtension {
         _votingState._voteWithVoiceCredits(__recipients, _amounts);
 
         voiceCreditsAllocated[_sender] += voiceCreditsToAllocate;
+    }
+
+    /// @notice Add allocator
+    /// @dev Only the pool manager(s) can call this function and emits an `AllocatorAdded` event
+    /// @param _allocator The allocator address
+    function _addAllocator(address _allocator) internal virtual {
+        allowedAllocators[_allocator] = true;
+
+        emit AllocatorAdded(_allocator, msg.sender);
+    }
+
+    /// @notice Remove allocator
+    /// @dev Only the pool manager(s) can call this function and emits an `AllocatorRemoved` event
+    /// @param _allocator The allocator address
+    function _removeAllocator(address _allocator) internal virtual {
+        allowedAllocators[_allocator] = false;
+
+        emit AllocatorRemoved(_allocator, msg.sender);
     }
 
     /// @notice Returns if the recipient is accepted

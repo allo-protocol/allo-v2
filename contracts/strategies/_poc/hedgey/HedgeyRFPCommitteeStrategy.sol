@@ -4,9 +4,11 @@ pragma solidity 0.8.19;
 // Core Contracts
 import {RFPCommitteeStrategy} from "../../rfp-committee/RFPCommitteeStrategy.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IAllo} from "contracts/core/interfaces/IAllo.sol";
 
 // Internal Libraries
 import {Metadata} from "../../../core/libraries/Metadata.sol";
+import {Transfer} from "contracts/core/libraries/Transfer.sol";
 
 interface ITokenVestingPlans {
     function createPlan(
@@ -23,6 +25,8 @@ interface ITokenVestingPlans {
 }
 
 contract HedgeyRFPCommitteeStrategy is RFPCommitteeStrategy {
+    using Transfer for address;
+
     /// ================================
     /// ========== Storage =============
     /// ================================
@@ -104,17 +108,55 @@ contract HedgeyRFPCommitteeStrategy is RFPCommitteeStrategy {
     /// @dev Callable by the pool manager
     /// @param _token The token to withdraw
     function withdraw(address _token) external virtual override onlyPoolManager(msg.sender) onlyInactivePool {
-        uint256 amount = _getBalance(_token, address(this));
+        uint256 amount = _token.getBalance(address(this));
 
         // Transfer the tokens to the 'msg.sender' (pool manager calling function)
-        super._transferAmount(_token, msg.sender, amount);
+        _token.transferAmount(msg.sender, amount);
     }
 
     /// ====================================
     /// ============ Internal ==============
     /// ====================================
 
-    function _transferAmount(address _token, address _recipient, uint256 _amount) internal override {
+    /// @notice Distribute the upcoming milestone to acceptedRecipientId.
+    /// @dev '_sender' must be a pool manager to distribute.
+    /// @param _sender The sender of the distribution
+    function _distribute(address[] memory, bytes memory, address _sender)
+        internal
+        virtual
+        override
+        onlyInactivePool
+        onlyPoolManager(_sender)
+    {
+        // check to make sure there is a pending milestone
+        if (upcomingMilestone >= milestones.length) revert INVALID_MILESTONE();
+
+        IAllo.Pool memory pool = allo.getPool(poolId);
+        Milestone storage milestone = milestones[upcomingMilestone];
+        Recipient memory recipient = _recipients[acceptedRecipientId];
+
+        // Check if the milestone is pending
+        if (milestone.milestoneStatus != Status.Pending) revert INVALID_MILESTONE();
+
+        // Calculate the amount to be distributed for the milestone
+        uint256 amount = (recipient.proposalBid * milestone.amountPercentage) / 1e18;
+
+        // Get the pool, subtract the amount and transfer to the recipient
+        poolAmount -= amount;
+        _transferAmount(pool.token, recipient.recipientAddress, amount);
+
+        // Set the milestone status to 'Accepted'
+        milestone.milestoneStatus = Status.Accepted;
+
+        // Increment the upcoming milestone
+        upcomingMilestone++;
+
+        // Emit events for the milestone and the distribution
+        emit MilestoneStatusChanged(upcomingMilestone, Status.Accepted);
+        emit Distributed(acceptedRecipientId, recipient.recipientAddress, amount, _sender);
+    }
+
+    function _transferAmount(address _token, address _recipient, uint256 _amount) internal {
         IERC20(_token).approve(hedgeyContract, _amount);
 
         uint256 rate = _amount / _recipientLockupTerm[_recipient];
