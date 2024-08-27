@@ -11,7 +11,7 @@ import {MockBaseStrategy} from "../../mocks/MockBaseStrategy.sol";
 import {IBaseStrategy} from "strategies/IBaseStrategy.sol";
 import {IAllo} from "contracts/core/interfaces/IAllo.sol";
 
-contract CoreBaseStrategyTest is Test, AlloSetup {
+contract BaseStrategyTest is Test, AlloSetup {
     MockBaseStrategy strategy;
 
     function setUp() public {
