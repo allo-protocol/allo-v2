@@ -10,6 +10,7 @@ import {IAllo} from "contracts/core/interfaces/IAllo.sol";
 import {DonationVotingOffchain} from "contracts/strategies/DonationVotingOffchain.sol";
 // Internal Libraries
 import {Metadata} from "contracts/core/libraries/Metadata.sol";
+import {Transfer} from "contracts/core/libraries/Transfer.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⣿⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -30,6 +31,8 @@ import {Metadata} from "contracts/core/libraries/Metadata.sol";
 /// @notice Strategy that allows allocations in multiple tokens to accepted recipient. The actual payouts are set
 /// by the pool manager.
 contract DonationVotingMerkleDistribution is DonationVotingOffchain {
+    using Transfer for address;
+
     /// ===============================
     /// ========== Events =============
     /// ===============================
@@ -183,7 +186,7 @@ contract DonationVotingMerkleDistribution is DonationVotingOffchain {
             poolAmount -= _distribution.amount;
 
             address recipientAddress = _recipients[_distribution.recipientId].recipientAddress;
-            _transferAmount(_poolToken, recipientAddress, _distribution.amount);
+            _poolToken.transferAmount(recipientAddress, _distribution.amount);
 
             emit Distributed(_distribution.recipientId, abi.encode(recipientAddress, _distribution.amount, _sender));
         }
