@@ -6,10 +6,8 @@ import {
     ISuperToken,
     ISuperApp,
     SuperAppDefinitions
-} from
-    "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
-import {SuperTokenV1Library} from
-    "@superfluid-finance/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
+} from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
+import {SuperTokenV1Library} from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
 import {IInstantDistributionAgreementV1} from
     "@superfluid-finance/ethereum-contracts/contracts/interfaces/agreements/IInstantDistributionAgreementV1.sol";
 

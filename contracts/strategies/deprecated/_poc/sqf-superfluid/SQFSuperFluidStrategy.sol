@@ -6,12 +6,10 @@ import {ReentrancyGuard} from "openzeppelin-contracts/contracts/security/Reentra
 import {
     ISuperToken,
     ISuperfluidPool
-} from
-    "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
+} from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
 import {PoolConfig} from
     "@superfluid-finance/ethereum-contracts/contracts/interfaces/agreements/gdav1/IGeneralDistributionAgreementV1.sol";
-import {SuperTokenV1Library} from
-    "@superfluid-finance/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
+import {SuperTokenV1Library} from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
 import {IGitcoinPassportDecoder} from "./lib/IGitcoinPassportDecoder.sol";
 import {FixedPointMathLib} from "solady/utils/FixedPointMathLib.sol";
 

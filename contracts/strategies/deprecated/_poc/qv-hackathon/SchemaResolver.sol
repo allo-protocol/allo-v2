@@ -77,10 +77,12 @@ abstract contract SchemaResolver is ISchemaResolver {
     /**
      * @inheritdoc ISchemaResolver
      */
-    function multiAttest(
-        Attestation[] calldata attestations,
-        uint256[] calldata values
-    ) external payable onlyEAS returns (bool) {
+    function multiAttest(Attestation[] calldata attestations, uint256[] calldata values)
+        external
+        payable
+        onlyEAS
+        returns (bool)
+    {
         uint256 length = attestations.length;
 
         // We are keeping track of the remaining ETH amount that can be sent to resolvers and will keep deducting
@@ -120,10 +122,12 @@ abstract contract SchemaResolver is ISchemaResolver {
     /**
      * @inheritdoc ISchemaResolver
      */
-    function multiRevoke(
-        Attestation[] calldata attestations,
-        uint256[] calldata values
-    ) external payable onlyEAS returns (bool) {
+    function multiRevoke(Attestation[] calldata attestations, uint256[] calldata values)
+        external
+        payable
+        onlyEAS
+        returns (bool)
+    {
         uint256 length = attestations.length;
 
         // We are keeping track of the remaining ETH amount that can be sent to resolvers and will keep deducting

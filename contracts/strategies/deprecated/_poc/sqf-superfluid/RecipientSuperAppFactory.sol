@@ -5,8 +5,7 @@ import {
     ISuperfluid,
     ISuperToken,
     SuperAppDefinitions
-} from
-    "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
+} from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
 import "./RecipientSuperApp.sol";
 
 contract RecipientSuperAppFactory {
