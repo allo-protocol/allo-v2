@@ -2,12 +2,12 @@
 pragma solidity 0.8.19;
 
 // Interfaces
-import {IAllo} from "../core/interfaces/IAllo.sol";
+import {IAllo} from "contracts/core/interfaces/IAllo.sol";
 // Core Contracts
-import {CoreBaseStrategy} from "./CoreBaseStrategy.sol";
-import {RecipientsExtension} from "../extensions/contracts/RecipientsExtension.sol";
+import {CoreBaseStrategy} from "contracts/strategies/CoreBaseStrategy.sol";
+import {RecipientsExtension} from "contracts/extensions/contracts/RecipientsExtension.sol";
 // Internal Libraries
-import {QFHelper} from "../core/libraries/QFHelper.sol";
+import {QFHelper} from "contracts/core/libraries/QFHelper.sol";
 import {Native} from "contracts/core/libraries/Native.sol";
 import {Transfer} from "contracts/core/libraries/Transfer.sol";
 
@@ -167,8 +167,9 @@ contract DonationVotingOnchain is CoreBaseStrategy, RecipientsExtension, Native 
     /// @notice This will allocate to recipients.
     /// @param _recipients The addresses of the recipients to allocate to
     /// @param _amounts The amounts to allocate to the recipients
+    /// @param _data The data containing permit data for the sum of '_amounts' if needed (ignored if empty)
     /// @param _sender The address of the sender
-    function _allocate(address[] memory _recipients, uint256[] memory _amounts, bytes memory, address _sender)
+    function _allocate(address[] memory _recipients, uint256[] memory _amounts, bytes memory _data, address _sender)
         internal
         virtual
         override
@@ -188,6 +189,7 @@ contract DonationVotingOnchain is CoreBaseStrategy, RecipientsExtension, Native 
         if (allocationToken == NATIVE) {
             if (msg.value != totalAmount) revert ETH_MISMATCH();
         } else {
+            allocationToken.usePermit(_sender, address(this), totalAmount, _data);
             allocationToken.transferAmountFrom(_sender, address(this), totalAmount);
         }
 

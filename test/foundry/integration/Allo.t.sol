@@ -18,7 +18,7 @@ contract IntegrationAllo is IntegrationBase {
 
         allo = IAllo(ALLO_PROXY);
 
-        strategy = new DonationVotingOffchain(ALLO_PROXY);
+        strategy = new DonationVotingOffchain(ALLO_PROXY, false);
 
         // Deal 130k DAI to the user
         deal(DAI, userAddr, 130_000 ether);
@@ -139,6 +139,7 @@ contract IntegrationAllo is IntegrationBase {
         address[] memory _recipients = new address[](1);
         uint256[] memory _amounts = new uint256[](1);
         address[] memory _tokens = new address[](1);
+        bytes[] memory _permits = new bytes[](1);
         _tokens[0] = DAI;
         _amounts[0] = 10_000 ether;
 
@@ -146,7 +147,7 @@ contract IntegrationAllo is IntegrationBase {
         _sendWithRelayer(
             userAddr,
             address(allo),
-            abi.encodeWithSelector(allo.allocate.selector, poolId, _recipients, _amounts, abi.encode(_tokens)),
+            abi.encodeWithSelector(allo.allocate.selector, poolId, _recipients, _amounts, abi.encode(_tokens, _permits)),
             userPk
         );
 
@@ -154,7 +155,7 @@ contract IntegrationAllo is IntegrationBase {
         _sendWithRelayer(
             userAddr,
             address(allo),
-            abi.encodeWithSelector(allo.allocate.selector, poolId, _recipients, _amounts, abi.encode(_tokens)),
+            abi.encodeWithSelector(allo.allocate.selector, poolId, _recipients, _amounts, abi.encode(_tokens, _permits)),
             userPk
         );
         // Strategy still has 120k DAI, userAddr has 10k DAI
@@ -180,7 +181,7 @@ contract IntegrationAllo is IntegrationBase {
 
         // Set payout (it's needed to distribute)
         vm.prank(userAddr);
-        deployedStrategy.setPayout(_recipientsToDistribute, _amountsToDistribute);
+        deployedStrategy.setPayout(abi.encode(_recipientsToDistribute, _amountsToDistribute));
 
         // Distribute
         _sendWithRelayer(
@@ -291,14 +292,15 @@ contract IntegrationAllo is IntegrationBase {
         address[] memory _recipients = new address[](1);
         uint256[] memory _amounts = new uint256[](1);
         address[] memory _tokens = new address[](1);
+        bytes[] memory _permits = new bytes[](1);
         _tokens[0] = DAI;
         _amounts[0] = 10_000 ether;
 
         _recipients[0] = recipient0Addr;
-        allo.allocate(poolId, _recipients, _amounts, abi.encode(_tokens));
+        allo.allocate(poolId, _recipients, _amounts, abi.encode(_tokens, _permits));
 
         _recipients[0] = recipient1Addr;
-        allo.allocate(poolId, _recipients, _amounts, abi.encode(_tokens));
+        allo.allocate(poolId, _recipients, _amounts, abi.encode(_tokens, _permits));
         // Strategy still has 120k DAI, userAddr has 10k DAI
         assertTrue(IERC20(DAI).balanceOf(address(deployedStrategy)) == 120_000 ether);
         assertTrue(IERC20(DAI).balanceOf(userAddr) == 10_000 ether);
@@ -321,7 +323,7 @@ contract IntegrationAllo is IntegrationBase {
         _amountsToDistribute[2] = 35_000 ether;
 
         // Set payout (it's needed to distribute)
-        deployedStrategy.setPayout(_recipientsToDistribute, _amountsToDistribute);
+        deployedStrategy.setPayout(abi.encode(_recipientsToDistribute, _amountsToDistribute));
 
         // Distribute
         allo.distribute(poolId, _recipientsToDistribute, bytes(""));
