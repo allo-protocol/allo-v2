@@ -290,13 +290,13 @@ contract DonationVotingOffchain is CoreBaseStrategy, RecipientsExtension, Native
             if (!DIRECT_TRANSFER) amountAllocated[__recipients[i]][tokens[i]] += _amounts[i];
 
             address recipientAddress = DIRECT_TRANSFER ? _recipients[__recipients[i]].recipientAddress : address(this);
-    
+
             if (tokens[i] == NATIVE) {
                 totalNativeAmount += _amounts[i];
             } else {
                 tokens[i].usePermit(_sender, recipientAddress, _amounts[i], permits[i]);
             }
-            
+
             tokens[i].transferAmountFrom(_sender, recipientAddress, _amounts[i]);
 
             emit Allocated(__recipients[i], _sender, _amounts[i], abi.encode(tokens[i]));
