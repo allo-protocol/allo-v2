@@ -11,7 +11,6 @@ import {IRecipientSuperAppFactory} from "contracts/strategies/interfaces/IRecipi
 import {RecipientSuperApp} from "contracts/strategies/RecipientSuperApp.sol";
 
 contract RecipientSuperAppFactory is IRecipientSuperAppFactory {
-    
     /// @notice Creates a new RecipientSuperApp
     /// @param _recipient The address of the recipient
     /// @param _strategy The address of the strategy
