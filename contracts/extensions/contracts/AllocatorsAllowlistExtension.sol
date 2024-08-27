@@ -1,0 +1,71 @@
+// SPDX-License-Identifier: AGPL-3.0-only
+pragma solidity 0.8.19;
+
+import {AllocationExtension} from "contracts/extensions/contracts/AllocationExtension.sol";
+import {IAllocatorsAllowlistExtension} from "contracts/extensions/interfaces/IAllocatorsAllowlistExtension.sol";
+
+abstract contract AllocatorsAllowlistExtension is AllocationExtension, IAllocatorsAllowlistExtension {
+    /// ================================
+    /// ========== Storage =============
+    /// ================================
+
+    /// @dev allocator => isAllowed
+    mapping(address => bool) public allowedAllocators;
+
+    /// ====================================
+    /// ============ Internal ==============
+    /// ====================================
+
+    /// @notice Checks if the allocator is valid
+    /// @param _allocator The allocator address
+    /// @return true if the allocator is valid
+    function _isValidAllocator(address _allocator) internal view virtual override returns (bool) {
+        return allowedAllocators[_allocator];
+    }
+
+    /// @dev Mark an address as valid allocator
+    function _addAllocator(address _allocator) internal virtual {
+        allowedAllocators[_allocator] = true;
+    }
+
+    /// @dev Remove an address from the valid allocators
+    function _removeAllocator(address _allocator) internal virtual {
+        allowedAllocators[_allocator] = false;
+    }
+
+    //  ====================================
+    //  ==== External/Public Functions =====
+    //  ====================================
+
+    /// @notice Add allocator
+    /// @dev Only the pool manager(s) can call this function and emits an `AllocatorAdded` event
+    /// @param _allocators The allocator addresses
+    function addAllocators(address[] memory _allocators) external onlyPoolManager(msg.sender) {
+        uint256 length = _allocators.length;
+        for (uint256 i = 0; i < length;) {
+            _addAllocator(_allocators[i]);
+
+            unchecked {
+                ++i;
+            }
+        }
+
+        emit AllocatorsAdded(_allocators, msg.sender);
+    }
+
+    /// @notice Remove allocators
+    /// @dev Only the pool manager(s) can call this function and emits an `AllocatorRemoved` event
+    /// @param _allocators The allocator addresses
+    function removeAllocators(address[] memory _allocators) external onlyPoolManager(msg.sender) {
+        uint256 length = _allocators.length;
+        for (uint256 i = 0; i < length;) {
+            _removeAllocator(_allocators[i]);
+
+            unchecked {
+                ++i;
+            }
+        }
+
+        emit AllocatorsRemoved(_allocators, msg.sender);
+    }
+}
