@@ -22,7 +22,7 @@ AllocationExtension::_updateAllocationTimestamps
     └── It should emit event
 
 AllocationExtension::_checkBeforeAllocation
-└── When timestamp is bigger than start time
+└── When timestamp is bigger or equal than start time
     └── It should revert
 
 AllocationExtension::_checkOnlyActiveAllocation

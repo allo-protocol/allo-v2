@@ -119,11 +119,11 @@ contract AllocationExtension is Test {
         assertEq(extension.allocationEndTime(), _allocationEndTime);
     }
 
-    function test__checkBeforeAllocationRevertWhen_TimestampIsBiggerThanStartTime(
+    function test__checkBeforeAllocationRevertWhen_TimestampIsBiggerOrEqualThanStartTime(
         uint64 _timestamp,
         uint64 _allocationStartTime
     ) external {
-        vm.assume(_timestamp > _allocationStartTime);
+        vm.assume(_timestamp >= _allocationStartTime);
 
         extension.call___AllocationExtension_init(new address[](0), _allocationStartTime, _allocationStartTime, false);
         vm.warp(_timestamp);

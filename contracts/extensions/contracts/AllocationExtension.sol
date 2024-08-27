@@ -109,7 +109,7 @@ abstract contract AllocationExtension is CoreBaseStrategy, IAllocationExtension 
 
     /// @dev Ensure the function is called before allocation start time
     function _checkBeforeAllocation() internal virtual {
-        if (block.timestamp > allocationStartTime) revert ALLOCATION_HAS_STARTED();
+        if (block.timestamp >= allocationStartTime) revert ALLOCATION_HAS_STARTED();
     }
 
     /// @dev Ensure the function is called during allocation times
