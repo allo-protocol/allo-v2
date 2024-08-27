@@ -150,6 +150,7 @@ interface IAllo {
     /// @param _managers The managers of the pool
     /// @custom:initstrategydata The encoded data will be specific to a given strategy requirements,
     ///    reference the strategy implementation of 'initialize()'
+    /// @return poolId The ID of the pool
     function createPool(
         bytes32 _profileId,
         address _strategy,

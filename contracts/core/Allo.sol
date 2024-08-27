@@ -199,6 +199,7 @@ contract Allo is
     /// @param _managers The managers of the pool
     /// @custom:initstrategydata The encoded data will be specific to a given strategy requirements,
     ///    reference the strategy implementation of 'initialize()'
+    /// @return poolId The ID of the pool
     function createPool(
         bytes32 _profileId,
         address _strategy,
@@ -820,6 +821,8 @@ contract Allo is
     }
 
     /// @dev Logic copied from ERC2771ContextUpgradeable OZ contracts
+    /// @param forwarder address to check if it is trusted
+    /// @return true if it is trusted, false otherwise
     function isTrustedForwarder(address forwarder) public view returns (bool) {
         return forwarder == _trustedForwarder;
     }
