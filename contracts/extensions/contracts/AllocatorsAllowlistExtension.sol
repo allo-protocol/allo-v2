@@ -42,12 +42,8 @@ abstract contract AllocatorsAllowlistExtension is AllocationExtension, IAllocato
     /// @param _allocators The allocator addresses
     function addAllocators(address[] memory _allocators) external onlyPoolManager(msg.sender) {
         uint256 length = _allocators.length;
-        for (uint256 i = 0; i < length;) {
+        for (uint256 i = 0; i < length; i++) {
             _addAllocator(_allocators[i]);
-
-            unchecked {
-                ++i;
-            }
         }
 
         emit AllocatorsAdded(_allocators, msg.sender);
@@ -58,12 +54,8 @@ abstract contract AllocatorsAllowlistExtension is AllocationExtension, IAllocato
     /// @param _allocators The allocator addresses
     function removeAllocators(address[] memory _allocators) external onlyPoolManager(msg.sender) {
         uint256 length = _allocators.length;
-        for (uint256 i = 0; i < length;) {
+        for (uint256 i = 0; i < length; i++) {
             _removeAllocator(_allocators[i]);
-
-            unchecked {
-                ++i;
-            }
         }
 
         emit AllocatorsRemoved(_allocators, msg.sender);
