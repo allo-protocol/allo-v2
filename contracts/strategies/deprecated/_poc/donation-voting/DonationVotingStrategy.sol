@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
 // External Libraries
 import {ReentrancyGuard} from "openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
-import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 // Interfaces
 import {IAllo} from "contracts/core/interfaces/IAllo.sol";
 import {IRegistry} from "contracts/core/interfaces/IRegistry.sol";
@@ -12,6 +11,7 @@ import {BaseStrategy} from "../../BaseStrategy.sol";
 // Internal Libraries
 import {Metadata} from "contracts/core/libraries/Metadata.sol";
 import {Native} from "contracts/core/libraries/Native.sol";
+import {Transfer} from "contracts/core/libraries/Transfer.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⣿⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -28,7 +28,9 @@ import {Native} from "contracts/core/libraries/Native.sol";
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⠙⠋⠛⠙⠋⠛⠙⠋⠛⠙⠋⠃⠀⠀⠀⠀⠀⠀⠀⠀⠠⠿⠻⠟⠿⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⠟⠿⠟⠿⠆⠀⠸⠿⠿⠟⠯⠀⠀⠀⠸⠿⠿⠿⠏⠀⠀⠀⠀⠀⠈⠉⠻⠻⡿⣿⢿⡿⡿⠿⠛⠁⠀⠀⠀⠀⠀⠀
 //                    allo.gitcoin.co
 
-contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
+contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard, Native {
+    using Transfer for address;
+
     /// ================================
     /// ========== Struct ==============
     /// ================================
@@ -296,7 +298,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
 
             address token = singleClaim.token;
 
-            _transferAmount(token, recipient.recipientAddress, amount);
+            token.transferAmount(recipient.recipientAddress, amount);
 
             emit Claimed(singleClaim.recipientId, recipient.recipientAddress, amount, token);
             unchecked {
@@ -341,7 +343,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
         }
 
         poolAmount -= _amount;
-        _transferAmount(pool.token, msg.sender, _amount);
+        pool.token.transferAmount(msg.sender, _amount);
     }
 
     /// ====================================
@@ -479,16 +481,11 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
 
         uint256 transferredAmount = amount;
         if (token == NATIVE) {
-            if (msg.value < amount) {
-                revert AMOUNT_MISMATCH();
-            }
-            SafeTransferLib.safeTransferETH(address(this), amount);
+            if (msg.value < amount) revert ETH_MISMATCH();
         } else {
-            uint256 balanceBefore = SafeTransferLib.balanceOf(token, address(this));
-
-            _transferAmount(token, address(this), amount);
-
-            uint256 balanceAfter = SafeTransferLib.balanceOf(token, address(this));
+            uint256 balanceBefore = token.getBalance(address(this));
+            token.transferAmountFrom(_sender, address(this), amount);
+            uint256 balanceAfter = token.getBalance(address(this));
             transferredAmount = balanceAfter - balanceBefore;
         }
 
@@ -523,7 +520,7 @@ contract DonationVotingStrategy is BaseStrategy, ReentrancyGuard {
             }
 
             IAllo.Pool memory pool = allo.getPool(poolId);
-            _transferAmount(pool.token, recipient.recipientAddress, amount);
+            pool.token.transferAmount(recipient.recipientAddress, amount);
 
             emit Distributed(recipientId, recipient.recipientAddress, amount, _sender);
             unchecked {

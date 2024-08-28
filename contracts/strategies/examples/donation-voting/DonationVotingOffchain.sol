@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
-import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 // Interfaces
 import {IAllo} from "contracts/core/interfaces/IAllo.sol";
 // Core Contracts
 import {BaseStrategy} from "strategies/BaseStrategy.sol";
 import {RecipientsExtension} from "strategies/extensions/register/RecipientsExtension.sol";
+// Internal Libraries
+import {Transfer} from "contracts/core/libraries/Transfer.sol";
+import {Native} from "contracts/core/libraries/Native.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⣿⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -26,7 +28,9 @@ import {RecipientsExtension} from "strategies/extensions/register/RecipientsExte
 /// @title Donation Voting Strategy with off-chain setup
 /// @notice Strategy that allows allocations in multiple tokens to accepted recipient. The actual payouts are set
 /// by the pool manager.
-contract DonationVotingOffchain is BaseStrategy, RecipientsExtension {
+contract DonationVotingOffchain is BaseStrategy, RecipientsExtension, Native {
+    using Transfer for address;
+
     /// ===============================
     /// ========== Events =============
     /// ===============================
@@ -87,6 +91,9 @@ contract DonationVotingOffchain is BaseStrategy, RecipientsExtension {
     /// ========== Storage =============
     /// ================================
 
+    /// @notice If true, allocations are directly sent to recipients. Otherwise, they they must be claimed later.
+    bool public immutable DIRECT_TRANSFER;
+
     /// @notice The start and end times for allocations
     uint64 public allocationStartTime;
     uint64 public allocationEndTime;
@@ -127,7 +134,10 @@ contract DonationVotingOffchain is BaseStrategy, RecipientsExtension {
 
     /// @notice Constructor for the Donation Voting Offchain strategy
     /// @param _allo The 'Allo' contract
-    constructor(address _allo) RecipientsExtension(_allo, false) {}
+    /// @param _directTransfer false if allocations must be manually claimed, true if they are sent during allocation.
+    constructor(address _allo, bool _directTransfer) RecipientsExtension(_allo, false) {
+        DIRECT_TRANSFER = _directTransfer;
+    }
 
     /// ===============================
     /// ========= Initialize ==========
@@ -197,31 +207,36 @@ contract DonationVotingOffchain is BaseStrategy, RecipientsExtension {
         _updatePoolTimestamps(_registrationStartTime, _registrationEndTime);
     }
 
-    /// @notice Claim allocated tokens
-    /// @param _claims Claims to be claimed
-    function claimAllocation(Claim[] calldata _claims) external onlyAfterAllocation {
+    /// @notice Transfers the allocated tokens to recipients.
+    /// @dev This function is ignored if DIRECT_TRANSFER is enabled, in which case allocated tokens are not stored
+    /// in the contract for later claim but directly sent to recipients in `_allocate()`.
+    /// @param _data The data to be decoded
+    /// @custom:data (Claim[] _claims)
+    function claimAllocation(bytes memory _data) external virtual onlyAfterAllocation {
+        if (DIRECT_TRANSFER) revert NOT_IMPLEMENTED();
+
+        (Claim[] memory _claims) = abi.decode(_data, (Claim[]));
+
         uint256 claimsLength = _claims.length;
         for (uint256 i; i < claimsLength; i++) {
-            Claim calldata claim = _claims[i];
+            Claim memory claim = _claims[i];
             uint256 amount = amountAllocated[claim.recipientId][claim.token];
             address recipientAddress = _recipients[claim.recipientId].recipientAddress;
 
             amountAllocated[claim.recipientId][claim.token] = 0;
 
-            _transferAmount(claim.token, recipientAddress, amount);
+            claim.token.transferAmount(recipientAddress, amount);
 
             emit Claimed(claim.recipientId, amount, claim.token);
         }
     }
 
-    /// @notice Set payout for the recipients
-    /// @param _recipientIds Ids of the recipients
-    /// @param _amounts Amounts to be paid out
-    function setPayout(address[] memory _recipientIds, uint256[] memory _amounts)
-        external
-        onlyPoolManager(msg.sender)
-        onlyAfterAllocation
-    {
+    /// @notice Sets the payout amounts to be distributed to.
+    /// @param _data The data to be decoded
+    /// @custom:data (address[] _recipientIds, uint256[] _amounts)
+    function setPayout(bytes memory _data) external virtual onlyPoolManager(msg.sender) onlyAfterAllocation {
+        (address[] memory _recipientIds, uint256[] memory _amounts) = abi.decode(_data, (address[], uint256[]));
+
         uint256 totalAmount;
         for (uint256 i; i < _recipientIds.length; i++) {
             address recipientId = _recipientIds[i];
@@ -248,40 +263,46 @@ contract DonationVotingOffchain is BaseStrategy, RecipientsExtension {
     /// ====================================
 
     /// @notice This will allocate to recipients.
-    /// @dev The encoded '_data' is an array of token addresses corresponding to the _amounts array.
-    /// @param _recipients The addresses of the recipients to allocate to
+    /// @dev The encoded '_data' is a tuple containing an array of token addresses corresponding to '_amounts' and
+    /// an array of permits data
+    /// @param __recipients The addresses of the recipients to allocate to
     /// @param _amounts The amounts to allocate to the recipients
     /// @param _data The data to use to allocate to the recipient
+    /// @custom:data (
+    ///        address[] tokens,
+    ///        bytes[] permits
+    ///    )
     /// @param _sender The address of the sender
-    function _allocate(address[] memory _recipients, uint256[] memory _amounts, bytes memory _data, address _sender)
+    function _allocate(address[] memory __recipients, uint256[] memory _amounts, bytes memory _data, address _sender)
         internal
         virtual
         override
         onlyActiveAllocation
     {
-        (address[] memory tokens) = abi.decode(_data, (address[]));
+        (address[] memory tokens, bytes[] memory permits) = abi.decode(_data, (address[], bytes[]));
         uint256 totalNativeAmount;
 
-        for (uint256 i = 0; i < _recipients.length; i++) {
-            if (!_isAcceptedRecipient(_recipients[i])) revert RECIPIENT_NOT_ACCEPTED();
+        for (uint256 i = 0; i < __recipients.length; i++) {
+            if (!_isAcceptedRecipient(__recipients[i])) revert RECIPIENT_NOT_ACCEPTED();
 
-            if (!allowedTokens[tokens[i]] && !allowedTokens[address(0)]) {
-                revert TOKEN_NOT_ALLOWED();
-            }
+            if (!allowedTokens[tokens[i]] && !allowedTokens[address(0)]) revert TOKEN_NOT_ALLOWED();
 
-            // Update the total payout amount for the claim and the total claimable amount
-            amountAllocated[_recipients[i]][tokens[i]] += _amounts[i];
+            if (!DIRECT_TRANSFER) amountAllocated[__recipients[i]][tokens[i]] += _amounts[i];
+
+            address recipientAddress = DIRECT_TRANSFER ? _recipients[__recipients[i]].recipientAddress : address(this);
 
             if (tokens[i] == NATIVE) {
                 totalNativeAmount += _amounts[i];
             } else {
-                SafeTransferLib.safeTransferFrom(tokens[i], _sender, address(this), _amounts[i]);
+                tokens[i].usePermit(_sender, recipientAddress, _amounts[i], permits[i]);
             }
 
-            emit Allocated(_recipients[i], _sender, _amounts[i], abi.encode(tokens[i]));
+            tokens[i].transferAmountFrom(_sender, recipientAddress, _amounts[i]);
+
+            emit Allocated(__recipients[i], _sender, _amounts[i], abi.encode(tokens[i]));
         }
 
-        if (msg.value != totalNativeAmount) revert AMOUNT_MISMATCH();
+        if (msg.value != totalNativeAmount) revert ETH_MISMATCH();
     }
 
     /// @notice Distributes funds (tokens) to recipients.
@@ -304,7 +325,7 @@ contract DonationVotingOffchain is BaseStrategy, RecipientsExtension {
 
             address recipientAddress = _recipients[recipientId].recipientAddress;
             IAllo.Pool memory pool = allo.getPool(poolId);
-            _transferAmount(pool.token, recipientAddress, amount);
+            pool.token.transferAmount(recipientAddress, amount);
 
             emit Distributed(recipientId, abi.encode(recipientAddress, amount, _sender));
         }

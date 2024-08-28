@@ -59,7 +59,7 @@ sequenceDiagram
 ## Smart Contract Overview
 
 * **License:** The `DonationVotingMerkleDistributionDirectTransferStrategy` contract adheres to the AGPL-3.0-only License, promoting open-source usage with specific terms.
-* **Solidity Version:** Developed using Solidity version 0.8.19, leveraging the latest Ethereum smart contract advancements.
+* **Solidity Version:** Developed using Solidity version 0.8.22, leveraging the latest Ethereum smart contract advancements.
 * **External Libraries:** Utilizes the `MerkleProof`, `ReentrancyGuard`, `Multicall` libraries from OpenZeppelin for enhanced security, efficiency, and reentrancy protection, `SafeTransferLib` from Solady and `ISignatureTransfer` from Uniswap permit2.
 * **Interfaces:** Interfaces with the `IAllo` and `IRegistry` components for external communication.
 * **Inheritance:** Inherits from the `BaseStrategy` contract, inheriting and expanding core strategy functionalities.

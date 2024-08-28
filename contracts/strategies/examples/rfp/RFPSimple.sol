@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
 // Interfaces
 import {IAllo} from "contracts/core/interfaces/IAllo.sol";
@@ -8,6 +8,7 @@ import {BaseStrategy} from "../../BaseStrategy.sol";
 import {MilestonesExtension} from "strategies/extensions/milestones/MilestonesExtension.sol";
 import {RecipientsExtension} from "strategies/extensions/register/RecipientsExtension.sol";
 // Internal Libraries
+import {Transfer} from "contracts/core/libraries/Transfer.sol";
 import {Metadata} from "contracts/core/libraries/Metadata.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -28,6 +29,8 @@ import {Metadata} from "contracts/core/libraries/Metadata.sol";
 /// @title RFP Simple Strategy
 /// @notice Strategy for Request for Proposal (RFP) allocation with milestone submission and management.
 contract RFPSimple is BaseStrategy, MilestonesExtension, RecipientsExtension {
+    using Transfer for address;
+
     /// ================================
     /// ========== Storage =============
     /// ================================
@@ -131,7 +134,7 @@ contract RFPSimple is BaseStrategy, MilestonesExtension, RecipientsExtension {
 
         IAllo.Pool memory pool = allo.getPool(poolId);
         address recipientAddress = _recipients[acceptedRecipientId].recipientAddress;
-        _transferAmount(pool.token, recipientAddress, amount);
+        pool.token.transferAmount(recipientAddress, amount);
 
         emit Distributed(acceptedRecipientId, abi.encode(recipientAddress, amount, milestoneIds, _sender));
     }

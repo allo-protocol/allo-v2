@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
 import {BaseStrategy} from "strategies/BaseStrategy.sol";
 import {MilestonesExtension} from "strategies/extensions/milestones/MilestonesExtension.sol";

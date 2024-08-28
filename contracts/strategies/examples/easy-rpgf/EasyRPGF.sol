@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
 // Interfaces
 import {IAllo} from "contracts/core/interfaces/IAllo.sol";
 // Contracts
 import {BaseStrategy} from "strategies/BaseStrategy.sol";
+// Internal Libraries
+import {Transfer} from "contracts/core/libraries/Transfer.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⣿⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -21,6 +23,8 @@ import {BaseStrategy} from "strategies/BaseStrategy.sol";
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⠙⠋⠛⠙⠋⠛⠙⠋⠛⠙⠋⠃⠀⠀⠀⠀⠀⠀⠀⠀⠠⠿⠻⠟⠿⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⠟⠿⠟⠿⠆⠀⠸⠿⠿⠟⠯⠀⠀⠀⠸⠿⠿⠿⠏⠀⠀⠀⠀⠀⠈⠉⠻⠻⡿⣿⢿⡿⡿⠿⠛⠁⠀⠀⠀⠀⠀⠀
 //                    allo.gitcoin.co
 contract EasyRPGF is BaseStrategy {
+    using Transfer for address;
+
     /// ===============================
     /// ============ Errors ===========
     /// ===============================
@@ -71,18 +75,14 @@ contract EasyRPGF is BaseStrategy {
         }
 
         IAllo.Pool memory pool = allo.getPool(poolId);
-        for (uint256 i; i < payoutLength;) {
+        for (uint256 i; i < payoutLength; ++i) {
             uint256 amount = amounts[i];
             address recipientAddress = _recipientIds[i];
 
             poolAmount -= amount;
-            _transferAmount(pool.token, recipientAddress, amount);
+            pool.token.transferAmount(recipientAddress, amount);
 
             emit Distributed(recipientAddress, abi.encode(amount, _sender));
-
-            unchecked {
-                ++i;
-            }
         }
     }
 

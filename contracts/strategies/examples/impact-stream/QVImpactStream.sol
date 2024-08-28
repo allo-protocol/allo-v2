@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
 // External Libraries
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -8,6 +8,8 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IAllo} from "contracts/core/interfaces/IAllo.sol";
 // Core Contracts
 import {QVSimple} from "strategies/examples/quadratic-voting/QVSimple.sol";
+// Internal Libraries
+import {Transfer} from "contracts/core/libraries/Transfer.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⣿⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -23,7 +25,10 @@ import {QVSimple} from "strategies/examples/quadratic-voting/QVSimple.sol";
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠛⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⢰⣿⣿⣿⣿⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⣿⣿⣿⣿⣧⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠹⢿⣿⣿⣿⣿⣾⣾⣷⣿⣿⣿⣿⡿⠋⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⠙⠋⠛⠙⠋⠛⠙⠋⠛⠙⠋⠃⠀⠀⠀⠀⠀⠀⠀⠀⠠⠿⠻⠟⠿⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⠟⠿⠟⠿⠆⠀⠸⠿⠿⠟⠯⠀⠀⠀⠸⠿⠿⠿⠏⠀⠀⠀⠀⠀⠈⠉⠻⠻⡿⣿⢿⡿⡿⠿⠛⠁⠀⠀⠀⠀⠀⠀
 //                    allo.gitcoin.co
+
 contract QVImpactStream is QVSimple {
+    using Transfer for address;
+
     /// ======================
     /// ======= Events =======
     /// ======================
@@ -81,12 +86,8 @@ contract QVImpactStream is QVSimple {
     /// @param _allocators The allocator address array
     function batchAddAllocator(address[] memory _allocators) external onlyPoolManager(msg.sender) {
         uint256 length = _allocators.length;
-        for (uint256 i = 0; i < length;) {
+        for (uint256 i = 0; i < length; ++i) {
             _addAllocator(_allocators[i]);
-
-            unchecked {
-                ++i;
-            }
         }
     }
 
@@ -95,12 +96,8 @@ contract QVImpactStream is QVSimple {
     /// @param _allocators The allocators address array
     function batchRemoveAllocator(address[] memory _allocators) external onlyPoolManager(msg.sender) {
         uint256 length = _allocators.length;
-        for (uint256 i = 0; i < length;) {
+        for (uint256 i = 0; i < length; ++i) {
             _removeAllocator(_allocators[i]);
-
-            unchecked {
-                ++i;
-            }
         }
     }
 
@@ -114,7 +111,7 @@ contract QVImpactStream is QVSimple {
         uint256 totalAmount;
 
         uint256 length = _payouts.length;
-        for (uint256 i = 0; i < length;) {
+        for (uint256 i = 0; i < length; ++i) {
             Payout memory payout = _payouts[i];
             uint256 amount = payout.amount;
             address recipientId = payout.recipientId;
@@ -125,9 +122,6 @@ contract QVImpactStream is QVSimple {
 
             payouts[recipientId] = amount;
             totalAmount += amount;
-            unchecked {
-                ++i;
-            }
         }
 
         if (totalAmount > poolAmount) revert PAYOUT_MORE_THAN_POOL_BALANCE();
@@ -149,7 +143,7 @@ contract QVImpactStream is QVSimple {
         address poolToken = pool.token;
 
         uint256 length = _recipientIds.length;
-        for (uint256 i = 0; i < length;) {
+        for (uint256 i = 0; i < length; ++i) {
             address recipientId = _recipientIds[i];
             Recipient storage recipient = _recipients[recipientId];
 
@@ -160,15 +154,11 @@ contract QVImpactStream is QVSimple {
 
             delete payouts[recipientId];
 
-            _transferAmount(poolToken, recipientAddress, amount);
+            poolToken.transferAmount(recipientAddress, amount);
 
             bytes memory data = abi.encode(recipientAddress, amount, _sender);
 
             emit Distributed(recipientId, data);
-
-            unchecked {
-                ++i;
-            }
         }
     }
 

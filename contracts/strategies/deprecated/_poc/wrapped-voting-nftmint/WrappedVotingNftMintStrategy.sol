@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
 // External Libraries
 import {ReentrancyGuard} from "openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
@@ -11,6 +11,7 @@ import {BaseStrategy} from "../../BaseStrategy.sol";
 import {Native} from "contracts/core/libraries/Native.sol";
 import {NFT} from "./NFT.sol";
 import {NFTFactory} from "./NFTFactory.sol";
+import {Transfer} from "contracts/core/libraries/Transfer.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⣿⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -28,6 +29,8 @@ import {NFTFactory} from "./NFTFactory.sol";
 //                    allo.gitcoin.co
 
 contract WrappedVotingNftMintStrategy is Native, BaseStrategy, ReentrancyGuard {
+    using Transfer for address;
+
     /// ===============================
     /// ========== Events =============
     /// ===============================
@@ -210,7 +213,7 @@ contract WrappedVotingNftMintStrategy is Native, BaseStrategy, ReentrancyGuard {
 
         delete poolAmount;
 
-        _transferAmount(pool.token, currentWinner, poolAmount);
+        pool.token.transferAmount(currentWinner, poolAmount);
 
         emit Distributed(currentWinner, currentWinner, poolAmount, _sender);
     }

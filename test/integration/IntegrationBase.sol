@@ -18,6 +18,7 @@ abstract contract IntegrationBase is Test {
     address public constant ALLO_PROXY = 0x1133eA7Af70876e64665ecD07C0A0476d09465a1;
     address public constant BICONOMY_FORWARDER = 0x84a0856b038eaAd1cC7E297cF34A7e72685A8693;
     address public constant DAI = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
+    address public constant NATIVE = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
     bytes32 public constant DOMAIN_SEPARATOR = 0x4fde6db5140ab711910b567033f2d5e64dc4f7123d722004dd748edf6ed07abb;
 

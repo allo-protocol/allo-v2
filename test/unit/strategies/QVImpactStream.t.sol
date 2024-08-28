@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
@@ -9,7 +9,6 @@ import {IBaseStrategy} from "strategies/IBaseStrategy.sol";
 import {IRecipientsExtension} from "strategies/extensions/register/IRecipientsExtension.sol";
 import {QVSimple} from "strategies/examples/quadratic-voting/QVSimple.sol";
 import {QVImpactStream} from "strategies/examples/impact-stream/QVImpactStream.sol";
-import {IRecipientsExtension} from "strategies/extensions/register/IRecipientsExtension.sol";
 import {Errors} from "contracts/core/libraries/Errors.sol";
 import {Metadata} from "contracts/core/libraries/Metadata.sol";
 

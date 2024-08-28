@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
 // External Libraries
 import {ReentrancyGuard} from "openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
@@ -9,6 +9,7 @@ import {IRegistry} from "contracts/core/interfaces/IRegistry.sol";
 // Core Contracts
 import {BaseStrategy} from "../../BaseStrategy.sol";
 // Internal Libraries
+import {Transfer} from "contracts/core/libraries/Transfer.sol";
 import {Metadata} from "contracts/core/libraries/Metadata.sol";
 import {Hats} from "hats-protocol/Hats.sol";
 
@@ -33,6 +34,8 @@ import {Hats} from "hats-protocol/Hats.sol";
 ///         are set by the recipient and the pool manager can accept or reject the milestone. The pool manager
 ///         can also reject the recipient.
 contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
+    using Transfer for address;
+
     /// ================================
     /// ========== Struct =============
     /// ================================
@@ -426,7 +429,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         poolAmount -= _amount;
 
         // Transfer the amount to the pool manager
-        _transferAmount(allo.getPool(poolId).token, msg.sender, _amount);
+        allo.getPool(poolId).token.transferAmount(msg.sender, _amount);
     }
 
     /// ====================================
@@ -617,7 +620,7 @@ contract DirectGrantsSimpleStrategy is BaseStrategy, ReentrancyGuard {
         IAllo.Pool memory pool = allo.getPool(poolId);
 
         poolAmount -= amount;
-        _transferAmount(pool.token, recipient.recipientAddress, amount);
+        pool.token.transferAmount(recipient.recipientAddress, amount);
 
         // Set the milestone status to 'Accepted'
         milestone.milestoneStatus = Status.Accepted;

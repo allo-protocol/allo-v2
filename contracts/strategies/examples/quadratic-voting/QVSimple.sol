@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
 // Interfaces
 import {IAllo} from "contracts/core/interfaces/IAllo.sol";
@@ -7,6 +7,8 @@ import {IRecipientsExtension} from "strategies/extensions/register/IRecipientsEx
 // Contracts
 import {BaseStrategy} from "contracts/strategies/BaseStrategy.sol";
 import {RecipientsExtension} from "strategies/extensions/register/RecipientsExtension.sol";
+// Internal Libraries
+import {Transfer} from "contracts/core/libraries/Transfer.sol";
 import {QVHelper} from "strategies/libraries/QVHelper.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -25,6 +27,7 @@ import {QVHelper} from "strategies/libraries/QVHelper.sol";
 //                    allo.gitcoin.co
 contract QVSimple is BaseStrategy, RecipientsExtension {
     using QVHelper for QVHelper.VotingState;
+    using Transfer for address;
 
     /// ======================
     /// ======= Storage ======
@@ -168,7 +171,7 @@ contract QVSimple is BaseStrategy, RecipientsExtension {
 
         IAllo.Pool memory pool = allo.getPool(poolId);
 
-        for (uint256 i; i < payouts.length;) {
+        for (uint256 i; i < payouts.length; ++i) {
             address recipientId = _recipientIds[i];
             Recipient memory recipient = _recipients[recipientId];
 
@@ -178,14 +181,11 @@ contract QVSimple is BaseStrategy, RecipientsExtension {
                 revert RECIPIENT_ERROR(recipientId);
             }
 
-            _transferAmount(pool.token, recipient.recipientAddress, amount);
+            pool.token.transferAmount(recipient.recipientAddress, amount);
 
             paidOut[recipientId] = true;
 
             emit Distributed(recipientId, abi.encode(recipient.recipientAddress, amount, _sender));
-            unchecked {
-                ++i;
-            }
         }
     }
 

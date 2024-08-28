@@ -1,17 +1,17 @@
 /// SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
 /// Interfaces
 import "./IBaseStrategy.sol";
-
-/// Libraries
+// Internal Libraries
 import {Transfer} from "contracts/core/libraries/Transfer.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 /// @title BaseStrategy Contract
 /// @notice This contract is the base contract for all strategies
 /// @dev This contract is implemented by all strategies.
-abstract contract BaseStrategy is IBaseStrategy, Transfer {
+abstract contract BaseStrategy is IBaseStrategy {
+    using Transfer for address;
+
     /// ==========================
     /// === Storage Variables ====
     /// ==========================
@@ -109,10 +109,10 @@ abstract contract BaseStrategy is IBaseStrategy, Transfer {
     {
         _beforeWithdraw(_token, _amount, _recipient);
         // If the token is the pool token, revert if the amount is greater than the pool amount
-        if (_getBalance(_token, address(this)) - _amount < poolAmount) {
+        if (_token.getBalance(address(this)) - _amount < poolAmount) {
             revert BaseStrategy_WITHDRAW_MORE_THAN_POOL_AMOUNT();
         }
-        _transferAmount(_token, _recipient, _amount);
+        _token.transferAmount(_recipient, _amount);
         _afterWithdraw(_token, _amount, _recipient);
 
         emit Withdrew(_token, _amount, _recipient);

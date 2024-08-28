@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
 import {Test} from "forge-std/Test.sol";
 import {DirectAllocationStrategy} from "strategies/examples/direct-allocation/DirectAllocation.sol";
+import {Errors} from "contracts/core/libraries/Errors.sol";
 
 contract DirectAllocationTest is Test {
     event Initialized(uint256 poolId, bytes data);
@@ -84,7 +85,7 @@ contract DirectAllocationTest is Test {
     function test_DistributeRevertWhen_Called(address[] memory _recipientIds, bytes memory _data, address _sender)
         external
     {
-        vm.expectRevert(DirectAllocationStrategy.NOT_IMPLEMENTED.selector);
+        vm.expectRevert(Errors.NOT_IMPLEMENTED.selector);
 
         vm.prank(mockAlloAddress);
         directAllocationStrategy.distribute(_recipientIds, _data, _sender);
@@ -93,14 +94,14 @@ contract DirectAllocationTest is Test {
     function test_RegisterRevertWhen_Called(address[] memory _recipients, bytes memory _data, address _sender)
         external
     {
-        vm.expectRevert(DirectAllocationStrategy.NOT_IMPLEMENTED.selector);
+        vm.expectRevert(Errors.NOT_IMPLEMENTED.selector);
 
         vm.prank(mockAlloAddress);
         directAllocationStrategy.register(_recipients, _data, _sender);
     }
 
     function test_ReceiveRevertWhen_Called() external {
-        vm.expectRevert(DirectAllocationStrategy.NOT_IMPLEMENTED.selector);
+        vm.expectRevert(Errors.NOT_IMPLEMENTED.selector);
 
         /// send ether to the strategy
         payable(address(directAllocationStrategy)).transfer(1 ether);

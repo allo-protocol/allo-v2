@@ -61,7 +61,7 @@ sequenceDiagram
 ## Smart Contract Overview
 
 - **License:** The `DirectGrantsSimpleStrategy` contract operates under the AGPL-3.0-only License, fostering open-source usage under specific terms.
-- **Solidity Version:** Developed using Solidity version 0.8.19, capitalizing on the latest Ethereum smart contract functionalities.
+- **Solidity Version:** Developed using Solidity version 0.8.22, capitalizing on the latest Ethereum smart contract functionalities.
 - **External Libraries:** Utilizes the `ReentrancyGuard` library from the OpenZeppelin contracts to prevent reentrant attacks.
 - **Interfaces:** Inherits from the `BaseStrategy` contract, extending its functionalities for direct grant allocation strategies.
 - **Internal Libraries:** Imports the `Metadata` library from the Allo core for metadata management.

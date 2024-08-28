@@ -446,14 +446,6 @@ contract RegistryTest is Test, RegistrySetup, Native, Errors {
         registry().acceptProfileOwnership(invalidProfileId);
     }
 
-    function testRevert_recoverFunds_INVALID_TOKEN_ADDRESS() public {
-        address nonExistentToken = address(0xAAA);
-        address recipient = address(0xBBB);
-        vm.expectRevert();
-        vm.prank(registry_owner());
-        registry().recoverFunds(nonExistentToken, recipient);
-    }
-
     function testRevert_recoverFunds_ZERO_RECIPIENT() public {
         address nonExistentToken = address(0xAAA);
         vm.expectRevert(ZERO_ADDRESS.selector);

@@ -5,7 +5,6 @@ pragma solidity ^0.8.19;
 import "./IStrategy.sol";
 
 // Libraries
-import {Transfer} from "contracts/core/libraries/Transfer.sol";
 import {Errors} from "contracts/core/libraries/Errors.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -27,7 +26,7 @@ import {Errors} from "contracts/core/libraries/Errors.sol";
 /// @author @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>, @0xZakk <zakk@gitcoin.co>, @nfrgosselin <nate@gitcoin.co>
 /// @notice This contract is the base contract for all strategies
 /// @dev This contract is implemented by all strategies.
-abstract contract BaseStrategy is IStrategy, Transfer, Errors {
+abstract contract BaseStrategy is IStrategy, Errors {
     /// ==========================
     /// === Storage Variables ====
     /// ==========================

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
 // External Libraries
 import {ISignatureTransfer} from "permit2/ISignatureTransfer.sol";
@@ -13,6 +13,7 @@ import {BaseStrategy} from "../BaseStrategy.sol";
 // Internal Libraries
 import {Metadata} from "contracts/core/libraries/Metadata.sol";
 import {Native} from "contracts/core/libraries/Native.sol";
+import {Transfer} from "contracts/core/libraries/Transfer.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⣿⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -33,6 +34,8 @@ import {Native} from "contracts/core/libraries/Native.sol";
 /// @author @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>, @0xZakk <zakk@gitcoin.co>, @nfrgosselin <nate@gitcoin.co>
 /// @notice Strategy for donation voting allocation with a merkle distribution
 abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseStrategy, Multicall {
+    using Transfer for address;
+
     /// ================================
     /// ========== Struct ==============
     /// ================================
@@ -319,11 +322,8 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
         }
 
         // Loop through the allowed tokens and set them to true
-        for (uint256 i; i < allowedTokensLength;) {
+        for (uint256 i; i < allowedTokensLength; ++i) {
             allowedTokens[_initializeData.allowedTokens[i]] = true;
-            unchecked {
-                i++;
-            }
         }
     }
 
@@ -371,7 +371,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     {
         if (refRecipientsCounter != recipientsCounter) revert INVALID();
         // Loop through the statuses and set the status
-        for (uint256 i; i < statuses.length;) {
+        for (uint256 i; i < statuses.length; ++i) {
             uint256 rowIndex = statuses[i].index;
             uint256 fullRow = statuses[i].statusRow;
 
@@ -379,10 +379,6 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
 
             // Emit that the recipient status has been updated with the values
             emit RecipientStatusUpdated(rowIndex, fullRow, msg.sender);
-
-            unchecked {
-                i++;
-            }
         }
     }
 
@@ -423,7 +419,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
         }
 
         // get the actual balance hold by the pool
-        uint256 amount = _getBalance(_token, address(this));
+        uint256 amount = _token.getBalance(address(this));
 
         // get the token amount in vault which belong to the recipients
         uint256 tokenInVault = _tokenAmountInVault(_token);
@@ -432,7 +428,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
         uint256 accessableAmount = amount - tokenInVault;
 
         // transfer the amount to the pool manager
-        _transferAmount(_token, msg.sender, accessableAmount);
+        _token.transferAmount(msg.sender, accessableAmount);
     }
 
     /// @notice Internal function to return the token amount locked in vault
@@ -660,11 +656,8 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
         uint256 length = distributions.length;
 
         // Loop through the distributions and distribute the funds
-        for (uint256 i; i < length;) {
+        for (uint256 i; i < length; ++i) {
             _distributeSingle(distributions[i]);
-            unchecked {
-                i++;
-            }
         }
 
         // Emit that the batch payout was successful
@@ -829,7 +822,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
             poolAmount -= amount;
 
             // Transfer the amount to the recipient
-            _transferAmount(pool.token, payable(recipientAddress), amount);
+            pool.token.transferAmount(payable(recipientAddress), amount);
 
             // Emit that the funds have been distributed to the recipient
             emit FundsDistributed(amount, recipientAddress, pool.token, recipientId);

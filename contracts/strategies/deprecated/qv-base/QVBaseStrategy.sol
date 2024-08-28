@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
 // Interfaces
 import {IAllo} from "contracts/core/interfaces/IAllo.sol";
@@ -8,6 +8,7 @@ import {IRegistry} from "contracts/core/interfaces/IRegistry.sol";
 import {BaseStrategy} from "../BaseStrategy.sol";
 // Internal Libraries
 import {Metadata} from "contracts/core/libraries/Metadata.sol";
+import {Transfer} from "contracts/core/libraries/Transfer.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⣿⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -28,6 +29,8 @@ import {Metadata} from "contracts/core/libraries/Metadata.sol";
 /// @notice Base strategy for quadratic voting strategies
 /// @author @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>, @0xZakk <zakk@gitcoin.co>, @nfrgosselin <nate@gitcoin.co>
 abstract contract QVBaseStrategy is BaseStrategy {
+    using Transfer for address;
+
     /// ======================
     /// ======= Events =======
     /// ======================
@@ -282,7 +285,7 @@ abstract contract QVBaseStrategy is BaseStrategy {
         uint256 recipientLength = _recipientIds.length;
         if (recipientLength != _recipientStatuses.length) revert INVALID();
 
-        for (uint256 i; i < recipientLength;) {
+        for (uint256 i; i < recipientLength; ++i) {
             Status recipientStatus = _recipientStatuses[i];
             address recipientId = _recipientIds[i];
             Recipient storage recipient = recipients[recipientId];
@@ -309,10 +312,6 @@ abstract contract QVBaseStrategy is BaseStrategy {
             }
 
             emit Reviewed(recipientId, applicationId, recipientStatus, msg.sender);
-
-            unchecked {
-                ++i;
-            }
         }
     }
 
@@ -338,10 +337,10 @@ abstract contract QVBaseStrategy is BaseStrategy {
             revert INVALID();
         }
 
-        uint256 amount = _getBalance(_token, address(this));
+        uint256 amount = _token.getBalance(address(this));
 
         // Transfer the tokens to the 'msg.sender' (pool manager calling function)
-        _transferAmount(_token, msg.sender, amount);
+        _token.transferAmount(msg.sender, amount);
     }
 
     /// ====================================
@@ -493,7 +492,7 @@ abstract contract QVBaseStrategy is BaseStrategy {
         onlyAfterAllocation
     {
         uint256 payoutLength = _recipientIds.length;
-        for (uint256 i; i < payoutLength;) {
+        for (uint256 i; i < payoutLength; ++i) {
             address recipientId = _recipientIds[i];
             Recipient storage recipient = recipients[recipientId];
 
@@ -505,14 +504,11 @@ abstract contract QVBaseStrategy is BaseStrategy {
             }
 
             IAllo.Pool memory pool = allo.getPool(poolId);
-            _transferAmount(pool.token, recipient.recipientAddress, amount);
+            pool.token.transferAmount(recipient.recipientAddress, amount);
 
             paidOut[recipientId] = true;
 
             emit Distributed(recipientId, recipient.recipientAddress, amount, _sender);
-            unchecked {
-                ++i;
-            }
         }
         if (!distributionStarted) {
             distributionStarted = true;

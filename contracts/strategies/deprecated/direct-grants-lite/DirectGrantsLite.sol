@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
 // External Libraries
 import {Multicall} from "openzeppelin-contracts/contracts/utils/Multicall.sol";
@@ -10,6 +10,7 @@ import {BaseStrategy} from "../BaseStrategy.sol";
 // Internal Libraries
 import {Metadata} from "contracts/core/libraries/Metadata.sol";
 import {Native} from "contracts/core/libraries/Native.sol";
+import {Transfer} from "contracts/core/libraries/Transfer.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⣿⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -30,6 +31,8 @@ import {Native} from "contracts/core/libraries/Native.sol";
 /// @author @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>
 /// @notice Strategy for direct grants
 contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
+    using Transfer for address;
+
     /// ================================
     /// ========== Struct ==============
     /// ================================
@@ -252,7 +255,7 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
         if (refRecipientsCounter != recipientsCounter) revert INVALID();
         // Loop through the statuses and set the status
         uint256 length = statuses.length;
-        for (uint256 i; i < length;) {
+        for (uint256 i; i < length; ++i) {
             uint256 rowIndex = statuses[i].index;
             uint256 fullRow = statuses[i].statusRow;
 
@@ -260,10 +263,6 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
 
             // Emit that the recipient status has been updated with the values
             emit RecipientStatusUpdated(rowIndex, fullRow, msg.sender);
-
-            unchecked {
-                i++;
-            }
         }
     }
 
@@ -291,13 +290,13 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
     /// @param _token The token to be withdrawn
     function withdraw(address _token) external onlyPoolManager(msg.sender) {
         // get the actual balance hold by the pool
-        uint256 amount = _getBalance(_token, address(this));
+        uint256 amount = _token.getBalance(address(this));
 
         // calculate the amount which is accessible
         uint256 accessibleAmount = amount;
 
         // transfer the amount to the pool manager
-        _transferAmount(_token, msg.sender, accessibleAmount);
+        _token.transferAmount(msg.sender, accessibleAmount);
     }
 
     /// ====================================
@@ -442,7 +441,7 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
 
         if (length == 0) revert INVALID(); // nothing to allocate
 
-        for (uint256 i = 0; i < length;) {
+        for (uint256 i = 0; i < length; ++i) {
             Allocation memory allocation = allocations[i];
             address recipientId = allocation.recipientId;
             Recipient memory recipient = _getRecipient(recipientId);
@@ -450,9 +449,6 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
 
             address token = allocations[i].token;
             uint256 amount = allocations[i].amount;
-
-            // This will revert if the sender tries to spend more than the msg.value
-            if (token == NATIVE) nativeAmount -= amount;
 
             if (recipient.recipientAddress == address(0)) {
                 revert RECIPIENT_ERROR(recipientId);
@@ -462,16 +458,13 @@ contract DirectGrantsLiteStrategy is Native, BaseStrategy, Multicall {
                 revert RECIPIENT_NOT_ACCEPTED();
             }
 
-            _transferAmountFrom(token, TransferData({from: _sender, to: recipientAddress, amount: amount}));
+            if (token == NATIVE) nativeAmount -= amount;
+            token.transferAmountFrom(_sender, recipientAddress, amount);
 
             emit Allocated(recipientId, amount, token, _sender);
-
-            unchecked {
-                ++i;
-            }
         }
 
-        if (nativeAmount > 0) _transferAmount(NATIVE, _sender, nativeAmount);
+        if (nativeAmount > 0) _sender.transferAmountNative(nativeAmount);
     }
 
     /// @notice Check if sender is profile owner or member.

@@ -54,7 +54,7 @@ sequenceDiagram
 ## Smart Contract Overview
 
 * **License:** The `QVBaseStrategy` contract adheres to the AGPL-3.0-only License, promoting open-source usage with specific terms.
-* **Solidity Version:** Developed using Solidity version 0.8.19, leveraging the latest Ethereum smart contract advancements.
+* **Solidity Version:** Developed using Solidity version 0.8.22, leveraging the latest Ethereum smart contract advancements.
 * **Internal Libraries:** Utilizes the `Metadata` library.
 * **Interfaces:** Interfaces with the `IAllo` and `IRegistry` components for external communication.
 * **Inheritance:** Inherits from the `BaseStrategy` contract, inheriting and expanding core strategy functionalities.

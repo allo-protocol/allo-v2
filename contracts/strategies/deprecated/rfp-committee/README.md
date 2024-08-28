@@ -48,7 +48,7 @@ sequenceDiagram
 ## Smart Contract Overview
 
 - **License:** The `RFPCommitteeStrategy` contract operates under the AGPL-3.0-only License.
-- **Solidity Version:** Developed using Solidity version 0.8.19.
+- **Solidity Version:** Developed using Solidity version 0.8.22.
 - **Inheritance:** Inherits functionality from the `RFPSimpleStrategy` contract.
 - **Events:** Introduces an additional event `Voted` to signal committee member votes.
 - **Storage Variables:** Adds new storage variables for voting and threshold management.

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
 // External Libraries
 import {ReentrancyGuard} from "openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
@@ -10,6 +10,7 @@ import {IRegistry} from "contracts/core/interfaces/IRegistry.sol";
 import {BaseStrategy} from "../BaseStrategy.sol";
 // Internal Libraries
 import {Metadata} from "contracts/core/libraries/Metadata.sol";
+import {Transfer} from "contracts/core/libraries/Transfer.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⣿⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -30,6 +31,8 @@ import {Metadata} from "contracts/core/libraries/Metadata.sol";
 /// @author @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>, @0xZakk <zakk@gitcoin.co>, @nfrgosselin <nate@gitcoin.co>
 /// @notice Strategy for Request for Proposal (RFP) allocation with milestone submission and management.
 contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
+    using Transfer for address;
+
     /// ================================
     /// ========== Struct ==============
     /// ================================
@@ -238,7 +241,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
         // Loop through the milestones and add them to the milestones array
         uint256 milestonesLength = _milestones.length;
-        for (uint256 i; i < milestonesLength;) {
+        for (uint256 i; i < milestonesLength; ++i) {
             uint256 amountPercentage = _milestones[i].amountPercentage;
 
             if (amountPercentage == 0) revert INVALID_MILESTONE();
@@ -246,10 +249,6 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
             totalAmountPercentage += amountPercentage;
             _milestones[i].milestoneStatus = Status.None;
             milestones.push(_milestones[i]);
-
-            unchecked {
-                i++;
-            }
         }
 
         // Check if the all milestone amount percentage totals to 1e18(100%)
@@ -307,10 +306,10 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
     /// @dev Callable by the pool manager
     /// @param _token The token to withdraw
     function withdraw(address _token) external virtual onlyPoolManager(msg.sender) onlyInactivePool {
-        uint256 amount = _getBalance(_token, address(this));
+        uint256 amount = _token.getBalance(address(this));
 
         // Transfer the tokens to the 'msg.sender' (pool manager calling function)
-        _transferAmount(_token, msg.sender, amount);
+        _token.transferAmount(msg.sender, amount);
     }
 
     /// ====================================
@@ -448,7 +447,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
 
         // Get the pool, subtract the amount and transfer to the recipient
         poolAmount -= amount;
-        _transferAmount(pool.token, recipient.recipientAddress, amount);
+        pool.token.transferAmount(recipient.recipientAddress, amount);
 
         // Set the milestone status to 'Accepted'
         milestone.milestoneStatus = Status.Accepted;
