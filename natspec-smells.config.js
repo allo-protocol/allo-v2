@@ -5,9 +5,12 @@
 /** @type {import('@defi-wonderland/natspec-smells').Config} */
 module.exports = {
   include: [
-    'contracts/(core|extensions)/**/*.sol',
-    'contracts/strategies/*.sol',
+    'contracts/**/*.sol',
   ],
-  exclude: 'contracts/strategies/*/**.sol',
+  exclude: [
+    'contracts/strategies/deprecated/**/*.sol',
+    'contracts/factories/**/*.sol',
+    'contracts/migration/**/*.sol',
+  ],
   enforceInheritdoc: false,
 };

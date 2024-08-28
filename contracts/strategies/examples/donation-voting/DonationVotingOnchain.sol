@@ -48,6 +48,7 @@ contract DonationVotingOnchain is BaseStrategy, RecipientsExtension, Native {
     /// ===============================
 
     /// @notice Thrown when there is nothing to distribute for the given recipient.
+    /// @param recipientId The recipientId to which distribution was attempted.
     error NOTHING_TO_DISTRIBUTE(address recipientId);
 
     /// @notice Thrown when the timestamps being set or updated don't meet the contracts requirements.
@@ -57,8 +58,9 @@ contract DonationVotingOnchain is BaseStrategy, RecipientsExtension, Native {
     /// ========== Storage =============
     /// ================================
 
-    /// @notice The start and end times for allocations
+    /// @notice The start time for allocations
     uint64 public allocationStartTime;
+    /// @notice The end time for allocations
     uint64 public allocationEndTime;
     /// @notice Cooldown time from allocationEndTime after which the pool manager is allowed to withdraw tokens.
     uint64 public withdrawalCooldown;
@@ -198,8 +200,9 @@ contract DonationVotingOnchain is BaseStrategy, RecipientsExtension, Native {
 
     /// @notice Distributes funds (tokens) to recipients.
     /// @param _recipientIds The IDs of the recipients
+    /// @param _data NOT USED
     /// @param _sender The address of the sender
-    function _distribute(address[] memory _recipientIds, bytes memory, address _sender)
+    function _distribute(address[] memory _recipientIds, bytes memory _data, address _sender)
         internal
         virtual
         override
@@ -231,12 +234,16 @@ contract DonationVotingOnchain is BaseStrategy, RecipientsExtension, Native {
     }
 
     /// @notice Hook called before withdrawing tokens from the pool.
-    function _beforeWithdraw(address, uint256, address) internal virtual override {
+    /// @param _token The address of the token
+    /// @param _amount The amount to withdraw
+    /// @param _recipient The address to withdraw to
+    function _beforeWithdraw(address _token, uint256 _amount, address _recipient) internal virtual override {
         if (block.timestamp <= allocationEndTime + withdrawalCooldown) revert INVALID();
     }
 
     /// @notice Hook called before increasing the pool amount.
-    function _beforeIncreasePoolAmount(uint256) internal virtual override {
+    /// @param _amount The amount to increase the pool by
+    function _beforeIncreasePoolAmount(uint256 _amount) internal virtual override {
         if (block.timestamp > allocationEndTime) revert POOL_INACTIVE();
     }
 

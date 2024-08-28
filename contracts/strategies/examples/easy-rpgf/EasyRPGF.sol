@@ -29,7 +29,9 @@ contract EasyRPGF is BaseStrategy {
     /// ============ Errors ===========
     /// ===============================
 
+    /// @dev Thrown when input arrays have different lengths
     error INPUT_LENGTH_MISMATCH();
+    /// @dev Thrown when a function which hasn't been implemented is called
     error NOOP();
 
     /// ===============================
@@ -86,10 +88,12 @@ contract EasyRPGF is BaseStrategy {
         }
     }
 
+    /// @inheritdoc BaseStrategy
     function _allocate(address[] memory, uint256[] memory, bytes memory, address) internal virtual override {
         revert NOOP();
     }
 
+    /// @inheritdoc BaseStrategy
     function _register(address[] memory, bytes memory, address) internal virtual override returns (address[] memory) {
         revert NOOP();
     }
