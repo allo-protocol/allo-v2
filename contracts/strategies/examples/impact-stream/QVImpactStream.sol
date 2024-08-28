@@ -135,7 +135,7 @@ contract QVImpactStream is QVSimple {
     /// ==== Internal Functions =====
     /// =============================
 
-    /// @inheritdoc BaseStrategy
+    /// @inheritdoc QVSimple
     function _distribute(address[] memory _recipientIds, bytes memory, address _sender)
         internal
         virtual

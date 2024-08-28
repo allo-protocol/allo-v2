@@ -29,7 +29,8 @@ interface IRecipientsExtension {
     /// | recipient1 | recipient2 | recipient3 | recipient4 | recipient5 | 'rowIndex'
     /// |     0000   |    0001    |    0010    |    0011    |    0100    | 'statusRow'
     /// |     none   |   pending  |  accepted  |  rejected  |  appealed  | converted status (0, 1, 2, 3, 4)
-    ///
+    /// @param index along a word
+    /// @param statusRow is the word index
     struct ApplicationStatus {
         uint256 index;
         uint256 statusRow;

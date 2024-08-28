@@ -9,8 +9,8 @@ module.exports = {
   ],
   exclude: [
     'contracts/strategies/deprecated/**/*.sol',
-    'contracts/factories/**/*.sol',
     'contracts/migration/**/*.sol',
+    'contracts/core/interfaces/IDAI.sol',
   ],
   enforceInheritdoc: false,
 };

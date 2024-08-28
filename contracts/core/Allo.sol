@@ -694,6 +694,7 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
     }
 
     /// @dev Logic copied from ERC2771ContextUpgradeable OZ contracts
+    /// @return the sender of the call
     function _msgSender() internal view virtual override returns (address) {
         uint256 calldataLength = msg.data.length;
         if (isTrustedForwarder(msg.sender) && calldataLength >= 20) {
@@ -704,6 +705,7 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
     }
 
     /// @dev Logic copied from ERC2771ContextUpgradeable OZ contracts
+    /// @return calldata filterring the sender address when the trusted forward is the operator
     function _msgData() internal view override returns (bytes calldata) {
         uint256 calldataLength = msg.data.length;
         if (isTrustedForwarder(msg.sender) && calldataLength >= 20) {
