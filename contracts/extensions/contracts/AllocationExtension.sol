@@ -104,7 +104,7 @@ abstract contract AllocationExtension is CoreBaseStrategy, IAllocationExtension 
         allocationStartTime = _allocationStartTime;
         allocationEndTime = _allocationEndTime;
 
-        emit AllocationTimestampsUpdated(allocationStartTime, allocationEndTime, msg.sender);
+        emit AllocationTimestampsUpdated(_allocationStartTime, _allocationEndTime, msg.sender);
     }
 
     /// @dev Ensure the function is called before allocation start time
