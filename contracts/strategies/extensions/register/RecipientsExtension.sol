@@ -389,7 +389,7 @@ abstract contract RecipientsExtension is BaseStrategy, Errors, IRecipientsExtens
     /// @param _newStatus New proposed status
     /// @param _oldStatus Previous status
     /// @param _recipientIndex The index of the recipient in case the recipient data needs to be accessed
-    /// @return _reviewedStatus The actual new status to use 
+    /// @return _reviewedStatus The actual new status to use
     function _reviewRecipientStatus(Status _newStatus, Status _oldStatus, uint256 _recipientIndex)
         internal
         virtual
