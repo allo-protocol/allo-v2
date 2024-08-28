@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
 // Core Contracts
 import {CoreBaseStrategy} from "contracts/strategies/CoreBaseStrategy.sol";
@@ -74,15 +74,12 @@ contract DirectAllocationStrategy is CoreBaseStrategy, Native, Errors {
         }
 
         uint256 _totalNativeAmount;
-        for (uint256 _i = 0; _i < _recipientsLength;) {
+        for (uint256 _i = 0; _i < _recipientsLength; ++_i) {
             /// Direct allocate the funds
             if (_tokens[_i] == NATIVE) _totalNativeAmount += _amounts[_i];
             _tokens[_i].transferAmountFrom(_sender, _recipients[_i], _amounts[_i]);
 
             emit DirectAllocated(_recipients[_i], _amounts[_i], _tokens[_i], _sender);
-            unchecked {
-                ++_i;
-            }
         }
 
         if (msg.value < _totalNativeAmount) revert ETH_MISMATCH();

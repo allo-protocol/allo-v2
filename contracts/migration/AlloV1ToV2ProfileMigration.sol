@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
 // Core Contracts
 import {Metadata} from "../core/libraries/Metadata.sol";
@@ -83,7 +83,7 @@ contract AlloV1ToV2ProfileMigration {
 
         bytes32[] memory migratedProfileIds = new bytes32[](_profilesLength);
 
-        for (uint256 i = 0; i < _profilesLength;) {
+        for (uint256 i = 0; i < _profilesLength; ++i) {
             bytes32 alloV1 = _projectIds[i];
             uint256 alloV1ChainId = _sourceChainIds[i];
             uint256 nonce = _nonces[i];
@@ -101,10 +101,6 @@ contract AlloV1ToV2ProfileMigration {
             alloV2ToAlloV1V2Profile[alloV2Profile] = alloV1V2Profile;
 
             emit ProfileMigrated(alloV1, alloV1ChainId, alloV2Profile, nonce);
-
-            unchecked {
-                i++;
-            }
         }
 
         return abi.encode(migratedProfileIds);

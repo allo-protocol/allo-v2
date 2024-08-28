@@ -35,7 +35,7 @@ sequenceDiagram
 ## Contract Overview
 
 * **License:** The `QVSimpleStrategy` contract adheres to the AGPL-3.0-only License, promoting open-source usage with specific terms.
-* **Solidity Version:** Developed using Solidity version 0.8.19, leveraging the latest Ethereum smart contract advancements.
+* **Solidity Version:** Developed using Solidity version 0.8.22, leveraging the latest Ethereum smart contract advancements.
 * **Inheritance:** Inherits from the `QVBaseStrategy` contract, inheriting and expanding core strategy functionalities.
 
 ### InitializeParamsSimple

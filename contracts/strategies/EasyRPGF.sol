@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
 // Interfaces
 import {IAllo} from "contracts/core/interfaces/IAllo.sol";
@@ -75,7 +75,7 @@ contract EasyRPGF is CoreBaseStrategy {
         }
 
         IAllo.Pool memory pool = allo.getPool(poolId);
-        for (uint256 i; i < payoutLength;) {
+        for (uint256 i; i < payoutLength; ++i) {
             uint256 amount = amounts[i];
             address recipientAddress = _recipientIds[i];
 
@@ -83,10 +83,6 @@ contract EasyRPGF is CoreBaseStrategy {
             pool.token.transferAmount(recipientAddress, amount);
 
             emit Distributed(recipientAddress, abi.encode(amount, _sender));
-
-            unchecked {
-                ++i;
-            }
         }
     }
 

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
 import {IRecipientsExtension} from "../interfaces/IRecipientsExtension.sol";
 import {IRegistry} from "../../core/interfaces/IRegistry.sol";
@@ -118,7 +118,7 @@ abstract contract RecipientsExtension is CoreBaseStrategy, Errors, IRecipientsEx
         _validateReviewRecipients(msg.sender);
         if (refRecipientsCounter != recipientsCounter) revert INVALID();
         // Loop through the statuses and set the status
-        for (uint256 i; i < statuses.length;) {
+        for (uint256 i; i < statuses.length; ++i) {
             uint256 rowIndex = statuses[i].index;
             uint256 fullRow = statuses[i].statusRow;
 
@@ -130,10 +130,6 @@ abstract contract RecipientsExtension is CoreBaseStrategy, Errors, IRecipientsEx
 
             // Emit that the recipient status has been updated with the values
             emit RecipientStatusUpdated(rowIndex, fullRow, msg.sender);
-
-            unchecked {
-                i++;
-            }
         }
     }
 
@@ -355,7 +351,7 @@ abstract contract RecipientsExtension is CoreBaseStrategy, Errors, IRecipientsEx
     function _processStatusRow(uint256 _rowIndex, uint256 _fullRow) internal returns (uint256) {
         // Loop through each status in the updated row
         uint256 currentRow = statusesBitMap[_rowIndex];
-        for (uint256 col = 0; col < 64;) {
+        for (uint256 col = 0; col < 64; ++col) {
             // Extract the status at the column index
             uint256 colIndex = col << 2; // col * 4
             uint8 newStatus = uint8((_fullRow >> colIndex) & 0xF);
@@ -370,10 +366,6 @@ abstract contract RecipientsExtension is CoreBaseStrategy, Errors, IRecipientsEx
                     uint256 reviewedRow = _fullRow & ~(0xF << colIndex);
                     _fullRow = reviewedRow | (uint256(reviewedStatus) << colIndex);
                 }
-            }
-
-            unchecked {
-                col++;
             }
         }
         return _fullRow;

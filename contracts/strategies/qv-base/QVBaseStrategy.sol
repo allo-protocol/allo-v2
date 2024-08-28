@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
 // Interfaces
 import {IAllo} from "../../core/interfaces/IAllo.sol";
@@ -285,7 +285,7 @@ abstract contract QVBaseStrategy is BaseStrategy {
         uint256 recipientLength = _recipientIds.length;
         if (recipientLength != _recipientStatuses.length) revert INVALID();
 
-        for (uint256 i; i < recipientLength;) {
+        for (uint256 i; i < recipientLength; ++i) {
             Status recipientStatus = _recipientStatuses[i];
             address recipientId = _recipientIds[i];
             Recipient storage recipient = recipients[recipientId];
@@ -312,10 +312,6 @@ abstract contract QVBaseStrategy is BaseStrategy {
             }
 
             emit Reviewed(recipientId, applicationId, recipientStatus, msg.sender);
-
-            unchecked {
-                ++i;
-            }
         }
     }
 
@@ -496,7 +492,7 @@ abstract contract QVBaseStrategy is BaseStrategy {
         onlyAfterAllocation
     {
         uint256 payoutLength = _recipientIds.length;
-        for (uint256 i; i < payoutLength;) {
+        for (uint256 i; i < payoutLength; ++i) {
             address recipientId = _recipientIds[i];
             Recipient storage recipient = recipients[recipientId];
 
@@ -513,9 +509,6 @@ abstract contract QVBaseStrategy is BaseStrategy {
             paidOut[recipientId] = true;
 
             emit Distributed(recipientId, recipient.recipientAddress, amount, _sender);
-            unchecked {
-                ++i;
-            }
         }
         if (!distributionStarted) {
             distributionStarted = true;

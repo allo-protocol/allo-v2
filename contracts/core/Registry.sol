@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
 // External Libraries
 import "openzeppelin-contracts-upgradeable/contracts/access/AccessControlUpgradeable.sol";
@@ -153,7 +153,7 @@ contract Registry is IRegistry, Initializable, AccessControlUpgradeable, Errors 
             revert UNAUTHORIZED();
         }
 
-        for (uint256 i; i < memberLength;) {
+        for (uint256 i; i < memberLength; ++i) {
             address member = _members[i];
 
             // Will revert if any of the addresses are a zero address
@@ -161,9 +161,6 @@ contract Registry is IRegistry, Initializable, AccessControlUpgradeable, Errors 
 
             // Grant the role to the member and emit the event for each member
             _grantRole(profileId, member);
-            unchecked {
-                ++i;
-            }
         }
 
         // Emit the event that the profile was created
@@ -291,7 +288,7 @@ contract Registry is IRegistry, Initializable, AccessControlUpgradeable, Errors 
         uint256 memberLength = _members.length;
 
         // Loop through the members and add them to the profile by granting the role
-        for (uint256 i; i < memberLength;) {
+        for (uint256 i; i < memberLength; ++i) {
             address member = _members[i];
 
             // Will revert if any of the addresses are a zero address
@@ -299,9 +296,6 @@ contract Registry is IRegistry, Initializable, AccessControlUpgradeable, Errors 
 
             // Grant the role to the member and emit the event for each member
             _grantRole(_profileId, member);
-            unchecked {
-                ++i;
-            }
         }
     }
 
@@ -313,12 +307,9 @@ contract Registry is IRegistry, Initializable, AccessControlUpgradeable, Errors 
         uint256 memberLength = _members.length;
 
         // Loop through the members and remove them from the profile by revoking the role
-        for (uint256 i; i < memberLength;) {
+        for (uint256 i; i < memberLength; ++i) {
             // Revoke the role from the member and emit the event for each member
             _revokeRole(_profileId, _members[i]);
-            unchecked {
-                ++i;
-            }
         }
     }
 

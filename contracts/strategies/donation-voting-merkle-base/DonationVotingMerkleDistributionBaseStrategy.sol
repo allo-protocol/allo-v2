@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
 // External Libraries
 import {ISignatureTransfer} from "permit2/ISignatureTransfer.sol";
@@ -322,11 +322,8 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
         }
 
         // Loop through the allowed tokens and set them to true
-        for (uint256 i; i < allowedTokensLength;) {
+        for (uint256 i; i < allowedTokensLength; ++i) {
             allowedTokens[_initializeData.allowedTokens[i]] = true;
-            unchecked {
-                i++;
-            }
         }
     }
 
@@ -374,7 +371,7 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
     {
         if (refRecipientsCounter != recipientsCounter) revert INVALID();
         // Loop through the statuses and set the status
-        for (uint256 i; i < statuses.length;) {
+        for (uint256 i; i < statuses.length; ++i) {
             uint256 rowIndex = statuses[i].index;
             uint256 fullRow = statuses[i].statusRow;
 
@@ -382,10 +379,6 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
 
             // Emit that the recipient status has been updated with the values
             emit RecipientStatusUpdated(rowIndex, fullRow, msg.sender);
-
-            unchecked {
-                i++;
-            }
         }
     }
 
@@ -663,11 +656,8 @@ abstract contract DonationVotingMerkleDistributionBaseStrategy is Native, BaseSt
         uint256 length = distributions.length;
 
         // Loop through the distributions and distribute the funds
-        for (uint256 i; i < length;) {
+        for (uint256 i; i < length; ++i) {
             _distributeSingle(distributions[i]);
-            unchecked {
-                i++;
-            }
         }
 
         // Emit that the batch payout was successful

@@ -51,16 +51,13 @@ contract EasyRPGFStrategy is BaseStrategy {
         }
 
         IAllo.Pool memory pool = allo.getPool(poolId);
-        for (uint256 i; i < payoutLength;) {
+        for (uint256 i; i < payoutLength; ++i) {
             uint256 amount = amounts[i];
             address recipientAddress = _recipientIds[i];
 
             poolAmount -= amount;
             pool.token.transferAmount(recipientAddress, amount);
             emit Distributed(recipientAddress, recipientAddress, amount, _sender);
-            unchecked {
-                ++i;
-            }
         }
     }
 

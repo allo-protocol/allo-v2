@@ -3,19 +3,19 @@ pragma solidity ^0.8.19;
 import "forge-std/Test.sol";
 
 // Interfaces
-import {IStrategy} from "../../../../contracts/core/interfaces/IStrategy.sol";
+import {IStrategy} from "contracts/core/interfaces/IStrategy.sol";
 // Core contracts
-import {HedgeyRFPCommitteeStrategy} from "../../../../contracts/strategies/_poc/hedgey/HedgeyRFPCommitteeStrategy.sol";
-import {RFPSimpleStrategy} from "../../../../contracts/strategies/rfp-simple/RFPSimpleStrategy.sol";
+import {HedgeyRFPCommitteeStrategy} from "contracts/strategies/_poc/hedgey/HedgeyRFPCommitteeStrategy.sol";
+import {RFPSimpleStrategy} from "contracts/strategies/rfp-simple/RFPSimpleStrategy.sol";
 // Internal libraries
-import {Errors} from "../../../../contracts/core/libraries/Errors.sol";
-import {Metadata} from "../../../../contracts/core/libraries/Metadata.sol";
+import {Errors} from "contracts/core/libraries/Errors.sol";
+import {Metadata} from "contracts/core/libraries/Metadata.sol";
 // Test libraries
-import {AlloSetup} from "../../shared/AlloSetup.sol";
-import {RegistrySetupFull} from "../../shared/RegistrySetup.sol";
-import {EventSetup} from "../../shared/EventSetup.sol";
+import {AlloSetup} from "test/foundry/shared/AlloSetup.sol";
+import {RegistrySetupFull} from "test/foundry/shared/RegistrySetup.sol";
+import {EventSetup} from "test/foundry/shared/EventSetup.sol";
 import {HedgeySetup} from "./HedgeySetup.sol";
-import {MockERC20} from "../../../utils/MockERC20.sol";
+import {MockERC20} from "test/utils/MockERC20.sol";
 
 contract HedgeyRFPCommitteeStrategyTest is Test, RegistrySetupFull, AlloSetup, HedgeySetup, EventSetup, Errors {
     // Events

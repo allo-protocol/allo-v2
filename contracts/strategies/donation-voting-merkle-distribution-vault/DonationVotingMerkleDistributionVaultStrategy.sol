@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
 import {ISignatureTransfer} from "permit2/ISignatureTransfer.sol";
 import {DonationVotingMerkleDistributionBaseStrategy} from
@@ -78,7 +78,7 @@ contract DonationVotingMerkleDistributionVaultStrategy is
         uint256 claimsLength = _claims.length;
 
         // Loop through the claims
-        for (uint256 i; i < claimsLength;) {
+        for (uint256 i; i < claimsLength; ++i) {
             Claim memory singleClaim = _claims[i];
             Recipient memory recipient = _recipients[singleClaim.recipientId];
             uint256 amount = claims[singleClaim.recipientId][singleClaim.token];
@@ -100,9 +100,6 @@ contract DonationVotingMerkleDistributionVaultStrategy is
 
             // Emit that the tokens have been claimed and sent to the recipient
             emit Claimed(singleClaim.recipientId, recipient.recipientAddress, amount, token);
-            unchecked {
-                i++;
-            }
         }
     }
 

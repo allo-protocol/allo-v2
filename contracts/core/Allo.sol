@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
 // External Libraries
 import "solady/auth/Ownable.sol";
@@ -269,12 +269,8 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
     /// @param _poolId ID of the pool
     /// @param _managers The addresses to add
     function addPoolManagers(uint256 _poolId, address[] calldata _managers) public onlyPoolAdmin(_poolId) {
-        for (uint256 i; i < _managers.length;) {
+        for (uint256 i; i < _managers.length; ++i) {
             _addPoolManager(_poolId, _managers[i]);
-
-            unchecked {
-                ++i;
-            }
         }
     }
 
@@ -283,12 +279,8 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
     /// @param _poolId ID of the pool
     /// @param _managers The addresses to remove
     function removePoolManagers(uint256 _poolId, address[] calldata _managers) public onlyPoolAdmin(_poolId) {
-        for (uint256 i; i < _managers.length;) {
+        for (uint256 i; i < _managers.length; ++i) {
             _revokeRole(pools[_poolId].managerRole, _managers[i]);
-
-            unchecked {
-                ++i;
-            }
         }
     }
 
@@ -296,11 +288,8 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
     /// @param _poolIds IDs of the pools
     /// @param _managers The addresses to add
     function addPoolManagersInMultiplePools(uint256[] calldata _poolIds, address[] calldata _managers) external {
-        for (uint256 i; i < _poolIds.length;) {
+        for (uint256 i; i < _poolIds.length; ++i) {
             addPoolManagers(_poolIds[i], _managers);
-            unchecked {
-                ++i;
-            }
         }
     }
 
@@ -308,11 +297,8 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
     /// @param _poolIds IDs of the pools
     /// @param _managers The addresses to remove
     function removePoolManagersInMultiplePools(uint256[] calldata _poolIds, address[] calldata _managers) external {
-        for (uint256 i; i < _poolIds.length;) {
+        for (uint256 i; i < _poolIds.length; ++i) {
             removePoolManagers(_poolIds[i], _managers);
-            unchecked {
-                ++i;
-            }
         }
     }
 
@@ -368,11 +354,8 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
         if (poolIdLength != _data.length || poolIdLength != _recipientAddresses.length) revert MISMATCH();
 
         // Loop through the '_poolIds' & '_data' and call the 'strategy.register()' function
-        for (uint256 i; i < poolIdLength;) {
+        for (uint256 i; i < poolIdLength; ++i) {
             recipientIds[i] = pools[_poolIds[i]].strategy.register(_recipientAddresses[i], _data[i], _msgSender());
-            unchecked {
-                ++i;
-            }
         }
 
         // Return the recipientIds that have been registered
@@ -438,12 +421,9 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
         // Loop through the _poolIds & _datas and call the internal _allocate() function
         uint256 totalValue;
         address msgSender = _msgSender();
-        for (uint256 i; i < numPools;) {
+        for (uint256 i; i < numPools; ++i) {
             _allocate(_poolIds[i], _recipients[i], _amounts[i], _datas[i], _values[i], msgSender);
             totalValue += _values[i];
-            unchecked {
-                ++i;
-            }
         }
         // Reverts if the sum of all the allocated values is different than 'msg.value' with 'MISMATCH()' error
         if (totalValue != msg.value) revert ETH_MISMATCH();
@@ -548,13 +528,8 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
 
         // grant pool managers roles
         uint256 managersLength = _managers.length;
-        for (uint256 i; i < managersLength;) {
-            address manager = _managers[i];
-            _addPoolManager(poolId, manager);
-
-            unchecked {
-                ++i;
-            }
+        for (uint256 i; i < managersLength; ++i) {
+            _addPoolManager(poolId, _managers[i]);
         }
 
         if (baseFee > 0) {
