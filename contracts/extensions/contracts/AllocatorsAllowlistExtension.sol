@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
 import {AllocationExtension} from "contracts/extensions/contracts/AllocationExtension.sol";
 import {IAllocatorsAllowlistExtension} from "contracts/extensions/interfaces/IAllocatorsAllowlistExtension.sol";

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
 interface IAllocationExtension {
     /// @dev Error thrown when the allocation timestamps are invalid
