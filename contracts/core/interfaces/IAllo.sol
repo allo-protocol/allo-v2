@@ -3,7 +3,7 @@ pragma solidity ^0.8.19;
 
 // Interfaces
 import {IRegistry} from "./IRegistry.sol";
-import {IBaseStrategy} from "./IBaseStrategy.sol";
+import {IBaseStrategy} from "strategies/IBaseStrategy.sol";
 // Internal Libraries
 import {Metadata} from "../libraries/Metadata.sol";
 
