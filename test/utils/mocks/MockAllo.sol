@@ -8,19 +8,19 @@ import {Metadata} from "contracts/core/libraries/Metadata.sol";
 contract MockAllo is Allo {
     constructor() Allo() {}
 
-    function _initializeOwner(address newOwner) internal override virtual {
+    function _initializeOwner(address newOwner) internal virtual override {
         super._initializeOwner(newOwner);
     }
 
-    function _revokeRole(bytes32 role, address account) internal override virtual {
+    function _revokeRole(bytes32 role, address account) internal virtual override {
         super._revokeRole(role, account);
     }
 
-    function _checkOnlyPoolManager(uint256 _poolId, address _address) internal view override virtual {
+    function _checkOnlyPoolManager(uint256 _poolId, address _address) internal view virtual override {
         super._checkOnlyPoolManager(_poolId, _address);
     }
 
-    function _checkOnlyPoolAdmin(uint256 _poolId, address _address) internal view override virtual {
+    function _checkOnlyPoolAdmin(uint256 _poolId, address _address) internal view virtual override {
         super._checkOnlyPoolAdmin(_poolId, _address);
     }
 
@@ -34,17 +34,9 @@ contract MockAllo is Allo {
         uint256 _amount,
         Metadata memory _metadata,
         address[] memory _managers
-    ) internal override virtual returns (uint256 poolId) {
+    ) internal virtual override returns (uint256 poolId) {
         return super._createPool(
-            _creator,
-            _msgValue,
-            _profileId,
-            _strategy,
-            _initStrategyData,
-            _token,
-            _amount,
-            _metadata,
-            _managers
+            _creator, _msgValue, _profileId, _strategy, _initStrategyData, _token, _amount, _metadata, _managers
         );
     }
 
@@ -59,7 +51,11 @@ contract MockAllo is Allo {
         super._allocate(_poolId, _recipients, _amounts, _data, _value, _allocator);
     }
 
-    function _fundPool(uint256 _amount, address _funder, uint256 _poolId, IBaseStrategy _strategy) internal virtual override {
+    function _fundPool(uint256 _amount, address _funder, uint256 _poolId, IBaseStrategy _strategy)
+        internal
+        virtual
+        override
+    {
         super._fundPool(_amount, _funder, _poolId, _strategy);
     }
 
