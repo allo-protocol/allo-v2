@@ -39,8 +39,8 @@ allow_paths = ['node_modules']
 
 [fmt]
 ignore = [
-  'contracts/strategies/_poc/qv-hackathon/SchemaResolver.sol',
-  'contracts/strategies/_poc/direct-grants-simple/DirectGrantsSimpleStrategy.sol'
+  'contracts/strategies/deprecated/_poc/qv-hackathon/SchemaResolver.sol',
+  'contracts/strategies/deprecated/_poc/direct-grants-simple/DirectGrantsSimpleStrategy.sol'
 ]
 
 [rpc_endpoints]
