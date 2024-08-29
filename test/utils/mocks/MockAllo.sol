@@ -2,7 +2,7 @@
 pragma solidity ^0.8.19;
 
 import {Allo} from "contracts/core/Allo.sol";
-import {IBaseStrategy} from "contracts/core/interfaces/IBaseStrategy.sol";
+import {IBaseStrategy} from "contracts/strategies/IBaseStrategy.sol";
 import {Metadata} from "contracts/core/libraries/Metadata.sol";
 
 contract MockAllo is Allo {
