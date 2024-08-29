@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity ^0.8.19;
 
-import {AllocationExtension} from "contracts/extensions/contracts/AllocationExtension.sol";
-import {CoreBaseStrategy} from "contracts/strategies/CoreBaseStrategy.sol";
+import {AllocationExtension} from "contracts/strategies/extensions/allocate/AllocationExtension.sol";
+import {BaseStrategy} from "contracts/strategies/BaseStrategy.sol";
 
 /// @dev This mock allows smock to override the functions of AllocationExtension abstract contract
-contract MockAllocationExtension is CoreBaseStrategy, AllocationExtension {
-    constructor(address _allo) CoreBaseStrategy(_allo) {}
+contract MockAllocationExtension is BaseStrategy, AllocationExtension {
+    constructor(address _allo) BaseStrategy(_allo) {}
 
     function initialize(uint256 _poolId, bytes memory _data) external override {
         __BaseStrategy_init(_poolId);
