@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity ^0.8.19;
 
-import {AllocatorsAllowlistExtension} from "contracts/extensions/contracts/AllocatorsAllowlistExtension.sol";
-import {CoreBaseStrategy} from "contracts/strategies/CoreBaseStrategy.sol";
+import {AllocatorsAllowlistExtension} from "contracts/strategies/extensions/allocate/AllocatorsAllowlistExtension.sol";
+import {BaseStrategy} from "contracts/strategies/BaseStrategy.sol";
 
-contract MockAllocatorsAllowlistExtension is CoreBaseStrategy, AllocatorsAllowlistExtension {
-
-    constructor(address _allo) CoreBaseStrategy(_allo) {}
+contract MockAllocatorsAllowlistExtension is BaseStrategy, AllocatorsAllowlistExtension {
+    constructor(address _allo) BaseStrategy(_allo) {}
 
     function initialize(uint256 _poolId, bytes memory _data) external override {
         __BaseStrategy_init(_poolId);
@@ -31,7 +30,7 @@ contract MockAllocatorsAllowlistExtension is CoreBaseStrategy, AllocatorsAllowli
         super._removeAllocator(_allocator);
     }
 
-    function _checkOnlyPoolManager(address _sender) internal view override virtual {
+    function _checkOnlyPoolManager(address _sender) internal view virtual override {
         super._checkOnlyPoolManager(_sender);
     }
 

@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
 // External Libraries
-import "openzeppelin-contracts-upgradeable/contracts/access/AccessControlUpgradeable.sol";
-import "openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
+import {AccessControlUpgradeable} from
+    "openzeppelin-contracts-upgradeable/contracts/access/AccessControlUpgradeable.sol";
+import {Initializable} from "openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
 import {ERC20} from "solady/tokens/ERC20.sol";
 // Interfaces
-import "./interfaces/IRegistry.sol";
+import {IRegistry} from "./interfaces/IRegistry.sol";
 // Internal Libraries
 import {Anchor} from "./Anchor.sol";
 import {Errors} from "./libraries/Errors.sol";
 import {Metadata} from "./libraries/Metadata.sol";
-import "./libraries/Native.sol";
-import "./libraries/Transfer.sol";
+import {Transfer} from "./libraries/Transfer.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⣿⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -36,7 +36,9 @@ import "./libraries/Transfer.sol";
 ///      It is also used to deploy the anchor contract for each profile which acts as a proxy
 ///      for the profile and is used to receive funds and execute transactions on behalf of the profile
 ///      The Registry is also used to add and remove members from a profile and update the profile 'Metadata'
-contract Registry is IRegistry, Initializable, Native, AccessControlUpgradeable, Transfer, Errors {
+contract Registry is IRegistry, Initializable, AccessControlUpgradeable, Errors {
+    using Transfer for address;
+
     /// ==========================
     /// === Storage Variables ====
     /// ==========================
@@ -152,7 +154,7 @@ contract Registry is IRegistry, Initializable, Native, AccessControlUpgradeable,
             revert UNAUTHORIZED();
         }
 
-        for (uint256 i; i < memberLength;) {
+        for (uint256 i; i < memberLength; ++i) {
             address member = _members[i];
 
             // Will revert if any of the addresses are a zero address
@@ -160,9 +162,6 @@ contract Registry is IRegistry, Initializable, Native, AccessControlUpgradeable,
 
             // Grant the role to the member and emit the event for each member
             _grantRole(profileId, member);
-            unchecked {
-                ++i;
-            }
         }
 
         // Emit the event that the profile was created
@@ -290,7 +289,7 @@ contract Registry is IRegistry, Initializable, Native, AccessControlUpgradeable,
         uint256 memberLength = _members.length;
 
         // Loop through the members and add them to the profile by granting the role
-        for (uint256 i; i < memberLength;) {
+        for (uint256 i; i < memberLength; ++i) {
             address member = _members[i];
 
             // Will revert if any of the addresses are a zero address
@@ -298,9 +297,6 @@ contract Registry is IRegistry, Initializable, Native, AccessControlUpgradeable,
 
             // Grant the role to the member and emit the event for each member
             _grantRole(_profileId, member);
-            unchecked {
-                ++i;
-            }
         }
     }
 
@@ -312,12 +308,9 @@ contract Registry is IRegistry, Initializable, Native, AccessControlUpgradeable,
         uint256 memberLength = _members.length;
 
         // Loop through the members and remove them from the profile by revoking the role
-        for (uint256 i; i < memberLength;) {
+        for (uint256 i; i < memberLength; ++i) {
             // Revoke the role from the member and emit the event for each member
             _revokeRole(_profileId, _members[i]);
-            unchecked {
-                ++i;
-            }
         }
     }
 
@@ -392,7 +385,7 @@ contract Registry is IRegistry, Initializable, Native, AccessControlUpgradeable,
     function recoverFunds(address _token, address _recipient) external onlyRole(ALLO_OWNER) {
         if (_recipient == address(0)) revert ZERO_ADDRESS();
 
-        uint256 amount = _token == NATIVE ? address(this).balance : ERC20(_token).balanceOf(address(this));
-        _transferAmount(_token, _recipient, amount);
+        uint256 amount = _token.getBalance(address(this));
+        _token.transferAmount(_recipient, amount);
     }
 }
