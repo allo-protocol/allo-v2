@@ -12,6 +12,7 @@
     "build": "forge build",
     "test": "forge test",
     "fmt": "forge fmt contracts/**/*.sol && forge fmt test/**/*.sol",
+    "lint:natspec": "npx @defi-wonderland/natspec-smells --config natspec-smells.config.js",
     "fork": "anvil --fork-url",
     "chain": "anvil --block-time 10",
     "snap": "forge snapshot --snap ./snapshots/snapshot.json",
