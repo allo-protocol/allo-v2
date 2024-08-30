@@ -27,6 +27,11 @@ jobs:
         uses: foundry-rs/foundry-toolchain@v1.0.9
         with:
           version: nightly
+      
+      - name: Run Smock
+        run: |
+          bun smock
+        id: smock
 
       - name: Run Forge Format
         run: |
