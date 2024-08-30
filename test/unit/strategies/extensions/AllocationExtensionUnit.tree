@@ -1,0 +1,40 @@
+AllocationExtension::__AllocationExtension_init
+├── When allowedTokens array is empty
+│   └── It should mark address zero as true
+├── When allowedTokens array is not empty
+│   └── It should mark the tokens in the array as true
+├── It should set isUsingAllocationMetadata
+└── It should call _updateAllocationTimestamps
+
+AllocationExtension::_isAllowedToken
+├── When all tokens allowed
+│   └── It should always return true
+├── When the token sent is allowed
+│   └── It should return true
+└── When the token sent is not allowed
+    └── It should return false
+
+AllocationExtension::_updateAllocationTimestamps
+├── When start time is bigger than end time
+│   └── It should revert
+└── When times are correct
+    ├── It should update start and end time
+    └── It should emit event
+
+AllocationExtension::_checkBeforeAllocation
+└── When timestamp is bigger or equal than start time
+    └── It should revert
+
+AllocationExtension::_checkOnlyActiveAllocation
+├── When timestamp is smaller than start time
+│   └── It should revert
+└── When timestamp is bigger than end time
+    └── It should revert
+
+AllocationExtension::_checkOnlyAfterAllocation
+└── When timestamp is smaller or equal than end time
+    └── It should revert
+
+AllocationExtension::updateAllocationTimestamps
+└── Given sender is pool manager
+    └── It should call _updateAllocationTimestamps
