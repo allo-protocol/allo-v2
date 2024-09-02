@@ -240,19 +240,32 @@ contract RecipientsExtensionReviewRecipients is BaseRecipientsExtensionUnit {
 }
 
 contract RecipientsExtensionReviewRecipientStatus is BaseRecipientsExtensionUnit {
-    event ReviewRecipientStatus(Status _newStatus, Status _oldStatus, uint256 _recipientIndex);
-
     function test_Set_statusesBitMap(uint256 _fullRow) public {
-        vm.skip(true);
-
         uint8[] memory _statusValues;
         (_fullRow, _statusValues) = _boundStatuses(_fullRow);
+
+        uint256 _rowIndex = 0;
 
         // force allo to return true
         vm.mockCall(allo, abi.encodeWithSelector(IAllo.isPoolManager.selector), abi.encode(true));
 
-        // recipientsExtension.mock_call__reviewRecipientStatus(,,,Status.Accepted);
-        uint256 reviewedFullRow = recipientsExtension.call__processStatusRow(0, _fullRow);
+        uint256 currentRow = recipientsExtension.statusesBitMap(_rowIndex);
+        for (uint256 col = 0; col < 64; ++col) {
+            // Extract the status at the column index
+            uint256 colIndex = col << 2; // col * 4
+            uint8 newStatus = uint8((_fullRow >> colIndex) & 0xF);
+            uint8 currentStatus = uint8((currentRow >> colIndex) & 0xF);
+
+            // Only do something if the status is being modified
+            if (newStatus != currentStatus) {
+                uint256 recipientIndex = (_rowIndex << 6) + col + 1; // _rowIndex * 64 + col + 1
+                recipientsExtension.mock_call__reviewRecipientStatus(
+                    Status(newStatus), Status(currentStatus), recipientIndex, Status.Accepted
+                );
+            }
+        }
+
+        uint256 reviewedFullRow = recipientsExtension.call__processStatusRow(_rowIndex, _fullRow);
 
         for (uint256 col = 0; col < 64; col++) {
             uint256 colIndex = col << 2; // col * 4
@@ -266,17 +279,23 @@ contract RecipientsExtensionReviewRecipientStatus is BaseRecipientsExtensionUnit
         }
     }
 
-    function test_Emit_Test_Event(uint256 _fullRow) public {
-        vm.skip(true);
-
+    function test_Call__reviewRecipientStatus(uint256 _fullRow) public {
         uint8[] memory _statusValues;
         (_fullRow, _statusValues) = _boundStatuses(_fullRow);
 
-        for (uint256 i = 0; i < _statusValues.length; i++) {
-            if (_statusValues[i] != 0) {
-                vm.expectEmit();
-                emit ReviewRecipientStatus(
-                    IRecipientsExtension.Status(_statusValues[i]), IRecipientsExtension.Status(0), i + 1
+        uint256 _rowIndex = 0;
+        uint256 currentRow = recipientsExtension.statusesBitMap(_rowIndex);
+        for (uint256 col = 0; col < 64; ++col) {
+            // Extract the status at the column index
+            uint256 colIndex = col << 2; // col * 4
+            uint8 newStatus = uint8((_fullRow >> colIndex) & 0xF);
+            uint8 currentStatus = uint8((currentRow >> colIndex) & 0xF);
+
+            // Only do something if the status is being modified
+            if (newStatus != currentStatus) {
+                uint256 recipientIndex = (_rowIndex << 6) + col + 1; // _rowIndex * 64 + col + 1
+                recipientsExtension.expectCall__reviewRecipientStatus(
+                    Status(newStatus), Status(currentStatus), recipientIndex
                 );
             }
         }
