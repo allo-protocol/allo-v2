@@ -8,4 +8,4 @@ In order to expose some functions so Smock can generate the mock, we need to cre
 
 ### How to use it?
 
-If you wish to run the tests, be sure to have installed smock and run the following command: `bun smock`. This will generate the mock contracts in the `test/mocks` folder.
+If you wish to run the tests, be sure to have installed smock and run the following command: `bun smock`. This will generate the mock contracts in the `test/smock` folder.
