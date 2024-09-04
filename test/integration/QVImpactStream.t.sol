@@ -77,7 +77,8 @@ contract IntegrationQVImpactStream is Test {
                 QVSimple.QVSimpleInitializeData({
                     allocationStartTime: uint64(block.timestamp),
                     allocationEndTime: uint64(block.timestamp + 7 days),
-                    maxVoiceCreditsPerAllocator: 100
+                    maxVoiceCreditsPerAllocator: 100,
+                    isUsingAllocationMetadata: false
                 })
             ),
             dai,

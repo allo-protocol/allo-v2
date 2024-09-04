@@ -53,7 +53,8 @@ contract QVImpactStreamTest is Test {
         QVSimple.QVSimpleInitializeData memory qvInitData = QVSimple.QVSimpleInitializeData({
             allocationStartTime: uint64(block.timestamp),
             allocationEndTime: uint64(block.timestamp + allocationWindow),
-            maxVoiceCreditsPerAllocator: 100
+            maxVoiceCreditsPerAllocator: 100,
+            isUsingAllocationMetadata: false
         });
         /// initialize
         vm.prank(mockAlloAddress);

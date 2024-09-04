@@ -200,6 +200,7 @@ contract DonationVotingOnchain is BaseStrategy, RecipientsExtension, AllocationE
         return _getRecipientStatus(_recipientId) == Status.Accepted;
     }
 
+    /// @notice Returns always true as all addresses are valid allocators
     function _isValidAllocator(address) internal view override returns (bool) {
         return true;
     }

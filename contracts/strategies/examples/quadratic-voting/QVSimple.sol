@@ -72,10 +72,14 @@ contract QVSimple is BaseStrategy, RecipientsExtension, AllocatorsAllowlistExten
         ) = abi.decode(_data, (IRecipientsExtension.RecipientInitializeData, QVSimpleInitializeData));
 
         __RecipientsExtension_init(recipientInitializeData);
+        __AllocationExtension_init(
+            new address[](0),
+            qvSimpleInitializeData.allocationStartTime,
+            qvSimpleInitializeData.allocationEndTime,
+            qvSimpleInitializeData.isUsingAllocationMetadata
+        );
 
         maxVoiceCreditsPerAllocator = qvSimpleInitializeData.maxVoiceCreditsPerAllocator;
-        allocationStartTime = qvSimpleInitializeData.allocationStartTime;
-        allocationEndTime = qvSimpleInitializeData.allocationEndTime;
 
         emit Initialized(_poolId, _data);
     }
@@ -89,6 +93,7 @@ contract QVSimple is BaseStrategy, RecipientsExtension, AllocatorsAllowlistExten
         uint64 allocationStartTime;
         uint64 allocationEndTime;
         uint256 maxVoiceCreditsPerAllocator;
+        bool isUsingAllocationMetadata;
     }
 
     /// @notice Distribute the tokens to the recipients
