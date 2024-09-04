@@ -69,7 +69,8 @@ contract IntegrationDonationVotingOffchainBase is IntegrationBase {
                 allocationStartTime,
                 allocationEndTime,
                 withdrawalCooldown,
-                allowedTokens
+                allowedTokens,
+                true
             ),
             DAI,
             POOL_AMOUNT,

@@ -65,7 +65,8 @@ contract IntegrationDonationVotingOnchainBase is IntegrationBase {
                 allocationStartTime,
                 allocationEndTime,
                 withdrawalCooldown,
-                allocationToken
+                allocationToken,
+                true
             ),
             DAI,
             POOL_AMOUNT,
@@ -132,48 +133,6 @@ contract IntegrationDonationVotingOnchainReviewRecipients is IntegrationDonation
     }
 }
 
-contract IntegrationDonationVotingOnchainTimestamps is IntegrationDonationVotingOnchainBase {
-    function test_updateTimestamps() public {
-        vm.warp(registrationStartTime - 1 days);
-
-        // Review recipients
-        vm.startPrank(userAddr);
-
-        vm.expectRevert(DonationVotingOnchain.INVALID_TIMESTAMPS.selector);
-        // allocationStartTime > allocationEndTime
-        strategy.updatePoolTimestamps(
-            registrationStartTime, registrationEndTime, allocationEndTime, allocationStartTime
-        );
-
-        vm.expectRevert(DonationVotingOnchain.INVALID_TIMESTAMPS.selector);
-        // _registrationStartTime > _registrationEndTime
-        strategy.updatePoolTimestamps(
-            registrationEndTime, registrationStartTime, allocationStartTime, allocationEndTime
-        );
-
-        vm.expectRevert(DonationVotingOnchain.INVALID_TIMESTAMPS.selector);
-        // _registrationStartTime > allocationStartTime
-        strategy.updatePoolTimestamps(
-            allocationStartTime + 1, allocationEndTime, allocationStartTime, allocationEndTime
-        );
-
-        vm.expectRevert(DonationVotingOnchain.INVALID_TIMESTAMPS.selector);
-        // _registrationEndTime > allocationEndTime
-        strategy.updatePoolTimestamps(
-            registrationStartTime, allocationEndTime + 1, allocationStartTime, allocationEndTime
-        );
-
-        vm.warp(registrationStartTime + 1);
-        vm.expectRevert(DonationVotingOnchain.INVALID_TIMESTAMPS.selector);
-        // block.timestamp > _registrationStartTime
-        strategy.updatePoolTimestamps(
-            registrationStartTime, registrationEndTime, allocationStartTime, allocationEndTime
-        );
-
-        vm.stopPrank();
-    }
-}
-
 contract IntegrationDonationVotingOnchainAllocateERC20 is IntegrationDonationVotingOnchainBase {
     function setUp() public override {
         super.setUp();
@@ -214,14 +173,14 @@ contract IntegrationDonationVotingOnchainAllocateERC20 is IntegrationDonationVot
 
         vm.startPrank(address(allo));
 
-        strategy.allocate(recipients, amounts, "", allocator0);
+        strategy.allocate(recipients, amounts, abi.encode(allocationToken, bytes("")), allocator0);
 
         assertEq(IERC20(allocationToken).balanceOf(allocator0), 0);
         assertEq(IERC20(allocationToken).balanceOf(address(strategy)), 4 + 25);
 
         recipients[0] = recipient2Addr;
         vm.expectRevert(Errors.RECIPIENT_NOT_ACCEPTED.selector);
-        strategy.allocate(recipients, amounts, "", allocator0);
+        strategy.allocate(recipients, amounts, abi.encode(allocationToken, bytes("")), allocator0);
 
         vm.stopPrank();
     }
@@ -266,14 +225,14 @@ contract IntegrationDonationVotingOnchainAllocateETH is IntegrationDonationVotin
 
         vm.startPrank(address(allo));
 
-        strategy.allocate{value: 4 + 25}(recipients, amounts, "", allocator0);
+        strategy.allocate{value: 4 + 25}(recipients, amounts, abi.encode(allocationToken, bytes("")), allocator0);
 
         assertEq(allocator0.balance, 0);
         assertEq(address(strategy).balance, 4 + 25);
 
         recipients[0] = recipient2Addr;
         vm.expectRevert(Errors.RECIPIENT_NOT_ACCEPTED.selector);
-        strategy.allocate(recipients, amounts, "", allocator0);
+        strategy.allocate(recipients, amounts, abi.encode(allocationToken, bytes("")), allocator0);
 
         vm.stopPrank();
     }
@@ -316,7 +275,7 @@ contract IntegrationDonationVotingOnchainDistributeERC20 is IntegrationDonationV
         amounts[1] = 25;
 
         vm.startPrank(address(allo));
-        strategy.allocate(recipients, amounts, "", allocator0);
+        strategy.allocate(recipients, amounts, abi.encode(allocationToken, bytes("")), allocator0);
         vm.stopPrank();
     }
 
@@ -329,7 +288,7 @@ contract IntegrationDonationVotingOnchainDistributeERC20 is IntegrationDonationV
         address[] memory recipients = new address[](2);
         recipients[0] = recipient0Addr;
         recipients[1] = recipient1Addr;
-        strategy.distribute(recipients, "", recipient0Addr);
+        strategy.distribute(recipients, abi.encode(allocationToken), recipient0Addr);
 
         uint256 recipient0Matching = POOL_AMOUNT * 4 / 29;
         uint256 recipient1Matching = POOL_AMOUNT * 25 / 29;
@@ -342,7 +301,7 @@ contract IntegrationDonationVotingOnchainDistributeERC20 is IntegrationDonationV
         assertEq(IERC20(allocationToken).balanceOf(address(strategy)), 0);
 
         vm.expectRevert(abi.encodeWithSelector(DonationVotingOnchain.NOTHING_TO_DISTRIBUTE.selector, recipient0Addr));
-        strategy.distribute(recipients, "", recipient0Addr);
+        strategy.distribute(recipients, abi.encode(allocationToken), recipient0Addr);
 
         vm.stopPrank();
     }
@@ -384,7 +343,7 @@ contract IntegrationDonationVotingOnchainDistributeETH is IntegrationDonationVot
         amounts[1] = 25;
 
         vm.prank(address(allo));
-        strategy.allocate{value: 4 + 25}(recipients, amounts, "", allocator0);
+        strategy.allocate{value: 4 + 25}(recipients, amounts, abi.encode(allocationToken, bytes("")), allocator0);
     }
 
     function test_distribute() public {
@@ -396,7 +355,7 @@ contract IntegrationDonationVotingOnchainDistributeETH is IntegrationDonationVot
         address[] memory recipients = new address[](2);
         recipients[0] = recipient0Addr;
         recipients[1] = recipient1Addr;
-        strategy.distribute(recipients, "", recipient0Addr);
+        strategy.distribute(recipients, abi.encode(allocationToken), recipient0Addr);
 
         uint256 recipient0Matching = POOL_AMOUNT * 4 / 29;
         uint256 recipient1Matching = POOL_AMOUNT * 25 / 29;
@@ -409,7 +368,7 @@ contract IntegrationDonationVotingOnchainDistributeETH is IntegrationDonationVot
         assertEq(address(strategy).balance, 0);
 
         vm.expectRevert(abi.encodeWithSelector(DonationVotingOnchain.NOTHING_TO_DISTRIBUTE.selector, recipient0Addr));
-        strategy.distribute(recipients, "", recipient0Addr);
+        strategy.distribute(recipients, abi.encode(allocationToken), recipient0Addr);
 
         vm.stopPrank();
     }
