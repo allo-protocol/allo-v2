@@ -13,7 +13,7 @@ abstract contract DeployBase is Script {
         vm.startBroadcast();
         address _contract = _deploy(block.chainid, _params);
         vm.stopBroadcast();
-        
+
         console.log("Deployed contract at address: %s", _contract);
     }
 
