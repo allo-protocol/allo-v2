@@ -59,9 +59,11 @@ contract IntegrationQVSimple is IntegrationBase {
         );
 
         // Adding allocators
-        vm.startPrank(userAddr);
-        strategy.addAllocator(allocator0);
-        strategy.addAllocator(allocator1);
+        address[] memory allocators = new address[](2);
+        allocators[0] = allocator0;
+        allocators[1] = allocator1;
+        vm.prank(userAddr);
+        strategy.addAllocators(allocators);
 
         // Adding recipients
         vm.startPrank(address(allo));

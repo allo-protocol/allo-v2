@@ -1,12 +1,3 @@
-QVImpactStream::batchAddAllocator
-└── when called by PoolManager
-    └── it should call _addAllocator
-
-QVImpactStream::batchRemoveAllocator
-└── when called by PoolManager
-    └── it should call _removeAllocator
-
-
 QVImpactStream::setPayouts
 ├── when payoutSet is true
 │   └── it should revert

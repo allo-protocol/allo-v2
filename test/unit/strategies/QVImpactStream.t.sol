@@ -71,36 +71,6 @@ contract QVImpactStreamTest is Test {
         _;
     }
 
-    function test_BatchAddAllocatorWhenCalledByPoolManager() external callWithPoolManager {
-        // if AllocatorAdded event emits with the correct parameters then _addAllocator was also called
-        // with the correct parameters
-        vm.expectEmit(true, true, true, true);
-        emit AllocatorAdded(recipient1, poolManager);
-
-        address[] memory _recipients = new address[](1);
-        _recipients[0] = recipient1;
-
-        vm.prank(poolManager);
-        qvImpactStream.batchAddAllocator(_recipients);
-
-        assertTrue(qvImpactStream.allowedAllocators(recipient1));
-    }
-
-    function test_BatchRemoveAllocatorWhenCalledByPoolManager() external callWithPoolManager {
-        // if AllocatorRemoved event emits with the correct parameters then _removeAllocator was also called
-        // with the correct parameters
-        vm.expectEmit(true, true, true, true);
-        emit AllocatorRemoved(recipient1, poolManager);
-
-        address[] memory _recipients = new address[](1);
-        _recipients[0] = recipient1;
-
-        vm.prank(poolManager);
-        qvImpactStream.batchRemoveAllocator(_recipients);
-
-        assertFalse(qvImpactStream.allowedAllocators(recipient1));
-    }
-
     function test_SetPayoutsRevertWhen_PayoutSetIsTrue() external callWithPoolManager {
         stdstore.target(address(qvImpactStream)).sig("payoutSet()").checked_write(true);
         vm.expectRevert(QVImpactStream.PAYOUT_ALREADY_SET.selector);
