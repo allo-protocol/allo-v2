@@ -165,48 +165,6 @@ contract IntegrationDonationVotingMerkleDistributionReviewRecipients is
     }
 }
 
-contract IntegrationDonationVotingMerkleDistributionTimestamps is IntegrationDonationVotingMerkleDistributionBase {
-    function test_updateTimestamps() public {
-        vm.warp(registrationStartTime - 1 days);
-
-        // Review recipients
-        vm.startPrank(userAddr);
-
-        vm.expectRevert(DonationVotingOffchain.INVALID_TIMESTAMPS.selector);
-        // allocationStartTime > allocationEndTime
-        strategy.updatePoolTimestamps(
-            registrationStartTime, registrationEndTime, allocationEndTime, allocationStartTime
-        );
-
-        vm.expectRevert(DonationVotingOffchain.INVALID_TIMESTAMPS.selector);
-        // _registrationStartTime > _registrationEndTime
-        strategy.updatePoolTimestamps(
-            registrationEndTime, registrationStartTime, allocationStartTime, allocationEndTime
-        );
-
-        vm.expectRevert(DonationVotingOffchain.INVALID_TIMESTAMPS.selector);
-        // _registrationStartTime > allocationStartTime
-        strategy.updatePoolTimestamps(
-            allocationStartTime + 1, allocationEndTime, allocationStartTime, allocationEndTime
-        );
-
-        vm.expectRevert(DonationVotingOffchain.INVALID_TIMESTAMPS.selector);
-        // _registrationEndTime > allocationEndTime
-        strategy.updatePoolTimestamps(
-            registrationStartTime, allocationEndTime + 1, allocationStartTime, allocationEndTime
-        );
-
-        vm.warp(registrationStartTime + 1);
-        vm.expectRevert(DonationVotingOffchain.INVALID_TIMESTAMPS.selector);
-        // block.timestamp > _registrationStartTime
-        strategy.updatePoolTimestamps(
-            registrationStartTime, registrationEndTime, allocationStartTime, allocationEndTime
-        );
-
-        vm.stopPrank();
-    }
-}
-
 contract IntegrationDonationVotingMerkleDistributionAllocateERC20 is IntegrationDonationVotingMerkleDistributionBase {
     function setUp() public override {
         super.setUp();

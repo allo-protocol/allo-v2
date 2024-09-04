@@ -6,6 +6,7 @@ import {IAllo} from "contracts/core/interfaces/IAllo.sol";
 // Core Contracts
 import {BaseStrategy} from "strategies/BaseStrategy.sol";
 import {RecipientsExtension} from "strategies/extensions/register/RecipientsExtension.sol";
+import {AllocationExtension} from "strategies/extensions/allocate/AllocationExtension.sol";
 // Internal Libraries
 import {Transfer} from "contracts/core/libraries/Transfer.sol";
 import {Native} from "contracts/core/libraries/Native.sol";
@@ -28,7 +29,7 @@ import {Native} from "contracts/core/libraries/Native.sol";
 /// @title Donation Voting Strategy with off-chain setup
 /// @notice Strategy that allows allocations in multiple tokens to accepted recipient. The actual payouts are set
 /// by the pool manager.
-contract DonationVotingOffchain is BaseStrategy, RecipientsExtension, Native {
+contract DonationVotingOffchain is BaseStrategy, RecipientsExtension, AllocationExtension, Native {
     using Transfer for address;
 
     /// ===============================
@@ -46,21 +47,12 @@ contract DonationVotingOffchain is BaseStrategy, RecipientsExtension, Native {
     /// @param amount The amount of pool tokens set
     event PayoutSet(address indexed recipientId, uint256 amount);
 
-    /// @notice Emitted when the allocation timestamps are updated
-    /// @param allocationStartTime The start time for the allocation period
-    /// @param allocationEndTime The end time for the allocation period
-    /// @param sender The sender of the transaction
-    event AllocationTimestampsUpdated(uint64 allocationStartTime, uint64 allocationEndTime, address sender);
-
     /// ================================
     /// ========== Errors ==============
     /// ================================
 
     /// @notice Thrown when there is nothing to distribute for the given recipient.
     error NOTHING_TO_DISTRIBUTE(address recipientId);
-
-    /// @notice Thrown when the timestamps being set or updated don't meet the contracts requirements.
-    error INVALID_TIMESTAMPS();
 
     /// @notice Thrown when a the payout for a recipient is attempted to be overwritten.
     error PAYOUT_ALREADY_SET(address recipientId);
@@ -94,39 +86,15 @@ contract DonationVotingOffchain is BaseStrategy, RecipientsExtension, Native {
     /// @notice If true, allocations are directly sent to recipients. Otherwise, they they must be claimed later.
     bool public immutable DIRECT_TRANSFER;
 
-    /// @notice The start and end times for allocations
-    uint64 public allocationStartTime;
-    uint64 public allocationEndTime;
     /// @notice Cooldown time from allocationEndTime after which the pool manager is allowed to withdraw tokens.
     uint64 public withdrawalCooldown;
     /// @notice amount to be distributed. `totalPayoutAmount` get reduced with each distribution.
     uint256 public totalPayoutAmount;
 
-    /// @notice token -> bool
-    mapping(address => bool) public allowedTokens;
     /// @notice recipientId -> PayoutSummary
     mapping(address => PayoutSummary) public payoutSummaries;
     /// @notice recipientId -> token -> amount
     mapping(address => mapping(address => uint256)) public amountAllocated;
-
-    /// ================================
-    /// ========== Modifier ============
-    /// ================================
-
-    /// @notice Modifier to check if allocation is active
-    /// @dev Reverts if allocation is not active
-    modifier onlyActiveAllocation() {
-        if (block.timestamp < allocationStartTime) revert ALLOCATION_NOT_ACTIVE();
-        if (block.timestamp > allocationEndTime) revert ALLOCATION_NOT_ACTIVE();
-        _;
-    }
-
-    /// @notice Modifier to check if allocation has ended
-    /// @dev Reverts if allocation has not ended
-    modifier onlyAfterAllocation() {
-        if (block.timestamp <= allocationEndTime) revert ALLOCATION_NOT_ENDED();
-        _;
-    }
 
     /// ===============================
     /// ======== Constructor ==========
@@ -151,7 +119,8 @@ contract DonationVotingOffchain is BaseStrategy, RecipientsExtension, Native {
     ///        uint64 _allocationStartTime,
     ///        uint64 _allocationEndTime,
     ///        uint64 _withdrawalCooldown,
-    ///        address[] _allowedTokens
+    ///        address[] _allowedTokens,
+    ///        bool _isUsingAllocationMetadata
     ///    )
     function initialize(uint256 _poolId, bytes memory _data) external virtual override {
         (
@@ -159,26 +128,15 @@ contract DonationVotingOffchain is BaseStrategy, RecipientsExtension, Native {
             uint64 _allocationStartTime,
             uint64 _allocationEndTime,
             uint64 _withdrawalCooldown,
-            address[] memory _allowedTokens
-        ) = abi.decode(_data, (RecipientInitializeData, uint64, uint64, uint64, address[]));
-
-        allocationStartTime = _allocationStartTime;
-        allocationEndTime = _allocationEndTime;
-        emit AllocationTimestampsUpdated(_allocationStartTime, _allocationEndTime, msg.sender);
+            address[] memory _allowedTokens,
+            bool _isUsingAllocationMetadata
+        ) = abi.decode(_data, (RecipientInitializeData, uint64, uint64, uint64, address[], bool));
 
         withdrawalCooldown = _withdrawalCooldown;
 
-        if (_allowedTokens.length == 0) {
-            // all tokens
-            allowedTokens[address(0)] = true;
-        } else {
-            for (uint256 i; i < _allowedTokens.length; i++) {
-                allowedTokens[_allowedTokens[i]] = true;
-            }
-        }
-
         __BaseStrategy_init(_poolId);
         __RecipientsExtension_init(_recipientExtensionInitializeData);
+        __AllocationExtension_init(_allowedTokens, _allocationStartTime, _allocationEndTime, _isUsingAllocationMetadata);
 
         emit Initialized(_poolId, _data);
     }
@@ -186,26 +144,6 @@ contract DonationVotingOffchain is BaseStrategy, RecipientsExtension, Native {
     /// ===============================
     /// ======= External/Custom =======
     /// ===============================
-
-    /// @notice Sets the start and end dates.
-    /// @dev The 'msg.sender' must be a pool manager.
-    /// @param _registrationStartTime The start time for the registration
-    /// @param _registrationEndTime The end time for the registration
-    /// @param _allocationStartTime The start time for the allocation
-    /// @param _allocationEndTime The end time for the allocation
-    function updatePoolTimestamps(
-        uint64 _registrationStartTime,
-        uint64 _registrationEndTime,
-        uint64 _allocationStartTime,
-        uint64 _allocationEndTime
-    ) external onlyPoolManager(msg.sender) {
-        if (_allocationStartTime > _allocationEndTime) revert INVALID_TIMESTAMPS();
-        allocationStartTime = _allocationStartTime;
-        allocationEndTime = _allocationEndTime;
-        emit AllocationTimestampsUpdated(allocationStartTime, allocationEndTime, msg.sender);
-
-        _updatePoolTimestamps(_registrationStartTime, _registrationEndTime);
-    }
 
     /// @notice Transfers the allocated tokens to recipients.
     /// @dev This function is ignored if DIRECT_TRANSFER is enabled, in which case allocated tokens are not stored
@@ -341,26 +279,14 @@ contract DonationVotingOffchain is BaseStrategy, RecipientsExtension, Native {
         if (block.timestamp > allocationEndTime) revert POOL_INACTIVE();
     }
 
-    /// @notice Checks if the timestamps are valid.
-    /// @param _registrationStartTime The start time for the registration
-    /// @param _registrationEndTime The end time for the registration
-    function _isPoolTimestampValid(uint64 _registrationStartTime, uint64 _registrationEndTime)
-        internal
-        view
-        virtual
-        override
-    {
-        if (_registrationStartTime > _registrationEndTime) revert INVALID_TIMESTAMPS();
-        if (block.timestamp > _registrationStartTime) revert INVALID_TIMESTAMPS();
-        // Check consistency with allocation timestamps
-        if (_registrationStartTime > allocationStartTime) revert INVALID_TIMESTAMPS();
-        if (_registrationEndTime > allocationEndTime) revert INVALID_TIMESTAMPS();
-    }
-
     /// @notice Returns if the recipient is accepted
     /// @param _recipientId The recipient id
     /// @return If the recipient is accepted
     function _isAcceptedRecipient(address _recipientId) internal view virtual returns (bool) {
         return _getRecipientStatus(_recipientId) == Status.Accepted;
+    }
+
+    function _isValidAllocator(address) internal view override returns (bool) {
+        return true;
     }
 }
