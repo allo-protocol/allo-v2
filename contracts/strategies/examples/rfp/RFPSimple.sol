@@ -67,9 +67,7 @@ contract RFPSimple is BaseStrategy, MilestonesExtension, RecipientsExtension {
     /// ============ Internal ==============
     /// ====================================
 
-    /// @notice Hook to review each new recipient status when REVIEW_EACH_STATUS is set to true
-    /// @dev Beware of gas costs, since this function will be called for each reviewed recipient
-    /// @param _newStatus New proposed status
+    /// @inheritdoc RecipientsExtension
     function _reviewRecipientStatus(Status _newStatus, Status, uint256)
         internal
         virtual
@@ -84,9 +82,7 @@ contract RFPSimple is BaseStrategy, MilestonesExtension, RecipientsExtension {
         _reviewedStatus = _newStatus;
     }
 
-    /// @notice Hook to process recipient data
-    /// @param _recipientId ID of the recipient
-    /// @param _extraData The extra data of the recipient
+    /// @inheritdoc RecipientsExtension
     function _processRecipient(address _recipientId, bool, Metadata memory, bytes memory _extraData)
         internal
         virtual
@@ -96,7 +92,7 @@ contract RFPSimple is BaseStrategy, MilestonesExtension, RecipientsExtension {
         _setProposalBid(_recipientId, proposalBid);
     }
 
-    /// @notice This will allocate to recipients.
+    /// @inheritdoc BaseStrategy
     function _allocate(address[] memory, uint256[] memory, bytes memory, address) internal virtual override {
         revert NOT_IMPLEMENTED();
     }

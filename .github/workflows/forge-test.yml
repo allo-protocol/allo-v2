@@ -34,13 +34,15 @@ jobs:
         id: smock
 
       - name: Run Forge Format
-        run: |
-          forge fmt --check
+        run: forge fmt --check
         id: fmt
 
+      - name: Run natspec linting
+        run: bun lint:natspec
+        id: natspec
+
       - name: Run Forge build
-        run: |
-          forge compile
+        run: forge compile
         id: build
 
       - name: Run Forge test

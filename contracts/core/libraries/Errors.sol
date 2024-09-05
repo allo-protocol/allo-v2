@@ -115,6 +115,7 @@ contract Errors {
     error REGISTRATION_ACTIVE();
 
     /// @notice Thrown when there is an error in recipient.
+    /// @param recipientId The recipient id associated to the error.
     error RECIPIENT_ERROR(address recipientId);
 
     /// @notice Thrown when the allocation is not active.

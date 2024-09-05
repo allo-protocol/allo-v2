@@ -45,6 +45,10 @@ library Transfer {
     }
 
     /// @notice Stores the permit2 data for the allocation
+    /// @param permit2 The address of the permit2 contract
+    /// @param nonce The nonce of the permit
+    /// @param deadline The deadline timestamp of the permit
+    /// @param signature The signature
     struct PermitData {
         ISignatureTransfer permit2;
         uint256 nonce;
@@ -136,6 +140,9 @@ library Transfer {
     /// @notice Splits a signature into its r, s, v components
     /// @dev compact EIP-2098 signatures are accepted as well
     /// @param _signature The signature
+    /// @return r
+    /// @return s
+    /// @return v
     function _splitSignature(bytes memory _signature) internal pure returns (bytes32 r, bytes32 s, uint8 v) {
         if (_signature.length == 65) {
             assembly {

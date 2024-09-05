@@ -9,8 +9,9 @@ abstract contract AllocationExtension is BaseStrategy, IAllocationExtension {
     /// ========== Storage =============
     /// ================================
 
-    /// @notice The start and end times for allocations
+    /// @notice The start time for allocations
     uint64 public allocationStartTime;
+    /// @notice The end time for allocations
     uint64 public allocationEndTime;
 
     /// @notice Defines if the strategy is sending Metadata struct in the data parameter
@@ -85,6 +86,7 @@ abstract contract AllocationExtension is BaseStrategy, IAllocationExtension {
 
     /// @notice Returns TRUE if the token is allowed
     /// @param _token The token to check
+    /// @return 'true' if the token is allowed, otherwise 'false'
     function _isAllowedToken(address _token) internal view virtual returns (bool) {
         // all tokens allowed
         if (allowedTokens[address(0)]) return true;

@@ -81,6 +81,9 @@ interface IMilestonesExtension {
     /// ================================
 
     /// @notice Stores the details of the milestone
+    /// @param amountPercentage The percentage of the bid assign to the milestone
+    /// @param metadata The metadata associated to the milestone
+    /// @param status The status of the milestone
     struct Milestone {
         uint256 amountPercentage;
         Metadata metadata;
@@ -115,6 +118,7 @@ interface IMilestonesExtension {
 
     /// @notice Get the status of the milestone
     /// @param _milestoneId Id of the milestone
+    /// @return MilestoneStatus Returns the milestone status
     function getMilestoneStatus(uint256 _milestoneId) external view returns (MilestoneStatus);
 
     /// ===============================
