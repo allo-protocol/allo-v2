@@ -24,11 +24,13 @@ abstract contract AllocatorsAllowlistExtension is AllocationExtension, IAllocato
     }
 
     /// @dev Mark an address as valid allocator
+    /// @param _allocator The allocator address to add
     function _addAllocator(address _allocator) internal virtual {
         allowedAllocators[_allocator] = true;
     }
 
     /// @dev Remove an address from the valid allocators
+    /// @param _allocator The allocator address to remove
     function _removeAllocator(address _allocator) internal virtual {
         allowedAllocators[_allocator] = false;
     }
