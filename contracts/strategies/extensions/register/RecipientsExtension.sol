@@ -354,7 +354,7 @@ abstract contract RecipientsExtension is BaseStrategy, Errors, IRecipientsExtens
     /// @param _rowIndex Row index in the statusesBitMap mapping
     /// @param _fullRow New row of statuses
     /// @return The _fullRow with any modifications made by _reviewRecipientStatus()
-    function _processStatusRow(uint256 _rowIndex, uint256 _fullRow) internal returns (uint256) {
+    function _processStatusRow(uint256 _rowIndex, uint256 _fullRow) internal virtual returns (uint256) {
         // Loop through each status in the updated row
         uint256 currentRow = statusesBitMap[_rowIndex];
         for (uint256 col = 0; col < 64; ++col) {

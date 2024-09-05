@@ -35,7 +35,7 @@ abstract contract MilestonesExtension is BaseStrategy, IMilestonesExtension {
     /// @notice This initializes the Milestones Extension
     /// @dev This function MUST be called by the 'initialize' function in the strategy.
     /// @param _maxBid The initialize params
-    function __MilestonesExtension_init(uint256 _maxBid) internal {
+    function __MilestonesExtension_init(uint256 _maxBid) internal virtual {
         // Set the strategy specific variables
         _increaseMaxBid(_maxBid);
     }
