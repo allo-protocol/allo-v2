@@ -31,6 +31,12 @@ interface IAllo {
     /// ======================
 
     /// @notice the Pool struct that all strategy pools are based from
+    /// @param profileId The profile id
+    /// @param strategy The strategy address
+    /// @param token The address of the token used by the pool
+    /// @param metadata The 'Metadata' of the pool
+    /// @param managerRole id of the manager role
+    /// @param adminRole id of the admin role
     struct Pool {
         bytes32 profileId;
         IBaseStrategy strategy;
@@ -150,6 +156,7 @@ interface IAllo {
     /// @param _managers The managers of the pool
     /// @custom:initstrategydata The encoded data will be specific to a given strategy requirements,
     ///    reference the strategy implementation of 'initialize()'
+    /// @return poolId The ID of the pool
     function createPool(
         bytes32 _profileId,
         address _strategy,
@@ -218,6 +225,7 @@ interface IAllo {
     /// @param _poolId The ID of the pool to register the recipient for
     /// @param _recipientAddresses The addresses of the recipients to register
     /// @param _data The data to pass to the strategy and may be handled differently by each strategy
+    /// @return array of recipients ids registered
     function registerRecipient(uint256 _poolId, address[] memory _recipientAddresses, bytes memory _data)
         external
         payable
@@ -227,6 +235,7 @@ interface IAllo {
     /// @param _poolIds The pool ID's to register the recipients for
     /// @param _recipientAddresses The addresses of the recipients to register
     /// @param _data The data to pass to the strategy and may be handled differently by each strategy
+    /// @return array of arrays of recipients ids registered in each pool
     function batchRegisterRecipient(
         uint256[] memory _poolIds,
         address[][] memory _recipientAddresses,
@@ -240,7 +249,7 @@ interface IAllo {
     /// @param _amount The amount to fund the pool with
     function fundPool(uint256 _poolId, uint256 _amount) external payable;
 
-    /// @notice Allocates funds to a recipient.
+    /// @notice Allocates funds to recipients.
     /// @dev Each strategy will handle the allocation of funds differently.
     /// @param _poolId The ID of the pool to allocate funds from
     /// @param _recipients The recipients to allocate to
@@ -250,8 +259,14 @@ interface IAllo {
         external
         payable;
 
-    /// @notice Allocates funds to multiple recipients.
-    /// @dev Each strategy will handle the allocation of funds differently
+    /// @notice Allocates to multiple pools
+    /// @dev The encoded data will be specific to a given strategy requirements, reference the strategy
+    ///      implementation of allocate().
+    /// @param _poolIds IDs of the pools
+    /// @param _recipients Addresses of the recipients
+    /// @param _amounts Amounts to allocate to each recipient
+    /// @param _values amounts of native tokens to allocate for each pool
+    /// @param _datas encoded data unique to the strategy for that pool
     function batchAllocate(
         uint256[] calldata _poolIds,
         address[][] calldata _recipients,

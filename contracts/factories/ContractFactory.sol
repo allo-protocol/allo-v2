@@ -38,6 +38,8 @@ contract ContractFactory {
     /// ======================
 
     /// @notice Emitted when a contract is deployed.
+    /// @param deployed address
+    /// @param salt used in contract creation
     event Deployed(address indexed deployed, bytes32 indexed salt);
 
     /// ======================

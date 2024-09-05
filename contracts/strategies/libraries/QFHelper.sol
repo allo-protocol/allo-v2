@@ -11,7 +11,7 @@ library QFHelper {
     /// @notice Error thrown when the number of recipients and amounts are not equal
     error QFHelper_LengthMissmatch();
 
-    /// Struct that defines the state of the donations to recipients
+    /// @notice Struct that defines the state of the donations to recipients
     /// @param sqrtDonationsSum The sum of the square root of the donations for each recipient
     /// @param totalContributions The total contributions of all recipients
     struct State {

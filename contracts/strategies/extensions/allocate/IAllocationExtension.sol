@@ -21,15 +21,20 @@ interface IAllocationExtension {
     event AllocationTimestampsUpdated(uint64 allocationStartTime, uint64 allocationEndTime, address sender);
 
     /// @notice The start time for the allocation period
+    /// @return allocationStartTime
     function allocationStartTime() external view returns (uint64);
 
     /// @notice The end time for the allocation period
+    /// @return allocationEndTime
     function allocationEndTime() external view returns (uint64);
 
     /// @notice Defines if the strategy is sending Metadata struct in the data parameter
+    /// @return TRUE if metadata is used for allocations
     function isUsingAllocationMetadata() external view returns (bool);
 
     /// @notice Returns TRUE if the token is allowed, FALSE otherwise
+    /// @param _token address of the token to evaluate
+    /// @return boolean
     function allowedTokens(address _token) external view returns (bool);
 
     /// @notice Sets the start and end dates for allocation.

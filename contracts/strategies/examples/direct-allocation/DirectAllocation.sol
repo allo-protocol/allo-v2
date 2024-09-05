@@ -85,14 +85,12 @@ contract DirectAllocationStrategy is BaseStrategy, Native, Errors {
         if (msg.value < _totalNativeAmount) revert ETH_MISMATCH();
     }
 
-    /// @notice Distribute funds to recipients
-    /// @dev This function is not implemented
+    /// @inheritdoc BaseStrategy
     function _distribute(address[] memory, bytes memory, address) internal virtual override {
         revert NOT_IMPLEMENTED();
     }
 
-    /// @notice Register a recipient
-    /// @dev This function is not implemented
+    /// @inheritdoc BaseStrategy
     function _register(address[] memory, bytes memory, address) internal virtual override returns (address[] memory) {
         revert NOT_IMPLEMENTED();
     }
