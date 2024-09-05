@@ -52,9 +52,11 @@ contract DonationVotingOffchain is BaseStrategy, RecipientsExtension, Allocation
     /// ================================
 
     /// @notice Thrown when there is nothing to distribute for the given recipient.
+    /// @param recipientId The recipientId to which distribution was attempted.
     error NOTHING_TO_DISTRIBUTE(address recipientId);
 
     /// @notice Thrown when a the payout for a recipient is attempted to be overwritten.
+    /// @param recipientId The recipientId to which a repeated payout was attempted.
     error PAYOUT_ALREADY_SET(address recipientId);
 
     /// @notice Thrown when the total payout amount is greater than the pool amount.
@@ -68,12 +70,16 @@ contract DonationVotingOffchain is BaseStrategy, RecipientsExtension, Allocation
     /// ================================
 
     /// @notice Payout summary struct to hold the payout data
+    /// @param recipientAddress payout address of the recipient
+    /// @param amount payout amount
     struct PayoutSummary {
         address recipientAddress;
         uint256 amount;
     }
 
     /// @notice Struct to hold details of the allocations to claim
+    /// @param recipientId id of the recipient
+    /// @param token token address
     struct Claim {
         address recipientId;
         address token;
@@ -245,8 +251,9 @@ contract DonationVotingOffchain is BaseStrategy, RecipientsExtension, Allocation
 
     /// @notice Distributes funds (tokens) to recipients.
     /// @param _recipientIds The IDs of the recipients
+    /// @param _data NOT USED
     /// @param _sender The address of the sender
-    function _distribute(address[] memory _recipientIds, bytes memory, address _sender)
+    function _distribute(address[] memory _recipientIds, bytes memory _data, address _sender)
         internal
         virtual
         override
@@ -270,12 +277,16 @@ contract DonationVotingOffchain is BaseStrategy, RecipientsExtension, Allocation
     }
 
     /// @notice Hook called before withdrawing tokens from the pool.
-    function _beforeWithdraw(address, uint256, address) internal virtual override {
+    /// @param _token The address of the token
+    /// @param _amount The amount to withdraw
+    /// @param _recipient The address to withdraw to
+    function _beforeWithdraw(address _token, uint256 _amount, address _recipient) internal virtual override {
         if (block.timestamp <= allocationEndTime + withdrawalCooldown) revert INVALID();
     }
 
-    /// @notice Hook called before increasing the pool amount.
-    function _beforeIncreasePoolAmount(uint256) internal virtual override {
+    /// @notice Hook called after increasing the pool amount.
+    /// @param _amount The amount to increase the pool by
+    function _beforeIncreasePoolAmount(uint256 _amount) internal virtual override {
         if (block.timestamp > allocationEndTime) revert POOL_INACTIVE();
     }
 
@@ -287,7 +298,9 @@ contract DonationVotingOffchain is BaseStrategy, RecipientsExtension, Allocation
     }
 
     /// @notice Returns always true as all addresses are valid allocators
-    function _isValidAllocator(address) internal view override returns (bool) {
+    /// @param _allocator NOT USED
+    /// @return Returns always true
+    function _isValidAllocator(address _allocator) internal view override returns (bool) {
         return true;
     }
 }

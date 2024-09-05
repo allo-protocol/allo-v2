@@ -29,22 +29,29 @@ interface IRecipientsExtension {
     /// | recipient1 | recipient2 | recipient3 | recipient4 | recipient5 | 'rowIndex'
     /// |     0000   |    0001    |    0010    |    0011    |    0100    | 'statusRow'
     /// |     none   |   pending  |  accepted  |  rejected  |  appealed  | converted status (0, 1, 2, 3, 4)
-    ///
+    /// @param index along a word
+    /// @param statusRow is the word index
     struct ApplicationStatus {
         uint256 index;
         uint256 statusRow;
     }
 
     /// @notice Stores the details of the recipients.
+    /// @param useRegistryAnchor If false, the recipientAddress is the anchor of the profile
+    /// @param recipientAddress The address of the recipient
+    /// @param statusIndex The index of the recipient in the 'statusesBitMap' bitmap.
+    /// @param metadata The 'Metadata'
     struct Recipient {
-        // If false, the recipientAddress is the anchor of the profile
         bool useRegistryAnchor;
         address recipientAddress;
-        // 'statusIndex' is the index of the recipient in the 'statusesBitMap' bitmap.
         uint64 statusIndex;
         Metadata metadata;
     }
 
+    /// @notice The data needed to initialize RecipientsExtension
+    /// @param metadataRequired Whether the metadata is required.
+    /// @param registrationStartTime The timestamp in seconds for the start time.
+    /// @param registrationEndTime The timestamp in seconds for the end time.
     struct RecipientInitializeData {
         bool metadataRequired;
         uint64 registrationStartTime;

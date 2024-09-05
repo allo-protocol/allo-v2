@@ -89,6 +89,10 @@ contract QVSimple is BaseStrategy, RecipientsExtension, AllocatorsAllowlistExten
     /// ======================
 
     /// @notice The parameters used to initialize the strategy
+    /// @param allocationStartTime The timestamp in seconds for the allocation start time.
+    /// @param allocationEndTime The timestamp in seconds for the allocation end time.
+    /// @param maxVoiceCreditsPerAllocator The maximumg amount of credits per allocator.
+    /// @param isUsingAllocationMetadata Whether the strategy is using allocation metadata.
     struct QVSimpleInitializeData {
         uint64 allocationStartTime;
         uint64 allocationEndTime;
@@ -99,8 +103,9 @@ contract QVSimple is BaseStrategy, RecipientsExtension, AllocatorsAllowlistExten
     /// @notice Distribute the tokens to the recipients
     /// @dev The '_sender' must be a pool manager and the allocation must have ended
     /// @param _recipientIds The recipient ids
+    /// @param _data NOT USED
     /// @param _sender The sender of the transaction
-    function _distribute(address[] memory _recipientIds, bytes memory, address _sender)
+    function _distribute(address[] memory _recipientIds, bytes memory _data, address _sender)
         internal
         virtual
         override
@@ -188,14 +193,18 @@ contract QVSimple is BaseStrategy, RecipientsExtension, AllocatorsAllowlistExten
     }
 
     /// @notice Ensure no withdrawals are allowed after the distribution starts
-    function _beforeWithdraw(address, uint256, address) internal override {
+    /// @param _token The address of the token
+    /// @param _amount The amount to withdraw
+    /// @param _recipient The address to withdraw to
+    function _beforeWithdraw(address _token, uint256 _amount, address _recipient) internal virtual override {
         if (distributionStarted) {
             revert INVALID();
         }
     }
 
     /// @notice Ensure no increase in pool amount is allowed after the distribution starts
-    function _beforeIncreasePoolAmount(uint256) internal virtual override {
+    /// @param _amount The amount to increase the pool by
+    function _beforeIncreasePoolAmount(uint256 _amount) internal virtual override {
         if (distributionStarted) {
             revert INVALID();
         }

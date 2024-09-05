@@ -53,6 +53,7 @@ contract DonationVotingMerkleDistribution is DonationVotingOffchain {
     error MERKLE_ROOT_NOT_SET();
 
     /// @notice Thrown when distribution is attempted twice for the same 'index'
+    /// @param _index The index for which a repeated distribution was attempted
     error ALREADY_DISTRIBUTED(uint256 _index);
 
     /// ================================
@@ -60,6 +61,10 @@ contract DonationVotingMerkleDistribution is DonationVotingOffchain {
     /// ================================
 
     /// @notice Stores the details of the distribution.
+    /// @param index The index in the merkle tree
+    /// @param recipientId The id of the recipient
+    /// @param amount The amount the should be distributed to the recipient
+    /// @param merkleProof The merkle proof
     struct Distribution {
         uint256 index;
         address recipientId;
@@ -126,10 +131,11 @@ contract DonationVotingMerkleDistribution is DonationVotingOffchain {
     /// ====================================
 
     /// @notice Distributes funds (tokens) to recipients.
+    /// @param _recipientIds NOT USED
     /// @param _data Data to be decoded
     /// @custom:data (Distribution[] _distributions)
     /// @param _sender The address of the sender
-    function _distribute(address[] memory, bytes memory _data, address _sender)
+    function _distribute(address[] memory _recipientIds, bytes memory _data, address _sender)
         internal
         virtual
         override
