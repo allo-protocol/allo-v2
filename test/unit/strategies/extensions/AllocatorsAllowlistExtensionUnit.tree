@@ -1,0 +1,18 @@
+AllocatorsAllowlistExtension::_isValidAllocator
+└── It should return TRUE or FALSE given the status of the allocator
+
+AllocatorsAllowlistExtension::_addAllocator
+└── It should set to true the status of the allocator
+
+AllocatorsAllowlistExtension::_removeAllocator
+└── It should set to false the status of the allocator
+
+AllocatorsAllowlistExtension::addAllocators
+└── Given sender is pool manager
+    ├── It should call _addAllocator for each allocator in the list
+    └── It should emit event
+
+AllocatorsAllowlistExtension::removeAllocators
+└── Given sender is pool manager
+    ├── It should call _removeAllocator for each allocator in the list
+    └── It should emit event

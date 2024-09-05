@@ -24,9 +24,10 @@ import {ClonesUpgradeable} from "openzeppelin-contracts-upgradeable/contracts/pr
 /// @notice A helper library to create deterministic clones of the strategy contracts when a pool is created
 /// @dev Handles the creation of clones for the strategy contracts and returns the address of the clone
 library Clone {
-    /// @dev Create a clone of the contract
+    /// @notice Create a clone of the contract
     /// @param _contract The address of the contract to clone
     /// @param _nonce The nonce to use for the clone
+    /// @return address of the new contract
     function createClone(address _contract, uint256 _nonce) internal returns (address) {
         bytes32 salt = keccak256(abi.encodePacked(msg.sender, _nonce));
 
