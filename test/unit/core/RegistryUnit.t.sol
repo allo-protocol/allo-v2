@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 import {MockMockRegistry} from "test/smock/MockMockRegistry.sol";
 import {Metadata} from "contracts/core/libraries/Metadata.sol";
 import {Errors} from "contracts/core/libraries/Errors.sol";
+import {Anchor} from "contracts/core/Anchor.sol";
 import {Test, stdStorage, StdStorage} from "forge-std/Test.sol";
 import {IAccessControlUpgradeable} from
     "openzeppelin-contracts-upgradeable/contracts/access/IAccessControlUpgradeable.sol";
@@ -294,6 +295,45 @@ contract RegistryUnit is Test {
         registry.call__checkOnlyProfileOwner(_profileId);
     }
 
+    function test__generateAnchorWhenAnchorDoesNotExist(bytes32 _profileId, string memory _name) external {
+        /// Calculate anchor address
+        bytes memory encodedData = abi.encode(_profileId, _name);
+        bytes memory encodedConstructorArgs = abi.encode(_profileId, address(registry));
+
+        bytes memory bytecode = abi.encodePacked(type(Anchor).creationCode, encodedConstructorArgs);
+
+        bytes32 salt = keccak256(encodedData);
+
+        address preComputedAddress = address(
+            uint160(uint256(keccak256(abi.encodePacked(bytes1(0xff), address(registry), salt, keccak256(bytecode)))))
+        );
+
+        // it should deploy the anchor
+        address _anchor = registry.call__generateAnchor(_profileId, _name);
+
+        assertEq(_anchor, preComputedAddress);
+    }
+
+    function test__generateAnchorWhenAnchorExists(bytes32 _profileId, string memory _name) external {
+        // it should return the anchor address
+        address _anchor = registry.call__generateAnchor(_profileId, _name);
+
+        // when called again with same params it should return the same address
+        assertEq(_anchor, registry.call__generateAnchor(_profileId, _name));
+    }
+
+    function test__generateAnchorRevertWhen_AnchorProfileIdIsNotTheSameAsProvidedProfileId(
+        bytes32 _profileId,
+        string memory _name
+    ) external {
+        address _anchor = registry.call__generateAnchor(_profileId, _name);
+
+        vm.mockCall(_anchor, abi.encodeWithSignature("profileId()"), abi.encode(keccak256("wrong")));
+        vm.expectRevert(Errors.ANCHOR_ERROR.selector);
+        // it should revert
+        registry.call__generateAnchor(_profileId, _name);
+    }
+
     function test__generateProfileIdShouldReturnTheKeccak256OfEncodedNonceAndOwnerAddress(
         uint256 _nonce,
         address _owner
@@ -304,6 +344,7 @@ contract RegistryUnit is Test {
 
     function test__isOwnerOfProfileWhenProvidedAddressIsOwnerOfProfile(bytes32 _profileId, address _owner) external {
         vm.skip(true);
+        // TODO:
         // it should return true
         stdstore.target(address(registry)).sig("profilesById(bytes32)").with_key(_profileId).depth(4).checked_write(
             _owner
@@ -349,6 +390,7 @@ contract RegistryUnit is Test {
         external
         givenCallerIsAlloOwner
     {
+        // TODO:
         // it should call getBalance
         // it should call transfer
         vm.skip(true);

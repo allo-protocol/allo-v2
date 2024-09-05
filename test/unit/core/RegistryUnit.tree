@@ -70,6 +70,12 @@ Registry::_checkOnlyProfileOwner
     └── it should not revert
 
 Registry::_generateAnchor
+├── when anchor does not exist
+│   └── it should deploy the anchor
+├── when anchor exists
+│   └── it should return the anchor address
+└── when anchor profileId is not the same as provided profileId
+    └── it should revert
 
 Registry::_generateProfileId
 └── it should return the keccak256 of encoded nonce and owner address
