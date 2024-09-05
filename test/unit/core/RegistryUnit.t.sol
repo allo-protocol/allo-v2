@@ -5,7 +5,8 @@ import {MockMockRegistry} from "test/smock/MockMockRegistry.sol";
 import {Metadata} from "contracts/core/libraries/Metadata.sol";
 import {Errors} from "contracts/core/libraries/Errors.sol";
 import {Test, stdStorage, StdStorage} from "forge-std/Test.sol";
-import {IAccessControlUpgradeable} from "openzeppelin-contracts-upgradeable/contracts/access/IAccessControlUpgradeable.sol";
+import {IAccessControlUpgradeable} from
+    "openzeppelin-contracts-upgradeable/contracts/access/IAccessControlUpgradeable.sol";
 
 contract RegistryUnit is Test {
     using stdStorage for StdStorage;
@@ -34,7 +35,7 @@ contract RegistryUnit is Test {
     }
 
     modifier givenCallerIsAlloOwner() {
-        registry.mock_call__checkRole(keccak256("ALLO_OWNER"), address(this), true);
+        registry.mock_call__checkRole(keccak256("ALLO_OWNER"), address(this));
         _;
     }
 
@@ -55,21 +56,22 @@ contract RegistryUnit is Test {
         assertTrue(registry.hasRole(keccak256("ALLO_OWNER"), _owner));
     }
 
-    function test_CreateProfileRevertWhen_ProfileAlreadyExists(
-        uint256 _nonce,
-        address _owner,
-        address[] memory _members
-    ) external {
-        vm.skip(true);
+    function test_CreateProfileRevertWhen_ProfileAlreadyExists(uint256 _nonce, address _owner) external {
+        vm.assume(_owner != address(0));
+        address[] memory _members = new address[](1);
+        _members[0] = makeAddr("member");
+
         // mock call _generateProfileId
         bytes32 _expectedProfileId = keccak256(abi.encodePacked(_nonce, _owner));
         registry.mock_call__generateProfileId(_nonce, _owner, _expectedProfileId);
 
-        address _fakeAnchor = makeAddr("fakeAnchor");
-        // store a fake address on the profile's anchor
-        stdstore.target(address(registry)).sig("profilesById(bytes32)").with_key(_expectedProfileId).depth(5)
-            .checked_write(_fakeAnchor);
+        address _mockAnchor = makeAddr("anchor");
+        registry.mock_call__generateAnchor(_expectedProfileId, "test", _mockAnchor);
 
+        vm.prank(_owner);
+        registry.createProfile(_nonce, "test", Metadata({protocol: 1, pointer: "0x"}), _owner, _members);
+
+        registry.mock_call__generateProfileId(_nonce, _owner, _expectedProfileId);
         // it should revert
         vm.expectRevert(Errors.NONCE_NOT_AVAILABLE.selector);
         registry.createProfile(_nonce, "test", Metadata({protocol: 1, pointer: "0x"}), _owner, _members);
@@ -303,7 +305,7 @@ contract RegistryUnit is Test {
     function test__isOwnerOfProfileWhenProvidedAddressIsOwnerOfProfile(bytes32 _profileId, address _owner) external {
         vm.skip(true);
         // it should return true
-        stdstore.target(address(registry)).sig("profilesById(bytes32)").with_key(_profileId).depth(5).checked_write(
+        stdstore.target(address(registry)).sig("profilesById(bytes32)").with_key(_profileId).depth(4).checked_write(
             _owner
         );
         assertTrue(registry.call__isOwnerOfProfile(_profileId, _owner));
@@ -321,7 +323,9 @@ contract RegistryUnit is Test {
         external
     {
         vm.mockCall(
-            address(registry), abi.encodeWithSelector(IAccessControlUpgradeable.hasRole.selector, _profileId, _member), abi.encode(true)
+            address(registry),
+            abi.encodeWithSignature("_isMemberOfProfile(bytes32,address)", _profileId, _member),
+            abi.encode(true)
         );
         // it should return true
         assertTrue(registry.call__isMemberOfProfile(_profileId, _member));
@@ -334,8 +338,6 @@ contract RegistryUnit is Test {
         assertTrue(!registry.call__isMemberOfProfile(_profileId, _member));
     }
 
-
-
     function test_RecoverFundsRevertWhen_RecipientIsZeroAddress(address _token) external givenCallerIsAlloOwner {
         // it should revert
         vm.expectRevert(Errors.ZERO_ADDRESS.selector);
@@ -343,7 +345,10 @@ contract RegistryUnit is Test {
         registry.recoverFunds(_token, address(0));
     }
 
-    function test_RecoverFundsWhenRecipientIsNotZeroAddress(address _token, address _recipient) external givenCallerIsAlloOwner {
+    function test_RecoverFundsWhenRecipientIsNotZeroAddress(address _token, address _recipient)
+        external
+        givenCallerIsAlloOwner
+    {
         // it should call getBalance
         // it should call transfer
         vm.skip(true);
