@@ -14,7 +14,7 @@ import {Native} from "contracts/core/libraries/Native.sol";
 import {Metadata} from "contracts/core/libraries/Metadata.sol";
 // Test libraries
 import {TestUtilities} from "../../utils/TestUtilities.sol";
-import {MockERC20} from "../../mocks/MockERC20.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract RegistryTest is Test, RegistrySetup, Native, Errors {
     event ProfileCreated(
@@ -30,7 +30,7 @@ contract RegistryTest is Test, RegistrySetup, Native, Errors {
     string public name;
     uint256 public nonce;
 
-    MockERC20 public token;
+    address public token;
 
     function setUp() public {
         __RegistrySetup();
@@ -38,7 +38,7 @@ contract RegistryTest is Test, RegistrySetup, Native, Errors {
         name = "New Profile";
         nonce = 2;
 
-        token = new MockERC20();
+        token = makeAddr("token");
     }
 
     function test_initialize() public {
@@ -470,11 +470,15 @@ contract RegistryTest is Test, RegistrySetup, Native, Errors {
 
     function test_recoverFunds_ERC20() public {
         uint256 amount = 100;
-        token.mint(address(registry()), amount);
-        address recipient = address(0xBBB);
+        address _recipient = address(0xBBB);
+
+        vm.mockCall(token, abi.encodeWithSelector(IERC20.balanceOf.selector, address(registry())), abi.encode(amount));
+        vm.mockCall(token, abi.encodeWithSelector(IERC20.transfer.selector, _recipient, amount), abi.encode(true));
+
+        vm.expectCall(token, abi.encodeWithSelector(IERC20.balanceOf.selector, address(registry())));
+        vm.expectCall(token, abi.encodeWithSelector(IERC20.transfer.selector, _recipient, amount));
 
         vm.prank(registry_owner());
-        registry().recoverFunds(address(token), recipient);
-        assertEq(token.balanceOf(recipient), amount, "amount");
+        registry().recoverFunds(address(token), _recipient);
     }
 }

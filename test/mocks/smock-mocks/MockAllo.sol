@@ -5,6 +5,7 @@ import {Allo} from "contracts/core/Allo.sol";
 import {IBaseStrategy} from "contracts/strategies/IBaseStrategy.sol";
 import {Metadata} from "contracts/core/libraries/Metadata.sol";
 
+/// @dev This mock allows smock to override the functions of Allo contract
 contract MockAllo is Allo {
     constructor() Allo() {}
 

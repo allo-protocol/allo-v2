@@ -31,7 +31,7 @@
     "/////// deploy-test ///////": "echo 'deploy test scripts'",
     "create-profile": "npx hardhat run scripts/test/createProfile.ts --network",
     "create-pool": "npx hardhat run scripts/test/createPool.ts --network",
-    "smock": "smock-foundry --contracts contracts/core --contracts test/utils/mocks/"
+    "smock": "smock-foundry --contracts contracts/core --contracts test/mocks/smock-mocks/"
   },
   "devDependencies": {
     "@defi-wonderland/natspec-smells": "1.1.5",
