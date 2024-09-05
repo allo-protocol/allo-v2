@@ -30,11 +30,7 @@
     "/////// deploy-test ///////": "echo 'deploy test scripts'",
     "create-profile": "npx hardhat run scripts/test/createProfile.ts --network",
     "create-pool": "npx hardhat run scripts/test/createPool.ts --network",
-<<<<<<< HEAD
     "smock": "smock-foundry --contracts contracts/core --contracts test/mocks/smock-mocks/"
-=======
-    "smock": "smock-foundry --contracts contracts/core --contracts test/utils/mocks/"
->>>>>>> 5e5ec81507abb02f02eb89db2db876a071f8b25e
   },
   "devDependencies": {
     "@matterlabs/hardhat-zksync-deploy": "^1.2.1",

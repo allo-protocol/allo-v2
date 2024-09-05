@@ -5,6 +5,7 @@ import {MockMockRegistry} from "test/smock/MockMockRegistry.sol";
 import {Metadata} from "contracts/core/libraries/Metadata.sol";
 import {Errors} from "contracts/core/libraries/Errors.sol";
 import {Test, stdStorage, StdStorage} from "forge-std/Test.sol";
+import {IAccessControlUpgradeable} from "openzeppelin-contracts-upgradeable/contracts/access/IAccessControlUpgradeable.sol";
 
 contract RegistryUnit is Test {
     using stdStorage for StdStorage;
@@ -29,6 +30,11 @@ contract RegistryUnit is Test {
 
     modifier givenCallerIsProfileOwner(bytes32 _profileId) {
         registry.mock_call__checkOnlyProfileOwner(_profileId);
+        _;
+    }
+
+    modifier givenCallerIsAlloOwner() {
+        registry.mock_call__checkRole(keccak256("ALLO_OWNER"), address(this), true);
         _;
     }
 
@@ -314,9 +320,8 @@ contract RegistryUnit is Test {
     function test__isMemberOfProfileWhenProvidedAddressIsMemberOfProfile(bytes32 _profileId, address _member)
         external
     {
-        vm.skip(true);
         vm.mockCall(
-            address(registry), abi.encodeWithSelector(registry.hasRole.selector, _profileId, _member), abi.encode(true)
+            address(registry), abi.encodeWithSelector(IAccessControlUpgradeable.hasRole.selector, _profileId, _member), abi.encode(true)
         );
         // it should return true
         assertTrue(registry.call__isMemberOfProfile(_profileId, _member));
@@ -329,16 +334,16 @@ contract RegistryUnit is Test {
         assertTrue(!registry.call__isMemberOfProfile(_profileId, _member));
     }
 
-    modifier givenCallerIsAlloOwner() {
-        _;
-    }
 
-    function test_RecoverFundsRevertWhen_RecipientIsZeroAddress() external givenCallerIsAlloOwner {
+
+    function test_RecoverFundsRevertWhen_RecipientIsZeroAddress(address _token) external givenCallerIsAlloOwner {
         // it should revert
-        vm.skip(true);
+        vm.expectRevert(Errors.ZERO_ADDRESS.selector);
+
+        registry.recoverFunds(_token, address(0));
     }
 
-    function test_RecoverFundsWhenRecipientIsNotZeroAddress() external givenCallerIsAlloOwner {
+    function test_RecoverFundsWhenRecipientIsNotZeroAddress(address _token, address _recipient) external givenCallerIsAlloOwner {
         // it should call getBalance
         // it should call transfer
         vm.skip(true);

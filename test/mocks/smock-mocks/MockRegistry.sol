@@ -8,6 +8,10 @@ contract MockRegistry is Registry {
         super._grantRole(role, account);
     }
 
+    function _checkRole(bytes32 role, address account) internal view virtual override {
+        super._checkRole(role, account);
+    }
+
     function _revokeRole(bytes32 role, address account) internal virtual override {
         super._revokeRole(role, account);
     }
