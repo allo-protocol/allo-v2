@@ -42,9 +42,6 @@ contract DonationVotingOnchain is BaseStrategy, RecipientsExtension, AllocationE
     /// @param recipientId The recipientId to which distribution was attempted.
     error NOTHING_TO_DISTRIBUTE(address recipientId);
 
-    /// @notice Thrown when the timestamps being set or updated don't meet the contracts requirements.
-    error INVALID_TIMESTAMPS();
-
     /// @notice Thrown when the allocation token is not allowed.
     error TOKEN_NOT_ALLOWED();
 
