@@ -35,7 +35,7 @@ abstract contract MilestonesExtension is BaseStrategy, IMilestonesExtension {
     /// @notice This initializes the Milestones Extension
     /// @dev This function MUST be called by the 'initialize' function in the strategy.
     /// @param _maxBid The initialize params
-    function __MilestonesExtension_init(uint256 _maxBid) internal {
+    function __MilestonesExtension_init(uint256 _maxBid) internal virtual {
         // Set the strategy specific variables
         _increaseMaxBid(_maxBid);
     }
@@ -53,6 +53,7 @@ abstract contract MilestonesExtension is BaseStrategy, IMilestonesExtension {
 
     /// @notice Get the status of the milestone
     /// @param _milestoneId Id of the milestone
+    /// @return MilestoneStatus Returns the milestone status
     function getMilestoneStatus(uint256 _milestoneId) external view returns (MilestoneStatus) {
         return milestones[_milestoneId].status;
     }
@@ -195,6 +196,10 @@ abstract contract MilestonesExtension is BaseStrategy, IMilestonesExtension {
     /// @return If the recipient is accepted
     function _isAcceptedRecipient(address _recipientId) internal view virtual returns (bool);
 
+    /// @notice Returns if the recipient is accepted
+    /// @param _recipientId The recipient id
+    /// @param _milestoneId The milestone id
+    /// @return payout amount assigned to the milestone
     function _getMilestonePayout(address _recipientId, uint256 _milestoneId) internal view virtual returns (uint256) {
         if (!_isAcceptedRecipient(_recipientId)) revert INVALID_RECIPIENT();
         return (bids[_recipientId] * milestones[_milestoneId].amountPercentage) / 1e18;

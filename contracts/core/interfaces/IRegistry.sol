@@ -36,6 +36,12 @@ interface IRegistry {
     /// ======================
 
     /// @dev The Profile struct that all profiles are based from
+    /// @param id The profile id
+    /// @param nonce The nonce used to generate the profile
+    /// @param name The name of the profile
+    /// @param metadata The 'Metadata'
+    /// @param owner The 'owner' address of the profile
+    /// @param anchor The lastest 'anchor' address generated for this profile
     struct Profile {
         bytes32 id;
         uint256 nonce;
@@ -50,20 +56,35 @@ interface IRegistry {
     /// ======================
 
     /// @dev Emitted when a profile is created. This will return your anchor address.
+    /// @param profileId The 'profileId' of the new profile
+    /// @param nonce The nonce used to generate the 'anchor' address
+    /// @param name The name used to generate the 'anchor' address
+    /// @param metadata The 'Metadata' used to generate the 'anchor' address
+    /// @param owner The 'owner' used to generate the 'anchor' address
+    /// @param anchor The 'anchor' address generated
     event ProfileCreated(
         bytes32 indexed profileId, uint256 nonce, string name, Metadata metadata, address owner, address anchor
     );
 
     /// @dev Emitted when a profile name is updated. This will update the anchor when the name is updated and return it.
+    /// @param profileId The 'profileId' of the updated profile
+    /// @param name The new name used to generate the 'anchor' address
+    /// @param anchor The new 'anchor' address generated
     event ProfileNameUpdated(bytes32 indexed profileId, string name, address anchor);
 
     /// @dev Emitted when a profile's metadata is updated.
+    /// @param profileId The 'profileId' of the updated profile
+    /// @param metadata The new 'Metadata'
     event ProfileMetadataUpdated(bytes32 indexed profileId, Metadata metadata);
 
     /// @dev Emitted when a profile owner is updated.
+    /// @param profileId The 'profileId' of the updated profile
+    /// @param owner The new 'owner'
     event ProfileOwnerUpdated(bytes32 indexed profileId, address owner);
 
     /// @dev Emitted when a profile pending owner is updated.
+    /// @param profileId The 'profileId' of the updated profile
+    /// @param pendingOwner The address of the pending owner
     event ProfilePendingOwnerUpdated(bytes32 indexed profileId, address pendingOwner);
 
     /// =========================

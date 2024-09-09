@@ -22,6 +22,7 @@ import {Transfer} from "contracts/core/libraries/Transfer.sol";
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠛⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⢰⣿⣿⣿⣿⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⣿⣿⣿⣿⣧⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠹⢿⣿⣿⣿⣿⣾⣾⣷⣿⣿⣿⣿⡿⠋⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⠙⠋⠛⠙⠋⠛⠙⠋⠛⠙⠋⠃⠀⠀⠀⠀⠀⠀⠀⠀⠠⠿⠻⠟⠿⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⠟⠿⠟⠿⠆⠀⠸⠿⠿⠟⠯⠀⠀⠀⠸⠿⠿⠿⠏⠀⠀⠀⠀⠀⠈⠉⠻⠻⡿⣿⢿⡿⡿⠿⠛⠁⠀⠀⠀⠀⠀⠀
 //                    allo.gitcoin.co
+
 contract EasyRPGF is BaseStrategy {
     using Transfer for address;
 
@@ -29,7 +30,9 @@ contract EasyRPGF is BaseStrategy {
     /// ============ Errors ===========
     /// ===============================
 
+    /// @dev Thrown when input arrays have different lengths
     error INPUT_LENGTH_MISMATCH();
+    /// @dev Thrown when a function which hasn't been implemented is called
     error NOOP();
 
     /// ===============================
@@ -44,7 +47,8 @@ contract EasyRPGF is BaseStrategy {
 
     /// @notice Initialize the strategy
     /// @param _poolId The pool id
-    function initialize(uint256 _poolId, bytes memory) external override {
+    /// @param _data Not used
+    function initialize(uint256 _poolId, bytes memory _data) external override {
         __BaseStrategy_init(_poolId);
 
         emit Initialized(_poolId, "");
@@ -86,10 +90,12 @@ contract EasyRPGF is BaseStrategy {
         }
     }
 
+    /// @inheritdoc BaseStrategy
     function _allocate(address[] memory, uint256[] memory, bytes memory, address) internal virtual override {
         revert NOOP();
     }
 
+    /// @inheritdoc BaseStrategy
     function _register(address[] memory, bytes memory, address) internal virtual override returns (address[] memory) {
         revert NOOP();
     }

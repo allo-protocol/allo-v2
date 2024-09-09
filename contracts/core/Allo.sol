@@ -46,7 +46,7 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
     ///         percentage is 1e17 (10%), then 100 DAI will be deducted from the 1000 DAI and the pool will be
     ///         funded with 900 DAI. The fee is then sent to the treasury address.
     /// @dev How the percentage is represented in our contracts: 1e18 = 100%, 1e17 = 10%, 1e16 = 1%, 1e15 = 0.1%
-    uint256 private percentFee;
+    uint256 internal percentFee;
 
     /// @notice Fee Allo charges for all pools on creation
     /// @dev This is different from the 'percentFee' in that this is a flat fee and not a percentage. So if you want to create a pool
@@ -55,28 +55,28 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
     uint256 internal baseFee;
 
     /// @notice Incremental index to track the pools created
-    uint256 private _poolIndex;
+    uint256 internal _poolIndex;
 
     /// @notice Allo treasury
-    address payable private treasury;
+    address payable internal treasury;
 
     /// @notice Registry contract
-    IRegistry private registry;
+    IRegistry internal registry;
 
     /// @notice Maps the `_msgSender` to a `nonce` to prevent duplicates
     /// @dev '_msgSender' -> 'nonce' for cloning strategies
-    mapping(address => uint256) private _nonces;
+    mapping(address => uint256) internal _nonces;
 
     /// @notice Maps the pool ID to the pool details
     /// @dev 'Pool.id' -> 'Pool'
-    mapping(uint256 => Pool) private pools;
+    mapping(uint256 => Pool) internal pools;
 
     /// @custom:oz-upgrades-renamed-from cloneableStrategies
-    mapping(address => bool) private _unusedSlot;
+    mapping(address => bool) internal _unusedSlot;
 
     /// @notice The trusted forwarder contract address
     /// @dev Based on ERC2771ContextUpgradeable OZ contracts
-    address private _trustedForwarder;
+    address internal _trustedForwarder;
 
     // ====================================
     // =========== Initializer =============
@@ -191,6 +191,7 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
     /// @param _managers The managers of the pool
     /// @custom:initstrategydata The encoded data will be specific to a given strategy requirements,
     ///    reference the strategy implementation of 'initialize()'
+    /// @return poolId The ID of the pool
     function createPool(
         bytes32 _profileId,
         address _strategy,
@@ -693,6 +694,7 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
     }
 
     /// @dev Logic copied from ERC2771ContextUpgradeable OZ contracts
+    /// @return the sender of the call
     function _msgSender() internal view virtual override returns (address) {
         uint256 calldataLength = msg.data.length;
         if (isTrustedForwarder(msg.sender) && calldataLength >= 20) {
@@ -703,6 +705,7 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
     }
 
     /// @dev Logic copied from ERC2771ContextUpgradeable OZ contracts
+    /// @return calldata filtering the sender address when the trusted forward is the operator
     function _msgData() internal view override returns (bytes calldata) {
         uint256 calldataLength = msg.data.length;
         if (isTrustedForwarder(msg.sender) && calldataLength >= 20) {
@@ -777,6 +780,8 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
     }
 
     /// @dev Logic copied from ERC2771ContextUpgradeable OZ contracts
+    /// @param forwarder address to check if it is trusted
+    /// @return true if it is trusted, false otherwise
     function isTrustedForwarder(address forwarder) public view returns (bool) {
         return forwarder == _trustedForwarder;
     }

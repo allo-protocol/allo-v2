@@ -14,8 +14,9 @@ abstract contract RecipientsExtension is BaseStrategy, Errors, IRecipientsExtens
     /// @notice Flag to indicate whether metadata is required or not.
     bool public metadataRequired;
 
-    /// @notice The timestamps in seconds for the start and end times.
+    /// @notice The timestamp in seconds for the start time.
     uint64 public registrationStartTime;
+    /// @notice The timestamp in seconds for the end time.
     uint64 public registrationEndTime;
 
     /// @notice The total number of recipients.
@@ -93,6 +94,7 @@ abstract contract RecipientsExtension is BaseStrategy, Errors, IRecipientsExtens
     /// @notice Check if sender is profile owner or member
     /// @param _anchor Anchor of the profile
     /// @param _sender The sender of the transaction
+    /// @return true if _sender is a profile owner or member
     function _isProfileMember(address _anchor, address _sender) internal view virtual returns (bool) {
         IRegistry registry = allo.getRegistry();
         IRegistry.Profile memory profile = registry.getProfileByAnchor(_anchor);
@@ -191,6 +193,7 @@ abstract contract RecipientsExtension is BaseStrategy, Errors, IRecipientsExtens
     }
 
     /// @notice Submit recipients to pool and set their status.
+    /// @param __recipients An array of recipients to be registered.
     /// @param _data An array of bytes to be decoded.
     /// @dev Each item of the array can be decoded as follows: (address _recipientIdOrRegistryAnchor, Metadata metadata, bytes extraData)
     /// @param _sender The sender of the transaction
@@ -334,7 +337,9 @@ abstract contract RecipientsExtension is BaseStrategy, Errors, IRecipientsExtens
 
     /// @notice Get recipient status 'rowIndex', 'colIndex' and 'currentRow'.
     /// @param _recipientId ID of the recipient
-    /// @return (rowIndex, colIndex, currentRow)
+    /// @return rowIndex
+    /// @return colIndex
+    /// @return currentRow
     function _getStatusRowColumn(address _recipientId) internal view virtual returns (uint256, uint256, uint256) {
         uint256 recipientIndex = _recipients[_recipientId].statusIndex - 1;
 
@@ -348,7 +353,8 @@ abstract contract RecipientsExtension is BaseStrategy, Errors, IRecipientsExtens
     /// @dev Each new status in the statuses row (_fullrow) gets isolated and sent to _reviewRecipientStatus for review.
     /// @param _rowIndex Row index in the statusesBitMap mapping
     /// @param _fullRow New row of statuses
-    function _processStatusRow(uint256 _rowIndex, uint256 _fullRow) internal returns (uint256) {
+    /// @return The _fullRow with any modifications made by _reviewRecipientStatus()
+    function _processStatusRow(uint256 _rowIndex, uint256 _fullRow) internal virtual returns (uint256) {
         // Loop through each status in the updated row
         uint256 currentRow = statusesBitMap[_rowIndex];
         for (uint256 col = 0; col < 64; ++col) {
@@ -383,6 +389,7 @@ abstract contract RecipientsExtension is BaseStrategy, Errors, IRecipientsExtens
     /// @param _newStatus New proposed status
     /// @param _oldStatus Previous status
     /// @param _recipientIndex The index of the recipient in case the recipient data needs to be accessed
+    /// @return _reviewedStatus The actual new status to use
     function _reviewRecipientStatus(Status _newStatus, Status _oldStatus, uint256 _recipientIndex)
         internal
         virtual

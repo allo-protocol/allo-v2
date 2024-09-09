@@ -64,6 +64,8 @@ contract QVImpactStream is QVSimple {
     /// ======================
 
     /// @notice The details of the payout set by the pool managers
+    /// @param recipientId The recipient id
+    /// @param amount assigned to the recipient
     struct Payout {
         address recipientId;
         uint256 amount;
@@ -133,6 +135,7 @@ contract QVImpactStream is QVSimple {
     /// ==== Internal Functions =====
     /// =============================
 
+    /// @inheritdoc QVSimple
     function _distribute(address[] memory _recipientIds, bytes memory, address _sender)
         internal
         virtual

@@ -88,6 +88,7 @@ contract DVMDTFactory is Ownable {
     }
 
     /// @notice Creates a new DonationVotingMerkleDistributionDirectTransferStrategy
+    /// @return strategy The address of the new strategy
     function createStrategy() external returns (address strategy) {
         strategy = address(new DonationVotingMerkleDistributionDirectTransferStrategy(allo, name, permit2));
         emit StrategyCreated(strategy);
@@ -97,6 +98,7 @@ contract DVMDTFactory is Ownable {
     /// @param _allo The 'Allo' contract
     /// @param _name The name of the strategy
     /// @param _permit2 The permit2 contract
+    /// @return strategy The address of the new strategy
     function createStrategyCustom(address _allo, string memory _name, ISignatureTransfer _permit2)
         external
         returns (address strategy)
