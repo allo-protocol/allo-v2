@@ -5,13 +5,8 @@ import {DeployBase} from "script/DeployBase.sol";
 import {DonationVotingOnchain} from "contracts/strategies/examples/donation-voting/DonationVotingOnchain.sol";
 
 contract DeployDonationVotingOnchain is DeployBase {
-    function setUp() public {
-        // Mainnet
-        address _allo = 0x0000000000000000000000000000000000000000;
-        _deploymentParams[1] = abi.encode(_allo);
-    }
-
-    function _deploy(uint256, bytes memory _data) internal override returns (address _contract) {
-        return address(new DonationVotingOnchain(abi.decode(_data, (address))));
+    function _deploy() internal override returns (address _contract) {
+        address _allo = vm.envAddress("ALLO_ADDRESS");
+        return address(new DonationVotingOnchain(_allo));
     }
 }
