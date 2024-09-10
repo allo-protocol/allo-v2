@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
 // External Libraries
 import "solady/auth/Ownable.sol";
 // Internal Libraries
-import "../strategies/direct-grants-lite/DirectGrantsLite.sol";
+import {DirectGrantsLiteStrategy} from "strategies/deprecated/direct-grants-lite/DirectGrantsLite.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⣿⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -72,6 +72,7 @@ contract DGLFactory is Ownable {
     }
 
     /// @notice Creates a new DirectGrantsLiteStrategy
+    /// @return strategy The address of the new strategy
     function createStrategy() external returns (address strategy) {
         strategy = address(new DirectGrantsLiteStrategy(allo, name));
         emit StrategyCreated(strategy);
@@ -80,6 +81,7 @@ contract DGLFactory is Ownable {
     /// @notice Creates a new DirectGrantsLiteStrategy with custom params
     /// @param _allo The 'Allo' contract
     /// @param _name The name of the strategy
+    /// @return strategy The address of the new strategy
     function createCustomStrategy(address _allo, string memory _name) external returns (address strategy) {
         strategy = address(new DirectGrantsLiteStrategy(_allo, _name));
         emit StrategyCreated(strategy);

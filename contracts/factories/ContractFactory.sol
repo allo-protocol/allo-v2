@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
 // External
 import {CREATE3} from "solady/utils/CREATE3.sol";
@@ -38,6 +38,8 @@ contract ContractFactory {
     /// ======================
 
     /// @notice Emitted when a contract is deployed.
+    /// @param deployed address
+    /// @param salt used in contract creation
     event Deployed(address indexed deployed, bytes32 indexed salt);
 
     /// ======================

@@ -1,0 +1,101 @@
+Registry::initialize
+├── when owner is zero address
+│   └── it should revert
+└── when owner is not zero address
+    └── it should call _grantRole
+
+Registry::createProfile
+├── when profile already exists
+│   └── it should revert
+├── when profile owner is zero address
+│   └── it should revert
+├── when profile members are higher than zero and owner is not the caller
+│   └── it should revert
+├── when profile member address is zero
+│   └── it should revert
+└── when called with correct params
+    ├── it should call _generateProfileId
+    ├── it should call _generateAnchor
+    ├── it should call _grantRole for members
+    └── it should emit ProfileCreated event
+
+Registry::updateProfileName
+├── it should call _generateAnchor
+└── it should emit ProfileNameUpdated event
+
+Registry::updateProfileMetadata
+└── it should emit ProfileMetadataUpdated event
+
+Registry::isOwnerOrMemberOfProfile
+└── when called
+    ├── it should call _isOwnerOfProfile
+    └── it should call _isMemberOfProfile
+
+Registry::isOwnerOfProfile
+└── when called
+    └── it should call _isOwnerOfProfile
+
+Registry::isMemberOfProfile
+└── when called
+    └── it should call _isMemberOfProfile
+
+Registry::updateProfilePendingOwner
+└── when profile owner is the caller
+    ├── it should store the pendingOwner to profileIdToPendingOwner
+    └── it should emit ProfilePendingOwnerUpdated
+
+Registry::acceptProfileOwnership
+├── when caller is different than newOwner
+│   └── it should revert
+└── when called with correct params
+    ├── it should delete the pending owner from profileIdToPendingOwner
+    └── it should emit ProfileOwnerUpdated
+
+Registry::addMembers
+└── given caller is profile owner
+    ├── when member is zero address
+    │   └── it should revert
+    └── when called with correct params
+        └── it should call _grantRole for members
+
+Registry::removeMembers
+└── given caller is profile owner
+    └── when called
+        └── it should call _revokeRole for members
+
+Registry::_checkOnlyProfileOwner
+├── when caller is not profile owner
+│   └── it should revert
+└── when caller is profile owner
+    └── it should not revert
+
+Registry::_generateAnchor
+├── when anchor does not exist
+│   └── it should deploy the anchor
+├── when anchor exists
+│   └── it should return the anchor address
+└── when anchor profileId is not the same as provided profileId
+    └── it should revert
+
+Registry::_generateProfileId
+└── it should return the keccak256 of encoded nonce and owner address
+
+Registry::_isOwnerOfProfile
+├── when provided address is owner of profile
+│   └── it should return true
+└── when provided address is not owner of profile
+    └── it should return false
+
+Registry::_isMemberOfProfile
+├── when provided address is member of profile
+│   └── it should return true
+└── when provided address is not member of profile
+    └── it should return false
+
+Registry::recoverFunds
+└── given caller is allo owner
+    ├── when recipient is zero address
+    │   └── it should revert
+    └── when recipient is not zero address
+        ├── it should call getBalance
+        └── it should call transfer

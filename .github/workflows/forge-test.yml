@@ -27,15 +27,22 @@ jobs:
         uses: foundry-rs/foundry-toolchain@v1.0.9
         with:
           version: nightly
+      
+      - name: Run Smock
+        run: |
+          bun smock
+        id: smock
 
       - name: Run Forge Format
-        run: |
-          forge fmt --check
+        run: forge fmt --check
         id: fmt
 
+      - name: Run natspec linting
+        run: bun lint:natspec
+        id: natspec
+
       - name: Run Forge build
-        run: |
-          forge compile
+        run: forge compile
         id: build
 
       - name: Run Forge test

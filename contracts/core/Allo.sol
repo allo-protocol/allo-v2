@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
 // External Libraries
 import "solady/auth/Ownable.sol";
@@ -9,11 +9,10 @@ import "openzeppelin-contracts-upgradeable/contracts/access/AccessControlUpgrade
 import "openzeppelin-contracts-upgradeable/contracts/security/ReentrancyGuardUpgradeable.sol";
 // Interfaces
 import "./interfaces/IAllo.sol";
-
 // Internal Libraries
 import {Clone} from "./libraries/Clone.sol";
 import {Errors} from "./libraries/Errors.sol";
-import "./libraries/Native.sol";
+import {Native} from "./libraries/Native.sol";
 import {Transfer} from "./libraries/Transfer.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -35,16 +34,9 @@ import {Transfer} from "./libraries/Transfer.sol";
 /// @author @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>, @0xZakk <zakk@gitcoin.co>, @nfrgosselin <nate@gitcoin.co>
 /// @notice This contract is used to create & manage pools as well as manage the protocol.
 /// @dev The contract must be initialized with the 'initialize()' function.
-contract Allo is
-    IAllo,
-    Native,
-    Transfer,
-    Initializable,
-    Ownable,
-    AccessControlUpgradeable,
-    ReentrancyGuardUpgradeable,
-    Errors
-{
+contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable, ReentrancyGuardUpgradeable, Errors {
+    using Transfer for address;
+
     // ==========================
     // === Storage Variables ====
     // ==========================
@@ -54,7 +46,7 @@ contract Allo is
     ///         percentage is 1e17 (10%), then 100 DAI will be deducted from the 1000 DAI and the pool will be
     ///         funded with 900 DAI. The fee is then sent to the treasury address.
     /// @dev How the percentage is represented in our contracts: 1e18 = 100%, 1e17 = 10%, 1e16 = 1%, 1e15 = 0.1%
-    uint256 private percentFee;
+    uint256 internal percentFee;
 
     /// @notice Fee Allo charges for all pools on creation
     /// @dev This is different from the 'percentFee' in that this is a flat fee and not a percentage. So if you want to create a pool
@@ -63,28 +55,28 @@ contract Allo is
     uint256 internal baseFee;
 
     /// @notice Incremental index to track the pools created
-    uint256 private _poolIndex;
+    uint256 internal _poolIndex;
 
     /// @notice Allo treasury
-    address payable private treasury;
+    address payable internal treasury;
 
     /// @notice Registry contract
-    IRegistry private registry;
+    IRegistry internal registry;
 
     /// @notice Maps the `_msgSender` to a `nonce` to prevent duplicates
     /// @dev '_msgSender' -> 'nonce' for cloning strategies
-    mapping(address => uint256) private _nonces;
+    mapping(address => uint256) internal _nonces;
 
     /// @notice Maps the pool ID to the pool details
     /// @dev 'Pool.id' -> 'Pool'
-    mapping(uint256 => Pool) private pools;
+    mapping(uint256 => Pool) internal pools;
 
     /// @custom:oz-upgrades-renamed-from cloneableStrategies
-    mapping(address => bool) private _unusedSlot;
+    mapping(address => bool) internal _unusedSlot;
 
     /// @notice The trusted forwarder contract address
     /// @dev Based on ERC2771ContextUpgradeable OZ contracts
-    address private _trustedForwarder;
+    address internal _trustedForwarder;
 
     // ====================================
     // =========== Initializer =============
@@ -199,6 +191,7 @@ contract Allo is
     /// @param _managers The managers of the pool
     /// @custom:initstrategydata The encoded data will be specific to a given strategy requirements,
     ///    reference the strategy implementation of 'initialize()'
+    /// @return poolId The ID of the pool
     function createPool(
         bytes32 _profileId,
         address _strategy,
@@ -277,12 +270,8 @@ contract Allo is
     /// @param _poolId ID of the pool
     /// @param _managers The addresses to add
     function addPoolManagers(uint256 _poolId, address[] calldata _managers) public onlyPoolAdmin(_poolId) {
-        for (uint256 i; i < _managers.length;) {
+        for (uint256 i; i < _managers.length; ++i) {
             _addPoolManager(_poolId, _managers[i]);
-
-            unchecked {
-                ++i;
-            }
         }
     }
 
@@ -291,12 +280,8 @@ contract Allo is
     /// @param _poolId ID of the pool
     /// @param _managers The addresses to remove
     function removePoolManagers(uint256 _poolId, address[] calldata _managers) public onlyPoolAdmin(_poolId) {
-        for (uint256 i; i < _managers.length;) {
+        for (uint256 i; i < _managers.length; ++i) {
             _revokeRole(pools[_poolId].managerRole, _managers[i]);
-
-            unchecked {
-                ++i;
-            }
         }
     }
 
@@ -304,11 +289,8 @@ contract Allo is
     /// @param _poolIds IDs of the pools
     /// @param _managers The addresses to add
     function addPoolManagersInMultiplePools(uint256[] calldata _poolIds, address[] calldata _managers) external {
-        for (uint256 i; i < _poolIds.length;) {
+        for (uint256 i; i < _poolIds.length; ++i) {
             addPoolManagers(_poolIds[i], _managers);
-            unchecked {
-                ++i;
-            }
         }
     }
 
@@ -316,11 +298,8 @@ contract Allo is
     /// @param _poolIds IDs of the pools
     /// @param _managers The addresses to remove
     function removePoolManagersInMultiplePools(uint256[] calldata _poolIds, address[] calldata _managers) external {
-        for (uint256 i; i < _poolIds.length;) {
+        for (uint256 i; i < _poolIds.length; ++i) {
             removePoolManagers(_poolIds[i], _managers);
-            unchecked {
-                ++i;
-            }
         }
     }
 
@@ -333,7 +312,7 @@ contract Allo is
         uint256 amount = _token == NATIVE ? address(this).balance : IERC20Upgradeable(_token).balanceOf(address(this));
 
         // Transfer the amount to the recipient (pool owner)
-        _transferAmount(_token, _recipient, amount);
+        _token.transferAmount(_recipient, amount);
     }
 
     // ====================================
@@ -376,11 +355,8 @@ contract Allo is
         if (poolIdLength != _data.length || poolIdLength != _recipientAddresses.length) revert MISMATCH();
 
         // Loop through the '_poolIds' & '_data' and call the 'strategy.register()' function
-        for (uint256 i; i < poolIdLength;) {
+        for (uint256 i; i < poolIdLength; ++i) {
             recipientIds[i] = pools[_poolIds[i]].strategy.register(_recipientAddresses[i], _data[i], _msgSender());
-            unchecked {
-                ++i;
-            }
         }
 
         // Return the recipientIds that have been registered
@@ -446,12 +422,9 @@ contract Allo is
         // Loop through the _poolIds & _datas and call the internal _allocate() function
         uint256 totalValue;
         address msgSender = _msgSender();
-        for (uint256 i; i < numPools;) {
+        for (uint256 i; i < numPools; ++i) {
             _allocate(_poolIds[i], _recipients[i], _amounts[i], _datas[i], _values[i], msgSender);
             totalValue += _values[i];
-            unchecked {
-                ++i;
-            }
         }
         // Reverts if the sum of all the allocated values is different than 'msg.value' with 'MISMATCH()' error
         if (totalValue != msg.value) revert ETH_MISMATCH();
@@ -556,23 +529,19 @@ contract Allo is
 
         // grant pool managers roles
         uint256 managersLength = _managers.length;
-        for (uint256 i; i < managersLength;) {
-            address manager = _managers[i];
-            _addPoolManager(poolId, manager);
-
-            unchecked {
-                ++i;
-            }
+        for (uint256 i; i < managersLength; ++i) {
+            _addPoolManager(poolId, _managers[i]);
         }
 
         if (baseFee > 0) {
             // To prevent paying the baseFee from the Allo contract's balance
             // If _token is NATIVE, then baseFee + _amount should be equal to _msgValue.
             // If _token is not NATIVE, then baseFee should be equal to _msgValue.
-            if ((_token == NATIVE && (baseFee + _amount != _msgValue)) || (_token != NATIVE && baseFee != _msgValue)) {
-                revert NOT_ENOUGH_FUNDS();
-            }
-            _transferAmount(NATIVE, treasury, baseFee);
+            if (_token == NATIVE && (baseFee + _amount != _msgValue)) revert NOT_ENOUGH_FUNDS();
+            if (_token != NATIVE && baseFee != _msgValue) revert NOT_ENOUGH_FUNDS();
+
+            address(treasury).transferAmountNative(baseFee);
+
             emit BaseFeePaid(poolId, baseFee);
         }
 
@@ -611,38 +580,27 @@ contract Allo is
     /// @param _poolId The 'poolId' for the pool you are funding
     /// @param _strategy The address of the strategy
     function _fundPool(uint256 _amount, address _funder, uint256 _poolId, IBaseStrategy _strategy) internal virtual {
-        uint256 feeAmount;
-        uint256 amountAfterFee = _amount;
+        uint256 feeAmount = (_amount * percentFee) / getFeeDenominator(); // Can be zero if percentFee is zero
+        uint256 amountAfterFee = _amount - feeAmount;
 
         Pool storage pool = pools[_poolId];
         address _token = pool.token;
 
-        if (percentFee > 0) {
-            feeAmount = (_amount * percentFee) / getFeeDenominator();
-            amountAfterFee -= feeAmount;
+        if (_token == NATIVE && msg.value < _amount) revert ETH_MISMATCH();
 
-            if (feeAmount + amountAfterFee != _amount) revert INVALID();
-
-            if (_token == NATIVE) {
-                _transferAmountFrom(_token, TransferData({from: _funder, to: treasury, amount: feeAmount}));
-            } else {
-                uint256 balanceBeforeFee = _getBalance(_token, treasury);
-                _transferAmountFrom(_token, TransferData({from: _funder, to: treasury, amount: feeAmount}));
-                uint256 balanceAfterFee = _getBalance(_token, treasury);
-                // Track actual fee paid to account for fee on ERC20 token transfers
-                feeAmount = balanceAfterFee - balanceBeforeFee;
-            }
-        }
-
-        if (_token == NATIVE) {
-            _transferAmountFrom(_token, TransferData({from: _funder, to: address(_strategy), amount: amountAfterFee}));
-        } else {
-            uint256 balanceBeforeFundingPool = _getBalance(_token, address(_strategy));
-            _transferAmountFrom(_token, TransferData({from: _funder, to: address(_strategy), amount: amountAfterFee}));
-            uint256 balanceAfterFundingPool = _getBalance(_token, address(_strategy));
+        if (feeAmount > 0) {
+            uint256 balanceBeforeFee = _token.getBalance(treasury);
+            _token.transferAmountFrom(_funder, treasury, feeAmount);
+            uint256 balanceAfterFee = _token.getBalance(treasury);
             // Track actual fee paid to account for fee on ERC20 token transfers
-            amountAfterFee = balanceAfterFundingPool - balanceBeforeFundingPool;
+            feeAmount = balanceAfterFee - balanceBeforeFee;
         }
+
+        uint256 balanceBeforeFundingPool = _token.getBalance(address(_strategy));
+        _token.transferAmountFrom(_funder, address(_strategy), amountAfterFee);
+        uint256 balanceAfterFundingPool = _token.getBalance(address(_strategy));
+        // Track actual fee paid to account for fee on ERC20 token transfers
+        amountAfterFee = balanceAfterFundingPool - balanceBeforeFundingPool;
 
         _strategy.increasePoolAmount(amountAfterFee);
 
@@ -736,6 +694,7 @@ contract Allo is
     }
 
     /// @dev Logic copied from ERC2771ContextUpgradeable OZ contracts
+    /// @return the sender of the call
     function _msgSender() internal view virtual override returns (address) {
         uint256 calldataLength = msg.data.length;
         if (isTrustedForwarder(msg.sender) && calldataLength >= 20) {
@@ -746,6 +705,7 @@ contract Allo is
     }
 
     /// @dev Logic copied from ERC2771ContextUpgradeable OZ contracts
+    /// @return calldata filtering the sender address when the trusted forward is the operator
     function _msgData() internal view override returns (bytes calldata) {
         uint256 calldataLength = msg.data.length;
         if (isTrustedForwarder(msg.sender) && calldataLength >= 20) {
@@ -820,6 +780,8 @@ contract Allo is
     }
 
     /// @dev Logic copied from ERC2771ContextUpgradeable OZ contracts
+    /// @param forwarder address to check if it is trusted
+    /// @return true if it is trusted, false otherwise
     function isTrustedForwarder(address forwarder) public view returns (bool) {
         return forwarder == _trustedForwarder;
     }
