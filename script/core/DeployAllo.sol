@@ -2,7 +2,9 @@
 pragma solidity ^0.8.19;
 
 import {Script, console} from "forge-std/Script.sol";
-import {TransparentUpgradeableProxy} from "openzeppelin-contracts/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import {TransparentUpgradeableProxy} from
+    "openzeppelin-contracts/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import {ProxyAdmin} from "openzeppelin-contracts/contracts/proxy/transparent/ProxyAdmin.sol";
 
 import {Allo} from "contracts/core/Allo.sol";
 
@@ -17,19 +19,48 @@ contract DeployAllo is Script {
     }
 
     function _deploy() internal returns (address alloAddress, address alloImplementation) {
-        (address owner, address registry, address treasury, uint256 percentFee, uint256 baseFee, address trustedForwarder) = _getNetworkParams();
+        (
+            address owner,
+            address registry,
+            address treasury,
+            uint256 percentFee,
+            uint256 baseFee,
+            address trustedForwarder,
+            address proxyAdmin
+        ) = _getAlloParams();
 
         alloImplementation = address(new Allo());
 
-        alloAddress = address(new TransparentUpgradeableProxy(
-            address(alloImplementation),
-            owner, // initial owner address for proxy admin
-            abi.encodeCall(Allo.initialize, (owner, registry, payable(treasury), percentFee, baseFee, trustedForwarder))
-        ));
+        if (proxyAdmin == address(0)) {
+            ProxyAdmin admin = new ProxyAdmin();
+            admin.transferOwnership(owner);
+            proxyAdmin = address(admin);
+        }
 
+        alloAddress = address(
+            new TransparentUpgradeableProxy(
+                address(alloImplementation),
+                proxyAdmin, // initial owner address for proxy admin
+                abi.encodeCall(
+                    Allo.initialize, (owner, registry, payable(treasury), percentFee, baseFee, trustedForwarder)
+                )
+            )
+        );
     }
 
-    function _getNetworkParams() internal view returns (address owner, address registry, address treasury, uint256 percentFee, uint256 baseFee, address trustedForwarder) {
+    function _getAlloParams()
+        internal
+        view
+        returns (
+            address owner,
+            address registry,
+            address treasury,
+            uint256 percentFee,
+            uint256 baseFee,
+            address trustedForwarder,
+            address proxyAdmin
+        )
+    {
         // Mainnet
         if (block.chainid == 1) {
             owner = 0x34d82D1ED8B4fB6e6A569d6D086A39f9f734107E;
@@ -38,6 +69,7 @@ contract DeployAllo is Script {
             percentFee = 0;
             baseFee = 0;
             trustedForwarder = 0x0000000000000000000000000000000000000000;
+            proxyAdmin = 0x758b87af7fdB4783f848a1dDEa1F025dC48B9858;
         }
         // Goerli
         else if (block.chainid == 5) {
@@ -47,6 +79,7 @@ contract DeployAllo is Script {
             percentFee = 0;
             baseFee = 0;
             trustedForwarder = 0x0000000000000000000000000000000000000000;
+            proxyAdmin = 0x758b87af7fdB4783f848a1dDEa1F025dC48B9858;
         }
         // Sepolia
         else if (block.chainid == 11155111) {
@@ -56,6 +89,7 @@ contract DeployAllo is Script {
             percentFee = 0;
             baseFee = 0;
             trustedForwarder = 0x0000000000000000000000000000000000000000;
+            proxyAdmin = 0x758b87af7fdB4783f848a1dDEa1F025dC48B9858;
         }
         // Optimism
         else if (block.chainid == 10) {
@@ -65,6 +99,7 @@ contract DeployAllo is Script {
             percentFee = 0;
             baseFee = 0;
             trustedForwarder = 0x0000000000000000000000000000000000000000;
+            proxyAdmin = 0x758b87af7fdB4783f848a1dDEa1F025dC48B9858;
         }
         // Optimism Goerli
         else if (block.chainid == 420) {
@@ -74,6 +109,7 @@ contract DeployAllo is Script {
             percentFee = 0;
             baseFee = 0;
             trustedForwarder = 0x0000000000000000000000000000000000000000;
+            proxyAdmin = 0x758b87af7fdB4783f848a1dDEa1F025dC48B9858;
         }
         // Celo Mainnet
         else if (block.chainid == 42220) {
@@ -83,6 +119,7 @@ contract DeployAllo is Script {
             percentFee = 0;
             baseFee = 0;
             trustedForwarder = 0x0000000000000000000000000000000000000000;
+            proxyAdmin = 0x758b87af7fdB4783f848a1dDEa1F025dC48B9858;
         }
         // Celo Testnet Alfajores
         else if (block.chainid == 44787) {
@@ -92,6 +129,7 @@ contract DeployAllo is Script {
             percentFee = 0;
             baseFee = 0;
             trustedForwarder = 0x0000000000000000000000000000000000000000;
+            proxyAdmin = 0x758b87af7fdB4783f848a1dDEa1F025dC48B9858;
         }
         // Polygon Mainnet
         else if (block.chainid == 137) {
@@ -101,6 +139,7 @@ contract DeployAllo is Script {
             percentFee = 0;
             baseFee = 0;
             trustedForwarder = 0x0000000000000000000000000000000000000000;
+            proxyAdmin = 0x758b87af7fdB4783f848a1dDEa1F025dC48B9858;
         }
         // Mumbai
         else if (block.chainid == 80001) {
@@ -110,6 +149,7 @@ contract DeployAllo is Script {
             percentFee = 0;
             baseFee = 0;
             trustedForwarder = 0x0000000000000000000000000000000000000000;
+            proxyAdmin = 0x758b87af7fdB4783f848a1dDEa1F025dC48B9858;
         }
         // Arbitrum One
         else if (block.chainid == 42161) {
@@ -119,6 +159,7 @@ contract DeployAllo is Script {
             percentFee = 0;
             baseFee = 0;
             trustedForwarder = 0x0000000000000000000000000000000000000000;
+            proxyAdmin = 0x758b87af7fdB4783f848a1dDEa1F025dC48B9858;
         }
         // Arbitrum Sepolia
         else if (block.chainid == 421614) {
@@ -128,6 +169,7 @@ contract DeployAllo is Script {
             percentFee = 0;
             baseFee = 0;
             trustedForwarder = 0x0000000000000000000000000000000000000000;
+            proxyAdmin = 0x758b87af7fdB4783f848a1dDEa1F025dC48B9858;
         }
         // Base Mainnet
         else if (block.chainid == 8453) {
@@ -137,6 +179,7 @@ contract DeployAllo is Script {
             percentFee = 0;
             baseFee = 0;
             trustedForwarder = 0x0000000000000000000000000000000000000000;
+            proxyAdmin = 0x758b87af7fdB4783f848a1dDEa1F025dC48B9858;
         }
         // Base Testnet Goerli
         else if (block.chainid == 84531) {
@@ -146,6 +189,7 @@ contract DeployAllo is Script {
             percentFee = 0;
             baseFee = 0;
             trustedForwarder = 0x0000000000000000000000000000000000000000;
+            proxyAdmin = 0x758b87af7fdB4783f848a1dDEa1F025dC48B9858;
         }
         // Optimism Sepolia
         else if (block.chainid == 11155420) {
@@ -155,6 +199,7 @@ contract DeployAllo is Script {
             percentFee = 0;
             baseFee = 0;
             trustedForwarder = 0x0000000000000000000000000000000000000000;
+            proxyAdmin = 0x758b87af7fdB4783f848a1dDEa1F025dC48B9858;
         }
         // Fuji
         else if (block.chainid == 43113) {
@@ -164,6 +209,7 @@ contract DeployAllo is Script {
             percentFee = 0;
             baseFee = 0;
             trustedForwarder = 0x0000000000000000000000000000000000000000;
+            proxyAdmin = 0xf7B93519a3A1790F97f7b14E6f118A139187843e;
         }
         // Avalanche Mainnet
         else if (block.chainid == 43114) {
@@ -173,6 +219,7 @@ contract DeployAllo is Script {
             percentFee = 0;
             baseFee = 0;
             trustedForwarder = 0x0000000000000000000000000000000000000000;
+            proxyAdmin = 0x758b87af7fdB4783f848a1dDEa1F025dC48B9858;
         }
         // Scroll
         else if (block.chainid == 534352) {
@@ -182,6 +229,7 @@ contract DeployAllo is Script {
             percentFee = 0;
             baseFee = 0;
             trustedForwarder = 0x0000000000000000000000000000000000000000;
+            proxyAdmin = 0x758b87af7fdB4783f848a1dDEa1F025dC48B9858;
         }
         // Fantom
         else if (block.chainid == 250) {
@@ -191,6 +239,7 @@ contract DeployAllo is Script {
             percentFee = 0;
             baseFee = 0;
             trustedForwarder = 0x0000000000000000000000000000000000000000;
+            proxyAdmin = 0x758b87af7fdB4783f848a1dDEa1F025dC48B9858;
         }
         // Fantom Testnet
         else if (block.chainid == 4002) {
@@ -200,6 +249,7 @@ contract DeployAllo is Script {
             percentFee = 0;
             baseFee = 0;
             trustedForwarder = 0x0000000000000000000000000000000000000000;
+            proxyAdmin = 0x758b87af7fdB4783f848a1dDEa1F025dC48B9858;
         }
         // ZkSync Mainnet
         else if (block.chainid == 324) {
@@ -209,6 +259,7 @@ contract DeployAllo is Script {
             percentFee = 0;
             baseFee = 0;
             trustedForwarder = 0x0000000000000000000000000000000000000000;
+            proxyAdmin = 0x0000000000000000000000000000000000000000;
         }
         // ZkSync Sepolia Testnet
         else if (block.chainid == 300) {
@@ -218,6 +269,7 @@ contract DeployAllo is Script {
             percentFee = 0;
             baseFee = 0;
             trustedForwarder = 0x0000000000000000000000000000000000000000;
+            proxyAdmin = 0x0000000000000000000000000000000000000000;
         }
         // Filecoin Mainnet
         else if (block.chainid == 314) {
@@ -227,6 +279,7 @@ contract DeployAllo is Script {
             percentFee = 0;
             baseFee = 0;
             trustedForwarder = 0x0000000000000000000000000000000000000000;
+            proxyAdmin = 0x758b87af7fdB4783f848a1dDEa1F025dC48B9858;
         }
         // Filecoin Calibration Testnet
         else if (block.chainid == 314159) {
@@ -236,6 +289,7 @@ contract DeployAllo is Script {
             percentFee = 0;
             baseFee = 0;
             trustedForwarder = 0x0000000000000000000000000000000000000000;
+            proxyAdmin = 0x7DE1218DCDC3628F839b19a3aF5ACF092C35BcDE;
         }
         // Sei Devnet
         else if (block.chainid == 713715) {
@@ -245,14 +299,15 @@ contract DeployAllo is Script {
             percentFee = 0;
             baseFee = 0;
             trustedForwarder = 0x0000000000000000000000000000000000000000;
-        }
-        else if (block.chainid == 1329) {
+            proxyAdmin = 0x2447dD8C1f4cd4361a649564Bd441787edf8c03A;
+        } else if (block.chainid == 1329) {
             owner = 0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C;
             registry = 0x4AAcca72145e1dF2aeC137E1f3C5E3D75DB8b5f3;
             treasury = 0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C;
             percentFee = 0;
             baseFee = 0;
             trustedForwarder = 0x0000000000000000000000000000000000000000;
+            proxyAdmin = 0x758b87af7fdB4783f848a1dDEa1F025dC48B9858;
         }
         // Lukso Mainnet
         else if (block.chainid == 42) {
@@ -262,6 +317,7 @@ contract DeployAllo is Script {
             percentFee = 0;
             baseFee = 0;
             trustedForwarder = 0x0000000000000000000000000000000000000000;
+            proxyAdmin = 0x758b87af7fdB4783f848a1dDEa1F025dC48B9858;
         }
         // Lukso Testnet
         else if (block.chainid == 4201) {
@@ -271,8 +327,8 @@ contract DeployAllo is Script {
             percentFee = 0;
             baseFee = 0;
             trustedForwarder = 0x0000000000000000000000000000000000000000;
-        }
-        else {
+            proxyAdmin = 0x758b87af7fdB4783f848a1dDEa1F025dC48B9858;
+        } else {
             revert("Network not supported");
         }
     }
