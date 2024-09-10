@@ -2,29 +2,31 @@
 pragma solidity ^0.8.19;
 
 import {Script, console} from "forge-std/Script.sol";
-import {Upgrades} from "openzeppelin-foundry-upgrades/LegacyUpgrades.sol";
+import {TransparentUpgradeableProxy} from "openzeppelin-contracts/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 import {Allo} from "contracts/core/Allo.sol";
 
 contract DeployAllo is Script {
     function run() public {
         vm.startBroadcast();
-        address _contract = _deploy();
+        (address allo, address alloImplementation) = _deploy();
         vm.stopBroadcast();
 
-        console.log("Deployed contract at address: %s", _contract);
-        address implementationAddress = Upgrades.getImplementationAddress(_contract);
-        console.log("Allo implementation at address: %s", implementationAddress);
+        console.log("Deployed Allo at address: %s", allo);
+        console.log("Allo implementation at address: %s", alloImplementation);
     }
 
-    function _deploy() internal returns (address alloAddress) {
+    function _deploy() internal returns (address alloAddress, address alloImplementation) {
         (address owner, address registry, address treasury, uint256 percentFee, uint256 baseFee, address trustedForwarder) = _getNetworkParams();
 
-        alloAddress = Upgrades.deployTransparentProxy(
-            "Allo.sol",
+        alloImplementation = address(new Allo());
+
+        alloAddress = address(new TransparentUpgradeableProxy(
+            address(alloImplementation),
             owner, // initial owner address for proxy admin
-            abi.encodeCall(Allo.initialize, (owner, registry, treasury, percentFee, baseFee, trustedForwarder))
-        );
+            abi.encodeCall(Allo.initialize, (owner, registry, payable(treasury), percentFee, baseFee, trustedForwarder))
+        ));
+
     }
 
     function _getNetworkParams() internal view returns (address owner, address registry, address treasury, uint256 percentFee, uint256 baseFee, address trustedForwarder) {
