@@ -23,6 +23,8 @@
     "coverage:report": "forge coverage --no-match-test 'testFork' --report lcov && lcov --remove ./lcov.info -o ./lcov.info.pruned 'test' 'contracts/core/libraries'",
     "coverage:html": "forge coverage --report lcov && lcov --remove ./lcov.info -o ./lcov.info.pruned 'test' 'contracts/core/libraries'  && genhtml lcov.info.pruned --branch-coverage --output-dir coverage",
     "/////// deploy-core ///////": "echo 'deploy allo-v2'",
+    "deploy-allo-v2.1:sepolia": "bash -c 'source .env && forge script DeployAllo --rpc-url $SEPOLIA_RPC_URL --broadcast --private-key $DEPLOYER_PRIVATE_KEY --verify --etherscan-api-key $ETHERSCAN_API_KEY'",
+    "deploy-allo-v2.1:mainnet": "bash -c 'source .env && forge script DeployAllo --rpc-url $MAINNET_RPC_URL --broadcast --private-key $DEPLOYER_PRIVATE_KEY --verify --etherscan-api-key $ETHERSCAN_API_KEY'",
     "deploy-allo": "npx hardhat run scripts/core/deployAllo.ts --network",
     "deploy-registry": "npx hardhat run scripts/core/deployRegistry.ts --network",
     "upgrade-allo": "npx hardhat run scripts/core/deployAllo.ts --network",
