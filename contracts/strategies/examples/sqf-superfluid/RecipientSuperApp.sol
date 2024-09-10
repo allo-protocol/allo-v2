@@ -9,9 +9,11 @@ import {
 import {SuperTokenV1Library} from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
 import {SQFSuperfluid} from "contracts/strategies/examples/sqf-superfluid/SQFSuperfluid.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {Transfer} from "contracts/core/libraries/Transfer.sol";
 
 contract RecipientSuperApp is ISuperApp {
     using SuperTokenV1Library for ISuperToken;
+    using Transfer for address;
 
     /// ======================
     /// ======= Errors =======
@@ -43,13 +45,13 @@ contract RecipientSuperApp is ISuperApp {
     ISuperfluid public immutable HOST;
 
     /// @notice The address of the recipient
-    address public recipient;
+    address public immutable RECIPIENT;
 
     /// @notice The strategy contract
-    SQFSuperfluid public immutable strategy;
+    SQFSuperfluid public immutable STRATEGY;
 
     /// @notice The accepted super token
-    ISuperToken public immutable acceptedToken;
+    ISuperToken public immutable ACCEPTED_TOKEN;
 
     /// ==============================
     /// ========= Modifiers ==========
@@ -62,33 +64,45 @@ contract RecipientSuperApp is ISuperApp {
     }
 
     constructor(address _recipient, address _strategy, address _host, ISuperToken _acceptedToken) {
-        if (address(_strategy) == address(0)) {
+        if (_strategy == address(0)) {
+            revert ZERO_ADDRESS();
+        }
+
+        if (_host == address(0)) {
+            revert ZERO_ADDRESS();
+        }
+
+        if (address(_acceptedToken) == address(0)) {
+            revert ZERO_ADDRESS();
+        }
+
+        if (_recipient == address(0)) {
             revert ZERO_ADDRESS();
         }
 
         HOST = ISuperfluid(_host);
-        strategy = SQFSuperfluid(payable(_strategy));
-        acceptedToken = _acceptedToken;
-        recipient = _recipient;
+        STRATEGY = SQFSuperfluid(payable(_strategy));
+        ACCEPTED_TOKEN = _acceptedToken;
+        RECIPIENT = _recipient;
     }
 
     /// @notice Withdraw ERC20 funds in an emergency
     /// @param token The token address to withdraw
     function emergencyWithdraw(address token) external onlyRecipient {
-        IERC20(token).transfer(msg.sender, IERC20(token).balanceOf(address(this)));
+        token.transferAmount(msg.sender, IERC20(token).balanceOf(address(this)));
     }
 
     /// @notice Close incoming streams in an emergency
     /// @param from The address to close the stream from
     function closeIncomingStream(address from) external onlyRecipient {
-        acceptedToken.deleteFlow(from, address(this));
+        ACCEPTED_TOKEN.deleteFlow(from, address(this));
     }
 
     /// @dev Accepts all super tokens
     /// @param _superToken The super token to check
     /// @return TRUE if the super token is accepted, FALSE otherwise
     function isAcceptedSuperToken(ISuperToken _superToken) public view virtual returns (bool) {
-        return address(_superToken) == address(acceptedToken);
+        return address(_superToken) == address(ACCEPTED_TOKEN);
     }
 
     /// @notice This is the main callback function called by the host
@@ -102,7 +116,7 @@ contract RecipientSuperApp is ISuperApp {
         internal
         returns (bytes memory newCtx)
     {
-        if (!strategy.isValidAllocator(sender)) revert UNAUTHORIZED();
+        if (!STRATEGY.isValidAllocator(sender)) revert UNAUTHORIZED();
         newCtx = onFlowUpdated(previousFlowRate, newFlowRate, ctx);
     }
 
@@ -116,7 +130,7 @@ contract RecipientSuperApp is ISuperApp {
         internal
         returns (bytes memory newCtx)
     {
-        strategy.adjustWeightings(uint256(int256(previousFlowRate)), uint256(int256(newFlowRate)));
+        STRATEGY.adjustWeightings(uint256(int256(previousFlowRate)), uint256(int256(newFlowRate)));
         newCtx = _updateOutflow(ctx);
     }
 
@@ -129,7 +143,7 @@ contract RecipientSuperApp is ISuperApp {
 
     /// @notice Check that only the recipient can call the function
     function _checkOnlyRecipient() internal view virtual {
-        if (msg.sender != recipient) {
+        if (msg.sender != RECIPIENT) {
             revert UNAUTHORIZED();
         }
     }
@@ -140,21 +154,21 @@ contract RecipientSuperApp is ISuperApp {
     function _updateOutflow(bytes memory ctx) private returns (bytes memory newCtx) {
         newCtx = ctx;
 
-        int96 netFlowRate = acceptedToken.getNetFlowRate(address(this));
+        int96 netFlowRate = ACCEPTED_TOKEN.getNetFlowRate(address(this));
 
-        int96 outFlowRate = acceptedToken.getFlowRate(address(this), recipient);
+        int96 outFlowRate = ACCEPTED_TOKEN.getFlowRate(address(this), RECIPIENT);
 
         int96 inFlowRate = netFlowRate + outFlowRate;
 
         if (inFlowRate == 0) {
             // The flow does exist and should be deleted.
-            newCtx = acceptedToken.deleteFlowWithCtx(address(this), recipient, ctx);
+            newCtx = ACCEPTED_TOKEN.deleteFlowWithCtx(address(this), RECIPIENT, ctx);
         } else if (outFlowRate != 0) {
             // The flow does exist and needs to be updated.
-            newCtx = acceptedToken.updateFlowWithCtx(recipient, inFlowRate, ctx);
+            newCtx = ACCEPTED_TOKEN.updateFlowWithCtx(RECIPIENT, inFlowRate, ctx);
         } else {
             // The flow does not exist but should be created.
-            newCtx = acceptedToken.createFlowWithCtx(recipient, inFlowRate, ctx);
+            newCtx = ACCEPTED_TOKEN.createFlowWithCtx(RECIPIENT, inFlowRate, ctx);
         }
     }
 
@@ -163,7 +177,7 @@ contract RecipientSuperApp is ISuperApp {
     /// @return The callback data
     function _createCbData(bytes calldata _agreementData) internal view returns (bytes memory) {
         (address sender,) = abi.decode(_agreementData, (address, address));
-        (uint256 lastUpdated, int96 flowRate,,) = acceptedToken.getFlowInfo(sender, address(this));
+        (uint256 lastUpdated, int96 flowRate,,) = ACCEPTED_TOKEN.getFlowInfo(sender, address(this));
 
         return abi.encode(flowRate, lastUpdated);
     }
