@@ -321,7 +321,7 @@ contract Registry is IRegistry, Initializable, AccessControlUpgradeable, Errors 
     /// @notice Checks if the caller is the owner of the profile
     /// @dev Internal function used by modifier 'onlyProfileOwner'
     /// @param _profileId The ID of the profile
-    function _checkOnlyProfileOwner(bytes32 _profileId) internal view {
+    function _checkOnlyProfileOwner(bytes32 _profileId) internal view virtual {
         if (!_isOwnerOfProfile(_profileId, msg.sender)) revert UNAUTHORIZED();
     }
 
@@ -330,7 +330,7 @@ contract Registry is IRegistry, Initializable, AccessControlUpgradeable, Errors 
     /// @param _profileId The ID of the profile
     /// @param _name The name of the profile
     /// @return anchor The address of the deployed anchor contract
-    function _generateAnchor(bytes32 _profileId, string memory _name) internal returns (address anchor) {
+    function _generateAnchor(bytes32 _profileId, string memory _name) internal virtual returns (address anchor) {
         bytes memory encodedData = abi.encode(_profileId, _name);
         bytes memory encodedConstructorArgs = abi.encode(_profileId, address(this));
 
@@ -356,7 +356,7 @@ contract Registry is IRegistry, Initializable, AccessControlUpgradeable, Errors 
     /// @param _nonce Nonce provided by the caller to generate 'profileId'
     /// @param _owner The owner of the profile
     /// @return 'profileId' The ID of the profile
-    function _generateProfileId(uint256 _nonce, address _owner) internal pure returns (bytes32) {
+    function _generateProfileId(uint256 _nonce, address _owner) internal pure virtual returns (bytes32) {
         return keccak256(abi.encodePacked(_nonce, _owner));
     }
 
@@ -365,7 +365,7 @@ contract Registry is IRegistry, Initializable, AccessControlUpgradeable, Errors 
     /// @param _profileId The 'profileId' of the profile
     /// @param _owner The address to check
     /// @return 'true' if the address is an owner of the profile, otherwise 'false'
-    function _isOwnerOfProfile(bytes32 _profileId, address _owner) internal view returns (bool) {
+    function _isOwnerOfProfile(bytes32 _profileId, address _owner) internal view virtual returns (bool) {
         return profilesById[_profileId].owner == _owner;
     }
 
@@ -374,7 +374,7 @@ contract Registry is IRegistry, Initializable, AccessControlUpgradeable, Errors 
     /// @param _profileId The 'profileId' of the profile
     /// @param _member The address to check
     /// @return 'true' if the address is a member of the profile, otherwise 'false'
-    function _isMemberOfProfile(bytes32 _profileId, address _member) internal view returns (bool) {
+    function _isMemberOfProfile(bytes32 _profileId, address _member) internal view virtual returns (bool) {
         return hasRole(_profileId, _member);
     }
 
