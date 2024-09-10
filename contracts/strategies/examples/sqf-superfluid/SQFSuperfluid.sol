@@ -30,6 +30,14 @@ contract SQFSuperfluid is BaseStrategy, RecipientsExtension {
     /// ================================
 
     /// @notice Stores the details needed for initializing strategy
+    /// @param passportDecoder The Gitcoin Passport Decoder
+    /// @param superfluidHost The host contract for the superfluid protocol
+    /// @param allocationSuperToken The allocation super token
+    /// @param recipientSuperAppFactory The recipient SuperApp factory
+    /// @param allocationStartTime The start time for the allocation
+    /// @param allocationEndTime The end time for the allocation
+    /// @param minPassportScore The minimum passport score required to be an allocator
+    /// @param initialSuperAppBalance The initial balance for the super app
     struct SQFSuperfluidInitializeParams {
         address passportDecoder;
         address superfluidHost;
@@ -84,8 +92,10 @@ contract SQFSuperfluid is BaseStrategy, RecipientsExtension {
     /// @notice The host contract for the superfluid protocol
     address public superfluidHost;
 
-    /// @notice The pool super token
+    /// @notice The allocation super token
     ISuperToken public allocationSuperToken;
+
+    /// @notice The pool super token
     ISuperToken public poolSuperToken;
 
     /// @notice The recipient SuperApp factory
@@ -100,9 +110,10 @@ contract SQFSuperfluid is BaseStrategy, RecipientsExtension {
     /// @notice The minimum passport score required to be an allocator
     uint256 public minPassportScore;
 
-    /// @notice The start and end times for allocation
-    /// @dev The values will be in milliseconds since the epoch
+    /// @notice The start time for allocation
     uint64 public allocationStartTime;
+
+    /// @notice The end time for allocation
     uint64 public allocationEndTime;
 
     /// @notice stores the superApp of each recipientId
@@ -357,7 +368,10 @@ contract SQFSuperfluid is BaseStrategy, RecipientsExtension {
     /// ====================================
 
     /// @dev prevent the pool token from being withdrawn
-    function _beforeWithdraw(address _token, uint256, address) internal override {
+    /// @param _token The token address
+    /// @param _amount The amount to withdraw
+    /// @param _recipient The address to withdraw to
+    function _beforeWithdraw(address _token, uint256 _amount, address _recipient) internal override {
         if (_token == address(poolSuperToken)) {
             revert INVALID();
         }
@@ -375,7 +389,11 @@ contract SQFSuperfluid is BaseStrategy, RecipientsExtension {
     }
 
     /// @dev If the recipient is accepted, create a super app for the recipient
-    function _reviewRecipientStatus(Status _newStatus, Status, uint256 _recipientIndex)
+    /// @param _newStatus The new status
+    /// @param _oldStatus The old status
+    /// @param _recipientIndex The index of the recipient
+    /// @return _reviewedStatus The reviewed status
+    function _reviewRecipientStatus(Status _newStatus, Status _oldStatus, uint256 _recipientIndex)
         internal
         override
         returns (Status _reviewedStatus)
@@ -402,9 +420,10 @@ contract SQFSuperfluid is BaseStrategy, RecipientsExtension {
     /// @notice This will distribute funds (tokens) to recipients.
     /// @dev most strategies will track a TOTAL amount per recipient, and a PAID amount, and pay the difference
     /// this contract will need to track the amount paid already, so that it doesn't double pay.
+    /// @param _recipientsAddresses NOT USED
     /// @param _data Data required will depend on the strategy implementation
     /// @param _sender The address of the sender
-    function _distribute(address[] memory, bytes memory _data, address _sender)
+    function _distribute(address[] memory _recipientsAddresses, bytes memory _data, address _sender)
         internal
         override
         onlyPoolManager(_sender)
@@ -420,13 +439,15 @@ contract SQFSuperfluid is BaseStrategy, RecipientsExtension {
     /// @notice This will allocate to recipients.
     /// @dev The encoded '_data' will be determined by the strategy implementation.
     /// @param _recipientsAddresses The addresses of the recipients to allocate to
+    /// @param _amounts The amounts to allocate to each recipient
     /// @param _data The data to use to allocate to the recipient
     /// @param _sender The address of the sender
-    function _allocate(address[] memory _recipientsAddresses, uint256[] memory, bytes memory _data, address _sender)
-        internal
-        override
-        onlyActiveAllocation
-    {
+    function _allocate(
+        address[] memory _recipientsAddresses,
+        uint256[] memory _amounts,
+        bytes memory _data,
+        address _sender
+    ) internal override onlyActiveAllocation {
         if (!_isValidAllocator(_sender)) revert UNAUTHORIZED();
 
         int96[] memory flowRates = abi.decode(_data, (int96[]));

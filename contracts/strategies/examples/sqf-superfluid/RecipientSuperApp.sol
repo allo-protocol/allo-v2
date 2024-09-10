@@ -73,22 +73,31 @@ contract RecipientSuperApp is ISuperApp {
     }
 
     /// @notice Withdraw ERC20 funds in an emergency
+    /// @param token The token address to withdraw
     function emergencyWithdraw(address token) external onlyRecipient {
         IERC20(token).transfer(msg.sender, IERC20(token).balanceOf(address(this)));
     }
 
     /// @notice Close incoming streams in an emergency
+    /// @param from The address to close the stream from
     function closeIncomingStream(address from) external onlyRecipient {
         acceptedToken.deleteFlow(from, address(this));
     }
 
     /// @dev Accepts all super tokens
+    /// @param _superToken The super token to check
+    /// @return TRUE if the super token is accepted, FALSE otherwise
     function isAcceptedSuperToken(ISuperToken _superToken) public view virtual returns (bool) {
         return address(_superToken) == address(acceptedToken);
     }
 
     /// @notice This is the main callback function called by the host
     ///      to notify the app about the callback context.
+    /// @param previousFlowRate The previous flow rate
+    /// @param newFlowRate The new flow rate
+    /// @param sender The sender of the flow
+    /// @param ctx The callback context
+    /// @return newCtx The new callback context
     function onFlowCreated(int96 previousFlowRate, int96 newFlowRate, address sender, bytes calldata ctx)
         internal
         returns (bytes memory newCtx)
@@ -99,6 +108,10 @@ contract RecipientSuperApp is ISuperApp {
 
     /// @notice This is the main callback function called by the host
     ///      to notify the app about the callback context.
+    /// @param previousFlowRate The previous flow rate
+    /// @param newFlowRate The new flow rate
+    /// @param ctx The callback context
+    /// @return newCtx The new callback context
     function onFlowUpdated(int96 previousFlowRate, int96 newFlowRate, bytes calldata ctx)
         internal
         returns (bytes memory newCtx)
@@ -108,6 +121,7 @@ contract RecipientSuperApp is ISuperApp {
     }
 
     /// @notice Perform sanity checks for the hooks
+    /// @param _superToken The super token to check
     function _checkHookParam(ISuperToken _superToken) internal view {
         if (msg.sender != address(HOST)) revert UnauthorizedHost();
         if (!isAcceptedSuperToken(_superToken)) revert NotAcceptedSuperToken();
@@ -121,6 +135,8 @@ contract RecipientSuperApp is ISuperApp {
     }
 
     /// @dev https://Ihub.com/superfluid-finance/super-examples/blob/main/projects/tradeable-cashflow/contracts/RedirectAll.sol#L163
+    /// @param ctx The callback context
+    /// @return newCtx The new callback context
     function _updateOutflow(bytes memory ctx) private returns (bytes memory newCtx) {
         newCtx = ctx;
 
@@ -142,6 +158,9 @@ contract RecipientSuperApp is ISuperApp {
         }
     }
 
+    /// @dev Create the callback data
+    /// @param _agreementData The agreement data
+    /// @return The callback data
     function _createCbData(bytes calldata _agreementData) internal view returns (bytes memory) {
         (address sender,) = abi.decode(_agreementData, (address, address));
         (uint256 lastUpdated, int96 flowRate,,) = acceptedToken.getFlowInfo(sender, address(this));
@@ -154,23 +173,36 @@ contract RecipientSuperApp is ISuperApp {
     /// ================================
 
     /// @dev This callback is called before the flow is created
+    /// @param superToken NOT USED
+    /// @param agreementClass NOT USED
+    /// @param agreementId NOT USED
+    /// @param agreementData NOT USED
+    /// @param ctx NOT USED
+    /// @return beforeData NOT USED
     function beforeAgreementCreated(
-        ISuperToken, /*superToken,*/
-        address, /*agreementClass,*/
-        bytes32, /*agreementId*/
-        bytes calldata, /*agreementData*/
-        bytes calldata /*ctx*/
-    ) external pure override returns (bytes memory /*beforeData*/ ) {
+        ISuperToken superToken,
+        address agreementClass,
+        bytes32 agreementId,
+        bytes calldata agreementData,
+        bytes calldata ctx
+    ) external pure override returns (bytes memory beforeData) {
         return "0x";
     }
 
     /// @dev This callback is called after the flow is created
+    /// @param superToken The super token
+    /// @param agreementClass The agreement class
+    /// @param agreementId NOT USED
+    /// @param agreementData The agreement data
+    /// @param cbdata NOT USED
+    /// @param ctx The callback context
+    /// @return newCtx The new callback context
     function afterAgreementCreated(
         ISuperToken superToken,
         address agreementClass,
-        bytes32, /*agreementId*/
+        bytes32 agreementId,
         bytes calldata agreementData,
-        bytes calldata, /*cbdata*/
+        bytes calldata cbdata,
         bytes calldata ctx
     ) external override returns (bytes memory newCtx) {
         _checkHookParam(superToken);
@@ -192,13 +224,19 @@ contract RecipientSuperApp is ISuperApp {
     /// ================================
 
     /// @dev This callback is called before the flow is updated
+    /// @param superToken The super token
+    /// @param agreementClass The agreement class
+    /// @param agreementId NOT USED
+    /// @param agreementData The agreement data
+    /// @param ctx NOT USED
+    /// @return beforeData NOT USED
     function beforeAgreementUpdated(
         ISuperToken superToken,
         address agreementClass,
-        bytes32, /*agreementId*/
+        bytes32 agreementId,
         bytes calldata agreementData,
-        bytes calldata /*ctx*/
-    ) external view override returns (bytes memory /*beforeData*/ ) {
+        bytes calldata ctx
+    ) external view override returns (bytes memory beforeData) {
         _checkHookParam(superToken);
         if (!isAcceptedAgreement(agreementClass)) return "0x";
 
@@ -206,10 +244,17 @@ contract RecipientSuperApp is ISuperApp {
     }
 
     /// @dev This callback is called after the flow is updated
+    /// @param superToken The super token
+    /// @param agreementClass The agreement class
+    /// @param agreementId NOT USED
+    /// @param agreementData The agreement data
+    /// @param cbdata The callback data
+    /// @param ctx The callback context
+    /// @return The new callback context
     function afterAgreementUpdated(
         ISuperToken superToken,
         address agreementClass,
-        bytes32, /*agreementId*/
+        bytes32 agreementId,
         bytes calldata agreementData,
         bytes calldata cbdata,
         bytes calldata ctx
@@ -233,13 +278,19 @@ contract RecipientSuperApp is ISuperApp {
     /// =================================
 
     /// @dev This callback is called before the flow is terminated
+    /// @param superToken The super token
+    /// @param agreementClass The agreement class
+    /// @param agreementId NOT USED
+    /// @param agreementData The agreement data
+    /// @param ctx NOT USED
+    /// @return beforeData NOT USED
     function beforeAgreementTerminated(
         ISuperToken superToken,
         address agreementClass,
-        bytes32, /*agreementId*/
+        bytes32 agreementId,
         bytes calldata agreementData,
-        bytes calldata /*ctx*/
-    ) external view override returns (bytes memory /*beforeData*/ ) {
+        bytes calldata ctx
+    ) external view override returns (bytes memory beforeData) {
         if (msg.sender != address(HOST) || !isAcceptedAgreement(agreementClass) || !isAcceptedSuperToken(superToken)) {
             return "0x";
         }
@@ -248,11 +299,18 @@ contract RecipientSuperApp is ISuperApp {
     }
 
     /// @dev This callback is called after the flow is terminated
+    /// @param superToken The super token
+    /// @param agreementClass The agreement class
+    /// @param agreementId NOT USED
+    /// @param agreementData NOT USED
+    /// @param cbdata The callback data
+    /// @param ctx The callback context
+    /// @return The new callback context
     function afterAgreementTerminated(
         ISuperToken superToken,
         address agreementClass,
-        bytes32, /*agreementId*/
-        bytes calldata, /*agreementData*/
+        bytes32 agreementId,
+        bytes calldata agreementData,
         bytes calldata cbdata,
         bytes calldata ctx
     ) external override returns (bytes memory) {
@@ -268,11 +326,11 @@ contract RecipientSuperApp is ISuperApp {
     /// ========== Helpers =============
     /// ================================
 
-    /**
-     * @dev Expect Super Agreement involved in callback to be an accepted one
-     *      This function can be overridden with custom logic and to revert if desired
-     *      Current implementation expects ConstantFlowAgreement
-     */
+    /// @dev Expect Super Agreement involved in callback to be an accepted one
+    ///      This function can be overridden with custom logic and to revert if desired
+    ///      Current implementation expects ConstantFlowAgreement
+    /// @param agreementClass The agreement class
+    /// @return TRUE if the agreement is accepted, FALSE otherwise
     function isAcceptedAgreement(address agreementClass) internal view virtual returns (bool) {
         return agreementClass == address(HOST.getAgreementClass(CFAV1_TYPE));
     }
