@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
 /**
  * @title IGitcoinPassportDecoder

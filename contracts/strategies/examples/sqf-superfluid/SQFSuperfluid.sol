@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
 // External Libraries
 import {
@@ -9,17 +9,21 @@ import {
 import {PoolConfig} from
     "@superfluid-finance/ethereum-contracts/contracts/interfaces/agreements/gdav1/IGeneralDistributionAgreementV1.sol";
 import {SuperTokenV1Library} from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
-import {IGitcoinPassportDecoder} from "contracts/strategies/interfaces/IGitcoinPassportDecoder.sol";
+import {IGitcoinPassportDecoder} from "contracts/strategies/examples/sqf-superfluid/IGitcoinPassportDecoder.sol";
 import {FixedPointMathLib} from "solady/utils/FixedPointMathLib.sol";
-import {IRecipientSuperAppFactory} from "contracts/strategies/interfaces/IRecipientSuperAppFactory.sol";
+import {IRecipientSuperAppFactory} from "contracts/strategies/examples/sqf-superfluid/IRecipientSuperAppFactory.sol";
 
 // Core Contracts
-import {RecipientsExtension} from "contracts/extensions/contracts/RecipientsExtension.sol";
-import {CoreBaseStrategy} from "contracts/strategies/CoreBaseStrategy.sol";
+import {RecipientsExtension} from "contracts/strategies/extensions/register/RecipientsExtension.sol";
+import {BaseStrategy} from "contracts/strategies/BaseStrategy.sol";
 
-contract SQFSuperfluid is CoreBaseStrategy, RecipientsExtension {
+// Internal Libraries
+import {Transfer} from "contracts/core/libraries/Transfer.sol";
+
+contract SQFSuperfluid is BaseStrategy, RecipientsExtension {
     using SuperTokenV1Library for ISuperToken;
     using FixedPointMathLib for uint256;
+    using Transfer for address;
 
     /// ================================
     /// ========== Struct ==============
@@ -338,7 +342,7 @@ contract SQFSuperfluid is CoreBaseStrategy, RecipientsExtension {
     /// @notice Close the stream
     function closeStream() external onlyPoolManager(msg.sender) {
         poolSuperToken.distributeFlow(address(this), gdaPool, 0, "0x");
-        _transferAmount(address(poolSuperToken), msg.sender, poolSuperToken.balanceOf(address(this)));
+        address(poolSuperToken).transferAmount(msg.sender, poolSuperToken.balanceOf(address(this)));
     }
 
     /// @notice Checks if the allocator is valid

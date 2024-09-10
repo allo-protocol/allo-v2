@@ -3,16 +3,16 @@ pragma solidity ^0.8.19;
 
 import {Test} from "forge-std/Test.sol";
 import {Allo, IAllo} from "contracts/core/Allo.sol";
-import {SQFSuperfluid} from "contracts/strategies/SQFSuperfluid.sol";
-import {IRecipientsExtension} from "contracts/extensions/interfaces/IRecipientsExtension.sol";
-import {IRecipientSuperAppFactory} from "contracts/strategies/interfaces/IRecipientSuperAppFactory.sol";
-import {RecipientSuperAppFactory} from "contracts/strategies/RecipientSuperAppFactory.sol";
-import {IOwnable} from "./IOwnable.sol";
-import {ITransparentUpgradeableProxy} from "./ITransparentUpgradeableProxy.sol";
+import {SQFSuperfluid} from "contracts/strategies/examples/sqf-superfluid/SQFSuperfluid.sol";
+import {IRecipientsExtension} from "contracts/strategies/extensions/register/IRecipientsExtension.sol";
+import {IRecipientSuperAppFactory} from "contracts/strategies/examples/sqf-superfluid/IRecipientSuperAppFactory.sol";
+import {RecipientSuperAppFactory} from "contracts/strategies/examples/sqf-superfluid/RecipientSuperAppFactory.sol";
+import {IOwnable} from "test/utils/IOwnable.sol";
+import {ITransparentUpgradeableProxy} from "test/utils/ITransparentUpgradeableProxy.sol";
 import {Metadata, IRegistry} from "contracts/core/Registry.sol";
-import {IGitcoinPassportDecoder} from "contracts/strategies/interfaces/IGitcoinPassportDecoder.sol";
-import {RecipientsExtension} from "contracts/extensions/contracts/RecipientsExtension.sol";
-import {ISuperfluidGovernance} from "contracts/strategies/ISuperfluidGovernance.sol";
+import {IGitcoinPassportDecoder} from "contracts/strategies/examples/sqf-superfluid/IGitcoinPassportDecoder.sol";
+import {RecipientsExtension} from "contracts/strategies/extensions/register/RecipientsExtension.sol";
+import {ISuperfluidGovernance} from "contracts/strategies/examples/sqf-superfluid/ISuperfluidGovernance.sol";
 import {ISuperToken} from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
 import {SuperTokenV1Library} from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
 

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
 import {
     ISuperfluid,
@@ -7,8 +7,8 @@ import {
     ISuperApp,
     SuperAppDefinitions
 } from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
-import {IRecipientSuperAppFactory} from "contracts/strategies/interfaces/IRecipientSuperAppFactory.sol";
-import {RecipientSuperApp} from "contracts/strategies/RecipientSuperApp.sol";
+import {IRecipientSuperAppFactory} from "contracts/strategies/examples/sqf-superfluid/IRecipientSuperAppFactory.sol";
+import {RecipientSuperApp} from "contracts/strategies/examples/sqf-superfluid/RecipientSuperApp.sol";
 
 contract RecipientSuperAppFactory is IRecipientSuperAppFactory {
     /// @notice Creates a new RecipientSuperApp
