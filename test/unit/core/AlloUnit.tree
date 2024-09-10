@@ -229,11 +229,8 @@ Allo::_updateBaseFee
 └── it should emit event
 
 Allo::_updateTrustedForwarder
-├── when trustedForwarder is zero address
-│   └── it should revert
-└── given trustedForwarder is not zero address
-    ├── it should update trustedForwarder
-    └── it should emit event
+├── it should update trustedForwarder
+└── it should emit event
 
 Allo::_addPoolManager
 ├── when manager is zero address
