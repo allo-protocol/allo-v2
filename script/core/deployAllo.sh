@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Function to dynamically map chains to variables
+# Relevant issue that would deprecate this script if solved: https://github.com/foundry-rs/foundry/issues/7726
 # TODO: add networks
 deploy() {
   chain=$1
