@@ -12,6 +12,7 @@ import {SuperTokenV1Library} from "@superfluid-finance/ethereum-contracts/contra
 import {IGitcoinPassportDecoder} from "contracts/strategies/examples/sqf-superfluid/IGitcoinPassportDecoder.sol";
 import {FixedPointMathLib} from "solady/utils/FixedPointMathLib.sol";
 import {IRecipientSuperAppFactory} from "contracts/strategies/examples/sqf-superfluid/IRecipientSuperAppFactory.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 // Core Contracts
 import {RecipientsExtension} from "contracts/strategies/extensions/register/RecipientsExtension.sol";
@@ -20,7 +21,7 @@ import {BaseStrategy} from "contracts/strategies/BaseStrategy.sol";
 // Internal Libraries
 import {Transfer} from "contracts/core/libraries/Transfer.sol";
 
-contract SQFSuperfluid is BaseStrategy, RecipientsExtension {
+contract SQFSuperfluid is BaseStrategy, RecipientsExtension, ReentrancyGuard {
     using SuperTokenV1Library for ISuperToken;
     using FixedPointMathLib for uint256;
     using Transfer for address;
@@ -263,10 +264,11 @@ contract SQFSuperfluid is BaseStrategy, RecipientsExtension {
         external
         onlyPoolManager(msg.sender)
         onlyBeforeAllocationEnds
+        nonReentrant
     {
         uint256 recipientLength = _recipientIds.length;
 
-        for (uint256 i; i < recipientLength;) {
+        for (uint256 i; i < recipientLength; ++i) {
             address recipientId = _recipientIds[i];
             Recipient storage recipient = _recipients[recipientId];
 
@@ -288,10 +290,6 @@ contract SQFSuperfluid is BaseStrategy, RecipientsExtension {
             _updateMemberUnits(recipientId, recipient.recipientAddress, 0);
 
             emit Canceled(recipientId, msg.sender);
-
-            unchecked {
-                ++i;
-            }
         }
     }
 
@@ -396,6 +394,7 @@ contract SQFSuperfluid is BaseStrategy, RecipientsExtension {
     function _reviewRecipientStatus(Status _newStatus, Status _oldStatus, uint256 _recipientIndex)
         internal
         override
+        nonReentrant
         returns (Status _reviewedStatus)
     {
         if (_newStatus == Status.Accepted) {
@@ -405,13 +404,13 @@ contract SQFSuperfluid is BaseStrategy, RecipientsExtension {
                 recipientAddress, address(this), superfluidHost, allocationSuperToken, true, true, true
             );
 
-            allocationSuperToken.transfer(address(superApp), initialSuperAppBalance);
-
             // Add recipientAddress as member of the GDA with 1 unit
             _updateMemberUnits(recipientId, recipientAddress, 1);
 
             recipientIdSuperApps[recipientId] = superApp;
             superAppsRecipientIds[superApp] = recipientId;
+
+            address(allocationSuperToken).transferAmount(address(superApp), initialSuperAppBalance);
         }
 
         _reviewedStatus = _newStatus;
