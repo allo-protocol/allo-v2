@@ -16,12 +16,13 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.
 
 // Core Contracts
 import {RecipientsExtension} from "contracts/strategies/extensions/register/RecipientsExtension.sol";
+import {AllocationExtension} from "strategies/extensions/allocate/AllocationExtension.sol";
 import {BaseStrategy} from "contracts/strategies/BaseStrategy.sol";
 
 // Internal Libraries
 import {Transfer} from "contracts/core/libraries/Transfer.sol";
 
-contract SQFSuperfluid is BaseStrategy, RecipientsExtension, ReentrancyGuard {
+contract SQFSuperfluid is BaseStrategy, RecipientsExtension, AllocationExtension, ReentrancyGuard {
     using SuperTokenV1Library for ISuperToken;
     using FixedPointMathLib for uint256;
     using Transfer for address;
@@ -54,12 +55,6 @@ contract SQFSuperfluid is BaseStrategy, RecipientsExtension, ReentrancyGuard {
     /// ======= Events =======
     /// ======================
 
-    /// @notice Emitted when the pool timestamps are updated
-    /// @param allocationStartTime The start time for the allocation
-    /// @param allocationEndTime The end time for the allocation
-    /// @param sender The sender of the transaction
-    event AllocationTimestampsUpdated(uint64 allocationStartTime, uint64 allocationEndTime, address sender);
-
     /// @notice Emitted when a recipient is canceled
     /// @param recipientId ID of the recipient
     /// @param sender The sender of the transaction
@@ -74,13 +69,6 @@ contract SQFSuperfluid is BaseStrategy, RecipientsExtension, ReentrancyGuard {
     /// @param recipientId ID of the recipient
     /// @param totalUnits The total units
     event TotalUnitsUpdated(address indexed recipientId, uint256 totalUnits);
-
-    /// ======================
-    /// ======= Errors =======
-    /// ======================
-
-    /// @notice Thrown when the timestamps being set or updated don't meet the contracts requirements.
-    error INVALID_TIMESTAMPS();
 
     /// ================================
     /// ========== Storage =============
@@ -111,12 +99,6 @@ contract SQFSuperfluid is BaseStrategy, RecipientsExtension, ReentrancyGuard {
     /// @notice The minimum passport score required to be an allocator
     uint256 public minPassportScore;
 
-    /// @notice The start time for allocation
-    uint64 public allocationStartTime;
-
-    /// @notice The end time for allocation
-    uint64 public allocationEndTime;
-
     /// @notice stores the superApp of each recipientId
     mapping(address => address) public recipientIdSuperApps;
 
@@ -130,24 +112,6 @@ contract SQFSuperfluid is BaseStrategy, RecipientsExtension, ReentrancyGuard {
     /// @notice stores the flow rate for each recipient
     /// @dev recipientId => flowRate
     mapping(address => uint256) public recipientFlowRate;
-
-    /// ================================
-    /// ========== Modifier ============
-    /// ================================
-
-    /// @notice Modifier to check if the allocation is active
-    /// @dev Reverts if the allocation is not active
-    modifier onlyActiveAllocation() {
-        _checkOnlyActiveAllocation();
-        _;
-    }
-
-    /// @notice Modifier to check if the allocation has ended
-    /// @dev This will revert if the allocation has ended.
-    modifier onlyBeforeAllocationEnds() {
-        _checkOnlyBeforeAllocationEnds();
-        _;
-    }
 
     /// ===============================
     /// ======== Constructor ==========
@@ -177,6 +141,14 @@ contract SQFSuperfluid is BaseStrategy, RecipientsExtension, ReentrancyGuard {
         // Initialize the RecipientsExtension
         __RecipientsExtension_init(_recipientExtensionInitializeData);
 
+        // Initialize the AllocationExtension
+        __AllocationExtension_init(
+            new address[](0),
+            _sqfSuperfluidInitializeParams.allocationStartTime,
+            _sqfSuperfluidInitializeParams.allocationEndTime,
+            true
+        );
+
         if (
             _sqfSuperfluidInitializeParams.superfluidHost == address(0)
                 || _sqfSuperfluidInitializeParams.allocationSuperToken == address(0)
@@ -185,11 +157,6 @@ contract SQFSuperfluid is BaseStrategy, RecipientsExtension, ReentrancyGuard {
         ) revert ZERO_ADDRESS();
 
         if (_sqfSuperfluidInitializeParams.initialSuperAppBalance == 0) revert INVALID();
-
-        // validate the timestamps for this strategy
-        if (_sqfSuperfluidInitializeParams.allocationStartTime > _sqfSuperfluidInitializeParams.allocationEndTime) {
-            revert INVALID_TIMESTAMPS();
-        }
 
         superfluidHost = _sqfSuperfluidInitializeParams.superfluidHost;
         minPassportScore = _sqfSuperfluidInitializeParams.minPassportScore;
@@ -210,44 +177,11 @@ contract SQFSuperfluid is BaseStrategy, RecipientsExtension, ReentrancyGuard {
                 true
             )
         );
-
-        // Set the new values
-        allocationStartTime = _sqfSuperfluidInitializeParams.allocationStartTime;
-        allocationEndTime = _sqfSuperfluidInitializeParams.allocationEndTime;
-
-        emit AllocationTimestampsUpdated(
-            _sqfSuperfluidInitializeParams.allocationStartTime,
-            _sqfSuperfluidInitializeParams.allocationEndTime,
-            msg.sender
-        );
     }
 
     /// ====================================
     /// ============= External =============
     /// ====================================
-
-    /// @notice Set the start and end dates for the pool
-    /// @param _registrationStartTime The start time for the registration
-    /// @param _registrationEndTime The end time for the registration
-    /// @param _allocationStartTime The start time for the allocation
-    /// @param _allocationEndTime The end time for the allocation
-    function updatePoolTimestamps(
-        uint64 _registrationStartTime,
-        uint64 _registrationEndTime,
-        uint64 _allocationStartTime,
-        uint64 _allocationEndTime
-    ) external onlyPoolManager(msg.sender) {
-        // validate the timestamps for this strategy
-        if (_allocationStartTime > _allocationEndTime) revert INVALID_TIMESTAMPS();
-
-        // Set the new values
-        allocationStartTime = _allocationStartTime;
-        allocationEndTime = _allocationEndTime;
-
-        emit AllocationTimestampsUpdated(allocationStartTime, allocationEndTime, msg.sender);
-
-        _updatePoolTimestamps(_registrationStartTime, _registrationEndTime);
-    }
 
     /// @notice Update the min passport score
     /// @param _minPassportScore The new min passport score
@@ -263,7 +197,7 @@ contract SQFSuperfluid is BaseStrategy, RecipientsExtension, ReentrancyGuard {
     function cancelRecipients(address[] calldata _recipientIds)
         external
         onlyPoolManager(msg.sender)
-        onlyBeforeAllocationEnds
+        onlyActiveAllocation
         nonReentrant
     {
         uint256 recipientLength = _recipientIds.length;
@@ -378,7 +312,7 @@ contract SQFSuperfluid is BaseStrategy, RecipientsExtension, ReentrancyGuard {
     /// @notice Checks if the allocator is valid
     /// @param _allocator The allocator address
     /// @return 'true' if the allocator is valid, otherwise 'false'
-    function _isValidAllocator(address _allocator) internal view returns (bool) {
+    function _isValidAllocator(address _allocator) internal view override returns (bool) {
         uint256 allocatorScore = passportDecoder.getScore(_allocator);
         if (allocatorScore >= minPassportScore) {
             return true;
@@ -480,22 +414,6 @@ contract SQFSuperfluid is BaseStrategy, RecipientsExtension, ReentrancyGuard {
     function _checkOnlyAfterRegistration() internal view {
         if (block.timestamp < registrationEndTime) {
             revert REGISTRATION_ACTIVE();
-        }
-    }
-
-    /// @notice Check if the allocation is active
-    /// @dev Reverts if the allocation is not active
-    function _checkOnlyActiveAllocation() internal view {
-        if (allocationStartTime > block.timestamp || block.timestamp > allocationEndTime) {
-            revert ALLOCATION_NOT_ACTIVE();
-        }
-    }
-
-    /// @notice Checks if the allocation has not ended and reverts if it has.
-    /// @dev This will revert if the allocation has ended.
-    function _checkOnlyBeforeAllocationEnds() internal view {
-        if (block.timestamp > allocationEndTime) {
-            revert ALLOCATION_NOT_ACTIVE();
         }
     }
 
