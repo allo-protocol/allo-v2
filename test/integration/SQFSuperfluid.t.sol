@@ -15,6 +15,7 @@ import {RecipientsExtension} from "contracts/strategies/extensions/register/Reci
 import {ISuperfluidGovernance} from "contracts/strategies/examples/sqf-superfluid/ISuperfluidGovernance.sol";
 import {ISuperToken} from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
 import {SuperTokenV1Library} from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract IntegrationSQFSuperfluid is Test {
     using SuperTokenV1Library for ISuperToken;
@@ -226,7 +227,20 @@ contract IntegrationSQFSuperfluid is Test {
     }
 
     function test_Distribute() public {
-        //
-        vm.skip(true);
+        vm.warp(block.timestamp + 7 days);
+
+        vm.startPrank(userAddr);
+
+        // Fund the pool
+        deal(POOL_SUPER_TOKEN, userAddr, 100 ether);
+        IERC20(POOL_SUPER_TOKEN).approve(ALLO_PROXY, 100 ether);
+        IAllo(ALLO_PROXY).fundPool(poolId, 100 ether);
+
+        // Call distribute
+        int96 flowRate = 0.0001 ether;
+        bytes memory data = abi.encode(flowRate);
+        IAllo(ALLO_PROXY).distribute(poolId, new address[](0), data);
+
+        vm.stopPrank();
     }
 }
