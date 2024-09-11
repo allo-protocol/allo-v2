@@ -69,7 +69,8 @@ contract IntegrationDonationVotingOffchainBase is IntegrationBase {
                 allocationStartTime,
                 allocationEndTime,
                 withdrawalCooldown,
-                allowedTokens
+                allowedTokens,
+                true
             ),
             DAI,
             POOL_AMOUNT,
@@ -155,48 +156,6 @@ contract IntegrationDonationVotingOffchainReviewRecipients is IntegrationDonatio
         statuses[0] = _getApplicationStatus(_recipientIds, _newStatuses, address(strategy));
         vm.expectRevert(Errors.REGISTRATION_NOT_ACTIVE.selector);
         strategy.reviewRecipients(statuses, recipientsCounter);
-
-        vm.stopPrank();
-    }
-}
-
-contract IntegrationDonationVotingOffchainTimestamps is IntegrationDonationVotingOffchainBase {
-    function test_updateTimestamps() public {
-        vm.warp(registrationStartTime - 1 days);
-
-        // Review recipients
-        vm.startPrank(userAddr);
-
-        vm.expectRevert(DonationVotingOffchain.INVALID_TIMESTAMPS.selector);
-        // allocationStartTime > allocationEndTime
-        strategy.updatePoolTimestamps(
-            registrationStartTime, registrationEndTime, allocationEndTime, allocationStartTime
-        );
-
-        vm.expectRevert(DonationVotingOffchain.INVALID_TIMESTAMPS.selector);
-        // _registrationStartTime > _registrationEndTime
-        strategy.updatePoolTimestamps(
-            registrationEndTime, registrationStartTime, allocationStartTime, allocationEndTime
-        );
-
-        vm.expectRevert(DonationVotingOffchain.INVALID_TIMESTAMPS.selector);
-        // _registrationStartTime > allocationStartTime
-        strategy.updatePoolTimestamps(
-            allocationStartTime + 1, allocationEndTime, allocationStartTime, allocationEndTime
-        );
-
-        vm.expectRevert(DonationVotingOffchain.INVALID_TIMESTAMPS.selector);
-        // _registrationEndTime > allocationEndTime
-        strategy.updatePoolTimestamps(
-            registrationStartTime, allocationEndTime + 1, allocationStartTime, allocationEndTime
-        );
-
-        vm.warp(registrationStartTime + 1);
-        vm.expectRevert(DonationVotingOffchain.INVALID_TIMESTAMPS.selector);
-        // block.timestamp > _registrationStartTime
-        strategy.updatePoolTimestamps(
-            registrationStartTime, registrationEndTime, allocationStartTime, allocationEndTime
-        );
 
         vm.stopPrank();
     }

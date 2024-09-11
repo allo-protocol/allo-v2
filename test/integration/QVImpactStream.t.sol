@@ -77,7 +77,8 @@ contract IntegrationQVImpactStream is Test {
                 QVSimple.QVSimpleInitializeData({
                     allocationStartTime: uint64(block.timestamp),
                     allocationEndTime: uint64(block.timestamp + 7 days),
-                    maxVoiceCreditsPerAllocator: 100
+                    maxVoiceCreditsPerAllocator: 100,
+                    isUsingAllocationMetadata: false
                 })
             ),
             dai,
@@ -88,8 +89,10 @@ contract IntegrationQVImpactStream is Test {
 
         // Adding allocators
         vm.startPrank(profileOwner);
-        strategy.addAllocator(allocator0);
-        strategy.addAllocator(allocator1);
+        address[] memory allocators = new address[](2);
+        allocators[0] = allocator0;
+        allocators[1] = allocator1;
+        strategy.addAllocators(allocators);
         vm.stopPrank();
 
         // Adding recipients

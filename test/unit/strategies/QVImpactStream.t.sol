@@ -53,7 +53,8 @@ contract QVImpactStreamTest is Test {
         QVSimple.QVSimpleInitializeData memory qvInitData = QVSimple.QVSimpleInitializeData({
             allocationStartTime: uint64(block.timestamp),
             allocationEndTime: uint64(block.timestamp + allocationWindow),
-            maxVoiceCreditsPerAllocator: 100
+            maxVoiceCreditsPerAllocator: 100,
+            isUsingAllocationMetadata: false
         });
         /// initialize
         vm.prank(mockAlloAddress);
@@ -69,36 +70,6 @@ contract QVImpactStreamTest is Test {
             mockAlloAddress, abi.encodeWithSelector(IAllo.isPoolManager.selector, 1, poolManager), abi.encode(true)
         );
         _;
-    }
-
-    function test_BatchAddAllocatorWhenCalledByPoolManager() external callWithPoolManager {
-        // if AllocatorAdded event emits with the correct parameters then _addAllocator was also called
-        // with the correct parameters
-        vm.expectEmit(true, true, true, true);
-        emit AllocatorAdded(recipient1, poolManager);
-
-        address[] memory _recipients = new address[](1);
-        _recipients[0] = recipient1;
-
-        vm.prank(poolManager);
-        qvImpactStream.batchAddAllocator(_recipients);
-
-        assertTrue(qvImpactStream.allowedAllocators(recipient1));
-    }
-
-    function test_BatchRemoveAllocatorWhenCalledByPoolManager() external callWithPoolManager {
-        // if AllocatorRemoved event emits with the correct parameters then _removeAllocator was also called
-        // with the correct parameters
-        vm.expectEmit(true, true, true, true);
-        emit AllocatorRemoved(recipient1, poolManager);
-
-        address[] memory _recipients = new address[](1);
-        _recipients[0] = recipient1;
-
-        vm.prank(poolManager);
-        qvImpactStream.batchRemoveAllocator(_recipients);
-
-        assertFalse(qvImpactStream.allowedAllocators(recipient1));
     }
 
     function test_SetPayoutsRevertWhen_PayoutSetIsTrue() external callWithPoolManager {

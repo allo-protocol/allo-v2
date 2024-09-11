@@ -6,13 +6,13 @@ interface IAllocationExtension {
     error INVALID_ALLOCATION_TIMESTAMPS();
 
     /// @dev Error thrown when trying to call the function when the allocation has started
-    error ALLOCATION_HAS_STARTED();
+    error ALLOCATION_HAS_ALREADY_STARTED();
 
     /// @dev Error thrown when trying to call the function when the allocation is not active
-    error ALLOCATION_NOT_ACTIVE();
+    error ALLOCATION_IS_NOT_ACTIVE();
 
     /// @dev Error thrown when trying to call the function when the allocation has ended
-    error ALLOCATION_NOT_ENDED();
+    error ALLOCATION_IS_NOT_ENDED();
 
     /// @notice Emitted when the allocation timestamps are updated
     /// @param allocationStartTime The start time for the allocation period

@@ -49,7 +49,8 @@ contract IntegrationQVSimple is IntegrationBase {
                 QVSimple.QVSimpleInitializeData({
                     allocationStartTime: uint64(block.timestamp),
                     allocationEndTime: uint64(block.timestamp + 7 days),
-                    maxVoiceCreditsPerAllocator: 100
+                    maxVoiceCreditsPerAllocator: 100,
+                    isUsingAllocationMetadata: false
                 })
             ),
             DAI,
@@ -59,9 +60,11 @@ contract IntegrationQVSimple is IntegrationBase {
         );
 
         // Adding allocators
-        vm.startPrank(userAddr);
-        strategy.addAllocator(allocator0);
-        strategy.addAllocator(allocator1);
+        address[] memory allocators = new address[](2);
+        allocators[0] = allocator0;
+        allocators[1] = allocator1;
+        vm.prank(userAddr);
+        strategy.addAllocators(allocators);
 
         // Adding recipients
         vm.startPrank(address(allo));
