@@ -147,7 +147,8 @@ contract IntegrationSQFSuperfluid is Test {
                     allocationStartTime: uint64(block.timestamp),
                     allocationEndTime: uint64(block.timestamp + 7 days),
                     minPassportScore: MIN_PASSPORT_SCORE,
-                    initialSuperAppBalance: INITIAL_SUPER_APP_BALANCE
+                    initialSuperAppBalance: INITIAL_SUPER_APP_BALANCE,
+                    erc721s: new address[](0)
                 })
             ),
             POOL_SUPER_TOKEN,

@@ -9,20 +9,27 @@ import {
 import {PoolConfig} from
     "@superfluid-finance/ethereum-contracts/contracts/interfaces/agreements/gdav1/IGeneralDistributionAgreementV1.sol";
 import {SuperTokenV1Library} from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
-import {IGitcoinPassportDecoder} from "contracts/strategies/examples/sqf-superfluid/IGitcoinPassportDecoder.sol";
+import {IGitcoinPassportDecoder} from "strategies/examples/sqf-superfluid/IGitcoinPassportDecoder.sol";
 import {FixedPointMathLib} from "solady/utils/FixedPointMathLib.sol";
-import {IRecipientSuperAppFactory} from "contracts/strategies/examples/sqf-superfluid/IRecipientSuperAppFactory.sol";
+import {IRecipientSuperAppFactory} from "strategies/examples/sqf-superfluid/IRecipientSuperAppFactory.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 // Core Contracts
-import {RecipientsExtension} from "contracts/strategies/extensions/register/RecipientsExtension.sol";
+import {RecipientsExtension} from "strategies/extensions/register/RecipientsExtension.sol";
 import {AllocationExtension} from "strategies/extensions/allocate/AllocationExtension.sol";
-import {BaseStrategy} from "contracts/strategies/BaseStrategy.sol";
+import {NFTGatingExtension} from "strategies/extensions/gating/NFTGatingExtension.sol";
+import {BaseStrategy} from "strategies/BaseStrategy.sol";
 
 // Internal Libraries
 import {Transfer} from "contracts/core/libraries/Transfer.sol";
 
-contract SQFSuperfluid is BaseStrategy, RecipientsExtension, AllocationExtension, ReentrancyGuard {
+contract SQFSuperfluid is
+    BaseStrategy,
+    RecipientsExtension,
+    AllocationExtension,
+    NFTGatingExtension,
+    ReentrancyGuard
+{
     using SuperTokenV1Library for ISuperToken;
     using FixedPointMathLib for uint256;
     using Transfer for address;
@@ -40,6 +47,7 @@ contract SQFSuperfluid is BaseStrategy, RecipientsExtension, AllocationExtension
     /// @param allocationEndTime The end time for the allocation
     /// @param minPassportScore The minimum passport score required to be an allocator
     /// @param initialSuperAppBalance The initial balance for the super app
+    /// @param erc721s An array containing the NFTs to check eligibility
     struct SQFSuperfluidInitializeParams {
         address passportDecoder;
         address superfluidHost;
@@ -49,6 +57,7 @@ contract SQFSuperfluid is BaseStrategy, RecipientsExtension, AllocationExtension
         uint64 allocationEndTime;
         uint256 minPassportScore;
         uint256 initialSuperAppBalance;
+        address[] erc721s;
     }
 
     /// ======================
@@ -98,6 +107,9 @@ contract SQFSuperfluid is BaseStrategy, RecipientsExtension, AllocationExtension
 
     /// @notice The minimum passport score required to be an allocator
     uint256 public minPassportScore;
+
+    /// @notice An array containing the NFTs to check eligibility
+    address[] public erc721s;
 
     /// @notice stores the superApp of each recipientId
     mapping(address => address) public recipientIdSuperApps;
@@ -177,6 +189,7 @@ contract SQFSuperfluid is BaseStrategy, RecipientsExtension, AllocationExtension
                 true
             )
         );
+        erc721s = _sqfSuperfluidInitializeParams.erc721s;
     }
 
     /// ====================================
@@ -313,11 +326,19 @@ contract SQFSuperfluid is BaseStrategy, RecipientsExtension, AllocationExtension
     /// @param _allocator The allocator address
     /// @return 'true' if the allocator is valid, otherwise 'false'
     function _isValidAllocator(address _allocator) internal view override returns (bool) {
+        // Check if the allocator has a minimum passport score
         uint256 allocatorScore = passportDecoder.getScore(_allocator);
-        if (allocatorScore >= minPassportScore) {
-            return true;
+        if (allocatorScore < minPassportScore) {
+            // If the allocator does not have the required score, then it is not valid. No need to check for NFTs
+            return false;
         }
-        return false;
+
+        // Check if the allocator has the required NFTs
+        for (uint256 i; i < erc721s.length; i++) {
+            _checkOnlyWithNFT(erc721s[i], _allocator);
+        }
+        // If didnt revert, then the allocator has the required NFT (and we assume it also has the required score)
+        return true;
     }
 
     /// @dev If the recipient is accepted, create a super app for the recipient
