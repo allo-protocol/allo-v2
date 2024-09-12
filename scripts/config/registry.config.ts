@@ -119,4 +119,8 @@ export const registryConfig: DeployParams = {
   1088: {
     owner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
   },
+  // Gnosis
+  100: {
+    owner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
+  },
 };
