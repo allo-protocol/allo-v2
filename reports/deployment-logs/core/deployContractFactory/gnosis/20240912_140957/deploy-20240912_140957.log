@@ -1,0 +1,43 @@
+
+    ////////////////////////////////////////////////////
+        Deploys ContractFactory.sol on gnosis
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────┐
+│     (index)     │                    Values                    │
+├─────────────────┼──────────────────────────────────────────────┤
+│    contract     │         'Deploy ContractFactory.sol'         │
+│     chainId     │                     100                      │
+│     network     │                   'gnosis'                   │
+│ deployerAddress │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│     balance     │           '115.271819118573483118'           │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying ContractFactory.sol...
+ContractFactory deployed to: 0xE195743480D1591B79106FF9B296A0cD38aDa807
+
+Verifying contract...
+MissingApiKeyError: You are trying to verify a contract in 'xdai', but no API token was found for this network. Please provide one in your hardhat config. For example:
+
+{
+  ...
+  etherscan: {
+    apiKey: {
+      xdai: 'your API key'
+    }
+  }
+}
+
+See https://etherscan.io/apis
+    at resolveApiKey (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/@nomicfoundation+hardhat-verify@1.1.1_hardhat@2.22.1/node_modules/@nomicfoundation/hardhat-verify/src/internal/etherscan.ts:290:11)
+    at Function.fromChainConfig (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/@nomicfoundation+hardhat-verify@1.1.1_hardhat@2.22.1/node_modules/@nomicfoundation/hardhat-verify/src/internal/etherscan.ts:75:28)
+    at SimpleTaskDefinition.action (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/@nomicfoundation+hardhat-verify@1.1.1_hardhat@2.22.1/node_modules/@nomicfoundation/hardhat-verify/src/index.ts:240:35)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Environment._runTaskDefinition (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:359:14)
+    at async hardhatVerify (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/@openzeppelin+hardhat-upgrades@2.5.1_sym3ukwnpvfhm2yjdhnkm4xtb4/node_modules/@openzeppelin/hardhat-upgrades/src/verify-proxy.ts:118:12)
+    at async OverriddenTaskDefinition._action (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/@openzeppelin+hardhat-upgrades@2.5.1_sym3ukwnpvfhm2yjdhnkm4xtb4/node_modules/@openzeppelin/hardhat-upgrades/src/index.ts:206:12)
+    at async Environment._runTaskDefinition (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:359:14)
+    at async Environment.run (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:192:14)
+    at async SimpleTaskDefinition.action (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/.pnpm/@nomicfoundation+hardhat-verify@1.1.1_hardhat@2.22.1/node_modules/@nomicfoundation/hardhat-verify/src/index.ts:546:7)
+[90m
+	Validating isDeployer(0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C) == true[0m
+[32m	✅ PASSED with Result: true[0m
