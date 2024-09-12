@@ -28,7 +28,7 @@ export async function createProfile() {
 
     await instance.createProfile(
         1, // none
-        "Shitzu", // name
+        "Direct Allocation", // name
         {
             protocol: 1,
             pointer: "bafybeia4khbew3r2mkflyn7nzlvfzcb3qpfeftz5ivpzfwn77ollj47gqi"

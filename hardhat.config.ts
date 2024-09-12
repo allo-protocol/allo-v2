@@ -50,7 +50,8 @@ const chainIds = {
   avalanche: 43114,
   scroll: 534352,
   "lukso-mainnet": 42,
-  metisAndromeda: 1088
+  metisAndromeda: 1088,
+  gnosis: 100,
 };
 
 let deployPrivateKey = process.env.DEPLOYER_PRIVATE_KEY as string;
@@ -266,6 +267,10 @@ const config: HardhatUserConfig = {
       ...createTestnetConfig("lukso-testnet"),
       url: "https://4201.rpc.thirdweb.com",
     },
+    "gnosis": {
+      ...createMainnetConfig("gnosis"),
+      url: "https://rpc.gnosischain.com",
+    },
 
     // Local Networks
     localhost: createTestnetConfig("localhost", "http://localhost:8545"),
@@ -313,6 +318,7 @@ const config: HardhatUserConfig = {
       "lukso-mainnet": "no-api-key-needed",
       "lukso-testnet": "no-api-key-needed",
       metisAndromeda: "no-api-key-needed",
+      xdai: process.env.GNOSISSCAN_API_KEY || "",
     },
     customChains: [
       {

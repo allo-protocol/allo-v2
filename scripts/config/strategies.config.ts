@@ -717,4 +717,19 @@ export const strategyConfig: DeployParams = {
       version: "v1.1",
     },
   },
+  // Gnosis
+  100: {
+    "donation-voting-merkle-distribution-direct": {
+      name: "DonationVotingMerkleDistributionDirectTransferStrategy",
+      version: "v2.1",
+    },
+    "direct-grants-lite": {
+      name: "DirectGrantsLiteStrategy",
+      version: "v1.0",
+    },
+    "direct-allocation": {
+      name: "DirectAllocationStrategy",
+      version: "v1.1",
+    },
+  },
 };

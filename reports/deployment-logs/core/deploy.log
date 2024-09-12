@@ -657,3 +657,15 @@
 20240729_144601 - Deployment finished with 0 error(s)
 20240729_144601 - Executing: bun hardhat run scripts/strategies/deployDirectAllocation.ts --no-compile --network metisAndromeda | tee ./reports/deployment-logs/strategies/deployDirectAllocation/metisAndromeda/20240729_144147/deploy-20240729_144147.log
 20240729_144755 - Deployment finished with 0 error(s)
+20240912_140627 - Executing: bun hardhat run scripts/core/deployRegistry.ts --no-compile --network gnosis | tee ./reports/deployment-logs/core/deployRegistry/gnosis/20240912_140627/deploy-20240912_140627.log
+20240912_140751 - Deployment finished with 0 error(s)
+20240912_140957 - Executing: bun hardhat run scripts/core/deployContractFactory.ts --no-compile --network gnosis | tee ./reports/deployment-logs/core/deployContractFactory/gnosis/20240912_140957/deploy-20240912_140957.log
+20240912_141056 - Deployment finished with 0 error(s)
+20240912_141056 - Executing: bun hardhat run scripts/core/deployAllo.ts --no-compile --network gnosis | tee ./reports/deployment-logs/core/deployAllo/gnosis/20240912_140957/deploy-20240912_140957.log
+20240912_141208 - Deployment finished with 0 error(s)
+20240912_141426 - Executing: bun hardhat run scripts/strategies/deployDonationVotingMerkleDistributionDirect.ts --no-compile --network gnosis | tee ./reports/deployment-logs/strategies/deployDonationVotingMerkleDistributionDirect/gnosis/20240912_141426/deploy-20240912_141426.log
+20240912_141657 - Deployment finished with 0 error(s)
+20240912_141657 - Executing: bun hardhat run scripts/strategies/deployDirectGrantsLite.ts --no-compile --network gnosis | tee ./reports/deployment-logs/strategies/deployDirectGrantsLite/gnosis/20240912_141426/deploy-20240912_141426.log
+20240912_141937 - Deployment finished with 0 error(s)
+20240912_141937 - Executing: bun hardhat run scripts/strategies/deployDirectAllocation.ts --no-compile --network gnosis | tee ./reports/deployment-logs/strategies/deployDirectAllocation/gnosis/20240912_141426/deploy-20240912_141426.log
+20240912_142146 - Deployment finished with 0 error(s)

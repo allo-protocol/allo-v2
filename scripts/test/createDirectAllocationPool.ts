@@ -36,7 +36,7 @@ export async function createDirectAllocationPool() {
             protocol: 0,
             pointer: ""
         }, // _metadata
-        ['0xB8cEF765721A6da910f14Be93e7684e9a3714123'] // _managers
+        ['0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C'] // _managers
     );
 
     console.log("pool created on registry at:", instance.target);
