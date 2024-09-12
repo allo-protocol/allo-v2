@@ -318,7 +318,7 @@ const config: HardhatUserConfig = {
       "lukso-mainnet": "no-api-key-needed",
       "lukso-testnet": "no-api-key-needed",
       metisAndromeda: "no-api-key-needed",
-      gnosis: process.env.GNOSISSCAN_API_KEY || "",
+      xdai: process.env.GNOSISSCAN_API_KEY || "",
     },
     customChains: [
       {

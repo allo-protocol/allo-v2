@@ -48,7 +48,7 @@ networks=(
 #   "lukso-testnet"
 #   "lukso-mainnet"
 #   "metisAndromeda"
-  "gnosis"
+#   "gnosis"
 
 #  === ZkSync Era ===
 #   "zkSyncTestnet"
@@ -57,9 +57,9 @@ networks=(
 )
 
 scripts=(
-    "core/deployRegistry"
-    "core/deployContractFactory"
-    "core/deployAllo"
+    # "core/deployRegistry"
+    # "core/deployContractFactory"
+    # "core/deployAllo"
    
     # "strategies/deployDonationVotingMerkleDistributionDirect"
     # "strategies/deployDirectGrantsLite"
