@@ -678,8 +678,6 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
     ///      Emits a TrustedForwarderUpdated event.
     /// @param __trustedForwarder The new trusted forwarder address
     function _updateTrustedForwarder(address __trustedForwarder) internal virtual {
-        if (__trustedForwarder == address(0)) revert ZERO_ADDRESS();
-
         _trustedForwarder = __trustedForwarder;
 
         emit TrustedForwarderUpdated(__trustedForwarder);

@@ -747,12 +747,7 @@ contract Allo is Test {
         vm.skip(true);
     }
 
-    function test__updateTrustedForwarderRevertWhen_TrustedForwarderIsZeroAddress() external {
-        // it should revert
-        vm.skip(true);
-    }
-
-    function test__updateTrustedForwarderGivenTrustedForwarderIsNotZeroAddress() external {
+    function test__updateTrustedForwarder() external {
         // it should update trustedForwarder
         // it should emit event
         vm.skip(true);
