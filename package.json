@@ -28,6 +28,7 @@
     "deploy-registry": "npx hardhat run scripts/core/deployRegistry.ts --network",
     "upgrade-allo": "npx hardhat run scripts/core/deployAllo.ts --network",
     "deploy-deployer": "npx hardhat run scripts/core/deployContractFactory.ts --network",
+    "deploy-strategy": "script/strategies/deployStrategy.sh",
     "/////// deploy-test ///////": "echo 'deploy test scripts'",
     "create-profile": "npx hardhat run scripts/test/createProfile.ts --network",
     "create-pool": "npx hardhat run scripts/test/createPool.ts --network",
