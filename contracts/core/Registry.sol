@@ -1,18 +1,17 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity ^0.8.19;
 
-// External Libraries
+// External Imports
 import {AccessControlUpgradeable} from
     "openzeppelin-contracts-upgradeable/contracts/access/AccessControlUpgradeable.sol";
 import {Initializable} from "openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
 import {ERC20} from "solady/tokens/ERC20.sol";
-// Interfaces
-import {IRegistry} from "./interfaces/IRegistry.sol";
-// Internal Libraries
-import {Anchor} from "./Anchor.sol";
-import {Errors} from "./libraries/Errors.sol";
-import {Metadata} from "./libraries/Metadata.sol";
-import {Transfer} from "./libraries/Transfer.sol";
+// Internal Imports
+import {IRegistry} from "contracts/core/interfaces/IRegistry.sol";
+import {Anchor} from "contracts/core/Anchor.sol";
+import {Errors} from "contracts/core/libraries/Errors.sol";
+import {Metadata} from "contracts/core/libraries/Metadata.sol";
+import {Transfer} from "contracts/core/libraries/Transfer.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⣿⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀

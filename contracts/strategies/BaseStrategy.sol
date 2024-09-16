@@ -1,8 +1,10 @@
 /// SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity ^0.8.19;
 
-/// Interfaces
-import "./IBaseStrategy.sol";
+// Internal Imports
+// Interfaces
+import {IAllo} from "contracts/core/interfaces/IAllo.sol";
+import {IBaseStrategy} from "strategies/IBaseStrategy.sol";
 // Internal Libraries
 import {Transfer} from "contracts/core/libraries/Transfer.sol";
 

@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity ^0.8.19;
 
+// External Imports
 // External Libraries
 import {MerkleProof} from "openzeppelin-contracts/contracts/utils/cryptography/MerkleProof.sol";
 import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
+// Internal Imports
 // Interfaces
 import {IAllo} from "contracts/core/interfaces/IAllo.sol";
 // Core Contracts

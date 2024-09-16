@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.19;
 
-import "solady/utils/FixedPointMathLib.sol";
+// External Imports
+import {FixedPointMathLib} from "solady/utils/FixedPointMathLib.sol";
 
 /// @title QV Helper Library
 /// @notice A helper library for Quadratic Voting

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity ^0.8.19;
 
+// Internal Imports
 import {IAllocationExtension} from "contracts/strategies/extensions/allocate/IAllocationExtension.sol";
 import {BaseStrategy} from "contracts/strategies/BaseStrategy.sol";
 

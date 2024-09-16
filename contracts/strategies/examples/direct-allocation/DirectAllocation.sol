@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+// Internal Imports
 // Core Contracts
 import {BaseStrategy} from "strategies/BaseStrategy.sol";
 // Internal Libraries

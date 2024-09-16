@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity ^0.8.19;
 
+// Internal Imports
 // Interfaces
 import {IAllo} from "contracts/core/interfaces/IAllo.sol";
 // Core Contracts
-import {BaseStrategy} from "../../BaseStrategy.sol";
+import {BaseStrategy} from "strategies/BaseStrategy.sol";
 import {MilestonesExtension} from "strategies/extensions/milestones/MilestonesExtension.sol";
 import {RecipientsExtension} from "strategies/extensions/register/RecipientsExtension.sol";
 // Internal Libraries

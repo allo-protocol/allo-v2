@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity ^0.8.19;
 
-/// External Libraries
+// External Imports
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
+// Internal Imports
 // Core Contracts
 import {BaseStrategy} from "strategies/BaseStrategy.sol";
 
