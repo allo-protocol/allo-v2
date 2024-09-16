@@ -130,9 +130,9 @@ contract QVSimple is BaseStrategy, RecipientsExtension, AllocatorsAllowlistExten
                 revert RECIPIENT_ERROR(recipientId);
             }
 
-            pool.token.transferAmount(recipient.recipientAddress, amount);
-
             paidOut[recipientId] = true;
+
+            pool.token.transferAmount(recipient.recipientAddress, amount);
 
             emit Distributed(recipientId, abi.encode(recipient.recipientAddress, amount, _sender));
         }
