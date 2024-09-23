@@ -31,6 +31,7 @@
     "deploy-deployer": "npx hardhat run scripts/core/deployContractFactory.ts --network",
     "deploy-strategy": "script/strategies/deployStrategy.sh",
     "/////// deploy-test ///////": "echo 'deploy test scripts'",
+    "interaction": "script/core/interaction/runScript.sh",
     "create-profile": "npx hardhat run scripts/test/createProfile.ts --network",
     "create-pool": "npx hardhat run scripts/test/createPool.ts --network",
     "smock": "smock-foundry --contracts test/mocks/smock-mocks/"
