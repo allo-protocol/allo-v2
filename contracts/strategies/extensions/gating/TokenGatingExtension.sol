@@ -43,7 +43,7 @@ abstract contract TokenGatingExtension is BaseStrategy {
     /// @param _token The token address
     /// @param _amount The amount of tokens
     /// @param _actor The actor address
-    function _checkOnlyWithToken(address _token, uint256 _amount, address _actor) internal view {
+    function _checkOnlyWithToken(address _token, uint256 _amount, address _actor) internal view virtual {
         if (_token == address(0)) revert TokenGatingExtension_INVALID_TOKEN();
         if (_actor == address(0)) revert TokenGatingExtension_INVALID_ACTOR();
         if (IERC20(_token).balanceOf(_actor) < _amount) revert TokenGatingExtension_INSUFFICIENT_BALANCE();
