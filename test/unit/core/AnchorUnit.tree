@@ -1,0 +1,28 @@
+Anchor::constructor
+├── it should set registry
+└── it should set profileId
+
+Anchor::execute
+├── when caller is not the profileId owner
+│   └── it should revert
+├── when target is the zero address
+│   └── it should revert
+└── when caller owns the profile
+    └── when target is not the zero address
+        ├── when the call to target fails
+        │   └── it should revert
+        └── when the call to target succeeds
+            ├── it should return the data returned by the call
+            └── it should call target with value and data
+
+Anchor::receive
+└── it should receive native tokens
+
+Anchor::erc721Holder
+└── it should return the onERC721Received selector
+
+Anchor::erc1155Holder
+└── it should return the onERC1155Received selector
+
+Anchor::erc1155HolderBatch
+└── it should return the onERC1155BatchReceived selector
