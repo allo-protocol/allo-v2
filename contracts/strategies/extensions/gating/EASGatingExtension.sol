@@ -34,7 +34,7 @@ abstract contract EASGatingExtension is BaseStrategy {
     /// ===============================
     /// @notice This initializes the strategy
     /// @param _eas The eas address
-    function __EASGatingExtension_init(address _eas) internal {
+    function __EASGatingExtension_init(address _eas) internal virtual {
         if (_eas == address(0)) revert EASGatingExtension_INVALID_EAS_ADDRESS();
         /// Set the EAS contract
         eas = _eas;
@@ -61,7 +61,7 @@ abstract contract EASGatingExtension is BaseStrategy {
     /// @param _schema The unique identifier of the schema
     /// @param _attester The attester address
     /// @param _uid The unique identifier of the attestation
-    function _checkOnlyWithAttestation(bytes32 _schema, address _attester, bytes32 _uid) internal view {
+    function _checkOnlyWithAttestation(bytes32 _schema, address _attester, bytes32 _uid) internal view virtual {
         Attestation memory _attestation = IEAS(eas).getAttestation(_uid);
         if (_attestation.schema != _schema) revert EASGatingExtension_INVALID_ATTESTATION_SCHEMA();
         if (_attestation.attester != _attester) revert EASGatingExtension_INVALID_ATTESTATION_ATTESTER();

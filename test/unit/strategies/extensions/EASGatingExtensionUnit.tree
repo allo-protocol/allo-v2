@@ -1,0 +1,11 @@
+EASGatingExtension::__EASGatingExtension_init
+├── It should revert if _eas is zero address
+└── When _eas is not zero address
+    └── It should set the EAS address
+
+EASGatingExtension::_checkOnlyWithAttestation
+├── It should call getAttestation in eas contract
+├── When schema is different than returned
+│   └── It should revert
+└── When attester is different than returned
+    └── It should revert
