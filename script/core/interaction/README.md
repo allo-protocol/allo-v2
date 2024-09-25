@@ -28,7 +28,7 @@ contract CreateProfile is Script {
     string public name = "";
     Metadata public metadata = Metadata({protocol: uint256(0), pointer: ""});
     address public owner = address(0);
-    address[] public members = [];
+    address[] public members;
 ```
 
 overwrite profile parameters like so:
