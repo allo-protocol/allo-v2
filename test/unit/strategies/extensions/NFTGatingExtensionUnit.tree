@@ -1,0 +1,9 @@
+NFTGatingExtension::_checkOnlyWithNFT
+├── When nft address is zero
+│   └── It should revert
+├── When actor address is zero
+│   └── It should revert
+├── When actor balance is equal zero
+│   └── It should revert
+└── When parameters are valid
+    └── It should execute successfully
