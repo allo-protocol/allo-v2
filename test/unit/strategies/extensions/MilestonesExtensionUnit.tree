@@ -1,0 +1,76 @@
+MilestonesExtension::__MilestonesExtension_init
+└── It should call _increaseMaxBid
+
+MilestonesExtension::increaseMaxBid
+└── When parameters are valid
+    ├── It should call _checkOnlyPoolManager
+    └── It should call _increaseMaxBid
+
+MilestonesExtension::setMilestones
+├── When parameters are valid
+│   ├── It should call _validateSetMilestones
+│   ├── It should set the milestones
+│   └── It should emit event
+├── When amountPercentage is zero
+│   └── It should revert
+└── When totalAmountPercentage is different from 1e18
+    └── It should revert
+
+MilestonesExtension::submitUpcomingMilestone
+└── When parameters are valid
+    ├── It should call _validateSubmitUpcomingMilestone
+    ├── It should set the milestone metadata
+    ├── It should set the milestone status
+    └── It should emit event
+
+MilestonesExtension::reviewMilestone
+└── When parameters are valid
+    ├── It should call _validateReviewMilestone
+    ├── It should set the milestone status
+    ├── It should emit event
+    └── When milestone status is equal to accepted
+        └── It should increase upcomingMilestone
+
+MilestonesExtension::_setProposalBid
+├── When proposalBid parameter is bigger than maxBid
+│   └── It should revert
+└── When parameters of the function are valid
+    ├── When proposalBid is equal to 0
+    │   └── It should set the _proposalBid to maxBid
+    ├── It should set the _proposalBid at bids mapping
+    └── It should emit event
+
+MilestonesExtension::_validateSetMilestones
+├── It should call _checkOnlyPoolManager
+└── When array length is more than zero
+    ├── It should delete milestones array
+    └── When first milestone status is different from None
+        └── It should revert
+
+MilestonesExtension::_validateSubmitUpcomingMilestone
+├── When recipient is not accepted
+│   └── It should revert
+├── When sender is different from recipientId
+│   └── It should revert
+└── When milestone status is pending
+    └── It should revert
+
+MilestonesExtension::_validateReviewMilestone
+├── It should call _checkOnlyPoolManager
+├── When provided milestone status is None
+│   └── It should revert
+└── When upcomingMilestone status is different from pending
+    └── It should revert
+
+MilestonesExtension::_increaseMaxBid
+├── When provided maxBid is smaller than maxBid
+│   └── It should revert
+└── When parameters are valid
+    ├── It should set the maxBid
+    └── It should emit event
+
+MilestonesExtension::_getMilestonePayout
+├── When recipient is not accepted
+│   └── It should revert
+└── When recipient is accepted
+    └── It should return the milestone payout

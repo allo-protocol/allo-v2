@@ -182,7 +182,7 @@ abstract contract MilestonesExtension is BaseStrategy, IMilestonesExtension {
 
     /// @notice Increase max bid
     /// @param _maxBid The new max bid to be set
-    function _increaseMaxBid(uint256 _maxBid) internal {
+    function _increaseMaxBid(uint256 _maxBid) internal virtual {
         // make sure the new max bid is greater than the current max bid
         if (_maxBid < maxBid) revert AMOUNT_TOO_LOW();
 
