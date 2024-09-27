@@ -7,12 +7,12 @@ import {Initializable} from "openzeppelin-contracts-upgradeable/contracts/proxy/
 import {IERC20Upgradeable} from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 import {AccessControlUpgradeable} from
     "openzeppelin-contracts-upgradeable/contracts/access/AccessControlUpgradeable.sol";
+import {ClonesUpgradeable} from "openzeppelin-contracts-upgradeable/contracts/proxy/ClonesUpgradeable.sol";
 import {ReentrancyGuardUpgradeable} from
     "openzeppelin-contracts-upgradeable/contracts/security/ReentrancyGuardUpgradeable.sol";
 // Internal Imports
 import {IAllo} from "contracts/core/interfaces/IAllo.sol";
 import {IRegistry} from "contracts/core/interfaces/IRegistry.sol";
-import {Clone} from "contracts/core/libraries/Clone.sol";
 import {Errors} from "contracts/core/libraries/Errors.sol";
 import {Native} from "contracts/core/libraries/Native.sol";
 import {Transfer} from "contracts/core/libraries/Transfer.sol";
@@ -208,13 +208,18 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
         // Revert if the strategy address passed is the zero address with 'ZERO_ADDRESS()'
         if (_strategy == address(0)) revert ZERO_ADDRESS();
 
-        // Returns the created pool ID
         address creator = _msgSender();
+
+        // Clone the strategy contract
+        bytes32 salt = keccak256(abi.encodePacked(creator, _nonces[creator]++));
+        address clone = ClonesUpgradeable.cloneDeterministic(_strategy, salt);
+
+        // Returns the created pool ID
         return _createPool(
             creator,
             msg.value,
             _profileId,
-            IBaseStrategy(Clone.createClone(_strategy, _nonces[creator]++)),
+            IBaseStrategy(clone),
             _initStrategyData,
             _token,
             _amount,
