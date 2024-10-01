@@ -111,8 +111,10 @@ abstract contract BaseStrategy is IBaseStrategy {
     {
         _beforeWithdraw(_token, _amount, _recipient);
         // If the token is the pool token, revert if the amount is greater than the pool amount
-        if (_token.getBalance(address(this)) - _amount < poolAmount) {
-            revert BaseStrategy_WITHDRAW_MORE_THAN_POOL_AMOUNT();
+        if (_token == allo.getPool(poolId).token) {
+            if (_token.getBalance(address(this)) - _amount < poolAmount) {
+                revert BaseStrategy_WITHDRAW_MORE_THAN_POOL_AMOUNT();
+            }
         }
         _token.transferAmount(_recipient, _amount);
         _afterWithdraw(_token, _amount, _recipient);
@@ -173,7 +175,7 @@ abstract contract BaseStrategy is IBaseStrategy {
 
     /// @notice Checks if the 'msg.sender' is the Allo contract.
     /// @dev Reverts if the 'msg.sender' is not the Allo contract.
-    function _checkOnlyAllo() internal view {
+    function _checkOnlyAllo() internal view virtual {
         if (msg.sender != address(allo)) revert BaseStrategy_UNAUTHORIZED();
     }
 

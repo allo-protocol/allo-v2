@@ -1,0 +1,58 @@
+BaseStrategy::__BaseStrategy_init
+├── It should call onlyAllo
+├── When poolId is zero
+│   └── It should revert
+├── When poolId argument is zero
+│   └── It should revert
+└── It should set poolId
+
+BaseStrategy::increasePoolAmount
+├── It should call onlyAllo
+├── It should call _beforeIncreasePoolAmount
+├── It should add amount to poolAmount
+└── It should call _afterIncreasePoolAmount
+
+BaseStrategy::withdraw
+├── When token is not pool token
+│   ├── It should call onlyPoolManager
+│   ├── It should call _beforeWithdraw
+│   ├── It should call getPool at allo
+│   ├── It should call transfer at token
+│   ├── It should call _afterWithdraw
+│   ├── It should not change the pool amount
+│   └── It should emit event
+└── When token is pool token
+    ├── It should call balanceOf at token
+    └── When amount is greater than balance minus poolAmount
+        └── It should revert
+
+BaseStrategy::register
+└── When parameters are valid
+    ├── It should call onlyAllo
+    ├── It should call _beforeRegisterRecipient
+    ├── It should call _register
+    ├── It should call _afterRegisterRecipient
+    └── It should return _recipientIds
+
+BaseStrategy::allocate
+└── When parameters are valid
+    ├── It should call onlyAllo
+    ├── It should call _beforeAllocate
+    ├── It should call _allocate
+    └── It should call _afterAllocate
+
+BaseStrategy::distribute
+└── When parameters are valid
+    ├── It should call onlyAllo
+    ├── It should call _beforeDistribute
+    ├── It should call _distribute
+    └── It should call _afterDistribute
+
+BaseStrategy::_checkOnlyAllo
+└── When caller is not allo
+    └── It should revert
+
+BaseStrategy::_checkOnlyPoolManager
+├── It should call isPoolManager at allo
+└── When caller is not poolManager
+    └── It should revert
