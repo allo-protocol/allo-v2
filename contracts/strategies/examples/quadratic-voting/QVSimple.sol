@@ -41,8 +41,8 @@ contract QVSimple is BaseStrategy, RecipientsExtension, AllocatorsAllowlistExten
     /// @notice The maximum voice credits per allocator
     uint256 public maxVoiceCreditsPerAllocator;
 
-    /// @notice Whether the distribution started or not
-    bool public distributionStarted;
+    /// @notice The total amount to distribute. Zero if distribution has not started
+    uint256 public totalPayoutAmount;
 
     /// @notice The voice credits allocated for each allocator
     mapping(address => uint256) public voiceCreditsAllocated;
@@ -113,11 +113,11 @@ contract QVSimple is BaseStrategy, RecipientsExtension, AllocatorsAllowlistExten
         onlyPoolManager(_sender)
         onlyAfterAllocation
     {
-        if (!distributionStarted) {
-            distributionStarted = true;
+        if (totalPayoutAmount == 0) {
+            totalPayoutAmount = poolAmount;
         }
 
-        uint256[] memory payouts = _votingState._getPayout(_recipientIds, poolAmount);
+        uint256[] memory payouts = _votingState._getPayout(_recipientIds, totalPayoutAmount);
 
         IAllo.Pool memory pool = allo.getPool(poolId);
 
@@ -132,6 +132,7 @@ contract QVSimple is BaseStrategy, RecipientsExtension, AllocatorsAllowlistExten
             }
 
             paidOut[recipientId] = true;
+            poolAmount -= amount;
 
             pool.token.transferAmount(recipient.recipientAddress, amount);
 
@@ -193,20 +194,10 @@ contract QVSimple is BaseStrategy, RecipientsExtension, AllocatorsAllowlistExten
         return _voiceCreditsToAllocate + _allocatedVoiceCredits <= maxVoiceCreditsPerAllocator;
     }
 
-    /// @notice Ensure no withdrawals are allowed after the distribution starts
-    /// @param _token The address of the token
-    /// @param _amount The amount to withdraw
-    /// @param _recipient The address to withdraw to
-    function _beforeWithdraw(address _token, uint256 _amount, address _recipient) internal virtual override {
-        if (distributionStarted) {
-            revert INVALID();
-        }
-    }
-
     /// @notice Ensure no increase in pool amount is allowed after the distribution starts
     /// @param _amount The amount to increase the pool by
     function _beforeIncreasePoolAmount(uint256 _amount) internal virtual override {
-        if (distributionStarted) {
+        if (totalPayoutAmount != 0) {
             revert INVALID();
         }
     }

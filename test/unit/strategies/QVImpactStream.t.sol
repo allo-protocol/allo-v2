@@ -143,6 +143,9 @@ contract QVImpactStreamTest is Test {
     function test__distributeWhenCalled() external callWithPoolManager {
         stdstore.target(address(qvImpactStream)).sig("payouts(address)").with_key(address(0)).checked_write(100);
 
+        vm.prank(mockAlloAddress);
+        qvImpactStream.increasePoolAmount(100);
+
         IAllo.Pool memory poolData = IAllo.Pool({
             profileId: keccak256(abi.encodePacked(recipient1)),
             strategy: IBaseStrategy(address(qvImpactStream)),

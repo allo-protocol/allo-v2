@@ -137,6 +137,7 @@ contract QVImpactStream is QVSimple {
             if (amount == 0) revert RECIPIENT_ERROR(recipientId);
 
             delete payouts[recipientId];
+            poolAmount -= amount;
 
             poolToken.transferAmount(recipientAddress, amount);
 
