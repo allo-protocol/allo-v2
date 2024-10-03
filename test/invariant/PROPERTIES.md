@@ -4,25 +4,26 @@
 
 | id  | property                                                                                                          | covered |
 | --- | :---------------------------------------------------------------------------------------------------------------- | ------- |
-|     | one should always be able to pull/push correct (based on strategy) allocation for recipient                       |   []    |
-|     | a token allocation never “disappears” (withdraw cannot impact an allocation)                                      |   []    |
-|     | an address can only withdraw if has allocation                                                                    |   []    |
-|     | profile owner can always create a pool                                                                            |   []    |
-|     | profile owner is the only one who can always add/remove/modify profile members (name ⇒ new anchor())              |   []    |
-|     | profile owner is the only one who can always initiate a change of profile owner (2 steps)                         |   []    |
-|     | profile member can always create a pool                                                                           |   []    |
-|     | only profile owner or member can create a pool                                                                    |   []    |
-|     | initial admin is always the creator of the pool                                                                   |   []    |
-|     | pool admin can always change admin (but not to address(0))                                                        |   []    |
-|     | pool admin can always add/remove pool managers                                                                    |   []    |
-|     | pool manager can always withdraw within strategy limits/logic                                                     |   []    |
-|     | pool manager can always change metadata                                                                           |   []    |
-|     | allo owner can always change base fee (flat) and percent flee (./. funding amt) to any arbitrary value (max 100%) |   []    |
-|     | allo owner can always change the treasury address/trustred forwarded/etc                                          |   []    |
-|     | allo owner can always recover funds from allo contract ( (non-)native token )                                     |   []    |
-|     | only funds not allocated can be withdrawn                                                                         |   []    |
-|     | anyone can increase fund in a pool, if strategy (hook) logic allows so and if more than base fee                  |   []    |
-|     | every deposit/pool creation must take the correct fee on the amount deposited, forwarded to the treasury          |   []    |
+| 1   | one should always be able to pull/push correct (based on strategy) allocation for recipient                       |   []    |
+| 2   | a token allocation never “disappears” (withdraw cannot impact an allocation)                                      |   []    |
+| 3   | an address can only withdraw if has allocation                                                                    |   []    |
+| 4   | profile owner can always create a pool                                                                            |   []    |
+| 5   | profile owner is the only one who can always add/remove/modify profile members (name ⇒ new anchor())              |   []    |
+| 6   | profile owner is the only one who can always initiate a change of profile owner (2 steps)                         |   []    |
+| 7   | profile member can always create a pool                                                                           |   []    |
+| 8   | only profile owner or member can create a pool                                                                    |   []    |
+| 9   | initial admin is always the creator of the pool                                                                   |   []    |
+| 10  | pool admin can always change admin (but not to address(0))                                                        |   []    |
+| 11  | pool admin can always add/remove pool managers                                                                    |   []    |
+| 12  | pool manager can always withdraw within strategy limits/logic                                                     |   []    |
+| 13  | pool manager can always change metadata                                                                           |   []    |
+| 14  | allo owner can always change base fee (flat) and percent flee (./. funding amt) to any arbitrary value (max 100%) |   []    |
+| 15  | allo owner can always change the treasury address/trustred forwarded/etc                                          |   []    |
+| 16  | allo owner can always recover funds from allo contract ( (non-)native token )                                     |   []    |
+| 17  | only funds not allocated can be withdrawn                                                                         |   []    |
+| 18  | anyone can increase fund in a pool, if strategy (hook) logic allows so and if more than base fee                  |   []    |
+| 19  | every deposit/pool creation must take the correct fee on the amount deposited, forwarded to the treasury          |   []    |
+
 
 ## Other leads
 
