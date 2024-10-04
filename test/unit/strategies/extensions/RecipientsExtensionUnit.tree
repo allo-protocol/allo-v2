@@ -1,0 +1,135 @@
+RecipientsExtension::__RecipientsExtension_init
+└── When parameters are valid
+    ├── It should set metadataRequired
+    ├── It should call _updatePoolTimestamps
+    └── It should set recipientsCounter to 1
+
+RecipientsExtension::getRecipient
+└── When parameters are valid
+    ├── It should call _getRecipient
+    └── It should return the recipient
+
+RecipientsExtension::_getRecipientStatus
+└── When parameters are valid
+    ├── It should call _getUintRecipientStatus
+    └── It should return the recipient status
+
+RecipientsExtension::_isProfileMember
+└── When parameters are valid
+    ├── It should call getRegistry on allo
+    ├── It should call getProfileByAnchor on registry
+    ├── It should call isOwnerOrMemberOfProfile on registry
+    └── It should return the result
+
+RecipientsExtension::reviewRecipients
+├── When parameters are valid
+│   ├── It should call _validateReviewRecipients
+│   ├── It should call _processStatusRow on each status
+│   ├── It should update the statusesBitMap
+│   └── It should emit the event
+└── When refRecipientsCounter is different from recipientsCounter
+    └── It should revert
+
+RecipientsExtension::updatePoolTimestamps
+└── When parameters are valid
+    ├── It should call _checkOnlyPoolManager
+    └── It should call _updatePoolTimestamps
+
+RecipientsExtension::_updatePoolTimestamps
+└── When parameters are valid
+    ├── It should call _isPoolTimestampValid
+    ├── It should set registrationStartTime
+    ├── It should set registrationEndTime
+    └── It should emit event
+
+RecipientsExtension::_checkOnlyActiveRegistration
+├── When parameters are correct
+│   └── It should execute successfully
+├── When registrationStartTime is more than block timestamp
+│   └── It should revert
+└── When registrationEndTime is less than block timestamp
+    └── It should revert
+
+RecipientsExtension::_isPoolTimestampValid
+├── When parameters are right
+│   └── It should execute successfully
+└── When registrationStartTime is more than registrationEndTime
+    └── It should revert
+
+RecipientsExtension::_isPoolActive
+├── When current timestamp is between registrationStartTime and registrationEndTime
+│   └── It should return true
+└── When current timestamp is less than registrationStartTime or more than registrationEndTime
+    └── It should return false
+
+RecipientsExtension::_register
+├── When parameters are valid
+│   └── It should call _checkOnlyActiveRegistration
+└── When iterating each recipient
+    ├── It should call _extractRecipientAndMetadata
+    ├── It should call _processRecipient
+    ├── When recipientAddress is address zero
+    │   └── It should revert
+    ├── When metadataRequired is true and the metadata is invalid
+    │   └── It should revert
+    ├── It should set recipient struct
+    ├── When statusIndex is zero
+    │   ├── It should set statusIndex
+    │   ├── It should set recipientIndexToRecipientId mapping
+    │   ├── It should call _setRecipientStatus
+    │   ├── It should emit event
+    │   └── It should increment recipientsCounter
+    ├── When statusIndex is different than zero
+    │   ├── It should call _getUintRecipientStatus
+    │   ├── It should emit event
+    │   ├── It should call _getUintRecipientStatus
+    │   ├── When currentStatus is accepted or InReview
+    │   │   └── It should call _setRecipientStatus with correct parameters
+    │   └── When currentStatus is rejected
+    │       └── It should call _setRecipientStatus with correct parameters
+    └── It should save recipientId in the array
+
+RecipientsExtension::_extractRecipientAndMetadata
+├── When parameters are valid
+│   ├── It should return metadata
+│   └── It should return extraData
+├── When decoded _recipientIdOrRegistryAnchor is not zero
+│   ├── It should call _isProfileMember
+│   ├── When is not a profile member
+│   │   └── It should revert
+│   ├── It should set isUsingRegistryAnchor as true
+│   └── It should set recipientId as _recipientIdOrRegistryAnchor
+└── When decoded _recipientIdOrRegistryAnchor is equal zero
+    └── It should set recipientId as sender
+
+RecipientsExtension::_getRecipient
+└── It should return the recipient
+
+RecipientsExtension::_setRecipientStatus
+└── When parameters are valid
+    ├── It should call _getStatusRowColumn
+    └── It should set statusesBitMap
+
+RecipientsExtension::_getUintRecipientStatus
+├── When parameters are valid
+│   ├── It should call _getStatusRowColumn
+│   └── It should return the status
+└── When statusIndex is zero
+    └── It should return zero
+
+RecipientsExtension::_getStatusRowColumn
+└── It should return rowIndex, colIndex and the value from the bitmap
+
+RecipientsExtension::_processStatusRow
+└── When the newStatus is different than the currentStatus
+    ├── It should call _reviewRecipientStatus
+    └── When the reviewedStatus is different than newStatus
+        └── It should update _fullRow
+
+RecipientsExtension::_validateReviewRecipients
+└── When parameters are valid
+    ├── It should call _checkOnlyActiveRegistration
+    └── It should call _checkOnlyPoolManager
+
+RecipientsExtension::_reviewRecipientStatus
+└── It should return the newStatus as _reviewedStatus
