@@ -81,6 +81,10 @@ export const strategyConfig: DeployParams = {
   },
   // Sepolia
   11155111: {
+    hyperstaker: {
+      name: "HyperstakerStrategy",
+      version: "v0.0.1",
+    },
     "ltip-hedgey-governor": {
       name: "LTIPHedgeyGovernorStrategy",
       version: "v0.1",
