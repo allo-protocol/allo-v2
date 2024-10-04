@@ -2,8 +2,9 @@
 pragma solidity ^0.8.19;
 
 import {Registry} from "contracts/core/Registry.sol";
+import {IRegistry} from "contracts/core/interfaces/IRegistry.sol";
 
-contract MockRegistry is Registry {
+contract MockRegistry is IRegistry, Registry {
     function _grantRole(bytes32 role, address account) internal virtual override {
         super._grantRole(role, account);
     }
@@ -39,5 +40,9 @@ contract MockRegistry is Registry {
 
     function _isMemberOfProfile(bytes32 _profileId, address _member) internal view virtual override returns (bool) {
         return super._isMemberOfProfile(_profileId, _member);
+    }
+
+    function set_profilesById(bytes32 _profileId, IRegistry.Profile memory _profile) external {
+        profilesById[_profileId] = _profile;
     }
 }
