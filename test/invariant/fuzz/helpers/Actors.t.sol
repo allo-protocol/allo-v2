@@ -27,6 +27,8 @@ contract Actors is Utils {
     // toggle eoa vs anchor as sender
     function handler_anchorActorSwitch() public {
         _usingAnchor = !_usingAnchor;
+
+        // This event if for forge, as medusa will not show it in failed trace (no revert)
         emit ActorsLog(
             string.concat("using anchor: ", vm.toString(_usingAnchor))
         );
@@ -37,7 +39,7 @@ contract Actors is Utils {
         address target,
         uint256 msgValue,
         bytes memory payload
-    ) internal returns (bytes memory returnData, bool success) {
+    ) internal returns (bool success, bytes memory returnData) {
         address anchorOwner = msg.sender;
         address anchor = _ghost_anchorOf[anchorOwner];
 
@@ -57,7 +59,10 @@ contract Actors is Utils {
                 string.concat("call using EOA ", vm.toString(anchorOwner))
             );
 
-            vm.deal(anchorOwner, msgValue);
+            // vm.deal(anchorOwner, msgValue);
+            payable(anchorOwner).transfer(msgValue);
+
+            emit ActorsLog(vm.toString(anchorOwner.balance));
 
             vm.prank(anchorOwner);
             (success, returnData) = address(target).call{value: msgValue}(

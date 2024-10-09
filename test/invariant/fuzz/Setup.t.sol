@@ -9,6 +9,8 @@ import {Allo, IAllo, Metadata} from "contracts/core/Allo.sol";
 import {Registry, Anchor} from "contracts/core/Anchor.sol";
 import {IRegistry} from "contracts/core/interfaces/IRegistry.sol";
 
+import {DirectAllocationStrategy} from "contracts/strategies/examples/direct-allocation/DirectAllocation.sol";
+
 import {Actors} from "./helpers/Actors.t.sol";
 import {Utils} from "./helpers/Utils.t.sol";
 
@@ -25,6 +27,7 @@ contract Setup is Actors {
 
     Allo allo;
     Registry registry;
+    DirectAllocationStrategy strategy_directAllocation;
 
     address protocolDeployer = makeAddr("protocolDeployer");
     address proxyOwner = makeAddr("proxyOwner");
@@ -59,6 +62,9 @@ contract Setup is Actors {
             baseFee,
             forwarder
         );
+
+        // Deploy base strategy
+        strategy_directAllocation = new DirectAllocationStrategy(address(allo));
 
         // Create profile for each medusa sender
         for (uint i; i < DEFAULT_MEDUSA_SENDER.length; i++) {
