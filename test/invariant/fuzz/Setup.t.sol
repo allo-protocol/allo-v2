@@ -2,17 +2,16 @@
 pragma solidity ^0.8.19;
 
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
-
 import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 import {Allo, IAllo, Metadata} from "contracts/core/Allo.sol";
 import {Registry, Anchor} from "contracts/core/Anchor.sol";
 import {IRegistry} from "contracts/core/interfaces/IRegistry.sol";
-
 import {DirectAllocationStrategy} from "contracts/strategies/examples/direct-allocation/DirectAllocation.sol";
 
 import {Actors} from "./helpers/Actors.t.sol";
 import {Utils} from "./helpers/Utils.t.sol";
+import {FuzzERC20, ERC20} from "./helpers/FuzzERC20.sol";
 
 contract Setup is Actors {
     address[] DEFAULT_MEDUSA_SENDER = [
@@ -27,7 +26,10 @@ contract Setup is Actors {
 
     Allo allo;
     Registry registry;
+
     DirectAllocationStrategy strategy_directAllocation;
+
+    ERC20 token;
 
     address protocolDeployer = makeAddr("protocolDeployer");
     address proxyOwner = makeAddr("proxyOwner");
@@ -66,6 +68,9 @@ contract Setup is Actors {
         // Deploy base strategy
         strategy_directAllocation = new DirectAllocationStrategy(address(allo));
 
+        // Deploy token
+        token = ERC20(address(new FuzzERC20()));
+
         // Create profile for each medusa sender
         for (uint i; i < DEFAULT_MEDUSA_SENDER.length; i++) {
             bytes32 _id = registry.createProfile(
@@ -78,7 +83,7 @@ contract Setup is Actors {
 
             _addActorAndAnchor(
                 DEFAULT_MEDUSA_SENDER[i],
-                registry.getProfileById(_id).owner
+                registry.getProfileById(_id).anchor
             );
         }
     }
