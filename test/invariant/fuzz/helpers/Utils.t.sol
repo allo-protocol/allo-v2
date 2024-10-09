@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.19;
 
 import {Test, Vm} from "forge-std/Test.sol";
@@ -14,9 +15,14 @@ contract Utils {
         IStdCheats(address(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D));
 
     event TestFailure(string reason);
+    event AddressMade(string label, address addressGenerated);
 
-    function makeAddr(string memory label) internal pure returns (address) {
-        return address(uint160(uint256(keccak256(abi.encodePacked(label)))));
+    function makeAddr(string memory label) internal returns (address) {
+        address genAddress = address(
+            uint160(uint256(keccak256(abi.encodePacked(label))))
+        );
+        emit AddressMade(label, genAddress);
+        return genAddress;
     }
 
     function assertEq(uint256 a, uint256 b) internal {
