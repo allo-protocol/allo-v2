@@ -60,7 +60,9 @@
 				]
 			},
 			"targetFunctionSignatures": [],
-			"excludeFunctionSignatures": []
+			"excludeFunctionSignatures": [
+				"FuzzTest.handler_currentRole()"
+			]
 		},
 		"chainConfig": {
 			"codeSizeCheckDisabled": true,

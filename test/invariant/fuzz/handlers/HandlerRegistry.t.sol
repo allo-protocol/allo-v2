@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.19;
 
-import {Setup} from '../Setup.t.sol';
-import {HandlerAgents} from './HandlerAgents.t.sol';
+import {Setup} from "../Setup.t.sol";
 
-contract HandlerRegistry is Setup, HandlerAgents {
-}
+contract HandlerRegistry is Setup {}
