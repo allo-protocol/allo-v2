@@ -96,6 +96,8 @@ contract EASGatingExtensionUnit is Test {
         address _returnedAttester,
         bytes32 _uid
     ) external {
+        vm.assume(_attester != _returnedAttester);
+
         vm.mockCall(
             address(easGatingExtension.eas()),
             abi.encodeWithSignature("getAttestation(bytes32)", _uid),

@@ -327,11 +327,14 @@ contract RegistryUnit is Test {
         bytes32 _profileId,
         string memory _name
     ) external {
+        bytes32 _wrongProfileId = keccak256("wrong");
+        vm.assume(_profileId != _wrongProfileId);
         address _anchor = registry.call__generateAnchor(_profileId, _name);
+        vm.mockCall(_anchor, abi.encodeWithSignature("profileId()"), abi.encode(_wrongProfileId));
 
-        vm.mockCall(_anchor, abi.encodeWithSignature("profileId()"), abi.encode(keccak256("wrong")));
-        vm.expectRevert(Errors.ANCHOR_ERROR.selector);
         // it should revert
+        vm.expectRevert(Errors.ANCHOR_ERROR.selector);
+
         registry.call__generateAnchor(_profileId, _name);
     }
 
