@@ -8,6 +8,7 @@ import {IAllo} from "contracts/core/interfaces/IAllo.sol";
 import {BaseStrategy} from "strategies/BaseStrategy.sol";
 // Internal Libraries
 import {Transfer} from "contracts/core/libraries/Transfer.sol";
+import {Errors} from "contracts/core/libraries/Errors.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⣿⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -24,17 +25,8 @@ import {Transfer} from "contracts/core/libraries/Transfer.sol";
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⠙⠋⠛⠙⠋⠛⠙⠋⠛⠙⠋⠃⠀⠀⠀⠀⠀⠀⠀⠀⠠⠿⠻⠟⠿⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⠟⠿⠟⠿⠆⠀⠸⠿⠿⠟⠯⠀⠀⠀⠸⠿⠿⠿⠏⠀⠀⠀⠀⠀⠈⠉⠻⠻⡿⣿⢿⡿⡿⠿⠛⠁⠀⠀⠀⠀⠀⠀
 //                    allo.gitcoin.co
 
-contract EasyRPGF is BaseStrategy {
+contract EasyRPGF is BaseStrategy, Errors {
     using Transfer for address;
-
-    /// ===============================
-    /// ============ Errors ===========
-    /// ===============================
-
-    /// @dev Thrown when input arrays have different lengths
-    error INPUT_LENGTH_MISMATCH();
-    /// @dev Thrown when a function which hasn't been implemented is called
-    error NOOP();
 
     /// ===============================
     /// ========= Constructor =========
@@ -70,34 +62,34 @@ contract EasyRPGF is BaseStrategy {
         onlyPoolManager(_sender)
     {
         // Decode amounts from memory param
-        uint256[] memory amounts = abi.decode(_recipientAmounts, (uint256[]));
+        uint256[] memory _amounts = abi.decode(_recipientAmounts, (uint256[]));
 
-        uint256 payoutLength = _recipientIds.length;
+        uint256 _payoutLength = _recipientIds.length;
 
         // Assert recipient and amounts length are equal
-        if (payoutLength != amounts.length) {
-            revert INPUT_LENGTH_MISMATCH();
+        if (_payoutLength != _amounts.length) {
+            revert ARRAY_MISMATCH();
         }
 
-        IAllo.Pool memory pool = allo.getPool(poolId);
-        for (uint256 i; i < payoutLength; ++i) {
-            uint256 amount = amounts[i];
-            address recipientAddress = _recipientIds[i];
+        IAllo.Pool memory pool = _ALLO.getPool(_poolId);
+        for (uint256 i; i < _payoutLength; ++i) {
+            uint256 _amount = _amounts[i];
+            address _recipientAddress = _recipientIds[i];
 
-            poolAmount -= amount;
-            pool.token.transferAmount(recipientAddress, amount);
+            _poolAmount -= _amount;
+            pool.token.transferAmount(_recipientAddress, _amount);
 
-            emit Distributed(recipientAddress, abi.encode(amount, _sender));
+            emit Distributed(_recipientAddress, abi.encode(_amount, _sender));
         }
     }
 
     /// @inheritdoc BaseStrategy
     function _allocate(address[] memory, uint256[] memory, bytes memory, address) internal virtual override {
-        revert NOOP();
+        revert NOT_IMPLEMENTED();
     }
 
     /// @inheritdoc BaseStrategy
     function _register(address[] memory, bytes memory, address) internal virtual override returns (address[] memory) {
-        revert NOOP();
+        revert NOT_IMPLEMENTED();
     }
 }

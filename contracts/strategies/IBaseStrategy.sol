@@ -27,19 +27,16 @@ interface IBaseStrategy {
     /// ======================
 
     /// @notice Error when the sender is not authorized
-    error BaseStrategy_UNAUTHORIZED();
-
-    /// @notice Error when the strategy is not initialized
-    error BaseStrategy_NOT_INITIALIZED();
+    error BaseStrategy_Unauthorized();
 
     /// @notice Error when the strategy is already initialized
-    error BaseStrategy_ALREADY_INITIALIZED();
+    error BaseStrategy_AlreadyInitialized();
 
     /// @notice Error when the pool ID is invalid
-    error BaseStrategy_INVALID_POOL_ID();
+    error BaseStrategy_InvalidPoolId();
 
     /// @notice Error when the withdraw amount leaves the pool with insufficient funds
-    error BaseStrategy_WITHDRAW_MORE_THAN_POOL_AMOUNT();
+    error BaseStrategy_WithdrawMoreThanPoolAmount();
 
     /// ======================
     /// ======= Events =======

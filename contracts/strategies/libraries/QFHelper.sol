@@ -34,7 +34,7 @@ library QFHelper {
         if (_recipientsLength != _amounts.length) revert QFHelper_LengthMissmatch();
 
         uint256 _totalContributionsDelta;
-        for (uint256 i = 0; i < _recipientsLength; i++) {
+        for (uint256 i; i < _recipientsLength; i++) {
             /// Calculate the square root of the donation amount and add it to the sum of donations
             uint256 _sqrtDonationsSum = _state.sqrtDonationsSum[_recipients[i]];
             _sqrtDonationsSum += FixedPointMathLib.sqrt(_amounts[i]);

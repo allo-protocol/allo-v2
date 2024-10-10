@@ -74,7 +74,7 @@ contract QVImpactStreamTest is Test {
 
     function test_SetPayoutsRevertWhen_PayoutSetIsTrue() external callWithPoolManager {
         stdstore.target(address(qvImpactStream)).sig("payoutSet()").checked_write(true);
-        vm.expectRevert(QVImpactStream.PAYOUT_ALREADY_SET.selector);
+        vm.expectRevert(QVImpactStream.QVImpactStream_PayoutAlreadySet.selector);
 
         /// make it after allocation finished
         vm.warp(block.timestamp + allocationWindow + 1 days);
@@ -84,7 +84,9 @@ contract QVImpactStreamTest is Test {
     }
 
     function test_SetPayoutsRevertWhen_PayoutAmountIsZero() external callWithPoolManager {
-        vm.expectRevert(abi.encodeWithSelector(Errors.RECIPIENT_ERROR.selector, recipient1));
+        vm.expectRevert(
+            abi.encodeWithSelector(IRecipientsExtension.RecipientsExtension_RecipientError.selector, recipient1)
+        );
         payouts.push(QVImpactStream.Payout({recipientId: recipient1, amount: 0}));
 
         /// make it after allocation finished
@@ -95,7 +97,9 @@ contract QVImpactStreamTest is Test {
     }
 
     function test_SetPayoutsRevertWhen_RecipientStatusIsNotAccepted() external callWithPoolManager {
-        vm.expectRevert(abi.encodeWithSelector(Errors.RECIPIENT_ERROR.selector, recipient1));
+        vm.expectRevert(
+            abi.encodeWithSelector(IRecipientsExtension.RecipientsExtension_RecipientError.selector, recipient1)
+        );
 
         /// make it after allocation finished
         vm.warp(block.timestamp + allocationWindow + 1 days);
@@ -131,7 +135,9 @@ contract QVImpactStreamTest is Test {
         vm.warp(block.timestamp + allocationWindow + 1 days);
 
         /// it should revert
-        vm.expectRevert(abi.encodeWithSelector(Errors.RECIPIENT_ERROR.selector, recipient1));
+        vm.expectRevert(
+            abi.encodeWithSelector(IRecipientsExtension.RecipientsExtension_RecipientError.selector, recipient1)
+        );
 
         address[] memory _recipients = new address[](1);
         _recipients[0] = recipient1;

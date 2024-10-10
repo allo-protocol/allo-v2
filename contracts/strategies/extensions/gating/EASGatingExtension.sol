@@ -17,11 +17,11 @@ abstract contract EASGatingExtension is BaseStrategy {
     /// ================================
 
     /// @notice Throws when EAS address is zero
-    error EASGatingExtension_INVALID_EAS_ADDRESS();
+    error EASGatingExtension_InvalidEASAddress();
     /// @notice Throws when the attestation schema is wrong
-    error EASGatingExtension_INVALID_ATTESTATION_SCHEMA();
+    error EASGatingExtension_InvalidAttestationSchema();
     /// @notice Throws when the attester is wrong
-    error EASGatingExtension_INVALID_ATTESTATION_ATTESTER();
+    error EASGatingExtension_InvalidAttestationAttester();
 
     /// ================================
     /// ========== Storage =============
@@ -35,7 +35,7 @@ abstract contract EASGatingExtension is BaseStrategy {
     /// @notice This initializes the strategy
     /// @param _eas The eas address
     function __EASGatingExtension_init(address _eas) internal virtual {
-        if (_eas == address(0)) revert EASGatingExtension_INVALID_EAS_ADDRESS();
+        if (_eas == address(0)) revert EASGatingExtension_InvalidEASAddress();
         /// Set the EAS contract
         eas = _eas;
     }
@@ -63,7 +63,7 @@ abstract contract EASGatingExtension is BaseStrategy {
     /// @param _uid The unique identifier of the attestation
     function _checkOnlyWithAttestation(bytes32 _schema, address _attester, bytes32 _uid) internal view virtual {
         Attestation memory _attestation = IEAS(eas).getAttestation(_uid);
-        if (_attestation.schema != _schema) revert EASGatingExtension_INVALID_ATTESTATION_SCHEMA();
-        if (_attestation.attester != _attester) revert EASGatingExtension_INVALID_ATTESTATION_ATTESTER();
+        if (_attestation.schema != _schema) revert EASGatingExtension_InvalidAttestationSchema();
+        if (_attestation.attester != _attester) revert EASGatingExtension_InvalidAttestationAttester();
     }
 }

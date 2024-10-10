@@ -277,7 +277,7 @@ contract RecipientsExtensionUnit is Test {
         vm.warp(_blockTimestamp);
 
         // It should revert
-        vm.expectRevert(Errors.REGISTRATION_NOT_ACTIVE.selector);
+        vm.expectRevert(IRecipientsExtension.RecipientsExtension_RegistrationNotActive.selector);
 
         recipientsExtension.call__checkOnlyActiveRegistration();
     }
@@ -294,7 +294,7 @@ contract RecipientsExtensionUnit is Test {
         vm.warp(_blockTimestamp);
 
         // It should revert
-        vm.expectRevert(Errors.REGISTRATION_NOT_ACTIVE.selector);
+        vm.expectRevert(IRecipientsExtension.RecipientsExtension_RegistrationNotActive.selector);
 
         recipientsExtension.call__checkOnlyActiveRegistration();
     }
@@ -435,7 +435,9 @@ contract RecipientsExtensionUnit is Test {
         }
 
         // It should revert
-        vm.expectRevert(abi.encodeWithSelector(Errors.RECIPIENT_ERROR.selector, _recipientIds[0]));
+        vm.expectRevert(
+            abi.encodeWithSelector(IRecipientsExtension.RecipientsExtension_RecipientError.selector, _recipientIds[0])
+        );
 
         bytes memory _datas = abi.encode(_dataArray);
         recipientsExtension.call__register(_fixedArrayToMemory(_recipients), _datas, _sender);
@@ -461,7 +463,7 @@ contract RecipientsExtensionUnit is Test {
         }
 
         // It should revert
-        vm.expectRevert(Errors.INVALID_METADATA.selector);
+        vm.expectRevert(IRecipientsExtension.RecipientsExtension_InvalidMetada.selector);
 
         bytes memory _datas = abi.encode(_dataArray);
         recipientsExtension.call__register(_fixedArrayToMemory(_recipients), _datas, _sender);

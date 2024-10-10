@@ -143,7 +143,7 @@ library Transfer {
     /// @return r
     /// @return s
     /// @return v
-    function _splitSignature(bytes memory _signature) internal pure returns (bytes32 r, bytes32 s, uint8 v) {
+    function _splitSignature(bytes memory _signature) private pure returns (bytes32 r, bytes32 s, uint8 v) {
         if (_signature.length == 65) {
             assembly {
                 r := mload(add(_signature, 0x20))

@@ -40,7 +40,7 @@ contract QuadraticVotingStrategy is BaseStrategy {
     QVHelper.VotingState internal votingState;
 
     function vote(address[] memory _recipients, uint256[] memory _votes) external {
-        votingState._vote(votingState, _recipients, _votes);
+        votingState.vote(votingState, _recipients, _votes);
     }
 }
 ```

@@ -102,7 +102,7 @@ abstract contract AllocationExtension is BaseStrategy, IAllocationExtension {
     /// @param _allocationStartTime The start time for the allocation
     /// @param _allocationEndTime The end time for the allocation
     function _updateAllocationTimestamps(uint64 _allocationStartTime, uint64 _allocationEndTime) internal virtual {
-        if (_allocationStartTime > _allocationEndTime) revert INVALID_ALLOCATION_TIMESTAMPS();
+        if (_allocationStartTime > _allocationEndTime) revert AllocationExtension_INVALID_ALLOCATION_TIMESTAMPS();
 
         allocationStartTime = _allocationStartTime;
         allocationEndTime = _allocationEndTime;
@@ -112,18 +112,18 @@ abstract contract AllocationExtension is BaseStrategy, IAllocationExtension {
 
     /// @dev Ensure the function is called before allocation start time
     function _checkBeforeAllocation() internal virtual {
-        if (block.timestamp >= allocationStartTime) revert ALLOCATION_HAS_ALREADY_STARTED();
+        if (block.timestamp >= allocationStartTime) revert AllocationExtension_ALLOCATION_HAS_ALREADY_STARTED();
     }
 
     /// @dev Ensure the function is called during allocation times
     function _checkOnlyActiveAllocation() internal virtual {
-        if (block.timestamp < allocationStartTime) revert ALLOCATION_IS_NOT_ACTIVE();
-        if (block.timestamp > allocationEndTime) revert ALLOCATION_IS_NOT_ACTIVE();
+        if (block.timestamp < allocationStartTime) revert AllocationExtension_ALLOCATION_NOT_ACTIVE();
+        if (block.timestamp > allocationEndTime) revert AllocationExtension_ALLOCATION_NOT_ACTIVE();
     }
 
     /// @dev Ensure the function is called after allocation start time
     function _checkOnlyAfterAllocation() internal virtual {
-        if (block.timestamp <= allocationEndTime) revert ALLOCATION_IS_NOT_ENDED();
+        if (block.timestamp <= allocationEndTime) revert AllocationExtension_ALLOCATION_HAS_NOT_ENDED();
     }
 
     //  ====================================

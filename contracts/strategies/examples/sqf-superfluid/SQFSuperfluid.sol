@@ -174,7 +174,7 @@ contract SQFSuperfluid is
         minPassportScore = _sqfSuperfluidInitializeParams.minPassportScore;
         recipientSuperAppFactory = IRecipientSuperAppFactory(_sqfSuperfluidInitializeParams.recipientSuperAppFactory);
         allocationSuperToken = ISuperToken(_sqfSuperfluidInitializeParams.allocationSuperToken);
-        poolSuperToken = ISuperToken(allo.getPool(_poolId).token);
+        poolSuperToken = ISuperToken(_ALLO.getPool(_poolId).token);
         initialSuperAppBalance = _sqfSuperfluidInitializeParams.initialSuperAppBalance;
         passportDecoder = IGitcoinPassportDecoder(_sqfSuperfluidInitializeParams.passportDecoder);
         gdaPool = SuperTokenV1Library.createPool(
@@ -222,7 +222,7 @@ contract SQFSuperfluid is
             // if the status is none or appealed then revert
             Status recipientStatus = Status(_getUintRecipientStatus(recipientId));
             if (recipientStatus == Status.None || recipientStatus == Status.Canceled) {
-                revert RECIPIENT_ERROR(recipientId);
+                revert RecipientsExtension_RecipientError(recipientId);
             }
 
             _setRecipientStatus(recipientId, uint256(Status.Canceled));
@@ -412,7 +412,7 @@ contract SQFSuperfluid is
             int96 flowRate = flowRates[i];
 
             if (Status(_getUintRecipientStatus(recipientId)) != Status.Accepted || superApp == address(0)) {
-                revert RECIPIENT_ERROR(recipientId);
+                revert RecipientsExtension_RecipientError(recipientId);
             }
 
             (uint256 lastUpdated, int96 currentFlowRate,,) = allocationSuperToken.getFlowInfo(_sender, superApp);
@@ -434,7 +434,7 @@ contract SQFSuperfluid is
     /// @dev Reverts if the registration is not active
     function _checkOnlyAfterRegistration() internal view {
         if (block.timestamp < registrationEndTime) {
-            revert REGISTRATION_ACTIVE();
+            revert RecipientsExtension_RegistrationHasNotEnded();
         }
     }
 

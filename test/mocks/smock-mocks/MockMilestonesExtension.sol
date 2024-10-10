@@ -81,10 +81,10 @@ contract MockMilestonesExtension is BaseStrategy, IMilestonesExtension, Mileston
     }
 
     function set__milestones(uint256 _index, Milestone memory _milestone) external {
-        if (milestones.length == 0) {
-            milestones.push(_milestone);
+        if (_milestones.length == 0) {
+            _milestones.push(_milestone);
         } else {
-            milestones[_index] = _milestone;
+            _milestones[_index] = _milestone;
         }
     }
 
@@ -97,6 +97,6 @@ contract MockMilestonesExtension is BaseStrategy, IMilestonesExtension, Mileston
     }
 
     function get__milestones() external view returns (Milestone[] memory) {
-        return milestones;
+        return _milestones;
     }
 }

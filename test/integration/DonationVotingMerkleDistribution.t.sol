@@ -158,7 +158,7 @@ contract IntegrationDonationVotingMerkleDistributionReviewRecipients is
         vm.warp(registrationEndTime + 1);
         _newStatuses[1] = uint256(IRecipientsExtension.Status.Rejected);
         statuses[0] = _getApplicationStatus(_recipientIds, _newStatuses, address(strategy));
-        vm.expectRevert(Errors.REGISTRATION_NOT_ACTIVE.selector);
+        vm.expectRevert(IRecipientsExtension.RecipientsExtension_RegistrationNotActive.selector);
         strategy.reviewRecipients(statuses, recipientsCounter);
 
         vm.stopPrank();
@@ -219,7 +219,7 @@ contract IntegrationDonationVotingMerkleDistributionAllocateERC20 is Integration
         assertEq(IERC20(allocationToken).balanceOf(address(strategy)), 4 + 25);
 
         recipients[0] = recipient2Addr;
-        vm.expectRevert(Errors.RECIPIENT_NOT_ACCEPTED.selector);
+        vm.expectRevert(IRecipientsExtension.RecipientsExtension_RecipientNotAccepted.selector);
         strategy.allocate(recipients, amounts, data, allocator0);
 
         vm.stopPrank();
@@ -285,7 +285,7 @@ contract IntegrationDonationVotingMerkleDistributionAllocateETH is IntegrationDo
         assertEq(IERC20(allocationToken).balanceOf(address(strategy)), 4);
 
         recipients[0] = recipient2Addr;
-        vm.expectRevert(Errors.RECIPIENT_NOT_ACCEPTED.selector);
+        vm.expectRevert(IRecipientsExtension.RecipientsExtension_RecipientNotAccepted.selector);
         strategy.allocate(recipients, amounts, data, allocator0);
 
         vm.stopPrank();
@@ -355,7 +355,7 @@ contract IntegrationDonationVotingMerkleDistributionDirectAllocateERC20 is
         assertEq(amountAllocated1, 0);
 
         recipients[0] = recipient2Addr;
-        vm.expectRevert(Errors.RECIPIENT_NOT_ACCEPTED.selector);
+        vm.expectRevert(IRecipientsExtension.RecipientsExtension_RecipientNotAccepted.selector);
         strategyWithDirectTransfers.allocate(recipients, amounts, data, allocator0);
 
         vm.stopPrank();
@@ -426,7 +426,7 @@ contract IntegrationDonationVotingMerkleDistributionDirectAllocateETH is
         assertEq(IERC20(allocationToken).balanceOf(recipient0Addr), 4);
 
         recipients[0] = recipient2Addr;
-        vm.expectRevert(Errors.RECIPIENT_NOT_ACCEPTED.selector);
+        vm.expectRevert(IRecipientsExtension.RecipientsExtension_RecipientNotAccepted.selector);
         strategyWithDirectTransfers.allocate(recipients, amounts, data, allocator0);
 
         vm.stopPrank();
@@ -624,11 +624,17 @@ contract IntegrationDonationVotingMerkleDistributionDistribute is IntegrationDon
         assertEq(IERC20(DAI).balanceOf(address(strategy)), 0);
         assertEq(strategy.getPoolAmount(), 0);
 
-        vm.expectRevert(abi.encodeWithSelector(DonationVotingMerkleDistribution.ALREADY_DISTRIBUTED.selector, 0));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                DonationVotingMerkleDistribution.DonationVotingMerkleDistribution_AlreadyDistributed.selector, 0
+            )
+        );
         strategy.distribute(recipients, data, recipient2Addr);
 
         vm.startPrank(address(userAddr));
-        vm.expectRevert(DonationVotingMerkleDistribution.DISTRIBUTION_ALREADY_STARTED.selector);
+        vm.expectRevert(
+            DonationVotingMerkleDistribution.DonationVotingMerkleDistribution_DistributionAlreadyStarted.selector
+        );
         bytes32 merkleRoot = keccak256(abi.encode("merkleRoot"));
         Metadata memory distributionMetadata = Metadata({protocol: 1, pointer: "A"});
         strategy.setPayout(abi.encode(merkleRoot, distributionMetadata));

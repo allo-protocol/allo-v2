@@ -113,14 +113,14 @@ interface IAllo {
     /// @param _treasury Address of the treasury
     /// @param _percentFee Percentage for the fee
     /// @param _baseFee Base fee amount
-    /// @param __trustedForwarder The address of the trusted forwarder
+    /// @param _trustedForwarder The address of the trusted forwarder
     function initialize(
         address _owner,
         address _registry,
         address payable _treasury,
         uint256 _percentFee,
         uint256 _baseFee,
-        address __trustedForwarder
+        address _trustedForwarder
     ) external;
 
     /// @notice Creates a new pool (with a custom strategy)
@@ -134,7 +134,7 @@ interface IAllo {
     /// @param _amount The amount of the token you want to deposit into the pool on initialization
     /// @param _metadata The 'Metadata' of the pool, this uses our 'Meatdata.sol' struct (consistent throughout the protocol)
     /// @param _managers The managers of the pool, and can be added/removed later by the pool admin
-    /// @return poolId The ID of the pool
+    /// @return _poolId The ID of the pool
     function createPoolWithCustomStrategy(
         bytes32 _profileId,
         address _strategy,
@@ -143,7 +143,7 @@ interface IAllo {
         uint256 _amount,
         Metadata memory _metadata,
         address[] memory _managers
-    ) external payable returns (uint256 poolId);
+    ) external payable returns (uint256 _poolId);
 
     /// @notice Creates a new pool (by cloning a deployed strategies).
     /// @dev '_msgSender' must be owner or member of the profile id passed as '_profileId'. The strategy address passed
@@ -157,7 +157,7 @@ interface IAllo {
     /// @param _managers The managers of the pool
     /// @custom:initstrategydata The encoded data will be specific to a given strategy requirements,
     ///    reference the strategy implementation of 'initialize()'
-    /// @return poolId The ID of the pool
+    /// @return _poolId The ID of the pool
     function createPool(
         bytes32 _profileId,
         address _strategy,
@@ -166,7 +166,7 @@ interface IAllo {
         uint256 _amount,
         Metadata memory _metadata,
         address[] memory _managers
-    ) external payable returns (uint256 poolId);
+    ) external payable returns (uint256 _poolId);
 
     /// @notice Updates a pools metadata.
     /// @dev '_msgSender' must be a pool admin.
@@ -337,7 +337,7 @@ interface IAllo {
     function getFeeDenominator() external view returns (uint256);
 
     /// @notice Returns TRUE if the forwarder is trusted
-    /// @param forwarder The address of the forwarder to check
+    /// @param _forwarder The address of the forwarder to check
     /// @return 'true' if the forwarder is trusted, otherwise 'false'
-    function isTrustedForwarder(address forwarder) external view returns (bool);
+    function isTrustedForwarder(address _forwarder) external view returns (bool);
 }

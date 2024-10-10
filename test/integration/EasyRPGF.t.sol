@@ -6,6 +6,7 @@ import {Metadata} from "contracts/core/Registry.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {EasyRPGF} from "strategies/examples/easy-rpgf/EasyRPGF.sol";
 import {IntegrationBase} from "./IntegrationBase.sol";
+import {Errors} from "contracts/core/libraries/Errors.sol";
 
 contract IntegrationEasyRPGF is IntegrationBase {
     IAllo public allo;
@@ -41,7 +42,7 @@ contract IntegrationEasyRPGF is IntegrationBase {
     }
 
     function test_Revert_Allocate() public {
-        vm.expectRevert(EasyRPGF.NOOP.selector);
+        vm.expectRevert(Errors.NOT_IMPLEMENTED.selector);
         vm.prank(address(allo));
         strategy.allocate(new address[](0), new uint256[](0), "", address(0));
     }

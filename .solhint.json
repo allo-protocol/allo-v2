@@ -1,0 +1,19 @@
+{
+	"extends": "solhint:recommended",
+	"rules": {
+		"compiler-version": ["off"],
+		"constructor-syntax": "warn",
+		"func-visibility": ["warn", { "ignoreConstructors": true }],
+		"not-rely-on-time": "off",
+		"no-inline-assembly": "off",
+		"no-empty-blocks": "off",
+		"private-vars-leading-underscore": ["warn", { "strict": false }],
+		"const-name-snakecase": "warn",
+    "immutable-vars-naming": ["warn", { "immutablesAsConstants": true }],
+		"avoid-low-level-calls": "off",
+		"no-console": "off",
+		"max-line-length": ["off", 120, { "ignore": ["comments"] }],
+		"gas-custom-errors": "warn",
+		"no-unused-vars": "warn"
+	}
+}

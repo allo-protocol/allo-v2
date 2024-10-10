@@ -98,7 +98,7 @@ contract AllocationExtension is Test {
         vm.assume(_allocationStartTime > _allocationEndTime);
 
         // It should revert
-        vm.expectRevert(IAllocationExtension.INVALID_ALLOCATION_TIMESTAMPS.selector);
+        vm.expectRevert(IAllocationExtension.AllocationExtension_INVALID_ALLOCATION_TIMESTAMPS.selector);
 
         extension.call__updateAllocationTimestamps(_allocationStartTime, _allocationEndTime);
     }
@@ -129,7 +129,7 @@ contract AllocationExtension is Test {
         vm.warp(_timestamp);
 
         // It should revert
-        vm.expectRevert(IAllocationExtension.ALLOCATION_HAS_ALREADY_STARTED.selector);
+        vm.expectRevert(IAllocationExtension.AllocationExtension_ALLOCATION_HAS_ALREADY_STARTED.selector);
 
         extension.call__checkBeforeAllocation();
     }
@@ -144,7 +144,7 @@ contract AllocationExtension is Test {
         vm.warp(_timestamp);
 
         // It should revert
-        vm.expectRevert(IAllocationExtension.ALLOCATION_IS_NOT_ACTIVE.selector);
+        vm.expectRevert(IAllocationExtension.AllocationExtension_ALLOCATION_NOT_ACTIVE.selector);
 
         extension.call__checkOnlyActiveAllocation();
     }
@@ -159,7 +159,7 @@ contract AllocationExtension is Test {
         vm.warp(_timestamp);
 
         // It should revert
-        vm.expectRevert(IAllocationExtension.ALLOCATION_IS_NOT_ACTIVE.selector);
+        vm.expectRevert(IAllocationExtension.AllocationExtension_ALLOCATION_NOT_ACTIVE.selector);
 
         extension.call__checkOnlyActiveAllocation();
     }
@@ -174,7 +174,7 @@ contract AllocationExtension is Test {
         vm.warp(_timestamp);
 
         // It should revert
-        vm.expectRevert(IAllocationExtension.ALLOCATION_IS_NOT_ENDED.selector);
+        vm.expectRevert(IAllocationExtension.AllocationExtension_ALLOCATION_HAS_NOT_ENDED.selector);
 
         extension.call__checkOnlyAfterAllocation();
     }

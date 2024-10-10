@@ -41,10 +41,10 @@ contract DonationVotingOnchain is BaseStrategy, RecipientsExtension, AllocationE
 
     /// @notice Thrown when there is nothing to distribute for the given recipient.
     /// @param recipientId The recipientId to which distribution was attempted.
-    error NOTHING_TO_DISTRIBUTE(address recipientId);
+    error DonationVotingOnchain_NothingToDistribute(address recipientId);
 
     /// @notice Thrown when the allocation token is not allowed.
-    error TOKEN_NOT_ALLOWED();
+    error DonationVotingOnchain_TokenNotAllowed();
 
     /// ================================
     /// ========== Storage =============
@@ -120,25 +120,25 @@ contract DonationVotingOnchain is BaseStrategy, RecipientsExtension, AllocationE
         override
         onlyActiveAllocation
     {
-        (address allocationToken, bytes memory permitData) = abi.decode(_data, (address, bytes));
-        if (!_isAllowedToken(allocationToken)) revert TOKEN_NOT_ALLOWED();
+        (address _allocationToken, bytes memory _permitData) = abi.decode(_data, (address, bytes));
+        if (!_isAllowedToken(_allocationToken)) revert DonationVotingOnchain_TokenNotAllowed();
 
-        uint256 totalAmount;
-        for (uint256 i = 0; i < _recipients.length; i++) {
-            if (!_isAcceptedRecipient(_recipients[i])) revert RECIPIENT_NOT_ACCEPTED();
+        uint256 _totalAmount;
+        for (uint256 i; i < _recipients.length; i++) {
+            if (!_isAcceptedRecipient(_recipients[i])) revert RecipientsExtension_RecipientNotAccepted();
 
             // Update the total payout amount for the claim and the total claimable amount
             amountAllocated[_recipients[i]] += _amounts[i];
-            totalAmount += _amounts[i];
+            _totalAmount += _amounts[i];
 
-            emit Allocated(_recipients[i], _sender, _amounts[i], abi.encode(allocationToken));
+            emit Allocated(_recipients[i], _sender, _amounts[i], abi.encode(_allocationToken));
         }
 
-        if (allocationToken == NATIVE) {
-            if (msg.value != totalAmount) revert ETH_MISMATCH();
+        if (_allocationToken == NATIVE) {
+            if (msg.value != _totalAmount) revert ETH_MISMATCH();
         } else {
-            allocationToken.usePermit(_sender, address(this), totalAmount, permitData);
-            allocationToken.transferAmountFrom(_sender, address(this), totalAmount);
+            _allocationToken.usePermit(_sender, address(this), _totalAmount, _permitData);
+            _allocationToken.transferAmountFrom(_sender, address(this), _totalAmount);
         }
 
         QFState.fund(_recipients, _amounts);
@@ -154,31 +154,31 @@ contract DonationVotingOnchain is BaseStrategy, RecipientsExtension, AllocationE
         override
         onlyAfterAllocation
     {
-        if (totalPayoutAmount == 0) totalPayoutAmount = poolAmount;
+        if (totalPayoutAmount == 0) totalPayoutAmount = _poolAmount;
 
-        (address allocationToken) = abi.decode(_data, (address));
-        if (!_isAllowedToken(allocationToken)) revert TOKEN_NOT_ALLOWED();
+        (address _allocationToken) = abi.decode(_data, (address));
+        if (!_isAllowedToken(_allocationToken)) revert DonationVotingOnchain_TokenNotAllowed();
 
         for (uint256 i; i < _recipientIds.length; i++) {
-            address recipientId = _recipientIds[i];
-            address recipientAddress = _recipients[recipientId].recipientAddress;
+            address _recipientId = _recipientIds[i];
+            address _recipientAddress = _recipients[_recipientId].recipientAddress;
 
-            if (amountAllocated[recipientId] == 0) revert NOTHING_TO_DISTRIBUTE(recipientId);
+            if (amountAllocated[_recipientId] == 0) revert DonationVotingOnchain_NothingToDistribute(_recipientId);
 
             // Transfer allocation
-            uint256 allocationAmount = amountAllocated[recipientId];
-            amountAllocated[recipientId] = 0;
-            allocationToken.transferAmount(recipientAddress, allocationAmount);
+            uint256 _allocationAmount = amountAllocated[_recipientId];
+            amountAllocated[_recipientId] = 0;
+            _allocationToken.transferAmount(_recipientAddress, _allocationAmount);
 
-            emit Distributed(recipientId, abi.encode(recipientAddress, allocationToken, allocationAmount, _sender));
+            emit Distributed(_recipientId, abi.encode(_recipientAddress, _allocationToken, _allocationAmount, _sender));
 
             // Transfer matching amount
-            uint256 matchingAmount = QFState.calculateMatching(totalPayoutAmount, recipientId);
-            poolAmount -= matchingAmount;
-            IAllo.Pool memory pool = allo.getPool(poolId);
-            pool.token.transferAmount(recipientAddress, matchingAmount);
+            uint256 _matchingAmount = QFState.calculateMatching(totalPayoutAmount, _recipientId);
+            _poolAmount -= _matchingAmount;
+            IAllo.Pool memory _pool = _ALLO.getPool(_poolId);
+            _pool.token.transferAmount(_recipientAddress, _matchingAmount);
 
-            emit Distributed(recipientId, abi.encode(recipientAddress, pool.token, matchingAmount, _sender));
+            emit Distributed(_recipientId, abi.encode(_recipientAddress, _pool.token, _matchingAmount, _sender));
         }
     }
 
@@ -193,7 +193,7 @@ contract DonationVotingOnchain is BaseStrategy, RecipientsExtension, AllocationE
     /// @notice Hook called before increasing the pool amount.
     /// @param _amount The amount to increase the pool by
     function _beforeIncreasePoolAmount(uint256 _amount) internal virtual override {
-        if (block.timestamp > allocationEndTime) revert POOL_INACTIVE();
+        if (block.timestamp > allocationEndTime) revert AllocationExtension_ALLOCATION_HAS_ENDED();
     }
 
     /// @notice Returns if the recipient is accepted

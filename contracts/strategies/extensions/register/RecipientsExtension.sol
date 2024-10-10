@@ -11,7 +11,7 @@ import {BaseStrategy} from "strategies/BaseStrategy.sol";
 import {Metadata} from "contracts/core/libraries/Metadata.sol";
 import {Errors} from "contracts/core/libraries/Errors.sol";
 
-abstract contract RecipientsExtension is BaseStrategy, Errors, IRecipientsExtension {
+abstract contract RecipientsExtension is BaseStrategy, IRecipientsExtension, Errors {
     /// @notice if set to true, `_reviewRecipientStatus()` is called for each new status update.
     bool public immutable REVIEW_EACH_STATUS;
 
@@ -81,8 +81,8 @@ abstract contract RecipientsExtension is BaseStrategy, Errors, IRecipientsExtens
 
     /// @notice Get a recipient with a '_recipientId'
     /// @param _recipientId ID of the recipient
-    /// @return recipient The recipient details
-    function getRecipient(address _recipientId) external view returns (Recipient memory recipient) {
+    /// @return _recipient The recipient details
+    function getRecipient(address _recipientId) external view returns (Recipient memory _recipient) {
         return _getRecipient(_recipientId);
     }
 
@@ -100,9 +100,9 @@ abstract contract RecipientsExtension is BaseStrategy, Errors, IRecipientsExtens
     /// @param _sender The sender of the transaction
     /// @return true if _sender is a profile owner or member
     function _isProfileMember(address _anchor, address _sender) internal view virtual returns (bool) {
-        IRegistry registry = allo.getRegistry();
-        IRegistry.Profile memory profile = registry.getProfileByAnchor(_anchor);
-        return registry.isOwnerOrMemberOfProfile(profile.id, _sender);
+        IRegistry _registry = _ALLO.getRegistry();
+        IRegistry.Profile memory _profile = _registry.getProfileByAnchor(_anchor);
+        return _registry.isOwnerOrMemberOfProfile(_profile.id, _sender);
     }
 
     /// @notice Sets recipient statuses.
@@ -118,24 +118,24 @@ abstract contract RecipientsExtension is BaseStrategy, Errors, IRecipientsExtens
     /// - 5: in review
     /// - 6: canceled
     /// Emits the RecipientStatusUpdated() event.
-    /// @param statuses new statuses
-    /// @param refRecipientsCounter the recipientCounter the transaction is based on
-    function reviewRecipients(ApplicationStatus[] calldata statuses, uint256 refRecipientsCounter) public virtual {
+    /// @param _statuses new statuses
+    /// @param _refRecipientsCounter the recipientCounter the transaction is based on
+    function reviewRecipients(ApplicationStatus[] calldata _statuses, uint256 _refRecipientsCounter) public virtual {
         _validateReviewRecipients(msg.sender);
-        if (refRecipientsCounter != recipientsCounter) revert INVALID();
+        if (_refRecipientsCounter != recipientsCounter) revert INVALID();
         // Loop through the statuses and set the status
-        for (uint256 i; i < statuses.length; ++i) {
-            uint256 rowIndex = statuses[i].index;
-            uint256 fullRow = statuses[i].statusRow;
+        for (uint256 i; i < _statuses.length; ++i) {
+            uint256 _rowIndex = _statuses[i].index;
+            uint256 _fullRow = _statuses[i].statusRow;
 
             if (REVIEW_EACH_STATUS) {
-                fullRow = _processStatusRow(rowIndex, fullRow);
+                _fullRow = _processStatusRow(_rowIndex, _fullRow);
             }
 
-            statusesBitMap[rowIndex] = fullRow;
+            statusesBitMap[_rowIndex] = _fullRow;
 
             // Emit that the recipient status has been updated with the values
-            emit RecipientStatusUpdated(rowIndex, fullRow, msg.sender);
+            emit RecipientStatusUpdated(_rowIndex, _fullRow, msg.sender);
         }
     }
 
@@ -170,7 +170,7 @@ abstract contract RecipientsExtension is BaseStrategy, Errors, IRecipientsExtens
     /// @dev This will revert if the registration has not started or if the registration has ended.
     function _checkOnlyActiveRegistration() internal view virtual {
         if (registrationStartTime > block.timestamp || block.timestamp > registrationEndTime) {
-            revert REGISTRATION_NOT_ACTIVE();
+            revert RecipientsExtension_RegistrationNotActive();
         }
     }
 
@@ -210,83 +210,80 @@ abstract contract RecipientsExtension is BaseStrategy, Errors, IRecipientsExtens
         returns (address[] memory _recipientIds)
     {
         // Decode the data, datas array must be same length as recipients array
-        bytes[] memory datas = abi.decode(_data, (bytes[]));
+        bytes[] memory _datas = abi.decode(_data, (bytes[]));
 
         _recipientIds = new address[](__recipients.length);
 
         for (uint256 i; i < __recipients.length; i++) {
-            address recipientAddress = __recipients[i];
-            bytes memory data = datas[i];
+            address _recipientAddress = __recipients[i];
+            bytes memory _recipientData = _datas[i];
 
             // decode data
-            (address recipientId, bool isUsingRegistryAnchor, Metadata memory metadata, bytes memory extraData) =
-                _extractRecipientAndMetadata(data, _sender);
+            (address _recipientId, bool _isUsingRegistryAnchor, Metadata memory _metadata, bytes memory _extraData) =
+                _extractRecipientAndMetadata(_recipientData, _sender);
 
             // Call hook
-            _processRecipient(recipientId, isUsingRegistryAnchor, metadata, extraData);
+            _processRecipient(_recipientId, _isUsingRegistryAnchor, _metadata, _extraData);
 
             // If the recipient address is the zero address this will revert
-            if (recipientAddress == address(0)) {
-                revert RECIPIENT_ERROR(recipientId);
+            if (_recipientAddress == address(0)) {
+                revert RecipientsExtension_RecipientError(_recipientId);
             }
 
             // If the metadata is required and the metadata is invalid this will revert
-            if (metadataRequired && (bytes(metadata.pointer).length == 0 || metadata.protocol == 0)) {
-                revert INVALID_METADATA();
+            if (metadataRequired && (bytes(_metadata.pointer).length == 0 || _metadata.protocol == 0)) {
+                revert RecipientsExtension_InvalidMetada();
             }
 
             // Get the recipient
-            Recipient storage recipient = _recipients[recipientId];
+            Recipient storage _recipient = _recipients[_recipientId];
 
             // update the recipients data
-            recipient.recipientAddress = recipientAddress;
-            recipient.metadata = metadata;
-            recipient.useRegistryAnchor = isUsingRegistryAnchor;
+            _recipient.recipientAddress = _recipientAddress;
+            _recipient.metadata = _metadata;
+            _recipient.useRegistryAnchor = _isUsingRegistryAnchor;
 
-            if (recipient.statusIndex == 0) {
+            if (_recipient.statusIndex == 0) {
                 // recipient registering new application
-                recipient.statusIndex = uint64(recipientsCounter);
-                recipientIndexToRecipientId[recipientsCounter] = recipientId;
-                _setRecipientStatus(recipientId, uint8(Status.Pending));
+                _recipient.statusIndex = uint64(recipientsCounter);
+                recipientIndexToRecipientId[recipientsCounter] = _recipientId;
+                _setRecipientStatus(_recipientId, uint8(Status.Pending));
 
-                bytes memory extendedData = abi.encode(data, recipientsCounter);
-                emit Registered(recipientId, extendedData);
+                bytes memory _extendedData = abi.encode(_recipientData, recipientsCounter);
+                emit Registered(_recipientId, _extendedData);
 
                 recipientsCounter++;
             } else {
-                uint8 currentStatus = _getUintRecipientStatus(recipientId);
-                if (currentStatus == uint8(Status.Accepted) || currentStatus == uint8(Status.InReview)) {
+                uint8 _currentStatus = _getUintRecipientStatus(_recipientId);
+                if (_currentStatus == uint8(Status.Accepted) || _currentStatus == uint8(Status.InReview)) {
                     // recipient updating accepted application
-                    _setRecipientStatus(recipientId, uint8(Status.Pending));
-                } else if (currentStatus == uint8(Status.Rejected)) {
+                    _setRecipientStatus(_recipientId, uint8(Status.Pending));
+                } else if (_currentStatus == uint8(Status.Rejected)) {
                     // recipient updating rejected application
-                    _setRecipientStatus(recipientId, uint8(Status.Appealed));
+                    _setRecipientStatus(_recipientId, uint8(Status.Appealed));
                 }
-                emit UpdatedRegistration(recipientId, data, _sender, _getUintRecipientStatus(recipientId));
+                emit UpdatedRegistration(_recipientId, _recipientData, _sender, _getUintRecipientStatus(_recipientId));
             }
 
-            _recipientIds[i] = recipientId;
+            _recipientIds[i] = _recipientId;
         }
     }
 
     /// @notice Extract recipient and metadata from the data.
     /// @param _data The data to be decoded
     /// @param _sender The sender of the transaction
-    /// @return recipientId The ID of the recipient
-    /// @return isUsingRegistryAnchor A flag to indicate whether to use the registry anchor or not
-    /// @return metadata The metadata of the recipient
-    /// @return extraData The extra data of the recipient
+    /// @return _recipientId The ID of the recipient
+    /// @return _isUsingRegistryAnchor A flag to indicate whether to use the registry anchor or not
+    /// @return _metadata The metadata of the recipient
+    /// @return _extraData The extra data of the recipient
     function _extractRecipientAndMetadata(bytes memory _data, address _sender)
         internal
         view
         virtual
-        returns (address recipientId, bool isUsingRegistryAnchor, Metadata memory metadata, bytes memory extraData)
+        returns (address _recipientId, bool _isUsingRegistryAnchor, Metadata memory _metadata, bytes memory _extraData)
     {
-        (address _recipientIdOrRegistryAnchor, Metadata memory _metadata, bytes memory _extraData) =
-            abi.decode(_data, (address, Metadata, bytes));
-
-        metadata = _metadata;
-        extraData = _extraData;
+        address _recipientIdOrRegistryAnchor;
+        (_recipientIdOrRegistryAnchor, _metadata, _extraData) = abi.decode(_data, (address, Metadata, bytes));
 
         // If the registry anchor is not the zero address check authorization
         // Anchor can never be zero, so if zero, set '_sender' as the recipientId
@@ -295,11 +292,11 @@ abstract contract RecipientsExtension is BaseStrategy, Errors, IRecipientsExtens
                 revert UNAUTHORIZED();
             }
 
-            isUsingRegistryAnchor = true;
-            recipientId = _recipientIdOrRegistryAnchor;
+            _isUsingRegistryAnchor = true;
+            _recipientId = _recipientIdOrRegistryAnchor;
         } else {
             // Using 'isUsingRegistryAnchor' default value (false)
-            recipientId = _sender;
+            _recipientId = _sender;
         }
     }
 
@@ -315,42 +312,39 @@ abstract contract RecipientsExtension is BaseStrategy, Errors, IRecipientsExtens
     /// @param _status Status of the recipient
     function _setRecipientStatus(address _recipientId, uint256 _status) internal virtual {
         // Get the row index, column index and current row
-        (uint256 rowIndex, uint256 colIndex, uint256 currentRow) = _getStatusRowColumn(_recipientId);
+        (uint256 _rowIndex, uint256 _colIndex, uint256 _currentRow) = _getStatusRowColumn(_recipientId);
 
         // Calculate the 'newRow'
-        uint256 newRow = currentRow & ~(15 << colIndex);
+        uint256 _newRow = _currentRow & ~(15 << _colIndex);
 
         // Add the status to the mapping
-        statusesBitMap[rowIndex] = newRow | (_status << colIndex);
+        statusesBitMap[_rowIndex] = _newRow | (_status << _colIndex);
     }
 
     /// @notice Get recipient status
     /// @param _recipientId ID of the recipient
-    /// @return status The status of the recipient
-    function _getUintRecipientStatus(address _recipientId) internal view virtual returns (uint8 status) {
+    /// @return _status The status of the recipient
+    function _getUintRecipientStatus(address _recipientId) internal view virtual returns (uint8 _status) {
         if (_recipients[_recipientId].statusIndex == 0) return 0;
         // Get the column index and current row
-        (, uint256 colIndex, uint256 currentRow) = _getStatusRowColumn(_recipientId);
+        (, uint256 _colIndex, uint256 _currentRow) = _getStatusRowColumn(_recipientId);
 
         // Get the status from the 'currentRow' shifting by the 'colIndex'
-        status = uint8((currentRow >> colIndex) & 15);
-
-        // Return the status
-        return status;
+        _status = uint8((_currentRow >> _colIndex) & 15);
     }
 
     /// @notice Get recipient status 'rowIndex', 'colIndex' and 'currentRow'.
     /// @param _recipientId ID of the recipient
-    /// @return rowIndex
-    /// @return colIndex
-    /// @return currentRow
+    /// @return _rowIndex
+    /// @return _colIndex
+    /// @return _currentRow
     function _getStatusRowColumn(address _recipientId) internal view virtual returns (uint256, uint256, uint256) {
-        uint256 recipientIndex = _recipients[_recipientId].statusIndex - 1;
+        uint256 _recipientIndex = _recipients[_recipientId].statusIndex - 1;
 
-        uint256 rowIndex = recipientIndex / 64; // 256 / 4
-        uint256 colIndex = (recipientIndex % 64) * 4;
+        uint256 _rowIndex = _recipientIndex / 64; // 256 / 4
+        uint256 _colIndex = (_recipientIndex % 64) * 4;
 
-        return (rowIndex, colIndex, statusesBitMap[rowIndex]);
+        return (_rowIndex, _colIndex, statusesBitMap[_rowIndex]);
     }
 
     /// @notice Called from reviewRecipients if REVIEW_EACH_STATUS is set to true.
@@ -360,21 +354,21 @@ abstract contract RecipientsExtension is BaseStrategy, Errors, IRecipientsExtens
     /// @return The _fullRow with any modifications made by _reviewRecipientStatus()
     function _processStatusRow(uint256 _rowIndex, uint256 _fullRow) internal virtual returns (uint256) {
         // Loop through each status in the updated row
-        uint256 currentRow = statusesBitMap[_rowIndex];
+        uint256 _currentRow = statusesBitMap[_rowIndex];
         for (uint256 col = 0; col < 64; ++col) {
             // Extract the status at the column index
-            uint256 colIndex = col << 2; // col * 4
-            uint8 newStatus = uint8((_fullRow >> colIndex) & 0xF);
-            uint8 currentStatus = uint8((currentRow >> colIndex) & 0xF);
+            uint256 _colIndex = col << 2; // col * 4
+            Status _newStatus = Status(uint8((_fullRow >> _colIndex) & 0xF));
+            Status _currentStatus = Status(uint8((_currentRow >> _colIndex) & 0xF));
 
             // Only do something if the status is being modified
-            if (newStatus != currentStatus) {
-                uint256 recipientIndex = (_rowIndex << 6) + col + 1; // _rowIndex * 64 + col + 1
-                Status reviewedStatus = _reviewRecipientStatus(Status(newStatus), Status(currentStatus), recipientIndex);
-                if (reviewedStatus != Status(newStatus)) {
+            if (_newStatus != _currentStatus) {
+                uint256 _recipientIndex = (_rowIndex << 6) + col + 1; // _rowIndex * 64 + col + 1
+                Status _reviewedStatus = _reviewRecipientStatus(_newStatus, _currentStatus, _recipientIndex);
+                if (_reviewedStatus != _newStatus) {
                     // Update `_fullRow` with the reviewed status.
-                    uint256 reviewedRow = _fullRow & ~(0xF << colIndex);
-                    _fullRow = reviewedRow | (uint256(reviewedStatus) << colIndex);
+                    uint256 reviewedRow = _fullRow & ~(0xF << _colIndex);
+                    _fullRow = reviewedRow | (uint256(_reviewedStatus) << _colIndex);
                 }
             }
         }
