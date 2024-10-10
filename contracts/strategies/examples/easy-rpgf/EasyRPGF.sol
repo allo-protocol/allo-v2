@@ -32,7 +32,7 @@ contract EasyRPGF is BaseStrategy, Errors {
     /// ========= Constructor =========
     /// ===============================
 
-    constructor(address _allo) BaseStrategy(_allo) {}
+    constructor(address _allo) BaseStrategy(_allo, "EasyRPGF") {}
 
     /// ===============================
     /// ========= Initialize ==========

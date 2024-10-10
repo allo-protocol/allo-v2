@@ -26,7 +26,7 @@ contract IntegrationQVSimple is IntegrationBase {
         allocator1 = makeAddr("allocator1");
 
         // Deploying contracts
-        strategy = new QVSimple(address(allo));
+        strategy = new QVSimple(address(allo), "QVSimple");
 
         // Deal
         deal(DAI, userAddr, 100000 ether);

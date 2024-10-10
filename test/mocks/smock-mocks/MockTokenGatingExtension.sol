@@ -5,7 +5,7 @@ import {TokenGatingExtension} from "contracts/strategies/extensions/gating/Token
 import {BaseStrategy} from "contracts/strategies/BaseStrategy.sol";
 
 contract MockTokenGatingExtension is BaseStrategy, TokenGatingExtension {
-    constructor(address _allo) BaseStrategy(_allo) {}
+    constructor(address _allo, string memory _strategyName) BaseStrategy(_allo, _strategyName) {}
 
     function initialize(uint256 _poolId, bytes memory) external virtual override {
         __BaseStrategy_init(_poolId);

@@ -75,7 +75,7 @@ contract QVImpactStream is QVSimple {
 
     /// @notice Constructor for the QV Impact Stream strategy
     /// @param _allo The 'Allo' contract
-    constructor(address _allo) QVSimple(_allo) {}
+    constructor(address _allo) QVSimple(_allo, "QVImpactStream") {}
 
     /// ====================================
     /// ==== External/Public Functions =====

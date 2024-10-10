@@ -131,7 +131,7 @@ contract SQFSuperfluid is
 
     /// @notice Constructor for the Micro Grants Strategy
     /// @param _allo The 'Allo' contract
-    constructor(address _allo) RecipientsExtension(_allo, true) {}
+    constructor(address _allo) RecipientsExtension(_allo, "SQFSuperfluid", true) {}
 
     /// ===============================
     /// ========= Initialize ==========

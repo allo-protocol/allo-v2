@@ -5,7 +5,7 @@ import {AllocatorsAllowlistExtension} from "contracts/strategies/extensions/allo
 import {BaseStrategy} from "contracts/strategies/BaseStrategy.sol";
 
 contract MockAllocatorsAllowlistExtension is BaseStrategy, AllocatorsAllowlistExtension {
-    constructor(address _allo) BaseStrategy(_allo) {}
+    constructor(address _allo, string memory _strategyName) BaseStrategy(_allo, _strategyName) {}
 
     function initialize(uint256 _poolId, bytes memory _data) external override {
         __BaseStrategy_init(_poolId);

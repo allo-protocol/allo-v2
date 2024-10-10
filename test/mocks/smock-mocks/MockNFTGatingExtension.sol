@@ -5,7 +5,7 @@ import {NFTGatingExtension} from "contracts/strategies/extensions/gating/NFTGati
 import {BaseStrategy} from "contracts/strategies/BaseStrategy.sol";
 
 contract MockNFTGatingExtension is BaseStrategy, NFTGatingExtension {
-    constructor(address _allo) BaseStrategy(_allo) {}
+    constructor(address _allo, string memory _strategyName) BaseStrategy(_allo, _strategyName) {}
 
     function initialize(uint256 _poolId, bytes memory) external virtual override {
         __BaseStrategy_init(_poolId);

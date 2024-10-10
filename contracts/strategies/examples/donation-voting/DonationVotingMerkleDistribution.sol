@@ -98,7 +98,9 @@ contract DonationVotingMerkleDistribution is DonationVotingOffchain {
     /// @notice Constructor for the Donation Voting Offchain strategy
     /// @param _allo The 'Allo' contract
     /// @param _directTransfer false if allocations must be manually claimed, true if they are sent during allocation.
-    constructor(address _allo, bool _directTransfer) DonationVotingOffchain(_allo, _directTransfer) {}
+    constructor(address _allo, bool _directTransfer)
+        DonationVotingOffchain(_allo, "DonationVotingMerkleDistribution", _directTransfer)
+    {}
 
     /// ===============================
     /// ======= External/Custom =======

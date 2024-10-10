@@ -37,8 +37,8 @@ contract IntegrationDonationVotingOffchainBase is IntegrationBase {
         allocator0 = makeAddr("allocator0");
         allocator1 = makeAddr("allocator1");
 
-        strategy = new DonationVotingOffchain(address(allo), false);
-        strategyWithDirectTransfers = new DonationVotingOffchain(address(allo), true);
+        strategy = new DonationVotingOffchain(address(allo), "DonationVotingOffchain", false);
+        strategyWithDirectTransfers = new DonationVotingOffchain(address(allo), "DonationVotingOffchain", true);
 
         // Deal
         deal(DAI, userAddr, POOL_AMOUNT * 2);

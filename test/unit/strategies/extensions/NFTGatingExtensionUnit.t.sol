@@ -10,7 +10,7 @@ contract NFTGatingExtensionUnit is Test {
     MockMockNFTGatingExtension nftGatingExtension;
 
     function setUp() public {
-        nftGatingExtension = new MockMockNFTGatingExtension(address(0));
+        nftGatingExtension = new MockMockNFTGatingExtension(address(0), "MockNFTGatingExtension");
     }
 
     function test_RevertWhen_NftAddressIsZero(address _actor) external {

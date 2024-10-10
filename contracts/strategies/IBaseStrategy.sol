@@ -77,6 +77,10 @@ interface IBaseStrategy {
     /// @return _allo The 'Allo' contract
     function getAllo() external view returns (IAllo _allo);
 
+    /// @notice Getter for the strategy ID.
+    /// @return _strategyId The ID of the strategy
+    function getStrategyId() external view returns (bytes32 _strategyId);
+
     /// @notice Getter for the 'poolId' for this strategy.
     /// @return _poolId The ID of the pool
     function getPoolId() external view returns (uint256 _poolId);

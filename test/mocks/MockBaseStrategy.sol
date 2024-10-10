@@ -6,7 +6,7 @@ import "strategies/BaseStrategy.sol";
 contract MockBaseStrategy is BaseStrategy {
     uint256 internal surpressStateMutabilityWarning;
 
-    constructor(address _allo) BaseStrategy(_allo) {}
+    constructor(address _allo, string memory _strategyName) BaseStrategy(_allo, _strategyName) {}
 
     function initialize(uint256 _poolId, bytes memory _data) external {
         __BaseStrategy_init(_poolId);

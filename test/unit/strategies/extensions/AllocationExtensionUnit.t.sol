@@ -11,7 +11,7 @@ contract AllocationExtension is Test {
     event AllocationTimestampsUpdated(uint64 allocationStartTime, uint64 allocationEndTime, address sender);
 
     function setUp() public {
-        extension = new MockMockAllocationExtension(address(0));
+        extension = new MockMockAllocationExtension(address(0), "MockAllocationExtension");
     }
 
     function test___AllocationExtension_initWhenAllowedTokensArrayIsEmpty() external {

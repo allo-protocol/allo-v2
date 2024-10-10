@@ -7,7 +7,9 @@ import {IRecipientsExtension} from "strategies/extensions/register/IRecipientsEx
 import {Metadata} from "contracts/core/libraries/Metadata.sol";
 
 contract MockRecipientsExtension is BaseStrategy, RecipientsExtension {
-    constructor(address _allo, bool _reviewEachStatus) RecipientsExtension(_allo, _reviewEachStatus) {}
+    constructor(address _allo, string memory _strategyName, bool _reviewEachStatus)
+        RecipientsExtension(_allo, _strategyName, _reviewEachStatus)
+    {}
 
     function initialize(uint256 _poolId, bytes memory _data) external {
         __BaseStrategy_init(_poolId);

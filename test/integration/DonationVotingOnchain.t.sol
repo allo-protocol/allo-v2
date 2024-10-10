@@ -37,7 +37,7 @@ contract IntegrationDonationVotingOnchainBase is IntegrationBase {
         allocator1 = makeAddr("allocator1");
 
         // Deploying contracts
-        strategy = new DonationVotingOnchain(address(allo));
+        strategy = new DonationVotingOnchain(address(allo), "DonationVotingOnchain");
 
         // Deal
         deal(DAI, userAddr, POOL_AMOUNT);

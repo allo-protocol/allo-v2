@@ -10,7 +10,7 @@ import {Metadata} from "contracts/core/libraries/Metadata.sol";
 contract MockMilestonesExtension is BaseStrategy, IMilestonesExtension, MilestonesExtension {
     address public acceptedRecipientId;
 
-    constructor(address _allo) BaseStrategy(_allo) {}
+    constructor(address _allo, string memory _strategyName) BaseStrategy(_allo, _strategyName) {}
 
     function initialize(uint256 _poolId, bytes memory _data) external {
         __BaseStrategy_init(_poolId);

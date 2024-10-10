@@ -29,7 +29,7 @@ contract MilestonesExtensionUnit is Test {
     }
 
     function setUp() public {
-        milestonesExtension = new MockMockMilestonesExtension(address(0));
+        milestonesExtension = new MockMockMilestonesExtension(address(0), "MockMilestonesExtension");
     }
 
     function test___MilestonesExtension_initShouldCall_increaseMaxBid(uint256 _maxBid) external {

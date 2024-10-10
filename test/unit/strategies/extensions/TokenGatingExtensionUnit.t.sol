@@ -10,7 +10,7 @@ contract TokenGatingExtensionUnit is Test {
     MockMockTokenGatingExtension tokenGatingExtension;
 
     function setUp() external {
-        tokenGatingExtension = new MockMockTokenGatingExtension(address(0));
+        tokenGatingExtension = new MockMockTokenGatingExtension(address(0), "MockTokenGatingExtension");
     }
 
     function test_RevertWhen_TokenAddressIsZero(uint256 _amount, address _actor) external {

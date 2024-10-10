@@ -14,7 +14,7 @@ contract RecipientsExtensionUnit is Test {
     MockMockRecipientsExtension recipientsExtension;
 
     function setUp() public {
-        recipientsExtension = new MockMockRecipientsExtension(address(0), true);
+        recipientsExtension = new MockMockRecipientsExtension(address(0), "MockRecipientsExtension", true);
     }
 
     function _boundStatuses(IRecipientsExtension.ApplicationStatus[] memory _statuses)

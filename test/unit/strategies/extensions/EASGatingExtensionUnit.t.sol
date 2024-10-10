@@ -10,7 +10,7 @@ contract EASGatingExtensionUnit is Test {
     MockMockEASGatingExtension easGatingExtension;
 
     function setUp() public {
-        easGatingExtension = new MockMockEASGatingExtension(address(0));
+        easGatingExtension = new MockMockEASGatingExtension(address(0), "MockEASGatingExtension");
     }
 
     function test___EASGatingExtension_initShouldRevertIf_easIsZeroAddress() external {

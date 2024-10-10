@@ -19,6 +19,8 @@ abstract contract BaseStrategy is IBaseStrategy {
     /// ==========================
     /// @notice The Allo contract
     IAllo internal immutable _ALLO;
+    /// @notice The id of the strategy
+    bytes32 internal immutable strategyId;
     /// @notice The id of the pool
     uint256 internal _poolId;
     /// @notice The balance of the pool
@@ -30,8 +32,10 @@ abstract contract BaseStrategy is IBaseStrategy {
 
     /// @notice Constructor to set the Allo contract
     /// @param _allo Address of the Allo contract.
-    constructor(address _allo) {
+    /// @param _strategyName Name of the strategy
+    constructor(address _allo, string memory _strategyName) {
         _ALLO = IAllo(_allo);
+        strategyId = keccak256(abi.encode(_strategyName));
     }
 
     /// ====================================
@@ -60,6 +64,12 @@ abstract contract BaseStrategy is IBaseStrategy {
     /// @return _allo The 'Allo' contract
     function getAllo() external view override returns (IAllo) {
         return _ALLO;
+    }
+
+    /// @notice Getter for the 'strategyId'.
+    /// @return _strategyId The ID of the strategy
+    function getStrategyId() external view override returns (bytes32) {
+        return strategyId;
     }
 
     /// @notice Getter for the '_poolId'.
