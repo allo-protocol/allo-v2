@@ -42,7 +42,7 @@ contract DirectAllocationTest is Test {
         address[] memory _tokens = new address[](_recipients.length);
         bytes memory _data = abi.encode(_tokens);
 
-        vm.expectRevert(DirectAllocationStrategy.INVALID_INPUT.selector);
+        vm.expectRevert(Errors.ARRAY_MISMATCH.selector);
 
         vm.prank(mockAlloAddress);
         directAllocationStrategy.allocate(_recipients, _amounts, _data, _sender);
@@ -56,7 +56,7 @@ contract DirectAllocationTest is Test {
         address[] memory _tokens = new address[](_recipients.length + 1);
         bytes memory _data = abi.encode(_tokens);
 
-        vm.expectRevert(DirectAllocationStrategy.INVALID_INPUT.selector);
+        vm.expectRevert(Errors.ARRAY_MISMATCH.selector);
 
         vm.prank(mockAlloAddress);
         directAllocationStrategy.allocate(_recipients, _amounts, _data, _sender);

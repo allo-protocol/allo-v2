@@ -8,6 +8,7 @@ import {Anchor} from "contracts/core/Anchor.sol";
 import {Test, stdStorage, StdStorage} from "forge-std/Test.sol";
 import {IAccessControlUpgradeable} from
     "openzeppelin-contracts-upgradeable/contracts/access/IAccessControlUpgradeable.sol";
+import {IRegistry} from "contracts/core/interfaces/IRegistry.sol";
 
 contract RegistryUnit is Test {
     using stdStorage for StdStorage;
@@ -326,11 +327,14 @@ contract RegistryUnit is Test {
         bytes32 _profileId,
         string memory _name
     ) external {
+        bytes32 _wrongProfileId = keccak256("wrong");
+        vm.assume(_profileId != _wrongProfileId);
         address _anchor = registry.call__generateAnchor(_profileId, _name);
+        vm.mockCall(_anchor, abi.encodeWithSignature("profileId()"), abi.encode(_wrongProfileId));
 
-        vm.mockCall(_anchor, abi.encodeWithSignature("profileId()"), abi.encode(keccak256("wrong")));
-        vm.expectRevert(Errors.ANCHOR_ERROR.selector);
         // it should revert
+        vm.expectRevert(Errors.ANCHOR_ERROR.selector);
+
         registry.call__generateAnchor(_profileId, _name);
     }
 
@@ -343,12 +347,18 @@ contract RegistryUnit is Test {
     }
 
     function test__isOwnerOfProfileWhenProvidedAddressIsOwnerOfProfile(bytes32 _profileId, address _owner) external {
-        vm.skip(true);
-        // TODO:
-        // it should return true
-        stdstore.target(address(registry)).sig("profilesById(bytes32)").with_key(_profileId).depth(4).checked_write(
-            _owner
+        registry.set_profilesById(
+            _profileId,
+            IRegistry.Profile({
+                id: bytes32(0),
+                nonce: 0,
+                name: "",
+                metadata: Metadata({protocol: 0, pointer: ""}),
+                owner: _owner,
+                anchor: address(0)
+            })
         );
+
         assertTrue(registry.call__isOwnerOfProfile(_profileId, _owner));
     }
 
@@ -386,13 +396,22 @@ contract RegistryUnit is Test {
         registry.recoverFunds(_token, address(0));
     }
 
-    function test_RecoverFundsWhenRecipientIsNotZeroAddress(address _token, address _recipient)
+    function test_RecoverFundsWhenRecipientIsNotZeroAddress(address _token, address _recipient, uint256 _amount)
         external
         givenCallerIsAlloOwner
     {
-        // TODO:
+        vm.assume(_recipient != address(0));
+        vm.assume(_token != address(vm));
+
+        vm.mockCall(_token, abi.encodeWithSignature("balanceOf(address)", address(registry)), abi.encode(_amount));
+        vm.mockCall(_token, abi.encodeWithSignature("transfer(address,uint256)", _recipient, _amount), abi.encode(true));
+
         // it should call getBalance
+        vm.expectCall(_token, abi.encodeWithSignature("balanceOf(address)", address(registry)));
+
         // it should call transfer
-        vm.skip(true);
+        vm.expectCall(_token, abi.encodeWithSignature("transfer(address,uint256)", _recipient, _amount));
+
+        registry.recoverFunds(_token, _recipient);
     }
 }

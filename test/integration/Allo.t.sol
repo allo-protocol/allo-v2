@@ -18,7 +18,7 @@ contract IntegrationAllo is IntegrationBase {
 
         allo = IAllo(ALLO_PROXY);
 
-        strategy = new DonationVotingOffchain(ALLO_PROXY, false);
+        strategy = new DonationVotingOffchain(ALLO_PROXY, "DonationVotingOffchain", false);
 
         // Deal 130k DAI to the user
         deal(DAI, userAddr, 130_000 ether);

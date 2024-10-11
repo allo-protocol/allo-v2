@@ -1,4 +1,4 @@
-Allo::initialize
+AlloUnit::initialize
 └── given upgrade version is correct
     ├── it should call _initializeOwner
     ├── it should call _updateRegistry
@@ -7,95 +7,121 @@ Allo::initialize
     ├── it should call _updateBaseFee
     └── it should call _updateTrustedForwarder
 
-Allo::createPoolWithCustomStrategy
+AlloUnit::createPoolWithCustomStrategy
 ├── when strategy is zero address
 │   └── it should revert
 └── when calling with proper params
     ├── it should call _createPool
     └── it should return poolId
 
-Allo::createPool
+AlloUnit::createPool
 ├── when strategy is zero address
 │   └── it should revert
 └── when calling with proper params
     ├── it should call _createPool
+    ├── it should increment the _nonces of the creator
     └── it should return poolId
 
-Allo::updatePoolMetadata
+AlloUnit::updatePoolMetadata
 └── given sender is manager of pool
     ├── it should call _checkOnlyPoolManager
     ├── it should update metadata
     └── it should emit event
 
-Allo::updateRegistry
+AlloUnit::updateRegistry
 ├── when sender is not owner
 │   └── it should revert
 └── when sender is owner
-    └── it should call _updateRegistry
+    ├── when new registry is zero address
+    │   └── it should revert
+    └── when new registry is not zero address
+        ├── it should update registry
+        └── it should emit event
 
-Allo::updateTreasury
+AlloUnit::updateTreasury
 ├── when sender is not owner
 │   └── it should revert
 └── when sender is owner
-    └── it should call _updateTreasury
+    ├── when new treasury is zero address
+    │   └── it should revert
+    └── given new treasury is not zero address
+        ├── it should update treasury
+        └── it should emit event
 
-Allo::updatePercentFee
+AlloUnit::updatePercentFee
 ├── when sender is not owner
 │   └── it should revert
 └── when sender is owner
-    └── it should call _updatePercentFee
+    ├── when percentFee is more than 1e18
+    │   └── it should revert
+    └── when percentFee is less than 1e18
+        ├── it should update percentFee
+        └── it should emit event
 
-Allo::updateBaseFee
+AlloUnit::updateBaseFee
 ├── when sender is not owner
 │   └── it should revert
 └── when sender is owner
-    └── it should call _updateBaseFee
+    ├── it should update baseFee
+    └── it should emit event
 
-Allo::updateTrustedForwarder
+AlloUnit::updateTrustedForwarder
 ├── when sender is not owner
 │   └── it should revert
 └── when sender is owner
-    └── it should call _updateTrustedForwarder
+    ├── it should update trustedForwarder
+    └── it should emit event
 
-Allo::addPoolManagers
-└── given sender is admin of poolId
-    ├── it should call _checkOnlyPoolAdmin
-    └── it should call _addPoolManager
+AlloUnit::addPoolManagers
+├── when sender is not admin of poolId
+│   └── it should revert
+└── when sender is admin of poolId
+    ├── when manager is zero address
+    │   └── it should revert
+    └── when manager is not zero address
+        └── it should call _grantRole for manager
 
-Allo::removePoolManagers
-└── given sender is admin of poolId
-    ├── it should call _checkOnlyPoolAdmin
-    └── it should call _revokeRole
+AlloUnit::removePoolManagers
+├── when sender is not admin of poolId
+│   └── it should revert
+└── when sender is admin of poolId
+    └── it should call _revokeRole for manager
 
-Allo::addPoolManagersInMultiplePools
-└── given sender is admin of all poolIds
+AlloUnit::addPoolManagersInMultiplePools
+├── when sender is not admin of all poolIds
+│   └── it should revert
+└── when sender is admin of of all poolIds
     └── it should call addPoolManagers
 
-Allo::removePoolManagersInMultiplePools
-└── given sender is admin of all poolIds
+AlloUnit::removePoolManagersInMultiplePools
+├── when sender is not admin of all poolIds
+│   └── it should revert
+└── when sender is admin of of all poolIds
     └── it should call removePoolManagers
 
-Allo::recoverFunds
+AlloUnit::recoverFunds
 ├── when sender is not owner
 │   └── it should revert
 └── when sender is owner
     ├── when token is native
-    │   └── it should transfer native token
+    │   └── it should transfer the whole balance of native token
     └── when token is not native
-        └── it should transfer token
+        └── it should transfer the whole balance of token
 
-Allo::registerRecipient
-├── it should call register on the strategy
-└── it should return recipientId
+AlloUnit::registerRecipient
+├── it should transfer the msg.value received
+└── it should call register on the strategy
 
-Allo::batchRegisterRecipient
+AlloUnit::batchRegisterRecipient
 ├── when poolId length does not match _data length
 │   └── it should revert
-└── when poolId length matches _data length
+├── when poolId length does not match _recipients length
+│   └── it should revert
+└── when poolId length matches _data length and _recipients length
     ├── it should call register on the strategy
     └── it should return recipientIds
 
-Allo::fundPool
+AlloUnit::fundPool
 ├── when amount is zero
 │   └── it should revert
 ├── when token is native and value does not match amount
@@ -103,10 +129,10 @@ Allo::fundPool
 └── when called with proper params
     └── it should call _fundPool
 
-Allo::allocate
-└── it should call allocate
+AlloUnit::allocate
+└── it should call allocate on the strategy
 
-Allo::batchAllocate
+AlloUnit::batchAllocate
 ├── when poolId length does not match _data length
 │   └── it should revert
 ├── when poolId length does not match _values length
@@ -117,43 +143,50 @@ Allo::batchAllocate
 │   └── it should revert
 ├── when lengths matches
 │   └── it should call allocate
-└── when totalValue does not match value
+└── when totalValue does not match msg value
     └── it should revert
 
-Allo::distribute
+AlloUnit::distribute
 └── it should call distribute on the strategy
 
-Allo::changeAdmin
-└── given sender is admin of poolId
-    ├── it should call _checkOnlyPoolAdmin
-    ├── it should call _revokeRole
-    └── it should call _grantRole
+AlloUnit::changeAdmin
+├── when sender is not admin of poolId
+│   └── it should revert
+└── when sender is admin of poolId
+    ├── when new admin is zero address
+    │   └── it should revert
+    └── when new admin is not zero address
+        ├── it should call _checkOnlyPoolAdmin
+        ├── it should call _revokeRole
+        └── it should call _grantRole
 
-Allo::_checkOnlyPoolManager
-├── it should call _isPoolManager
-└── when is not pool manager
-    └── it should revert
+AlloUnit::_checkOnlyPoolManager
+├── when is not pool manager
+│   └── it should revert
+└── when is pool manager
+    └── it should not revert
 
-Allo::_checkOnlyPoolAdmin
-├── it should call _isPoolAdmin
-└── when is not pool admin
-    └── it should revert
 
-Allo::_createPool
-├── it should call isOwnerOrMemberOfProfile
+AlloUnit::_checkOnlyPoolAdmin
+├── when is not pool admin
+│   └── it should revert
+└── when is pool admin
+    └── it should not revert
+
+AlloUnit::_createPool
+├──when called valid params
+│   ├── it should grant admin role to creator
+│   ├── it should set admin role to pool manager
+│   ├── it should save pool on pools mapping
+│   ├── it should call initialize on the strategy
+│   ├── it should add pool managers
+│   └── it should emit PoolCreated event
 ├── when is not owner or member of profile
 │   └── it should revert
-├── it should save pool on pools mapping
-├── it should call _grantRole
-├── it should call _setRoleAdmin
-├── it should call initialize on the strategy
-├── it should call getPoolId on the strategy
-├── it should emit getAllo on the strategy
-├── when poolId does not match
+├── when strategy poolId does not match
 │   └── it should revert
-├── when allo does not match
-│   └── it should revert
-├── it should call _addPoolManager for each manager
+├── when allo address does not match
+│    └── it should revert
 ├── when baseFee is more than zero
 │   ├── when token is native
 │   │   └── when baseFee plus amount is diff from value
@@ -161,41 +194,32 @@ Allo::_createPool
 │   ├── when token is not native
 │   │   └── when baseFee is diff from value
 │   │       └── it should revert
-│   ├── it should call _transferAmount
-│   └── it should emit event
-├── when amount is more than zero
-│   └── it should call _fundPool
-├── it should emit event
-└── it should return poolId
+│   └── when provided fee is correct
+│       ├── it should call _transferAmount
+│       └── it should emit event
+└── when amount is more than zero
+    └── it should call _fundPool
 
-Allo::_allocate
-└── it should call allocate on the strategy
+AlloUnit::_fundPool
+├── when token is native and value is less than amount
+│   └── it should revert
+├── when fee amount is more than zero
+│   ├── it should call getBalance on the treasury
+│   ├── it should transfer the fee to the treasury
+│   ├── it should transfer the remaining amount to the pool
+│   └── it should increase the pool amount
+└── when fee amount is zero
+    ├── it should transfer the amount to the pool
+    ├── it should increase the pool amount
+    └── it should emit event
 
-Allo::_fundPool
-├── when percentFee is more than zero
-│   ├── it should call getFeeDenominator
-│   ├── when feeAmount plus amountAfterFee diff amount
-│   │   └── it should revert
-│   ├── when token is native
-│   │   └── it should call _transferAmountFrom
-│   └── when token is not native
-│       ├── it should call _getBalance
-│       └── it should call _transferAmountFrom
-├── when token is native token
-│   └── it should call _transferAmountFrom
-├── when token is not native token
-│   ├── it should call _getBalance
-│   └── it should call _transferAmountFrom
-├── it should call increasePoolAmount on the strategy
-└── it should emit event
-
-Allo::_isPoolAdmin
+AlloUnit::_isPoolAdmin
 ├── when has role admin
 │   └── it should return true
 └── when has no role admin
     └── it should return false
 
-Allo::_isPoolManager
+AlloUnit::_isPoolManager
 ├── when has role manager
 │   └── it should return true
 ├── when has role admin
@@ -203,85 +227,36 @@ Allo::_isPoolManager
 └── when has no roles at all
     └── it should return false
 
-Allo::_updateRegistry
-├── when registry is zero address
-│   └── it should revert
-└── given registry is not zero address
-    ├── it should update registry
-    └── it should emit event
-
-Allo::_updateTreasury
-├── when treasury is zero address
-│   └── it should revert
-└── given treasury is not zero address
-    ├── it should update treasury
-    └── it should emit event
-
-Allo::_updatePercentFee
-├── when percentFee is more than 1e18
-│   └── it should revert
-└── given percentFee is valid
-    ├── it should update percentFee
-    └── it should emit event
-
-Allo::_updateBaseFee
-├── it should update baseFee
-└── it should emit event
-
-Allo::_updateTrustedForwarder
-├── it should update trustedForwarder
-└── it should emit event
-
-Allo::_addPoolManager
-├── when manager is zero address
-│   └── it should revert
-└── given manager is not zero address
-    └── it should call _grantRole
-
-Allo::_msgSender
-├── when sender is trustedForwarder
-│   └── when calldata length is more than 20
-│       └── it should return actual sender
-└── when conditions are not met
-    └── it should call _msgSender
-
-Allo::_msgData
-├── when sender is trustedForwarder
-│   └── when calldata length is more than 20
-│       └── it should return actual data
-└── when conditions are not met
-    └── it should call _msgData
-
-Allo::getFeeDenominator
+AlloUnit::getFeeDenominator
 └── it should return feeDenominator
 
-Allo::isPoolAdmin
+AlloUnit::isPoolAdmin
 ├── it should call _isPoolAdmin
 └── it should return isPoolAdmin
 
-Allo::isPoolManager
+AlloUnit::isPoolManager
 ├── it should call _isPoolManager
 └── it should return isPoolManager
 
-Allo::getStrategy
+AlloUnit::getStrategy
 └── it should return strategy
 
-Allo::getPercentFee
+AlloUnit::getPercentFee
 └── it should return percentFee
 
-Allo::getBaseFee
+AlloUnit::getBaseFee
 └── it should return baseFee
 
-Allo::getTreasury
+AlloUnit::getTreasury
 └── it should return treasury
 
-Allo::getRegistry
+AlloUnit::getRegistry
 └── it should return registry
 
-Allo::getPool
+AlloUnit::getPool
 └── it should return pool
 
-Allo::isTrustedForwarder
+AlloUnit::isTrustedForwarder
 ├── when forwarder is trustedForwarder
 │   └── it should return true
 └── when forwarder is not trustedForwarder

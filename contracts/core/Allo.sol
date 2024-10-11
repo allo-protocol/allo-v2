@@ -36,7 +36,7 @@ import {IBaseStrategy} from "strategies/IBaseStrategy.sol";
 
 /// @title Allo
 /// @author @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>, @0xZakk <zakk@gitcoin.co>, @nfrgosselin <nate@gitcoin.co>
-/// @notice This contract is used to create & manage pools as well as manage the protocol.
+/// @notice This contract is used to create & manage _pools as well as manage the protocol.
 /// @dev The contract must be initialized with the 'initialize()' function.
 contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable, ReentrancyGuardUpgradeable, Errors {
     using Transfer for address;
@@ -48,24 +48,24 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
     /// @notice Percentage that is used to calculate the fee Allo takes from each pool when funded
     ///         and is deducted when a pool is funded. So if you want to fund a round with 1000 DAI and the fee
     ///         percentage is 1e17 (10%), then 100 DAI will be deducted from the 1000 DAI and the pool will be
-    ///         funded with 900 DAI. The fee is then sent to the treasury address.
+    ///         funded with 900 DAI. The fee is then sent to the _treasury address.
     /// @dev How the percentage is represented in our contracts: 1e18 = 100%, 1e17 = 10%, 1e16 = 1%, 1e15 = 0.1%
-    uint256 internal percentFee;
+    uint256 internal _percentFee;
 
-    /// @notice Fee Allo charges for all pools on creation
-    /// @dev This is different from the 'percentFee' in that this is a flat fee and not a percentage. So if you want to create a pool
+    /// @notice Fee Allo charges for all _pools on creation
+    /// @dev This is different from the '_percentFee' in that this is a flat fee and not a percentage. So if you want to create a pool
     ///      with a base fee of 100 DAI, then you would pass 100 DAI to the 'createPool()' function and the pool would be created
-    ///      with 100 DAI less than the amount you passed to the function. The base fee is sent to the treasury address.
-    uint256 internal baseFee;
+    ///      with 100 DAI less than the amount you passed to the function. The base fee is sent to the _treasury address.
+    uint256 internal _baseFee;
 
-    /// @notice Incremental index to track the pools created
+    /// @notice Incremental index to track the _pools created
     uint256 internal _poolIndex;
 
-    /// @notice Allo treasury
-    address payable internal treasury;
+    /// @notice Allo _treasury
+    address payable internal _treasury;
 
     /// @notice Registry contract
-    IRegistry internal registry;
+    IRegistry internal _registry;
 
     /// @notice Maps the `_msgSender` to a `nonce` to prevent duplicates
     /// @dev '_msgSender' -> 'nonce' for cloning strategies
@@ -73,7 +73,7 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
 
     /// @notice Maps the pool ID to the pool details
     /// @dev 'Pool.id' -> 'Pool'
-    mapping(uint256 => Pool) internal pools;
+    mapping(uint256 => Pool) internal _pools;
 
     /// @custom:oz-upgrades-renamed-from cloneableStrategies
     mapping(address => bool) internal _unusedSlot;
@@ -89,33 +89,33 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
     /// @notice Initializes the contract after an upgrade
     /// @dev During upgrade -> a higher version should be passed to reinitializer
     /// @param _owner The owner of allo
-    /// @param _registry The address of the registry
-    /// @param _treasury The address of the treasury
-    /// @param _percentFee The percentage fee
-    /// @param _baseFee The base fee
+    /// @param __registry The address of the _registry
+    /// @param __treasury The address of the _treasury
+    /// @param __percentFee The percentage fee
+    /// @param __baseFee The base fee
     /// @param __trustedForwarder The address of the trusted forwarder
     function initialize(
         address _owner,
-        address _registry,
-        address payable _treasury,
-        uint256 _percentFee,
-        uint256 _baseFee,
+        address __registry,
+        address payable __treasury,
+        uint256 __percentFee,
+        uint256 __baseFee,
         address __trustedForwarder
     ) external reinitializer(2) {
         // Initialize the owner using Solady ownable library
         _initializeOwner(_owner);
 
-        // Set the address of the registry
-        _updateRegistry(_registry);
+        // Set the address of the _registry
+        _updateRegistry(__registry);
 
-        // Set the address of the treasury
-        _updateTreasury(_treasury);
+        // Set the address of the _treasury
+        _updateTreasury(__treasury);
 
         // Set the fee percentage
-        _updatePercentFee(_percentFee);
+        _updatePercentFee(__percentFee);
 
         // Set the base fee
-        _updateBaseFee(_baseFee);
+        _updateBaseFee(__baseFee);
 
         // Set the trusted forwarder
         _updateTrustedForwarder(__trustedForwarder);
@@ -149,14 +149,14 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
     /// @dev '_msgSender' must be a member or owner of a profile to create a pool with or without a custom strategy, The encoded data
     ///      will be specific to a given strategy requirements, reference the strategy implementation of 'initialize()'. The strategy
     ///      address passed must not be the zero address. '_msgSender' must be a member or owner of the profile id passed as '_profileId'.
-    /// @param _profileId The 'profileId' of the registry profile, used to check if '_msgSender' is a member or owner of the profile
+    /// @param _profileId The 'profileId' of the _registry profile, used to check if '_msgSender' is a member or owner of the profile
     /// @param _strategy The address of the deployed custom strategy
     /// @param _initStrategyData The data to initialize the strategy
     /// @param _token The address of the token you want to use in your pool
     /// @param _amount The amount of the token you want to deposit into the pool on initialization
     /// @param _metadata The 'Metadata' of the pool, this uses our 'Meatdata.sol' struct (consistent throughout the protocol)
     /// @param _managers The managers of the pool, and can be added/removed later by the pool admin
-    /// @return poolId The ID of the pool
+    /// @return _poolId The ID of the pool
     function createPoolWithCustomStrategy(
         bytes32 _profileId,
         address _strategy,
@@ -165,7 +165,7 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
         uint256 _amount,
         Metadata memory _metadata,
         address[] memory _managers
-    ) external payable returns (uint256 poolId) {
+    ) external payable returns (uint256 _poolId) {
         // Revert if the strategy address passed is the zero address with 'ZERO_ADDRESS()'
         if (_strategy == address(0)) revert ZERO_ADDRESS();
 
@@ -186,7 +186,7 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
     /// @notice Creates a new pool (by cloning a deployed strategies).
     /// @dev '_msgSender' must be owner or member of the profile id passed as '_profileId'. The strategy address passed
     ///      must not be the zero address.
-    /// @param _profileId The ID of the registry profile, used to check if '_msgSender' is a member or owner of the profile
+    /// @param _profileId The ID of the _registry profile, used to check if '_msgSender' is a member or owner of the profile
     /// @param _strategy The address of the strategy contract the pool will use.
     /// @param _initStrategyData The data to initialize the strategy
     /// @param _token The address of the token
@@ -195,7 +195,7 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
     /// @param _managers The managers of the pool
     /// @custom:initstrategydata The encoded data will be specific to a given strategy requirements,
     ///    reference the strategy implementation of 'initialize()'
-    /// @return poolId The ID of the pool
+    /// @return _poolId The ID of the pool
     function createPool(
         bytes32 _profileId,
         address _strategy,
@@ -204,22 +204,22 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
         uint256 _amount,
         Metadata memory _metadata,
         address[] memory _managers
-    ) external payable nonReentrant returns (uint256 poolId) {
+    ) external payable nonReentrant returns (uint256 _poolId) {
         // Revert if the strategy address passed is the zero address with 'ZERO_ADDRESS()'
         if (_strategy == address(0)) revert ZERO_ADDRESS();
 
-        address creator = _msgSender();
+        address _creator = _msgSender();
 
         // Clone the strategy contract
-        bytes32 salt = keccak256(abi.encodePacked(creator, _nonces[creator]++));
-        address clone = ClonesUpgradeable.cloneDeterministic(_strategy, salt);
+        bytes32 _salt = keccak256(abi.encodePacked(_creator, _nonces[_creator]++));
+        address _clone = ClonesUpgradeable.cloneDeterministic(_strategy, _salt);
 
         // Returns the created pool ID
         return _createPool(
-            creator,
+            _creator,
             msg.value,
             _profileId,
-            IBaseStrategy(clone),
+            IBaseStrategy(_clone),
             _initStrategyData,
             _token,
             _amount,
@@ -233,38 +233,38 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
     /// @param _poolId ID of the pool
     /// @param _metadata The new metadata of the pool
     function updatePoolMetadata(uint256 _poolId, Metadata memory _metadata) external onlyPoolManager(_poolId) {
-        Pool storage pool = pools[_poolId];
-        pool.metadata = _metadata;
+        Pool storage _pool = _pools[_poolId];
+        _pool.metadata = _metadata;
 
         emit PoolMetadataUpdated(_poolId, _metadata);
     }
 
-    /// @notice Updates the registry address.
-    /// @dev Use this to update the registry address. 'msg.sender' must be Allo owner.
-    /// @param _registry The new registry address
-    function updateRegistry(address _registry) external onlyOwner {
-        _updateRegistry(_registry);
+    /// @notice Updates the _registry address.
+    /// @dev Use this to update the _registry address. 'msg.sender' must be Allo owner.
+    /// @param __registry The new _registry address
+    function updateRegistry(address __registry) external onlyOwner {
+        _updateRegistry(__registry);
     }
 
-    /// @notice Updates the treasury address.
-    /// @dev Use this to update the treasury address. 'msg.sender' must be Allo owner.
-    /// @param _treasury The new treasury address
-    function updateTreasury(address payable _treasury) external onlyOwner {
-        _updateTreasury(_treasury);
+    /// @notice Updates the _treasury address.
+    /// @dev Use this to update the _treasury address. 'msg.sender' must be Allo owner.
+    /// @param __treasury The new _treasury address
+    function updateTreasury(address payable __treasury) external onlyOwner {
+        _updateTreasury(__treasury);
     }
 
     /// @notice Updates the fee percentage.
     /// @dev Use this to update the fee percentage. 'msg.sender' must be Allo owner.
-    /// @param _percentFee The new fee
-    function updatePercentFee(uint256 _percentFee) external onlyOwner {
-        _updatePercentFee(_percentFee);
+    /// @param __percentFee The new fee
+    function updatePercentFee(uint256 __percentFee) external onlyOwner {
+        _updatePercentFee(__percentFee);
     }
 
     /// @notice Updates the base fee.
     /// @dev Use this to update the base fee. 'msg.sender' must be Allo owner.
-    /// @param _baseFee The new base fee
-    function updateBaseFee(uint256 _baseFee) external onlyOwner {
-        _updateBaseFee(_baseFee);
+    /// @param __baseFee The new base fee
+    function updateBaseFee(uint256 __baseFee) external onlyOwner {
+        _updateBaseFee(__baseFee);
     }
 
     /// @notice Updates the trusted forwarder address.
@@ -290,12 +290,12 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
     /// @param _managers The addresses to remove
     function removePoolManagers(uint256 _poolId, address[] calldata _managers) public onlyPoolAdmin(_poolId) {
         for (uint256 i; i < _managers.length; ++i) {
-            _revokeRole(pools[_poolId].managerRole, _managers[i]);
+            _revokeRole(_pools[_poolId].managerRole, _managers[i]);
         }
     }
 
-    /// @notice Add multiple pool managers to multiple pools
-    /// @param _poolIds IDs of the pools
+    /// @notice Add multiple pool managers to multiple _pools
+    /// @param _poolIds IDs of the _pools
     /// @param _managers The addresses to add
     function addPoolManagersInMultiplePools(uint256[] calldata _poolIds, address[] calldata _managers) external {
         for (uint256 i; i < _poolIds.length; ++i) {
@@ -303,8 +303,8 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
         }
     }
 
-    /// @notice Remove multiple pool managers from multiple pools
-    /// @param _poolIds IDs of the pools
+    /// @notice Remove multiple pool managers from multiple _pools
+    /// @param _poolIds IDs of the _pools
     /// @param _managers The addresses to remove
     function removePoolManagersInMultiplePools(uint256[] calldata _poolIds, address[] calldata _managers) external {
         for (uint256 i; i < _poolIds.length; ++i) {
@@ -318,10 +318,10 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
     /// @param _recipient The recipient
     function recoverFunds(address _token, address _recipient) external onlyOwner {
         // Get the amount of the token to transfer, which is always the entire balance of the contract address
-        uint256 amount = _token == NATIVE ? address(this).balance : IERC20Upgradeable(_token).balanceOf(address(this));
+        uint256 _amount = _token == NATIVE ? address(this).balance : IERC20Upgradeable(_token).balanceOf(address(this));
 
         // Transfer the amount to the recipient (pool owner)
-        _token.transferAmount(_recipient, amount);
+        _token.transferAmount(_recipient, _amount);
     }
 
     // ====================================
@@ -342,34 +342,32 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
         returns (address[] memory)
     {
         // Return the recipientId (address) from the strategy
-        return pools[_poolId].strategy.register{value: msg.value}(_recipientAddresses, _data, _msgSender());
+        return _pools[_poolId].strategy.register{value: msg.value}(_recipientAddresses, _data, _msgSender());
     }
 
-    /// @notice Register multiple recipients to multiple pools.
+    /// @notice Register multiple recipients to multiple _pools.
     /// @dev Returns the 'recipientIds' from the strategy that have been registered from calling this function.
     ///      Encoded data unique to a strategy that registerRecipient() requires. Encoded '_data' length must match
-    ///      '_poolIds' length or this will revert with MISMATCH(). Other requirements will be determined by the strategy.
-    /// @param _poolIds ID's of the pools
+    ///      '_poolIds' length or this will revert with ARRAY_MISMATCH(). Other requirements will be determined by the strategy.
+    /// @param _poolIds ID's of the _pools
     /// @param _recipientAddresses An array of recipients addresses arrays
     /// @param _data An array of encoded data unique to a strategy that registerRecipient() requires.
-    /// @return recipientIds The recipient IDs that have been registered
+    /// @return _recipientIds The recipient IDs that have been registered
     function batchRegisterRecipient(
         uint256[] memory _poolIds,
         address[][] memory _recipientAddresses,
         bytes[] memory _data
-    ) external nonReentrant returns (address[][] memory recipientIds) {
-        uint256 poolIdLength = _poolIds.length;
-        recipientIds = new address[][](poolIdLength);
+    ) external nonReentrant returns (address[][] memory _recipientIds) {
+        uint256 _poolIdLength = _poolIds.length;
+        _recipientIds = new address[][](_poolIdLength);
 
-        if (poolIdLength != _data.length || poolIdLength != _recipientAddresses.length) revert MISMATCH();
+        if (_poolIdLength != _data.length) revert ARRAY_MISMATCH();
+        if (_poolIdLength != _recipientAddresses.length) revert ARRAY_MISMATCH();
 
         // Loop through the '_poolIds' & '_data' and call the 'strategy.register()' function
-        for (uint256 i; i < poolIdLength; ++i) {
-            recipientIds[i] = pools[_poolIds[i]].strategy.register(_recipientAddresses[i], _data[i], _msgSender());
+        for (uint256 i; i < _poolIdLength; ++i) {
+            _recipientIds[i] = _pools[_poolIds[i]].strategy.register(_recipientAddresses[i], _data[i], _msgSender());
         }
-
-        // Return the recipientIds that have been registered
-        return recipientIds;
     }
 
     /// @notice Fund a pool.
@@ -377,14 +375,14 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
     /// @param _poolId ID of the pool
     /// @param _amount The amount to be deposited into the pool
     function fundPool(uint256 _poolId, uint256 _amount) external payable nonReentrant {
-        // if amount is 0, revert with 'NOT_ENOUGH_FUNDS()' error
-        if (_amount == 0) revert NOT_ENOUGH_FUNDS();
+        // if amount is 0, revert with 'INVALID()' error
+        if (_amount == 0) revert INVALID();
 
-        Pool memory pool = pools[_poolId];
-        if (pool.token == NATIVE && _amount != msg.value) revert NOT_ENOUGH_FUNDS();
+        Pool memory _pool = _pools[_poolId];
+        if (_pool.token == NATIVE && _amount != msg.value) revert ETH_MISMATCH();
 
         // Call the internal fundPool() function
-        _fundPool(_amount, _msgSender(), _poolId, pool.strategy);
+        _fundPool(_amount, _msgSender(), _poolId, _pool.strategy);
     }
 
     /// @notice Allocate to a recipient or multiple recipients.
@@ -402,10 +400,10 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
         _allocate(_poolId, _recipients, _amounts, _data, msg.value, _msgSender());
     }
 
-    /// @notice Allocate to multiple pools
+    /// @notice Allocate to multiple _pools
     /// @dev The encoded data will be specific to a given strategy requirements, reference the strategy
     ///      implementation of allocate().
-    /// @param _poolIds IDs of the pools
+    /// @param _poolIds IDs of the _pools
     /// @param _recipients Addresses of the recipients
     /// @param _amounts Amounts to allocate to each recipient
     /// @param _values amounts of native tokens to allocate for each pool
@@ -417,26 +415,26 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
         uint256[] calldata _values,
         bytes[] memory _datas
     ) external payable nonReentrant {
-        uint256 numPools = _poolIds.length;
+        uint256 _numPools = _poolIds.length;
 
-        // Reverts if the length of _poolIds does not match the length of _datas with 'MISMATCH()' error
-        if (numPools != _datas.length) revert MISMATCH();
-        // Reverts if the length of _poolIds does not match the length of _values with 'MISMATCH()' error
-        if (numPools != _values.length) revert MISMATCH();
-        // Reverts if the length of _poolIds does not match the length of _recipients with 'MISMATCH()' error
-        if (numPools != _recipients.length) revert MISMATCH();
-        // Reverts if the length of _poolIds does not match the length of _amounts with 'MISMATCH()' error
-        if (numPools != _amounts.length) revert MISMATCH();
+        // Reverts if the length of _poolIds does not match the length of _datas with 'ARRAY_MISMATCH()' error
+        if (_numPools != _datas.length) revert ARRAY_MISMATCH();
+        // Reverts if the length of _poolIds does not match the length of _values with 'ARRAY_MISMATCH()' error
+        if (_numPools != _values.length) revert ARRAY_MISMATCH();
+        // Reverts if the length of _poolIds does not match the length of _recipients with 'ARRAY_MISMATCH()' error
+        if (_numPools != _recipients.length) revert ARRAY_MISMATCH();
+        // Reverts if the length of _poolIds does not match the length of _amounts with 'ARRAY_MISMATCH()' error
+        if (_numPools != _amounts.length) revert ARRAY_MISMATCH();
 
         // Loop through the _poolIds & _datas and call the internal _allocate() function
-        uint256 totalValue;
-        address msgSender = _msgSender();
-        for (uint256 i; i < numPools; ++i) {
-            _allocate(_poolIds[i], _recipients[i], _amounts[i], _datas[i], _values[i], msgSender);
-            totalValue += _values[i];
+        uint256 _totalValue;
+        address _sender = _msgSender();
+        for (uint256 i; i < _numPools; ++i) {
+            _allocate(_poolIds[i], _recipients[i], _amounts[i], _datas[i], _values[i], _sender);
+            _totalValue += _values[i];
         }
-        // Reverts if the sum of all the allocated values is different than 'msg.value' with 'MISMATCH()' error
-        if (totalValue != msg.value) revert ETH_MISMATCH();
+        // Reverts if the sum of all the allocated values is different than 'msg.value' with 'ETH_MISMATCH()' error
+        if (_totalValue != msg.value) revert ETH_MISMATCH();
     }
 
     /// @notice Distribute to a recipient or multiple recipients.
@@ -446,7 +444,7 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
     /// @param _recipientIds Ids of the recipients of the distribution
     /// @param _data Encoded data unique to the strategy
     function distribute(uint256 _poolId, address[] memory _recipientIds, bytes memory _data) external nonReentrant {
-        pools[_poolId].strategy.distribute(_recipientIds, _data, _msgSender());
+        _pools[_poolId].strategy.distribute(_recipientIds, _data, _msgSender());
     }
 
     /// @notice Revoke the admin role of an account and transfer it to another account
@@ -456,8 +454,8 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
     function changeAdmin(uint256 _poolId, address _newAdmin) external onlyPoolAdmin(_poolId) {
         if (_newAdmin == address(0)) revert ZERO_ADDRESS();
 
-        _revokeRole(pools[_poolId].adminRole, _msgSender());
-        _grantRole(pools[_poolId].adminRole, _newAdmin);
+        _revokeRole(_pools[_poolId].adminRole, _msgSender());
+        _grantRole(_pools[_poolId].adminRole, _newAdmin);
     }
 
     /// ====================================
@@ -484,14 +482,14 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
     ///      a profile to create a pool.
     /// @param _creator The address that is creating the pool
     /// @param _msgValue The value paid by the sender of this transaciton
-    /// @param _profileId The ID of the profile of for pool creator in the registry
+    /// @param _profileId The ID of the profile of for pool creator in the _registry
     /// @param _strategy The address of strategy
     /// @param _initStrategyData The data to initialize the strategy
     /// @param _token The address of the token that the pool is denominated in
     /// @param _amount The amount of the token to be deposited into the pool
     /// @param _metadata The 'Metadata' of the pool
     /// @param _managers The managers of the pool
-    /// @return poolId The ID of the pool
+    /// @return _poolId The ID of the pool
     function _createPool(
         address _creator,
         uint256 _msgValue,
@@ -502,14 +500,14 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
         uint256 _amount,
         Metadata memory _metadata,
         address[] memory _managers
-    ) internal virtual returns (uint256 poolId) {
-        if (!registry.isOwnerOrMemberOfProfile(_profileId, _creator)) revert UNAUTHORIZED();
+    ) internal virtual returns (uint256 _poolId) {
+        if (!_registry.isOwnerOrMemberOfProfile(_profileId, _creator)) revert UNAUTHORIZED();
 
-        poolId = ++_poolIndex;
+        _poolId = ++_poolIndex;
 
         // Generate the manager & admin roles for the pool (this is the way we do this throughout the protocol for consistency)
-        bytes32 POOL_MANAGER_ROLE = bytes32(poolId);
-        bytes32 POOL_ADMIN_ROLE = keccak256(abi.encodePacked(poolId, "admin"));
+        bytes32 _poolManagerRole = bytes32(_poolId);
+        bytes32 _poolAdminRole = keccak256(abi.encodePacked(_poolId, "admin"));
 
         // Create the Pool instance
         Pool memory pool = Pool({
@@ -517,48 +515,48 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
             strategy: _strategy,
             metadata: _metadata,
             token: _token,
-            managerRole: POOL_MANAGER_ROLE,
-            adminRole: POOL_ADMIN_ROLE
+            managerRole: _poolManagerRole,
+            adminRole: _poolAdminRole
         });
 
-        // Add the pool to the mapping of created pools
-        pools[poolId] = pool;
+        // Add the pool to the mapping of created _pools
+        _pools[_poolId] = pool;
 
         // Grant admin roles to the pool creator
-        _grantRole(POOL_ADMIN_ROLE, _creator);
+        _grantRole(_poolAdminRole, _creator);
 
         // Set admin role for POOL_MANAGER_ROLE
-        _setRoleAdmin(POOL_MANAGER_ROLE, POOL_ADMIN_ROLE);
+        _setRoleAdmin(_poolManagerRole, _poolAdminRole);
 
         // initialize strategies
         // Initialization is expected to revert when invoked more than once with 'ALREADY_INITIALIZED()' error
-        _strategy.initialize(poolId, _initStrategyData);
+        _strategy.initialize(_poolId, _initStrategyData);
 
-        if (_strategy.getPoolId() != poolId || address(_strategy.getAllo()) != address(this)) revert MISMATCH();
+        if (_strategy.getPoolId() != _poolId || address(_strategy.getAllo()) != address(this)) revert MISMATCH();
 
         // grant pool managers roles
-        uint256 managersLength = _managers.length;
-        for (uint256 i; i < managersLength; ++i) {
-            _addPoolManager(poolId, _managers[i]);
+        uint256 _managersLength = _managers.length;
+        for (uint256 i; i < _managersLength; ++i) {
+            _addPoolManager(_poolId, _managers[i]);
         }
 
-        if (baseFee > 0) {
-            // To prevent paying the baseFee from the Allo contract's balance
-            // If _token is NATIVE, then baseFee + _amount should be equal to _msgValue.
-            // If _token is not NATIVE, then baseFee should be equal to _msgValue.
-            if (_token == NATIVE && (baseFee + _amount != _msgValue)) revert NOT_ENOUGH_FUNDS();
-            if (_token != NATIVE && baseFee != _msgValue) revert NOT_ENOUGH_FUNDS();
+        if (_baseFee > 0) {
+            // To prevent paying the _baseFee from the Allo contract's balance
+            // If _token is NATIVE, then _baseFee + _amount should be equal to _msgValue.
+            // If _token is not NATIVE, then _baseFee should be equal to _msgValue.
+            if (_token == NATIVE && (_baseFee + _amount != _msgValue)) revert ETH_MISMATCH();
+            if (_token != NATIVE && _baseFee != _msgValue) revert ETH_MISMATCH();
 
-            address(treasury).transferAmountNative(baseFee);
+            address(_treasury).transferAmountNative(_baseFee);
 
-            emit BaseFeePaid(poolId, baseFee);
+            emit BaseFeePaid(_poolId, _baseFee);
         }
 
         if (_amount > 0) {
-            _fundPool(_amount, _creator, poolId, _strategy);
+            _fundPool(_amount, _creator, _poolId, _strategy);
         }
 
-        emit PoolCreated(poolId, _profileId, _strategy, _token, _amount, _metadata);
+        emit PoolCreated(_poolId, _profileId, _strategy, _token, _amount, _metadata);
     }
 
     /// @notice Allocate to recipient(s).
@@ -578,7 +576,7 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
         uint256 _value,
         address _allocator
     ) internal virtual {
-        pools[_poolId].strategy.allocate{value: _value}(_recipients, _amounts, _data, _allocator);
+        _pools[_poolId].strategy.allocate{value: _value}(_recipients, _amounts, _data, _allocator);
     }
 
     /// @notice Fund a pool.
@@ -589,31 +587,30 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
     /// @param _poolId The 'poolId' for the pool you are funding
     /// @param _strategy The address of the strategy
     function _fundPool(uint256 _amount, address _funder, uint256 _poolId, IBaseStrategy _strategy) internal virtual {
-        uint256 feeAmount = (_amount * percentFee) / getFeeDenominator(); // Can be zero if percentFee is zero
-        uint256 amountAfterFee = _amount - feeAmount;
+        uint256 _feeAmount = (_amount * _percentFee) / getFeeDenominator(); // Can be zero if _percentFee is zero
+        uint256 _amountAfterFee = _amount - _feeAmount;
 
-        Pool storage pool = pools[_poolId];
-        address _token = pool.token;
+        address _token = _pools[_poolId].token;
 
         if (_token == NATIVE && msg.value < _amount) revert ETH_MISMATCH();
 
-        if (feeAmount > 0) {
-            uint256 balanceBeforeFee = _token.getBalance(treasury);
-            _token.transferAmountFrom(_funder, treasury, feeAmount);
-            uint256 balanceAfterFee = _token.getBalance(treasury);
+        if (_feeAmount > 0) {
+            uint256 _balanceBeforeFee = _token.getBalance(_treasury);
+            _token.transferAmountFrom(_funder, _treasury, _feeAmount);
+            uint256 _balanceAfterFee = _token.getBalance(_treasury);
             // Track actual fee paid to account for fee on ERC20 token transfers
-            feeAmount = balanceAfterFee - balanceBeforeFee;
+            _feeAmount = _balanceAfterFee - _balanceBeforeFee;
         }
 
-        uint256 balanceBeforeFundingPool = _token.getBalance(address(_strategy));
-        _token.transferAmountFrom(_funder, address(_strategy), amountAfterFee);
-        uint256 balanceAfterFundingPool = _token.getBalance(address(_strategy));
+        uint256 _balanceBeforeFundingPool = _token.getBalance(address(_strategy));
+        _token.transferAmountFrom(_funder, address(_strategy), _amountAfterFee);
+        uint256 _balanceAfterFundingPool = _token.getBalance(address(_strategy));
         // Track actual fee paid to account for fee on ERC20 token transfers
-        amountAfterFee = balanceAfterFundingPool - balanceBeforeFundingPool;
+        _amountAfterFee = _balanceAfterFundingPool - _balanceBeforeFundingPool;
 
-        _strategy.increasePoolAmount(amountAfterFee);
+        _strategy.increasePoolAmount(_amountAfterFee);
 
-        emit PoolFunded(_poolId, amountAfterFee, feeAmount);
+        emit PoolFunded(_poolId, _amountAfterFee, _feeAmount);
     }
 
     /// @notice Checks if the address is a pool admin
@@ -622,7 +619,7 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
     /// @param _address The address to check
     /// @return This will return 'true' if the address is a pool admin, otherwise 'false'
     function _isPoolAdmin(uint256 _poolId, address _address) internal view virtual returns (bool) {
-        return hasRole(pools[_poolId].adminRole, _address);
+        return hasRole(_pools[_poolId].adminRole, _address);
     }
 
     /// @notice Checks if the address is a pool manager
@@ -631,51 +628,51 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
     /// @param _address The address to check
     /// @return This will return 'true' if the address is a pool manager, otherwise 'false'
     function _isPoolManager(uint256 _poolId, address _address) internal view virtual returns (bool) {
-        return hasRole(pools[_poolId].managerRole, _address) || _isPoolAdmin(_poolId, _address);
+        return hasRole(_pools[_poolId].managerRole, _address) || _isPoolAdmin(_poolId, _address);
     }
 
-    /// @notice Updates the registry address
-    /// @dev Internal function used to update the registry address.
+    /// @notice Updates the _registry address
+    /// @dev Internal function used to update the _registry address.
     ///      Emits a RegistryUpdated event.
-    /// @param _registry The new registry address
-    function _updateRegistry(address _registry) internal virtual {
-        if (_registry == address(0)) revert ZERO_ADDRESS();
+    /// @param __registry The new _registry address
+    function _updateRegistry(address __registry) internal virtual {
+        if (__registry == address(0)) revert ZERO_ADDRESS();
 
-        registry = IRegistry(_registry);
-        emit RegistryUpdated(_registry);
+        _registry = IRegistry(__registry);
+        emit RegistryUpdated(__registry);
     }
 
-    /// @notice Updates the treasury address
-    /// @dev Internal function used to update the treasury address.
+    /// @notice Updates the _treasury address
+    /// @dev Internal function used to update the _treasury address.
     ///      Emits a TreasuryUpdated event.
-    /// @param _treasury The new treasury address
-    function _updateTreasury(address payable _treasury) internal virtual {
-        if (_treasury == address(0)) revert ZERO_ADDRESS();
+    /// @param __treasury The new _treasury address
+    function _updateTreasury(address payable __treasury) internal virtual {
+        if (__treasury == address(0)) revert ZERO_ADDRESS();
 
-        treasury = _treasury;
-        emit TreasuryUpdated(treasury);
+        _treasury = __treasury;
+        emit TreasuryUpdated(_treasury);
     }
 
     /// @notice Updates the fee percentage
     /// @dev Internal function used to update the percentage fee.
     ///      Emits a PercentFeeUpdated event.
-    /// @param _percentFee The new fee
-    function _updatePercentFee(uint256 _percentFee) internal virtual {
-        if (_percentFee > 1e18) revert INVALID_FEE();
+    /// @param __percentFee The new fee
+    function _updatePercentFee(uint256 __percentFee) internal virtual {
+        if (__percentFee > 1e18) revert INVALID();
 
-        percentFee = _percentFee;
+        _percentFee = __percentFee;
 
-        emit PercentFeeUpdated(percentFee);
+        emit PercentFeeUpdated(_percentFee);
     }
 
     /// @notice Updates the base fee
     /// @dev Internal function used to update the base fee.
     ///      Emits a BaseFeeUpdated event.
-    /// @param _baseFee The new base fee
-    function _updateBaseFee(uint256 _baseFee) internal virtual {
-        baseFee = _baseFee;
+    /// @param __baseFee The new base fee
+    function _updateBaseFee(uint256 __baseFee) internal virtual {
+        _baseFee = __baseFee;
 
-        emit BaseFeeUpdated(baseFee);
+        emit BaseFeeUpdated(_baseFee);
     }
 
     /// @notice Updates the trusted forwarder address
@@ -697,15 +694,15 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
         if (_manager == address(0)) revert ZERO_ADDRESS();
 
         // Grants the pool manager role to the '_manager' address
-        _grantRole(pools[_poolId].managerRole, _manager);
+        _grantRole(_pools[_poolId].managerRole, _manager);
     }
 
     /// @dev Logic copied from ERC2771ContextUpgradeable OZ contracts
     /// @return the sender of the call
     function _msgSender() internal view virtual override returns (address) {
-        uint256 calldataLength = msg.data.length;
-        if (isTrustedForwarder(msg.sender) && calldataLength >= 20) {
-            return address(bytes20(msg.data[calldataLength - 20:]));
+        uint256 _calldataLength = msg.data.length;
+        if (isTrustedForwarder(msg.sender) && _calldataLength >= 20) {
+            return address(bytes20(msg.data[_calldataLength - 20:]));
         } else {
             return super._msgSender();
         }
@@ -714,9 +711,9 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
     /// @dev Logic copied from ERC2771ContextUpgradeable OZ contracts
     /// @return calldata filtering the sender address when the trusted forward is the operator
     function _msgData() internal view override returns (bytes calldata) {
-        uint256 calldataLength = msg.data.length;
-        if (isTrustedForwarder(msg.sender) && calldataLength >= 20) {
-            return msg.data[:calldataLength - 20];
+        uint256 _calldataLength = msg.data.length;
+        if (isTrustedForwarder(msg.sender) && _calldataLength >= 20) {
+            return msg.data[:_calldataLength - 20];
         } else {
             return super._msgData();
         }
@@ -752,44 +749,44 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
     /// @param _poolId The ID of the pool
     /// @return The address of the strategy
     function getStrategy(uint256 _poolId) external view returns (address) {
-        return address(pools[_poolId].strategy);
+        return address(_pools[_poolId].strategy);
     }
 
     /// @notice Getter for fee percentage.
     /// @return The fee percentage (1e18 = 100%)
     function getPercentFee() external view returns (uint256) {
-        return percentFee;
+        return _percentFee;
     }
 
     /// @notice Getter for base fee.
     /// @return The base fee
     function getBaseFee() external view returns (uint256) {
-        return baseFee;
+        return _baseFee;
     }
 
-    /// @notice Getter for treasury address.
-    /// @return The treasury address
+    /// @notice Getter for _treasury address.
+    /// @return The _treasury address
     function getTreasury() external view returns (address payable) {
-        return treasury;
+        return _treasury;
     }
 
-    /// @notice Getter for registry.
-    /// @return The registry address
+    /// @notice Getter for _registry.
+    /// @return The _registry address
     function getRegistry() external view returns (IRegistry) {
-        return registry;
+        return _registry;
     }
 
     /// @notice Getter for the 'Pool'.
     /// @param _poolId The ID of the pool
     /// @return The 'Pool' struct
     function getPool(uint256 _poolId) external view returns (Pool memory) {
-        return pools[_poolId];
+        return _pools[_poolId];
     }
 
     /// @dev Logic copied from ERC2771ContextUpgradeable OZ contracts
-    /// @param forwarder address to check if it is trusted
+    /// @param _forwarder address to check if it is trusted
     /// @return true if it is trusted, false otherwise
-    function isTrustedForwarder(address forwarder) public view returns (bool) {
-        return forwarder == _trustedForwarder;
+    function isTrustedForwarder(address _forwarder) public view returns (bool) {
+        return _forwarder == _trustedForwarder;
     }
 }

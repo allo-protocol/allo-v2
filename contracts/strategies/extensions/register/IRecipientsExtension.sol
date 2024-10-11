@@ -59,6 +59,30 @@ interface IRecipientsExtension {
         uint64 registrationEndTime;
     }
 
+    /// ======================
+    /// ======= Errors =======
+    /// ======================
+
+    /// @notice Error when the registration of recipients is not active
+    error RecipientsExtension_RegistrationNotActive();
+
+    /// @notice Thrown when there is an error in recipient.
+    /// @param recipientId The recipient id associated to the error.
+    error RecipientsExtension_RecipientError(address recipientId);
+
+    /// @notice Thrown when the metadata is invalid.
+    error RecipientsExtension_InvalidMetada();
+
+    /// @notice Error when the recipient is not accepted
+    error RecipientsExtension_RecipientNotAccepted();
+
+    /// @notice Error when the registration period has not ended
+    error RecipientsExtension_RegistrationHasNotEnded();
+
+    /// ======================
+    /// ======= Events =======
+    /// ======================
+
     /// @notice Emitted when a recipient updates their registration
     /// @param recipientId Id of the recipient
     /// @param data The encoded data - (address recipientId, address recipientAddress, Metadata metadata)

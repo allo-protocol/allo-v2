@@ -18,11 +18,13 @@ abstract contract BaseStrategy is IBaseStrategy {
     /// === Storage Variables ====
     /// ==========================
     /// @notice The Allo contract
-    IAllo internal immutable allo;
+    IAllo internal immutable _ALLO;
+    /// @notice The id of the strategy
+    bytes32 internal immutable strategyId;
     /// @notice The id of the pool
-    uint256 internal poolId;
+    uint256 internal _poolId;
     /// @notice The balance of the pool
-    uint256 internal poolAmount;
+    uint256 internal _poolAmount;
 
     /// ====================================
     /// ========== Constructor =============
@@ -30,8 +32,10 @@ abstract contract BaseStrategy is IBaseStrategy {
 
     /// @notice Constructor to set the Allo contract
     /// @param _allo Address of the Allo contract.
-    constructor(address _allo) {
-        allo = IAllo(_allo);
+    /// @param _strategyName Name of the strategy
+    constructor(address _allo, string memory _strategyName) {
+        _ALLO = IAllo(_allo);
+        strategyId = keccak256(abi.encode(_strategyName));
     }
 
     /// ====================================
@@ -59,19 +63,25 @@ abstract contract BaseStrategy is IBaseStrategy {
     /// @notice Gets the allo contract
     /// @return _allo The 'Allo' contract
     function getAllo() external view override returns (IAllo) {
-        return allo;
+        return _ALLO;
     }
 
-    /// @notice Getter for the 'poolId'.
-    /// @return _poolId The ID of the pool
+    /// @notice Getter for the 'strategyId'.
+    /// @return _strategyId The ID of the strategy
+    function getStrategyId() external view override returns (bytes32) {
+        return strategyId;
+    }
+
+    /// @notice Getter for the '_poolId'.
+    /// @return __poolId The ID of the pool
     function getPoolId() external view override returns (uint256) {
-        return poolId;
+        return _poolId;
     }
 
-    /// @notice Getter for the 'poolAmount'.
-    /// @return _poolAmount The balance of the pool
+    /// @notice Getter for the '_poolAmount'.
+    /// @return __poolAmount The balance of the pool
     function getPoolAmount() external view virtual override returns (uint256) {
-        return poolAmount;
+        return _poolAmount;
     }
 
     /// ====================================
@@ -79,23 +89,23 @@ abstract contract BaseStrategy is IBaseStrategy {
     /// ====================================
 
     /// @notice Initializes the 'Basetrategy'.
-    /// @dev Will revert if the poolId is invalid or already initialized
-    /// @param _poolId ID of the pool
-    function __BaseStrategy_init(uint256 _poolId) internal virtual onlyAllo {
+    /// @dev Will revert if the _poolId is invalid or already initialized
+    /// @param __poolId ID of the pool
+    function __BaseStrategy_init(uint256 __poolId) internal virtual onlyAllo {
         // check if pool ID is not initialized already, if it is, revert
-        if (poolId != 0) revert BaseStrategy_ALREADY_INITIALIZED();
+        if (_poolId != 0) revert BaseStrategy_AlreadyInitialized();
 
         // check if pool ID is valid and not zero (0), if it is, revert
-        if (_poolId == 0) revert BaseStrategy_INVALID_POOL_ID();
-        poolId = _poolId;
+        if (__poolId == 0) revert BaseStrategy_InvalidPoolId();
+        _poolId = __poolId;
     }
 
     /// @notice Increases the pool amount.
-    /// @dev Increases the 'poolAmount' by '_amount'. Only 'Allo' contract can call this.
+    /// @dev Increases the '_poolAmount' by '_amount'. Only 'Allo' contract can call this.
     /// @param _amount The amount to increase the pool by
     function increasePoolAmount(uint256 _amount) external override onlyAllo {
         _beforeIncreasePoolAmount(_amount);
-        poolAmount += _amount;
+        _poolAmount += _amount;
         _afterIncreasePoolAmount(_amount);
     }
 
@@ -111,9 +121,9 @@ abstract contract BaseStrategy is IBaseStrategy {
     {
         _beforeWithdraw(_token, _amount, _recipient);
         // If the token is the pool token, revert if the amount is greater than the pool amount
-        if (_token == allo.getPool(poolId).token) {
-            if (_token.getBalance(address(this)) - _amount < poolAmount) {
-                revert BaseStrategy_WITHDRAW_MORE_THAN_POOL_AMOUNT();
+        if (_token == _ALLO.getPool(_poolId).token) {
+            if (_token.getBalance(address(this)) - _amount < _poolAmount) {
+                revert BaseStrategy_WithdrawMoreThanPoolAmount();
             }
         }
         _token.transferAmount(_recipient, _amount);
@@ -176,14 +186,14 @@ abstract contract BaseStrategy is IBaseStrategy {
     /// @notice Checks if the 'msg.sender' is the Allo contract.
     /// @dev Reverts if the 'msg.sender' is not the Allo contract.
     function _checkOnlyAllo() internal view virtual {
-        if (msg.sender != address(allo)) revert BaseStrategy_UNAUTHORIZED();
+        if (msg.sender != address(_ALLO)) revert BaseStrategy_Unauthorized();
     }
 
     /// @notice Checks if the '_sender' is a pool manager.
     /// @dev Reverts if the '_sender' is not a pool manager.
     /// @param _sender The address to check if they are a pool manager
     function _checkOnlyPoolManager(address _sender) internal view virtual {
-        if (!allo.isPoolManager(poolId, _sender)) revert BaseStrategy_UNAUTHORIZED();
+        if (!_ALLO.isPoolManager(_poolId, _sender)) revert BaseStrategy_Unauthorized();
     }
 
     /// @notice This will register a recipient, set their status (and any other strategy specific values), and

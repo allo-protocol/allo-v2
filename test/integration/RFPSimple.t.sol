@@ -109,7 +109,7 @@ contract IntegrationRFPSimple is IntegrationBase {
 
         // Registration has ended
         assertEq(uint256(strategy.registrationEndTime()), block.timestamp - 1);
-        vm.expectRevert(Errors.REGISTRATION_NOT_ACTIVE.selector);
+        vm.expectRevert(IRecipientsExtension.RecipientsExtension_RegistrationNotActive.selector);
         strategy.reviewRecipients(statuses, recipientsCounter);
 
         vm.stopPrank();
@@ -160,12 +160,12 @@ contract IntegrationRFPSimple is IntegrationBase {
         // Revert when attempting to claim twice
         _milestonesIds[0] = 0;
         _milestonesIds[1] = 0;
-        vm.expectRevert(IMilestonesExtension.INVALID_MILESTONE_STATUS.selector);
+        vm.expectRevert(IMilestonesExtension.MilestonesExtension_InvalidMilestoneStatus.selector);
         strategy.distribute(recipients, abi.encode(_milestonesIds), recipient0Addr);
 
         // Revert when attempting to claim non-submitted milestone
         _milestonesIds[1] = 1;
-        vm.expectRevert(IMilestonesExtension.INVALID_MILESTONE_STATUS.selector);
+        vm.expectRevert(IMilestonesExtension.MilestonesExtension_InvalidMilestoneStatus.selector);
         strategy.distribute(recipients, abi.encode(_milestonesIds), recipient0Addr);
 
         // Distribute

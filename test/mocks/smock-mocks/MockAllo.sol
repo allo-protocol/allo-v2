@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.19;
 
+import {IAllo} from "contracts/core/interfaces/IAllo.sol";
 import {Allo} from "contracts/core/Allo.sol";
 import {IBaseStrategy} from "contracts/strategies/IBaseStrategy.sol";
 import {Metadata} from "contracts/core/libraries/Metadata.sol";
@@ -15,6 +16,14 @@ contract MockAllo is Allo {
 
     function _revokeRole(bytes32 role, address account) internal virtual override {
         super._revokeRole(role, account);
+    }
+
+    function _grantRole(bytes32 role, address account) internal virtual override {
+        super._grantRole(role, account);
+    }
+
+    function _setRoleAdmin(bytes32 role, bytes32 adminRole) internal virtual override {
+        super._setRoleAdmin(role, adminRole);
     }
 
     function _checkOnlyPoolManager(uint256 _poolId, address _address) internal view virtual override {
@@ -45,11 +54,11 @@ contract MockAllo is Allo {
         uint256 _poolId,
         address[] memory _recipients,
         uint256[] memory _amounts,
-        bytes memory _data,
+        bytes memory __data,
         uint256 _value,
         address _allocator
     ) internal virtual override {
-        super._allocate(_poolId, _recipients, _amounts, _data, _value, _allocator);
+        super._allocate(_poolId, _recipients, _amounts, __data, _value, _allocator);
     }
 
     function _fundPool(uint256 _amount, address _funder, uint256 _poolId, IBaseStrategy _strategy)
@@ -94,5 +103,13 @@ contract MockAllo is Allo {
 
     function _msgSender() internal view virtual override returns (address) {
         return super._msgSender();
+    }
+
+    function setPool(uint256 _poolId, IAllo.Pool memory _pool) public {
+        _pools[_poolId] = _pool;
+    }
+
+    function getNonce(address _caller) public view returns (uint256) {
+        return _nonces[_caller];
     }
 }

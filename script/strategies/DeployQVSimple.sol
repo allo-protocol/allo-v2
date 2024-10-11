@@ -8,7 +8,7 @@ contract DeployQVSimple is DeployBase {
     function _deploy() internal override returns (address _contract, string memory _contractName) {
         address _allo = vm.envAddress("ALLO_ADDRESS");
 
-        _contract = address(new QVSimple(_allo));
-        _contractName = "QVSimpleStrategy";
+        _contractName = "QVSimple";
+        _contract = address(new QVSimple(_allo, _contractName));
     }
 }

@@ -9,7 +9,7 @@ contract DeployDonationVotingOffchain is DeployBase {
         address _allo = vm.envAddress("ALLO_ADDRESS");
         bool _directTransfer = vm.envBool("DONATION_VOTING_OFFCHAIN_IS_DIRECT_TRANSFER");
 
-        _contract = address(new DonationVotingOffchain(_allo, _directTransfer));
-        _contractName = "DonationVotingOffchainStrategy";
+        _contractName = "DonationVotingOffchain";
+        _contract = address(new DonationVotingOffchain(_allo, _contractName, _directTransfer));
     }
 }

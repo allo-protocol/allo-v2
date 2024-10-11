@@ -16,11 +16,11 @@ abstract contract NFTGatingExtension is BaseStrategy {
     /// ========== Errors ==============
     /// ================================
     /// @notice Throws when the token is zero address
-    error NFTGatingExtension_INVALID_TOKEN();
+    error NFTGatingExtension_InvalidToken();
     /// @notice Throws when the actor is zero address
-    error NFTGatingExtension_INVALID_ACTOR();
+    error NFTGatingExtension_InvalidActor();
     /// @notice Throws when the balance of the actor is insufficient
-    error NFTGatingExtension_INSUFFICIENT_BALANCE();
+    error NFTGatingExtension_InsufficientBalance();
 
     /// ==============================
     /// ========= Modifiers ==========
@@ -42,8 +42,8 @@ abstract contract NFTGatingExtension is BaseStrategy {
     /// @param _nft The NFT address
     /// @param _actor The actor address
     function _checkOnlyWithNFT(address _nft, address _actor) internal view virtual {
-        if (_nft == address(0)) revert NFTGatingExtension_INVALID_TOKEN();
-        if (_actor == address(0)) revert NFTGatingExtension_INVALID_ACTOR();
-        if (IERC721(_nft).balanceOf(_actor) == 0) revert NFTGatingExtension_INSUFFICIENT_BALANCE();
+        if (_nft == address(0)) revert NFTGatingExtension_InvalidToken();
+        if (_actor == address(0)) revert NFTGatingExtension_InvalidActor();
+        if (IERC721(_nft).balanceOf(_actor) == 0) revert NFTGatingExtension_InsufficientBalance();
     }
 }

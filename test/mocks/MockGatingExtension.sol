@@ -8,7 +8,7 @@ import {TokenGatingExtension} from "strategies/extensions/gating/TokenGatingExte
 import {MockBaseStrategy} from "./MockBaseStrategy.sol";
 
 contract MockGatingExtension is EASGatingExtension, NFTGatingExtension, TokenGatingExtension {
-    constructor(address _allo) BaseStrategy(_allo) {}
+    constructor(address _allo, string memory _strategyName) BaseStrategy(_allo, _strategyName) {}
 
     function initialize(uint256 _poolId, bytes memory _data) public {
         __BaseStrategy_init(_poolId);

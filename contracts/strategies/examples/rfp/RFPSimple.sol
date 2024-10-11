@@ -45,7 +45,7 @@ contract RFPSimple is BaseStrategy, MilestonesExtension, RecipientsExtension {
 
     /// @notice Constructor for the RFP Simple Strategy
     /// @param _allo The 'Allo' contract
-    constructor(address _allo) RecipientsExtension(_allo, true) {}
+    constructor(address _allo) RecipientsExtension(_allo, "RFPSimple", true) {}
 
     /// ===============================
     /// ========= Initialize ==========
@@ -110,30 +110,32 @@ contract RFPSimple is BaseStrategy, MilestonesExtension, RecipientsExtension {
         virtual
         override
     {
-        if (block.timestamp <= registrationEndTime) revert ALLOCATION_NOT_ENDED();
-        if (_recipientIds.length > 1) revert RECIPIENT_NOT_ACCEPTED();
+        if (block.timestamp <= registrationEndTime) revert RecipientsExtension_RegistrationHasNotEnded();
+        if (_recipientIds.length > 1) revert RecipientsExtension_RecipientNotAccepted();
 
-        address acceptedRecipientId = _recipientIds[0];
-        uint256[] memory milestoneIds = abi.decode(_data, (uint256[]));
-        uint256 amount;
-        for (uint256 i = 0; i < milestoneIds.length; i++) {
-            uint256 milestoneId = milestoneIds[i];
+        address _acceptedRecipientId = _recipientIds[0];
+        uint256[] memory _milestoneIds = abi.decode(_data, (uint256[]));
+        uint256 _amount;
+        for (uint256 i; i < _milestoneIds.length; i++) {
+            uint256 _milestoneId = _milestoneIds[i];
             // Check if the milestone is accepted or if it was already paid
-            if (milestones[milestoneId].status != MilestoneStatus.Accepted) revert INVALID_MILESTONE_STATUS();
-            if (wasMilestonePaid[milestoneId]) revert INVALID_MILESTONE_STATUS();
+            if (_milestones[_milestoneId].status != MilestoneStatus.Accepted) {
+                revert MilestonesExtension_InvalidMilestoneStatus();
+            }
+            if (wasMilestonePaid[_milestoneId]) revert MilestonesExtension_InvalidMilestoneStatus();
 
             // Calculate the amount to be distributed for the milestone
             // Reverts if the recipient is not actually accepted
-            amount += _getMilestonePayout(acceptedRecipientId, milestoneId);
-            wasMilestonePaid[milestoneId] = true;
+            _amount += _getMilestonePayout(_acceptedRecipientId, _milestoneId);
+            wasMilestonePaid[_milestoneId] = true;
         }
-        poolAmount -= amount;
+        _poolAmount -= _amount;
 
-        IAllo.Pool memory pool = allo.getPool(poolId);
-        address recipientAddress = _recipients[acceptedRecipientId].recipientAddress;
-        pool.token.transferAmount(recipientAddress, amount);
+        IAllo.Pool memory pool = _ALLO.getPool(_poolId);
+        address _recipientAddress = _recipients[_acceptedRecipientId].recipientAddress;
+        pool.token.transferAmount(_recipientAddress, _amount);
 
-        emit Distributed(acceptedRecipientId, abi.encode(recipientAddress, amount, milestoneIds, _sender));
+        emit Distributed(_acceptedRecipientId, abi.encode(_recipientAddress, _amount, _milestoneIds, _sender));
     }
 
     /// @notice Returns if the recipient is accepted

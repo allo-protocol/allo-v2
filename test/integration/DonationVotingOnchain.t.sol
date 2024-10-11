@@ -37,7 +37,7 @@ contract IntegrationDonationVotingOnchainBase is IntegrationBase {
         allocator1 = makeAddr("allocator1");
 
         // Deploying contracts
-        strategy = new DonationVotingOnchain(address(allo));
+        strategy = new DonationVotingOnchain(address(allo), "DonationVotingOnchain");
 
         // Deal
         deal(DAI, userAddr, POOL_AMOUNT);
@@ -126,7 +126,7 @@ contract IntegrationDonationVotingOnchainReviewRecipients is IntegrationDonation
         vm.warp(registrationEndTime + 1);
         _newStatuses[1] = uint256(IRecipientsExtension.Status.Rejected);
         statuses[0] = _getApplicationStatus(_recipientIds, _newStatuses, address(strategy));
-        vm.expectRevert(Errors.REGISTRATION_NOT_ACTIVE.selector);
+        vm.expectRevert(IRecipientsExtension.RecipientsExtension_RegistrationNotActive.selector);
         strategy.reviewRecipients(statuses, recipientsCounter);
 
         vm.stopPrank();
@@ -179,7 +179,7 @@ contract IntegrationDonationVotingOnchainAllocateERC20 is IntegrationDonationVot
         assertEq(IERC20(allocationToken).balanceOf(address(strategy)), 4 + 25);
 
         recipients[0] = recipient2Addr;
-        vm.expectRevert(Errors.RECIPIENT_NOT_ACCEPTED.selector);
+        vm.expectRevert(IRecipientsExtension.RecipientsExtension_RecipientNotAccepted.selector);
         strategy.allocate(recipients, amounts, abi.encode(allocationToken, bytes("")), allocator0);
 
         vm.stopPrank();
@@ -231,7 +231,7 @@ contract IntegrationDonationVotingOnchainAllocateETH is IntegrationDonationVotin
         assertEq(address(strategy).balance, 4 + 25);
 
         recipients[0] = recipient2Addr;
-        vm.expectRevert(Errors.RECIPIENT_NOT_ACCEPTED.selector);
+        vm.expectRevert(IRecipientsExtension.RecipientsExtension_RecipientNotAccepted.selector);
         strategy.allocate(recipients, amounts, abi.encode(allocationToken, bytes("")), allocator0);
 
         vm.stopPrank();
@@ -300,7 +300,11 @@ contract IntegrationDonationVotingOnchainDistributeERC20 is IntegrationDonationV
         assertEq(IERC20(allocationToken).balanceOf(recipient1Addr), 25);
         assertEq(IERC20(allocationToken).balanceOf(address(strategy)), 0);
 
-        vm.expectRevert(abi.encodeWithSelector(DonationVotingOnchain.NOTHING_TO_DISTRIBUTE.selector, recipient0Addr));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                DonationVotingOnchain.DonationVotingOnchain_NothingToDistribute.selector, recipient0Addr
+            )
+        );
         strategy.distribute(recipients, abi.encode(allocationToken), recipient0Addr);
 
         vm.stopPrank();
@@ -367,7 +371,11 @@ contract IntegrationDonationVotingOnchainDistributeETH is IntegrationDonationVot
         assertEq(recipient1Addr.balance, 25);
         assertEq(address(strategy).balance, 0);
 
-        vm.expectRevert(abi.encodeWithSelector(DonationVotingOnchain.NOTHING_TO_DISTRIBUTE.selector, recipient0Addr));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                DonationVotingOnchain.DonationVotingOnchain_NothingToDistribute.selector, recipient0Addr
+            )
+        );
         strategy.distribute(recipients, abi.encode(allocationToken), recipient0Addr);
 
         vm.stopPrank();

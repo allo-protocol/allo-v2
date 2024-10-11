@@ -65,12 +65,6 @@ contract Errors {
     /// ======== Allo ========
     /// ======================
 
-    /// @notice Thrown when the strategy is not approved
-    error NOT_APPROVED_STRATEGY();
-
-    /// @notice Thrown when the strategy is approved and should be cloned
-    error IS_APPROVED_STRATEGY();
-
     /// @notice Thrown when the fee is below 1e18 which is the fee percentage denominator
     error INVALID_FEE();
 

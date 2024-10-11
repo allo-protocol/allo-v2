@@ -11,7 +11,7 @@ contract AllocatorsAllowlistExtension is Test {
     event AllocatorsRemoved(address[] allocators, address sender);
 
     function setUp() public {
-        extension = new MockMockAllocatorsAllowlistExtension(address(0));
+        extension = new MockMockAllocatorsAllowlistExtension(address(0), "MockAllocatorsAllowlistExtension");
     }
 
     function test__isValidAllocatorShouldReturnTRUEOrFALSEGivenTheStatusOfTheAllocator(

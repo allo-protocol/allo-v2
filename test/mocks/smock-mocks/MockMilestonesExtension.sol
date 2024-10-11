@@ -10,7 +10,7 @@ import {Metadata} from "contracts/core/libraries/Metadata.sol";
 contract MockMilestonesExtension is BaseStrategy, IMilestonesExtension, MilestonesExtension {
     address public acceptedRecipientId;
 
-    constructor(address _allo) BaseStrategy(_allo) {}
+    constructor(address _allo, string memory _strategyName) BaseStrategy(_allo, _strategyName) {}
 
     function initialize(uint256 _poolId, bytes memory _data) external {
         __BaseStrategy_init(_poolId);
@@ -81,10 +81,10 @@ contract MockMilestonesExtension is BaseStrategy, IMilestonesExtension, Mileston
     }
 
     function set__milestones(uint256 _index, Milestone memory _milestone) external {
-        if (milestones.length == 0) {
-            milestones.push(_milestone);
+        if (_milestones.length == 0) {
+            _milestones.push(_milestone);
         } else {
-            milestones[_index] = _milestone;
+            _milestones[_index] = _milestone;
         }
     }
 
@@ -97,6 +97,6 @@ contract MockMilestonesExtension is BaseStrategy, IMilestonesExtension, Mileston
     }
 
     function get__milestones() external view returns (Milestone[] memory) {
-        return milestones;
+        return _milestones;
     }
 }

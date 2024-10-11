@@ -16,11 +16,11 @@ abstract contract TokenGatingExtension is BaseStrategy {
     /// ========== Errors ==============
     /// ================================
     /// @notice Throws when the token is zero address
-    error TokenGatingExtension_INVALID_TOKEN();
+    error TokenGatingExtension_InvalidToken();
     /// @notice Throws when the actor is zero address
-    error TokenGatingExtension_INVALID_ACTOR();
+    error TokenGatingExtension_InvalidActor();
     /// @notice Throws when the balance of the actor is insufficient
-    error TokenGatingExtension_INSUFFICIENT_BALANCE();
+    error TokenGatingExtension_InsufficientBalance();
 
     /// ==============================
     /// ========= Modifiers ==========
@@ -44,8 +44,8 @@ abstract contract TokenGatingExtension is BaseStrategy {
     /// @param _amount The amount of tokens
     /// @param _actor The actor address
     function _checkOnlyWithToken(address _token, uint256 _amount, address _actor) internal view virtual {
-        if (_token == address(0)) revert TokenGatingExtension_INVALID_TOKEN();
-        if (_actor == address(0)) revert TokenGatingExtension_INVALID_ACTOR();
-        if (IERC20(_token).balanceOf(_actor) < _amount) revert TokenGatingExtension_INSUFFICIENT_BALANCE();
+        if (_token == address(0)) revert TokenGatingExtension_InvalidToken();
+        if (_actor == address(0)) revert TokenGatingExtension_InvalidActor();
+        if (IERC20(_token).balanceOf(_actor) < _amount) revert TokenGatingExtension_InsufficientBalance();
     }
 }

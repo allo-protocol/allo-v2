@@ -3,16 +3,19 @@ pragma solidity ^0.8.19;
 
 interface IAllocationExtension {
     /// @dev Error thrown when the allocation timestamps are invalid
-    error INVALID_ALLOCATION_TIMESTAMPS();
+    error AllocationExtension_INVALID_ALLOCATION_TIMESTAMPS();
 
     /// @dev Error thrown when trying to call the function when the allocation has started
-    error ALLOCATION_HAS_ALREADY_STARTED();
+    error AllocationExtension_ALLOCATION_HAS_ALREADY_STARTED();
 
     /// @dev Error thrown when trying to call the function when the allocation is not active
-    error ALLOCATION_IS_NOT_ACTIVE();
+    error AllocationExtension_ALLOCATION_NOT_ACTIVE();
+
+    /// @dev Error thrown when trying to call the function when the allocation has not ended
+    error AllocationExtension_ALLOCATION_HAS_NOT_ENDED();
 
     /// @dev Error thrown when trying to call the function when the allocation has ended
-    error ALLOCATION_IS_NOT_ENDED();
+    error AllocationExtension_ALLOCATION_HAS_ENDED();
 
     /// @notice Emitted when the allocation timestamps are updated
     /// @param allocationStartTime The start time for the allocation period

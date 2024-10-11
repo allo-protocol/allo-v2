@@ -29,7 +29,7 @@ contract MilestonesExtensionUnit is Test {
     }
 
     function setUp() public {
-        milestonesExtension = new MockMockMilestonesExtension(address(0));
+        milestonesExtension = new MockMockMilestonesExtension(address(0), "MockMilestonesExtension");
     }
 
     function test___MilestonesExtension_initShouldCall_increaseMaxBid(uint256 _maxBid) external {
@@ -96,7 +96,7 @@ contract MilestonesExtensionUnit is Test {
         milestonesExtension.mock_call__validateSetMilestones(address(this));
 
         // It should revert
-        vm.expectRevert(IMilestonesExtension.INVALID_MILESTONE.selector);
+        vm.expectRevert(IMilestonesExtension.MilestonesExtension_InvalidMilestone.selector);
 
         milestonesExtension.setMilestones(_milestones);
     }
@@ -114,7 +114,7 @@ contract MilestonesExtensionUnit is Test {
         milestonesExtension.mock_call__validateSetMilestones(address(this));
 
         // It should revert
-        vm.expectRevert(IMilestonesExtension.INVALID_MILESTONE.selector);
+        vm.expectRevert(IMilestonesExtension.MilestonesExtension_InvalidMilestone.selector);
 
         milestonesExtension.setMilestones(_milestones);
     }
@@ -207,7 +207,7 @@ contract MilestonesExtensionUnit is Test {
         vm.assume(_proposalBid > milestonesExtension.maxBid()); // maxBid is 0
 
         // It should revert
-        vm.expectRevert(IMilestonesExtension.EXCEEDING_MAX_BID.selector);
+        vm.expectRevert(IMilestonesExtension.MilestonesExtension_ExceedingMaxBid.selector);
 
         milestonesExtension.call__setProposalBid(_bidderId, _proposalBid);
     }
@@ -279,7 +279,7 @@ contract MilestonesExtensionUnit is Test {
         );
 
         // It should revert
-        vm.expectRevert(IMilestonesExtension.MILESTONES_ALREADY_SET.selector);
+        vm.expectRevert(IMilestonesExtension.MilestonesExtension_MilestonesAlreadySet.selector);
 
         milestonesExtension.call__validateSetMilestones(address(this));
     }
@@ -291,7 +291,7 @@ contract MilestonesExtensionUnit is Test {
         milestonesExtension.mock_call__isAcceptedRecipient(_recipientId, false);
 
         // It should revert
-        vm.expectRevert(IMilestonesExtension.INVALID_RECIPIENT.selector);
+        vm.expectRevert(IMilestonesExtension.MilestonesExtension_InvalidRecipient.selector);
 
         milestonesExtension.call__validateSubmitUpcomingMilestone(_recipientId, _sender);
     }
@@ -304,7 +304,7 @@ contract MilestonesExtensionUnit is Test {
         milestonesExtension.mock_call__isAcceptedRecipient(_recipientId, true);
 
         // It should revert
-        vm.expectRevert(IMilestonesExtension.INVALID_SUBMITTER.selector);
+        vm.expectRevert(IMilestonesExtension.MilestonesExtension_InvalidSubmitter.selector);
 
         milestonesExtension.call__validateSubmitUpcomingMilestone(_recipientId, _sender);
     }
@@ -316,7 +316,7 @@ contract MilestonesExtensionUnit is Test {
         );
 
         // It should revert
-        vm.expectRevert(IMilestonesExtension.MILESTONE_PENDING.selector);
+        vm.expectRevert(IMilestonesExtension.MilestonesExtension_MilestonePending.selector);
 
         milestonesExtension.call__validateSubmitUpcomingMilestone(_recipientId, _recipientId);
     }
@@ -337,7 +337,7 @@ contract MilestonesExtensionUnit is Test {
         milestonesExtension.mock_call__checkOnlyPoolManager(address(this));
 
         // It should revert
-        vm.expectRevert(IMilestonesExtension.INVALID_MILESTONE_STATUS.selector);
+        vm.expectRevert(IMilestonesExtension.MilestonesExtension_InvalidMilestoneStatus.selector);
 
         milestonesExtension.call__validateReviewMilestone(address(this), IMilestonesExtension.MilestoneStatus.None);
     }
@@ -349,7 +349,7 @@ contract MilestonesExtensionUnit is Test {
         );
 
         // It should revert
-        vm.expectRevert(IMilestonesExtension.MILESTONE_NOT_PENDING.selector);
+        vm.expectRevert(IMilestonesExtension.MilestonesExtension_MilestoneNotPending.selector);
 
         milestonesExtension.call__validateReviewMilestone(address(this), IMilestonesExtension.MilestoneStatus.Accepted);
     }
@@ -361,7 +361,7 @@ contract MilestonesExtensionUnit is Test {
         milestonesExtension.set__maxBid(_currentMaxBid);
 
         // It should revert
-        vm.expectRevert(IMilestonesExtension.AMOUNT_TOO_LOW.selector);
+        vm.expectRevert(IMilestonesExtension.MilestonesExtension_AmountTooLow.selector);
 
         milestonesExtension.call__increaseMaxBid(_maxBid);
     }
@@ -386,7 +386,7 @@ contract MilestonesExtensionUnit is Test {
         milestonesExtension.mock_call__isAcceptedRecipient(_recipientId, false);
 
         // It should revert
-        vm.expectRevert(IMilestonesExtension.INVALID_RECIPIENT.selector);
+        vm.expectRevert(IMilestonesExtension.MilestonesExtension_InvalidRecipient.selector);
 
         milestonesExtension.call__getMilestonePayout(_recipientId, _milestoneId);
     }

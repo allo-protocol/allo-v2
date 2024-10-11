@@ -4,7 +4,7 @@ pragma solidity ^0.8.19;
 import {BaseStrategy} from "contracts/strategies/BaseStrategy.sol";
 
 contract MockBaseStrategy is BaseStrategy {
-    constructor(address _allo) BaseStrategy(_allo) {}
+    constructor(address _allo, string memory _strategyName) BaseStrategy(_allo, _strategyName) {}
 
     function initialize(uint256 _poolId, bytes memory) external override {
         __BaseStrategy_init(_poolId);
@@ -85,11 +85,11 @@ contract MockBaseStrategy is BaseStrategy {
         override
     {}
 
-    function set__poolId(uint256 _poolId) external {
-        poolId = _poolId;
+    function set__poolId(uint256 __poolId) external {
+        _poolId = __poolId;
     }
 
-    function set__poolAmount(uint256 _poolAmount) external {
-        poolAmount = _poolAmount;
+    function set__poolAmount(uint256 __poolAmount) external {
+        _poolAmount = __poolAmount;
     }
 }

@@ -6,7 +6,7 @@ import {BaseStrategy} from "contracts/strategies/BaseStrategy.sol";
 
 /// @dev This mock allows smock to override the functions of AllocationExtension abstract contract
 contract MockAllocationExtension is BaseStrategy, AllocationExtension {
-    constructor(address _allo) BaseStrategy(_allo) {}
+    constructor(address _allo, string memory _strategyName) BaseStrategy(_allo, _strategyName) {}
 
     function initialize(uint256 _poolId, bytes memory _data) external override {
         __BaseStrategy_init(_poolId);

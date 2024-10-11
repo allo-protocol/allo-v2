@@ -16,13 +16,6 @@ contract DirectAllocationStrategy is BaseStrategy, Native, Errors {
     using Transfer for address;
 
     /// ===============================
-    /// ============ Errors ===========
-    /// ===============================
-
-    /// @notice Error when the input is invalid
-    error INVALID_INPUT();
-
-    /// ===============================
     /// ============ Events ===========
     /// ===============================
 
@@ -37,7 +30,7 @@ contract DirectAllocationStrategy is BaseStrategy, Native, Errors {
     /// ========= Constructor =========
     /// ===============================
 
-    constructor(address _allo) BaseStrategy(_allo) {}
+    constructor(address _allo) BaseStrategy(_allo, "DirectAllocation") {}
 
     /// ===============================
     /// ========= Initialize ==========
@@ -71,16 +64,16 @@ contract DirectAllocationStrategy is BaseStrategy, Native, Errors {
         uint256 _recipientsLength = _recipients.length;
         /// Check if inputs match the decoded data
         if (_recipientsLength != _amounts.length || _recipientsLength != _tokens.length) {
-            revert INVALID_INPUT();
+            revert ARRAY_MISMATCH();
         }
 
         uint256 _totalNativeAmount;
-        for (uint256 _i = 0; _i < _recipientsLength; ++_i) {
+        for (uint256 i; i < _recipientsLength; ++i) {
             /// Direct allocate the funds
-            if (_tokens[_i] == NATIVE) _totalNativeAmount += _amounts[_i];
-            _tokens[_i].transferAmountFrom(_sender, _recipients[_i], _amounts[_i]);
+            if (_tokens[i] == NATIVE) _totalNativeAmount += _amounts[i];
+            _tokens[i].transferAmountFrom(_sender, _recipients[i], _amounts[i]);
 
-            emit DirectAllocated(_recipients[_i], _amounts[_i], _tokens[_i], _sender);
+            emit DirectAllocated(_recipients[i], _amounts[i], _tokens[i], _sender);
         }
 
         if (msg.value < _totalNativeAmount) revert ETH_MISMATCH();

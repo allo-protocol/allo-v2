@@ -4,7 +4,6 @@ pragma solidity ^0.8.19;
 // Internal Imports
 // Interfaces
 import {IMilestonesExtension} from "strategies/extensions/milestones/IMilestonesExtension.sol";
-import {IRegistry} from "contracts/core/interfaces/IRegistry.sol";
 // Core Contracts
 import {BaseStrategy} from "strategies/BaseStrategy.sol";
 // Internal Libraries
@@ -27,7 +26,7 @@ abstract contract MilestonesExtension is BaseStrategy, IMilestonesExtension {
     mapping(address => uint256) public bids;
 
     /// @notice Collection of milestones
-    Milestone[] internal milestones;
+    Milestone[] internal _milestones;
 
     /// ===============================
     /// ========= Initialize ==========
@@ -49,14 +48,14 @@ abstract contract MilestonesExtension is BaseStrategy, IMilestonesExtension {
     /// @param _milestoneId ID of the milestone
     /// @return Milestone Returns the milestone
     function getMilestone(uint256 _milestoneId) external view returns (Milestone memory) {
-        return milestones[_milestoneId];
+        return _milestones[_milestoneId];
     }
 
     /// @notice Get the status of the milestone
     /// @param _milestoneId Id of the milestone
     /// @return MilestoneStatus Returns the milestone status
     function getMilestoneStatus(uint256 _milestoneId) external view returns (MilestoneStatus) {
-        return milestones[_milestoneId].status;
+        return _milestones[_milestoneId].status;
     }
 
     /// ===============================
@@ -72,27 +71,27 @@ abstract contract MilestonesExtension is BaseStrategy, IMilestonesExtension {
 
     /// @notice Set the milestones.
     /// @dev Emits 'MilestonesSet' event
-    /// @param _milestones Milestone[] The milestones to be set
-    function setMilestones(Milestone[] memory _milestones) external virtual {
+    /// @param __milestones Milestone[] The milestones to be set
+    function setMilestones(Milestone[] memory __milestones) external virtual {
         _validateSetMilestones(msg.sender);
-        uint256 totalAmountPercentage;
+        uint256 _totalAmountPercentage;
 
         // Loop through the milestones and add them to the milestones array
-        uint256 milestonesLength = _milestones.length;
-        for (uint256 i; i < milestonesLength; ++i) {
-            uint256 amountPercentage = _milestones[i].amountPercentage;
+        uint256 _milestonesLength = __milestones.length;
+        for (uint256 i; i < _milestonesLength; ++i) {
+            uint256 _amountPercentage = __milestones[i].amountPercentage;
 
-            if (amountPercentage == 0) revert INVALID_MILESTONE();
+            if (_amountPercentage == 0) revert MilestonesExtension_InvalidMilestone();
 
-            totalAmountPercentage += amountPercentage;
-            _milestones[i].status = MilestoneStatus.None;
-            milestones.push(_milestones[i]);
+            _totalAmountPercentage += _amountPercentage;
+            __milestones[i].status = MilestoneStatus.None;
+            _milestones.push(__milestones[i]);
         }
 
         // Check if the all milestone amount percentage totals to 1e18 (100%)
-        if (totalAmountPercentage != 1e18) revert INVALID_MILESTONE();
+        if (_totalAmountPercentage != 1e18) revert MilestonesExtension_InvalidMilestone();
 
-        emit MilestonesSet(milestonesLength);
+        emit MilestonesSet(_milestonesLength);
     }
 
     /// @notice Submit milestone by an accepted recipient.
@@ -103,11 +102,11 @@ abstract contract MilestonesExtension is BaseStrategy, IMilestonesExtension {
         _validateSubmitUpcomingMilestone(_recipientId, msg.sender);
 
         // Get the milestone and update the metadata and status
-        Milestone storage milestone = milestones[upcomingMilestone];
-        milestone.metadata = _metadata;
+        Milestone storage _milestone = _milestones[upcomingMilestone];
+        _milestone.metadata = _metadata;
 
         // Set the milestone status to 'Pending' to indicate that the milestone is submitted
-        milestone.status = MilestoneStatus.Pending;
+        _milestone.status = MilestoneStatus.Pending;
 
         // Emit event for the milestone
         emit MilestoneSubmitted(upcomingMilestone);
@@ -120,7 +119,7 @@ abstract contract MilestonesExtension is BaseStrategy, IMilestonesExtension {
         _validateReviewMilestone(msg.sender, _milestoneStatus);
         // Check if the milestone status is pending
 
-        milestones[upcomingMilestone].status = _milestoneStatus;
+        _milestones[upcomingMilestone].status = _milestoneStatus;
 
         emit MilestoneStatusChanged(upcomingMilestone, _milestoneStatus);
 
@@ -139,7 +138,7 @@ abstract contract MilestonesExtension is BaseStrategy, IMilestonesExtension {
     function _setProposalBid(address _bidderId, uint256 _proposalBid) internal virtual {
         if (_proposalBid > maxBid) {
             // If the proposal bid is greater than the max bid this will revert
-            revert EXCEEDING_MAX_BID();
+            revert MilestonesExtension_ExceedingMaxBid();
         } else if (_proposalBid == 0) {
             // If the proposal bid is 0, set it to the max bid
             _proposalBid = maxBid;
@@ -153,9 +152,9 @@ abstract contract MilestonesExtension is BaseStrategy, IMilestonesExtension {
     /// @param _sender The address setting the milestones
     function _validateSetMilestones(address _sender) internal virtual {
         _checkOnlyPoolManager(_sender);
-        if (milestones.length > 0) {
-            if (milestones[0].status != MilestoneStatus.None) revert MILESTONES_ALREADY_SET();
-            delete milestones;
+        if (_milestones.length > 0) {
+            if (_milestones[0].status != MilestoneStatus.None) revert MilestonesExtension_MilestonesAlreadySet();
+            delete _milestones;
         }
     }
 
@@ -164,11 +163,13 @@ abstract contract MilestonesExtension is BaseStrategy, IMilestonesExtension {
     /// @param _sender The address of the submitter
     function _validateSubmitUpcomingMilestone(address _recipientId, address _sender) internal virtual {
         // Check if the 'msg.sender' is accepted
-        if (!_isAcceptedRecipient(_recipientId)) revert INVALID_RECIPIENT();
-        if (_sender != _recipientId) revert INVALID_SUBMITTER();
+        if (!_isAcceptedRecipient(_recipientId)) revert MilestonesExtension_InvalidRecipient();
+        if (_sender != _recipientId) revert MilestonesExtension_InvalidSubmitter();
 
         // Check if a submission is ongoing to prevent front-running a milestone review.
-        if (milestones[upcomingMilestone].status == MilestoneStatus.Pending) revert MILESTONE_PENDING();
+        if (_milestones[upcomingMilestone].status == MilestoneStatus.Pending) {
+            revert MilestonesExtension_MilestonePending();
+        }
     }
 
     /// @notice Validates if the milestone can be reviewed at this moment by the `_sender` with `_milestoneStatus`
@@ -176,15 +177,17 @@ abstract contract MilestonesExtension is BaseStrategy, IMilestonesExtension {
     /// @param _milestoneStatus The new status to set the milestone to
     function _validateReviewMilestone(address _sender, MilestoneStatus _milestoneStatus) internal virtual {
         _checkOnlyPoolManager(_sender);
-        if (_milestoneStatus == MilestoneStatus.None) revert INVALID_MILESTONE_STATUS();
-        if (milestones[upcomingMilestone].status != MilestoneStatus.Pending) revert MILESTONE_NOT_PENDING();
+        if (_milestoneStatus == MilestoneStatus.None) revert MilestonesExtension_InvalidMilestoneStatus();
+        if (_milestones[upcomingMilestone].status != MilestoneStatus.Pending) {
+            revert MilestonesExtension_MilestoneNotPending();
+        }
     }
 
     /// @notice Increase max bid
     /// @param _maxBid The new max bid to be set
     function _increaseMaxBid(uint256 _maxBid) internal virtual {
         // make sure the new max bid is greater than the current max bid
-        if (_maxBid < maxBid) revert AMOUNT_TOO_LOW();
+        if (_maxBid < maxBid) revert MilestonesExtension_AmountTooLow();
 
         maxBid = _maxBid;
 
@@ -202,7 +205,7 @@ abstract contract MilestonesExtension is BaseStrategy, IMilestonesExtension {
     /// @param _milestoneId The milestone id
     /// @return payout amount assigned to the milestone
     function _getMilestonePayout(address _recipientId, uint256 _milestoneId) internal view virtual returns (uint256) {
-        if (!_isAcceptedRecipient(_recipientId)) revert INVALID_RECIPIENT();
-        return (bids[_recipientId] * milestones[_milestoneId].amountPercentage) / 1e18;
+        if (!_isAcceptedRecipient(_recipientId)) revert MilestonesExtension_InvalidRecipient();
+        return (bids[_recipientId] * _milestones[_milestoneId].amountPercentage) / 1e18;
     }
 }

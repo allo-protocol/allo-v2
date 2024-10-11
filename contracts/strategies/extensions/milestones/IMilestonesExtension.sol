@@ -6,37 +6,6 @@ import {Metadata} from "contracts/core/libraries/Metadata.sol";
 
 interface IMilestonesExtension {
     /// ===============================
-    /// ========== Errors =============
-    /// ===============================
-
-    /// @notice Thrown when the pool manager attempts to lower the max bid
-    error AMOUNT_TOO_LOW();
-
-    /// @notice Thrown when the proposal bid exceeds maximum bid
-    error EXCEEDING_MAX_BID();
-
-    /// @notice Thrown when a recipient is not accepted
-    error INVALID_RECIPIENT();
-
-    /// @notice Thrown when an unauthorized address attempts to submit a milestone
-    error INVALID_SUBMITTER();
-
-    /// @notice Thrown when the milestone is invalid
-    error INVALID_MILESTONE();
-
-    /// @notice Thrown when the new milestone status being reviewed is invalid
-    error INVALID_MILESTONE_STATUS();
-
-    /// @notice Thrown when the milestone are already approved and cannot be changed
-    error MILESTONES_ALREADY_SET();
-
-    /// @notice Thrown when the milestone is not pending
-    error MILESTONE_NOT_PENDING();
-
-    /// @notice Thrown when the milestone is pending
-    error MILESTONE_PENDING();
-
-    /// ===============================
     /// ========== Events =============
     /// ===============================
 
@@ -61,6 +30,37 @@ interface IMilestonesExtension {
     /// @notice Emitted when milestones are set.
     /// @param milestonesLength Count of milestones
     event MilestonesSet(uint256 milestonesLength);
+
+    /// ===============================
+    /// ========== Errors =============
+    /// ===============================
+
+    /// @notice Thrown when the pool manager attempts to lower the max bid
+    error MilestonesExtension_AmountTooLow();
+
+    /// @notice Thrown when the proposal bid exceeds maximum bid
+    error MilestonesExtension_ExceedingMaxBid();
+
+    /// @notice Thrown when a recipient is not accepted
+    error MilestonesExtension_InvalidRecipient();
+
+    /// @notice Thrown when an unauthorized address attempts to submit a milestone
+    error MilestonesExtension_InvalidSubmitter();
+
+    /// @notice Thrown when the milestone is invalid
+    error MilestonesExtension_InvalidMilestone();
+
+    /// @notice Thrown when the new milestone status being reviewed is invalid
+    error MilestonesExtension_InvalidMilestoneStatus();
+
+    /// @notice Thrown when the milestone are already approved and cannot be changed
+    error MilestonesExtension_MilestonesAlreadySet();
+
+    /// @notice Thrown when the milestone is not pending
+    error MilestonesExtension_MilestoneNotPending();
+
+    /// @notice Thrown when the milestone is pending
+    error MilestonesExtension_MilestonePending();
 
     /// ================================
     /// =========== Enums ==============

@@ -7,7 +7,9 @@ import {IRecipientsExtension} from "strategies/extensions/register/IRecipientsEx
 import {Metadata} from "contracts/core/libraries/Metadata.sol";
 
 contract MockRecipientsExtension is BaseStrategy, RecipientsExtension {
-    constructor(address _allo, bool _reviewEachStatus) RecipientsExtension(_allo, _reviewEachStatus) {}
+    constructor(address _allo, string memory _strategyName, bool _reviewEachStatus)
+        RecipientsExtension(_allo, _strategyName, _reviewEachStatus)
+    {}
 
     function initialize(uint256 _poolId, bytes memory _data) external {
         __BaseStrategy_init(_poolId);
@@ -139,6 +141,23 @@ contract MockRecipientsExtension is BaseStrategy, RecipientsExtension {
         returns (bool _returnParam0)
     {
         return super._isProfileMember(_anchor, _sender);
+    }
+
+    function _checkOnlyPoolManager(address _sender) internal view virtual override {
+        super._checkOnlyPoolManager(_sender);
+    }
+
+    function _validateReviewRecipients(address _sender) internal virtual override {
+        super._validateReviewRecipients(_sender);
+    }
+
+    function _processRecipient(
+        address _recipientId,
+        bool _isUsingRegistryAnchor,
+        Metadata memory _metadata,
+        bytes memory _extraData
+    ) internal virtual override {
+        super._processRecipient(_recipientId, _isUsingRegistryAnchor, _metadata, _extraData);
     }
 
     function set_recipientsCounter(uint256 _recipientsCounter) public {

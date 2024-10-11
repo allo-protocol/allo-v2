@@ -28,7 +28,7 @@ library QVHelper {
     /// @param _recipients The recipients to vote
     /// @param _voiceCredits The amounts of voice credits to cast for each recipient
     /// @dev The number of recipients and voiceCredits should be equal and the same index should correspond to the same recipient and amount
-    function _voteWithVoiceCredits(
+    function voteWithVoiceCredits(
         VotingState storage _state,
         address[] memory _recipients,
         uint256[] memory _voiceCredits
@@ -36,7 +36,7 @@ library QVHelper {
         /// Check if the number of recipients and amounts are equal
         if (_recipients.length != _voiceCredits.length) revert QVHelper_LengthMissmatch();
 
-        for (uint256 i = 0; i < _recipients.length; i++) {
+        for (uint256 i; i < _recipients.length; i++) {
             /// Add the voice credits to the recipient
             _state.recipientVoiceCredits[_recipients[i]] += _voiceCredits[i];
             uint256 _votes = FixedPointMathLib.sqrt(_voiceCredits[i]);
@@ -54,11 +54,11 @@ library QVHelper {
     /// @param _recipients The recipients to vote
     /// @param _votes The amounts of votes to cast for each recipient
     /// @dev The number of recipients and votes should be equal and the same index should correspond to the same recipient and amount
-    function _vote(VotingState storage _state, address[] memory _recipients, uint256[] memory _votes) internal {
+    function vote(VotingState storage _state, address[] memory _recipients, uint256[] memory _votes) internal {
         /// Check if the number of recipients and amounts are equal
         if (_recipients.length != _votes.length) revert QVHelper_LengthMissmatch();
 
-        for (uint256 i = 0; i < _recipients.length; i++) {
+        for (uint256 i; i < _recipients.length; i++) {
             /// Add the votes to the recipient
             _state.recipientVotes[_recipients[i]] += _votes[i];
             /// Add the total votes
@@ -77,18 +77,18 @@ library QVHelper {
     /// @param _recipients The recipients
     /// @param _poolAmount The amount of the pool
     /// @return _payouts The payouts for each recipient
-    function _getPayout(VotingState storage _state, address[] memory _recipients, uint256 _poolAmount)
+    function getPayout(VotingState storage _state, address[] memory _recipients, uint256 _poolAmount)
         internal
         view
         returns (uint256[] memory _payouts)
     {
         _payouts = new uint256[](_recipients.length);
 
-        for (uint256 i = 0; i < _recipients.length; i++) {
+        for (uint256 i; i < _recipients.length; i++) {
             /// Get the recipient
-            address recipient = _recipients[i];
+            address _recipient = _recipients[i];
             /// Get the votes of the recipient
-            uint256 _recipientVotes = _state.recipientVotes[recipient];
+            uint256 _recipientVotes = _state.recipientVotes[_recipient];
             /// Calculate the payout for the recipient
             _payouts[i] = _poolAmount * _recipientVotes / _state.totalVotes;
         }
