@@ -50,16 +50,16 @@
 # Coverage
 
 ## Allo.sol
-| Function Name                     | Sighash  | Function Signature                                                                             | Covered |
+| Function Name                     | Sighash  | Function Signature                                                                             | Handler |
 | --------------------------------- | -------- | ---------------------------------------------------------------------------------------------- | ------- |
-| initialize                        | 4b636f72 | initialize(address,address,address,uint256,uint256,address)                                    | []      |
+| initialize                        | 4b636f72 | initialize(address,address,address,uint256,uint256,address)                                    | NA      |
 | createPoolWithCustomStrategy      | e1007d4a | createPoolWithCustomStrategy(bytes32,address,bytes,address,uint256,(uint256,string),address[]) | []      |
-| createPool                        | 77da8caf | createPool(bytes32,address,bytes,address,uint256,(uint256,string),address[])                   | []      |
-| updatePoolMetadata                | 5f9ca138 | updatePoolMetadata(uint256,(uint256,string))                                                   | []      |
+| createPool                        | 77da8caf | createPool(bytes32,address,bytes,address,uint256,(uint256,string),address[])                   | [x]      |
+| updatePoolMetadata                | 5f9ca138 | updatePoolMetadata(uint256,(uint256,string))                                                   | [x]      |
 | updateRegistry                    | 1a5da6c8 | updateRegistry(address)                                                                        | []      |
 | updateTreasury                    | 7f51bb1f | updateTreasury(address)                                                                        | []      |
-| updatePercentFee                  | f54fc4a0 | updatePercentFee(uint256)                                                                      | []      |
-| updateBaseFee                     | 8e690186 | updateBaseFee(uint256)                                                                         | []      |
+| updatePercentFee                  | f54fc4a0 | updatePercentFee(uint256)                                                                      | [x]      |
+| updateBaseFee                     | 8e690186 | updateBaseFee(uint256)                                                                         | [x]      |
 | updateTrustedForwarder            | f90b0311 | updateTrustedForwarder(address)                                                                | []      |
 | addPoolManagers                   | 7025b800 | addPoolManagers(uint256,address[])                                                             | []      |
 | removePoolManagers                | ed8cae16 | removePoolManagers(uint256,address[])                                                          | []      |
@@ -73,34 +73,20 @@
 | batchAllocate                     | da49d0c9 | batchAllocate(uint256[],address[][],uint256[][],uint256[],bytes[])                             | []      |
 | distribute                        | 3a5fbd92 | distribute(uint256,address[],bytes)                                                            | []      |
 | changeAdmin                       | 6cc5af29 | changeAdmin(uint256,address)                                                                   | []      |
-| getFeeDenominator                 | f4e1fc41 | getFeeDenominator()                                                                            | []      |
-| isPoolAdmin                       | ab3febc6 | isPoolAdmin(uint256,address)                                                                   | []      |
-| isPoolManager                     | 29e40d4b | isPoolManager(uint256,address)                                                                 | []      |
-| getStrategy                       | cfc0cc34 | getStrategy(uint256)                                                                           | []      |
-| getPercentFee                     | 4edbaadc | getPercentFee()                                                                                | []      |
-| getBaseFee                        | 15e812ad | getBaseFee()                                                                                   | []      |
-| getTreasury                       | 3b19e84a | getTreasury()                                                                                  | []      |
-| getRegistry                       | 5ab1bd53 | getRegistry()                                                                                  | []      |
-| getPool                           | 068bcd8d | getPool(uint256)                                                                               | []      |
-| isTrustedForwarder                | 572b6c05 | isTrustedForwarder(address)                                                                    | []      |
 
 ## Anchor.sol
-| Function Name | Sighash  | Function Signature             | Covered |
+| Function Name | Sighash  | Function Signature             | Handler |
 | ------------- | -------- | ------------------------------ | ------- |
-| execute       | b61d27f6 | execute(address,uint256,bytes) | []      |
+| execute       | b61d27f6 | execute(address,uint256,bytes) | [x]*     |
+* Every call is constrained as either coming from an anchor or an eoa, when coming from an anchor, it is with a valid payload
 
 ## Registry.sol
-| Function Name             | Sighash  | Function Signature                                               | Covered |
+| Function Name             | Sighash  | Function Signature                                               | Handler |
 | ------------------------- | -------- | ---------------------------------------------------------------- | ------- |
-| initialize                | c4d66de8 | initialize(address)                                              | []      |
-| getProfileById            | 0114cf0a | getProfileById(bytes32)                                          | []      |
-| getProfileByAnchor        | dd93da43 | getProfileByAnchor(address)                                      | []      |
+| initialize                | c4d66de8 | initialize(address)                                              | NA      |
 | createProfile             | 3a92f65f | createProfile(uint256,string,(uint256,string),address,address[]) | []      |
 | updateProfileName         | cf189ff2 | updateProfileName(bytes32,string)                                | []      |
 | updateProfileMetadata     | ac402839 | updateProfileMetadata(bytes32,(uint256,string))                  | []      |
-| isOwnerOrMemberOfProfile  | 5e8a7915 | isOwnerOrMemberOfProfile(bytes32,address)                        | []      |
-| isOwnerOfProfile          | 39b86b8c | isOwnerOfProfile(bytes32,address)                                | []      |
-| isMemberOfProfile         | 0ec1fbac | isMemberOfProfile(bytes32,add]ress)                               | []      |
 | updateProfilePendingOwner | 3b66dacd | updateProfilePendingOwner(bytes32,address)                       | []      |
 | acceptProfileOwnership    | 2497f3c6 | acceptProfileOwnership(bytes32)                                  | []      |
 | addMembers                | 5063f361 | addMembers(bytes32,address[])                                    | []      |

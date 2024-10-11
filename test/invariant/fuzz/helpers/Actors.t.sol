@@ -43,7 +43,8 @@ contract Actors is Utils {
         address anchorOwner = msg.sender;
         address anchor = _ghost_anchorOf[anchorOwner];
 
-        if (_usingAnchor) {
+        // Every EOA should have an anchor, second check is probably not needed
+        if (_usingAnchor && anchor != address(0)) {
             emit ActorsLog(
                 string.concat("call using anchor of ", vm.toString(anchorOwner))
             );
