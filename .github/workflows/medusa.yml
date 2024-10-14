@@ -1,0 +1,21 @@
+name: Run medusa
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches:
+      - "**"
+jobs:
+  tests:
+    concurrency: ci-medusa-${{ github.head_ref || github.run_id }}
+    runs-on: ubuntu-latest
+    container: ghcr.io/defi-wonderland/eth-security-toolbox-ci:latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: "recursive"
+          fetch-depth: 1
+
+      - name: Run medusa (200k runs)
+        run: medusa fuzz --test-limit 200000
