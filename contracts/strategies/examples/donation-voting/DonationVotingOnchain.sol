@@ -10,7 +10,6 @@ import {RecipientsExtension} from "strategies/extensions/register/RecipientsExte
 import {AllocationExtension} from "strategies/extensions/allocate/AllocationExtension.sol";
 // Internal Libraries
 import {QFHelper} from "strategies/libraries/QFHelper.sol";
-import {Native} from "contracts/core/libraries/Native.sol";
 import {Transfer} from "contracts/core/libraries/Transfer.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -31,7 +30,7 @@ import {Transfer} from "contracts/core/libraries/Transfer.sol";
 /// @title Donation Voting Strategy with qudratic funding tracked on-chain
 /// @notice Strategy that allows allocations in a specified token to accepted recipient. Payouts are calculated from
 /// allocations based on the quadratic funding formula.
-contract DonationVotingOnchain is BaseStrategy, RecipientsExtension, AllocationExtension, Native {
+contract DonationVotingOnchain is BaseStrategy, RecipientsExtension, AllocationExtension {
     using QFHelper for QFHelper.State;
     using Transfer for address;
 
@@ -135,7 +134,7 @@ contract DonationVotingOnchain is BaseStrategy, RecipientsExtension, AllocationE
             emit Allocated(_recipients[i], _sender, _amounts[i], abi.encode(_allocationToken));
         }
 
-        if (_allocationToken == NATIVE) {
+        if (_allocationToken == Transfer.NATIVE) {
             if (msg.value != _totalAmount) revert ETH_MISMATCH();
         } else {
             _allocationToken.usePermit(_sender, address(this), _totalAmount, _permitData);

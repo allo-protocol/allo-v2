@@ -10,7 +10,6 @@ import {RecipientsExtension} from "strategies/extensions/register/RecipientsExte
 import {AllocationExtension} from "strategies/extensions/allocate/AllocationExtension.sol";
 // Internal Libraries
 import {Transfer} from "contracts/core/libraries/Transfer.sol";
-import {Native} from "contracts/core/libraries/Native.sol";
 
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⣿⣿⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣗⠀⠀⠀⢸⣿⣿⣿⡯⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -30,7 +29,7 @@ import {Native} from "contracts/core/libraries/Native.sol";
 /// @title Donation Voting Strategy with off-chain setup
 /// @notice Strategy that allows allocations in multiple tokens to accepted recipient. The actual payouts are set
 /// by the pool manager.
-contract DonationVotingOffchain is BaseStrategy, RecipientsExtension, AllocationExtension, Native {
+contract DonationVotingOffchain is BaseStrategy, RecipientsExtension, AllocationExtension {
     using Transfer for address;
 
     /// ===============================
@@ -241,7 +240,7 @@ contract DonationVotingOffchain is BaseStrategy, RecipientsExtension, Allocation
 
             address _recipientAddress = DIRECT_TRANSFER ? _recipients[__recipients[i]].recipientAddress : address(this);
 
-            if (_tokens[i] == NATIVE) {
+            if (_tokens[i] == Transfer.NATIVE) {
                 _totalNativeAmount += _amounts[i];
             } else {
                 _tokens[i].usePermit(_sender, _recipientAddress, _amounts[i], _permits[i]);
