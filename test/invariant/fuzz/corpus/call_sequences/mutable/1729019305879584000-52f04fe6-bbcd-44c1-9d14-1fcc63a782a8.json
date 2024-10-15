@@ -1,0 +1,69 @@
+[
+ {
+  "call": {
+   "from": "0x0000000000000000000000000000000000090000",
+   "to": "0xa647ff3c36cfab592509e13860ab8c4f28781a66",
+   "nonce": 0,
+   "value": "0x0",
+   "gasLimit": 12500000,
+   "gasPrice": "0x1",
+   "gasFeeCap": "0x0",
+   "gasTipCap": "0x0",
+   "data": "0xe74fdeda",
+   "dataAbiValues": {
+    "methodSignature": "test_forgeDebug()",
+    "inputValues": []
+   },
+   "AccessList": null,
+   "SkipAccountChecks": false
+  },
+  "blockNumberDelay": 44,
+  "blockTimestampDelay": 255
+ },
+ {
+  "call": {
+   "from": "0x0000000000000000000000000000000000090000",
+   "to": "0xa647ff3c36cfab592509e13860ab8c4f28781a66",
+   "nonce": 1,
+   "value": "0x0",
+   "gasLimit": 12500000,
+   "gasPrice": "0x1",
+   "gasFeeCap": "0x0",
+   "gasTipCap": "0x0",
+   "data": "0xa1568dc90000000000000000000000000000000000000000000000000000000000000009",
+   "dataAbiValues": {
+    "methodSignature": "handler_createPool(uint256)",
+    "inputValues": [
+     "9"
+    ]
+   },
+   "AccessList": null,
+   "SkipAccountChecks": false
+  },
+  "blockNumberDelay": 23443,
+  "blockTimestampDelay": 205457
+ },
+ {
+  "call": {
+   "from": "0x0000000000000000000000000000000000010000",
+   "to": "0xa647ff3c36cfab592509e13860ab8c4f28781a66",
+   "nonce": 0,
+   "value": "0x0",
+   "gasLimit": 12500000,
+   "gasPrice": "0x1",
+   "gasFeeCap": "0x0",
+   "gasTipCap": "0x0",
+   "data": "0x623bdcd1000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000390071d120d5074d497feaa08ce0c709b1919bec72da390071d873fbe90322538249d1a6140991df6be5de9c6e34afc7710e8a58fbfef874d8aa00000000000000",
+   "dataAbiValues": {
+    "methodSignature": "handler_updateProfileName(string)",
+    "inputValues": [
+     "\u0000q\ufffd \ufffd\u0007MIꠌ\ufffd\ufffd\t\ufffd\ufffd\ufffd\ufffdr\ufffd9\u0000q\ufffds\ufffd\ufffd\u0003\"S\ufffdIѦ\u0014\t\ufffd\ufffdk\ufffdޜn4\ufffd\ufffdq\u000e\ufffdX\ufffd\ufffd\ufffdtت"
+    ]
+   },
+   "AccessList": null,
+   "SkipAccountChecks": false
+  },
+  "blockNumberDelay": 13,
+  "blockTimestampDelay": 15
+ }
+]

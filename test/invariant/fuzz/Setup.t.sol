@@ -14,13 +14,6 @@ import {Utils} from "./helpers/Utils.t.sol";
 import {FuzzERC20, ERC20} from "./helpers/FuzzERC20.sol";
 
 contract Setup is Actors {
-    address[] DEFAULT_MEDUSA_SENDER = [
-        address(0x10000),
-        address(0x20000),
-        address(0x30000),
-        address(0x40000)
-    ];
-
     uint256 percentFee;
     uint256 baseFee;
 
@@ -71,18 +64,18 @@ contract Setup is Actors {
         // Deploy token
         token = ERC20(address(new FuzzERC20()));
 
-        // Create profile for each medusa sender
-        for (uint i; i < DEFAULT_MEDUSA_SENDER.length; i++) {
+        // Create profile for 4 addresses
+        for (uint i; i < 4; i++) {
             bytes32 _id = registry.createProfile(
                 0,
                 "a",
                 Metadata({protocol: i + 1, pointer: ""}),
-                DEFAULT_MEDUSA_SENDER[i],
+                _ghost_actors[i],
                 new address[](0)
             );
 
-            _addActorAndAnchor(
-                DEFAULT_MEDUSA_SENDER[i],
+            _addAnchorToActor(
+                _ghost_actors[i],
                 registry.getProfileById(_id).anchor
             );
         }

@@ -1,0 +1,46 @@
+[
+ {
+  "call": {
+   "from": "0x0000000000000000000000000000000000070000",
+   "to": "0xa647ff3c36cfab592509e13860ab8c4f28781a66",
+   "nonce": 0,
+   "value": "0x0",
+   "gasLimit": 12500000,
+   "gasPrice": "0x1",
+   "gasFeeCap": "0x0",
+   "gasTipCap": "0x0",
+   "data": "0xe74fdeda",
+   "dataAbiValues": {
+    "methodSignature": "test_forgeDebug()",
+    "inputValues": []
+   },
+   "AccessList": null,
+   "SkipAccountChecks": false
+  },
+  "blockNumberDelay": 44479,
+  "blockTimestampDelay": 316161
+ },
+ {
+  "call": {
+   "from": "0x0000000000000000000000000000000000040000",
+   "to": "0xa647ff3c36cfab592509e13860ab8c4f28781a66",
+   "nonce": 0,
+   "value": "0x0",
+   "gasLimit": 12500000,
+   "gasPrice": "0x1",
+   "gasFeeCap": "0x0",
+   "gasTipCap": "0x0",
+   "data": "0x623bdcd1000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000206c6f6728737472696e4b2c75696e743235362c616464726573732c626f6f6c29",
+   "dataAbiValues": {
+    "methodSignature": "handler_updateProfileName(string)",
+    "inputValues": [
+     "log(strinK,uint256,address,bool)"
+    ]
+   },
+   "AccessList": null,
+   "SkipAccountChecks": false
+  },
+  "blockNumberDelay": 34636,
+  "blockTimestampDelay": 140285
+ }
+]

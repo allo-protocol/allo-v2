@@ -15,8 +15,34 @@ import {Anchor} from "contracts/core/Anchor.sol";
 //
 // For convenience, EOA used all have an anchor (most calls from the EOA to allo
 // should revert, in most properties, anyway)
+//
+// Profile Owners (manage members and create pools) - 7 (we track one strat of each, testing "can always create pool" can be with a pool with then drop)
+// Profile Member (create pools) - 1
+// (- Pool Creator) -> profile owner or member
+
+// Pool Administrator (manage managers, like the assistant TO the regional manager or smth) - 1
+
+// Pool Manager (withdraw based on strat, update metadata) - 1
+
+// Recipient (get the chicken) - 2 (one auth and one non-auth/has no allocation)?
+
+// Maybe "donator" which are external too? (ie funding the pool) - 1 (and 7th is for the allo owner, which would be a profile owner too)
+
+// protocol/allo owner is a single one, so a bit special case. Plus 7 strategies, big space...
 contract Actors is Utils {
-    address[] internal _ghost_actorsArray;
+    address[] internal _ghost_actors = [
+        address(0x10000),
+        address(0x20000),
+        address(0x30000),
+        address(0x40000),
+        address(0x50000),
+        address(0x60000),
+        address(0x70000),
+        address(0x80000),
+        address(0x90000),
+        address(0xa0000)
+    ];
+
     mapping(address actor => address anchor) internal _ghost_anchorOf;
 
     // switch between using the anchor or an EOA as msg.sender for the call to target
@@ -43,8 +69,9 @@ contract Actors is Utils {
         address anchorOwner = msg.sender;
         address anchor = _ghost_anchorOf[anchorOwner];
 
-        // Every EOA should have an anchor, second check is probably not needed
-        if (_usingAnchor && anchor != address(0)) {
+        if (_usingAnchor) {
+            if (anchor == address(0)) revert();
+
             emit ActorsLog(
                 string.concat("call using anchor of ", vm.toString(anchorOwner))
             );
@@ -72,19 +99,7 @@ contract Actors is Utils {
         }
     }
 
-    // Conditionnally add new msg sender (no duplicate)
-    function _addActorAndAnchor(address _actor, address _anchor) internal {
-        bool _previouslyUsed = false;
-        for (uint256 i = 0; i < _ghost_actorsArray.length; i++) {
-            if (_ghost_actorsArray[i] == _actor) {
-                _previouslyUsed = true;
-                break;
-            }
-        }
-
-        if (!_previouslyUsed) {
-            _ghost_actorsArray.push(_actor);
-            _ghost_anchorOf[_actor] = _anchor;
-        }
+    function _addAnchorToActor(address _actor, address _anchor) internal {
+        _ghost_anchorOf[_actor] = _anchor;
     }
 }
