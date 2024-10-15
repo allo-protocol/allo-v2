@@ -94,6 +94,9 @@ contract AnchorUnit is Test {
         bytes memory _data,
         bytes memory _returnedData
     ) external whenTargetIsNotTheZeroAddress(_target) {
+        vm.assume(_target != address(vm));
+        assumeNotPrecompile(_target);
+
         // it should return the data returned by the call
         // it should call target with value and data
         (Anchor _anchor, address _registry, bytes32 _profileId) = _initAnchor();

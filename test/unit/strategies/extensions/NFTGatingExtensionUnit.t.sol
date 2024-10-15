@@ -22,6 +22,8 @@ contract NFTGatingExtensionUnit is Test {
 
     function test_RevertWhen_ActorAddressIsZero(address _nft) external {
         vm.assume(_nft != address(0));
+        vm.assume(_nft != address(vm));
+        assumeNotPrecompile(_nft);
 
         // It should revert
         vm.expectRevert(NFTGatingExtension.NFTGatingExtension_InvalidActor.selector);
@@ -32,6 +34,8 @@ contract NFTGatingExtensionUnit is Test {
     function test_RevertWhen_ActorBalanceIsEqualZero(address _nft, address _actor) external {
         vm.assume(_nft != address(0));
         vm.assume(_actor != address(0));
+        vm.assume(_nft != address(vm));
+        assumeNotPrecompile(_nft);
 
         vm.mockCall(address(_nft), abi.encodeWithSelector(IERC721.balanceOf.selector, _actor), abi.encode(uint256(0)));
 
@@ -45,6 +49,7 @@ contract NFTGatingExtensionUnit is Test {
         vm.assume(_nft != address(0));
         vm.assume(_actor != address(0));
         vm.assume(_nft != address(vm));
+        assumeNotPrecompile(_nft);
 
         vm.mockCall(address(_nft), abi.encodeWithSelector(IERC721.balanceOf.selector, _actor), abi.encode(uint256(1)));
 
