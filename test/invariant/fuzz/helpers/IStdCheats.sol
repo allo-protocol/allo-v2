@@ -35,14 +35,14 @@ interface IStdCheats {
     // Sets an address' balance
     function deal(address who, uint256 newBalance) external;
 
+    // Sets an address' token balance
+    function deal(address token, address to, uint256 amount) external;
+
     // Sets an address' code
     function etch(address who, bytes calldata code) external;
 
     // Signs data
-    function sign(
-        uint256 privateKey,
-        bytes32 digest
-    ) external returns (uint8 v, bytes32 r, bytes32 s);
+    function sign(uint256 privateKey, bytes32 digest) external returns (uint8 v, bytes32 r, bytes32 s);
 
     // Computes address for a given private key
     function addr(uint256 privateKey) external returns (address);
