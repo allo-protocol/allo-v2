@@ -165,7 +165,7 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
         uint256 _amount,
         Metadata memory _metadata,
         address[] memory _managers
-    ) external payable returns (uint256 _poolId) {
+    ) external payable nonReentrant returns (uint256 _poolId) {
         // Revert if the strategy address passed is the zero address with 'ZERO_ADDRESS()'
         if (_strategy == address(0)) revert ZERO_ADDRESS();
 
