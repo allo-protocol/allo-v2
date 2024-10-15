@@ -43,11 +43,11 @@ RecipientsExtension::_updatePoolTimestamps
     └── It should emit event
 
 RecipientsExtension::_checkOnlyActiveRegistration
-├── When parameters are correct
+├── When pool is active
+│   ├── It should call _isPoolActive
 │   └── It should execute successfully
-├── When registrationStartTime is more than block timestamp
-│   └── It should revert
-└── When registrationEndTime is less than block timestamp
+└── When pool is not active
+    ├── It should call _isPoolActive
     └── It should revert
 
 RecipientsExtension::_isPoolTimestampValid
