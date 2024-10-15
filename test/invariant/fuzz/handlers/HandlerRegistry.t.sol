@@ -7,16 +7,16 @@ import {IRegistry} from "contracts/core/Registry.sol";
 contract HandlerRegistry is Setup {
     uint256 internal _ghost_nonce;
     bytes32[] internal _ghost_pendingOwnershipChange;
-    mapping(bytes32 _profileId => address[] _members)
-        internal _ghost_roleMembers;
+    mapping(bytes32 _profileId => address[] _members) internal _ghost_roleMembers;
 
     // create a new profile and discard it for now
     function handler_createProfile(uint256 _numberOfMembers) public {
         _numberOfMembers = bound(_numberOfMembers, 0, _ghost_actors.length);
 
         address[] memory _members = new address[](_numberOfMembers);
-        for (uint256 i = 0; i < _numberOfMembers; i++)
+        for (uint256 i = 0; i < _numberOfMembers; i++) {
             _members[i] = _ghost_actors[i];
+        }
 
         // Create a profile
         (bool succ, bytes memory ret) = targetCall(
@@ -35,30 +35,17 @@ contract HandlerRegistry is Setup {
 
     function handler_updateProfileName(string memory _newName) public {
         // Get the profile ID
-        IRegistry.Profile memory profile = registry.getProfileByAnchor(
-            _ghost_anchorOf[msg.sender]
-        );
+        IRegistry.Profile memory profile = registry.getProfileByAnchor(_ghost_anchorOf[msg.sender]);
 
         // will not succeed if no profile
         (bool succ, bytes memory ret) = targetCall(
-            address(registry),
-            0,
-            abi.encodeWithSelector(
-                registry.updateProfileName.selector,
-                profile.id,
-                _newName
-            )
+            address(registry), 0, abi.encodeWithSelector(registry.updateProfileName.selector, profile.id, _newName)
         );
     }
 
-    function handler_updateProfileMetadata(
-        uint256 _newProtocol,
-        string memory _newPtr
-    ) public {
+    function handler_updateProfileMetadata(uint256 _newProtocol, string memory _newPtr) public {
         // Get the profile ID
-        IRegistry.Profile memory profile = registry.getProfileByAnchor(
-            _ghost_anchorOf[msg.sender]
-        );
+        IRegistry.Profile memory profile = registry.getProfileByAnchor(_ghost_anchorOf[msg.sender]);
 
         (bool succ, bytes memory ret) = targetCall(
             address(registry),
@@ -73,9 +60,7 @@ contract HandlerRegistry is Setup {
 
     function handler_updateProfilePendingOwner(uint256 _newOwnerSeed) public {
         // Get the profile ID
-        IRegistry.Profile memory profile = registry.getProfileByAnchor(
-            _ghost_anchorOf[msg.sender]
-        );
+        IRegistry.Profile memory profile = registry.getProfileByAnchor(_ghost_anchorOf[msg.sender]);
 
         // Get an actor as future owner
         address _newOwner = _ghost_actors[_newOwnerSeed % _ghost_actors.length];
@@ -83,11 +68,7 @@ contract HandlerRegistry is Setup {
         (bool succ, bytes memory ret) = targetCall(
             address(registry),
             0,
-            abi.encodeWithSelector(
-                registry.updateProfilePendingOwner.selector,
-                profile.id,
-                _newOwner
-            )
+            abi.encodeWithSelector(registry.updateProfilePendingOwner.selector, profile.id, _newOwner)
         );
 
         if (succ) {
@@ -96,83 +77,58 @@ contract HandlerRegistry is Setup {
     }
 
     function handler_acceptProfileOwnership(uint256 _profileSeed) public {
-        bytes32 _profileId = _ghost_pendingOwnershipChange[
-            _profileSeed % _ghost_pendingOwnershipChange.length
-        ];
+        bytes32 _profileId = _ghost_pendingOwnershipChange[_profileSeed % _ghost_pendingOwnershipChange.length];
 
         // Get the profile ID
         IRegistry.Profile memory profile = registry.getProfileById(_profileId);
 
         (bool succ, bytes memory ret) = targetCall(
-            address(registry),
-            0,
-            abi.encodeWithSelector(
-                registry.acceptProfileOwnership.selector,
-                profile.id
-            )
+            address(registry), 0, abi.encodeWithSelector(registry.acceptProfileOwnership.selector, profile.id)
         );
     }
 
     function handler_addMembers(uint256 _seed) public {
         uint256 _membersToAdd = _seed % _ghost_actors.length;
         address[] memory _members = new address[](_membersToAdd);
-        for (uint256 i = 0; i < _membersToAdd; i++)
+        for (uint256 i = 0; i < _membersToAdd; i++) {
             _members[i] = _ghost_actors[i];
+        }
 
         // Get the profile ID
-        IRegistry.Profile memory profile = registry.getProfileByAnchor(
-            _ghost_anchorOf[msg.sender]
-        );
+        IRegistry.Profile memory profile = registry.getProfileByAnchor(_ghost_anchorOf[msg.sender]);
 
-        (bool succ, bytes memory ret) = targetCall(
-            address(registry),
-            0,
-            abi.encodeWithSelector(
-                registry.addMembers.selector,
-                profile.id,
-                _members
-            )
-        );
+        (bool succ, bytes memory ret) =
+            targetCall(address(registry), 0, abi.encodeWithSelector(registry.addMembers.selector, profile.id, _members));
 
         if (succ) {
-            for (uint256 i = 0; i < _membersToAdd; i++)
+            for (uint256 i = 0; i < _membersToAdd; i++) {
                 _ghost_roleMembers[profile.id].push(_members[i]);
+            }
         }
     }
 
     function handler_removeMembers(uint256 _seed) public {
         // Get the profile ID
-        IRegistry.Profile memory profile = registry.getProfileByAnchor(
-            _ghost_anchorOf[msg.sender]
-        );
+        IRegistry.Profile memory profile = registry.getProfileByAnchor(_ghost_anchorOf[msg.sender]);
 
-        uint256 _membersToRemove = _seed %
-            _ghost_roleMembers[profile.id].length;
+        uint256 _membersToRemove = _seed % _ghost_roleMembers[profile.id].length;
 
         address[] memory _members = new address[](_membersToRemove);
-        for (uint256 i = 0; i < _membersToRemove; i++)
+        for (uint256 i = 0; i < _membersToRemove; i++) {
             _members[i] = _ghost_roleMembers[profile.id][i];
+        }
 
         (bool succ, bytes memory ret) = targetCall(
-            address(registry),
-            0,
-            abi.encodeWithSelector(
-                registry.removeMembers.selector,
-                profile.id,
-                _members
-            )
+            address(registry), 0, abi.encodeWithSelector(registry.removeMembers.selector, profile.id, _members)
         );
 
         // keep only the non-removed members in the ghost array
         if (succ) {
-            address[] memory _nonRemovedMembers = new address[](
-                _ghost_roleMembers[profile.id].length - _membersToRemove
-            );
+            address[] memory _nonRemovedMembers =
+                new address[](_ghost_roleMembers[profile.id].length - _membersToRemove);
 
             for (uint256 i = 0; i < _nonRemovedMembers.length; i++) {
-                _nonRemovedMembers[i] = _ghost_roleMembers[profile.id][
-                    i + _membersToRemove
-                ];
+                _nonRemovedMembers[i] = _ghost_roleMembers[profile.id][i + _membersToRemove];
             }
         }
     }
