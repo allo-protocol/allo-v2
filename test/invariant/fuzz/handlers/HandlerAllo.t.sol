@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 import {Setup} from "../Setup.t.sol";
 import {IRegistry} from "contracts/core/Registry.sol";
 import {IAllo, Allo, Metadata} from "contracts/core/Allo.sol";
+import {FuzzERC20} from "../helpers/FuzzERC20.sol";
 
 contract HandlerAllo is Setup {
     uint256[] ghost_poolIds;
@@ -194,8 +195,14 @@ contract HandlerAllo is Setup {
 
     function handler_fundPool(uint256 _seed, uint256 _amount, uint256 _msgValue) public onlyValidPool(_seed) {
         uint256 _poolId = _getPoolId(_seed);
+        uint256 _previousBalance = token.balanceOf(address(msg.sender));
+        if (_previousBalance > 0) {
+            _amount = bound(_amount, 0, type(uint256).max - _previousBalance);
+        }
 
-        vm.deal(address(token), msg.sender, _amount);
+        if (_amount > 0) {
+            FuzzERC20(address(token)).mint(address(msg.sender), _amount);
+        }
 
         // Fund pool - will revert if the amount is zero or if pool token is native and message value is != amount
         targetCall(address(allo), _msgValue, abi.encodeWithSelector(IAllo.fundPool.selector, _poolId, _amount));
@@ -225,14 +232,8 @@ contract HandlerAllo is Setup {
         bytes[] memory _datas,
         uint256 _msgValue
     ) public onlyValidPools(_seeds) {
-        if (
-            _seeds.length != _recipients.length || _seeds.length != _amounts.length || _seeds.length != _values.length
-                || _seeds.length != _datas.length
-        ) {
-            revert("Arrays mismatch");
-        }
         uint256[] memory _poolIds = _getPoolsIds(_seeds);
-        // Batch allocate - allocate to multiple pools and recipients
+        // Batch allocate - allocate to multiple pools and recipients, will revert if arrays are not of same length
         targetCall(
             address(allo),
             _msgValue,
