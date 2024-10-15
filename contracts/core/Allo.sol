@@ -708,17 +708,6 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
         }
     }
 
-    /// @dev Logic copied from ERC2771ContextUpgradeable OZ contracts
-    /// @return calldata filtering the sender address when the trusted forward is the operator
-    function _msgData() internal view override returns (bytes calldata) {
-        uint256 _calldataLength = msg.data.length;
-        if (isTrustedForwarder(msg.sender) && _calldataLength >= 20) {
-            return msg.data[:_calldataLength - 20];
-        } else {
-            return super._msgData();
-        }
-    }
-
     // =========================
     // ==== View Functions =====
     // =========================
