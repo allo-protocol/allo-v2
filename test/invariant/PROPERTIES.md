@@ -96,8 +96,10 @@
 ## Base strategy
 | Function Name      | Sighash  | Function Signature                          | Handler |
 | ------------------ | -------- | ------------------------------------------- | ------- |
-| increasePoolAmount | f5b0dfb7 | increasePoolAmount(uint256)                 | []      |
+| increasePoolAmount | f5b0dfb7 | increasePoolAmount(uint256)                 | NA*     |
 | withdraw           | 69328dec | withdraw(address,uint256,address)           | []      |
-| register           | facfe313 | register(address[],bytes,address)           | []      |
-| allocate           | 5fdfa0e0 | allocate(address[],uint256[],bytes,address) | []      |
-| distribute         | 0a6f0ee9 | distribute(address[],bytes,address)         | []      |
+| register           | facfe313 | register(address[],bytes,address)           | NA*     |
+| allocate           | 5fdfa0e0 | allocate(address[],uint256[],bytes,address) | NA*      |
+| distribute         | 0a6f0ee9 | distribute(address[],bytes,address)         | NA*      |
+
+*only called via Allo
