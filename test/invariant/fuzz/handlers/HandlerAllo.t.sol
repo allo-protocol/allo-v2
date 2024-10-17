@@ -87,10 +87,7 @@ contract HandlerAllo is Setup {
         targetCall(address(allo), 0, abi.encodeWithSelector(Allo.updateTrustedForwarder.selector, _newForwarder));
     }
 
-    function handler_addPoolManagers(uint256 _idSeed, address[] calldata _managers)
-        public
-        onlyValidPoolAndAdmin(_idSeed)
-    {
+    function handler_addPoolManagers(uint256 _idSeed, address[] calldata _managers) public {
         uint256 _poolId = _getPoolId(_idSeed);
 
         // Add pool managers - will revert if caller is not the pool admin of the pool id
@@ -104,7 +101,7 @@ contract HandlerAllo is Setup {
         }
     }
 
-    function handler_removePoolManagers(uint256 _idSeed) public onlyValidPoolAndAdmin(_idSeed) {
+    function handler_removePoolManagers(uint256 _idSeed) public {
         uint256 _poolId = _getPoolId(_idSeed);
         address[] memory _managers = ghost_poolManagers[_poolId];
 
@@ -117,10 +114,7 @@ contract HandlerAllo is Setup {
         }
     }
 
-    function handler_addPoolManagersInMultiplePools(uint256[] calldata _seeds, address[] calldata _managers)
-        public
-        onlyValidPoolsAdmin(_seeds)
-    {
+    function handler_addPoolManagersInMultiplePools(uint256[] calldata _seeds, address[] calldata _managers) public {
         uint256[] memory _poolIds = _getPoolsIds(_seeds);
 
         // Add pool managers in multiple pools - will revert if caller is not a pool admin of any pool id
@@ -140,7 +134,6 @@ contract HandlerAllo is Setup {
 
     function handler_removePoolManagersInMultiplePools(uint256[] calldata _seeds, address[] calldata _managers)
         public
-        onlyValidPoolsAdmin(_seeds)
     {
         uint256[] memory _poolIds = _getPoolsIds(_seeds);
 
@@ -169,7 +162,7 @@ contract HandlerAllo is Setup {
         address[] memory _recipientAddresses,
         bytes memory _data,
         uint256 _msgValue
-    ) public onlyValidPool(_seed) {
+    ) public {
         uint256 _poolId = _getPoolId(_seed);
         // Register recipient
         targetCall(
@@ -183,7 +176,7 @@ contract HandlerAllo is Setup {
         uint256[] memory _seeds,
         address[][] memory _recipientAddresses,
         bytes[] memory _data
-    ) public onlyValidPools(_seeds) {
+    ) public {
         uint256[] memory _poolIds = _getPoolsIds(_seeds);
         // Batch register recipient - will revert if arrays are not of same length
         targetCall(
@@ -193,7 +186,7 @@ contract HandlerAllo is Setup {
         );
     }
 
-    function handler_fundPool(uint256 _seed, uint256 _amount, uint256 _msgValue) public onlyValidPool(_seed) {
+    function handler_fundPool(uint256 _seed, uint256 _amount, uint256 _msgValue) public {
         uint256 _poolId = _getPoolId(_seed);
         uint256 _previousBalance = token.balanceOf(address(msg.sender));
         if (_previousBalance > 0) {
@@ -214,7 +207,7 @@ contract HandlerAllo is Setup {
         uint256[] memory _amounts,
         bytes memory _data,
         uint256 _msgValue
-    ) public onlyValidPool(_seed) {
+    ) public {
         uint256 _poolId = _getPoolId(_seed);
         // Allocate - allocate to a recipient or multiple recipients
         targetCall(
@@ -231,7 +224,7 @@ contract HandlerAllo is Setup {
         uint256[] calldata _values,
         bytes[] memory _datas,
         uint256 _msgValue
-    ) public onlyValidPools(_seeds) {
+    ) public {
         uint256[] memory _poolIds = _getPoolsIds(_seeds);
         // Batch allocate - allocate to multiple pools and recipients, will revert if arrays are not of same length
         targetCall(
@@ -241,16 +234,13 @@ contract HandlerAllo is Setup {
         );
     }
 
-    function handler_distribute(uint256 _seed, address[] memory _recipientIds, bytes memory _data)
-        public
-        onlyValidPool(_seed)
-    {
+    function handler_distribute(uint256 _seed, address[] memory _recipientIds, bytes memory _data) public {
         uint256 _poolId = _getPoolId(_seed);
         // Distribute - distribute to a recipient or multiple recipients
         targetCall(address(allo), 0, abi.encodeWithSelector(IAllo.distribute.selector, _poolId, _recipientIds, _data));
     }
 
-    function handler_changeAdmin(uint256 _seed, address _newAdmin) public onlyValidPoolAndAdmin(_seed) {
+    function handler_changeAdmin(uint256 _seed, address _newAdmin) public {
         uint256 _poolId = _getPoolId(_seed);
         // Change admin - will revert if caller is not the pool admin
         targetCall(address(allo), 0, abi.encodeWithSelector(IAllo.changeAdmin.selector, _poolId, _newAdmin));
@@ -297,36 +287,5 @@ contract HandlerAllo is Setup {
 
         // Avoid EOA
         if (_profile.anchor == address(0)) revert("EOA");
-    }
-
-    modifier onlyValidPool(uint256 _idSeed) {
-        if (_getPoolId(_idSeed) == 0) revert("Invalid pool");
-        _;
-    }
-
-    modifier onlyValidPools(uint256[] memory _seeds) {
-        for (uint256 _i; _i < _seeds.length; ++_i) {
-            if (_getPoolId(_seeds[_i]) == 0) revert("Invalid pool");
-        }
-        _;
-    }
-
-    modifier onlyPoolAdmin(uint256 _poolId) {
-        if (msg.sender != ghost_poolAdmins[_poolId]) revert("Not pool admin");
-        _;
-    }
-
-    modifier onlyValidPoolAndAdmin(uint256 _idSeed) {
-        uint256 poolId = _getPoolId(_idSeed);
-        if (poolId == 0 || msg.sender != ghost_poolAdmins[poolId]) revert("Invalid pool or not pool admin");
-        _;
-    }
-
-    modifier onlyValidPoolsAdmin(uint256[] calldata _seeds) {
-        for (uint256 _i; _i < _seeds.length; ++_i) {
-            uint256 _poolId = _getPoolId(_seeds[_i]);
-            if (_poolId == 0 || msg.sender != ghost_poolAdmins[_poolId]) revert("Invalid pool or not pool admin");
-        }
-        _;
     }
 }

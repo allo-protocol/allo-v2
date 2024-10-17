@@ -35,9 +35,6 @@ interface IStdCheats {
     // Sets an address' balance
     function deal(address who, uint256 newBalance) external;
 
-    // Sets an address' token balance
-    function deal(address token, address to, uint256 amount) external;
-
     // Sets an address' code
     function etch(address who, bytes calldata code) external;
 
