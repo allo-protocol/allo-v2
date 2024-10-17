@@ -22,6 +22,8 @@ contract TokenGatingExtensionUnit is Test {
 
     function test_RevertWhen_ActorAddressIsZero(address _token, uint256 _amount) external {
         vm.assume(_token != address(0));
+        vm.assume(_token != address(vm));
+        assumeNotPrecompile(_token);
 
         // It should revert
         vm.expectRevert(TokenGatingExtension.TokenGatingExtension_InvalidActor.selector);
@@ -38,6 +40,8 @@ contract TokenGatingExtensionUnit is Test {
         vm.assume(_token != address(0));
         vm.assume(_actor != address(0));
         vm.assume(_balance < _amount);
+        vm.assume(_token != address(vm));
+        assumeNotPrecompile(_token);
 
         vm.mockCall(address(_token), abi.encodeWithSelector(IERC20.balanceOf.selector, _actor), abi.encode(_balance));
 
@@ -51,6 +55,8 @@ contract TokenGatingExtensionUnit is Test {
         vm.assume(_token != address(0));
         vm.assume(_actor != address(0));
         vm.assume(_balance > _amount);
+        vm.assume(_token != address(vm));
+        assumeNotPrecompile(_token);
 
         vm.mockCall(address(_token), abi.encodeWithSelector(IERC20.balanceOf.selector, _actor), abi.encode(_balance));
 

@@ -5,14 +5,13 @@ pragma solidity ^0.8.19;
 // Core Contracts
 import {BaseStrategy} from "strategies/BaseStrategy.sol";
 // Internal Libraries
-import {Native} from "contracts/core/libraries/Native.sol";
 import {Errors} from "contracts/core/libraries/Errors.sol";
 import {Transfer} from "contracts/core/libraries/Transfer.sol";
 
 /// @title DirectAllocationStrategy
 /// @dev The strategy only implements the allocate logic
 /// @notice A strategy that directly allocates funds to a recipient
-contract DirectAllocationStrategy is BaseStrategy, Native, Errors {
+contract DirectAllocationStrategy is BaseStrategy, Errors {
     using Transfer for address;
 
     /// ===============================
@@ -70,7 +69,7 @@ contract DirectAllocationStrategy is BaseStrategy, Native, Errors {
         uint256 _totalNativeAmount;
         for (uint256 i; i < _recipientsLength; ++i) {
             /// Direct allocate the funds
-            if (_tokens[i] == NATIVE) _totalNativeAmount += _amounts[i];
+            if (_tokens[i] == Transfer.NATIVE) _totalNativeAmount += _amounts[i];
             _tokens[i].transferAmountFrom(_sender, _recipients[i], _amounts[i]);
 
             emit DirectAllocated(_recipients[i], _amounts[i], _tokens[i], _sender);

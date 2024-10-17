@@ -249,49 +249,21 @@ contract RecipientsExtensionUnit is Test {
         assertEq(recipientsExtension.registrationEndTime(), _registrationEndTime);
     }
 
-    function test__checkOnlyActiveRegistrationWhenParametersAreCorrect(
-        uint64 _registrationStartTime,
-        uint64 _registrationEndTime,
-        uint64 _blockTimestamp
-    ) external {
-        vm.assume(_registrationStartTime < _registrationEndTime);
-        vm.assume(_registrationStartTime < _blockTimestamp);
-        vm.assume(_registrationEndTime > _blockTimestamp);
-        recipientsExtension.set_registrationStartTime(_registrationStartTime);
-        recipientsExtension.set_registrationEndTime(_registrationEndTime);
-        vm.warp(_blockTimestamp);
+    function test__checkOnlyActiveRegistrationWhenPoolIsActive() external {
+        recipientsExtension.mock_call__isPoolActive(true);
+
+        // It should call _isPoolActive
+        recipientsExtension.expectCall__isPoolActive();
 
         // It should execute successfully
         recipientsExtension.call__checkOnlyActiveRegistration();
     }
 
-    function test__checkOnlyActiveRegistrationRevertWhen_RegistrationStartTimeIsMoreThanBlockTimestamp(
-        uint64 _registrationStartTime,
-        uint64 _registrationEndTime,
-        uint64 _blockTimestamp
-    ) external {
-        vm.assume(_registrationStartTime < _registrationEndTime);
-        vm.assume(_registrationStartTime > _blockTimestamp);
-        recipientsExtension.set_registrationStartTime(_registrationStartTime);
-        recipientsExtension.set_registrationEndTime(_registrationEndTime);
-        vm.warp(_blockTimestamp);
+    function test__checkOnlyActiveRegistrationWhenPoolIsNotActive() external {
+        recipientsExtension.mock_call__isPoolActive(false);
 
-        // It should revert
-        vm.expectRevert(IRecipientsExtension.RecipientsExtension_RegistrationNotActive.selector);
-
-        recipientsExtension.call__checkOnlyActiveRegistration();
-    }
-
-    function test__checkOnlyActiveRegistrationRevertWhen_RegistrationEndTimeIsLessThanBlockTimestamp(
-        uint64 _registrationStartTime,
-        uint64 _registrationEndTime,
-        uint64 _blockTimestamp
-    ) external {
-        vm.assume(_registrationStartTime < _registrationEndTime);
-        vm.assume(_registrationEndTime < _blockTimestamp);
-        recipientsExtension.set_registrationStartTime(_registrationStartTime);
-        recipientsExtension.set_registrationEndTime(_registrationEndTime);
-        vm.warp(_blockTimestamp);
+        // It should call _isPoolActive
+        recipientsExtension.expectCall__isPoolActive();
 
         // It should revert
         vm.expectRevert(IRecipientsExtension.RecipientsExtension_RegistrationNotActive.selector);

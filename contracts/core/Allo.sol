@@ -14,7 +14,6 @@ import {ReentrancyGuardUpgradeable} from
 import {IAllo} from "contracts/core/interfaces/IAllo.sol";
 import {IRegistry} from "contracts/core/interfaces/IRegistry.sol";
 import {Errors} from "contracts/core/libraries/Errors.sol";
-import {Native} from "contracts/core/libraries/Native.sol";
 import {Transfer} from "contracts/core/libraries/Transfer.sol";
 import {Metadata} from "contracts/core/libraries/Metadata.sol";
 import {IBaseStrategy} from "strategies/IBaseStrategy.sol";
@@ -38,7 +37,7 @@ import {IBaseStrategy} from "strategies/IBaseStrategy.sol";
 /// @author @thelostone-mc <aditya@gitcoin.co>, @0xKurt <kurt@gitcoin.co>, @codenamejason <jason@gitcoin.co>, @0xZakk <zakk@gitcoin.co>, @nfrgosselin <nate@gitcoin.co>
 /// @notice This contract is used to create & manage _pools as well as manage the protocol.
 /// @dev The contract must be initialized with the 'initialize()' function.
-contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable, ReentrancyGuardUpgradeable, Errors {
+contract Allo is IAllo, Initializable, Ownable, AccessControlUpgradeable, ReentrancyGuardUpgradeable, Errors {
     using Transfer for address;
 
     // ==========================
@@ -165,7 +164,7 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
         uint256 _amount,
         Metadata memory _metadata,
         address[] memory _managers
-    ) external payable returns (uint256 _poolId) {
+    ) external payable nonReentrant returns (uint256 _poolId) {
         // Revert if the strategy address passed is the zero address with 'ZERO_ADDRESS()'
         if (_strategy == address(0)) revert ZERO_ADDRESS();
 
@@ -318,7 +317,8 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
     /// @param _recipient The recipient
     function recoverFunds(address _token, address _recipient) external onlyOwner {
         // Get the amount of the token to transfer, which is always the entire balance of the contract address
-        uint256 _amount = _token == NATIVE ? address(this).balance : IERC20Upgradeable(_token).balanceOf(address(this));
+        uint256 _amount =
+            _token == Transfer.NATIVE ? address(this).balance : IERC20Upgradeable(_token).balanceOf(address(this));
 
         // Transfer the amount to the recipient (pool owner)
         _token.transferAmount(_recipient, _amount);
@@ -379,7 +379,7 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
         if (_amount == 0) revert INVALID();
 
         Pool memory _pool = _pools[_poolId];
-        if (_pool.token == NATIVE && _amount != msg.value) revert ETH_MISMATCH();
+        if (_pool.token == Transfer.NATIVE && _amount != msg.value) revert ETH_MISMATCH();
 
         // Call the internal fundPool() function
         _fundPool(_amount, _msgSender(), _poolId, _pool.strategy);
@@ -544,8 +544,8 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
             // To prevent paying the _baseFee from the Allo contract's balance
             // If _token is NATIVE, then _baseFee + _amount should be equal to _msgValue.
             // If _token is not NATIVE, then _baseFee should be equal to _msgValue.
-            if (_token == NATIVE && (_baseFee + _amount != _msgValue)) revert ETH_MISMATCH();
-            if (_token != NATIVE && _baseFee != _msgValue) revert ETH_MISMATCH();
+            if (_token == Transfer.NATIVE && (_baseFee + _amount != _msgValue)) revert ETH_MISMATCH();
+            if (_token != Transfer.NATIVE && _baseFee != _msgValue) revert ETH_MISMATCH();
 
             address(_treasury).transferAmountNative(_baseFee);
 
@@ -592,7 +592,7 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
 
         address _token = _pools[_poolId].token;
 
-        if (_token == NATIVE && msg.value < _amount) revert ETH_MISMATCH();
+        if (_token == Transfer.NATIVE && msg.value < _amount) revert ETH_MISMATCH();
 
         if (_feeAmount > 0) {
             uint256 _balanceBeforeFee = _token.getBalance(_treasury);
@@ -705,17 +705,6 @@ contract Allo is IAllo, Native, Initializable, Ownable, AccessControlUpgradeable
             return address(bytes20(msg.data[_calldataLength - 20:]));
         } else {
             return super._msgSender();
-        }
-    }
-
-    /// @dev Logic copied from ERC2771ContextUpgradeable OZ contracts
-    /// @return calldata filtering the sender address when the trusted forward is the operator
-    function _msgData() internal view override returns (bytes calldata) {
-        uint256 _calldataLength = msg.data.length;
-        if (isTrustedForwarder(msg.sender) && _calldataLength >= 20) {
-            return msg.data[:_calldataLength - 20];
-        } else {
-            return super._msgData();
         }
     }
 
