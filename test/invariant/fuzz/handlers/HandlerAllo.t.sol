@@ -117,6 +117,8 @@ contract HandlerAllo is Setup {
     function handler_addPoolManagersInMultiplePools(uint256[] calldata _seeds, address[] calldata _managers) public {
         uint256[] memory _poolIds = _getPoolsIds(_seeds);
 
+        address[] memory _managers = ghost_poolManagers[_poolIds[0]];
+
         // Add pool managers in multiple pools - will revert if caller is not a pool admin of any pool id
         (bool _succ,) = targetCall(
             address(allo), 0, abi.encodeWithSelector(IAllo.addPoolManagersInMultiplePools.selector, _poolIds, _managers)
