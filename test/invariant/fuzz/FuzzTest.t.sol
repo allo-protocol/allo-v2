@@ -16,7 +16,5 @@ contract FuzzTest is PropertiesParent {
     }
 
     // This is a good place to include Forge test for debugging purposes
-    function test_forgeDebug() public {
-        handler_createPool(1 ether);
-    }
+    function test_forgeDebug() public {}
 }

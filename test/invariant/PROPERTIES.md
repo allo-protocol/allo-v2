@@ -4,25 +4,25 @@
 
 | id  | property                                                                                                          | covered |
 | --- | :---------------------------------------------------------------------------------------------------------------- | ------- |
-| 1   | one should always be able to pull/push correct (based on strategy) allocation for recipient                       |   []    |
-| 2   | a token allocation never “disappears” (withdraw cannot impact an allocation)                                      |   []    |
-| 3   | an address can only withdraw if has allocation                                                                    |   []    |
-| 4   | profile owner can always create a pool                                                                            |   []    |
-| 5   | profile owner is the only one who can always add/remove/modify profile members (name ⇒ new anchor())              |   []    |
-| 6   | profile owner is the only one who can always initiate a change of profile owner (2 steps)                         |   []    |
-| 7   | profile member can always create a pool                                                                           |   []    |
-| 8   | only profile owner or member can create a pool                                                                    |   []    |
-| 9   | initial admin is always the creator of the pool                                                                   |   []    |
-| 10  | pool admin can always change admin (but not to address(0))                                                        |   []    |
-| 11  | pool admin can always add/remove pool managers                                                                    |   []    |
-| 12  | pool manager can always withdraw within strategy limits/logic                                                     |   []    |
-| 13  | pool manager can always change metadata                                                                           |   []    |
-| 14  | allo owner can always change base fee (flat) and percent flee (./. funding amt) to any arbitrary value (max 100%) |   []    |
-| 15  | allo owner can always change the treasury address/trustred forwarded/etc                                          |   []    |
-| 16  | allo owner can always recover funds from allo contract ( (non-)native token )                                     |   []    |
-| 17  | only funds not allocated can be withdrawn                                                                         |   []    |
-| 18  | anyone can increase fund in a pool, if strategy (hook) logic allows so and if more than base fee                  |   []    |
-| 19  | every deposit/pool creation must take the correct fee on the amount deposited, forwarded to the treasury          |   []    |
+| 1   | one should always be able to pull/push correct (based on strategy) allocation for recipient                       | []      |
+| 2   | a token allocation never “disappears” (withdraw cannot impact an allocation)                                      | []      |
+| 3   | an address can only withdraw if has allocation                                                                    | []      |
+| 4   | profile owner can always create a pool                                                                            | []      |
+| 5   | profile owner is the only one who can always add/remove/modify profile members (name ⇒ new anchor())              | []      |
+| 6   | profile owner is the only one who can always initiate a change of profile owner (2 steps)                         | []      |
+| 7   | profile member can always create a pool                                                                           | []      |
+| 8   | only profile owner or member can create a pool                                                                    | []      |
+| 9   | initial admin is always the creator of the pool                                                                   | []      |
+| 10  | pool admin can always change admin (but not to address(0))                                                        | []      |
+| 11  | pool admin can always add/remove pool managers                                                                    | []      |
+| 12  | pool manager can always withdraw within strategy limits/logic                                                     | []      |
+| 13  | pool manager can always change metadata                                                                           | []      |
+| 14  | allo owner can always change base fee (flat) and percent flee (./. funding amt) to any arbitrary value (max 100%) | []      |
+| 15  | allo owner can always change the treasury address/trustred forwarded/etc                                          | []      |
+| 16  | allo owner can always recover funds from allo contract ( (non-)native token )                                     | []      |
+| 17  | only funds not allocated can be withdrawn                                                                         | []      |
+| 18  | anyone can increase fund in a pool, if strategy (hook) logic allows so and if more than base fee                  | []      |
+| 19  | every deposit/pool creation must take the correct fee on the amount deposited, forwarded to the treasury          | []      |
 
 
 ## Other leads
@@ -54,12 +54,12 @@
 | --------------------------------- | -------- | ---------------------------------------------------------------------------------------------- | ------- |
 | initialize                        | 4b636f72 | initialize(address,address,address,uint256,uint256,address)                                    | NA      |
 | createPoolWithCustomStrategy      | e1007d4a | createPoolWithCustomStrategy(bytes32,address,bytes,address,uint256,(uint256,string),address[]) | []      |
-| createPool                        | 77da8caf | createPool(bytes32,address,bytes,address,uint256,(uint256,string),address[])                   | [x]      |
-| updatePoolMetadata                | 5f9ca138 | updatePoolMetadata(uint256,(uint256,string))                                                   | [x]      |
+| createPool                        | 77da8caf | createPool(bytes32,address,bytes,address,uint256,(uint256,string),address[])                   | [x]     |
+| updatePoolMetadata                | 5f9ca138 | updatePoolMetadata(uint256,(uint256,string))                                                   | [x]     |
 | updateRegistry                    | 1a5da6c8 | updateRegistry(address)                                                                        | []      |
 | updateTreasury                    | 7f51bb1f | updateTreasury(address)                                                                        | []      |
-| updatePercentFee                  | f54fc4a0 | updatePercentFee(uint256)                                                                      | [x]      |
-| updateBaseFee                     | 8e690186 | updateBaseFee(uint256)                                                                         | [x]      |
+| updatePercentFee                  | f54fc4a0 | updatePercentFee(uint256)                                                                      | [x]     |
+| updateBaseFee                     | 8e690186 | updateBaseFee(uint256)                                                                         | [x]     |
 | updateTrustedForwarder            | f90b0311 | updateTrustedForwarder(address)                                                                | []      |
 | addPoolManagers                   | 7025b800 | addPoolManagers(uint256,address[])                                                             | []      |
 | removePoolManagers                | ed8cae16 | removePoolManagers(uint256,address[])                                                          | []      |
@@ -77,7 +77,7 @@
 ## Anchor.sol
 | Function Name | Sighash  | Function Signature             | Handler |
 | ------------- | -------- | ------------------------------ | ------- |
-| execute       | b61d27f6 | execute(address,uint256,bytes) | [x]*     |
+| execute       | b61d27f6 | execute(address,uint256,bytes) | [x]*    |
 * Every call is constrained as either coming from an anchor or an eoa, when coming from an anchor, it is with a valid payload
 
 ## Registry.sol
@@ -92,3 +92,12 @@
 | addMembers                | 5063f361 | addMembers(bytes32,address[])                                    | []      |
 | removeMembers             | e0cf1e4c | removeMembers(bytes32,address[])                                 | []      |
 | recoverFunds              | 24ae6a27 | recoverFunds(address,address)                                    | []      |
+
+## Base strategy
+| Function Name      | Sighash  | Function Signature                          | Handler |
+| ------------------ | -------- | ------------------------------------------- | ------- |
+| increasePoolAmount | f5b0dfb7 | increasePoolAmount(uint256)                 | []      |
+| withdraw           | 69328dec | withdraw(address,uint256,address)           | []      |
+| register           | facfe313 | register(address[],bytes,address)           | []      |
+| allocate           | 5fdfa0e0 | allocate(address[],uint256[],bytes,address) | []      |
+| distribute         | 0a6f0ee9 | distribute(address[],bytes,address)         | []      |
