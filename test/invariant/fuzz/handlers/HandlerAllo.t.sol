@@ -10,6 +10,7 @@ contract HandlerAllo is Setup {
     uint256[] ghost_poolIds;
     mapping(uint256 _poolId => address[] _managers) ghost_poolManagers;
     mapping(uint256 _poolId => address _poolAdmin) ghost_poolAdmins;
+    mapping(uint256 _poolId => address[] _recipients) ghost_recipients;
 
     function handler_createPool(uint256 _msgValue) public {
         // Get the profile ID
@@ -53,7 +54,8 @@ contract HandlerAllo is Setup {
         // Needs at least one pool
         if (ghost_poolIds.length == 0) return;
 
-        _idSeed = _idSeed % ghost_poolIds.length;
+        _idSeed = bound(_idSeed, 0, ghost_poolIds.length - 1);
+
         uint256 poolId = ghost_poolIds[_idSeed];
 
         // Get the profile ID
@@ -126,9 +128,15 @@ contract HandlerAllo is Setup {
 
     function handler_addPoolManagers(
         uint256 _idSeed,
-        address[] calldata _managers
+        uint256 _numberOfManagers
     ) public {
         uint256 _poolId = _pickPoolId(_idSeed);
+        _numberOfManagers = bound(_numberOfManagers, 0, _ghost_actors.length);
+
+        // Gather the managers
+        address[] memory _managers = new address[](_numberOfManagers);
+        for (uint256 i; i < _numberOfManagers; i++)
+            _managers[i] = _ghost_actors[i];
 
         // Add pool managers - will revert if caller is not the pool admin of the pool id
         (bool _succ, ) = targetCall(
@@ -160,75 +168,37 @@ contract HandlerAllo is Setup {
         }
     }
 
-    function handler_addPoolManagersInMultiplePools(
-        uint256[] calldata _seeds
-    ) public {
-        uint256[] memory _poolIds = _pickPoolId(_seeds);
-
-        address[] memory _managers = ghost_poolManagers[_poolIds[0]];
-
-        // Add pool managers in multiple pools - will revert if caller is not a pool admin of any pool id
-        (bool _succ, ) = targetCall(
-            address(allo),
-            0,
-            abi.encodeCall(
-                allo.addPoolManagersInMultiplePools,
-                (_poolIds, _managers)
-            )
-        );
-
-        if (_succ) {
-            for (uint256 _i; _i < _poolIds.length; ++_i) {
-                uint256 _poolId = _poolIds[_i];
-                for (uint256 _j; _j < _managers.length; ++_j) {
-                    ghost_poolManagers[_poolId].push(_managers[_j]);
-                }
-            }
-        }
-    }
-
-    function handler_removePoolManagersInMultiplePools(
-        uint256[] calldata _seeds,
-        address[] calldata _managers
-    ) public {
-        uint256[] memory _poolIds = _pickPoolId(_seeds);
-
-        // Remove pool managers in multiple pools - will revert if caller is not a pool admin of any pool id
-        (bool _succ, ) = targetCall(
-            address(allo),
-            0,
-            abi.encodeCall(
-                allo.removePoolManagersInMultiplePools,
-                (_poolIds, _managers)
-            )
-        );
-
-        if (_succ) {
-            for (uint256 _i; _i < _poolIds.length; ++_i) {
-                uint256 _poolId = _poolIds[_i];
-                delete ghost_poolManagers[_poolId];
-            }
-        }
-    }
-
-    function handler_recoverFunds(address _token, address _recipient) public {
+    function handler_recoverFunds(address _recipient) public {
         // Recover funds - will revert if caller is not the owner
         targetCall(
             address(allo),
             0,
-            abi.encodeCall(allo.recoverFunds, (_token, _recipient))
+            abi.encodeCall(allo.recoverFunds, (address(token), _recipient))
         );
     }
 
     function handler_registerRecipient(
-        uint256 _seed,
-        address[] memory _recipientAddresses,
+        uint256 _idSeed,
+        uint256 _numberOfRecipients,
         bytes memory _data,
         uint256 _msgValue
     ) public {
-        uint256 _poolId = _pickPoolId(_seed);
+        uint256 _poolId = _pickPoolId(_idSeed);
+        _numberOfRecipients = bound(
+            _numberOfRecipients,
+            0,
+            _ghost_actors.length
+        );
+
+        // Gather the recipients
+        address[] memory _recipientAddresses = new address[](
+            _numberOfRecipients
+        );
+        for (uint256 i; i < _numberOfRecipients; i++)
+            _recipientAddresses[i] = _ghost_actors[i];
+
         // Register recipient
-        targetCall(
+        (bool succ, ) = targetCall(
             address(allo),
             _msgValue,
             abi.encodeCall(
@@ -236,32 +206,21 @@ contract HandlerAllo is Setup {
                 (_poolId, _recipientAddresses, _data)
             )
         );
-    }
 
-    function handler_batchRegisterRecipient(
-        uint256[] memory _seeds,
-        address[][] memory _recipientAddresses,
-        bytes[] memory _data
-    ) public {
-        uint256[] memory _poolIds = _pickPoolId(_seeds);
-        // Batch register recipient - will revert if arrays are not of same length
-        targetCall(
-            address(allo),
-            0,
-            abi.encodeCall(
-                allo.batchRegisterRecipient,
-                (_poolIds, _recipientAddresses, _data)
-            )
-        );
+        // todo: double-check there is no way a recipient is registered twice
+        if (succ)
+            for (uint256 i; i < _recipientAddresses.length; i++)
+                ghost_recipients[_poolId].push(_recipientAddresses[i]);
     }
 
     function handler_fundPool(
-        uint256 _seed,
+        uint256 _idSeed,
         uint256 _amount,
         uint256 _msgValue
     ) public {
-        uint256 _poolId = _pickPoolId(_seed);
+        uint256 _poolId = _pickPoolId(_idSeed);
         uint256 _previousBalance = token.balanceOf(address(msg.sender));
+
         if (_previousBalance > 0) {
             _amount = bound(_amount, 0, type(uint256).max - _previousBalance);
         }
@@ -278,14 +237,30 @@ contract HandlerAllo is Setup {
         );
     }
 
+    // _seedAmounts at 50 as it is not likely we'll handle 50 actors at the same time (update if so)
     function handler_allocate(
-        uint256 _seed,
-        address[] memory _recipients,
-        uint256[] memory _amounts,
+        uint256 _idSeed,
+        uint256[50] memory _seedAmounts,
         bytes memory _data,
         uint256 _msgValue
     ) public {
-        uint256 _poolId = _pickPoolId(_seed);
+        uint256 _poolId = _pickPoolId(_idSeed);
+
+        address[] memory _recipients = ghost_recipients[_poolId];
+        uint256[] memory _amounts = new uint256[](_recipients.length);
+
+        // Fund the allocator/sender
+        for (uint256 i; i < _recipients.length; i++) {
+            _amounts[i] = _seedAmounts[i];
+
+            if (_amounts[i] > 0) {
+                FuzzERC20(address(token)).mint(
+                    address(msg.sender),
+                    _amounts[i]
+                );
+            }
+        }
+
         // Allocate - allocate to a recipient or multiple recipients
         targetCall(
             address(allo),
@@ -297,42 +272,28 @@ contract HandlerAllo is Setup {
         );
     }
 
-    function handler_batchAllocate(
-        uint256[] calldata _seeds,
-        address[][] calldata _recipients,
-        uint256[][] calldata _amounts,
-        uint256[] calldata _values,
-        bytes[] memory _datas,
-        uint256 _msgValue
-    ) public {
-        uint256[] memory _poolIds = _pickPoolId(_seeds);
-        // Batch allocate - allocate to multiple pools and recipients, will revert if arrays are not of same length
-        targetCall(
-            address(allo),
-            _msgValue,
-            abi.encodeCall(
-                allo.batchAllocate,
-                (_poolIds, _recipients, _amounts, _values, _datas)
-            )
-        );
-    }
-
     function handler_distribute(
-        uint256 _seed,
+        uint256 _idSeed,
         address[] memory _recipientIds,
         bytes memory _data
     ) public {
-        uint256 _poolId = _pickPoolId(_seed);
+        uint256 _poolId = _pickPoolId(_idSeed);
+
         // Distribute - distribute to a recipient or multiple recipients
         targetCall(
             address(allo),
             0,
-            abi.encodeCall(allo.distribute, (_poolId, _recipientIds, _data))
+            abi.encodeCall(
+                allo.distribute,
+                (_poolId, ghost_recipients[_idSeed], _data)
+            )
         );
     }
 
-    function handler_changeAdmin(uint256 _seed, address _newAdmin) public {
+    function handler_changeAdmin(uint256 _seed, uint256 _seedAdmin) public {
         uint256 _poolId = _pickPoolId(_seed);
+        address _newAdmin = _ghost_actors[_seedAdmin % _ghost_actors.length];
+
         // Change admin - will revert if caller is not the pool admin
         targetCall(
             address(allo),
@@ -341,31 +302,8 @@ contract HandlerAllo is Setup {
         );
     }
 
-    function handler_createPoolWithCustomStrategy(uint256 _msgValue) public {
-        // Get the profile ID
-        IRegistry.Profile memory _profile = registry.getProfileByAnchor(
-            _ghost_anchorOf[msg.sender]
-        );
-
-        // Avoid EOA
-        if (_profile.anchor == address(0)) revert("EOA");
-
-        targetCall(
-            address(allo),
-            _msgValue,
-            abi.encodeCall(
-                allo.createPoolWithCustomStrategy,
-                (
-                    _profile.id,
-                    address(strategy_directAllocation),
-                    bytes(""),
-                    address(token),
-                    0,
-                    _profile.metadata,
-                    new address[](0)
-                )
-            )
-        );
+    function handler_createPoolWithCustomStrategy(uint256 _msgValue) internal {
+        // Skipped for now
     }
 
     function _pickPoolId(uint256 _idSeed) internal view returns (uint256) {

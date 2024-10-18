@@ -30,7 +30,7 @@
     "blockGasLimit": 125000000,
     "transactionGasLimit": 12500000,
     "testing": {
-      "stopOnFailedTest": false,
+      "stopOnFailedTest": true,
       "stopOnFailedContractMatching": false,
       "stopOnNoTests": true,
       "testAllContracts": false,

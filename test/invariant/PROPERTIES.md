@@ -53,7 +53,7 @@
 | Function Name                     | Sighash  | Function Signature                                                                             | Handler |
 | --------------------------------- | -------- | ---------------------------------------------------------------------------------------------- | ------- |
 | initialize                        | 4b636f72 | initialize(address,address,address,uint256,uint256,address)                                    | NA      |
-| createPoolWithCustomStrategy      | e1007d4a | createPoolWithCustomStrategy(bytes32,address,bytes,address,uint256,(uint256,string),address[]) | [x]      |
+| createPoolWithCustomStrategy      | e1007d4a | createPoolWithCustomStrategy(bytes32,address,bytes,address,uint256,(uint256,string),address[]) | []      |
 | createPool                        | 77da8caf | createPool(bytes32,address,bytes,address,uint256,(uint256,string),address[])                   | [x]      |
 | updatePoolMetadata                | 5f9ca138 | updatePoolMetadata(uint256,(uint256,string))                                                   | [x]      |
 | updateRegistry                    | 1a5da6c8 | updateRegistry(address)                                                                        | [x]      |
@@ -63,16 +63,18 @@
 | updateTrustedForwarder            | f90b0311 | updateTrustedForwarder(address)                                                                | [x]      |
 | addPoolManagers                   | 7025b800 | addPoolManagers(uint256,address[])                                                             | [x]      |
 | removePoolManagers                | ed8cae16 | removePoolManagers(uint256,address[])                                                          | [x]      |
-| addPoolManagersInMultiplePools    | 2d50cce5 | addPoolManagersInMultiplePools(uint256[],address[])                                            | [x]      |
+| addPoolManagersInMultiplePools    | 2d50cce5 | addPoolManagersInMultiplePools(uint256[],address[])                                            | *      |
 | removePoolManagersInMultiplePools | cf9d5057 | removePoolManagersInMultiplePools(uint256[],address[])                                         | [x]      |
 | recoverFunds                      | 24ae6a27 | recoverFunds(address,address)                                                                  | [x]      |
 | registerRecipient                 | 1919ede6 | registerRecipient(uint256,address[],bytes)                                                     | [x]      |
-| batchRegisterRecipient            | 4653ebed | batchRegisterRecipient(uint256[],address[][],bytes[])                                          | [x]      |
+| batchRegisterRecipient            | 4653ebed | batchRegisterRecipient(uint256[],address[][],bytes[])                                          | *      |
 | fundPool                          | 5acd6fac | fundPool(uint256,uint256)                                                                      | [x]      |
 | allocate                          | 2037568f | allocate(uint256,address[],uint256[],bytes)                                                    | [x]      |
-| batchAllocate                     | da49d0c9 | batchAllocate(uint256[],address[][],uint256[][],uint256[],bytes[])                             | [x]      |
+| batchAllocate                     | da49d0c9 | batchAllocate(uint256[],address[][],uint256[][],uint256[],bytes[])                             | *      |
 | distribute                        | 3a5fbd92 | distribute(uint256,address[],bytes)                                                            | [x]      |
 | changeAdmin                       | 6cc5af29 | changeAdmin(uint256,address)                                                                   | [x]      |
+* BatchX are convenience function. Same state can be reached by using the non-batched fn X times
+
 
 ## Anchor.sol
 | Function Name | Sighash  | Function Signature             | Handler |
