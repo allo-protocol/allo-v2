@@ -39,10 +39,7 @@ interface IStdCheats {
     function etch(address who, bytes calldata code) external;
 
     // Signs data
-    function sign(
-        uint256 privateKey,
-        bytes32 digest
-    ) external returns (uint8 v, bytes32 r, bytes32 s);
+    function sign(uint256 privateKey, bytes32 digest) external returns (uint8 v, bytes32 r, bytes32 s);
 
     // Computes address for a given private key
     function addr(uint256 privateKey) external returns (address);
