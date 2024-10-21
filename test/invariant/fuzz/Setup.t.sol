@@ -10,17 +10,16 @@ import {IRegistry} from "contracts/core/interfaces/IRegistry.sol";
 import {DirectAllocationStrategy} from "contracts/strategies/examples/direct-allocation/DirectAllocation.sol";
 
 import {Actors} from "./helpers/Actors.t.sol";
+import {Pools} from "./helpers/Pools.t.sol";
 import {Utils} from "./helpers/Utils.t.sol";
 import {FuzzERC20, ERC20} from "./helpers/FuzzERC20.sol";
 
-contract Setup is Actors {
+contract Setup is Actors, Pools {
     uint256 percentFee;
     uint256 baseFee;
 
     Allo allo;
     Registry registry;
-
-    DirectAllocationStrategy strategy_directAllocation;
 
     ERC20 token;
 
@@ -58,8 +57,10 @@ contract Setup is Actors {
             forwarder
         );
 
-        // Deploy base strategy
-        strategy_directAllocation = new DirectAllocationStrategy(address(allo));
+        // Deploy strategies implementations
+        _initImplementations(address(allo));
+
+        // strategy_directAllocation = new DirectAllocationStrategy(address(allo));
 
         // Deploy token
         token = ERC20(address(new FuzzERC20()));

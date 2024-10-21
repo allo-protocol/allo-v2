@@ -17,10 +17,10 @@ contract HandlerStrategy is HandlerAllo {
 
         // Withdraw
         (bool succ, ) = targetCall(
-            address(allo),
+            address(_pool.strategy),
             0,
             abi.encodeCall(
-                strategy_directAllocation.withdraw,
+                BaseStrategy.withdraw,
                 (_pool.token, _amount, _recipient)
             )
         );

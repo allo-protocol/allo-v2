@@ -86,14 +86,15 @@
 | Function Name             | Sighash  | Function Signature                                               | Handler |
 | ------------------------- | -------- | ---------------------------------------------------------------- | ------- |
 | initialize                | c4d66de8 | initialize(address)                                              | NA      |
-| createProfile             | 3a92f65f | createProfile(uint256,string,(uint256,string),address,address[]) | []      |
-| updateProfileName         | cf189ff2 | updateProfileName(bytes32,string)                                | []      |
-| updateProfileMetadata     | ac402839 | updateProfileMetadata(bytes32,(uint256,string))                  | []      |
-| updateProfilePendingOwner | 3b66dacd | updateProfilePendingOwner(bytes32,address)                       | []      |
-| acceptProfileOwnership    | 2497f3c6 | acceptProfileOwnership(bytes32)                                  | []      |
-| addMembers                | 5063f361 | addMembers(bytes32,address[])                                    | []      |
-| removeMembers             | e0cf1e4c | removeMembers(bytes32,address[])                                 | []      |
-| recoverFunds              | 24ae6a27 | recoverFunds(address,address)                                    | []      |
+| createProfile             | 3a92f65f | createProfile(uint256,string,(uint256,string),address,address[]) | [x]      |
+| updateProfileName         | cf189ff2 | updateProfileName(bytes32,string)                                | [x]      |
+| updateProfileMetadata     | ac402839 | updateProfileMetadata(bytes32,(uint256,string))                  | [x]      |
+| updateProfilePendingOwner | 3b66dacd | updateProfilePendingOwner(bytes32,address)                       | [x]      |
+| acceptProfileOwnership    | 2497f3c6 | acceptProfileOwnership(bytes32)                                  | [x]      |
+| addMembers                | 5063f361 | addMembers(bytes32,address[])                                    | [x]      |
+| removeMembers             | e0cf1e4c | removeMembers(bytes32,address[])                                 | [x]      |
+| recoverFunds              | 24ae6a27 | recoverFunds(address,address)                                    | []*      |
+* via Allo.sol
 
 ## Base strategy
 | Function Name      | Sighash  | Function Signature                          | Handler |
