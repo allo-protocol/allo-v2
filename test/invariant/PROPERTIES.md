@@ -9,7 +9,7 @@
 | 3   | an address can only withdraw if has allocation                                                                    | []      |
 | 4   | profile owner can always create a pool                                                                            | []      |
 | 5   | profile owner is the only one who can always add/remove/modify profile members (name ⇒ new anchor())              | [x]      |
-| 6   | profile owner is the only one who can always initiate a change of profile owner (2 steps)                         | []      |
+| 6   | profile owner is the only one who can always initiate a change of profile owner (2 steps)                         | [x]      |
 | 7   | profile member can always create a pool                                                                           | []      |
 | 8   | only profile owner or member can create a pool                                                                    | []      |
 | 9   | initial admin is always the creator of the pool                                                                   | []      |
