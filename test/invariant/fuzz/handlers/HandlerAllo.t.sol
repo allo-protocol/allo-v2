@@ -295,11 +295,14 @@ contract HandlerAllo is Setup {
         address _newAdmin = _ghost_actors[_seedAdmin % _ghost_actors.length];
 
         // Change admin - will revert if caller is not the pool admin
-        targetCall(
+        (bool success,) = targetCall(
             address(allo),
             0,
             abi.encodeCall(allo.changeAdmin, (_poolId, _newAdmin))
         );
+        if (success) {
+            ghost_poolAdmins[_poolId] = _newAdmin;
+        }
     }
 
     function handler_createPoolWithCustomStrategy(uint256 _msgValue) internal {
