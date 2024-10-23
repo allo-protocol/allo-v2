@@ -8,7 +8,7 @@
 | 2   | a token allocation never “disappears” (withdraw cannot impact an allocation)                                      | []      |
 | 3   | an address can only withdraw if has allocation                                                                    | []      |
 | 4   | profile owner can always create a pool                                                                            | []      |
-| 5   | profile owner is the only one who can always add/remove/modify profile members (name ⇒ new anchor())              | []      |
+| 5   | profile owner is the only one who can always add/remove/modify profile members (name ⇒ new anchor())              | [x]      |
 | 6   | profile owner is the only one who can always initiate a change of profile owner (2 steps)                         | []      |
 | 7   | profile member can always create a pool                                                                           | []      |
 | 8   | only profile owner or member can create a pool                                                                    | []      |

@@ -44,6 +44,7 @@ contract Actors is Utils {
     ];
 
     mapping(address actor => address anchor) internal _ghost_anchorOf;
+    mapping(bytes32 profileId => address actor) internal _ghost_profileIdToActor;
 
     // switch between using the anchor or an EOA as msg.sender for the call to target
     bool internal _usingAnchor;
@@ -99,7 +100,13 @@ contract Actors is Utils {
         }
     }
 
-    function _addAnchorToActor(address _actor, address _anchor) internal {
+    function _addAnchorToActor(address _actor, address _anchor, bytes32 _profileId) internal {
         _ghost_anchorOf[_actor] = _anchor;
+        _ghost_profileIdToActor[_profileId] = _actor;
+    }
+
+    function _removeAnchorFromActor(address _actor, bytes32 _profileId) internal {
+        delete _ghost_anchorOf[_actor];
+        delete _ghost_profileIdToActor[_profileId];
     }
 }

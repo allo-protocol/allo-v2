@@ -76,7 +76,8 @@ contract Setup is Actors {
 
             _addAnchorToActor(
                 _ghost_actors[i],
-                registry.getProfileById(_id).anchor
+                registry.getProfileById(_id).anchor,
+                _id
             );
         }
     }

@@ -79,12 +79,23 @@ contract HandlerRegistry is Setup {
     function handler_acceptProfileOwnership(uint256 _profileSeed) public {
         bytes32 _profileId = _ghost_pendingOwnershipChange[_profileSeed % _ghost_pendingOwnershipChange.length];
 
+        if (_profileId == 0) {
+            return;
+        }
+
         // Get the profile ID
         IRegistry.Profile memory profile = registry.getProfileById(_profileId);
 
         (bool succ, bytes memory ret) = targetCall(
             address(registry), 0, abi.encodeWithSelector(registry.acceptProfileOwnership.selector, profile.id)
         );
+
+        if (succ) {
+            address _previousActor = _ghost_profileIdToActor[profile.id];
+            _removeAnchorFromActor(_previousActor, profile.id);
+            _addAnchorToActor(msg.sender, profile.anchor, profile.id);
+            delete _ghost_pendingOwnershipChange[_profileSeed % _ghost_pendingOwnershipChange.length];
+        }
     }
 
     function handler_addMembers(uint256 _seed) public {

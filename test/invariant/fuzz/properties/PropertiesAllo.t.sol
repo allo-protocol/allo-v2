@@ -3,7 +3,7 @@ pragma solidity ^0.8.19;
 
 import {HandlersParent} from '../handlers/HandlersParent.t.sol';
 import {IAllo, Allo, Metadata} from 'contracts/core/Allo.sol';
-import {Registry} from 'contracts/core/Registry.sol';
+import {IRegistry, Registry} from 'contracts/core/Registry.sol';
 
 contract PropertiesAllo is HandlersParent {
     ///@custom:property-id 1
@@ -18,11 +18,102 @@ contract PropertiesAllo is HandlersParent {
     ///@custom:property-id 4
     ///@custom:property profile owner can always create a pool
 
-    ///@custom:property-id 5
-    ///@custom:property profile owner is the only one who can always add/remove/modify profile members (name ⇒ new anchor())
+    ///@custom:property-id 5-a
+    ///@custom:property profile owner is the only one who can always add profile members (name ⇒ new anchor())
+    function prop_onlyProfileOwnerCanAddProfileMember(address _newMember, address _notOwner) public {
+        // Get the profile ID
+        IRegistry.Profile memory _profile = registry.getProfileByAnchor(_ghost_anchorOf[msg.sender]);
+
+        if (_profile.anchor == address(0) || _newMember == _profile.owner || registry.hasRole(_profile.id, _newMember) || _notOwner == _profile.owner) {
+            return;
+        }
+
+        address[] memory _members = new address[](1);
+        _members[0] = _newMember;
+
+        // Check that owner is the only one who can add members
+        vm.prank(_profile.owner);
+        try registry.addMembers(_profile.id, _members) {
+            assertTrue(registry.hasRole(_profile.id, _newMember), 'addMembers failed');
+            _ghost_roleMembers[_profile.id].push(_newMember);
+        } catch Error(string memory) {
+            assertTrue(_newMember == address(0), 'addMembers failed error');
+        } catch {
+            assertTrue(_newMember == address(0), 'addMembers failed failure');
+        }
+
+        // Check that non-owner cannot add members
+        vm.prank(_notOwner);
+        try registry.addMembers(_profile.id, _members) {
+            fail('addMembers only owner should be able to add members');
+        } catch Error(string memory) {
+        } catch {
+        }
+    }
+
+    ///@custom:property-id 5-b
+    ///@custom:property profile owner is the only one who can always remove profile members (name ⇒ new anchor())
+      function prop_onlyProfileOwnerCanRemoveProfileMembers(address _notOwner) public {
+        // Get the profile ID
+        IRegistry.Profile memory _profile = registry.getProfileByAnchor(_ghost_anchorOf[msg.sender]);
+
+        if (_profile.anchor == address(0) || _notOwner == _profile.owner || _ghost_roleMembers[_profile.id].length == 0) {
+            return;
+        }
+
+        address _memberToRemove = _ghost_roleMembers[_profile.id][_ghost_roleMembers[_profile.id].length - 1];
+
+        address[] memory _members = new address[](1);
+        _members[0] = _memberToRemove;
+
+        // Check that non-owner cannot add members
+        vm.prank(_notOwner);
+        try registry.removeMembers(_profile.id, _members) {
+            fail('removeMembers only owner should be able to remove members');
+        } catch Error(string memory) {
+        } catch {
+        }
+
+        // Check that owner is the only one who can add members
+        vm.prank(_profile.owner);
+        try registry.removeMembers(_profile.id, _members) {
+            assertTrue(!registry.hasRole(_profile.id, _memberToRemove), 'removeMembers failed');
+            _ghost_roleMembers[_profile.id].pop();
+        } catch Error(string memory) {
+            fail('removeMembers failed error');
+        } catch {
+            fail('removeMembers failed failure');
+        }
+    }
 
     ///@custom:property-id 6
     ///@custom:property profile owner is the only one who can always initiate a change of profile owner (2 steps)
+    function prop_onlyProfileOwnerCanInitiateChangeOfProfileOwner(address _newOwner, address _notOwner) public {
+        // Get the profile ID
+        IRegistry.Profile memory _profile = registry.getProfileByAnchor(_ghost_anchorOf[msg.sender]);
+
+        if (_profile.anchor == address(0) || _notOwner == _profile.owner) {
+            return;
+        }
+
+        // Check that non-owner cannot initiate change of owner
+        vm.prank(_notOwner);
+        try registry.updateProfilePendingOwner(_profile.id, _newOwner) {
+            fail('updateProfilePendingOwner only owner should be able to initiate change of owner');
+        } catch Error(string memory) {
+        } catch {
+        }
+
+        // Check that owner is the only one who can initiate change of owner
+        vm.prank(_profile.owner);
+        try registry.updateProfilePendingOwner(_profile.id, _newOwner) {
+            assertTrue(registry.profileIdToPendingOwner(_profile.id) == _newOwner, 'updateProfilePendingOwner failed');
+        } catch Error(string memory) {
+            fail('updateProfilePendingOwner failed error');
+        } catch {
+            fail('updateProfilePendingOwner failed failure');
+        }
+    }
 
     ///@custom:property-id 7
     ///@custom:property profile member can always create a pool
@@ -217,7 +308,16 @@ contract PropertiesAllo is HandlersParent {
         vm.prank(allo.owner());
         try allo.updateRegistry(_newRegistry) {
             assertEq(address(allo.getRegistry()), _newRegistry, 'updateRegistry failed');
-            registry = Registry(_newRegistry);
+
+            // rollback the change to use the original registry
+            vm.prank(allo.owner());
+            try allo.updateRegistry(address(registry)) {
+                assertEq(address(allo.getRegistry()), address(registry), 'updateRegistry rollback failed');
+            } catch Error(string memory) {
+                fail('updateRegistry rollback unexpected error');
+            } catch {
+                fail('updateRegistry rollback unexpected failure');
+            }
         } catch Error(string memory) {
             assertEq(_newRegistry, address(0), 'updateRegistry unexpected error');
         } catch {
