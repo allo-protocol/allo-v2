@@ -13,12 +13,12 @@
 | 7   | profile member can always create a pool                                                                           | []      |
 | 8   | only profile owner or member can create a pool                                                                    | []      |
 | 9   | initial admin is always the creator of the pool                                                                   | []      |
-| 10  | pool admin can always change admin (but not to address(0))                                                        | []      |
-| 11  | pool admin can always add/remove pool managers                                                                    | []      |
+| 10  | pool admin can always change admin (but not to address(0))                                                        | [x]      |
+| 11  | pool admin can always add/remove pool managers                                                                    | [x]      |
 | 12  | pool manager can always withdraw within strategy limits/logic                                                     | []      |
-| 13  | pool manager can always change metadata                                                                           | []      |
-| 14  | allo owner can always change base fee (flat) and percent flee (./. funding amt) to any arbitrary value (max 100%) | []      |
-| 15  | allo owner can always change the treasury address/trustred forwarded/etc                                          | []      |
+| 13  | pool manager can always change metadata                                                                           | [x]      |
+| 14  | allo owner can always change base fee (flat) and percent flee (./. funding amt) to any arbitrary value (max 100%) | [x]      |
+| 15  | allo owner can always change the treasury address/trustred forwarded/etc                                          | [x]      |
 | 16  | allo owner can always recover funds from allo contract ( (non-)native token )                                     | []      |
 | 17  | only funds not allocated can be withdrawn                                                                         | []      |
 | 18  | anyone can increase fund in a pool, if strategy (hook) logic allows so and if more than base fee                  | []      |
