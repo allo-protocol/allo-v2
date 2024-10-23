@@ -3,7 +3,7 @@ pragma solidity ^0.8.19;
 
 import {Setup} from "../Setup.t.sol";
 import {IRegistry} from "contracts/core/Registry.sol";
-import {Allo, Metadata} from "contracts/core/Allo.sol";
+import {IAllo, Allo, Metadata} from "contracts/core/Allo.sol";
 import {FuzzERC20} from "../helpers/FuzzERC20.sol";
 
 contract HandlerAllo is Setup {
