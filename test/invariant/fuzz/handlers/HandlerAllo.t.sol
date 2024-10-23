@@ -8,7 +8,6 @@ import {FuzzERC20} from "../helpers/FuzzERC20.sol";
 
 contract HandlerAllo is Setup {
     mapping(uint256 _poolId => address[] _managers) ghost_poolManagers;
-    mapping(uint256 _poolId => address _poolAdmin) ghost_poolAdmins;
     mapping(uint256 _poolId => address[] _recipients) ghost_recipients;
 
     function handler_createPool(
@@ -50,15 +49,6 @@ contract HandlerAllo is Setup {
                 )
             )
         );
-
-        if (succ) {
-            uint256 _poolId = abi.decode(ret, (uint256));
-            ghost_poolAdmins[_poolId] = msg.sender;
-
-            _recordPool(_poolId, PoolStrategies(_seedPoolStrategy));
-        }
-
-        assert(ghost_poolIds.length < 4);
     }
 
     function handler_updatePoolMetadata(

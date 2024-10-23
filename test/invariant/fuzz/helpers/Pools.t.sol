@@ -29,6 +29,8 @@ contract Pools is Utils {
     }
 
     uint256[] internal ghost_poolIds;
+    mapping(uint256 _poolId => address _poolAdmin) ghost_poolAdmins;
+
     // mapping(uint256 _poolId => PoolStrategies _strategy) internal _poolStrategy;
 
     mapping(PoolStrategies _strategy => address _implementation)
@@ -67,8 +69,7 @@ contract Pools is Utils {
 
     // reverse lookup pool id -> strategy type
     function _poolStrategy(uint256 _poolId) internal returns (PoolStrategies) {
-        IAllo.Pool memory _pool = allo.getPool(ghost_poolIds[_poolId]);
-
+        IAllo.Pool memory _pool = allo.getPool(_poolId);
         for (uint256 i; i < uint256(type(PoolStrategies).max); i++)
             if (
                 _strategyImplementations[PoolStrategies(i)] ==
