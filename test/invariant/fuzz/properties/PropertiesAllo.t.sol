@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.19;
 
-import {HandlersParent} from '../handlers/HandlersParent.t.sol';
-import {IAllo, Allo, Metadata} from 'contracts/core/Allo.sol';
-import {IRegistry, Registry} from 'contracts/core/Registry.sol';
+import {HandlersParent} from "../handlers/HandlersParent.t.sol";
+import {IAllo, Allo, Metadata} from "contracts/core/Allo.sol";
+import {IRegistry, Registry} from "contracts/core/Registry.sol";
 
 contract PropertiesAllo is HandlersParent {
     ///@custom:property-id 1
@@ -20,98 +20,82 @@ contract PropertiesAllo is HandlersParent {
 
     ///@custom:property-id 5-a
     ///@custom:property profile owner is the only one who can always add profile members (name ⇒ new anchor())
-    function prop_onlyProfileOwnerCanAddProfileMember(address _newMember, address _notOwner) public {
+    function prop_onlyProfileOwnerCanAddProfileMember(address _newMember) public {
         // Get the profile ID
         IRegistry.Profile memory _profile = registry.getProfileByAnchor(_ghost_anchorOf[msg.sender]);
-
-        if (_profile.anchor == address(0) || _newMember == _profile.owner || registry.hasRole(_profile.id, _newMember) || _notOwner == _profile.owner) {
-            return;
-        }
 
         address[] memory _members = new address[](1);
         _members[0] = _newMember;
 
-        // Check that owner is the only one who can add members
-        vm.prank(_profile.owner);
-        try registry.addMembers(_profile.id, _members) {
-            assertTrue(registry.hasRole(_profile.id, _newMember), 'addMembers failed');
-            _ghost_roleMembers[_profile.id].push(_newMember);
-        } catch Error(string memory) {
-            assertTrue(_newMember == address(0), 'addMembers failed error');
-        } catch {
-            assertTrue(_newMember == address(0), 'addMembers failed failure');
-        }
+        (bool _success,) = targetCallDefault(
+            address(registry), 0, abi.encodeWithSelector(registry.addMembers.selector, _profile.id, _members)
+        );
 
-        // Check that non-owner cannot add members
-        vm.prank(_notOwner);
-        try registry.addMembers(_profile.id, _members) {
-            fail('addMembers only owner should be able to add members');
-        } catch Error(string memory) {
-        } catch {
+        if (msg.sender == _profile.owner) {
+            if (_success) {
+                assertTrue(registry.hasRole(_profile.id, _newMember), "addMembers failed");
+                _ghost_roleMembers[_profile.id].push(_newMember);
+            } else {
+                assertTrue(_newMember == address(0), "addMembers failed");
+            }
+        } else {
+            if (_success) {
+                fail("addMembers only owner should be able to add members");
+            }
         }
     }
 
     ///@custom:property-id 5-b
     ///@custom:property profile owner is the only one who can always remove profile members (name ⇒ new anchor())
-      function prop_onlyProfileOwnerCanRemoveProfileMembers(address _notOwner) public {
+    function prop_onlyProfileOwnerCanRemoveProfileMembers() public {
         // Get the profile ID
         IRegistry.Profile memory _profile = registry.getProfileByAnchor(_ghost_anchorOf[msg.sender]);
-
-        if (_profile.anchor == address(0) || _notOwner == _profile.owner || _ghost_roleMembers[_profile.id].length == 0) {
-            return;
-        }
-
         address _memberToRemove = _ghost_roleMembers[_profile.id][_ghost_roleMembers[_profile.id].length - 1];
-
         address[] memory _members = new address[](1);
         _members[0] = _memberToRemove;
 
-        // Check that non-owner cannot add members
-        vm.prank(_notOwner);
-        try registry.removeMembers(_profile.id, _members) {
-            fail('removeMembers only owner should be able to remove members');
-        } catch Error(string memory) {
-        } catch {
-        }
+        (bool _success,) = targetCallDefault(
+            address(registry), 0, abi.encodeWithSelector(registry.removeMembers.selector, _profile.id, _members)
+        );
 
-        // Check that owner is the only one who can add members
-        vm.prank(_profile.owner);
-        try registry.removeMembers(_profile.id, _members) {
-            assertTrue(!registry.hasRole(_profile.id, _memberToRemove), 'removeMembers failed');
-            _ghost_roleMembers[_profile.id].pop();
-        } catch Error(string memory) {
-            fail('removeMembers failed error');
-        } catch {
-            fail('removeMembers failed failure');
+        if (msg.sender == _profile.owner) {
+            if (_success) {
+                assertTrue(!registry.hasRole(_profile.id, _memberToRemove), "removeMembers failed");
+                _ghost_roleMembers[_profile.id].pop();
+            } else {
+                assertTrue(_memberToRemove == address(0), "removeMembers failed");
+            }
+        } else {
+            if (_success) {
+                fail("removeMembers only owner should be able to remove members");
+            }
         }
     }
 
     ///@custom:property-id 6
     ///@custom:property profile owner is the only one who can always initiate a change of profile owner (2 steps)
-    function prop_onlyProfileOwnerCanInitiateChangeOfProfileOwner(address _newOwner, address _notOwner) public {
+    function prop_onlyProfileOwnerCanInitiateChangeOfProfileOwner(address _newOwner) public {
         // Get the profile ID
         IRegistry.Profile memory _profile = registry.getProfileByAnchor(_ghost_anchorOf[msg.sender]);
 
-        if (_profile.anchor == address(0) || _notOwner == _profile.owner) {
-            return;
-        }
+        (bool _success,) = targetCallDefault(
+            address(registry),
+            0,
+            abi.encodeWithSelector(registry.updateProfilePendingOwner.selector, _profile.id, _newOwner)
+        );
 
-        // Check that non-owner cannot initiate change of owner
-        vm.prank(_notOwner);
-        try registry.updateProfilePendingOwner(_profile.id, _newOwner) {
-            fail('updateProfilePendingOwner only owner should be able to initiate change of owner');
-        } catch Error(string memory) {
-        } catch {
-        }
-
-        // Check that owner is the only one who can initiate change of owner
-        vm.prank(_profile.owner);
-        try registry.updateProfilePendingOwner(_profile.id, _newOwner) {
-            assertTrue(registry.profileIdToPendingOwner(_profile.id) == _newOwner, 'updateProfilePendingOwner failed');
-        } catch Error(string memory) {
-            fail('updateProfilePendingOwner failed error');
-        } catch {
-            fail('updateProfilePendingOwner failed failure');
+        if (msg.sender == _profile.owner) {
+            if (_success) {
+                assertTrue(
+                    registry.profileIdToPendingOwner(_profile.id) == _newOwner, "updateProfilePendingOwner failed"
+                );
+            } else {
+                assertTrue(_newOwner == address(0), "updateProfilePendingOwner failed");
+            }
+        } else {
+            if (_success) {
+                fail("updateProfilePendingOwner only owner should be able to initiate change of owner");
+            }
         }
     }
 
@@ -131,52 +115,54 @@ contract PropertiesAllo is HandlersParent {
         uint256 _poolId = ghost_poolIds[_idSeed];
         address _admin = ghost_poolAdmins[_poolId];
 
-        bytes32 _poolAdminRole = keccak256(abi.encodePacked(_poolId, 'admin'));
+        bytes32 _poolAdminRole = keccak256(abi.encodePacked(_poolId, "admin"));
 
-        vm.prank(_admin);
-        try allo.changeAdmin(_poolId, _newAdmin) {
-            if (_newAdmin != _admin) {
-                assertTrue(!allo.hasRole(_poolAdminRole, _admin), 'changeAdmin failed remove old admin');
+        (bool _success,) =
+            targetCallDefault(address(allo), 0, abi.encodeWithSelector(allo.changeAdmin.selector, _poolId, _newAdmin));
+
+        if (msg.sender == _admin) {
+            if (_success) {
+                if (_newAdmin != _admin) {
+                    assertTrue(!allo.hasRole(_poolAdminRole, _admin), "changeAdmin failed remove old admin");
+                }
+                assertTrue(allo.hasRole(_poolAdminRole, _newAdmin), "changeAdmin failed set new admin");
+                ghost_poolAdmins[_poolId] = _newAdmin;
+            } else {
+                assertTrue(_newAdmin == address(0), "changeAdmin failed");
             }
-            assertTrue(allo.hasRole(_poolAdminRole, _newAdmin), 'changeAdmin failed set new admin');
-            ghost_poolAdmins[_poolId] = _newAdmin;
-        } catch Error(string memory) {
-            // should only fail if _newAdmin is address(0)
-            assertEq(_newAdmin, address(0), 'changeAdmin unexpected error');
-        } catch {
-            // should only fail if _newAdmin is address(0)
-            assertEq(_newAdmin, address(0), 'changeAdmin unexpected failure');
+        } else {
+            if (_success) {
+                fail("changeAdmin only admin should be able to change admin");
+            }
         }
     }
 
     ///@custom:property-id 11-a
-    ///@custom:property pool admin can always add/remove pool managers
+    ///@custom:property pool admin can always add
     function prop_poolAdminCanAlwaysAddManagers(uint256 _idSeed, address _newManager) public {
         _idSeed = bound(_idSeed, 0, ghost_poolIds.length - 1);
         uint256 _poolId = ghost_poolIds[_idSeed];
         address _admin = ghost_poolAdmins[_poolId];
 
-        if (_admin == address(0) || _newManager == address(0)) {
-            return;
-        }
-
-        bytes32 _poolManagerRole = bytes32(_poolId);
-
-        if (allo.hasRole(_poolManagerRole, _newManager)) {
-            return;
-        }
-
         address[] memory _managers = new address[](1);
         _managers[0] = _newManager;
 
-        vm.prank(_admin);
-        try allo.addPoolManagers(_poolId, _managers) {
-            assertTrue(allo.hasRole(_poolManagerRole, _newManager), 'addPoolManagers failed');
-            ghost_poolManagers[_poolId].push(_newManager);
-        } catch Error(string memory) {
-            fail('addPoolManager unexpected error');
-        } catch {
-            fail('addPoolManager unexpected failure');
+        bytes32 _poolManagerRole = bytes32(_poolId);
+
+        (bool _success,) =
+            targetCallDefault(address(allo), 0, abi.encodeWithSelector(allo.addPoolManagers.selector, _poolId, _managers));
+
+        if (msg.sender == _admin) {
+            if (_success) {
+                assertTrue(allo.hasRole(_poolManagerRole, _newManager), "addPoolManagers failed");
+                ghost_poolManagers[_poolId].push(_newManager);
+            } else {
+                assertTrue(_newManager == address(0), "addPoolManager failed");
+            }
+        } else {
+            if (_success) {
+                fail("addPoolManager only admin should be able to add managers");
+            }
         }
     }
 
@@ -188,30 +174,27 @@ contract PropertiesAllo is HandlersParent {
         _managerIndex = bound(_managerIndex, 0, ghost_poolManagers[_poolId].length - 1);
         address _admin = ghost_poolAdmins[_poolId];
         address[] storage _managers = ghost_poolManagers[_poolId];
-
-        if (_admin == address(0) || _managers.length == 0) {
-            return;
-        }
-
         address _manager = _managers[_managerIndex];
-
-        if (_manager == address(0)) {
-            return;
-        }
-
         bytes32 _poolManagerRole = bytes32(_poolId);
 
         address[] memory _removeManagers = new address[](1);
         _removeManagers[0] = _manager;
 
-        vm.prank(_admin);
-        try allo.removePoolManagers(_poolId, _removeManagers) {
-            assertTrue(!allo.hasRole(_poolManagerRole, _manager), 'removePoolManagers failed');
-            delete _managers[_managerIndex];
-        } catch Error(string memory) {
-            fail('addPoolManager unexpected error');
-        } catch {
-            fail('addPoolManager unexpected failure');
+        (bool _success,) = targetCallDefault(
+            address(allo), 0, abi.encodeWithSelector(allo.removePoolManagers.selector, _poolId, _removeManagers)
+        );
+
+        if (msg.sender == _admin) {
+            if (_success) {
+                assertTrue(!allo.hasRole(_poolManagerRole, _manager), "removePoolManagers failed");
+                delete _managers[_managerIndex];
+            } else {
+                assertTrue(_manager == address(0), "removePoolManager failed");
+            }
+        } else {
+            if (_success) {
+                fail("removePoolManager only admin should be able to remove managers");
+            }
         }
     }
 
@@ -228,100 +211,123 @@ contract PropertiesAllo is HandlersParent {
         uint256 _managerIndex = _seedManager % (ghost_poolManagers[_poolId].length - 1);
         address _manager = ghost_poolManagers[_poolId][_managerIndex];
 
-        if (_manager == address(0)) {
-            return;
-        }
+        (bool _success,) =
+            targetCallDefault(address(allo), 0, abi.encodeWithSelector(allo.updatePoolMetadata.selector, _poolId, _metadata));
 
-        vm.prank(_manager);
-        try allo.updatePoolMetadata(_poolId, _metadata) {
-            Allo.Pool memory _pool = allo.getPool(_poolId);
-            assertEq(_pool.metadata.protocol, _metadata.protocol, 'updatePoolMetadata protocol failed');
-            assertEq(_pool.metadata.pointer, _metadata.pointer, 'updatePoolMetadata pointer failed');
-        } catch Error(string memory) {
-            fail('updatePoolMetadata unexpected error');
-        } catch {
-            fail('updatePoolMetadata unexpected failure');
+        if (msg.sender == _manager) {
+            if (_success) {
+                Allo.Pool memory _pool = allo.getPool(_poolId);
+                assertEq(_pool.metadata.protocol, _metadata.protocol, "updatePoolMetadata protocol failed");
+                assertEq(_pool.metadata.pointer, _metadata.pointer, "updatePoolMetadata pointer failed");
+            } else {
+                fail("updatePoolMetadata failed");
+            }
+        } else {
+            if (_success) {
+                fail("updatePoolMetadata only manager should be able to update metadata");
+            }
         }
     }
 
     ///@custom:property-id 14-a
     ///@custom:property allo owner can always change base fee to any arbitrary value
     function prop_alloOwnerCanAlwaysChangeBaseFee(uint256 _newBaseFee) public {
-        vm.prank(allo.owner());
-        try allo.updateBaseFee(_newBaseFee) {
-            assertEq(allo.getBaseFee(), _newBaseFee, 'updateBaseFee failed');
-            baseFee = _newBaseFee;
-        } catch Error(string memory) {
-            fail('updateBaseFee unexpected error');
-        } catch {
-            fail('updateBaseFee unexpected failure');
+        (bool _success,) =
+            targetCallDefault(address(allo), 0, abi.encodeWithSelector(allo.updateBaseFee.selector, _newBaseFee));
+
+        if (msg.sender == allo.owner()) {
+            if (_success) {
+                assertEq(allo.getBaseFee(), _newBaseFee, "updateBaseFee failed");
+                baseFee = _newBaseFee;
+            } else {
+                fail("updateBaseFee failed");
+            }
+        } else {
+            if (_success) {
+                fail("updateBaseFee only owner should be able to update base fee");
+            }
         }
     }
 
     ///@custom:property-id 14-b
     ///@custom:property allo owner can always change the percent flee (./. funding amt) to any arbitrary value (max 100%)
     function prop_alloOwnerCanAlwaysPercentFee(uint256 _newPercentFee) public {
-        _newPercentFee = bound(_newPercentFee, 0, 1e18);
-
-        vm.prank(allo.owner());
-        try allo.updatePercentFee(_newPercentFee) {
-            assertEq(allo.getPercentFee(), _newPercentFee, 'updatePercentFee failed');
-            percentFee = _newPercentFee;
-        } catch Error(string memory) {
-            fail('updatePercentFee unexpected error');
-        } catch {
-            fail('updatePercentFee unexpected failure');
+        (bool _success,) =
+            targetCallDefault(address(allo), 0, abi.encodeWithSelector(allo.updatePercentFee.selector, _newPercentFee));
+        if (msg.sender == allo.owner()) {
+            if (_success) {
+                assertEq(allo.getPercentFee(), _newPercentFee, "updatePercentFee failed");
+                percentFee = _newPercentFee;
+            } else {
+                assertTrue(_newPercentFee > 1e18, "updatePercentFee failed");
+            }
+        } else {
+            if (_success) {
+                fail("updatePercentFee only owner should be able to update percent fee");
+            }
         }
     }
 
     ///@custom:property-id 15-a
     ///@custom:property allo owner can always change the treasury address
     function prop_alloOwnerCanAlwaysChangeTreasury(address _newTreasury) public {
-        vm.prank(allo.owner());
-        try allo.updateTreasury(payable(_newTreasury)) {
-            assertEq(allo.getTreasury(), _newTreasury, 'updateTreasury failed');
-            treasury = payable(_newTreasury);
-        } catch Error(string memory) {
-            assertEq(_newTreasury, address(0), 'updateTreasury unexpected error');
-        } catch {
-            assertEq(_newTreasury, address(0), 'updateTreasury unexpected failure');
+        (bool _success,) =
+            targetCallDefault(address(allo), 0, abi.encodeWithSelector(allo.updateTreasury.selector, _newTreasury));
+
+        if (msg.sender == allo.owner()) {
+            if (_success) {
+                assertEq(allo.getTreasury(), _newTreasury, "updateTreasury failed");
+                treasury = payable(_newTreasury);
+            } else {
+                fail("updateTreasury failed");
+            }
+        } else {
+            if (_success) {
+                fail("updateTreasury only owner should be able to update treasury");
+            }
         }
     }
 
     ///@custom:property-id 15-b
     ///@custom:property allo owner can always change the truster forwarder
     function prop_alloOwnerCanAlwaysChangeTrustedForwarder(address _newForwarder) public {
-        vm.prank(allo.owner());
-        try allo.updateTrustedForwarder(_newForwarder) {
-            assertTrue(allo.isTrustedForwarder(_newForwarder), 'updateTrustedForwarder failed');
-            forwarder = _newForwarder;
-        } catch Error(string memory) {
-            assertEq(_newForwarder, address(0), 'updateTrustedForwarder unexpected error');
-        } catch {
-            assertEq(_newForwarder, address(0), 'updateTrustedForwarder unexpected failure');
+        (bool _success,) =
+            targetCallDefault(address(allo), 0, abi.encodeWithSelector(allo.updateTrustedForwarder.selector, _newForwarder));
+
+        if (msg.sender == allo.owner()) {
+            if (_success) {
+                assertTrue(allo.isTrustedForwarder(_newForwarder), "updateTrustedForwarder failed");
+                forwarder = _newForwarder;
+            } else {
+                assertTrue(_newForwarder == address(0), "updateTrustedForwarder failed");
+            }
+        } else {
+            if (_success) {
+                fail("updateTrustedForwarder only owner should be able to update trusted forwarder");
+            }
         }
     }
 
     ///@custom:property-id 15-c
     ///@custom:property allo owner can always change the registry
     function prop_alloOwnerCanAlwaysChangeRegistry(address _newRegistry) public {
-        vm.prank(allo.owner());
-        try allo.updateRegistry(_newRegistry) {
-            assertEq(address(allo.getRegistry()), _newRegistry, 'updateRegistry failed');
+        (bool _success,) =
+            targetCallDefault(address(allo), 0, abi.encodeWithSelector(allo.updateRegistry.selector, _newRegistry));
 
-            // rollback the change to use the original registry
-            vm.prank(allo.owner());
-            try allo.updateRegistry(address(registry)) {
-                assertEq(address(allo.getRegistry()), address(registry), 'updateRegistry rollback failed');
-            } catch Error(string memory) {
-                fail('updateRegistry rollback unexpected error');
-            } catch {
-                fail('updateRegistry rollback unexpected failure');
+        if (msg.sender == allo.owner()) {
+            if (_success) {
+                assertEq(address(allo.getRegistry()), _newRegistry, "updateRegistry failed");
+
+                // rollback the change to use the original registry
+                allo.updateRegistry(address(registry));
+                assertEq(address(allo.getRegistry()), address(registry), "updateRegistry rollback failed");
+            } else {
+                assertTrue(_newRegistry == address(0), "updateRegistry failed");
             }
-        } catch Error(string memory) {
-            assertEq(_newRegistry, address(0), 'updateRegistry unexpected error');
-        } catch {
-            assertEq(_newRegistry, address(0), 'updateRegistry unexpected failure');
+        } else {
+            if (_success) {
+                fail("updateRegistry only owner should be able to update registry");
+            }
         }
     }
 

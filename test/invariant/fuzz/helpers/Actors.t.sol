@@ -56,37 +56,28 @@ contract Actors is Utils {
         _usingAnchor = !_usingAnchor;
 
         // This event if for forge, as medusa will not show it in failed trace (no revert)
-        emit ActorsLog(
-            string.concat("using anchor: ", vm.toString(_usingAnchor))
-        );
+        emit ActorsLog(string.concat("using anchor: ", vm.toString(_usingAnchor)));
     }
 
     // Handle the actual call, from an EOA or anchor
-    function targetCall(
-        address target,
-        uint256 msgValue,
-        bytes memory payload
-    ) internal returns (bool success, bytes memory returnData) {
+    function targetCall(address target, uint256 msgValue, bytes memory payload)
+        internal
+        returns (bool success, bytes memory returnData)
+    {
         address anchorOwner = msg.sender;
         address anchor = _ghost_anchorOf[anchorOwner];
 
         if (_usingAnchor) {
             if (anchor == address(0)) revert();
 
-            emit ActorsLog(
-                string.concat("call using anchor of ", vm.toString(anchorOwner))
-            );
+            emit ActorsLog(string.concat("call using anchor of ", vm.toString(anchorOwner)));
 
             vm.deal(anchor, msgValue);
 
             vm.prank(anchorOwner);
-            (success, returnData) = address(anchor).call(
-                abi.encodeCall(Anchor.execute, (target, msgValue, payload))
-            );
+            (success, returnData) = address(anchor).call(abi.encodeCall(Anchor.execute, (target, msgValue, payload)));
         } else {
-            emit ActorsLog(
-                string.concat("call using EOA ", vm.toString(anchorOwner))
-            );
+            emit ActorsLog(string.concat("call using EOA ", vm.toString(anchorOwner)));
 
             // vm.deal(anchorOwner, msgValue);
             payable(anchorOwner).transfer(msgValue);
@@ -94,10 +85,24 @@ contract Actors is Utils {
             emit ActorsLog(vm.toString(anchorOwner.balance));
 
             vm.prank(anchorOwner);
-            (success, returnData) = address(target).call{value: msgValue}(
-                payload
-            );
+            (success, returnData) = address(target).call{value: msgValue}(payload);
         }
+    }
+
+    // Handle the actual call, from an EOA or anchor
+    function targetCallDefault(address target, uint256 msgValue, bytes memory payload)
+        internal
+        returns (bool success, bytes memory returnData)
+    {
+        emit ActorsLog(string.concat("call using EOA ", vm.toString(msg.sender)));
+
+        vm.deal(msg.sender, msgValue);
+        payable(msg.sender).transfer(msgValue);
+
+        emit ActorsLog(vm.toString(msg.sender.balance));
+
+        vm.prank(msg.sender);
+        (success, returnData) = address(target).call{value: msgValue}(payload);
     }
 
     function _addAnchorToActor(address _actor, address _anchor, bytes32 _profileId) internal {
