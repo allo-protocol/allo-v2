@@ -27,9 +27,8 @@ contract PropertiesAllo is HandlersParent {
         address[] memory _members = new address[](1);
         _members[0] = _newMember;
 
-        (bool _success,) = targetCallDefault(
-            address(registry), 0, abi.encodeCall(registry.addMembers, (_profile.id, _members))
-        );
+        (bool _success,) =
+            targetCallDefault(address(registry), 0, abi.encodeCall(registry.addMembers, (_profile.id, _members)));
 
         if (msg.sender == _profile.owner) {
             if (_success) {
@@ -54,9 +53,8 @@ contract PropertiesAllo is HandlersParent {
         address[] memory _members = new address[](1);
         _members[0] = _memberToRemove;
 
-        (bool _success,) = targetCallDefault(
-            address(registry), 0, abi.encodeCall(registry.removeMembers, (_profile.id, _members))
-        );
+        (bool _success,) =
+            targetCallDefault(address(registry), 0, abi.encodeCall(registry.removeMembers, (_profile.id, _members)));
 
         if (msg.sender == _profile.owner) {
             if (_success) {
@@ -79,9 +77,7 @@ contract PropertiesAllo is HandlersParent {
         IRegistry.Profile memory _profile = registry.getProfileByAnchor(_ghost_anchorOf[msg.sender]);
 
         (bool _success,) = targetCallDefault(
-            address(registry),
-            0,
-            abi.encodeCall(registry.updateProfilePendingOwner, (_profile.id, _newOwner))
+            address(registry), 0, abi.encodeCall(registry.updateProfilePendingOwner, (_profile.id, _newOwner))
         );
 
         if (msg.sender == _profile.owner) {
@@ -117,13 +113,14 @@ contract PropertiesAllo is HandlersParent {
 
         bytes32 _poolAdminRole = keccak256(abi.encodePacked(_poolId, "admin"));
 
-        (bool _success,) =
-            targetCallDefault(address(allo), 0, abi.encodeCall(allo.changeAdmin, (_poolId, _newAdmin)));
+        (bool _success,) = targetCallDefault(address(allo), 0, abi.encodeCall(allo.changeAdmin, (_poolId, _newAdmin)));
 
         if (msg.sender == _admin) {
             if (_success) {
                 if (_newAdmin != _admin) {
-                    assertTrue(!allo.hasRole(_poolAdminRole, _admin), "changeAdmin failed remove old admin role not removed");
+                    assertTrue(
+                        !allo.hasRole(_poolAdminRole, _admin), "changeAdmin failed remove old admin role not removed"
+                    );
                 }
                 assertTrue(allo.hasRole(_poolAdminRole, _newAdmin), "changeAdmin failed role not set");
                 ghost_poolAdmins[_poolId] = _newAdmin;
@@ -149,9 +146,8 @@ contract PropertiesAllo is HandlersParent {
 
         bytes32 _poolManagerRole = bytes32(_poolId);
 
-        (bool _success,) = targetCallDefault(
-            address(allo), 0, abi.encodeCall(allo.addPoolManagers, (_poolId, _managers))
-        );
+        (bool _success,) =
+            targetCallDefault(address(allo), 0, abi.encodeCall(allo.addPoolManagers, (_poolId, _managers)));
 
         if (msg.sender == _admin) {
             if (_success) {
@@ -181,9 +177,8 @@ contract PropertiesAllo is HandlersParent {
         address[] memory _removeManagers = new address[](1);
         _removeManagers[0] = _manager;
 
-        (bool _success,) = targetCallDefault(
-            address(allo), 0, abi.encodeCall(allo.removePoolManagers, (_poolId, _removeManagers))
-        );
+        (bool _success,) =
+            targetCallDefault(address(allo), 0, abi.encodeCall(allo.removePoolManagers, (_poolId, _removeManagers)));
 
         if (msg.sender == _admin) {
             if (_success) {
@@ -204,9 +199,7 @@ contract PropertiesAllo is HandlersParent {
 
     ///@custom:property-id 13
     ///@custom:property pool manager can always change metadata
-    function prop_poolManagerCanAlwaysChangeMetadata(uint256 _idSeed, Metadata calldata _metadata)
-        public
-    {
+    function prop_poolManagerCanAlwaysChangeMetadata(uint256 _idSeed, Metadata calldata _metadata) public {
         _idSeed = bound(_idSeed, 0, ghost_poolIds.length - 1);
         uint256 _poolId = ghost_poolIds[_idSeed];
 
@@ -239,8 +232,7 @@ contract PropertiesAllo is HandlersParent {
     ///@custom:property-id 14-a
     ///@custom:property allo owner can always change base fee to any arbitrary value
     function prop_alloOwnerCanAlwaysChangeBaseFee(uint256 _newBaseFee) public {
-        (bool _success,) =
-            targetCall(address(allo), allo.owner(), 0, abi.encodeCall(allo.updateBaseFee, (_newBaseFee)));
+        (bool _success,) = targetCall(address(allo), allo.owner(), 0, abi.encodeCall(allo.updateBaseFee, (_newBaseFee)));
 
         if (_success) {
             assertEq(allo.getBaseFee(), _newBaseFee, "updateBaseFee failed");
@@ -280,9 +272,8 @@ contract PropertiesAllo is HandlersParent {
     ///@custom:property-id 15-b
     ///@custom:property allo owner can always change the truster forwarder
     function prop_alloOwnerCanAlwaysChangeTrustedForwarder(address _newForwarder) public {
-        (bool _success,) = targetCall(
-            address(allo), allo.owner(), 0, abi.encodeCall(allo.updateTrustedForwarder, (_newForwarder))
-        );
+        (bool _success,) =
+            targetCall(address(allo), allo.owner(), 0, abi.encodeCall(allo.updateTrustedForwarder, (_newForwarder)));
 
         if (_success) {
             assertTrue(allo.isTrustedForwarder(_newForwarder), "updateTrustedForwarder failed");

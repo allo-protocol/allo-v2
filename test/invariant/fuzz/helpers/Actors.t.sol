@@ -93,12 +93,7 @@ contract Actors is Utils {
         internal
         returns (bool success, bytes memory returnData)
     {
-        return targetCall({
-            target: target,
-            sender: msg.sender,
-            msgValue: msgValue,
-            payload: payload
-        });
+        return targetCall({target: target, sender: msg.sender, msgValue: msgValue, payload: payload});
     }
 
     function targetCall(address target, address sender, uint256 msgValue, bytes memory payload)
