@@ -16,13 +16,8 @@ contract HandlerStrategy is HandlerAllo {
         IAllo.Pool memory _pool = allo.getPool(ghost_poolIds[_poolSeed]);
 
         // Withdraw
-        (bool succ, ) = targetCall(
-            address(allo),
-            0,
-            abi.encodeCall(
-                strategy_directAllocation.withdraw,
-                (_pool.token, _amount, _recipient)
-            )
+        (bool succ,) = targetCall(
+            address(allo), 0, abi.encodeCall(strategy_directAllocation.withdraw, (_pool.token, _amount, _recipient))
         );
     }
 }

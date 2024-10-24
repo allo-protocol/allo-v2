@@ -38,18 +38,7 @@ extra_output = ["storageLayout"]
 allow_paths = ['node_modules']
 
 [fmt]
-ignore = [
-  'contracts/strategies/deprecated/_poc/qv-hackathon/SchemaResolver.sol',
-  'contracts/strategies/deprecated/_poc/direct-grants-simple/DirectGrantsSimpleStrategy.sol',
-  'test/invariant/fuzz/Setup.t.sol',
-	'test/invariant/fuzz/handlers/HandlerAllo.t.sol',
-	'test/invariant/fuzz/helpers/Actors.t.sol',
-	'test/invariant/fuzz/helpers/FuzzERC20.sol',
-	'test/invariant/fuzz/helpers/IStdCheats.sol',
-	'test/invariant/fuzz/helpers/Utils.t.sol',
-	'test/invariant/fuzz/properties/PropertiesAllo.t.sol',
-	'test/invariant/fuzz/properties/PropertiesParent.t.sol'
-]
+
 
 [fuzz]
 runs = 512
