@@ -39,24 +39,13 @@ contract Setup is Actors {
         registry = new Registry();
 
         // Deploy the proxy, pointing to the implementation
-        TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(
-            implementation,
-            proxyOwner,
-            ""
-        );
+        TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(implementation, proxyOwner, "");
 
         allo = Allo(payable(address(proxy)));
 
         // Initialize
         vm.prank(protocolDeployer);
-        allo.initialize(
-            protocolDeployer,
-            address(registry),
-            payable(treasury),
-            percentFee,
-            baseFee,
-            forwarder
-        );
+        allo.initialize(protocolDeployer, address(registry), payable(treasury), percentFee, baseFee, forwarder);
 
         // Deploy base strategy
         strategy_directAllocation = new DirectAllocationStrategy(address(allo));
@@ -65,20 +54,12 @@ contract Setup is Actors {
         token = ERC20(address(new FuzzERC20()));
 
         // Create profile for 4 addresses
-        for (uint i; i < 4; i++) {
+        for (uint256 i; i < 4; i++) {
             bytes32 _id = registry.createProfile(
-                0,
-                "a",
-                Metadata({protocol: i + 1, pointer: ""}),
-                _ghost_actors[i],
-                new address[](0)
+                0, "a", Metadata({protocol: i + 1, pointer: ""}), _ghost_actors[i], new address[](0)
             );
 
-            _addAnchorToActor(
-                _ghost_actors[i],
-                registry.getProfileById(_id).anchor,
-                _id
-            );
+            _addAnchorToActor(_ghost_actors[i], registry.getProfileById(_id).anchor, _id);
         }
     }
 }

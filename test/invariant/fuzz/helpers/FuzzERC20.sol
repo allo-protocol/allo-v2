@@ -10,10 +10,7 @@ contract FuzzERC20 is ERC20 {
         testContract = msg.sender;
     }
 
-    function transfer(
-        address to,
-        uint256 amount
-    ) public override returns (bool) {
+    function transfer(address to, uint256 amount) public override returns (bool) {
         address owner = _msgSender();
 
         // FuzzTest has an infinite mint

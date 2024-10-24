@@ -6,9 +6,4 @@ import {HandlerAnchor} from "./HandlerAnchor.t.sol";
 import {HandlerRegistry} from "./HandlerRegistry.t.sol";
 import {HandlerStrategy} from "./HandlerStrategy.t.sol";
 
-contract HandlersParent is
-    HandlerAllo,
-    HandlerStrategy,
-    HandlerAnchor,
-    HandlerRegistry
-{}
+contract HandlersParent is HandlerAllo, HandlerStrategy, HandlerAnchor, HandlerRegistry {}
