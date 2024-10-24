@@ -89,19 +89,30 @@ contract Actors is Utils {
         }
     }
 
-    // Handle the actual call, from an EOA or anchor
     function targetCallDefault(address target, uint256 msgValue, bytes memory payload)
         internal
         returns (bool success, bytes memory returnData)
     {
-        emit ActorsLog(string.concat("call using EOA ", vm.toString(msg.sender)));
+        return targetCall({
+            target: target,
+            sender: msg.sender,
+            msgValue: msgValue,
+            payload: payload
+        });
+    }
 
-        vm.deal(msg.sender, msgValue);
-        payable(msg.sender).transfer(msgValue);
+    function targetCall(address target, address sender, uint256 msgValue, bytes memory payload)
+        internal
+        returns (bool success, bytes memory returnData)
+    {
+        emit ActorsLog(string.concat("call using EOA ", vm.toString(sender)));
 
-        emit ActorsLog(vm.toString(msg.sender.balance));
+        vm.deal(sender, msgValue);
+        payable(sender).transfer(msgValue);
 
-        vm.prank(msg.sender);
+        emit ActorsLog(vm.toString(sender.balance));
+
+        vm.prank(sender);
         (success, returnData) = address(target).call{value: msgValue}(payload);
     }
 

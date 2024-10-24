@@ -28,12 +28,12 @@ contract PropertiesAllo is HandlersParent {
         _members[0] = _newMember;
 
         (bool _success,) = targetCallDefault(
-            address(registry), 0, abi.encodeWithSelector(registry.addMembers.selector, _profile.id, _members)
+            address(registry), 0, abi.encodeCall(registry.addMembers, (_profile.id, _members))
         );
 
         if (msg.sender == _profile.owner) {
             if (_success) {
-                assertTrue(registry.hasRole(_profile.id, _newMember), "addMembers failed");
+                assertTrue(registry.hasRole(_profile.id, _newMember), "addMembers failed role not set");
                 _ghost_roleMembers[_profile.id].push(_newMember);
             } else {
                 assertTrue(_newMember == address(0), "addMembers failed");
@@ -55,7 +55,7 @@ contract PropertiesAllo is HandlersParent {
         _members[0] = _memberToRemove;
 
         (bool _success,) = targetCallDefault(
-            address(registry), 0, abi.encodeWithSelector(registry.removeMembers.selector, _profile.id, _members)
+            address(registry), 0, abi.encodeCall(registry.removeMembers, (_profile.id, _members))
         );
 
         if (msg.sender == _profile.owner) {
@@ -81,7 +81,7 @@ contract PropertiesAllo is HandlersParent {
         (bool _success,) = targetCallDefault(
             address(registry),
             0,
-            abi.encodeWithSelector(registry.updateProfilePendingOwner.selector, _profile.id, _newOwner)
+            abi.encodeCall(registry.updateProfilePendingOwner, (_profile.id, _newOwner))
         );
 
         if (msg.sender == _profile.owner) {
@@ -118,14 +118,14 @@ contract PropertiesAllo is HandlersParent {
         bytes32 _poolAdminRole = keccak256(abi.encodePacked(_poolId, "admin"));
 
         (bool _success,) =
-            targetCallDefault(address(allo), 0, abi.encodeWithSelector(allo.changeAdmin.selector, _poolId, _newAdmin));
+            targetCallDefault(address(allo), 0, abi.encodeCall(allo.changeAdmin, (_poolId, _newAdmin)));
 
         if (msg.sender == _admin) {
             if (_success) {
                 if (_newAdmin != _admin) {
-                    assertTrue(!allo.hasRole(_poolAdminRole, _admin), "changeAdmin failed remove old admin");
+                    assertTrue(!allo.hasRole(_poolAdminRole, _admin), "changeAdmin failed remove old admin role not removed");
                 }
-                assertTrue(allo.hasRole(_poolAdminRole, _newAdmin), "changeAdmin failed set new admin");
+                assertTrue(allo.hasRole(_poolAdminRole, _newAdmin), "changeAdmin failed role not set");
                 ghost_poolAdmins[_poolId] = _newAdmin;
             } else {
                 assertTrue(_newAdmin == address(0), "changeAdmin failed");
@@ -149,12 +149,13 @@ contract PropertiesAllo is HandlersParent {
 
         bytes32 _poolManagerRole = bytes32(_poolId);
 
-        (bool _success,) =
-            targetCallDefault(address(allo), 0, abi.encodeWithSelector(allo.addPoolManagers.selector, _poolId, _managers));
+        (bool _success,) = targetCallDefault(
+            address(allo), 0, abi.encodeCall(allo.addPoolManagers, (_poolId, _managers))
+        );
 
         if (msg.sender == _admin) {
             if (_success) {
-                assertTrue(allo.hasRole(_poolManagerRole, _newManager), "addPoolManagers failed");
+                assertTrue(allo.hasRole(_poolManagerRole, _newManager), "addPoolManagers failed role not set");
                 ghost_poolManagers[_poolId].push(_newManager);
             } else {
                 assertTrue(_newManager == address(0), "addPoolManager failed");
@@ -181,7 +182,7 @@ contract PropertiesAllo is HandlersParent {
         _removeManagers[0] = _manager;
 
         (bool _success,) = targetCallDefault(
-            address(allo), 0, abi.encodeWithSelector(allo.removePoolManagers.selector, _poolId, _removeManagers)
+            address(allo), 0, abi.encodeCall(allo.removePoolManagers, (_poolId, _removeManagers))
         );
 
         if (msg.sender == _admin) {
@@ -203,18 +204,24 @@ contract PropertiesAllo is HandlersParent {
 
     ///@custom:property-id 13
     ///@custom:property pool manager can always change metadata
-    function prop_poolManagerCanAlwaysChangeMetadata(uint256 _idSeed, uint256 _seedManager, Metadata calldata _metadata)
+    function prop_poolManagerCanAlwaysChangeMetadata(uint256 _idSeed, Metadata calldata _metadata)
         public
     {
         _idSeed = bound(_idSeed, 0, ghost_poolIds.length - 1);
         uint256 _poolId = ghost_poolIds[_idSeed];
-        uint256 _managerIndex = _seedManager % (ghost_poolManagers[_poolId].length - 1);
-        address _manager = ghost_poolManagers[_poolId][_managerIndex];
 
         (bool _success,) =
-            targetCallDefault(address(allo), 0, abi.encodeWithSelector(allo.updatePoolMetadata.selector, _poolId, _metadata));
+            targetCallDefault(address(allo), 0, abi.encodeCall(allo.updatePoolMetadata, (_poolId, _metadata)));
 
-        if (msg.sender == _manager) {
+        bool _isManager;
+        for (uint256 _i; _i < ghost_poolManagers[_poolId].length; _i++) {
+            if (msg.sender == ghost_poolManagers[_poolId][_i]) {
+                _isManager = true;
+                break;
+            }
+        }
+
+        if (_isManager || msg.sender == ghost_poolAdmins[_poolId]) {
             if (_success) {
                 Allo.Pool memory _pool = allo.getPool(_poolId);
                 assertEq(_pool.metadata.protocol, _metadata.protocol, "updatePoolMetadata protocol failed");
@@ -233,19 +240,13 @@ contract PropertiesAllo is HandlersParent {
     ///@custom:property allo owner can always change base fee to any arbitrary value
     function prop_alloOwnerCanAlwaysChangeBaseFee(uint256 _newBaseFee) public {
         (bool _success,) =
-            targetCallDefault(address(allo), 0, abi.encodeWithSelector(allo.updateBaseFee.selector, _newBaseFee));
+            targetCall(address(allo), allo.owner(), 0, abi.encodeCall(allo.updateBaseFee, (_newBaseFee)));
 
-        if (msg.sender == allo.owner()) {
-            if (_success) {
-                assertEq(allo.getBaseFee(), _newBaseFee, "updateBaseFee failed");
-                baseFee = _newBaseFee;
-            } else {
-                fail("updateBaseFee failed");
-            }
+        if (_success) {
+            assertEq(allo.getBaseFee(), _newBaseFee, "updateBaseFee failed");
+            baseFee = _newBaseFee;
         } else {
-            if (_success) {
-                fail("updateBaseFee only owner should be able to update base fee");
-            }
+            fail("updateBaseFee failed");
         }
     }
 
@@ -253,18 +254,12 @@ contract PropertiesAllo is HandlersParent {
     ///@custom:property allo owner can always change the percent flee (./. funding amt) to any arbitrary value (max 100%)
     function prop_alloOwnerCanAlwaysPercentFee(uint256 _newPercentFee) public {
         (bool _success,) =
-            targetCallDefault(address(allo), 0, abi.encodeWithSelector(allo.updatePercentFee.selector, _newPercentFee));
-        if (msg.sender == allo.owner()) {
-            if (_success) {
-                assertEq(allo.getPercentFee(), _newPercentFee, "updatePercentFee failed");
-                percentFee = _newPercentFee;
-            } else {
-                assertTrue(_newPercentFee > 1e18, "updatePercentFee failed");
-            }
+            targetCall(address(allo), allo.owner(), 0, abi.encodeCall(allo.updatePercentFee, (_newPercentFee)));
+        if (_success) {
+            assertEq(allo.getPercentFee(), _newPercentFee, "updatePercentFee failed");
+            percentFee = _newPercentFee;
         } else {
-            if (_success) {
-                fail("updatePercentFee only owner should be able to update percent fee");
-            }
+            assertTrue(_newPercentFee > 1e18, "updatePercentFee failed");
         }
     }
 
@@ -272,39 +267,28 @@ contract PropertiesAllo is HandlersParent {
     ///@custom:property allo owner can always change the treasury address
     function prop_alloOwnerCanAlwaysChangeTreasury(address _newTreasury) public {
         (bool _success,) =
-            targetCallDefault(address(allo), 0, abi.encodeWithSelector(allo.updateTreasury.selector, _newTreasury));
+            targetCall(address(allo), allo.owner(), 0, abi.encodeCall(allo.updateTreasury, payable(_newTreasury)));
 
-        if (msg.sender == allo.owner()) {
-            if (_success) {
-                assertEq(allo.getTreasury(), _newTreasury, "updateTreasury failed");
-                treasury = payable(_newTreasury);
-            } else {
-                fail("updateTreasury failed");
-            }
+        if (_success) {
+            assertEq(allo.getTreasury(), _newTreasury, "updateTreasury failed");
+            treasury = payable(_newTreasury);
         } else {
-            if (_success) {
-                fail("updateTreasury only owner should be able to update treasury");
-            }
+            assertEq(_newTreasury, address(0), "updateTreasury failed");
         }
     }
 
     ///@custom:property-id 15-b
     ///@custom:property allo owner can always change the truster forwarder
     function prop_alloOwnerCanAlwaysChangeTrustedForwarder(address _newForwarder) public {
-        (bool _success,) =
-            targetCallDefault(address(allo), 0, abi.encodeWithSelector(allo.updateTrustedForwarder.selector, _newForwarder));
+        (bool _success,) = targetCall(
+            address(allo), allo.owner(), 0, abi.encodeCall(allo.updateTrustedForwarder, (_newForwarder))
+        );
 
-        if (msg.sender == allo.owner()) {
-            if (_success) {
-                assertTrue(allo.isTrustedForwarder(_newForwarder), "updateTrustedForwarder failed");
-                forwarder = _newForwarder;
-            } else {
-                assertTrue(_newForwarder == address(0), "updateTrustedForwarder failed");
-            }
+        if (_success) {
+            assertTrue(allo.isTrustedForwarder(_newForwarder), "updateTrustedForwarder failed");
+            forwarder = _newForwarder;
         } else {
-            if (_success) {
-                fail("updateTrustedForwarder only owner should be able to update trusted forwarder");
-            }
+            assertTrue(_newForwarder == address(0), "updateTrustedForwarder failed");
         }
     }
 
@@ -312,22 +296,16 @@ contract PropertiesAllo is HandlersParent {
     ///@custom:property allo owner can always change the registry
     function prop_alloOwnerCanAlwaysChangeRegistry(address _newRegistry) public {
         (bool _success,) =
-            targetCallDefault(address(allo), 0, abi.encodeWithSelector(allo.updateRegistry.selector, _newRegistry));
+            targetCall(address(allo), allo.owner(), 0, abi.encodeCall(allo.updateRegistry, (_newRegistry)));
 
-        if (msg.sender == allo.owner()) {
-            if (_success) {
-                assertEq(address(allo.getRegistry()), _newRegistry, "updateRegistry failed");
+        if (_success) {
+            assertEq(address(allo.getRegistry()), _newRegistry, "updateRegistry failed");
 
-                // rollback the change to use the original registry
-                allo.updateRegistry(address(registry));
-                assertEq(address(allo.getRegistry()), address(registry), "updateRegistry rollback failed");
-            } else {
-                assertTrue(_newRegistry == address(0), "updateRegistry failed");
-            }
+            // rollback the change to use the original registry
+            allo.updateRegistry(address(registry));
+            assertEq(address(allo.getRegistry()), address(registry), "updateRegistry rollback failed");
         } else {
-            if (_success) {
-                fail("updateRegistry only owner should be able to update registry");
-            }
+            assertTrue(_newRegistry == address(0), "updateRegistry failed");
         }
     }
 
