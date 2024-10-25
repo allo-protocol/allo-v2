@@ -278,7 +278,7 @@ contract PropertiesAllo is HandlersParent {
             assertEq(allo.getTreasury(), _newTreasury, "property-id 15-a: updateTreasury failed");
             treasury = payable(_newTreasury);
         } else {
-            assertEq(_newTreasury, address(0) || _usingAnchor, "property-id 15-a: updateTreasury failed");
+            assertTrue(_newTreasury == address(0) || _usingAnchor, "property-id 15-a: updateTreasury failed");
         }
     }
 
