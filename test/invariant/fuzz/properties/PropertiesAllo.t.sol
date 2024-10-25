@@ -29,18 +29,18 @@ contract PropertiesAllo is HandlersParent {
         _members[0] = _newMember;
 
         (bool _success,) =
-            targetCallDefault(address(registry), 0, abi.encodeCall(registry.addMembers, (_profile.id, _members)));
+            targetCall(address(registry), 0, abi.encodeCall(registry.addMembers, (_profile.id, _members)));
 
         if (msg.sender == _profile.owner) {
             if (_success) {
-                assertTrue(registry.hasRole(_profile.id, _newMember), "addMembers failed role not set");
+                assertTrue(registry.hasRole(_profile.id, _newMember), "property-id 5-a: addMembers failed role not set");
                 _ghost_roleMembers[_profile.id].push(_newMember);
             } else {
-                assertTrue(_newMember == address(0), "addMembers failed");
+                assertTrue(_newMember == address(0) || _usingAnchor, "property-id 5-a: addMembers failed");
             }
         } else {
             if (_success) {
-                fail("addMembers only owner should be able to add members");
+                fail("property-id 5-a: addMembers only owner should be able to add members");
             }
         }
     }
@@ -55,18 +55,18 @@ contract PropertiesAllo is HandlersParent {
         _members[0] = _memberToRemove;
 
         (bool _success,) =
-            targetCallDefault(address(registry), 0, abi.encodeCall(registry.removeMembers, (_profile.id, _members)));
+            targetCall(address(registry), 0, abi.encodeCall(registry.removeMembers, (_profile.id, _members)));
 
         if (msg.sender == _profile.owner) {
             if (_success) {
-                assertTrue(!registry.hasRole(_profile.id, _memberToRemove), "removeMembers failed");
+                assertTrue(!registry.hasRole(_profile.id, _memberToRemove), "property-id 5-b: removeMembers failed");
                 _ghost_roleMembers[_profile.id].pop();
             } else {
-                assertTrue(_memberToRemove == address(0), "removeMembers failed");
+                assertTrue(_memberToRemove == address(0) || _usingAnchor, "property-id 5-b: removeMembers failed");
             }
         } else {
             if (_success) {
-                fail("removeMembers only owner should be able to remove members");
+                fail("property-id 5-b: removeMembers only owner should be able to remove members");
             }
         }
     }
@@ -77,21 +77,22 @@ contract PropertiesAllo is HandlersParent {
         // Get the profile ID
         IRegistry.Profile memory _profile = registry.getProfileByAnchor(_ghost_anchorOf[msg.sender]);
 
-        (bool _success,) = targetCallDefault(
+        (bool _success,) = targetCall(
             address(registry), 0, abi.encodeCall(registry.updateProfilePendingOwner, (_profile.id, _newOwner))
         );
 
         if (msg.sender == _profile.owner) {
             if (_success) {
                 assertTrue(
-                    registry.profileIdToPendingOwner(_profile.id) == _newOwner, "updateProfilePendingOwner failed"
+                    registry.profileIdToPendingOwner(_profile.id) == _newOwner,
+                    "property-id 6: updateProfilePendingOwner failed"
                 );
             } else {
-                assertTrue(_newOwner == address(0), "updateProfilePendingOwner failed");
+                assertTrue(_newOwner == address(0) || _usingAnchor, "property-id 6: updateProfilePendingOwner failed");
             }
         } else {
             if (_success) {
-                fail("updateProfilePendingOwner only owner should be able to initiate change of owner");
+                fail("property-id 6: updateProfilePendingOwner only owner should be able to initiate change of owner");
             }
         }
     }
@@ -116,23 +117,24 @@ contract PropertiesAllo is HandlersParent {
 
         address _newAdmin = _ghost_actors[_actorSeed % (_ghost_actors.length - 1)];
 
-        (bool _success,) = targetCallDefault(address(allo), 0, abi.encodeCall(allo.changeAdmin, (_poolId, _newAdmin)));
+        (bool _success,) = targetCall(address(allo), 0, abi.encodeCall(allo.changeAdmin, (_poolId, _newAdmin)));
 
         if (msg.sender == _admin) {
             if (_success) {
                 if (_newAdmin != _admin) {
                     assertTrue(
-                        !allo.hasRole(_poolAdminRole, _admin), "changeAdmin failed remove old admin role not removed"
+                        !allo.hasRole(_poolAdminRole, _admin),
+                        "property-id 10: changeAdmin failed remove old admin role not removed"
                     );
                 }
-                assertTrue(allo.hasRole(_poolAdminRole, _newAdmin), "changeAdmin failed role not set");
+                assertTrue(allo.hasRole(_poolAdminRole, _newAdmin), "property-id 10: changeAdmin failed role not set");
                 ghost_poolAdmins[_poolId] = _newAdmin;
             } else {
-                assertTrue(_newAdmin == address(0), "changeAdmin failed");
+                assertTrue(_newAdmin == address(0), "property-id 10: changeAdmin failed");
             }
         } else {
             if (_success) {
-                fail("changeAdmin only admin should be able to change admin");
+                fail("property-id 10: changeAdmin only admin should be able to change admin");
             }
         }
     }
@@ -149,19 +151,20 @@ contract PropertiesAllo is HandlersParent {
 
         bytes32 _poolManagerRole = bytes32(_poolId);
 
-        (bool _success,) =
-            targetCallDefault(address(allo), 0, abi.encodeCall(allo.addPoolManagers, (_poolId, _managers)));
+        (bool _success,) = targetCall(address(allo), 0, abi.encodeCall(allo.addPoolManagers, (_poolId, _managers)));
 
         if (msg.sender == _admin) {
             if (_success) {
-                assertTrue(allo.hasRole(_poolManagerRole, _newManager), "addPoolManagers failed role not set");
+                assertTrue(
+                    allo.hasRole(_poolManagerRole, _newManager), "property-id 11-a: addPoolManagers failed role not set"
+                );
                 ghost_poolManagers[_poolId].push(_newManager);
             } else {
-                assertTrue(_newManager == address(0), "addPoolManager failed");
+                assertTrue(_newManager == address(0), "property-id 11-a: addPoolManager failed");
             }
         } else {
             if (_success) {
-                fail("addPoolManager only admin should be able to add managers");
+                fail("property-id 11-a: addPoolManager only admin should be able to add managers");
             }
         }
     }
@@ -181,11 +184,11 @@ contract PropertiesAllo is HandlersParent {
         _removeManagers[0] = _manager;
 
         (bool _success,) =
-            targetCallDefault(address(allo), 0, abi.encodeCall(allo.removePoolManagers, (_poolId, _removeManagers)));
+            targetCall(address(allo), 0, abi.encodeCall(allo.removePoolManagers, (_poolId, _removeManagers)));
 
         if (msg.sender == _admin) {
             if (_success) {
-                assertTrue(!allo.hasRole(_poolManagerRole, _manager), "removePoolManagers failed");
+                assertTrue(!allo.hasRole(_poolManagerRole, _manager), "property-id 11-b: removePoolManagers failed");
                 delete ghost_poolManagers[_poolId];
                 // regenerate the list of managers for the pool
                 for (uint256 _i; _i < _managers.length; _i++) {
@@ -194,11 +197,11 @@ contract PropertiesAllo is HandlersParent {
                     }
                 }
             } else {
-                assertTrue(_manager == address(0), "removePoolManager failed");
+                assertTrue(_manager == address(0), "property-id 11-b: removePoolManager failed");
             }
         } else {
             if (_success) {
-                fail("removePoolManager only admin should be able to remove managers");
+                fail("property-id 11-b: removePoolManager only admin should be able to remove managers");
             }
         }
     }
@@ -212,8 +215,7 @@ contract PropertiesAllo is HandlersParent {
         _idSeed = bound(_idSeed, 0, ghost_poolIds.length - 1);
         uint256 _poolId = ghost_poolIds[_idSeed];
 
-        (bool _success,) =
-            targetCallDefault(address(allo), 0, abi.encodeCall(allo.updatePoolMetadata, (_poolId, _metadata)));
+        (bool _success,) = targetCall(address(allo), 0, abi.encodeCall(allo.updatePoolMetadata, (_poolId, _metadata)));
 
         bool _isManager;
         for (uint256 _i; _i < ghost_poolManagers[_poolId].length; _i++) {
@@ -226,14 +228,16 @@ contract PropertiesAllo is HandlersParent {
         if (_isManager || msg.sender == ghost_poolAdmins[_poolId]) {
             if (_success) {
                 Allo.Pool memory _pool = allo.getPool(_poolId);
-                assertEq(_pool.metadata.protocol, _metadata.protocol, "updatePoolMetadata protocol failed");
-                assertEq(_pool.metadata.pointer, _metadata.pointer, "updatePoolMetadata pointer failed");
+                assertEq(
+                    _pool.metadata.protocol, _metadata.protocol, "property-id 13: updatePoolMetadata protocol failed"
+                );
+                assertEq(_pool.metadata.pointer, _metadata.pointer, "property-id 13: updatePoolMetadata pointer failed");
             } else {
-                fail("updatePoolMetadata failed");
+                fail("property-id 13: updatePoolMetadata failed");
             }
         } else {
             if (_success) {
-                fail("updatePoolMetadata only manager should be able to update metadata");
+                fail("property-id 13: updatePoolMetadata only manager should be able to update metadata");
             }
         }
     }
@@ -244,23 +248,23 @@ contract PropertiesAllo is HandlersParent {
         (bool _success,) = targetCall(address(allo), allo.owner(), 0, abi.encodeCall(allo.updateBaseFee, (_newBaseFee)));
 
         if (_success) {
-            assertEq(allo.getBaseFee(), _newBaseFee, "updateBaseFee failed");
+            assertEq(allo.getBaseFee(), _newBaseFee, "property-id 14-a: updateBaseFee failed");
             baseFee = _newBaseFee;
         } else {
-            fail("updateBaseFee failed");
+            fail("property-id 14-a: updateBaseFee failed");
         }
     }
 
     ///@custom:property-id 14-b
     ///@custom:property allo owner can always change the percent flee (./. funding amt) to any arbitrary value (max 100%)
-    function prop_alloOwnerCanAlwaysPercentFee(uint256 _newPercentFee) public {
+    function prop_alloOwnerCanAlwaysChangePercentFee(uint256 _newPercentFee) public {
         (bool _success,) =
             targetCall(address(allo), allo.owner(), 0, abi.encodeCall(allo.updatePercentFee, (_newPercentFee)));
         if (_success) {
-            assertEq(allo.getPercentFee(), _newPercentFee, "updatePercentFee failed");
+            assertEq(allo.getPercentFee(), _newPercentFee, "property-id 14-b: updatePercentFee failed");
             percentFee = _newPercentFee;
         } else {
-            assertTrue(_newPercentFee > 1e18, "updatePercentFee failed");
+            assertTrue(_newPercentFee > 1e18, "property-id 14-b: updatePercentFee failed");
         }
     }
 
@@ -271,10 +275,10 @@ contract PropertiesAllo is HandlersParent {
             targetCall(address(allo), allo.owner(), 0, abi.encodeCall(allo.updateTreasury, payable(_newTreasury)));
 
         if (_success) {
-            assertEq(allo.getTreasury(), _newTreasury, "updateTreasury failed");
+            assertEq(allo.getTreasury(), _newTreasury, "property-id 15-a: updateTreasury failed");
             treasury = payable(_newTreasury);
         } else {
-            assertEq(_newTreasury, address(0), "updateTreasury failed");
+            assertEq(_newTreasury, address(0), "property-id 15-a: updateTreasury failed");
         }
     }
 
@@ -285,10 +289,10 @@ contract PropertiesAllo is HandlersParent {
             targetCall(address(allo), allo.owner(), 0, abi.encodeCall(allo.updateTrustedForwarder, (_newForwarder)));
 
         if (_success) {
-            assertTrue(allo.isTrustedForwarder(_newForwarder), "updateTrustedForwarder failed");
+            assertTrue(allo.isTrustedForwarder(_newForwarder), "property-id 15-b: updateTrustedForwarder failed");
             forwarder = _newForwarder;
         } else {
-            assertTrue(_newForwarder == address(0), "updateTrustedForwarder failed");
+            assertTrue(_newForwarder == address(0), "property-id 15-b: updateTrustedForwarder failed");
         }
     }
 
@@ -299,13 +303,13 @@ contract PropertiesAllo is HandlersParent {
             targetCall(address(allo), allo.owner(), 0, abi.encodeCall(allo.updateRegistry, (_newRegistry)));
 
         if (_success) {
-            assertEq(address(allo.getRegistry()), _newRegistry, "updateRegistry failed");
+            assertEq(address(allo.getRegistry()), _newRegistry, "property-id 15-c: updateRegistry failed");
 
             // rollback the change to use the original registry
             allo.updateRegistry(address(registry));
-            assertEq(address(allo.getRegistry()), address(registry), "updateRegistry rollback failed");
+            assertEq(address(allo.getRegistry()), address(registry), "property-id 15-c: updateRegistry rollback failed");
         } else {
-            assertTrue(_newRegistry == address(0), "updateRegistry failed");
+            assertTrue(_newRegistry == address(0) || _usingAnchor, "property-id 15-c: updateRegistry failed");
         }
     }
 

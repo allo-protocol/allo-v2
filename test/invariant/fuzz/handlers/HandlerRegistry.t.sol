@@ -36,11 +36,16 @@ contract HandlerRegistry is Setup {
     function handler_updateProfileName(string memory _newName) public {
         // Get the profile ID
         IRegistry.Profile memory profile = registry.getProfileByAnchor(_ghost_anchorOf[msg.sender]);
+        address _owner = registry.getProfileById(profile.id).owner;
 
         // will not succeed if no profile
         (bool succ, bytes memory ret) = targetCall(
             address(registry), 0, abi.encodeWithSelector(registry.updateProfileName.selector, profile.id, _newName)
         );
+
+        if (succ) {
+            _ghost_anchorOf[_owner] = abi.decode(ret, (address));
+        }
     }
 
     function handler_updateProfileMetadata(uint256 _newProtocol, string memory _newPtr) public {
