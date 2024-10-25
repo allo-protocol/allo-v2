@@ -20,11 +20,12 @@ contract PropertiesAllo is HandlersParent {
 
     ///@custom:property-id 5-a
     ///@custom:property profile owner is the only one who can always add profile members (name ⇒ new anchor())
-    function prop_onlyProfileOwnerCanAddProfileMember(address _newMember) public {
+    function prop_onlyProfileOwnerCanAddProfileMember(uint256 _actorSeed) public {
         // Get the profile ID
         IRegistry.Profile memory _profile = registry.getProfileByAnchor(_ghost_anchorOf[msg.sender]);
 
         address[] memory _members = new address[](1);
+        address _newMember = _ghost_actors[_actorSeed % (_ghost_actors.length - 1)];
         _members[0] = _newMember;
 
         (bool _success,) =
@@ -106,12 +107,14 @@ contract PropertiesAllo is HandlersParent {
 
     ///@custom:property-id 10
     ///@custom:property pool admin can always change admin (but not to address(0))
-    function prop_poolAdminCanAlwaysChangeAdminToNonZero(uint256 _idSeed, address _newAdmin) public {
+    function prop_poolAdminCanAlwaysChangeAdminToNonZero(uint256 _idSeed, uint256 _actorSeed) public {
         _idSeed = bound(_idSeed, 0, ghost_poolIds.length - 1);
         uint256 _poolId = ghost_poolIds[_idSeed];
         address _admin = ghost_poolAdmins[_poolId];
 
         bytes32 _poolAdminRole = keccak256(abi.encodePacked(_poolId, "admin"));
+
+        address _newAdmin = _ghost_actors[_actorSeed % (_ghost_actors.length - 1)];
 
         (bool _success,) = targetCallDefault(address(allo), 0, abi.encodeCall(allo.changeAdmin, (_poolId, _newAdmin)));
 
@@ -170,7 +173,7 @@ contract PropertiesAllo is HandlersParent {
         uint256 _poolId = ghost_poolIds[_idSeed];
         _managerIndex = bound(_managerIndex, 0, ghost_poolManagers[_poolId].length - 1);
         address _admin = ghost_poolAdmins[_poolId];
-        address[] storage _managers = ghost_poolManagers[_poolId];
+        address[] memory _managers = ghost_poolManagers[_poolId];
         address _manager = _managers[_managerIndex];
         bytes32 _poolManagerRole = bytes32(_poolId);
 
@@ -183,7 +186,13 @@ contract PropertiesAllo is HandlersParent {
         if (msg.sender == _admin) {
             if (_success) {
                 assertTrue(!allo.hasRole(_poolManagerRole, _manager), "removePoolManagers failed");
-                delete _managers[_managerIndex];
+                delete ghost_poolManagers[_poolId];
+                // regenerate the list of managers for the pool
+                for (uint256 _i; _i < _managers.length; _i++) {
+                    if (_i != _managerIndex) {
+                        ghost_poolManagers[_poolId].push(_managers[_i]);
+                    }
+                }
             } else {
                 assertTrue(_manager == address(0), "removePoolManager failed");
             }

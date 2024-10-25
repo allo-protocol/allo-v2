@@ -85,13 +85,13 @@ contract HandlerRegistry is Setup {
 
         // Get the profile ID
         IRegistry.Profile memory profile = registry.getProfileById(_profileId);
+        address _previousActor = registry.getProfileById(profile.id).owner;
 
         (bool succ, bytes memory ret) = targetCall(
             address(registry), 0, abi.encodeWithSelector(registry.acceptProfileOwnership.selector, profile.id)
         );
 
         if (succ) {
-            address _previousActor = _ghost_profileIdToActor[profile.id];
             _removeAnchorFromActor(_previousActor, profile.id);
             _addAnchorToActor(msg.sender, profile.anchor, profile.id);
             delete _ghost_pendingOwnershipChange[_profileSeed % _ghost_pendingOwnershipChange.length];
