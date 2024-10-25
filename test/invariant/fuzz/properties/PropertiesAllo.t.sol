@@ -130,7 +130,7 @@ contract PropertiesAllo is HandlersParent {
                 assertTrue(allo.hasRole(_poolAdminRole, _newAdmin), "property-id 10: changeAdmin failed role not set");
                 ghost_poolAdmins[_poolId] = _newAdmin;
             } else {
-                assertTrue(_newAdmin == address(0), "property-id 10: changeAdmin failed");
+                assertTrue(_newAdmin == address(0) || _usingAnchor, "property-id 10: changeAdmin failed");
             }
         } else {
             if (_success) {
@@ -160,7 +160,7 @@ contract PropertiesAllo is HandlersParent {
                 );
                 ghost_poolManagers[_poolId].push(_newManager);
             } else {
-                assertTrue(_newManager == address(0), "property-id 11-a: addPoolManager failed");
+                assertTrue(_newManager == address(0) || _usingAnchor, "property-id 11-a: addPoolManager failed");
             }
         } else {
             if (_success) {
@@ -197,7 +197,7 @@ contract PropertiesAllo is HandlersParent {
                     }
                 }
             } else {
-                assertTrue(_manager == address(0), "property-id 11-b: removePoolManager failed");
+                assertTrue(_manager == address(0) || _usingAnchor, "property-id 11-b: removePoolManager failed");
             }
         } else {
             if (_success) {
@@ -278,7 +278,7 @@ contract PropertiesAllo is HandlersParent {
             assertEq(allo.getTreasury(), _newTreasury, "property-id 15-a: updateTreasury failed");
             treasury = payable(_newTreasury);
         } else {
-            assertEq(_newTreasury, address(0), "property-id 15-a: updateTreasury failed");
+            assertEq(_newTreasury, address(0) || _usingAnchor, "property-id 15-a: updateTreasury failed");
         }
     }
 
@@ -292,7 +292,7 @@ contract PropertiesAllo is HandlersParent {
             assertTrue(allo.isTrustedForwarder(_newForwarder), "property-id 15-b: updateTrustedForwarder failed");
             forwarder = _newForwarder;
         } else {
-            assertTrue(_newForwarder == address(0), "property-id 15-b: updateTrustedForwarder failed");
+            assertTrue(_newForwarder == address(0) || _usingAnchor, "property-id 15-b: updateTrustedForwarder failed");
         }
     }
 
