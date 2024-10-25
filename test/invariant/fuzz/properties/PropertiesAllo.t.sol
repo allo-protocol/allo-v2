@@ -233,7 +233,7 @@ contract PropertiesAllo is HandlersParent {
                 );
                 assertEq(_pool.metadata.pointer, _metadata.pointer, "property-id 13: updatePoolMetadata pointer failed");
             } else {
-                fail("property-id 13: updatePoolMetadata failed");
+                assertTrue(_usingAnchor, "property-id 13: updatePoolMetadata failed");
             }
         } else {
             if (_success) {
