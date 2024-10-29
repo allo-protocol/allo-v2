@@ -119,27 +119,21 @@ contract PropertiesAllo is HandlersParent {
 
         (bool _success,) = targetCall(address(allo), 0, abi.encodeCall(allo.changeAdmin, (_poolId, _newAdmin)));
 
-        if (msg.sender == _admin) {
-            if (_success) {
-                if (_newAdmin != _admin) {
-                    assertTrue(
-                        !allo.hasRole(_poolAdminRole, _admin),
-                        "property-id 10: changeAdmin failed remove old admin role not removed"
-                    );
-                }
-                assertTrue(allo.hasRole(_poolAdminRole, _newAdmin), "property-id 10: changeAdmin failed role not set");
-                assertTrue(allo.isPoolAdmin(_poolId, _newAdmin), "property-id 10: admin not set");
-                ghost_poolAdmins[_poolId] = _newAdmin;
-            } else {
-                assertTrue(_newAdmin == address(0) || _usingAnchor, "property-id 10: changeAdmin failed");
-            }
-        } else {
-            if (_success) {
+        if (_success) {
+            assertTrue(msg.sender == _admin, "property-id 10: changeAdmin only admin should be able to change admin");
+            if (_newAdmin != _admin) {
                 assertTrue(
-                    !allo.isPoolAdmin(_poolId, _ghost_anchorOf[msg.sender]),
-                    "property-id 10: changeAdmin only admin should be able to change admin"
+                    !allo.hasRole(_poolAdminRole, _admin),
+                    "property-id 10: changeAdmin failed remove old admin role not removed"
                 );
             }
+            assertTrue(allo.hasRole(_poolAdminRole, _newAdmin), "property-id 10: changeAdmin failed role not set");
+            assertTrue(allo.isPoolAdmin(_poolId, _newAdmin), "property-id 10: admin not set");
+            ghost_poolAdmins[_poolId] = _newAdmin;
+        } else {
+            assertTrue(
+                _newAdmin == address(0) || msg.sender != _admin || _usingAnchor, "property-id 10: changeAdmin failed"
+            );
         }
     }
 
