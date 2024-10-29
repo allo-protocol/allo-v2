@@ -3,16 +3,23 @@ pragma solidity ^0.8.19;
 
 import {Setup} from "../Setup.t.sol";
 import {IRegistry} from "contracts/core/Registry.sol";
-import {Allo, Metadata} from "contracts/core/Allo.sol";
+import {Allo, IAllo, Metadata} from "contracts/core/Allo.sol";
 import {FuzzERC20} from "../helpers/FuzzERC20.sol";
 
 contract HandlerAllo is Setup {
-    uint256[] ghost_poolIds;
     mapping(uint256 _poolId => address[] _managers) ghost_poolManagers;
-    mapping(uint256 _poolId => address _poolAdmin) ghost_poolAdmins;
     mapping(uint256 _poolId => address[] _recipients) ghost_recipients;
 
-    function handler_createPool(uint256 _msgValue) public {
+    function handler_createPool(
+        uint256 _msgValue,
+        uint256 _seedPoolStrategy
+    ) public {
+        _seedPoolStrategy = bound(
+            _seedPoolStrategy,
+            uint256(type(PoolStrategies).min) + 1, // Avoid None elt
+            uint256(type(PoolStrategies).max)
+        );
+
         // Get the profile ID
         IRegistry.Profile memory profile = registry.getProfileByAnchor(
             _ghost_anchorOf[msg.sender]
@@ -20,6 +27,10 @@ contract HandlerAllo is Setup {
 
         // Avoid EOA
         if (profile.anchor == address(0)) return;
+
+        // Avoid redeploying pool with a strategy already tested
+        if (_strategyHasImplementation(PoolStrategies(_seedPoolStrategy)))
+            return;
 
         // Create a pool
         (bool succ, bytes memory ret) = targetCall(
@@ -29,7 +40,7 @@ contract HandlerAllo is Setup {
                 allo.createPool,
                 (
                     profile.id,
-                    address(strategy_directAllocation),
+                    _strategyImplementations[PoolStrategies(_seedPoolStrategy)],
                     bytes(""),
                     address(token),
                     0,
@@ -38,12 +49,6 @@ contract HandlerAllo is Setup {
                 )
             )
         );
-
-        if (succ) {
-            uint256 _poolId = abi.decode(ret, (uint256));
-            ghost_poolIds.push(_poolId);
-            ghost_poolAdmins[_poolId] = msg.sender;
-        }
     }
 
     function handler_updatePoolMetadata(
