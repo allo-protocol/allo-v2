@@ -243,10 +243,10 @@ contract HandlerAllo is Setup {
         return _poolIds;
     }
 
-    function _isManager(address _sende, uint256 _poolId) internal returns (bool _isManager) {
+    function _isManager(address _sende, uint256 _poolId) internal returns (bool __isManager) {
         for (uint256 _i; _i < ghost_poolManagers[_poolId].length; _i++) {
             if (msg.sender == ghost_poolManagers[_poolId][_i]) {
-                _isManager = true;
+                __isManager = true;
                 break;
             }
         }
