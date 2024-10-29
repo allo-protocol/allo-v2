@@ -119,7 +119,7 @@ contract PropertiesAllo is HandlersParent {
 
         (bool _success,) = targetCall(address(allo), 0, abi.encodeCall(allo.changeAdmin, (_poolId, _newAdmin)));
 
-        if (msg.sender == _admin) {
+        if (allo.isPoolAdmin(_poolId, msg.sender)) {
             if (_success) {
                 if (_newAdmin != _admin) {
                     assertTrue(
@@ -154,7 +154,7 @@ contract PropertiesAllo is HandlersParent {
 
         (bool _success,) = targetCall(address(allo), 0, abi.encodeCall(allo.addPoolManagers, (_poolId, _managers)));
 
-        if (msg.sender == _admin) {
+        if (allo.isPoolAdmin(_poolId, msg.sender)) {
             if (_success) {
                 assertTrue(
                     allo.hasRole(_poolManagerRole, _newManager), "property-id 11-a: addPoolManagers failed role not set"
@@ -187,7 +187,7 @@ contract PropertiesAllo is HandlersParent {
         (bool _success,) =
             targetCall(address(allo), 0, abi.encodeCall(allo.removePoolManagers, (_poolId, _removeManagers)));
 
-        if (msg.sender == _admin) {
+        if (allo.isPoolAdmin(_poolId, msg.sender)) {
             if (_success) {
                 assertTrue(!allo.hasRole(_poolManagerRole, _manager), "property-id 11-b: removePoolManagers failed");
                 delete ghost_poolManagers[_poolId];
@@ -218,7 +218,7 @@ contract PropertiesAllo is HandlersParent {
 
         (bool _success,) = targetCall(address(allo), 0, abi.encodeCall(allo.updatePoolMetadata, (_poolId, _metadata)));
 
-        if (_isManager(msg.sender, _poolId) || msg.sender == ghost_poolAdmins[_poolId]) {
+        if (_isManager(msg.sender, _poolId) || allo.isPoolAdmin(_poolId, msg.sender)) {
             if (_success) {
                 Allo.Pool memory _pool = allo.getPool(_poolId);
                 assertEq(
