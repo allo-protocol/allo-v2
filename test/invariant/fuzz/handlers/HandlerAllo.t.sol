@@ -50,6 +50,7 @@ contract HandlerAllo is Setup {
             uint256 _poolId = abi.decode(ret, (uint256));
             ghost_poolIds.push(_poolId);
             ghost_poolAdmins[_poolId] = msg.sender;
+            assertTrue(allo.isPoolAdmin(_poolId, msg.sender), "Admin not set handler_createPool");
         }
     }
 
@@ -218,6 +219,7 @@ contract HandlerAllo is Setup {
         (bool success,) = targetCall(address(allo), 0, abi.encodeCall(allo.changeAdmin, (_poolId, _newAdmin)));
         if (success) {
             ghost_poolAdmins[_poolId] = _newAdmin;
+            assertTrue(allo.isPoolAdmin(_poolId, _newAdmin), "Admin not set handler_changeAdmin");
         }
     }
 

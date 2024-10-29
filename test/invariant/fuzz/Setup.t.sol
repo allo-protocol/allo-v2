@@ -162,6 +162,7 @@ contract Setup is Actors, Pools {
             );
 
             ghost_poolAdmins[_poolId] = _deployer;
+            assertTrue(allo.isPoolAdmin(_poolId, _deployer), "Admin not set _initPools_");
 
             _recordPool(_poolId, PoolStrategies(i));
         }
