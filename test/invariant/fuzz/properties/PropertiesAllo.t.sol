@@ -120,7 +120,7 @@ contract PropertiesAllo is HandlersParent {
         (bool _success,) = targetCall(address(allo), 0, abi.encodeCall(allo.changeAdmin, (_poolId, _newAdmin)));
 
         if (_success) {
-            assertTrue(msg.sender == _admin, "property-id 10: changeAdmin only admin should be able to change admin");
+            assertEq(msg.sender, _admin, "property-id 10: changeAdmin only admin should be able to change admin");
             if (_newAdmin != _admin) {
                 assertTrue(
                     !allo.hasRole(_poolAdminRole, _admin),
@@ -151,19 +151,17 @@ contract PropertiesAllo is HandlersParent {
 
         (bool _success,) = targetCall(address(allo), 0, abi.encodeCall(allo.addPoolManagers, (_poolId, _managers)));
 
-        if (msg.sender == _admin) {
-            if (_success) {
-                assertTrue(
-                    allo.hasRole(_poolManagerRole, _newManager), "property-id 11-a: addPoolManagers failed role not set"
-                );
-                ghost_poolManagers[_poolId].push(_newManager);
-            } else {
-                assertTrue(_newManager == address(0) || _usingAnchor, "property-id 11-a: addPoolManager failed");
-            }
+        if (_success) {
+            assertEq(msg.sender, _admin, "property-id 11-a: addPoolManagers only admin should be able to add managers");
+            assertTrue(
+                allo.hasRole(_poolManagerRole, _newManager), "property-id 11-a: addPoolManagers failed role not set"
+            );
+            ghost_poolManagers[_poolId].push(_newManager);
         } else {
-            if (_success) {
-                fail("property-id 11-a: addPoolManager only admin should be able to add managers");
-            }
+            assertTrue(
+                _newManager == address(0) || _usingAnchor || msg.sender != _admin,
+                "property-id 11-a: addPoolManager failed"
+            );
         }
     }
 
@@ -184,23 +182,23 @@ contract PropertiesAllo is HandlersParent {
         (bool _success,) =
             targetCall(address(allo), 0, abi.encodeCall(allo.removePoolManagers, (_poolId, _removeManagers)));
 
-        if (msg.sender == _admin) {
-            if (_success) {
-                assertTrue(!allo.hasRole(_poolManagerRole, _manager), "property-id 11-b: removePoolManagers failed");
-                delete ghost_poolManagers[_poolId];
-                // regenerate the list of managers for the pool
-                for (uint256 _i; _i < _managers.length; _i++) {
-                    if (_i != _managerIndex) {
-                        ghost_poolManagers[_poolId].push(_managers[_i]);
-                    }
+        if (_success) {
+            assertEq(
+                msg.sender, _admin, "property-id 11-b: removePoolManagers only admin should be able to remove managers"
+            );
+            assertTrue(!allo.hasRole(_poolManagerRole, _manager), "property-id 11-b: removePoolManagers failed");
+            delete ghost_poolManagers[_poolId];
+            // regenerate the list of managers for the pool
+            for (uint256 _i; _i < _managers.length; _i++) {
+                if (_i != _managerIndex) {
+                    ghost_poolManagers[_poolId].push(_managers[_i]);
                 }
-            } else {
-                assertTrue(_manager == address(0) || _usingAnchor, "property-id 11-b: removePoolManager failed");
             }
         } else {
-            if (_success) {
-                fail("property-id 11-b: removePoolManager only admin should be able to remove managers");
-            }
+            assertTrue(
+                _manager == address(0) || _usingAnchor || msg.sender != _admin,
+                "property-id 11-b: removePoolManager failed"
+            );
         }
     }
 
@@ -216,20 +214,19 @@ contract PropertiesAllo is HandlersParent {
 
         (bool _success,) = targetCall(address(allo), 0, abi.encodeCall(allo.updatePoolMetadata, (_poolId, _metadata)));
 
-        if (_isManager(msg.sender, _poolId) || msg.sender == _admin) {
-            if (_success) {
-                Allo.Pool memory _pool = allo.getPool(_poolId);
-                assertEq(
-                    _pool.metadata.protocol, _metadata.protocol, "property-id 13: updatePoolMetadata protocol failed"
-                );
-                assertEq(_pool.metadata.pointer, _metadata.pointer, "property-id 13: updatePoolMetadata pointer failed");
-            } else {
-                assertTrue(_usingAnchor, "property-id 13: updatePoolMetadata failed");
-            }
+        if (_success) {
+            assertTrue(
+                _isManager(msg.sender, _poolId) || msg.sender == _admin,
+                "property-id 13: updatePoolMetadata only manager or admin should be able to update metadata"
+            );
+            Allo.Pool memory _pool = allo.getPool(_poolId);
+            assertEq(_pool.metadata.protocol, _metadata.protocol, "property-id 13: updatePoolMetadata protocol failed");
+            assertEq(_pool.metadata.pointer, _metadata.pointer, "property-id 13: updatePoolMetadata pointer failed");
         } else {
-            if (_success) {
-                fail("property-id 13: updatePoolMetadata only manager should be able to update metadata");
-            }
+            assertTrue(
+                (_isManager(msg.sender, _poolId) && msg.sender != _admin) || _usingAnchor,
+                "property-id 13: updatePoolMetadata failed"
+            );
         }
     }
 
