@@ -71,8 +71,6 @@ contract Setup is Actors, Pools {
         // Deploy strategies implementations
         _initImplementations(address(allo));
 
-        // strategy_directAllocation = new DirectAllocationStrategy(address(allo));
-
         // Deploy token
         token = ERC20(address(new FuzzERC20()));
 

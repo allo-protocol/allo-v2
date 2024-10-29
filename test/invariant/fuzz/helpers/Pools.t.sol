@@ -31,8 +31,6 @@ contract Pools is Utils {
     uint256[] internal ghost_poolIds;
     mapping(uint256 _poolId => address _poolAdmin) ghost_poolAdmins;
 
-    // mapping(uint256 _poolId => PoolStrategies _strategy) internal _poolStrategy;
-
     mapping(PoolStrategies _strategy => address _implementation)
         internal _strategyImplementations;
 
@@ -63,7 +61,6 @@ contract Pools is Utils {
     }
 
     function _recordPool(uint256 _poolId, PoolStrategies _strategy) internal {
-        // _poolStrategy[_poolId] = _strategy;
         ghost_poolIds.push(_poolId);
     }
 
