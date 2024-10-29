@@ -117,4 +117,8 @@ contract Actors is Utils {
     function _removeAnchorFromActor(address _actor, bytes32 _profileId) internal {
         delete _ghost_anchorOf[_actor];
     }
+
+    function _pickActor(uint256 _seed) internal view returns (address _actor) {
+        _actor = _ghost_actors[_seed % _ghost_actors.length];
+    }
 }

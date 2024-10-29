@@ -3,21 +3,30 @@ pragma solidity ^0.8.19;
 
 import {Setup} from "../Setup.t.sol";
 import {IRegistry} from "contracts/core/Registry.sol";
-import {IAllo, Allo, Metadata} from "contracts/core/Allo.sol";
+import {Allo, IAllo, Metadata} from "contracts/core/Allo.sol";
 import {FuzzERC20} from "../helpers/FuzzERC20.sol";
 
 contract HandlerAllo is Setup {
-    uint256[] ghost_poolIds;
     mapping(uint256 _poolId => address[] _managers) ghost_poolManagers;
-    mapping(uint256 _poolId => address _poolAdmin) ghost_poolAdmins;
     mapping(uint256 _poolId => address[] _recipients) ghost_recipients;
 
-    function handler_createPool(uint256 _msgValue) public {
+    function handler_createPool(uint256 _msgValue, uint256 _seedPoolStrategy) public {
+        _seedPoolStrategy = bound(
+            _seedPoolStrategy,
+            uint256(type(PoolStrategies).min) + 1, // Avoid None elt
+            uint256(type(PoolStrategies).max)
+        );
+
         // Get the profile ID
         IRegistry.Profile memory profile = registry.getProfileByAnchor(_ghost_anchorOf[msg.sender]);
 
         // Avoid EOA
         if (profile.anchor == address(0)) return;
+
+        // Avoid redeploying pool with a strategy already tested
+        if (_strategyHasImplementation(PoolStrategies(_seedPoolStrategy))) {
+            return;
+        }
 
         // Create a pool
         (bool succ, bytes memory ret) = targetCall(
@@ -27,7 +36,7 @@ contract HandlerAllo is Setup {
                 allo.createPool,
                 (
                     profile.id,
-                    address(strategy_directAllocation),
+                    _strategyImplementations[PoolStrategies(_seedPoolStrategy)],
                     bytes(""),
                     address(token),
                     0,
@@ -41,6 +50,7 @@ contract HandlerAllo is Setup {
             uint256 _poolId = abi.decode(ret, (uint256));
             ghost_poolIds.push(_poolId);
             ghost_poolAdmins[_poolId] = msg.sender;
+            assertTrue(allo.isPoolAdmin(_poolId, msg.sender), "Admin not set handler_createPool");
         }
     }
 
@@ -209,6 +219,7 @@ contract HandlerAllo is Setup {
         (bool success,) = targetCall(address(allo), 0, abi.encodeCall(allo.changeAdmin, (_poolId, _newAdmin)));
         if (success) {
             ghost_poolAdmins[_poolId] = _newAdmin;
+            assertTrue(allo.isPoolAdmin(_poolId, _newAdmin), "Admin not set handler_changeAdmin");
         }
     }
 
@@ -230,5 +241,14 @@ contract HandlerAllo is Setup {
         }
 
         return _poolIds;
+    }
+
+    function _isManager(address _sende, uint256 _poolId) internal returns (bool __isManager) {
+        for (uint256 _i; _i < ghost_poolManagers[_poolId].length; _i++) {
+            if (msg.sender == ghost_poolManagers[_poolId][_i]) {
+                __isManager = true;
+                break;
+            }
+        }
     }
 }
