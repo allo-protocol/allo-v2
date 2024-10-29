@@ -25,7 +25,7 @@ contract PropertiesAllo is HandlersParent {
         IRegistry.Profile memory _profile = registry.getProfileByAnchor(_ghost_anchorOf[msg.sender]);
 
         address[] memory _members = new address[](1);
-        address _newMember = _ghost_actors[_actorSeed % (_ghost_actors.length - 1)];
+        address _newMember = _pickActor(_actorSeed);
         _members[0] = _newMember;
 
         (bool _success,) =
@@ -115,7 +115,7 @@ contract PropertiesAllo is HandlersParent {
 
         bytes32 _poolAdminRole = keccak256(abi.encodePacked(_poolId, "admin"));
 
-        address _newAdmin = _ghost_actors[_actorSeed % (_ghost_actors.length - 1)];
+        address _newAdmin = _pickActor(_actorSeed);
 
         (bool _success,) = targetCall(address(allo), 0, abi.encodeCall(allo.changeAdmin, (_poolId, _newAdmin)));
 
@@ -217,15 +217,7 @@ contract PropertiesAllo is HandlersParent {
 
         (bool _success,) = targetCall(address(allo), 0, abi.encodeCall(allo.updatePoolMetadata, (_poolId, _metadata)));
 
-        bool _isManager;
-        for (uint256 _i; _i < ghost_poolManagers[_poolId].length; _i++) {
-            if (msg.sender == ghost_poolManagers[_poolId][_i]) {
-                _isManager = true;
-                break;
-            }
-        }
-
-        if (_isManager || msg.sender == ghost_poolAdmins[_poolId]) {
+        if (_isManager(msg.sender, _poolId) || msg.sender == ghost_poolAdmins[_poolId]) {
             if (_success) {
                 Allo.Pool memory _pool = allo.getPool(_poolId);
                 assertEq(

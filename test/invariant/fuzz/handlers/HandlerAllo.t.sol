@@ -219,7 +219,7 @@ contract HandlerAllo is Setup {
     function _pickPoolId(uint256 _idSeed) internal view returns (uint256) {
         if (ghost_poolIds.length == 0) return 0;
 
-        return ghost_poolIds[_idSeed % ghost_poolIds.length];
+        return ghost_poolIds[_idSeed % ghost_poolIds.length - 1];
     }
 
     function _pickPoolId(uint256[] memory _seeds) internal view returns (uint256[] memory) {
@@ -230,5 +230,14 @@ contract HandlerAllo is Setup {
         }
 
         return _poolIds;
+    }
+
+    function _isManager(address _sende, uint256 _poolId) internal returns (bool _isManager) {
+        for (uint256 _i; _i < ghost_poolManagers[_poolId].length; _i++) {
+            if (msg.sender == ghost_poolManagers[_poolId][_i]) {
+                _isManager = true;
+                break;
+            }
+        }
     }
 }
