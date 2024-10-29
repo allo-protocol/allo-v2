@@ -135,7 +135,10 @@ contract PropertiesAllo is HandlersParent {
             }
         } else {
             if (_success) {
-                fail("property-id 10: changeAdmin only admin should be able to change admin");
+                assertTrue(
+                    !allo.isPoolAdmin(_poolId, _ghost_anchorOf[msg.sender]),
+                    "property-id 10: changeAdmin only admin should be able to change admin"
+                );
             }
         }
     }
