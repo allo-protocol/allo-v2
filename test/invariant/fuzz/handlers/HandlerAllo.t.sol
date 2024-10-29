@@ -45,6 +45,12 @@ contract HandlerAllo is Setup {
                 )
             )
         );
+
+        if (succ) {
+            uint256 _poolId = abi.decode(ret, (uint256));
+            ghost_poolIds.push(_poolId);
+            ghost_poolAdmins[_poolId] = msg.sender;
+        }
     }
 
     function handler_updatePoolMetadata(uint256 _idSeed, uint256 _metadataProtocol, string calldata _data) public {
