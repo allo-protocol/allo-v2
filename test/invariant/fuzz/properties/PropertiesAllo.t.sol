@@ -129,7 +129,7 @@ contract PropertiesAllo is HandlersParent {
                 }
                 assertTrue(allo.hasRole(_poolAdminRole, _newAdmin), "property-id 10: changeAdmin failed role not set");
                 ghost_poolAdmins[_poolId] = _newAdmin;
-                assertTrue(allo.isPoolAdmin(_poolId, _newAdmin), "Admin not set property-id 10");
+                assertTrue(allo.isPoolAdmin(_poolId, _newAdmin), "property-id 10: admin not set");
             } else {
                 assertTrue(_newAdmin == address(0) || _usingAnchor, "property-id 10: changeAdmin failed");
             }
