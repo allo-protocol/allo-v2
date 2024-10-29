@@ -224,7 +224,7 @@ contract PropertiesAllo is HandlersParent {
             assertEq(_pool.metadata.pointer, _metadata.pointer, "property-id 13: updatePoolMetadata pointer failed");
         } else {
             assertTrue(
-                (_isManager(msg.sender, _poolId) && msg.sender != _admin) || _usingAnchor,
+                (!_isManager(msg.sender, _poolId) && msg.sender != _admin) || _usingAnchor,
                 "property-id 13: updatePoolMetadata failed"
             );
         }
