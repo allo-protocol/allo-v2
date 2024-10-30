@@ -63,7 +63,7 @@ contract PropertiesAllo is HandlersParent {
             } else {
                 assertEq(
                     FuzzERC20(_token).balanceOf(_recipient),
-                    _recipientPreviousBalance + _amount,
+                    _allocator == _recipient ? _recipientPreviousBalance : _recipientPreviousBalance + _amount,
                     "property-id 1-a: allocate failed"
                 );
             }
