@@ -6,12 +6,112 @@ import {Transfer} from "contracts/core/libraries/Transfer.sol";
 import {HandlersParent} from "../handlers/HandlersParent.t.sol";
 import {IAllo, Allo, Metadata} from "contracts/core/Allo.sol";
 import {IRegistry, Registry} from "contracts/core/Registry.sol";
+import {IBaseStrategy} from "contracts/strategies/BaseStrategy.sol";
 
 import {FuzzERC20, ERC20} from "../helpers/FuzzERC20.sol";
 
 contract PropertiesAllo is HandlersParent {
-    ///@custom:property-id 1
-    ///@custom:property one should always be able to pull/push correct (based on strategy) allocation for recipient
+    ///@custom:property-id 1-a
+    ///@custom:property one should always be able to allocate for recipient
+    function prop_userShouldBeAbleToAllocateForRecipient(uint256 _actorSeed, uint256 _idSeed, uint256 _amount) public {
+        address _recipient = _pickActor(_actorSeed);
+
+        _idSeed = bound(_idSeed, 0, ghost_poolIds.length - 1);
+        uint256 _poolId = ghost_poolIds[_idSeed];
+
+        bytes32 _strategyId = allo.getPool(_poolId).strategy.getStrategyId();
+
+        address[] memory _recipients = new address[](1);
+        _recipients[0] = _recipient;
+
+        address _token = allo.getPool(_poolId).token;
+
+        address[] memory _tokens = new address[](1);
+        _tokens[0] = address(_token);
+
+        uint256[] memory _amounts = new uint256[](1);
+        _amounts[0] = _amount;
+
+        bytes memory _data = abi.encode(_tokens);
+
+        // For now, only DirectAllocation strategy is supported
+        if (_strategyId != keccak256(abi.encode("DirectAllocation"))) {
+            return;
+        }
+
+        address _allocator = _usingAnchor ? _ghost_anchorOf[msg.sender] : msg.sender;
+        address _strategy = address(allo.getPool(_poolId).strategy);
+
+        uint256 _recipientPreviousBalance;
+
+        if (_token == Transfer.NATIVE) {
+            vm.deal(_allocator, _amount);
+            _recipientPreviousBalance = _recipient.balance;
+        } else {
+            FuzzERC20(_token).mint(_allocator, _amount);
+            vm.prank(_allocator);
+            FuzzERC20(_token).approve(_strategy, _amount);
+            _recipientPreviousBalance = FuzzERC20(_token).balanceOf(_recipient);
+        }
+
+        (bool _success,) =
+            targetCall(address(allo), 0, abi.encodeCall(allo.allocate, (_poolId, _recipients, _amounts, _data)));
+
+        if (_success) {
+            if (_token == Transfer.NATIVE) {
+                assertEq(_recipient.balance, _recipientPreviousBalance + _amount, "property-id 1-a: allocate failed");
+            } else {
+                assertEq(
+                    FuzzERC20(_token).balanceOf(_recipient),
+                    _recipientPreviousBalance + _amount,
+                    "property-id 1-a: allocate failed"
+                );
+            }
+        } else {
+            fail("property-id 1-a: allocate failed");
+        }
+    }
+
+    ///@custom:property-id 1-b
+    ///@custom:property one should always be able to pull correct (based on strategy) allocation for recipient
+    function prop_poolManagerShouldBeAbleToWithdrawForRecipient(
+        uint256 _idSeed,
+        uint256 _managerSeed,
+        uint256 _actorSeed,
+        uint256 _amount
+    ) public {
+        address _recipient = _pickActor(_actorSeed);
+
+        _idSeed = bound(_idSeed, 0, ghost_poolIds.length - 1);
+        uint256 _poolId = ghost_poolIds[_idSeed];
+
+        address _manager = ghost_poolManagers[_poolId][_managerSeed % ghost_poolManagers[_poolId].length - 1];
+
+        IBaseStrategy _strategy = allo.getPool(_poolId).strategy;
+
+        // For now, only DirectAllocation strategy is supported
+        if (_strategy.getStrategyId() != keccak256(abi.encode("DirectAllocation"))) {
+            return;
+        }
+
+        uint256 _recipientPreviousBalance = token.balanceOf(_recipient);
+
+        FuzzERC20(address(token)).mint(address(_strategy), _amount);
+        _recipientPreviousBalance = token.balanceOf(_recipient);
+        uint256 _poolAmount = _strategy.getPoolAmount();
+
+        (bool _success,) = targetCall(
+            address(_strategy), _manager, 0, abi.encodeCall(_strategy.withdraw, (address(token), _amount, _recipient))
+        );
+
+        if (_success) {
+            assertEq(
+                token.balanceOf(_recipient), _recipientPreviousBalance + _amount, "property-id 1-b: withdraw failed"
+            );
+        } else {
+            assertTrue(_amount > _poolAmount, "property-id 1-b: withdraw failed");
+        }
+    }
 
     ///@custom:property-id 2
     ///@custom:property a token allocation never “disappears” (withdraw cannot impact an allocation)
@@ -21,7 +121,13 @@ contract PropertiesAllo is HandlersParent {
 
     ///@custom:property-id 4
     ///@custom:property profile owner can always create a pool
-    function prop_profileOwnerCanAlwaysCreateAPool(uint256 _msgValue) public {
+    function prop_profileOwnerCanAlwaysCreateAPool(uint256 _msgValue, uint256 _seedPoolStrategy) public {
+        _seedPoolStrategy = bound(
+            _seedPoolStrategy,
+            uint256(type(PoolStrategies).min) + 1, // Avoid None elt
+            uint256(type(PoolStrategies).max)
+        );
+
         IRegistry.Profile memory _profile = registry.getProfileByAnchor(_ghost_anchorOf[msg.sender]);
 
         bool _isOwnerOrMember = registry.isOwnerOrMemberOfProfile(_profile.id, msg.sender);
@@ -34,7 +140,7 @@ contract PropertiesAllo is HandlersParent {
                 allo.createPool,
                 (
                     _profile.id,
-                    address(strategy_directAllocation),
+                    _strategyImplementations[PoolStrategies(_seedPoolStrategy)],
                     bytes(""),
                     address(token),
                     0,

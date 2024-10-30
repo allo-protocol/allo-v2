@@ -20,4 +20,18 @@ contract HandlerStrategy is HandlerAllo {
             address(_pool.strategy), 0, abi.encodeCall(BaseStrategy.withdraw, (_pool.token, _amount, _recipient))
         );
     }
+
+    function handler_increasePoolAmount(uint256 _poolSeed, uint256 _amount) public {
+        _poolSeed = bound(_poolSeed, 0, ghost_poolIds.length - 1);
+        uint256 _poolId = ghost_poolIds[_poolSeed];
+
+        // Needs at least one pool
+        if (ghost_poolIds.length == 0) return;
+
+        IAllo.Pool memory _pool = allo.getPool(ghost_poolIds[_poolSeed]);
+
+        // Increase the pool amount
+        (bool succ,) =
+            targetCall(address(_pool.strategy), 0, abi.encodeCall(BaseStrategy.increasePoolAmount, (_amount)));
+    }
 }

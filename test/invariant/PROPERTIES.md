@@ -4,7 +4,7 @@
 
 | id  | property                                                                                                          | covered |
 | --- | :---------------------------------------------------------------------------------------------------------------- | ------- |
-| 1   | one should always be able to pull/push correct (based on strategy) allocation for recipient                       | []      |
+| 1   | one should always be able to pull/push correct (based on strategy) allocation for recipient                       | [x]      |
 | 2   | a token allocation never “disappears” (withdraw cannot impact an allocation)                                      | []      |
 | 3   | an address can only withdraw if has allocation                                                                    | []      |
 | 4   | profile owner can always create a pool                                                                            | [x]      |
@@ -41,7 +41,7 @@
 - A strategy should never be initialised more than once [UNIT]
 - Creating a pool by cloning an existing strategy should deploy the strategy with a clean state [STATE TRANSITION]
 - Creating a pool with an amount higher than 0 should fund the strategy contract with the amount minus the fees [STATE TRANSITION]
-- Creating a pool should always make the sender pool admin [HIGH LEVEL
+- Creating a pool should always make the sender pool admin [HIGH LEVEL]
 - Two profiles should never have the same anchor [HIGH LEVEL]
 - After creating a profile the owner and anchor must be valid [STATE TRANSITION]
 - Updating the profile’s name should deploy a new anchor [UNIT]
