@@ -494,6 +494,9 @@ contract PropertiesAllo is HandlersParent {
     ///@custom:property-id 17
     ///@custom:property only funds not allocated can be withdrawn
 
+    event log_named_address(string name, address addr);
+    event log_named_uint256(string name, uint256 val);
+
     ///@custom:property-id 18
     ///@custom:property anyone can increase fund in a pool, if strategy (hook) logic allows so and if more than base fee
     function prop_anyoneCanIncreaseFundInAPool(uint256 _idSeed, uint256 _amount) public {
@@ -511,6 +514,12 @@ contract PropertiesAllo is HandlersParent {
 
         address _funder = _usingAnchor ? _ghost_anchorOf[msg.sender] : msg.sender;
 
+        emit log_named_address("funder", _funder);
+        emit log_named_uint256("amount", _amount);
+        emit log_named_uint256("feeAmount", _feeAmount);
+        emit log_named_uint256("amountAfterFee", _amountAfterFee);
+
+
         if (_token == Transfer.NATIVE) {
             vm.deal(_funder, _amount);
             _previousBalanceStrategy = _strategy.balance;
@@ -522,6 +531,9 @@ contract PropertiesAllo is HandlersParent {
             _previousBalanceStrategy = token.balanceOf(_strategy);
             _previousBalanceTreasury = token.balanceOf(treasury);
         }
+
+        emit log_named_uint256("previousBalanceStrategy", _previousBalanceStrategy);
+        emit log_named_uint256("previousBalanceTreasury", _previousBalanceTreasury);
 
         (bool _success,) = targetCall(address(allo), _amount, abi.encodeCall(allo.fundPool, (_poolId, _amount)));
 
@@ -535,6 +547,9 @@ contract PropertiesAllo is HandlersParent {
                 _afterBalanceStrategy = token.balanceOf(_strategy);
                 _afterBalanceTreasury = token.balanceOf(treasury);
             }
+
+            emit log_named_uint256("afterBalanceStrategy", _afterBalanceStrategy);
+            emit log_named_uint256("afterBalanceTreasury", _afterBalanceTreasury);
 
             assertEq(
                 _afterBalanceStrategy,
