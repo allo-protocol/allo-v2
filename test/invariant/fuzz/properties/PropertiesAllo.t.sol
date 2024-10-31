@@ -122,13 +122,7 @@ contract PropertiesAllo is HandlersParent {
 
     ///@custom:property-id 4
     ///@custom:property profile owner can always create a pool
-    function prop_profileOwnerCanAlwaysCreateAPool(uint256 _msgValue, uint256 _seedPoolStrategy) public {
-        _seedPoolStrategy = bound(
-            _seedPoolStrategy,
-            uint256(type(PoolStrategies).min) + 1, // Avoid None elt
-            uint256(type(PoolStrategies).max)
-        );
-
+    function prop_profileOwnerCanAlwaysCreateAPool(uint256 _msgValue) public {
         IRegistry.Profile memory _profile = registry.getProfileByAnchor(_ghost_anchorOf[msg.sender]);
 
         bool _isOwnerOrMember = registry.isOwnerOrMemberOfProfile(_profile.id, msg.sender);
@@ -141,7 +135,7 @@ contract PropertiesAllo is HandlersParent {
                 allo.createPool,
                 (
                     _profile.id,
-                    _strategyImplementations[PoolStrategies(_seedPoolStrategy)],
+                    _strategyImplementations[PoolStrategies.DirectAllocation],
                     bytes(""),
                     address(token),
                     0,
