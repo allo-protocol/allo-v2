@@ -358,6 +358,7 @@ contract PropertiesAllo is HandlersParent {
         uint256 _poolId = ghost_poolIds[_idSeed];
         address _admin = ghost_poolAdmins[_poolId];
 
+        bool _unauthorized = !_isManager(msg.sender, _poolId) && msg.sender != _admin;
         (bool _success,) = targetCall(address(allo), 0, abi.encodeCall(allo.updatePoolMetadata, (_poolId, _metadata)));
 
         if (_success) {
@@ -369,10 +370,7 @@ contract PropertiesAllo is HandlersParent {
             assertEq(_pool.metadata.protocol, _metadata.protocol, "property-id 13: updatePoolMetadata protocol failed");
             assertEq(_pool.metadata.pointer, _metadata.pointer, "property-id 13: updatePoolMetadata pointer failed");
         } else {
-            assertTrue(
-                (!_isManager(msg.sender, _poolId) && msg.sender != _admin) || _usingAnchor,
-                "property-id 13: updatePoolMetadata failed"
-            );
+            assertTrue(_unauthorized, "property-id 13: updatePoolMetadata failed");
         }
     }
 
