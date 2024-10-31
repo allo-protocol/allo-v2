@@ -557,12 +557,12 @@ contract PropertiesAllo is HandlersParent {
         } else {
             (bool _successAllocationEndtime, bytes memory _allocationEndTimedata) =
                 address(_strategy).call(abi.encodeWithSignature("allocationEndTime()"));
-            uint256 _allocationEndTime;
+            uint64 _allocationEndTime;
             if (_successAllocationEndtime) {
-                _allocationEndTime = abi.decode(_allocationEndTimedata, (uint256));
+                _allocationEndTime = abi.decode(_allocationEndTimedata, (uint64));
             }
             assertTrue(
-                _amount == 0 || (_successAllocationEndtime && _allocationEndTime > block.timestamp),
+                _amount == 0 || (_successAllocationEndtime && _allocationEndTime < block.timestamp),
                 "property-id 18: increasePoolFunds failed"
             );
         }
