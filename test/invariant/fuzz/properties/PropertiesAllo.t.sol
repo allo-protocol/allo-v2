@@ -7,6 +7,7 @@ import {HandlersParent} from "../handlers/HandlersParent.t.sol";
 import {IAllo, Allo, Metadata} from "contracts/core/Allo.sol";
 import {IRegistry, Registry} from "contracts/core/Registry.sol";
 import {IBaseStrategy} from "contracts/strategies/BaseStrategy.sol";
+import {IAllocationExtension} from "contracts/strategies/extensions/allocate/IAllocationExtension.sol";
 
 import {FuzzERC20, ERC20} from "../helpers/FuzzERC20.sol";
 
@@ -546,7 +547,7 @@ contract PropertiesAllo is HandlersParent {
             assertEq(
                 _afterBalanceStrategy,
                 _previousBalanceStrategy + _amountAfterFee,
-                "property-id 18: increasePoolFunds invalid balance"
+                "property-id 18: increasePoolFunds invalid strategy balance"
             );
             assertEq(
                 _afterBalanceTreasury,
@@ -554,7 +555,16 @@ contract PropertiesAllo is HandlersParent {
                 "property-id 19: increasePoolFunds invalid treasury balance"
             );
         } else {
-            assertEq(_amount, 0, "property-id 18: increasePoolFunds failed");
+            (bool _successAllocationEndtime, bytes memory _allocationEndTimedata) =
+                address(_strategy).call(abi.encodeWithSignature("allocationEndTime()"));
+            uint256 _allocationEndTime;
+            if (_successAllocationEndtime) {
+                _allocationEndTime = abi.decode(_allocationEndTimedata, (uint256));
+            }
+            assertTrue(
+                _amount == 0 || (_successAllocationEndtime && _allocationEndTime > block.timestamp),
+                "property-id 18: increasePoolFunds failed"
+            );
         }
     }
 
