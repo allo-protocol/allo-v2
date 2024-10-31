@@ -538,7 +538,7 @@ contract PropertiesAllo is HandlersParent {
         emit log_named_uint256("previousBalanceTreasury", _previousBalanceTreasury);
 
 
-        (bool _success,) = targetCall(address(allo), _amount, abi.encodeCall(allo.fundPool, (_poolId, _amountAfterFee)));
+        (bool _success,) = targetCall(address(allo), _amount, abi.encodeCall(allo.fundPool, (_poolId, _amount)));
 
         if (_success) {
             
