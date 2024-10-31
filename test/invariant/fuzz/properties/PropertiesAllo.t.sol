@@ -496,9 +496,6 @@ contract PropertiesAllo is HandlersParent {
     ///@custom:property-id 17
     ///@custom:property only funds not allocated can be withdrawn
 
-    event log_named_address(string name, address addr);
-    event log_named_uint256(string name, uint256 val);
-
     ///@custom:property-id 18
     ///@custom:property anyone can increase fund in a pool, if strategy (hook) logic allows so and if more than base fee
     function prop_anyoneCanIncreaseFundInAPool(uint256 _idSeed, uint256 _amount) public {
@@ -511,16 +508,10 @@ contract PropertiesAllo is HandlersParent {
         uint256 _feeAmount = (_amount * percentFee) / allo.getFeeDenominator();
         uint256 _amountAfterFee = _amount - _feeAmount;
 
-        address anchor = _ghost_anchorOf[msg.sender];
         uint256 _previousBalanceStrategy;
         uint256 _previousBalanceTreasury;
 
         address _funder = _usingAnchor ? _ghost_anchorOf[msg.sender] : msg.sender;
-
-        emit log_named_address("funder", _funder);
-        emit log_named_address("strategy", _strategy);
-        emit log_named_address("treasury", treasury);
-        emit log_named_uint256("amount", _amount);
 
         if (_token == Transfer.NATIVE) {
             vm.deal(_funder, _amount);
@@ -534,14 +525,9 @@ contract PropertiesAllo is HandlersParent {
             _previousBalanceTreasury = token.balanceOf(treasury);
         }
 
-        emit log_named_uint256("previousBalanceStrategy", _previousBalanceStrategy);
-        emit log_named_uint256("previousBalanceTreasury", _previousBalanceTreasury);
-
-
-        (bool _success,) = targetCall(address(allo), _amount, abi.encodeCall(allo.fundPool, (_poolId, _amountAfterFee)));
+        (bool _success,) = targetCall(address(allo), _amount, abi.encodeCall(allo.fundPool, (_poolId, _amount)));
 
         if (_success) {
-            
             uint256 _afterBalanceStrategy;
             uint256 _afterBalanceTreasury;
             if (_token == Transfer.NATIVE) {
@@ -552,8 +538,6 @@ contract PropertiesAllo is HandlersParent {
                 _afterBalanceTreasury = token.balanceOf(treasury);
             }
 
-            emit log_named_uint256("afterBalanceStrategy", _afterBalanceStrategy);
-            emit log_named_uint256("afterBalanceTreasury", _afterBalanceTreasury);
             assertEq(
                 _afterBalanceStrategy,
                 _previousBalanceStrategy + _amountAfterFee,
