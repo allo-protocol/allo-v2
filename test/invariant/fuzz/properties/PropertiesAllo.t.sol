@@ -1,13 +1,118 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.19;
 
+import {Transfer} from "contracts/core/libraries/Transfer.sol";
+
 import {HandlersParent} from "../handlers/HandlersParent.t.sol";
 import {IAllo, Allo, Metadata} from "contracts/core/Allo.sol";
 import {IRegistry, Registry} from "contracts/core/Registry.sol";
+import {IBaseStrategy} from "contracts/strategies/BaseStrategy.sol";
+import {IAllocationExtension} from "contracts/strategies/extensions/allocate/IAllocationExtension.sol";
+
+import {FuzzERC20, ERC20} from "../helpers/FuzzERC20.sol";
 
 contract PropertiesAllo is HandlersParent {
-    ///@custom:property-id 1
-    ///@custom:property one should always be able to pull/push correct (based on strategy) allocation for recipient
+    ///@custom:property-id 1-a
+    ///@custom:property one should always be able to allocate for recipient
+    function prop_userShouldBeAbleToAllocateForRecipient(uint256 _actorSeed, uint256 _idSeed, uint256 _amount) public {
+        address _recipient = _pickActor(_actorSeed);
+
+        _idSeed = bound(_idSeed, 0, ghost_poolIds.length - 1);
+        uint256 _poolId = ghost_poolIds[_idSeed];
+
+        bytes32 _strategyId = allo.getPool(_poolId).strategy.getStrategyId();
+
+        address[] memory _recipients = new address[](1);
+        _recipients[0] = _recipient;
+
+        address _token = allo.getPool(_poolId).token;
+
+        address[] memory _tokens = new address[](1);
+        _tokens[0] = address(_token);
+
+        uint256[] memory _amounts = new uint256[](1);
+        _amounts[0] = _amount;
+
+        bytes memory _data = abi.encode(_tokens);
+
+        // For now, only DirectAllocation strategy is supported
+        if (_strategyId != keccak256(abi.encode("DirectAllocation"))) {
+            return;
+        }
+
+        address _allocator = _usingAnchor ? _ghost_anchorOf[msg.sender] : msg.sender;
+        address _strategy = address(allo.getPool(_poolId).strategy);
+
+        uint256 _recipientPreviousBalance;
+
+        if (_token == Transfer.NATIVE) {
+            vm.deal(_allocator, _amount);
+            _recipientPreviousBalance = _recipient.balance;
+        } else {
+            FuzzERC20(_token).mint(_allocator, _amount);
+            vm.prank(_allocator);
+            FuzzERC20(_token).approve(_strategy, _amount);
+            _recipientPreviousBalance = FuzzERC20(_token).balanceOf(_recipient);
+        }
+
+        (bool _success,) =
+            targetCall(address(allo), 0, abi.encodeCall(allo.allocate, (_poolId, _recipients, _amounts, _data)));
+
+        if (_success) {
+            if (_token == Transfer.NATIVE) {
+                assertEq(_recipient.balance, _recipientPreviousBalance + _amount, "property-id 1-a: allocate failed");
+            } else {
+                assertEq(
+                    FuzzERC20(_token).balanceOf(_recipient),
+                    _allocator == _recipient ? _recipientPreviousBalance : _recipientPreviousBalance + _amount,
+                    "property-id 1-a: allocate failed"
+                );
+            }
+        } else {
+            fail("property-id 1-a: allocate failed");
+        }
+    }
+
+    ///@custom:property-id 1-b
+    ///@custom:property one should always be able to pull correct (based on strategy) allocation for recipient
+    function prop_poolManagerShouldBeAbleToWithdrawForRecipient(
+        uint256 _idSeed,
+        uint256 _managerSeed,
+        uint256 _actorSeed,
+        uint256 _amount
+    ) public {
+        address _recipient = _pickActor(_actorSeed);
+
+        _idSeed = bound(_idSeed, 0, ghost_poolIds.length - 1);
+        uint256 _poolId = ghost_poolIds[_idSeed];
+
+        address _manager = ghost_poolManagers[_poolId][_managerSeed % ghost_poolManagers[_poolId].length - 1];
+
+        IBaseStrategy _strategy = allo.getPool(_poolId).strategy;
+
+        // For now, only DirectAllocation strategy is supported
+        if (_strategy.getStrategyId() != keccak256(abi.encode("DirectAllocation"))) {
+            return;
+        }
+
+        uint256 _recipientPreviousBalance = token.balanceOf(_recipient);
+
+        FuzzERC20(address(token)).mint(address(_strategy), _amount);
+        _recipientPreviousBalance = token.balanceOf(_recipient);
+        uint256 _poolAmount = _strategy.getPoolAmount();
+
+        (bool _success,) = targetCall(
+            address(_strategy), _manager, 0, abi.encodeCall(_strategy.withdraw, (address(token), _amount, _recipient))
+        );
+
+        if (_success) {
+            assertEq(
+                token.balanceOf(_recipient), _recipientPreviousBalance + _amount, "property-id 1-b: withdraw failed"
+            );
+        } else {
+            assertTrue(_amount > _poolAmount, "property-id 1-b: withdraw failed");
+        }
+    }
 
     ///@custom:property-id 2
     ///@custom:property a token allocation never “disappears” (withdraw cannot impact an allocation)
@@ -17,6 +122,44 @@ contract PropertiesAllo is HandlersParent {
 
     ///@custom:property-id 4
     ///@custom:property profile owner can always create a pool
+    function prop_profileOwnerCanAlwaysCreateAPool(uint256 _msgValue) public {
+        IRegistry.Profile memory _profile = registry.getProfileByAnchor(_ghost_anchorOf[msg.sender]);
+
+        bool _isOwnerOrMember = registry.isOwnerOrMemberOfProfile(_profile.id, msg.sender);
+
+        // Create a pool
+        (bool succ, bytes memory ret) = targetCall(
+            address(allo),
+            _msgValue,
+            abi.encodeCall(
+                allo.createPool,
+                (
+                    _profile.id,
+                    _strategyImplementations[PoolStrategies.DirectAllocation],
+                    bytes(""),
+                    address(token),
+                    0,
+                    _profile.metadata,
+                    new address[](0)
+                )
+            )
+        );
+
+        if (succ) {
+            uint256 _poolId = abi.decode(ret, (uint256));
+            assertTrue(
+                allo.hasRole(keccak256(abi.encodePacked(_poolId, "admin")), msg.sender),
+                "property-id 9: initial admin should be pool creator"
+            );
+            ghost_poolIds.push(_poolId);
+            ghost_poolAdmins[_poolId] = msg.sender;
+        } else {
+            assertTrue(
+                _profile.anchor == address(0) || _usingAnchor || !_isOwnerOrMember || _msgValue != baseFee,
+                "property-id 4: createPool failed"
+            );
+        }
+    }
 
     ///@custom:property-id 5-a
     ///@custom:property profile owner is the only one who can always add profile members (name ⇒ new anchor())
@@ -99,12 +242,15 @@ contract PropertiesAllo is HandlersParent {
 
     ///@custom:property-id 7
     ///@custom:property profile member can always create a pool
+    /// covered with property-id 4
 
     ///@custom:property-id 8
     ///@custom:property only profile owner or member can create a pool
+    /// covered with property-id 4
 
     ///@custom:property-id 9
     ///@custom:property initial admin is always the creator of the pool
+    /// covered with property-id 4
 
     ///@custom:property-id 10
     ///@custom:property pool admin can always change admin (but not to address(0))
@@ -212,6 +358,7 @@ contract PropertiesAllo is HandlersParent {
         uint256 _poolId = ghost_poolIds[_idSeed];
         address _admin = ghost_poolAdmins[_poolId];
 
+        bool _unauthorized = (!_isManager(msg.sender, _poolId) && msg.sender != _admin) || _usingAnchor;
         (bool _success,) = targetCall(address(allo), 0, abi.encodeCall(allo.updatePoolMetadata, (_poolId, _metadata)));
 
         if (_success) {
@@ -223,10 +370,7 @@ contract PropertiesAllo is HandlersParent {
             assertEq(_pool.metadata.protocol, _metadata.protocol, "property-id 13: updatePoolMetadata protocol failed");
             assertEq(_pool.metadata.pointer, _metadata.pointer, "property-id 13: updatePoolMetadata pointer failed");
         } else {
-            assertTrue(
-                (!_isManager(msg.sender, _poolId) && msg.sender != _admin) || _usingAnchor,
-                "property-id 13: updatePoolMetadata failed"
-            );
+            assertTrue(_unauthorized, "property-id 13: updatePoolMetadata failed");
         }
     }
 
@@ -303,13 +447,120 @@ contract PropertiesAllo is HandlersParent {
 
     ///@custom:property-id 16
     ///@custom:property allo owner can always recover funds from allo contract ( (non-)native token )
+    function prop_alloOwnerCanAlwaysRecoverFundsFromAlloContract(uint256 _idSeed) public {
+        _idSeed = bound(_idSeed, 0, ghost_poolIds.length - 1);
+        uint256 _poolId = ghost_poolIds[_idSeed];
+
+        address _token = allo.getPool(_poolId).token;
+        address _recipient = _ghost_actors[_idSeed % (_ghost_actors.length - 1)];
+
+        uint256 _previousBalanceRecipient;
+        uint256 _previousBalanceAllo;
+
+        if (_token == Transfer.NATIVE) {
+            _previousBalanceRecipient = _recipient.balance;
+            _previousBalanceAllo = address(allo).balance;
+        } else {
+            _previousBalanceRecipient = token.balanceOf(_recipient);
+            _previousBalanceAllo = token.balanceOf(address(allo));
+        }
+
+        (bool _success,) =
+            targetCall(address(allo), allo.owner(), 0, abi.encodeCall(allo.recoverFunds, (address(_token), _recipient)));
+
+        if (_success) {
+            if (_token == Transfer.NATIVE) {
+                assertEq(
+                    _recipient.balance,
+                    _previousBalanceRecipient + _previousBalanceAllo,
+                    "property-id 16: recoverFunds failed invalid recipient balance"
+                );
+                assertEq(address(allo).balance, 0, "property-id 16: recoverFunds failed allo balance should  be zero");
+            } else {
+                assertEq(
+                    token.balanceOf(_recipient),
+                    _previousBalanceRecipient + _previousBalanceAllo,
+                    "property-id 16: recoverFunds failed invalid recipient balance"
+                );
+                assertEq(
+                    token.balanceOf(address(allo)), 0, "property-id 16: recoverFunds failed allo balance should be zero"
+                );
+            }
+        } else {
+            assertTrue(_previousBalanceAllo == 0, "property-id 16: recoverFunds failed");
+        }
+    }
 
     ///@custom:property-id 17
     ///@custom:property only funds not allocated can be withdrawn
 
     ///@custom:property-id 18
     ///@custom:property anyone can increase fund in a pool, if strategy (hook) logic allows so and if more than base fee
+    function prop_anyoneCanIncreaseFundInAPool(uint256 _idSeed, uint256 _amount) public {
+        _idSeed = bound(_idSeed, 0, ghost_poolIds.length - 1);
+        uint256 _poolId = ghost_poolIds[_idSeed];
+
+        address _token = allo.getPool(_poolId).token;
+        address _strategy = allo.getStrategy(_poolId);
+
+        uint256 _feeAmount = (_amount * percentFee) / allo.getFeeDenominator();
+        uint256 _amountAfterFee = _amount - _feeAmount;
+
+        uint256 _previousBalanceStrategy;
+        uint256 _previousBalanceTreasury;
+
+        address _funder = _usingAnchor ? _ghost_anchorOf[msg.sender] : msg.sender;
+
+        if (_token == Transfer.NATIVE) {
+            vm.deal(_funder, _amount);
+            _previousBalanceStrategy = _strategy.balance;
+            _previousBalanceTreasury = treasury.balance;
+        } else {
+            FuzzERC20(_token).mint(_funder, _amount);
+            vm.prank(_funder);
+            token.approve(address(allo), type(uint256).max);
+            _previousBalanceStrategy = token.balanceOf(_strategy);
+            _previousBalanceTreasury = token.balanceOf(treasury);
+        }
+
+        (bool _success,) = targetCall(address(allo), _amount, abi.encodeCall(allo.fundPool, (_poolId, _amount)));
+
+        if (_success) {
+            uint256 _afterBalanceStrategy;
+            uint256 _afterBalanceTreasury;
+            if (_token == Transfer.NATIVE) {
+                _afterBalanceStrategy = _strategy.balance;
+                _afterBalanceTreasury = treasury.balance;
+            } else {
+                _afterBalanceStrategy = token.balanceOf(_strategy);
+                _afterBalanceTreasury = token.balanceOf(treasury);
+            }
+
+            assertEq(
+                _afterBalanceStrategy,
+                _previousBalanceStrategy + _amountAfterFee,
+                "property-id 18: increasePoolFunds invalid strategy balance"
+            );
+            assertEq(
+                _afterBalanceTreasury,
+                _previousBalanceTreasury + _feeAmount,
+                "property-id 19: increasePoolFunds invalid treasury balance"
+            );
+        } else {
+            (bool _successAllocationEndtime, bytes memory _allocationEndTimedata) =
+                address(_strategy).call(abi.encodeWithSignature("allocationEndTime()"));
+            uint64 _allocationEndTime;
+            if (_successAllocationEndtime) {
+                _allocationEndTime = abi.decode(_allocationEndTimedata, (uint64));
+            }
+            assertTrue(
+                _amount == 0 || (_successAllocationEndtime && _allocationEndTime < block.timestamp),
+                "property-id 18: increasePoolFunds failed"
+            );
+        }
+    }
 
     ///@custom:property-id 19
     ///@custom:property every deposit/pool creation must take the correct fee on the amount deposited, forwarded to the treasury
+    /// covered with property-id 18
 }

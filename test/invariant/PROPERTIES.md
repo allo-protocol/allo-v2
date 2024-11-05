@@ -4,25 +4,25 @@
 
 | id  | property                                                                                                          | covered |
 | --- | :---------------------------------------------------------------------------------------------------------------- | ------- |
-| 1   | one should always be able to pull/push correct (based on strategy) allocation for recipient                       | []      |
+| 1   | one should always be able to pull/push correct (based on strategy) allocation for recipient                       | [x]      |
 | 2   | a token allocation never “disappears” (withdraw cannot impact an allocation)                                      | []      |
 | 3   | an address can only withdraw if has allocation                                                                    | []      |
-| 4   | profile owner can always create a pool                                                                            | []      |
+| 4   | profile owner can always create a pool                                                                            | [x]      |
 | 5   | profile owner is the only one who can always add/remove/modify profile members (name ⇒ new anchor())              | [x]      |
 | 6   | profile owner is the only one who can always initiate a change of profile owner (2 steps)                         | [x]      |
-| 7   | profile member can always create a pool                                                                           | []      |
-| 8   | only profile owner or member can create a pool                                                                    | []      |
-| 9   | initial admin is always the creator of the pool                                                                   | []      |
+| 7   | profile member can always create a pool                                                                           | [x]      |
+| 8   | only profile owner or member can create a pool                                                                    | [x]      |
+| 9   | initial admin is always the creator of the pool                                                                   | [x]      |
 | 10  | pool admin can always change admin (but not to address(0))                                                        | [x]      |
 | 11  | pool admin can always add/remove pool managers                                                                    | [x]      |
 | 12  | pool manager can always withdraw within strategy limits/logic                                                     | []      |
 | 13  | pool manager can always change metadata                                                                           | [x]      |
 | 14  | allo owner can always change base fee (flat) and percent flee (./. funding amt) to any arbitrary value (max 100%) | [x]      |
 | 15  | allo owner can always change the treasury address/trustred forwarded/etc                                          | [x]      |
-| 16  | allo owner can always recover funds from allo contract ( (non-)native token )                                     | []      |
+| 16  | allo owner can always recover funds from allo contract ( (non-)native token )                                     | [x]      |
 | 17  | only funds not allocated can be withdrawn                                                                         | []      |
-| 18  | anyone can increase fund in a pool, if strategy (hook) logic allows so and if more than base fee                  | []      |
-| 19  | every deposit/pool creation must take the correct fee on the amount deposited, forwarded to the treasury          | []      |
+| 18  | anyone can increase fund in a pool, if strategy (hook) logic allows so and if more than base fee                  | [x]      |
+| 19  | every deposit/pool creation must take the correct fee on the amount deposited, forwarded to the treasury          | [x]      |
 
 
 ## Other leads
@@ -41,7 +41,7 @@
 - A strategy should never be initialised more than once [UNIT]
 - Creating a pool by cloning an existing strategy should deploy the strategy with a clean state [STATE TRANSITION]
 - Creating a pool with an amount higher than 0 should fund the strategy contract with the amount minus the fees [STATE TRANSITION]
-- Creating a pool should always make the sender pool admin [HIGH LEVEL
+- Creating a pool should always make the sender pool admin [HIGH LEVEL]
 - Two profiles should never have the same anchor [HIGH LEVEL]
 - After creating a profile the owner and anchor must be valid [STATE TRANSITION]
 - Updating the profile’s name should deploy a new anchor [UNIT]
