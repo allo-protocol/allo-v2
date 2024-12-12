@@ -583,7 +583,7 @@ contract Allo is
     /// @return This will return 'true' if the address is a pool manager, otherwise 'false'
     function _isPoolManager(uint256 _poolId, address _address) internal view returns (bool) {
         return hasRole(pools[_poolId].managerRole, _address) || _isPoolAdmin(_poolId, _address)
-            || registry.isOwnerOrMemberOfProfile(pools[_poolId].profileId, msg.sender);
+            || registry.isOwnerOrMemberOfProfile(pools[_poolId].profileId, _address);
     }
 
     /// @notice Updates the registry address
