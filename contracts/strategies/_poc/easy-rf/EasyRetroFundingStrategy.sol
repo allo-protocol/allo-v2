@@ -593,7 +593,7 @@ contract EasyRetroFundingStrategy is Native, BaseStrategy, Multicall {
 
     /// @notice Function reverts
     /// @dev This will revert.
-    function _allocate(bytes memory _data, address _sender) internal virtual override {
+    function _allocate(bytes memory, address) internal virtual override {
         revert INVALID();
     }
 
@@ -621,13 +621,15 @@ contract EasyRetroFundingStrategy is Native, BaseStrategy, Multicall {
         // Decode the '_data' to get the distribution
         Distribution memory distribution = abi.decode(_data, (Distribution));
 
-        uint256 index = distribution.index;
         address recipientId = distribution.recipientId;
         uint256 amount = distribution.amount;
         address recipientAddress = _getRecipient(recipientId).recipientAddress;
 
+        if(recipientAddress == address(0)) {
+            return PayoutSummary(recipientAddress, 0);
+        }
         // If the distribution is not valid, return a payout summary with the amount set to zero
-        return PayoutSummary(recipientAddress, 0);
+        return PayoutSummary(recipientAddress, amount);
     }
 
     /// @notice Check if the distribution has been distributed.
@@ -673,7 +675,7 @@ contract EasyRetroFundingStrategy is Native, BaseStrategy, Multicall {
 
         address recipientAddress = _recipients[recipientId].recipientAddress;
 
-        if (!_hasBeenDistributed(index)) {
+        if (recipientAddress != address(0) && !_hasBeenDistributed(index)) {
             IAllo.Pool memory pool = allo.getPool(poolId);
 
             // Set the distribution as distributed
