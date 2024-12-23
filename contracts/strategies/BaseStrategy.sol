@@ -254,13 +254,13 @@ abstract contract BaseStrategy is IStrategy, Transfer, Errors {
 
     /// @notice Checks if the pool is active.
     /// @dev Reverts if the pool is not active.
-    function _checkOnlyActivePool() internal view {
+    function _checkOnlyActivePool() internal view virtual {
         if (!poolActive) revert POOL_INACTIVE();
     }
 
     /// @notice Checks if the pool is inactive.
     /// @dev Reverts if the pool is active.
-    function _checkInactivePool() internal view {
+    function _checkInactivePool() internal view virtual {
         if (poolActive) revert POOL_ACTIVE();
     }
 
