@@ -481,7 +481,7 @@ contract EasyRetroFundingStrategyTest is Test, AlloSetup, RegistrySetupFull, Eve
     }
 
     function test_registerRecipient_new_withRegistryAnchor() public {
-        EasyRetroFundingStrategy _strategy = new EasyRetroFundingStrategy(address(allo()), "DonationVotingStrategy");
+        EasyRetroFundingStrategy _strategy = new EasyRetroFundingStrategy(address(allo()), "EasyRetroFundingStrategy");
         vm.prank(address(allo()));
         _strategy.initialize(
             poolId,
@@ -509,7 +509,7 @@ contract EasyRetroFundingStrategyTest is Test, AlloSetup, RegistrySetupFull, Eve
     }
 
     function testRevert_registerRecipient_new_withRegistryAnchor_UNAUTHORIZED() public {
-        EasyRetroFundingStrategy _strategy = new EasyRetroFundingStrategy(address(allo()), "DonationVotingStrategy");
+        EasyRetroFundingStrategy _strategy = new EasyRetroFundingStrategy(address(allo()), "EasyRetroFundingStrategy");
         vm.prank(address(allo()));
         _strategy.initialize(
             poolId,
