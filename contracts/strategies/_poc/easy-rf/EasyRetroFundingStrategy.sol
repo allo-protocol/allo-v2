@@ -36,6 +36,7 @@ contract EasyRetroFundingStrategy is Native, BaseStrategy, Multicall {
     /// ================================
 
     error POOL_NOT_ENDED();
+
     bytes32 private constant NULL_POINTER = keccak256(bytes(""));
 
     /// @notice Struct to hold details of the application status
@@ -219,7 +220,7 @@ contract EasyRetroFundingStrategy is Native, BaseStrategy, Multicall {
     /// @notice Constructor for the EasyRF Strategy
     /// @param _allo The 'Allo' contract
     /// @param _name The name of the strategy
-    constructor(address _allo, string memory _name) BaseStrategy(_allo, _name) { }
+    constructor(address _allo, string memory _name) BaseStrategy(_allo, _name) {}
 
     /// ===============================
     /// ========= Initialize ==========
@@ -262,9 +263,7 @@ contract EasyRetroFundingStrategy is Native, BaseStrategy, Multicall {
         _isPoolTimestampValid(registrationStartTime, registrationEndTime, poolStartTime, poolEndTime);
 
         // Emit that the timestamps have been updated with the updated values
-        emit TimestampsUpdated(
-            registrationStartTime, registrationEndTime, poolStartTime, poolEndTime, msg.sender
-        );
+        emit TimestampsUpdated(registrationStartTime, registrationEndTime, poolStartTime, poolEndTime, msg.sender);
     }
 
     /// ===============================
@@ -349,9 +348,7 @@ contract EasyRetroFundingStrategy is Native, BaseStrategy, Multicall {
         poolEndTime = _poolEndTime;
 
         // Emit that the timestamps have been updated with the updated values
-        emit TimestampsUpdated(
-            registrationStartTime, registrationEndTime, poolStartTime, poolEndTime, msg.sender
-        );
+        emit TimestampsUpdated(registrationStartTime, registrationEndTime, poolStartTime, poolEndTime, msg.sender);
     }
 
     /// @notice Withdraw funds from pool
@@ -373,7 +370,7 @@ contract EasyRetroFundingStrategy is Native, BaseStrategy, Multicall {
     /// @dev This can only be called after the pool has ended and 'msg.sender' must be a pool manager and pool must have ended.
     ///      Emits a 'DistributionUpdated()' event.
     /// @param _distributionMetadata The metadata of the distribution
-    function updateDistribution( Metadata memory _distributionMetadata)
+    function updateDistribution(Metadata memory _distributionMetadata)
         external
         onlyAfterPoolEnds
         onlyPoolManager(msg.sender)
@@ -625,7 +622,7 @@ contract EasyRetroFundingStrategy is Native, BaseStrategy, Multicall {
         uint256 amount = distribution.amount;
         address recipientAddress = _getRecipient(recipientId).recipientAddress;
 
-        if(recipientAddress == address(0)) {
+        if (recipientAddress == address(0)) {
             return PayoutSummary(recipientAddress, 0);
         }
         // If the distribution is not valid, return a payout summary with the amount set to zero
