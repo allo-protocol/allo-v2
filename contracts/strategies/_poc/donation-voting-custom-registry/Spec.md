@@ -31,7 +31,7 @@ In this strategy, recipients must submit an application and be approved by pool 
   - prospective recipients must provide the projects address as `recipientId`, which serves as the unique identifier for their registration
 - **Recipient eligibility**
   - Pool manager has the option to enable two separate eligibility requirements on this contract:
-    - Requiring recipients to have an registry profile in order to apply
+    - Requiring recipients to have a registry profile in order to apply
     - Requiring recipients to submit answers to questions, stored in metadata
       - This metadata may include information for the front end on required / optional questions, but the contract only needs to check for whether metadata has been submitted
       - The pool manager should have a function that enables them to edit the pool metadata, which is callable at any point
