@@ -121,6 +121,10 @@ export const strategyConfig: DeployParams = {
       name: "DirectAllocationStrategy",
       version: "v1.1",
     },
+    "easy-retro-funding": {
+      name: "EasyRetroFundingStrategy",
+      version: "v1.0",
+    },
   },
   // Optimism
   10: {
