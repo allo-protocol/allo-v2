@@ -152,9 +152,6 @@ contract EasyRetroFundingStrategy is Native, BaseStrategy, Multicall {
     uint64 public poolStartTime;
     uint64 public poolEndTime;
 
-    /// @notice The total amount of tokens allocated to the payout.
-    uint256 public totalPayoutAmount;
-
     /// @notice The total number of recipients.
     uint256 public recipientsCounter;
 
