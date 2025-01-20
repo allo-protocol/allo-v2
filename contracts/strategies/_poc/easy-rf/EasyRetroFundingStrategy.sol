@@ -565,8 +565,12 @@ contract EasyRetroFundingStrategy is Native, BaseStrategy, Multicall {
         override
         onlyPoolManager(_sender)
     {
-        if (keccak256(bytes(distributionMetadata.pointer)) != NULL_POINTER) {
-            distributionStarted = true;
+        if (!distributionStarted) {
+            if (keccak256(bytes(distributionMetadata.pointer)) != NULL_POINTER) {
+                distributionStarted = true;
+            } else {
+                revert INVALID();
+            }
         }
 
         // Decode the '_data' to get the distributions

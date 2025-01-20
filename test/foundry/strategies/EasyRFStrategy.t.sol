@@ -614,9 +614,13 @@ contract EasyRetroFundingStrategyTest is Test, AlloSetup, RegistrySetupFull, Eve
         // invalid recipientId
         distributions[1] = EasyRetroFundingStrategy.Distribution({index: 1, recipientId: randomAddress(), amount: 2e18});
 
-        vm.prank(address(allo()));
+        vm.warp(poolEndTime + 1);
+        vm.prank(pool_admin());
+        strategy.updateDistribution(Metadata(1, "metadata"));
+
         vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, profile1_notAMember()));
 
+        vm.prank(address(allo()));
         strategy.distribute(new address[](0), abi.encode(distributions), pool_admin());
     }
 
@@ -642,6 +646,23 @@ contract EasyRetroFundingStrategyTest is Test, AlloSetup, RegistrySetupFull, Eve
 
         vm.expectRevert(abi.encodeWithSelector(RECIPIENT_ERROR.selector, profile1_anchor()));
         vm.prank(address(allo()));
+        strategy.distribute(new address[](0), abi.encode(distributions), pool_admin());
+    }
+
+    function testRevert_distribute_INVALID() public {
+        __register_accept_recipient();
+        __register_recipient2();
+
+        EasyRetroFundingStrategy.Distribution[] memory distributions = new EasyRetroFundingStrategy.Distribution[](2);
+        distributions[0] =
+            EasyRetroFundingStrategy.Distribution({index: 0, recipientId: profile1_notAMember(), amount: 1e18});
+
+        // invalid recipientId
+        distributions[1] = EasyRetroFundingStrategy.Distribution({index: 1, recipientId: randomAddress(), amount: 2e18});
+
+        vm.prank(address(allo()));
+        vm.expectRevert(INVALID.selector);
+
         strategy.distribute(new address[](0), abi.encode(distributions), pool_admin());
     }
 
