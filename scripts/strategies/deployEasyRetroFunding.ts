@@ -10,13 +10,13 @@ export const deployEasyRetroFunding = async () => {
 
   const strategyParams = strategyConfig[chainId]["easy-retro-funding"];
 
-  const address = await deployStrategies(
-    strategyParams.name,
-    strategyParams.version,
-    true
-  );
+  // const address = await deployStrategies(
+  //   strategyParams.name,
+  //   strategyParams.version,
+  //   true
+  // );
 
-  console.log("==> address", address);
+  // console.log("==> address", address);
 
   // const validator = await new Validator(
   //   strategyParams.name,
@@ -25,13 +25,12 @@ export const deployEasyRetroFunding = async () => {
 
   // await validator.validate("PERMIT2", [], commonConfig[chainId].permit2Address);
 
-  // await deployStrategyDirectly(
-  //   strategyParams.name,
-  //   strategyParams.version,
-  //   [commonConfig[chainId].permit2Address],
-  //   true,
-  // );
-
+  await deployStrategyDirectly(
+    strategyParams.name,
+    strategyParams.version,
+    [],
+    true,
+  );
 };
 
 // Check if this script is the main module (being run directly)
