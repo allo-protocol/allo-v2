@@ -337,7 +337,11 @@ contract EasyRetroFundingStrategy is Native, BaseStrategy, Multicall {
     ) external onlyPoolManager(msg.sender) {
         // If the timestamps are invalid this will revert - See details in '_isPoolTimestampValid'
         _isPoolTimestampValid(_registrationStartTime, _registrationEndTime, _poolStartTime, _poolEndTime);
-
+        // If the distribution has already started this will revert, you can only
+        // update the pool timestamps before the distribution has started
+        if (distributionStarted) {
+            revert INVALID();
+        }
         // Set the updated timestamps
         registrationStartTime = _registrationStartTime;
         registrationEndTime = _registrationEndTime;
