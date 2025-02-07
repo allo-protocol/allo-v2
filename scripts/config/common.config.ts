@@ -150,5 +150,15 @@ export const commonConfig: DeployParams = {
   100: {
     proxyAdminOwner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
     permit2Address: "0x000000000022D473030F116dDEE9F6B43aC78BA3",
-  }
+  },
+  // Hedera Mainnet
+  295: {
+    proxyAdminOwner: "TODO",
+    permit2Address: "TODO",
+  },
+  // Hedera Testnet
+  296: {
+    proxyAdminOwner: "TODO",
+    permit2Address: "TODO",
+  },
 };

@@ -275,12 +275,14 @@ const config: HardhatUserConfig = {
     },
     "hedera-mainnet": {
       ...createMainnetConfig("hedera-mainnet"),
-      url: "https://mainnet.hashio.io/api"
+      url: "https://mainnet.hashio.io/api",
+      gasPrice: 350000000000,
       // url: "https://295.rpc.thirdweb.com",
     },
     "hedera-testnet": {
       ...createTestnetConfig("hedera-testnet"),
-      url: "https://testnet.hashio.io/api"
+      url: "https://testnet.hashio.io/api",
+      gasPrice: 350000000000,
       // url: "https://296.rpc.thirdweb.com"
     },
 

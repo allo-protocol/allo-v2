@@ -50,7 +50,7 @@ networks=(
 #   "metisAndromeda"
 #   "gnosis"
 #   "hedera-mainnet"
-#   "hedera-testnet"
+  "hedera-testnet"
 #  === ZkSync Era ===
 #   "zkSyncTestnet"
 #   "zkSyncMainnet"

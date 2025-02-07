@@ -1,0 +1,46 @@
+WARNING: You are currently using Node.js v21.7.3, which is not supported by Hardhat. This can lead to unexpected behavior. See https://hardhat.org/nodejs-versions
+
+
+
+    ////////////////////////////////////////////////////
+      Deploys DirectGrantsLiteStrategy.sol on hedera-testnet
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────┐
+│ (index)         │ Values                                       │
+├─────────────────┼──────────────────────────────────────────────┤
+│ contract        │ 'DirectGrantsLiteStrategy.sol'               │
+│ chainId         │ 296                                          │
+│ network         │ 'hedera-testnet'                             │
+│ deployerAddress │ '0xB8cEF765721A6da910f14Be93e7684e9a3714123' │
+│ balance         │ '99.36676994'                                │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying DirectGrantsLiteStrategy.sol
+[35mContract DirectGrantsLiteStrategy deployed at address: 0xe314247a745f207775097f0911569D523fd119b9[0m
+
+Verifying contract...
+ChainConfigNotFoundError: Trying to verify a contract in a network with chain id 296, but the plugin doesn't recognize it as a supported chain.
+
+You can manually add support for it by following these instructions: https://hardhat.org/verify-custom-networks
+
+To see the list of supported networks, run this command:
+
+  npx hardhat verify --list-networks
+    at Function.getCurrentChainConfig (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/internal/etherscan.ts:65:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async SimpleTaskDefinition.action (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/index.ts:234:27)
+    at async Environment._runTaskDefinition (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:351:14)
+    at async hardhatVerify (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/verify-proxy.ts:118:12)
+    at async OverriddenTaskDefinition._action (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/index.ts:206:12)
+    at async Environment._runTaskDefinition (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:351:14)
+    at async Environment.run (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:184:14)
+    at async SimpleTaskDefinition.action (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/index.ts:546:7)
+    at async Environment._runTaskDefinition (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:351:14)
+[90m
+	Validating getAllo() == 0x00CD233ae7F31DC3664401cb040f24f6bf615668[0m
+[32m	✅ PASSED with Result: 0x00CD233ae7F31DC3664401cb040f24f6bf615668[0m
+[90m
+	Validating getStrategyId() == 0x103732a8e473467a510d4128ee11065262bdd978f0d9dad89ba68f2c56127e27[0m
+[32m	✅ PASSED with Result: 0x103732a8e473467a510d4128ee11065262bdd978f0d9dad89ba68f2c56127e27[0m
+Adding DirectGrantsLiteStrategy v1.0 to cloneable strategies...
+Error adding DirectGrantsLiteStrategy v1.0 to cloneable strategies.

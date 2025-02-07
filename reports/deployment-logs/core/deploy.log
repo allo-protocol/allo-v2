@@ -673,3 +673,19 @@
 20250107_150308 - Deployment finished with 0 error(s)
 20250107_150313 - Executing: bun hardhat run scripts/strategies/deployEasyRetroFunding.ts --no-compile --network sepolia | tee ./reports/deployment-logs/strategies/deployEasyRetroFunding/sepolia/20250107_150313/deploy-20250107_150313.log
 20250107_160738 - Deployment finished with 0 error(s)
+20250207_152703 - Executing: bun hardhat run scripts/core/deployRegistry.ts --no-compile --network hedera-testnet | tee ./reports/deployment-logs/core/deployRegistry/hedera-testnet/20250207_152703/deploy-20250207_152703.log
+20250207_152709 - Deployment finished with 0 error(s)
+20250207_152709 - Executing: bun hardhat run scripts/core/deployContractFactory.ts --no-compile --network hedera-testnet | tee ./reports/deployment-logs/core/deployContractFactory/hedera-testnet/20250207_152703/deploy-20250207_152703.log
+20250207_152713 - Deployment finished with 0 error(s)
+20250207_152713 - Executing: bun hardhat run scripts/core/deployAllo.ts --no-compile --network hedera-testnet | tee ./reports/deployment-logs/core/deployAllo/hedera-testnet/20250207_152703/deploy-20250207_152703.log
+20250207_152714 - Deployment finished with 0 error(s)
+20250207_152933 - Executing: bun hardhat run scripts/core/deployRegistry.ts --no-compile --network hedera-testnet | tee ./reports/deployment-logs/core/deployRegistry/hedera-testnet/20250207_152933/deploy-20250207_152933.log
+20250207_153119 - Deployment finished with 0 error(s)
+20250207_182818 - Executing: bun hardhat run scripts/core/deployContractFactory.ts --no-compile --network hedera-testnet | tee ./reports/deployment-logs/core/deployContractFactory/hedera-testnet/20250207_182818/deploy-20250207_182818.log
+20250207_182917 - Deployment finished with 0 error(s)
+20250207_182922 - Executing: bun hardhat run scripts/core/deployAllo.ts --no-compile --network hedera-testnet | tee ./reports/deployment-logs/core/deployAllo/hedera-testnet/20250207_182922/deploy-20250207_182922.log
+20250207_183056 - Deployment finished with 0 error(s)
+20250207_183113 - Executing: bun hardhat run scripts/strategies/deployDirectGrantsLite.ts --no-compile --network hedera-testnet | tee ./reports/deployment-logs/strategies/deployDirectGrantsLite/hedera-testnet/20250207_183113/deploy-20250207_183113.log
+20250207_183210 - Deployment finished with 0 error(s)
+20250207_183231 - Executing: bun hardhat run scripts/strategies/deployDirectAllocation.ts --no-compile --network hedera-testnet | tee ./reports/deployment-logs/strategies/deployDirectAllocation/hedera-testnet/20250207_183231/deploy-20250207_183231.log
+20250207_183315 - Deployment finished with 0 error(s)

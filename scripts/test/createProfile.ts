@@ -12,7 +12,7 @@ export async function createProfile() {
 
     const balance = await ethers.provider.getBalance(deployerAddress);
 
-    const registry = "0x4AAcca72145e1dF2aeC137E1f3C5E3D75DB8b5f3";
+    const registry = "0xd39b40aC9279EeeB86FBbDeb2C9acDF16e16cF89";
 
     console.table({
         contract: "registry: create profile",
@@ -27,17 +27,17 @@ export async function createProfile() {
     const instance = await ethers.getContractAt('Registry', registry);
 
     await instance.createProfile(
-        1, // none
+        1, // nonce
         "Direct Allocation", // name
         {
             protocol: 1,
             pointer: "bafybeia4khbew3r2mkflyn7nzlvfzcb3qpfeftz5ivpzfwn77ollj47gqi"
         }, // metadata
         "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C", // owner
-        ["0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C"] // members
+        [] // members
     );
 
-    console.log("profile created at:", instance.target);
+    console.log("profile created on resgistry:", instance.target);
   
     return instance.target;
 }
