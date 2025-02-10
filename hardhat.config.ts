@@ -37,6 +37,7 @@ const chainIds = {
   "sei-devnet": 713715,
   "sei-mainnet": 1329,
   "lukso-testnet": 4201,
+  "hedera-testnet": 296,
 
   // mainnet
   mainnet: 1,
@@ -52,6 +53,7 @@ const chainIds = {
   "lukso-mainnet": 42,
   metisAndromeda: 1088,
   gnosis: 100,
+  "hedera-mainnet": 295,
 };
 
 let deployPrivateKey = process.env.DEPLOYER_PRIVATE_KEY as string;
@@ -270,6 +272,18 @@ const config: HardhatUserConfig = {
     "gnosis": {
       ...createMainnetConfig("gnosis"),
       url: "https://rpc.gnosischain.com",
+    },
+    "hedera-mainnet": {
+      ...createMainnetConfig("hedera-mainnet"),
+      url: "https://mainnet.hashio.io/api",
+      gasPrice: 350000000000,
+      // url: "https://295.rpc.thirdweb.com",
+    },
+    "hedera-testnet": {
+      ...createTestnetConfig("hedera-testnet"),
+      url: "https://testnet.hashio.io/api",
+      gasPrice: 350000000000,
+      // url: "https://296.rpc.thirdweb.com"
     },
 
     // Local Networks

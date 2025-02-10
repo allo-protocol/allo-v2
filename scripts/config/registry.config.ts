@@ -123,4 +123,12 @@ export const registryConfig: DeployParams = {
   100: {
     owner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
   },
+  // Hedera Mainnet
+  295: {
+    owner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
+  },
+  // Hedera Testnet
+  296: {
+    owner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
+  },
 };

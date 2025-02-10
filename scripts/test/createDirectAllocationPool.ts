@@ -70,4 +70,5 @@ createDirectAllocationPool().catch((error) => {
 // Metis       | 0x56662F9c0174cD6ae14b214fC52Bd6Eb6B6eA602 | 0x13ffe09671f07a4eb6bfcf96fa58d93bedabf721d26d0cc162f267504816f3db | 1 
 // Polygon     | | | |
 // Zksync      | | | |
+// Hedera      | 0x56662F9c0174cD6ae14b214fC52Bd6Eb6B6eA602 | 0x13ffe09671f07a4eb6bfcf96fa58d93bedabf721d26d0cc162f267504816f3db | 1
 // ```
