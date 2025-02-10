@@ -12,7 +12,7 @@ export async function createProfile() {
 
     const balance = await ethers.provider.getBalance(deployerAddress);
 
-    const registry = "0xd39b40aC9279EeeB86FBbDeb2C9acDF16e16cF89";
+    const registry = "0x4AAcca72145e1dF2aeC137E1f3C5E3D75DB8b5f3";
 
     console.table({
         contract: "registry: create profile",
@@ -37,7 +37,7 @@ export async function createProfile() {
         [] // members
     );
 
-    console.log("profile created on resgistry:", instance.target);
+    console.log("profile created at registry:", instance.target);
   
     return instance.target;
 }

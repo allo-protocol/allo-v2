@@ -703,3 +703,9 @@
 20250210_153908 - Deployment finished with 0 error(s)
 20250210_153916 - Executing: bun hardhat run scripts/core/deployAllo.ts --no-compile --network hedera-mainnet | tee ./reports/deployment-logs/core/deployAllo/hedera-mainnet/20250210_153916/deploy-20250210_153916.log
 20250210_154202 - Deployment finished with 0 error(s)
+20250210_154612 - Executing: bun hardhat run scripts/strategies/deployDirectGrantsLite.ts --no-compile --network hedera-mainnet | tee ./reports/deployment-logs/strategies/deployDirectGrantsLite/hedera-mainnet/20250210_154612/deploy-20250210_154612.log
+20250210_154756 - Deployment finished with 0 error(s)
+20250210_154806 - Executing: bun hardhat run scripts/strategies/deployDirectAllocation.ts --no-compile --network hedera-mainnet | tee ./reports/deployment-logs/strategies/deployDirectAllocation/hedera-mainnet/20250210_154806/deploy-20250210_154806.log
+20250210_154918 - Deployment finished with 0 error(s)
+20250210_161400 - Executing: bun hardhat run scripts/strategies/deployDonationVotingMerkleDistributionDirect.ts --no-compile --network hedera-mainnet | tee ./reports/deployment-logs/strategies/deployDonationVotingMerkleDistributionDirect/hedera-mainnet/20250210_161400/deploy-20250210_161400.log
+20250210_161551 - Deployment finished with 0 error(s)
