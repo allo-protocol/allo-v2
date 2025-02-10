@@ -689,3 +689,17 @@
 20250207_183210 - Deployment finished with 0 error(s)
 20250207_183231 - Executing: bun hardhat run scripts/strategies/deployDirectAllocation.ts --no-compile --network hedera-testnet | tee ./reports/deployment-logs/strategies/deployDirectAllocation/hedera-testnet/20250207_183231/deploy-20250207_183231.log
 20250207_183315 - Deployment finished with 0 error(s)
+20250210_152758 - Executing: bun hardhat run scripts/core/deployRegistry.ts --no-compile --network hedera-mainnet | tee ./reports/deployment-logs/core/deployRegistry/hedera-mainnet/20250210_152758/deploy-20250210_152758.log
+20250210_152807 - Deployment finished with 0 error(s)
+20250210_152934 - Executing: bun hardhat run scripts/core/deployRegistry.ts --no-compile --network hedera-testnet | tee ./reports/deployment-logs/core/deployRegistry/hedera-testnet/20250210_152934/deploy-20250210_152934.log
+20250210_153108 - Deployment finished with 0 error(s)
+20250210_153238 - Executing: bun hardhat run scripts/core/deployRegistry.ts --no-compile --network hedera-testnet | tee ./reports/deployment-logs/core/deployRegistry/hedera-testnet/20250210_153238/deploy-20250210_153238.log
+20250210_153353 - Deployment finished with 0 error(s)
+20250210_153356 - Executing: bun hardhat run scripts/core/deployContractFactory.ts --no-compile --network hedera-testnet | tee ./reports/deployment-logs/core/deployContractFactory/hedera-testnet/20250210_153356/deploy-20250210_153356.log
+20250210_153457 - Deployment finished with 0 error(s)
+20250210_153533 - Executing: bun hardhat run scripts/core/deployRegistry.ts --no-compile --network hedera-mainnet | tee ./reports/deployment-logs/core/deployRegistry/hedera-mainnet/20250210_153533/deploy-20250210_153533.log
+20250210_153750 - Deployment finished with 0 error(s)
+20250210_153803 - Executing: bun hardhat run scripts/core/deployContractFactory.ts --no-compile --network hedera-mainnet | tee ./reports/deployment-logs/core/deployContractFactory/hedera-mainnet/20250210_153803/deploy-20250210_153803.log
+20250210_153908 - Deployment finished with 0 error(s)
+20250210_153916 - Executing: bun hardhat run scripts/core/deployAllo.ts --no-compile --network hedera-mainnet | tee ./reports/deployment-logs/core/deployAllo/hedera-mainnet/20250210_153916/deploy-20250210_153916.log
+20250210_154202 - Deployment finished with 0 error(s)

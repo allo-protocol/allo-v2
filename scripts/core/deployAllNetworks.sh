@@ -49,8 +49,8 @@ networks=(
 #   "lukso-mainnet"
 #   "metisAndromeda"
 #   "gnosis"
-#   "hedera-mainnet"
-  "hedera-testnet"
+  "hedera-mainnet"
+#   "hedera-testnet"
 #  === ZkSync Era ===
 #   "zkSyncTestnet"
 #   "zkSyncMainnet"

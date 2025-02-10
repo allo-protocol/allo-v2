@@ -1,0 +1,69 @@
+
+    ////////////////////////////////////////////////////
+            Deploys Registry.sol on hedera-mainnet
+    ////////////////////////////////////////////////////
+  
+┌─────────────────┬──────────────────────────────────────────────┐
+│ (index)         │ Values                                       │
+├─────────────────┼──────────────────────────────────────────────┤
+│ contract        │ 'Registry.sol'                               │
+│ chainId         │ 295                                          │
+│ network         │ 'hedera-mainnet'                             │
+│ deployerAddress │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│ registryOwner   │ '0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C' │
+│ balance         │ '199.01'                                     │
+└─────────────────┴──────────────────────────────────────────────┘
+Deploying Registry...
+Registry proxy deployed to: 0x4AAcca72145e1dF2aeC137E1f3C5E3D75DB8b5f3
+Registry implementation deployed to: 0xA3Fd7042F83960398De6ceddbf513F8cac877cbE
+Proxy Admin:  0x758b87af7fdB4783f848a1dDEa1F025dC48B9858
+Proxy Admin Owner:  0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C
+
+Verifying contract...
+Verifying implementation: 0xA3Fd7042F83960398De6ceddbf513F8cac877cbE
+Failed to verify implementation contract at 0xA3Fd7042F83960398De6ceddbf513F8cac877cbE: Trying to verify a contract in a network with chain id 295, but the plugin doesn't recognize it as a supported chain.
+
+You can manually add support for it by following these instructions: https://hardhat.org/verify-custom-networks
+
+To see the list of supported networks, run this command:
+
+  npx hardhat verify --list-networks
+ChainConfigNotFoundError: Trying to verify a contract in a network with chain id 295, but the plugin doesn't recognize it as a supported chain.
+
+You can manually add support for it by following these instructions: https://hardhat.org/verify-custom-networks
+
+To see the list of supported networks, run this command:
+
+  npx hardhat verify --list-networks
+    at Function.getCurrentChainConfig (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/internal/etherscan.ts:65:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async getEtherscanInstance (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/utils/etherscan-api.ts:44:23)
+    at async fullVerifyTransparentOrUUPS (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/verify-proxy.ts:202:21)
+    at async verify (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/verify-proxy.ts:99:5)
+    at async OverriddenTaskDefinition._action (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/index.ts:206:12)
+    at async Environment._runTaskDefinition (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:351:14)
+    at async Environment.run (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:184:14)
+    at async SimpleTaskDefinition.action (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/index.ts:546:7)
+    at async Environment._runTaskDefinition (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:351:14)
+
+Verifying contract...
+ChainConfigNotFoundError: Trying to verify a contract in a network with chain id 295, but the plugin doesn't recognize it as a supported chain.
+
+You can manually add support for it by following these instructions: https://hardhat.org/verify-custom-networks
+
+To see the list of supported networks, run this command:
+
+  npx hardhat verify --list-networks
+    at Function.getCurrentChainConfig (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/internal/etherscan.ts:65:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async SimpleTaskDefinition.action (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/index.ts:234:27)
+    at async Environment._runTaskDefinition (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:351:14)
+    at async hardhatVerify (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/verify-proxy.ts:118:12)
+    at async OverriddenTaskDefinition._action (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/@openzeppelin/hardhat-upgrades/src/index.ts:206:12)
+    at async Environment._runTaskDefinition (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:351:14)
+    at async Environment.run (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:184:14)
+    at async SimpleTaskDefinition.action (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/@nomicfoundation/hardhat-verify/src/index.ts:546:7)
+    at async Environment._runTaskDefinition (/Users/thelostone-mc/Labs/allo/allo-v2/node_modules/hardhat/src/internal/core/runtime-environment.ts:351:14)
+[90m
+	Validating hasRole(0x815b5a78dc333d344c7df9da23c04dbd432015cc701876ddb9ffe850e6882747,0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C) == true[0m
+[32m	✅ PASSED with Result: true[0m
