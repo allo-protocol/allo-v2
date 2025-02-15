@@ -16,7 +16,7 @@ In this strategy, recipients do not need to apply — they are automatically add
         - update metadata for this pool
 
 ### Allocation logic
-In this strategy, only wallets that hold a specific NFT are eligible to allocate. Allocations can only be submitted during a allocation window that is set by the pool manager. Each allocator gets a budget of "voice credits", which they can use to "purchase" votes on as many recipients as they would like. The number of votes each allocator can give to a recipient is equal to the square root of the number of voice credits they spend on that specific recipient. Votes can be fractional. 
+In this strategy, only wallets that hold a specific NFT are eligible to allocate. Allocations can only be submitted during an allocation window that is set by the pool manager. Each allocator gets a budget of "voice credits", which they can use to "purchase" votes on as many recipients as they would like. The number of votes each allocator can give to a recipient is equal to the square root of the number of voice credits they spend on that specific recipient. Votes can be fractional. 
 - **Allocator Eligibility**
     - Wallets are only eligible if they hold a specific NFT.
         - Pool managers must have the ability to configure which NFT is required in order to vote. 

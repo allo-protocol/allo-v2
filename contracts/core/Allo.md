@@ -220,7 +220,7 @@ sequenceDiagram
 * **Strategy** Smart contracts implementing fund allocation and distribution logic for each pool. Strategies can be custom or cloneable and determine how funds are managed within a pool.
     
 
-In summary, the "Allo" smart contract provides a framework for creating and managing pools with customizable fund allocation and distribution strategies. It leverages access controls, mappings, and functions to enable various actions within the protocol. The contract is designed to support a  ecosystem, enhancing the efficiency and transparency of fund management in Ethereum-based applications.
+In summary, the "Allo" smart contract provides a framework for creating and managing pools with customizable fund allocation and distribution strategies. It leverages access controls, mappings, and functions to enable various actions within the protocol. The contract is designed to support an ecosystem, enhancing the efficiency and transparency of fund management in Ethereum-based applications.
 
 ## User Flows
 
