@@ -93,7 +93,7 @@ interface IStrategy {
     /// @return The ID of the strategy
     function getStrategyId() external view returns (bytes32);
 
-    /// @notice Checks whether a allocator is valid or not, will usually be true for all strategies
+    /// @notice Checks whether an allocator is valid or not, will usually be true for all strategies
     ///      and will depend on the strategy implementation.
     /// @param _allocator The allocator to check
     /// @return Whether the allocator is valid or not
