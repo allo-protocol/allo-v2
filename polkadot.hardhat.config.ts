@@ -11,12 +11,13 @@ require('dotenv').config();
 module.exports = {
   solidity: '0.8.19',
   resolc: {
-    compilerSource: 'binary',
+    compilerSource: 'remix',
     settings: {
       optimizer: {
         enabled: true,
-        runs: 400,
-      }
+        runs: 400
+      },
+      evmVersion: "istanbul"
     },
   },
   networks: {
@@ -24,6 +25,7 @@ module.exports = {
       polkavm: true,
       url: 'https://westend-asset-hub-eth-rpc.polkadot.io',
       accounts: [process.env.DEPLOYER_PRIVATE_KEY],
+      gasPrice: 3500000000000,
     },
   },
 };
