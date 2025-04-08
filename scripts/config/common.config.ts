@@ -156,4 +156,9 @@ export const commonConfig: DeployParams = {
     proxyAdminOwner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
     permit2Address: "0x629c94181a081a8d70f96a3d0b0c0e7c73d9e289",
   },
+  // Polkadot Westend Asset Hub
+  420420421: {
+    proxyAdminOwner: "0x8C180840fcBb90CE8464B4eCd12ab0f840c6647C",
+    permit2Address: "",
+  },
 };

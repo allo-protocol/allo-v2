@@ -56,12 +56,12 @@ networks=(
 #   "zkSyncMainnet"
 #  ==================
 #  === Polkadot ===
-#   "westendAssetHub"
+  "westendAssetHub"
 #  ==================
 )
 
 scripts=(
-    # "core/deployRegistry"
+    "core/deployRegistry"
     # "core/deployContractFactory"
     # "core/deployAllo"
    
