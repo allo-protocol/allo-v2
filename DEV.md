@@ -42,3 +42,24 @@ bun run test
 ```bash
 bun run fmt
 ```
+
+
+## Polkadot Compiling
+
+- overwrite `mapping.txt` with `era.mapping.txt`
+- Compile using `polkadot.hardhat.config.ts`
+
+```
+cp remappings.era.txt remappings.txt
+npx hardhat compile --network westendAssetHub --config polkadot.hardhat.config.ts
+```
+
+## ZkEra Compiling
+
+- overwrite `mapping.txt` with `era.mapping.txt`
+- Compile using `polkadot.hardhat.config.ts`
+
+```
+cp remappings.era.txt remappings.txt
+npx hardhat compile --network zkSyncTestnet --config era.hardhat.config.ts
+```
