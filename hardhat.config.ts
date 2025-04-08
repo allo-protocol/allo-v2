@@ -204,6 +204,11 @@ const config: HardhatUserConfig = {
       ...createMainnetConfig("metisAndromeda"),
       url: `https://andromeda.metis.io/?owner=1088`,
     },
+    "hedera-mainnet": {
+      ...createMainnetConfig("hedera-mainnet"),
+      url: "https://mainnet.hashio.io/api",
+      gasPrice: 350000000000,
+    },
     // Test Networks
     goerli: createTestnetConfig(
       "goerli",
@@ -273,19 +278,12 @@ const config: HardhatUserConfig = {
       ...createMainnetConfig("gnosis"),
       url: "https://rpc.gnosischain.com",
     },
-    "hedera-mainnet": {
-      ...createMainnetConfig("hedera-mainnet"),
-      url: "https://mainnet.hashio.io/api",
-      gasPrice: 350000000000,
-      // url: "https://295.rpc.thirdweb.com",
-    },
     "hedera-testnet": {
       ...createTestnetConfig("hedera-testnet"),
       url: "https://testnet.hashio.io/api",
       gasPrice: 350000000000,
       // url: "https://296.rpc.thirdweb.com"
     },
-
     // Local Networks
     localhost: createTestnetConfig("localhost", "http://localhost:8545"),
     hardhat: {
