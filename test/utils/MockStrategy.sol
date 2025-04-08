@@ -80,7 +80,7 @@ contract MockStrategy is BaseStrategy {
         return PayoutSummary(_recipientId, 0);
     }
 
-    // simply returns whether a allocator is valid or not, will usually be true for all
+    // simply returns whether an allocator is valid or not, will usually be true for all
     function _isValidAllocator(address _allocator) internal view override returns (bool) {
         surpressStateMutabilityWarning;
         return _allocator == address(0) ? false : true;

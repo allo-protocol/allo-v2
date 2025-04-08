@@ -186,7 +186,7 @@ Only in `MicroGrantsStrategy.sol`:
 
 ### Allocating to a Recipient 
 
-* Valid Allocator initiates a allocation request
+* Valid Allocator initiates an allocation request
 * An allocator can vote only once for a recipientId
 * An allocator can choose to: accept/reject a recipient
     * If the allocator accepts the recipient, we check to see if the recipient has approvals which are equal to the approvalThreshold, then the funds are distributed to the recipient
