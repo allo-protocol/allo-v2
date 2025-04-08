@@ -55,10 +55,13 @@ networks=(
 #   "zkSyncTestnet"
 #   "zkSyncMainnet"
 #  ==================
+#  === Polkadot ===
+  "westendAssetHub"
+#  ==================
 )
 
 scripts=(
-    # "core/deployRegistry"
+    "core/deployRegistry"
     # "core/deployContractFactory"
     # "core/deployAllo"
    
@@ -93,6 +96,8 @@ for script in "${scripts[@]}"; do
 
         if [ "$n" == "zkSyncTestnet" ] || [ "$n" == "zkSyncMainnet" ]; then
             cmd="bun hardhat deploy-zksync --network $n --config era.hardhat.config.ts --script $script.ts | tee ./reports/deployment-logs/$script/$n/$timestamp/deploy-$n_$timestamp.log"
+        elif [ "$n" == "westendAssetHub" ]; then
+            cmd="bun hardhat run scripts/$script.ts --no-compile --network $n --config polkadot.hardhat.config.ts | tee ./reports/deployment-logs/$script/$n/$timestamp/deploy-$n_$timestamp.log"
         else
             cmd="bun hardhat run scripts/$script.ts --no-compile --network $n | tee ./reports/deployment-logs/$script/$n/$timestamp/deploy-$n_$timestamp.log"
         fi
