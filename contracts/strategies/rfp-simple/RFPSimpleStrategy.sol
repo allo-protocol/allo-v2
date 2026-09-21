@@ -437,7 +437,8 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         if (upcomingMilestone >= milestones.length) revert INVALID_MILESTONE();
 
         IAllo.Pool memory pool = allo.getPool(poolId);
-        Milestone storage milestone = milestones[upcomingMilestone];
+        uint256 milestoneToBeDistributed = upcomingMilestone;
+        Milestone storage milestone = milestones[milestoneToBeDistributed];
         Recipient memory recipient = _recipients[acceptedRecipientId];
 
         // Check if the milestone is pending
@@ -457,7 +458,7 @@ contract RFPSimpleStrategy is BaseStrategy, ReentrancyGuard {
         upcomingMilestone++;
 
         // Emit events for the milestone and the distribution
-        emit MilestoneStatusChanged(upcomingMilestone, Status.Accepted);
+        emit MilestoneStatusChanged(milestoneToBeDistributed, Status.Accepted);
         emit Distributed(acceptedRecipientId, recipient.recipientAddress, amount, _sender);
     }
 

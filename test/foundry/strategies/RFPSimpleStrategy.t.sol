@@ -496,6 +496,23 @@ contract RFPSimpleStrategyTest is Test, RegistrySetupFull, AlloSetup, Native, Ev
         assertEq(uint8(strategy.getMilestoneStatus(0)), uint8(IStrategy.Status.Accepted));
     }
 
+    function test_distribute_emitsDistributedMilestoneId() public {
+        __register_setMilestones_allocate_submitUpcomingMilestone();
+        vm.deal(pool_admin(), 1e19);
+
+        vm.prank(pool_admin());
+        allo().fundPool{value: 1e19}(poolId, 1e19);
+
+        // The event must report the milestone that was just distributed, not the next one
+        vm.expectEmit();
+        emit MilestoneStatusChanged(0, IStrategy.Status.Accepted);
+
+        vm.prank(address(allo()));
+        strategy.distribute(new address[](0), "", pool_admin());
+
+        assertEq(strategy.upcomingMilestone(), 1);
+    }
+
     function testRevert_distribute_UNAUTHORIZED() public {
         __register_setMilestones_allocate_submitUpcomingMilestone();
         vm.expectRevert(UNAUTHORIZED.selector);
