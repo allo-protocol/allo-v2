@@ -275,6 +275,65 @@ contract MicroGrantsBaseStrategyTest is Test, RegistrySetupFull, AlloSetup, Nati
         assertEq(mgStrategy().recipientAllocations(recipientId, IStrategy.Status.Rejected), 1);
     }
 
+    function test_allocate_thresholdLoweredMidRound_distributesOnNextApproval() public {
+        // Default fixture: approvalThreshold == 3, four eligible allocators.
+        address recipientId = _register_fundPool();
+        __addAllocators();
+
+        bytes memory allocationData = abi.encode(recipientId, IStrategy.Status.Accepted);
+
+        // Two of the three approvals required at the time come in.
+        vm.prank(profile1_member1());
+        allo().allocate(poolId, allocationData);
+        vm.prank(profile1_member2());
+        allo().allocate(poolId, allocationData);
+
+        assertEq(mgStrategy().recipientAllocations(recipientId, IStrategy.Status.Accepted), 2);
+
+        // The pool manager lowers the quorum to the number of approvals already held.
+        vm.prank(pool_manager1());
+        mgStrategy().setApprovalThreshold(2);
+
+        uint256 balanceBefore = address(recipientAddress()).balance;
+
+        // A third approval arrives. The recipient is now at 3 approvals against a
+        // threshold of 2, so it must be accepted and paid out.
+        vm.prank(profile2_member1());
+        allo().allocate(poolId, allocationData);
+
+        assertEq(mgStrategy().recipientAllocations(recipientId, IStrategy.Status.Accepted), 3);
+        assertEq(uint8(mgStrategy().getRecipient(recipientId).recipientStatus), uint8(IStrategy.Status.Accepted));
+        assertEq(address(recipientAddress()).balance - balanceBefore, 1e18);
+    }
+
+    function test_allocate_rejectionAfterThresholdLowered_doesNotDistribute() public {
+        // Default fixture: approvalThreshold == 3, four eligible allocators.
+        address recipientId = _register_fundPool();
+        __addAllocators();
+
+        bytes memory acceptData = abi.encode(recipientId, IStrategy.Status.Accepted);
+
+        vm.prank(profile1_member1());
+        allo().allocate(poolId, acceptData);
+        vm.prank(profile1_member2());
+        allo().allocate(poolId, acceptData);
+
+        // Quorum drops below the number of approvals already held.
+        vm.prank(pool_manager1());
+        mgStrategy().setApprovalThreshold(1);
+
+        uint256 balanceBefore = address(recipientAddress()).balance;
+
+        // A rejection must not trigger a payout, even though the accepted count
+        // already exceeds the lowered threshold.
+        bytes memory rejectData = abi.encode(recipientId, IStrategy.Status.Rejected);
+        vm.prank(profile2_member1());
+        allo().allocate(poolId, rejectData);
+
+        assertEq(address(recipientAddress()).balance, balanceBefore);
+        assertTrue(uint8(mgStrategy().getRecipient(recipientId).recipientStatus) != uint8(IStrategy.Status.Accepted));
+    }
+
     function test_allocate_and_distribute() public {
         uint256 recipientBalanceBefore = address(recipientAddress()).balance;
         address recipientId = __register_allocate_accept();

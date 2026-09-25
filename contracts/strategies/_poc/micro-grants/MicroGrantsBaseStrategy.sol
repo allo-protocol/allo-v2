@@ -401,7 +401,13 @@ abstract contract MicroGrantsBaseStrategy is BaseStrategy, ReentrancyGuard {
 
         emit Allocated(recipientId, status, _sender);
 
-        if (recipientAllocations[recipientId][Status.Accepted] == approvalThreshold) {
+        // Use '>=' rather than '==': the pool manager can lower 'approvalThreshold' at any
+        // point, so the accepted count can already be past the threshold by the time the next
+        // allocation lands, and an equality check would then never fire again. The
+        // 'status == Status.Accepted' guard keeps a rejection from triggering the payout in
+        // that same situation, and the 'recipientStatus' check at the top of this function is
+        // what prevents a second payout.
+        if (status == Status.Accepted && recipientAllocations[recipientId][Status.Accepted] >= approvalThreshold) {
             recipient.recipientStatus = Status.Accepted;
 
             IAllo.Pool memory pool = allo.getPool(poolId);
